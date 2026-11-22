@@ -1200,7 +1200,7 @@ function r2.getDisplayButtonHeader(func, buttonText)
 		[[
 				<ctrl style="text_button_16" id="help" posref="TL TL" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" 
 					onclick_l="lua" params_l="%s" hardtext="%s"/>
-		]], func, buttonText)
+		]], r2:uiCall(func), buttonText)
 	
 	return header
 end

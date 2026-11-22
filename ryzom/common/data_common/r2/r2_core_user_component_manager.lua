@@ -1000,7 +1000,7 @@ function userComponentManager.registerForms()
 				local shortFilename = nlfile.getFilename(v)
 				local entry = createGroupInstance("r2ed_filelist_entry", "", 
 					{ id = tostring(k),  text = shortFilename, 
-					params_l="r2_core.setCurrSelectedFile('" .. shortFilename .. "', 'ComponentFileName')" })
+					params_l=r2:uiCall("r2_core.setCurrSelectedFile", shortFilename, "ComponentFileName") })
 				fileGroupList:addChild(entry)
 			end
 		end
@@ -1022,7 +1022,7 @@ function userComponentManager.registerForms()
 				if defaultValue == "" then defaultValue = shortFilename end
 				local entry = createGroupInstance("r2ed_filelist_entry", "", 
 					{ id = tostring(k),  text = shortFilename, 
-					params_l="r2_core.setCurrSelectedFile('" .. shortFilename .. "', 'FileName')" })
+					params_l=r2:uiCall("r2_core.setCurrSelectedFile", shortFilename, "FileName") })
 				fileGroupList:addChild(entry)
 			end
 		end
@@ -1037,7 +1037,7 @@ function userComponentManager.registerForms()
 		for k, v in pairs(featureNameTable) do
 			local entry = createGroupInstance("r2ed_filelist_entry", "",
 				{id = tostring(v), text=tostring(v),
-				params_l="r2.setCurrSelectedComponent('"..tostring(v).."')" })
+				params_l=r2:uiCall("r2.setCurrSelectedComponent", tostring(v)) })
 			fileGroupList:addChild(entry)
 		end
 		setCaptureKeyboard(r2.CurrentForm:find("eb"))

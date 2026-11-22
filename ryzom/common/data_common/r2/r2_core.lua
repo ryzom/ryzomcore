@@ -9,6 +9,7 @@ r2.doFile("r2_config.lua")
 r2.doFile("r2_debug.lua")
 --
 r2.doFile("r2_misc.lua")
+r2.doFile("r2_ui_calls.lua") -- calls from the interface without scenario values in compiled text
 r2.doFile("r2_console.lua")
 --
 r2.doFile("r2_environment.lua") -- main tables & general  editor functions

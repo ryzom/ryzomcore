@@ -101,7 +101,7 @@ function r2.ui.AnimBar:updateDMControlledEntitiesWindow()
 		button.b.texture_pushed="r2_icon_speak_as_small_pushed.tga"
 		button.b.texture_over="r2_icon_speak_as_small_over.tga"
 		-- the ids come from the client as floats: "stopTalk(123)", not "stopTalk(123.0)"
-		button.b.params_l="r2.ui.AnimBar:stopTalk(" .. numberText(talkingList[i * 2 + 1]) .. ")"
+		button.b.params_l=r2:uiCall("r2.ui.AnimBar:stopTalk", tonumber(numberText(talkingList[i * 2 + 1])))
 		button.b.tooltip = i18n.get("uiR2EDStopDMSpeakAs")
 		setDbProp("UI:VARIABLES:R2_DM_CONTROLLED:" .. index .. ":TEXT_ID", talkingList[i * 2 + 1])
 		index = index + 1
@@ -113,7 +113,7 @@ function r2.ui.AnimBar:updateDMControlledEntitiesWindow()
 		button.b.texture_pushed="r2_icon_possess_small_pushed.tga"
 		button.b.texture_over="r2_icon_possess_small_over.tga"		
 		button.b.tooltip = i18n.get("uiR2EDStopDMControl")
-		button.b.params_l="r2.ui.AnimBar:stopIncarnate(" .. numberText(incarnatingList[i * 2 + 1]) .. ")"
+		button.b.params_l=r2:uiCall("r2.ui.AnimBar:stopIncarnate", tonumber(numberText(incarnatingList[i * 2 + 1])))
 		setDbProp("UI:VARIABLES:R2_DM_CONTROLLED:" .. index .. ":TEXT_ID", incarnatingList[i * 2 + 1])
 		index = index + 1
 	end

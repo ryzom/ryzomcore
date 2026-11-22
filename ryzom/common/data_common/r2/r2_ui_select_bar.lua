@@ -282,7 +282,7 @@ function r2.SelectBar:popMenu(index)
 	-- fill menu
 	local currentLine = 0
 	for k, v in pairs(sons) do
-		r2:addMenuLine(rm, v:getDisplayName(), "lua", "r2:setSelectedInstanceId('" .. v.InstanceId .."')", tostring(k), v:getSelectBarIcon(), 14)
+		r2:addMenuLine(rm, v:getDisplayName(), "lua", r2:uiCall("r2:setSelectedInstanceId", v.InstanceId), tostring(k), v:getSelectBarIcon(), 14)
 		--rm:addLine(v:getDisplayName(), "lua", "r2:setSelectedInstanceId('" .. v.InstanceId .."')", tostring(k))
 		--if v:getSelectBarIcon() ~= "" then
 		--	local menuButton = createGroupInstance("r2_menu_button", "", { bitmap = v:getSelectBarIcon(), size="14" })

@@ -244,7 +244,7 @@ component.initLogicEntitiesInstancesMenu = function(this, subMenu, calledFunctio
 			
 	local entitiesTable = r2.Scenario:getAllInstancesByType(this.Name)
 	for key, entity in pairs(entitiesTable) do
-		subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+		subMenu:addLine(entity.Name, "lua", r2:uiCall(calledFunction, entity.InstanceId), entity.InstanceId)
 	end
 
 	if table.getn(entitiesTable)==0 then

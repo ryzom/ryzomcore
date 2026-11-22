@@ -229,8 +229,8 @@ function r2.acts:initActsEditor()
 						back_color= self.islandButtonColors[ecoSysName],
 						selected_color = self.islandSelectedButtonColors[ecoSysName].." 255",
 						col_over = self.islandOverButtonColors[ecoSysName].." 80",
-						group_params_l="r2.acts:openIslandCardFromButton('"..ecoSysName.."', '" ..islandName.."')",
-						params_l="r2.acts:openIslandCardFromButton('"..ecoSysName.."', '" ..islandName.."')",
+						group_params_l=r2:uiCall("r2.acts:openIslandCardFromButton", ecoSysName, islandName),
+						params_l=r2:uiCall("r2.acts:openIslandCardFromButton", ecoSysName, islandName),
 					}
 					local buttonIsland = createGroupInstance("act_button_template", currentLine.id, tmplParams)
 					

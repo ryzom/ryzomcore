@@ -138,6 +138,26 @@ function r2.refuseEmptyString(param)
 	return true
 end
 
+-- The action of the edit box of a string property, when its text is entered or when it loses the focus: the
+-- text goes to the property 'propName', unless it has not changed or 'validationFun' (the path of a
+-- function that is given the text, or nil) refuses it. 'validateForm': the form is then validated too.
+function r2:onStringPropertyEdited(propName, validationFun, validateForm)
+	local editBox = getUICaller()
+	if editBox.input_string == editBox.Env.CurrString then
+		return
+	end
+
+	local utf8Value = editBox.input_string
+	if validationFun then
+		if not r2:callByPath(validationFun, utf8Value) then editBox.input_string = editBox.Env.CurrString; return end
+	end
+	editBox.Env.CurrString = editBox.input_string
+	r2:requestSetObjectProperty(propName, utf8Value)
+	if validateForm then
+		r2:validateForm(r2.CurrentForm)
+	end
+end
+
 r2.WidgetStyles.String = 
 {
 	-- default string edition, using an edit box
@@ -146,7 +166,7 @@ r2.WidgetStyles.String =
 		local function setter(widget, prop, value)
 			local ok = true
 			if prop.ValidationFun  then
-				ok = r2.assert(loadstring('return '.. prop.ValidationFun))()(value)
+				ok = r2:callByPath(prop.ValidationFun, value)
 			end
 			if ok then
 				--debugInfo("value = " .. tostring(value))
@@ -159,29 +179,11 @@ r2.WidgetStyles.String =
 			end
 		end
 
-		local validation = ""
-		
-		if prop.ValidationFun then
-			validation = string.format([[	if not %s(utf8Value) then editBox.input_string = editBox.Env.CurrString; return end]], prop.ValidationFun)
-		end
-			
-		local onChangeAction = 
-			string.format(
-			[[
-				local editBox = getUICaller()
-				if editBox.input_string == editBox.Env.CurrString then
-					return
-				end
-
-				local utf8Value = editBox.input_string
-				%s
-				editBox.Env.CurrString = editBox.input_string		
-				r2:requestSetObjectProperty('%s', utf8Value)
-			]], validation, prop.Name)
+		local onChangeAction = r2:uiCall("r2:onStringPropertyEdited", prop.Name, prop.ValidationFun)
 
 		local onFocusLostAction = onChangeAction
 		if prop.ValidateOnEnter then
-			onChangeAction = onChangeAction .. "r2:validateForm(r2.CurrentForm)"
+			onChangeAction = r2:uiCall("r2:onStringPropertyEdited", prop.Name, prop.ValidationFun, true)
 		end
 		return r2:buildEditBox(prop, "TL TL", defaulting(prop.EntryType, "text"), true, defaulting(prop.MaxNumChar, 255), onChangeAction, onFocusLostAction),
 		       setter,
@@ -307,6 +309,22 @@ function r2:setRefIdWidgetTarget(instanceId)
 	--r2.requestSetNode(r2.currentRefIdWidgetParentInstance.InstanceId, r2.currentRefIdWidgetAttrName, instanceId)
 	r2.currentRefIdWidgetParentInstance:setRefIdValue(r2.currentRefIdWidgetAttrName, instanceId)
 	--debugInfo("requestSetNode")
+end
+--
+-- The action of the 'pick' button of a RefId property: the player picks the target of the property
+-- 'attrName' among the instances of the class 'filter'; 'testFunction' and 'pickFunction' are the names
+-- of the functions the picker calls
+function r2:pickRefIdWidgetTarget(attrName, filter, testFunction, pickFunction)
+	r2.currentRefIdWidgetParentInstance = r2:getPropertySheetTarget()
+	r2.currentRefIdWidgetAttrName = attrName
+	r2.currentRefIdIndexInArray = -1
+	r2.currentRefIdWidgetFilter = filter
+	runAH(nil, 'r2ed_picker_lua', 'TestFunc=' .. testFunction .. '|PickFunc=' .. pickFunction)
+end
+--
+-- The action of the 'clear' button of a RefId property: the property 'attrName' has no target any more
+function r2:clearRefIdWidgetTarget(attrName)
+	r2.requestSetNode(r2:getPropertySheetTarget().InstanceId, attrName, '')
 end
 
 function r2:canPickTaskComponent(instanceId)
@@ -717,19 +735,15 @@ r2.WidgetStyles.RefId =
 			<group id="%s" child_resize_w="true" child_resize_h="true">
 				<ctrl style="text_button_16" id="pick" posref="TL TL" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
 				 onclick_l="lua"
-				 params_l="r2.currentRefIdWidgetParentInstance = r2:getPropertySheetTarget()
-				  r2.currentRefIdWidgetAttrName = '%s'
-				  r2.currentRefIdIndexInArray = -1
-				  r2.currentRefIdWidgetFilter = '%s'
-				  runAH(nil, 'r2ed_picker_lua', 'TestFunc=%s|PickFunc=%s')" 
+				 params_l="%s" 
 				 hardtext="uiR2EDPick"/>
 				 <ctrl style="text_button_16" id="clear" posref="TR TL" posparent="pick" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" 
 				 onclick_l="lua" 
-				 params_l="r2.requestSetNode(r2:getPropertySheetTarget().InstanceId, '%s', '')"
+				 params_l="%s"
 				 hardtext="uiR2EDClear"/>
 				<view type="text" id="name" y="-2" color="192 192 192 255" posparent="clear" posref="MR ML" x="4" global_color="true" fontsize="12" shadow="true" hardtext="uiR2EDNone" auto_clamp="false"/>
 			</group>
-		]], prop.Name, prop.Name, select(prop.Filter, prop.Filter, "BaseClass"), testFunction, pickFunction, prop.Name
+		]], prop.Name, r2:uiCall("r2:pickRefIdWidgetTarget", prop.Name, select(prop.Filter, prop.Filter, "BaseClass"), testFunction, pickFunction), r2:uiCall("r2:clearRefIdWidgetTarget", prop.Name)
 		)
 		return widgetXml, refIdDefaultEventHandler, nil
 	end,
@@ -927,6 +941,64 @@ end
 --//  NUMBER WIDGETS //
 --/////////////////////
 
+-- The action of the edit box of a number property, when its text is entered or when it loses the focus: the
+-- number, kept between the Min and the Max of the property, goes to the property 'propName'
+function r2:onNumberPropertyEdited(propName)
+	local editBox = getUICaller()
+	if editBox.input_string == editBox.Env.CurrString then
+		return
+	end
+	editBox.Env.CurrString = editBox.input_string
+	local newValue = tonumber(getUICaller().input_string)
+	if newValue == nil then
+		debugInfo('Invalid number value : ' .. getUICaller().input_string)
+		return
+	end
+	local prop = r2:getPropertyDefinition(propName, getUICaller())
+	assert(prop)
+	local clamped = false
+	if prop.Min and newValue < tonumber(prop.Min) then
+		newValue = tonumber(prop.Min)
+		clamped = true
+	end
+	if prop.Max and newValue > tonumber(prop.Max) then
+		newValue = tonumber(prop.Max)
+		clamped = true
+	end
+	if clamped then
+		editBox.input_string = tostring(newValue)
+		editBox.Env.CurrString = tostring(newValue)
+	end
+	r2:requestSetObjectProperty(propName, newValue)
+end
+
+-- The action of the check box of a boolean property: the state of the box goes to the property 'propName'
+function r2:onBooleanPropertyClicked(propName)
+	local value
+	if getUICaller().pushed == true then value = 1 else value = 0 end
+	r2:requestSetObjectProperty(propName, value)
+end
+
+-- The action of the button that covers the caption and the check box of a boolean property: the property
+-- 'propName' gets the state its check box does not show
+function r2:onBooleanPropertyCoverClicked(propName)
+	local value
+	if getUICaller().parent:getEnclosingContainer():find(propName).butt.pushed then value = 0 else value = 1 end
+	r2:requestSetObjectProperty(propName, value)
+end
+
+-- The action of the slider of a number property while it is moved: its value goes to the property
+-- 'propName', on this client only until the move ends
+function r2:onSliderPropertyScrolled(propName)
+	r2:requestSetLocalObjectProperty(propName, getUICaller().value)
+end
+
+-- The action of the combo box of an enumerated property when its selection changes: the selection goes to
+-- the property 'propName', unless the box is being set from the property (Env.Locked)
+function r2:onEnumPropertyChanged(propName)
+	if getUICaller().parent.Env.Locked ~= true then  r2:requestSetObjectProperty(propName, getUICaller().selection) end
+end
+
 -- widget styles for 'Numbers'
 r2.WidgetStyles.Number = 
 {
@@ -936,36 +1008,7 @@ r2.WidgetStyles.Number =
 			widget.eb.input_string = tostring(value)
 			widget.eb.Env.CurrString = tostring(value)
 		end
-		local onChangeAction = 
-		string.format(
-		[[			
-			local editBox = getUICaller()
-			if editBox.input_string == editBox.Env.CurrString then
-				return
-			end
-			editBox.Env.CurrString = editBox.input_string
-			local newValue = tonumber(getUICaller().input_string)
-			if newValue == nil then
-				debugInfo('Invalid number value : ' .. getUICaller().input_string)
-				return
-			end
-			local prop = r2:getPropertyDefinition('%s', getUICaller())
-			assert(prop)
-			local clamped = false						
-			if prop.Min and newValue < tonumber(prop.Min) then
-				newValue = tonumber(prop.Min)
-				clamped = true
-			end			
-			if prop.Max and newValue > tonumber(prop.Max) then
-				newValue = tonumber(prop.Max)
-				clamped = true
-			end			
-			if clamped then				
-				editBox.input_string = tostring(newValue)				
-				editBox.Env.CurrString = tostring(newValue)				
-			end			
-			r2:requestSetObjectProperty('%s', newValue)						
-		]], prop.Name, prop.Name)
+		local onChangeAction = r2:uiCall("r2:onNumberPropertyEdited", prop.Name)
 		return r2:buildEditBox(prop, "TR TR", "integer", false, 16, onChangeAction, onChangeAction), setter, nil
 	end,
 	--------------------------------------------------------------------------------------------------------------------
@@ -993,7 +1036,7 @@ r2.WidgetStyles.Number =
 				col_pushed="0 0 0 0"
 				col_over="0 0 0 0"
 				onclick_l="lua"
-				params_l="local value; if getUICaller().parent:getEnclosingContainer():find(']] .. prop.Name .. [[').butt.pushed then value = 0 else value = 1 end; r2:requestSetObjectProperty(']] .. prop.Name .. [[', value)"
+				params_l="]] .. r2:uiCall("r2:onBooleanPropertyCoverClicked", prop.Name) .. [["
 				 /> 
 			 ]]			
 		end
@@ -1018,10 +1061,10 @@ r2.WidgetStyles.Number =
 				tx_normal="w_slot_on.tga" tx_pushed="w_opacity_on.tga" tx_over="w_slot_on.tga"
 				color="255 255 255 255"	col_pushed="255 255 255 255" col_over="255 255 255 0" 
 				onclick_l="lua"
-				params_l="local value; if getUICaller().pushed == true then value = 1 else value = 0 end; r2:requestSetObjectProperty('%s', value)"
+				params_l="%s"
 				/> 
 			</group> 
-		]], prop.Name, prop.Name)
+		]], prop.Name, r2:uiCall("r2:onBooleanPropertyClicked", prop.Name))
 		-- Caption is special here :
 		-- It contains a button to avoid to have to click in the tiny checkbox, which is inconvenient		
 		local iwidth0 = defaulting(prop.CaptionWidth, 35)
@@ -1084,9 +1127,9 @@ r2.WidgetStyles.Number =
 								vertical="false" align="L" tracksize="12" 
 								cancelable="true"
 								tx_topright="w_scroll_R.tga" tx_middle="w_scroll_M.tga" tx_bottomleft="w_scroll_L.tga"
-								onscroll="lua"		   params="r2:requestSetLocalObjectProperty('%s', getUICaller().value)"
-								onscrollend="lua"      end_params="r2:requestCommitLocalObjectProperty('%s')"
-								onscrollcancel="lua"   cancel_params="r2:requestRollbackLocalObjectProperty('%s')"
+								onscroll="lua"		   params="%s"
+								onscrollend="lua"      end_params="%s"
+								onscrollcancel="lua"   cancel_params="%s"
 			min="%s"
 			max="%s"
 			step_value="%s"
@@ -1106,7 +1149,7 @@ r2.WidgetStyles.Number =
 			"</group>"
 
 		"</group>"
-		]], prop.Name, prop.Name, prop.Name, defaulting(prop.Min, 0), defaulting(prop.Max, 100), defaulting(prop.StepValue, 1),
+		]], r2:uiCall("r2:onSliderPropertyScrolled", prop.Name), r2:uiCall("r2:requestCommitLocalObjectProperty", prop.Name), r2:uiCall("r2:requestRollbackLocalObjectProperty", prop.Name), defaulting(prop.Min, 0), defaulting(prop.Max, 100), defaulting(prop.StepValue, 1),
 		 defaulting(prop.ActiveBitmaps, 'false'), defaulting(prop.LeftBitmap, ""), defaulting(prop.MiddleBitmap, ""), defaulting(prop.RightBitmap, ""))		
 		--
 		--debugInfo(string.format("Creating slider widget, min = %s, max = %s", defaulting(prop.Min, 0), defaulting(prop.Min, 100)))
@@ -1129,7 +1172,7 @@ r2.WidgetStyles.Number =
 		[[
 		<group type="combo_box" sizeref="w" w="-2" x="2" y="0" child_resize_h="true" child_resize_hmargin="10" linked_to_db="false" posref="TL TL" id=]]
 		.. strifyXml(prop.Name) .. 
-		string.format([[ on_change="lua" on_change_params="if getUICaller().parent.Env.Locked ~= true then  r2:requestSetObjectProperty('%s', getUICaller().selection) end"]], prop.Name) ..
+		string.format([[ on_change="lua" on_change_params="%s"]], r2:uiCall("r2:onEnumPropertyChanged", prop.Name)) ..
 		">"
 		result = result .. [[<instance template="combo_box_def1" />]]
 		--  append enumerated values
@@ -1543,7 +1586,7 @@ function r2:buildPropertySheetXml(class, className, id, title, isForm)
 			>	
 		
 				<ctrl style="button_ok" id="help" active="true" x="-16" y="0" posref="MR MR" color="255 255 255 255"
-				text_y="-2" onclick_l="lua" params_l="r2.displayFeatureHelp(']]..featureName..[[')" hardtext="uiR2EdHelp" fontsize="10" />
+				text_y="-2" onclick_l="lua" params_l="]]..r2:uiCall("r2.displayFeatureHelp", featureName)..[[" hardtext="uiR2EdHelp" fontsize="10" />
 			</group>
 		]])
 	else		

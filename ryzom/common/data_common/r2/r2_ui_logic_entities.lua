@@ -345,7 +345,7 @@ function r2:initWhichEntityMenu()
 				addLine = false
 			end
 			if addLine then
-				subMenu:addLine(entity.Name, "lua", "r2:selectWhichEntity(".. tostring(i) .. "," .. tostring(count) .. ")", entity.InstanceId)
+				subMenu:addLine(entity.Name, "lua", r2:uiCall("r2:selectWhichEntity", i, count), entity.InstanceId)
 				count=count+1
 			end
 		end
@@ -1022,7 +1022,7 @@ function r2:openRightMenu(isEntityOfLeftMenu, loadTable, selectLineFunction)
 
 					local steps = sequence.Components
 					if steps.Size == 0 then
-						stepsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", selectLineFunction .. "()", "")
+						stepsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", r2:uiCall(selectLineFunction), "")
 					end
 
 					local count2 = 0
@@ -1030,24 +1030,24 @@ function r2:openRightMenu(isEntityOfLeftMenu, loadTable, selectLineFunction)
 						local step = steps[s]
 						local stepName = r2:getElementName(step)
 						stepsMenu:addLine(stepName, "lua", 
-							selectLineFunction.. "('".. action .. "','" .. step.InstanceId .."')", step.InstanceId)
+							r2:uiCall(selectLineFunction, action, step.InstanceId), step.InstanceId)
 						count2=count2+1
 					end
 				else 
 					--subMenu:addLine(sequence.Name, "lua", 
 					subMenu:addLine(r2:getSequenceName(sequence), "lua", 
-						selectLineFunction.. "('".. action .. "','" .. sequence.InstanceId .. "')", sequence.InstanceId)
+						r2:uiCall(selectLineFunction, action, sequence.InstanceId), sequence.InstanceId)
 				end
 				
 				count1=count1+1
 			end
 
 			if sequences.Size == 0 then
-				subMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", selectLineFunction .. "()", "")
+				subMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", r2:uiCall(selectLineFunction), "")
 			end
 
 		else
-			logicEntityMenu:addLine(actionText, "lua", selectLineFunction .. "('".. action .. "')", action)
+			logicEntityMenu:addLine(actionText, "lua", r2:uiCall(selectLineFunction, action), action)
 		end
 	end
 

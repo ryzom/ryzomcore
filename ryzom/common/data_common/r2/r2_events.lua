@@ -962,7 +962,7 @@ function r2.events:initEventMenu(categoryEvent)
 	if logicEntity then
 
 		firstLine = 2
-		logicEntityMenu:addLine(logicEntity.Name, "lua", "r2.events:setLogicEntity('".. logicEntity.InstanceId .."')", logicEntity.InstanceId)
+		logicEntityMenu:addLine(logicEntity.Name, "lua", r2:uiCall("r2.events:setLogicEntity", logicEntity.InstanceId), logicEntity.InstanceId)
 		logicEntityMenu:addSeparator()
 	
 		logicEntityMenu:addSubMenu(0)

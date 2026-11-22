@@ -1380,7 +1380,7 @@ r2.registerHighLevel = function()
 	-- add a line to the event sub menu
 	function classScenario.initLogicEntitiesInstancesMenu(this, subMenu, calledFunction)
 		local name = r2.Scenario:getName()
-		subMenu:addLine(name, "lua", calledFunction.."('".. r2.Scenario.InstanceId .."')", r2.Scenario.InstanceId)
+		subMenu:addLine(name, "lua", r2:uiCall(calledFunction, r2.Scenario.InstanceId), r2.Scenario.InstanceId)
 	end
 
 	----------------------------------------------------------------------------
@@ -1432,7 +1432,7 @@ r2.registerHighLevel = function()
 					local subMenu2= subMenu:getSubMenu(lineNb)
 					for s=0, 19 do
 						lineStr = tostring(i+s) 
-						local func = "r2.events:setEventValue('','" .. categoryEvent .."','".. lineStr.."')"
+						local func = r2:uiCall("r2.events:setEventValue", "", categoryEvent, lineStr)
 						subMenu2:addLine(lineStr, "lua", func, lineStr)
 					end
 					lineNb = lineNb+1
@@ -1903,7 +1903,7 @@ r2.registerHighLevel = function()
 		for i=0, r2.Scenario.Acts.Size-1 do
 			local act = r2.Scenario.Acts[i]
 			if not act:isBaseAct() then
-				subMenu:addLine(act.Name, "lua", calledFunction.."('".. act.InstanceId .."')", act.InstanceId)
+				subMenu:addLine(act.Name, "lua", r2:uiCall(calledFunction, act.InstanceId), act.InstanceId)
 				empty = false
 			end
 		end

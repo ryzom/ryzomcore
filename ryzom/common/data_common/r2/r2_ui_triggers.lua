@@ -242,7 +242,7 @@ function r2:newActivitiesSequence(firstRequest, activitySequence, reset)
 									maxMinElts="r2:maximizeMinimizeActivities()",
 									downUpColor="200 120 80 255",
 									colPushed = "200 80 80 255",
-									paramsL= "r2:selectSequenceTab('r2ed_triggers', "..tostring(tab.tabButtonNb)..")"
+									paramsL= r2:uiCall("r2:selectSequenceTab", "r2ed_triggers", tab.tabButtonNb)
 							   }
 
 		local editorEltTemplate = "template_edit_activity"
@@ -850,7 +850,7 @@ function r2:openActivityMenu()
 	local roadsMenu = activityMenu:getSubMenu(1)
 	local roadsTable = r2.Scenario:getAllInstancesByType("Road")
 	for key, road in pairs(roadsTable) do
-		roadsMenu:addLine(road.Name, "lua", "r2:setActivity('Follow Route', '".. road.InstanceId .."')", road.InstanceId)
+		roadsMenu:addLine(road.Name, "lua", r2:uiCall("r2:setActivity", "Follow Route", road.InstanceId), road.InstanceId)
 	end
 	if table.getn(roadsTable) == 0 then
 		roadsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2:setActivity()", "")
@@ -863,7 +863,7 @@ function r2:openActivityMenu()
 	activityMenu:addSubMenu(2)
 	roadsMenu = activityMenu:getSubMenu(2)
 	for key, road in pairs(roadsTable) do
-		roadsMenu:addLine(road.Name, "lua", "r2:setActivity('Patrol', '".. road.InstanceId .."')", road.InstanceId)
+		roadsMenu:addLine(road.Name, "lua", r2:uiCall("r2:setActivity", "Patrol", road.InstanceId), road.InstanceId)
 	end
 	if table.getn(roadsTable) == 0 then
 		roadsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2:setActivity()", "")
@@ -876,7 +876,7 @@ function r2:openActivityMenu()
 	activityMenu:addSubMenu(3)
 	roadsMenu = activityMenu:getSubMenu(3)
 	for key, road in pairs(roadsTable) do
-		roadsMenu:addLine(road.Name, "lua", "r2:setActivity('Repeat Road', '".. road.InstanceId .."')", road.InstanceId)
+		roadsMenu:addLine(road.Name, "lua", r2:uiCall("r2:setActivity", "Repeat Road", road.InstanceId), road.InstanceId)
 	end
 	if table.getn(roadsTable) == 0 then
 		roadsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2:setActivity()", "")
@@ -890,7 +890,7 @@ function r2:openActivityMenu()
 	local regionsMenu = activityMenu:getSubMenu(4)
 	local regionsTable = r2.Scenario:getAllInstancesByType("Region")
 	for key, region in pairs(regionsTable) do
-		regionsMenu:addLine(region.Name, "lua", "r2:setActivity('Wander', '".. region.InstanceId .."')", region.InstanceId)
+		regionsMenu:addLine(region.Name, "lua", r2:uiCall("r2:setActivity", "Wander", region.InstanceId), region.InstanceId)
 	end
 	if table.getn(regionsTable) == 0 then
 		regionsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2:setActivity()", "")
@@ -1064,7 +1064,7 @@ function r2:openSelectChatMenu()
 		local chatS = chatSequences[i]
 		assert(chatS)
 		--chatMenu:addLine(chatS.Name, "lua", "r2:selectChatSequence('" .. chatS.InstanceId .. "')", chatS.InstanceId)
-		chatMenu:addLine(r2:getSequenceName(chatS), "lua", "r2:selectChatSequence('" .. chatS.InstanceId .. "')", chatS.InstanceId)
+		chatMenu:addLine(r2:getSequenceName(chatS), "lua", r2:uiCall("r2:selectChatSequence", chatS.InstanceId), chatS.InstanceId)
 	end
 
 	r2:openTriggersMenu(getUICaller())
@@ -1177,7 +1177,7 @@ function r2:newChatsSequence(firstRequest, instanceSequence, reset)
 									maxMinElts="r2:maximizeMinimizeChats()",
 									downUpColor="120 150 140 255",
 									colPushed = "0 255 0 255",
-									paramsL= "r2:selectSequenceTab('r2ed_chat_sequence', "..tostring(tab.tabButtonNb)..")"
+									paramsL= r2:uiCall("r2:selectSequenceTab", "r2ed_chat_sequence", tab.tabButtonNb)
 							   }
 
 		if reset == true then
@@ -1595,11 +1595,11 @@ function r2:initTimeMenu(timeFunction, isHours)
 	timeMenu:reset()
 
 	for i=0,9 do
-		timeMenu:addLine(tostring(i), "lua", timeFunction .. "(" .. tostring(i) .. ")", tostring(i))
+		timeMenu:addLine(tostring(i), "lua", r2:uiCall(timeFunction, i), tostring(i))
 	end
 
 	if isHours == true then
-		timeMenu:addLine(tostring(10), "lua", timeFunction .. "(" .. tostring(10) .. ")", tostring(10))
+		timeMenu:addLine(tostring(10), "lua", r2:uiCall(timeFunction, 10), tostring(10))
 	else
 
 		local lineNb = 9
@@ -1613,7 +1613,7 @@ function r2:initTimeMenu(timeFunction, isHours)
 
 			for s=0,9 do
 				lineStr = tostring(i+s) 
-				subMenu:addLine(lineStr, "lua", timeFunction .. "(" .. tostring(i+s) .. ")", lineStr)
+				subMenu:addLine(lineStr, "lua", r2:uiCall(timeFunction, i+s), lineStr)
 			end
 		end
 	end
@@ -1707,7 +1707,7 @@ function r2:openWhoMenu(whoFunction, towho)
 	local npcTable = r2.Scenario:getAllInstancesByType("Npc")
 
 	if towho == true then
-		whoMenu:addLine(i18n.get("uiR2EdNobody"), "lua", whoFunction.."('" ..tostring(i18n.get("uiR2EdNobody")).. "')", "Nobody")
+		whoMenu:addLine(i18n.get("uiR2EdNobody"), "lua", r2:uiCall(whoFunction, tostring(i18n.get("uiR2EdNobody"))), "Nobody")
 	end
 
 	for key, npc in npcTable do
@@ -1723,7 +1723,7 @@ function r2:openWhoMenu(whoFunction, towho)
 				end
 			end
 			if addLine then
-				whoMenu:addLine(npc.Name, "lua", whoFunction.."('" ..npc.InstanceId.. "')", npc.InstanceId)	
+				whoMenu:addLine(npc.Name, "lua", r2:uiCall(whoFunction, npc.InstanceId), npc.InstanceId)	
 			end
 		end
 	end
@@ -2331,7 +2331,7 @@ function r2:removeElementsSequenceUI(tabIndex, uiName, elementsTable, sequName)
 		local buttonTab = tab:find("tab"..i)
 		assert(buttonTab)
 		
-		buttonTab.params_l = "r2:selectSequenceTab('"..uiName.."', "..tostring(i-1)..")"
+		buttonTab.params_l = r2:uiCall("r2:selectSequenceTab", uiName, i-1)
 
 		if buttonTab.hardtext == sequName..(i+1) then
 			buttonTab.text = sequName..i
@@ -3676,16 +3676,16 @@ function r2:chooseOrOpenSelectedChatSequence()
 	-- "Open chat sequence"
 	if chatSequenceId ~= "" then
 		--rootMenu:addLine(i18n.get("uiR2EDOpen").." "..chatSequence.Name, "lua", "r2:openMiniActivityChatSequence("..tostring(miniActivityNb)..")", "Open")
-		rootMenu:addLine(i18n.get("uiR2EDOpen").." "..r2:getSequenceName(chatSequence), "lua", "r2:openMiniActivityChatSequence("..tostring(miniActivityNb)..")", "Open")
+		rootMenu:addLine(i18n.get("uiR2EDOpen").." "..r2:getSequenceName(chatSequence), "lua", r2:uiCall("r2:openMiniActivityChatSequence", miniActivityNb), "Open")
 		newLine = newLine + 1
 	end
 
 	-- "Any chat sequence"
-	rootMenu:addLine(i18n.get("uiR2EdNoChat"), "lua", "r2:setSequenceChatToMiniActivity("..tostring(miniActivityNb)..")", "None")
+	rootMenu:addLine(i18n.get("uiR2EdNoChat"), "lua", r2:uiCall("r2:setSequenceChatToMiniActivity", miniActivityNb), "None")
 
 
 	-- "new chat sequence"
-	rootMenu:addLine(i18n.get("uiR2EdNewChat").."...", "lua", "r2:newChatsSequenceAndSelect("..tostring(miniActivityNb)..")", "None")
+	rootMenu:addLine(i18n.get("uiR2EdNewChat").."...", "lua", r2:uiCall("r2:newChatsSequenceAndSelect", miniActivityNb), "None")
 	local menuButton = createGroupInstance("r2_menu_button", "", { bitmap = "r2_icon_create.tga", size="14" })
 	rootMenu:setUserGroupLeft(newLine, menuButton)
 
@@ -3699,7 +3699,7 @@ function r2:chooseOrOpenSelectedChatSequence()
 		assert(sequence)
 
 		--rootMenu:addLine(sequence.Name, "lua", "r2:setSequenceChatToMiniActivity("..tostring(miniActivityNb)..", " .. tostring(i)..")", sequence.InstanceId)
-		rootMenu:addLine(r2:getSequenceName(sequence), "lua", "r2:setSequenceChatToMiniActivity("..tostring(miniActivityNb)..", " .. tostring(i)..")", sequence.InstanceId)
+		rootMenu:addLine(r2:getSequenceName(sequence), "lua", r2:uiCall("r2:setSequenceChatToMiniActivity", miniActivityNb, i), sequence.InstanceId)
 	end
 
 	-- display menu

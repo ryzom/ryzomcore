@@ -247,7 +247,7 @@ local registerFeature = function ()
 						local subMenu = menu:getSubMenu(ev)
 						local func = ""
 						for i=0, 9 do
-							func = "r2.events:setEventValue('','" .. categoryEvent .."','".. tostring(i).."')"
+							func = r2:uiCall("r2.events:setEventValue", "", categoryEvent, tostring(i))
 							subMenu:addLine(tostring(i), "lua", func, tostring(i))
 						end
 
@@ -259,7 +259,7 @@ local registerFeature = function ()
 							local sequence = this:getBehavior().Activities[s]
 							local func = ""
 							if r2.events.eventTypeWithValue[eventType]=="ActivitySequence" then
-								func = "r2.events:setEventValue('".. sequence.InstanceId .."','" .. categoryEvent .."')"
+								func = r2:uiCall("r2.events:setEventValue", sequence.InstanceId, categoryEvent)
 							end
 
 							subMenu:addLine(sequence:getName(), "lua", func, sequence.InstanceId)
@@ -282,7 +282,7 @@ local registerFeature = function ()
 								for a=0, sequence.Components.Size-1 do
 									local activity = sequence.Components[a]
 									activitiesMenu:addLine(activity:getShortName(), "lua", 
-										"r2.events:setEventValue('".. activity.InstanceId .."','" .. categoryEvent .."')", activity.InstanceId)
+										r2:uiCall("r2.events:setEventValue", activity.InstanceId, categoryEvent), activity.InstanceId)
 								end
 
 								-- no activity in the sequence
@@ -1684,7 +1684,7 @@ local registerFeature = function ()
 				addLine = not (entity:isKindOf("NpcCreature") or entity:isBotObject() or entity:isPlant() or entity:isGrouped()) --TEMP
 			end  --TEMP
 			if addLine then
-				subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+				subMenu:addLine(entity.Name, "lua", r2:uiCall(calledFunction, entity.InstanceId), entity.InstanceId)
 				empty = false
 			end
 		end
@@ -1913,7 +1913,7 @@ local registerFeature = function ()
 				addLine = not (entity:isKindOf("NpcPlant") or entity:isGrouped())	
 			end																		
 			if addLine then
-				subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+				subMenu:addLine(entity.Name, "lua", r2:uiCall(calledFunction, entity.InstanceId), entity.InstanceId)
 				empty = false
 			end
 		end

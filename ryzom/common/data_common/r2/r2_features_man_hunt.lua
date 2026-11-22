@@ -13,7 +13,7 @@ feature.Components = {}
 
 feature.Components.ManHunt =
 	{
-		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor()", "uiR2EdEditEventsButton"),
+		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor", "uiR2EdEditEventsButton"),
 		BaseClass="LogicEntity",			
 		Name="ManHunt",
 		InEventUI = true,

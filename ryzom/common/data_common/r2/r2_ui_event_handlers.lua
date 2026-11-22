@@ -707,7 +707,7 @@ function r2:popMainMenu()
 	local menu = getUI(menuName)	
 	assert(menu)
 	local function buildKeyName(action, params)
-		local keyName = runExpr(string.format("getKey('%s', '%s')", action, params))
+		local keyName = r2:getKeyName(action, params)
 		if keyName == i18n.get("uiNotAssigned")	then
 			-- no associated key...
 			return keyName

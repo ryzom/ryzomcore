@@ -657,7 +657,7 @@ Logic.Components.ChatStep = {
 
 local classChatSequenceVersion = 2
 Logic.Components.ChatSequence = {
-		PropertySheetHeader = r2.getDisplayButtonHeader("r2.dialogs:openEditor()", "uiR2EdEditDialogButton"),
+		PropertySheetHeader = r2.getDisplayButtonHeader("r2.dialogs:openEditor", "uiR2EdEditDialogButton"),
 		BaseClass = "LogicEntity",
 		Name = "ChatSequence",
 		InEventUI = true,
@@ -787,7 +787,7 @@ Logic.Components.ChatSequence = {
 					local subMenu = menu:getSubMenu(ev)
 					local func = ""
 					for i=0, 9 do
-						func = "r2.events:setEventValue('','" .. categoryEvent .."','".. tostring(i).."')"
+						func = r2:uiCall("r2.events:setEventValue", "", categoryEvent, tostring(i))
 						subMenu:addLine(tostring(i), "lua", func, tostring(i))
 					end
 
@@ -799,7 +799,7 @@ Logic.Components.ChatSequence = {
 					for c=0, this.Components.Size-1 do
 						local chat = this.Components[c]
 						subMenu:addLine(chat:getShortName(), "lua", 
-							"r2.events:setEventValue('".. chat.InstanceId .."','" .. categoryEvent .. "')", chat.InstanceId)
+							r2:uiCall("r2.events:setEventValue", chat.InstanceId, categoryEvent), chat.InstanceId)
 					end
 
 					if this.Components.Size==0 then
@@ -867,7 +867,7 @@ Logic.Components.ChatSequence = {
 			
 			local entitiesTable = r2.Scenario:getAllInstancesByType(this.Name)
 			for key, entity in pairs(entitiesTable) do
-				subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+				subMenu:addLine(entity.Name, "lua", r2:uiCall(calledFunction, entity.InstanceId), entity.InstanceId)
 			end
 
 			if table.getn(entitiesTable)==0 then

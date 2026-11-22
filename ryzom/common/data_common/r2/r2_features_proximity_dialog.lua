@@ -14,7 +14,7 @@ local classProximityDialogVersion = 1
 
 feature.Components.ProximityDialog =
 	{
-		PropertySheetHeader = r2.getDisplayButtonHeader("r2.dialogs:openEditor()", "uiR2EdEditDialogButton"),
+		PropertySheetHeader = r2.getDisplayButtonHeader("r2.dialogs:openEditor", "uiR2EdEditDialogButton"),
 		BaseClass="ChatSequence",			
 		Name="ProximityDialog",
 		InEventUI = true,
@@ -250,7 +250,7 @@ end
 function component.initLogicEntitiesInstancesMenu(this, subMenu, calledFunction)
 	local entitiesTable = r2.Scenario:getAllInstancesByType(this.Name)
 	for key, entity in pairs(entitiesTable) do
-		subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+		subMenu:addLine(entity.Name, "lua", r2:uiCall(calledFunction, entity.InstanceId), entity.InstanceId)
 	end
 
 	if table.getn(entitiesTable)==0 then

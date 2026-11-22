@@ -96,11 +96,17 @@ function r2.ToolUI:setActiveToolUIByName(toolName)
 end
 
 ------------------------------------------------------------------------------------------------------------
+-- The name of the key bound to an action handler with these parameters, as the interface function getKey gives
+-- it. runFct gives the two texts to the function as values: they are not part of the text of an expression.
+function r2:getKeyName(action, params)
+	return runFct("getKey", tostring(action), tostring(params))
+end
+
+------------------------------------------------------------------------------------------------------------
 function r2.ToolUI:updateTooltip(onClickL, paramsL)	
    onClickL = defaulting(onClickL, getUICaller().onclick_l)
    paramsL = defaulting(paramsL, getUICaller().params_l)
-   local expr = string.format("getKey('%s', '%s')", onClickL, paramsL)
-   local keyName = runExpr(expr)
+   local keyName = r2:getKeyName(onClickL, paramsL)
 	if keyName == i18n.get("uiNotAssigned") then
 		-- no associated key
 		setContextHelpText(getUICaller().tooltip)

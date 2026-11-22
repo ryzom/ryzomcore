@@ -319,15 +319,13 @@ local function showFileList(formInstance)
 	for k, v in pairs(files) do
 		if string.lower(nlfile.getExtension(v)) == "r2" then			
 			local shortFilename = nlfile.getFilename(v)
-			local shortFileEscape=string.gsub(shortFilename, "'", "\\'")
 
 			local shortFilename2 = shortFilename
-			local shortFileEscape2 = shortFileEscape
 
 
 			local entry = createGroupInstance("r2ed_filelist_entry", "", 
 				{ id = tostring(k),  text = shortFilename2,
-				params_l="r2.setCurrSelectedFile('" .. shortFileEscape2 .. "')" })
+				params_l=r2:uiCall("r2.setCurrSelectedFile", shortFilename) })
 			fileGroupList:addChild(entry)
 		end
 	end
@@ -375,20 +373,17 @@ local function buildScenarioTree(formInstance)
 		local destNode = rootNode:getNodeFromId(nodeId)
 		local autosaveNode = rootNode:getNodeFromId("autosave")
 		local files = getPathContent(searchPath)
-		-- the path goes into a script: a path of the configuration may have backslashes or a quote
-		local searchPathEscape = string.gsub(string.gsub(searchPath, "\\", "\\\\"), "'", "\\'")
 		table.sort(files)
 		for k, v in pairs(files) do
 			if string.lower(nlfile.getExtension(v)) == "r2" then
 				local shortFilename = nlfile.getFilename(v)
-				local shortFileEscape=string.gsub(shortFilename, "'", "\\'")
 
 				local fileLeaf= SNode()
 				fileLeaf.Id = shortFilename
 				local len = string.len(shortFilename) - 3
 				fileLeaf.Text = string.sub(shortFilename,0, len)
 				fileLeaf.AHName = "lua"
-				fileLeaf.AHParams = "r2.setCurrSelectedFileToLoad('" .. shortFileEscape .. "', '"..searchPathEscape.."')"
+				fileLeaf.AHParams = r2:uiCall("r2.setCurrSelectedFileToLoad", shortFilename, searchPath)
 				--if autosave file, plug it in the autosave branch
 				if string.find(shortFilename, "autosave") ~= nil then 
 					autosaveNode:addChild(fileLeaf)
@@ -419,7 +414,7 @@ local function buildScenarioTree(formInstance)
 				local len = string.len(v[1]) - 3
 				fileLeaf.Text = string.gsub(string.sub(v[1],0, len), "_", " ")
 				fileLeaf.AHName = "lua"
-				fileLeaf.AHParams = "r2.setCurrSelectedFileToLoad('" .. v[1] .. "', './examples/')"				
+				fileLeaf.AHParams = r2:uiCall("r2.setCurrSelectedFileToLoad", v[1], "./examples/")				
 				parentNode:addChild(fileLeaf)
 			end
 		end 
@@ -445,7 +440,7 @@ local function buildScenarioTree(formInstance)
 				local len = string.len(v[1]) - 3
 				fileLeaf.Text = string.gsub(string.sub(v[1],0, len), "_", " ")
 				fileLeaf.AHName = "lua"
-				fileLeaf.AHParams = "r2.setCurrSelectedFileToLoad('" .. v[1] .. "', './examples/')"				
+				fileLeaf.AHParams = r2:uiCall("r2.setCurrSelectedFileToLoad", v[1], "./examples/")				
 				parentNode:addChild(fileLeaf)
 			end
 		end 
@@ -471,7 +466,7 @@ local function buildScenarioTree(formInstance)
 					local len = string.len(v[1]) - 3
 					fileLeaf.Text = string.gsub(string.sub(v[1],0, len), "_", " ")
 					fileLeaf.AHName = "lua"
-					fileLeaf.AHParams = "r2.setCurrSelectedFileToLoad('" .. v[1] .. "', './examples/')"				
+					fileLeaf.AHParams = r2:uiCall("r2.setCurrSelectedFileToLoad", v[1], "./examples/")				
 					parentNode:addChild(fileLeaf)
 				end
 			end
@@ -630,11 +625,11 @@ local function showUserDefinedComponent(formInstance)
 				local str = name..description .. md5..tstamp..path
 				debugInfo(str)
 		
-				local entry = createGroupInstance("r2ed_filelist_entry", "", { id = tostring(k), text = "OK: " .. shortFilename, params_l="r2:userComponentOk('" .. shortFilename .. "', '"..str.."')" })
+				local entry = createGroupInstance("r2ed_filelist_entry", "", { id = tostring(k), text = "OK: " .. shortFilename, params_l=r2:uiCall("r2:userComponentOk", shortFilename, (string.gsub(str, "\\n", "\n"))) })
 				fileGroupList:addChild(entry)
 			else
 
-				local entry = createGroupInstance("r2ed_filelist_entry", "", { id = tostring(k), text =  "KO: " .. shortFilename, params_l="r2:userComponentKo('" ..shortFilename .."', 'syntax error')" })
+				local entry = createGroupInstance("r2ed_filelist_entry", "", { id = tostring(k), text =  "KO: " .. shortFilename, params_l=r2:uiCall("r2:userComponentKo", shortFilename, "syntax error") })
 				fileGroupList:addChild(entry)
 			end
 		end

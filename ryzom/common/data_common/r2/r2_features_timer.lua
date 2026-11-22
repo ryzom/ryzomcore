@@ -18,7 +18,7 @@ feature.Components = {}
 
 feature.Components.Timer =
 	{
-		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor()", "uiR2EdEditEventsButton"),
+		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor", "uiR2EdEditEventsButton"),
 		BaseClass="LogicEntity",			
 		Name="Timer",
 		InEventUI = true,
@@ -541,7 +541,7 @@ function component.initEventValuesMenu(this, menu, categoryEvent)
 				local subMenu2= subMenu:getSubMenu(lineNb)
 				for s=0,9 do
 					lineStr = tostring(i+s) 
-					local func = "r2.events:setEventValue('','" .. categoryEvent .."','".. lineStr.."')"
+					local func = r2:uiCall("r2.events:setEventValue", "", categoryEvent, lineStr)
 					subMenu2:addLine(lineStr, "lua", func, lineStr)
 				end
 				lineNb = lineNb+1
@@ -572,7 +572,7 @@ function component.initEventValuesMenu(this, menu, categoryEvent)
 					index = index + 1
 					for s=0, 55, 5 do
 						lineStr = tostring( (i+m)*60 + s) 
-						local func = "r2.events:setEventValue('','" .. categoryEvent .."','".. lineStr.."')"
+						local func = r2:uiCall("r2.events:setEventValue", "", categoryEvent, lineStr)
 						subMenu3:addLine(tostring(i+m) .. "m ".. s .. "s", "lua", func, lineStr)				
 					end										
 				end

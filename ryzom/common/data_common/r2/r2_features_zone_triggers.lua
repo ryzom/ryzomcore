@@ -14,7 +14,7 @@ local classZoneTriggerVersion = 1
 
 feature.Components.ZoneTrigger =
 	{
-		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor()", "uiR2EdEditEventsButton"),
+		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor", "uiR2EdEditEventsButton"),
 		BaseClass="LogicEntity",			
 		Name="ZoneTrigger",
 		InEventUI = true,

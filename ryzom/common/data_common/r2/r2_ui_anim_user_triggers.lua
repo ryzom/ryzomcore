@@ -23,7 +23,7 @@ function r2.ui.AnimUserTriggers:popMenu()
 	for k = 1, table.getn(triggers) do
 		if triggers[k].Act == 0 or triggers[k].Act == r2.getCurrentActIndex() then
 			rootMenu:addLine(triggers[k].Name, "lua",
-							 string.format("r2.ui.AnimUserTriggers:fireTrigger(%d, %d)", triggers[k].Act, triggers[k].Id), "")
+							 r2:uiCall("r2.ui.AnimUserTriggers:fireTrigger", triggers[k].Act, triggers[k].Id), "")
 		end
 	end
 	if rootMenu:getNumLine() == 0 then

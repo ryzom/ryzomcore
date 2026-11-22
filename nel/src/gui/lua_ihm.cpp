@@ -1388,45 +1388,49 @@ namespace NLGUI
 		// Execute expression
 		CInterfaceExprValue value;
 		if (CInterfaceExpr::eval(expr,    value, nullptr))
-		{
-			switch(value.getType())
-			{
-			case CInterfaceExprValue::Boolean:
-				ls.push(value.getBool());
-				break;
-			case CInterfaceExprValue::Integer:
-				ls.push(value.getInteger());
-				break;
-			case CInterfaceExprValue::Double:
-				ls.push(value.getDouble());
-				break;
-			case CInterfaceExprValue::String:
-				ls.push(value.getString());
-				break;
-			case CInterfaceExprValue::RGBA:
-				{
-					CRGBA color = value.getRGBA();
-	#if defined(LUABIND_STACK_HPP_INCLUDED)
-					luabind::push(ls.getStatePointer(), color);
-	#elif (LUABIND_VERSION > 600)
-					luabind::detail::push(ls.getStatePointer(), color);
-	#else
-					luabind::object obj(ls.getStatePointer(), color);
-					obj.pushvalue();
-	#endif
-					break;
-				}
-				break;
-			case CInterfaceExprValue::UserType: // Yoyo: don't care UserType...
-			default:
-				ls.pushNil();
-				break;
-			}
-		}
+			pushExprValue(ls,    value);
 		else
 			ls.pushNil();
 
 		return 1;
+	}
+
+	// ***************************************************************************
+	void	CLuaIHM::pushExprValue(CLuaState &ls,    const CInterfaceExprValue &value)
+	{
+		switch(value.getType())
+		{
+		case CInterfaceExprValue::Boolean:
+			ls.push(value.getBool());
+			break;
+		case CInterfaceExprValue::Integer:
+			ls.push(value.getInteger());
+			break;
+		case CInterfaceExprValue::Double:
+			ls.push(value.getDouble());
+			break;
+		case CInterfaceExprValue::String:
+			ls.push(value.getString());
+			break;
+		case CInterfaceExprValue::RGBA:
+			{
+				CRGBA color = value.getRGBA();
+#if defined(LUABIND_STACK_HPP_INCLUDED)
+				luabind::push(ls.getStatePointer(), color);
+#elif (LUABIND_VERSION > 600)
+				luabind::detail::push(ls.getStatePointer(), color);
+#else
+				luabind::object obj(ls.getStatePointer(), color);
+				obj.pushvalue();
+#endif
+				break;
+			}
+			break;
+		case CInterfaceExprValue::UserType: // Yoyo: don't care UserType...
+		default:
+			ls.pushNil();
+			break;
+		}
 	}
 
 	// ***************************************************************************
@@ -1460,40 +1464,52 @@ namespace NLGUI
 		CLuaIHM::check(ls,   ls.isString(1),    "runExpr() requires a string in param 1");
 
 		// retrieve fct
-		std::string expr;
-		ls.toString(1,    expr);
-		expr+= "(";
+		std::string fctName;
+		ls.toString(1,    fctName);
 
-		// retrieve params
+		// retrieve params. They are given to the function as values: written into the text of an expression,
+		// a string with a quote in it ended the string there and the rest of it was evaluated
+		CInterfaceExpr::TArgList	args;
 		uint	top= ls.getTop();
 		for(uint i=2;i<=top;i++)
 		{
-			if(i>2)
-				expr+= ",   ";
+			CInterfaceExprValue	arg;
 
 			// If it is a number
 			if(ls.type(i)==LUA_TNUMBER)
 			{
-				std::string	paramValue;
-				ls.toString(i,    paramValue);		// nb: transformed to a string in the stack
-				expr+= paramValue;
+#if LUA_VERSION_NUM >= 503
+				if(ls.isInteger(i))
+					arg.setInteger(ls.toInteger(i));
+				else
+					arg.setDouble(ls.toNumber(i));
+#else
+				// one number type: a whole value is an integer, as its text "12" was, another one a double
+				double	number= ls.toNumber(i);
+				if(number >= -9.0e18 && number <= 9.0e18 && (double)(sint64)number == number)
+					arg.setInteger((sint64)number);
+				else
+					arg.setDouble(number);
+#endif
 			}
 			// else suppose a string
 			else
 			{
-				// must enclose with "'"
 				std::string	paramValue;
 				ls.toString(i,    paramValue);
-				expr+= std::string("'") + paramValue + std::string("'") ;
+				arg.setString(paramValue);
 			}
+			args.push_back(arg);
 		}
 
-		// end fct call
-		expr+= ")";
+		// call the function and push result
+		CInterfaceExprValue value;
+		if (CInterfaceExpr::callUserFct(fctName,    args,    value))
+			pushExprValue(ls,    value);
+		else
+			ls.pushNil();
 
-
-		// run expression and push result
-		return runExprAndPushResult(ls,    expr);
+		return 1;
 	}
 
 	// ***************************************************************************
