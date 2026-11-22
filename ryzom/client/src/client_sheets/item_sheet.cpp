@@ -780,23 +780,29 @@ bool	CItemSheet::canBuildItemPart(RM_FABER_TYPE::TRMFType e) const
 }
 
 // ***************************************************************************
-bool	CItemSheet::canBuildItemPart(RM_FABER_TYPE::TRMFType e, ITEM_ORIGIN::EItemOrigin origin) const
+bool	CItemSheet::canBuildItemPart(RM_FABER_TYPE::TRMFType e, EGSPD::CPeople::TPeople planCiv) const
 {
-	if(e<RM_FABER_TYPE::NUM_FABER_TYPE)
-	{
-		if(Mp.ItemPartBF&(SINT64_CONSTANT(1)<<e))
-		{
-			const CMpItemPart		&itemPart= getItemPart(e);
-			// If this MP can build all origin items, or if origin matchs
-			if( itemPart.OriginFilter == ITEM_ORIGIN::COMMON ||
-				itemPart.OriginFilter == origin ||
-				origin == ITEM_ORIGIN::COMMON )
-				return true;
-		}
-	}
+	if(!canBuildItemPart(e))
+		return false;
 
-	// all other cases: false
-	return false;
+	// A common plan takes any MP
+	if(planCiv == EGSPD::CPeople::Common)
+		return true;
+
+	// A plan of a civilisation takes no MP of another civilisation's ecosystem
+	switch(Mp.Ecosystem)
+	{
+	case ECOSYSTEM::desert:
+		return planCiv == EGSPD::CPeople::Fyros;
+	case ECOSYSTEM::forest:
+		return planCiv == EGSPD::CPeople::Matis;
+	case ECOSYSTEM::lacustre:
+		return planCiv == EGSPD::CPeople::Tryker;
+	case ECOSYSTEM::jungle:
+		return planCiv == EGSPD::CPeople::Zorai;
+	default:
+		return true;
+	}
 }
 
 // ***************************************************************************

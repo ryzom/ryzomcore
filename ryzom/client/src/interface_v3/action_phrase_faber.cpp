@@ -629,7 +629,7 @@ void			CActionPhraseFaber::fillSelection(const std::vector<uint> &mps)
 
 
 // ***************************************************************************
-void			CActionPhraseFaber::filterSelectionItemPart(std::vector<uint> &mps, RM_FABER_TYPE::TRMFType itemPartFilter, ITEM_ORIGIN::EItemOrigin originFilter)
+void			CActionPhraseFaber::filterSelectionItemPart(std::vector<uint> &mps, RM_FABER_TYPE::TRMFType itemPartFilter, EGSPD::CPeople::TPeople planCiv)
 {
 	// Unknown => no fitler
 	if(itemPartFilter==RM_FABER_TYPE::Unknown)
@@ -645,7 +645,7 @@ void			CActionPhraseFaber::filterSelectionItemPart(std::vector<uint> &mps, RM_FA
 		// test itemPartFilter match.
 		if(itemSheet)
 		{
-			if(itemSheet->canBuildItemPart(itemPartFilter, originFilter))
+			if(itemSheet->canBuildItemPart(itemPartFilter, planCiv))
 			{
 				res.push_back(mps[i]);
 			}
@@ -762,9 +762,8 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 		// Filter the selection whether it is an itemPart or specificItem reqiurement
 		if(mpBuild.RequirementType==CMPBuild::ItemPartReq)
 		{
-			CItemSheet	*itemBuilt= dynamic_cast<CItemSheet*>(SheetMngr.get(_ExecuteFromItemPlanBrick->FaberPlan.ItemBuilt));
-			ITEM_ORIGIN::EItemOrigin	itemOrigin= itemBuilt? itemBuilt->ItemOrigin : ITEM_ORIGIN::UNKNOWN;
-			filterSelectionItemPart(selectMps, mpBuild.FaberTypeRequired, itemOrigin);
+			// the civilisation of the plan decides, as on the server, not the origin of the item built
+			filterSelectionItemPart(selectMps, mpBuild.FaberTypeRequired, _ExecuteFromItemPlanBrick->CivRestriction);
 		}
 		else if(mpBuild.RequirementType==CMPBuild::SpecificItemReq)
 		{

@@ -4386,11 +4386,13 @@ NLMISC_COMMAND(logFaberMpCompatibles, "log all MP compatibles for faber the item
 
 	// get the faber plan
 	CSBrickSheet	*brick= pBM->getBrick(CSheetId(sheetId));
-	// get the origin of the item built
-	CItemSheet		*itemBuilt= NULL;
-	if(brick)
-		itemBuilt= dynamic_cast<CItemSheet*>(SheetMngr.get(brick->FaberPlan.ItemBuilt));
-	if(brick && itemBuilt)
+	if(!brick)
+	{
+		nlwarning("logFaberMpCompatibles: %s is not a brick the client knows", CSheetId(sheetId).toString().c_str());
+		return true;
+	}
+	// the item built, for its origin: the civilisation of the plan decides which MPs it takes
+	CItemSheet		*itemBuilt= dynamic_cast<CItemSheet*>(SheetMngr.get(brick->FaberPlan.ItemBuilt));
 	{
 
 		// build array of MP sheetId
@@ -4408,7 +4410,11 @@ NLMISC_COMMAND(logFaberMpCompatibles, "log all MP compatibles for faber the item
 		// header
 		uint	numMpSlots= (uint)brick->FaberPlan.ItemPartMps.size();
 		nlinfo("**********  FABERLOG  **********");
-		nlinfo("  ItemBuilt Origin: %s", ITEM_ORIGIN::enumToString(itemBuilt->ItemOrigin).c_str() );
+		if(itemBuilt)
+			nlinfo("  ItemBuilt Origin: %s", ITEM_ORIGIN::enumToString(itemBuilt->ItemOrigin).c_str() );
+		else
+			nlwarning("  ItemBuilt %s: the client has no item sheet of that name", brick->FaberPlan.ItemBuilt.toString().c_str() );
+		nlinfo("  Plan civilisation: %s", EGSPD::CPeople::toString(brick->CivRestriction).c_str() );
 		nlinfo("  NumMPSlot: %d", numMpSlots);
 
 		// Parse All Slots.
@@ -4425,7 +4431,7 @@ NLMISC_COMMAND(logFaberMpCompatibles, "log all MP compatibles for faber the item
 				CItemSheet	*itemSheet= mps[i];
 				bool	ok= true;
 				// check faber type filter
-				if( mpSlot.FaberTypeFilter!=RM_FABER_TYPE::Unknown && !itemSheet->canBuildItemPart(mpSlot.FaberTypeFilter, itemBuilt->ItemOrigin))
+				if( mpSlot.FaberTypeFilter!=RM_FABER_TYPE::Unknown && !itemSheet->canBuildItemPart(mpSlot.FaberTypeFilter, brick->CivRestriction))
 					ok= false;
 
 				if(ok)
