@@ -216,6 +216,10 @@
           sendto="IOS"
           format="uc"
           description="the client sets an afk custom text" />
+    <leaf name="CHAT_SHARE"
+          description="the client sends a chat message with structured metadata" />
+    <leaf name="CHAT_SHARE_RESULT"
+          description="the server confirms or rejects a structured chat message" />
   </branch>
   <branch name="STUN">
     <leaf name="STUN" />

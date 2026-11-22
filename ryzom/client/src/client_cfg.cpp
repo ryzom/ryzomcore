@@ -330,6 +330,8 @@ CClientConfig::CClientConfig()
 
 	TexturesInterface.push_back("texture_interfaces_v3_2x");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc_2x");
+	// Chat emoji, kept uncompressed: DXTC blocks are too visible on them.
+	TexturesInterface.push_back("texture_emojis");
 
 	TexturesOutGameInterface.push_back("texture_interfaces_v3_outgame_ui");
 

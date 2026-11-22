@@ -1039,7 +1039,6 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 				{
 					H_AUTO(SystemAckSyncCode);
 					//nldebug("FERECV: received ACK_SYNC from client %d", clienthost->clientId());
-					clienthost->setConnectedState();
 
 					// decode long ack
 					uint32	frontack;
@@ -1057,10 +1056,22 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					// check the received sync is correct
 					if (syncCode == clienthost->LastSentSync)
 					{
+						// the long ack must end at a packet sent to this client, not before the last ack, and span no more than the bitfield holds
+						if (longackbitfield.size() < NumBitsInLongAck
+							|| frontack == 0 || frontack > clienthost->sendNumber()
+							|| backack > frontack || frontack-backack >= NumBitsInLongAck
+							|| (clienthost->LastReceivedAck != 0xFFFFFFFF && frontack < clienthost->LastReceivedAck))
+						{
+							rejectReceivedMessage( HackedSizeInBuffer, clienthost->Uid );
+							return;
+						}
+
+						clienthost->setConnectedState();
+
 						// process ack
 						uint	ack = std::max(backack, clienthost->LastReceivedAck+1);
 						//nlinfo("BEN-DBG: ACK_SYNC, start reading longackbitfield from client %d", clienthost->clientId());
-						for (; ack<=frontack; ++ack)
+						for (uint numAcks=frontack+1-ack; numAcks>0; --numAcks, ++ack)
 						{
 							bool	ackvalue = longackbitfield[ack&(NumBitsInLongAck-1)];
 							//nlinfo("BEN-DBG: ACK_SYNC, ack %d: %s", ack, (ackvalue ? "true" : "false"));

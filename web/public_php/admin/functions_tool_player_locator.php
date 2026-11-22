@@ -161,7 +161,7 @@
 		{
 			if ($db->sql_select_db('nel'))
 			{
-				$sql = "SELECT ring_db_name FROM domain WHERE domain_name='". $AS_Application ."'";
+				$sql = "SELECT ring_db_name FROM domain WHERE domain_name='". $db->sql_escape_string($AS_Application) ."'";
 				if ($resutl = $db->sql_query($sql))
 				{
 					if ($db->sql_numrows($result))
@@ -210,7 +210,7 @@
 
 		if ($db->sql_select_db('nel'))
 		{
-			$sql = "SELECT ring_db_name FROM domain WHERE domain_name='". $AS_Application ."'";
+			$sql = "SELECT ring_db_name FROM domain WHERE domain_name='". $db->sql_escape_string($AS_Application) ."'";
 			if ($resutl = $db->sql_query($sql))
 			{
 				if ($db->sql_numrows($result))

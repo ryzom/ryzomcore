@@ -99,6 +99,15 @@ string sqlQuery(const string &query, sint32 &nbRow, MYSQL_ROW &firstRow, CMysqlR
 	return "";
 }
 
+string sqlEscape(const string &str)
+{
+	nlassert(DatabaseConnection);
+	string escaped(str.size() * 2 + 1, '\0');
+	unsigned long len = mysql_real_escape_string(DatabaseConnection, &escaped[0], str.c_str(), (unsigned long)str.size());
+	escaped.resize(len);
+	return escaped;
+}
+
 string resetDatabase()
 {
 	// Reset all shards database

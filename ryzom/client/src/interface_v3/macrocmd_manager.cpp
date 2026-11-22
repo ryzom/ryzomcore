@@ -25,6 +25,7 @@
 // Interface
 #include "macrocmd_manager.h"
 #include "macrocmd_key.h"
+#include "chat_link_ui.h"
 
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
@@ -1063,29 +1064,33 @@ class	CHandlerMacrosNewMacro : public IActionHandler
 public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		// Reinit the new_macro container and variables
 		CMacroCmd mc;
 		mc.Name = "NewMacro";
 		mc.BitmapBack = 0;
 		mc.BitmapIcon = 0;
 		mc.BitmapOver = 0;
-		pMCM->CurrentEditMacro = mc;
-
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_NEWMACRO));
-		if (pGC != NULL)
-		{
-			pGC->setTitle(NEWMACRO_TITLE_NEW);
-			pGC->setActive (false);
-			pGC->setActive (true);
-		}
-
-		pMCM->CurrentEditMacroNb = -1;
-		pMCM->EditCmd->deactivate();
+		CMacroCmdManager::getInstance()->editNewMacro(mc);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerMacrosNewMacro, "macros_new_macro");
+
+// ***************************************************************************
+void CMacroCmdManager::editNewMacro(const CMacroCmd &macro)
+{
+	CurrentEditMacro = macro;
+
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_NEWMACRO));
+	if (pGC != NULL)
+	{
+		pGC->setTitle(NEWMACRO_TITLE_NEW);
+		pGC->setActive (false);
+		pGC->setActive (true);
+	}
+
+	CurrentEditMacroNb = -1;
+	EditCmd->deactivate();
+}
 
 // ***************************************************************************
 // Called from context menu on a macro
@@ -1146,6 +1151,38 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerMacrosCopy, "macros_copy");
+
+// ***************************************************************************
+// Called from context menu on a macro
+class	CHandlerMacrosChatLink : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &Params)
+	{
+		sint nMacNb = getMacroFromId(pCaller->getId());
+		const CMacroCmd &macro = CMacroCmdManager::getInstance()->getMacros()[nMacNb];
+
+		CChatMessageReference reference;
+		reference.Type = CChatMessageReference::Macro;
+		CChatMessageMacro &shared = reference.MacroValue;
+		shared.Name = macro.Name;
+		shared.DispText = macro.DispText;
+		shared.BitmapBack = macro.BitmapBack;
+		shared.BitmapIcon = macro.BitmapIcon;
+		shared.BitmapOver = macro.BitmapOver;
+		shared.Commands.resize(macro.Commands.size());
+		for (uint i = 0; i < macro.Commands.size(); ++i)
+		{
+			shared.Commands[i].Name = macro.Commands[i].Name;
+			shared.Commands[i].Params = macro.Commands[i].Params;
+		}
+		if (!shared.isValid())
+			CHAT_SHARE::reportInvalidLink();
+		else
+			CHAT_SHARE::share(macro.Name, reference, getParam(Params, "destination"));
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerMacrosChatLink, "macros_chat_link");
 
 
 // ***************************************************************************

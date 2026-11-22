@@ -1,5 +1,122 @@
 # ryzom-core
 
+## 2026-11-11 — 🐛 Player speed budget in GPMS, speed forced to 0 while afk
+
+Moving while sit or afk was possible with a modified client: the server only forced the speed to 0 when sitting. `CCharacter::applyCurrentSpeed()` (extracted from `applyRegenAndClipCurrentValue`) now also does it while afk, `setAfkState()` recomputes it at once, and refuses afk on a mount. The client leaves afk when a move input is pressed, and no longer shows the "speed factor is zero" message while afk.
+
+Forcing the speed to 0 exposed rubber-banding in `CWorldPositionManager::movePlayer`: a move was cancelled whenever two positions carried the same game tick (leaving afk, lag, mounting). The tick-based `maxDist` is replaced by a credit counted in real time (arrival time of the messages), with a floor, a reserve that grows while moving and a surplus for server stalls (the tick is global, a late tick is a stall of the whole server). New `gpms` variables (`SpeedBudget*`, `SpeedRunLogMinSeconds`) and a `SpeedRun` log of long runs above the speed limit. A client silent more than ~2 s still gets rubber-banding when its positions arrive in one burst: accepted, see `docs/gpms-player-speed-check.md` and `docs/server-tick-and-player-position.md`.
+
+## 2026-10-30 — ✨ nlcrashdbg: debug logs tagged with a crash group id
+
+Added the `nlcrashdbg(id, "format", ...)` macro in `nel/include/nel/misc/debug.h`.
+It is an `nlinfo` prefixed with `CRASHDBG #<id>`, where `<id>` is the id of the
+first report of a crash group. The tool that sends crash reports reads
+`client.log`, so it can pick those lines up and send them with the report, and
+they can all be removed with a grep once the crash is fixed. Not compiled in a
+full client build or run yet. See `docs/crash-debug-logs.md`.
+
+## 2026-10-06 — 🐛 Validate client-supplied values in EGS callbacks
+
+Crash found from a dump: a `CLIENT:EXCHANGE:ADD` message with an invalid source
+inventory (65535) made `CExchangeView::putItemInExchange()`
+call `getItem()` on a NULL inventory (`CCharacter::getInventory()` returns NULL
+for an unknown inventory). Hardened it and the other EGS callbacks that use
+values read from client messages without checking them. `nlassert` does
+nothing in release builds on Linux (`NLMISC_BREAKPOINT` is empty), so the code
+went on with the bad value.
+
+Exchange: `putItemInExchange()` and `putItemInFirstEmptyExchangeSlot()` check
+the inventory, slot and exchange slot; `itemExchangeToBag()` checks the
+exchange slot.
+
+NULL pointers and out of range indexes: `sendItemInfos()` (guild and room
+inventories) and `CGuild::getAndSyncItemInfoVersion()`, `buyPhraseByIndex()`,
+`sellItem()`, `clientEventSetItemCustomText()` and its callback,
+`cbClientPvPSetNeutralAllegianceGuild()`, `buildBuildingTradeList()`,
+`CCharacterShoppingList::buyItem()` (faction points), `CRewardSharing`
+(`userItemSelect()` for a user that is not a candidate, `userValidSelect()`
+off by one), `cbClientMissionWake()` and `abandonMission()` (missing or invalid
+template), `sendNpcMissionGiverIconDesc()` (missing creature),
+`CR2GiveItem::giveItemGranted()` (character no more online),
+`cbClientGuildSetGrade()` (grade >= `EndGuildGrade`).
+
+Character creation: `checkCreateParams()` now refuses an unknown `People`
+(`setStartStatistics()` dereferenced a NULL race sheet) and visual values that
+do not fit the visual property bit fields (hair, colors, morph targets, eyes,
+tattoo, gabarits). The official client only sends values inside these ranges.
+
+`cbHarvestDeposit()` (`CLIENT:HARVEST:DEPOSIT`) returns early: the rest of the
+function is dead code ending in `nlerror()`, which calls `abort()` on Linux.
+The official client no longer sends this message, only a modified one could.
+
+Also fixes `CTeamManager::joinLeagueDecline()`, which read the team invitor
+instead of the league invitor when informing the players.
+
+No debug/test steps: not reproducible on demand; validation relies on code-level
+reasoning. Not compiled nor run when written.
+
+## 2026-09-22 — ✨ Clip hairstyle mesh against equipped hat volume (HAT_SLOT)
+
+`ajout_hat_slot__hair_clip_alpha.md`: wide hairstyles (`HEAD_SLOT`) visually poking
+through hats (`HAT_SLOT`, added separately in `ajout_hat_slot.md`) are now fixed by
+building, per character and only while both slots are occupied, a private (never
+shape-bank-shared) copy of the hairstyle mesh with the geometry inside the hat's volume
+actually cut away — a real geometric clip, computed once at equip time. New module
+`ryzom/client/src/hairstyle_hat_clip.{h,cpp}`; see `docs/hairstyle_hat_clip.md` for the
+full design (coordinate-space handling, the `<hatShapeName>_mask.shape` clipping-volume
+convention, the clipping algorithm, and known limitations).
+
+Driven from a new `CPlayerCL::updateVisible()` override (`player_cl.h`/`.cpp`), not from
+`updateVisualPropertyVpa()`: the latter runs before the character's skeleton is fully
+configured for the frame (bone world matrices still default/identity, character scale not
+yet reflected), which produced three distinct "skeleton not ready" symptoms during
+testing (unresolved bone matrices, halved-scale positions, and world-space coordinates
+imprecise enough to swamp the sub-centimeter containment test on a large continent) before
+landing on `updateVisible()` and an explicit recenter-on-the-bone-position step.
+
+Two small public accessors added to the engine, both previously missing: `CMeshGeom::
+getBonesName()` (`nel/include/nel/3d/mesh.h`) and `CMeshMRMSkinnedGeom::getLodGeomorphs()`
+(`nel/include/nel/3d/mesh_mrm_skinned.h`, though `getGeomorphs()` already existed there
+doing the same thing under a different name — worth deduplicating later, not done here).
+
+`entity_cl.cpp`'s `SInstanceCL::updateCurrentFromLoading()` gained two `(IA_AGENT_DEBUG)`-
+tagged log lines during testing (kept out of the final commit) to confirm
+`KeepHiddenWhenLoaded` — already-existing engine plumbing — was being respected correctly
+for hiding the normal (shared) hairstyle instance while a clipped one is active.
+
+## 2026-09-23 — 🐛 Clear client PACS primitive handles before releasing the container
+
+`releasePACS()` (`ryzom/client/src/pacs_client.cpp`), the only place where the
+client destroys its PACS move container, now first calls
+`EntitiesMngr.removeCollision()` (entity `_Primitive` and user entity
+`_CheckPrimitive`) and the new `CEntityManager::removeShapePrimitives()`
+(the `Primitive` of every Lua shape instance, IG zone shapes included). No
+client entity or shape can keep a handle on a primitive freed with its
+container, whatever path leads to the release (`CContinent::select()` or
+`CContinent::unselect()`).
+
+Before this, IG zone shapes were skipped by `CEntityManager::removeInstances()`
+in `CContinent::unselect()` and kept dangling primitive handles, later passed to
+`removePrimitive()` of the next container (notably from
+`CEntityManager::release()` on FarTP reselect). The ownership guard in
+`CMoveContainer::removePrimitive()` only compares addresses, and primitives are
+plain `new`/`delete` objects, so a freed address reused by a live primitive of
+the new container would have let a stale handle remove it.
+
+Entity primitives are recreated as before by `CEntityManager::changeContinent()`.
+Shape primitives are not recreated: a shape surviving its container keeps its
+3D instance without collision. Shape primitives of a hibernated container
+(indoor switch) are intentionally left in place and remain covered only by the
+`removePrimitive()` ownership guard.
+
+No debug/test steps: the crash is not reproducible on demand; validation relies
+on the code-level reasoning (single container destruction point). Documented in
+`docs/client-pacs-primitives.md`.
+
+## 2026-09-22 — 🐛 Fix PACS removePrimitive use-after-free crash on FarTP
+
+PACS removePrimitive crash chantier (`fix_pacs_remove_primitive_crash.md`): the Windows client crashed with EXCEPTION_ACCESS_VIOLATION_READ in `NLPACS::CMoveContainer::removePrimitive` (`freePrimitive`/`delete`, move_container.cpp:1499) during a FarTP character reselect (stack: removePrimitive <- releaseMainLoopReselect release.cpp:257 <- CFarTP::disconnectFromPreviousShard far_tp.cpp:1169). `removePrimitive` never checked that the primitive belonged to the container before dereferencing and deleting it, so a dangling `UMovePrimitive` handle (primitive already freed by a previous container, released by `releasePACS()` on every continent switch) hit the unconditional walk + delete. `removePrimitive` now returns early when the primitive is not in `_PrimitiveSet` (pointer comparison only, no dereference), making removal idempotent and safe across container recreations; a `nlwarning` traces the ignored dangling handles (client entity/continent lifecycle cleanup stays a separate topic). Valid removal paths are unchanged.
+
 ## 2026-09-16 — ✨ Add smoothing angle property to material
 
 Added `CMaterial::_SmoothingAngle` (float, sentinel `-1.0` = never set) on

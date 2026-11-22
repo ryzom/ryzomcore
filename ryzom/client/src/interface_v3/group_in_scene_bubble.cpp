@@ -23,6 +23,8 @@
 
 #include "stdpch.h"
 #include "group_in_scene_bubble.h"
+#include "chat_text_manager.h"
+#include "emoji_manager.h"
 #include "interface_manager.h"
 #include "skill_manager.h"
 #include "../character_cl.h"
@@ -915,8 +917,13 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const std::string &ucsTe
 			if (strnicmp(pCharBubble->getId().c_str(), "ui:interface:in_scene_dyn_bubble", 32) == 0)
 				return;
 
+		// Bubbles have no room for emoji images, they use the emoji of the font.
+		string text = ucsText.substr(pos, textSize-pos);
+		if (getChatTextMngr().getEmojiMode() != CChatTextManager::EmojiText)
+			text = CEmojiManager::getInstance().substituteShortcodes(text);
+
 		// Get a bubble
-		CGroupInSceneBubble *bubble = newBubble (ucsText.substr(pos, textSize-pos));
+		CGroupInSceneBubble *bubble = newBubble (text);
 		if (bubble)
 		{
 			// Link the bubble

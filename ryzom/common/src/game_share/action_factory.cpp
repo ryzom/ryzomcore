@@ -313,7 +313,16 @@ CAction *CActionFactory::unpack (NLMISC::CBitMemStream &message, NLMISC::TGameCy
 		}
 		else
 		{
-			action->unpack (message);
+			try
+			{
+				action->unpack (message);
+			}
+			catch (...)
+			{
+				// the caller never gets this action, give it back to the store
+				remove (action);
+				throw;
+			}
 		}
 	}
 
