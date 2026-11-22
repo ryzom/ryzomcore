@@ -1916,7 +1916,8 @@ void CClientConfig::setValues()
 
 	READ_BOOL_DEV(DamageShieldEnabled)
 
-	READ_BOOL_FV(AllowDebugLua)
+	// The Lua commands, the ah command and the development libraries of Lua: not in a final version
+	READ_BOOL_DEV(AllowDebugLua)
 	READ_BOOL_FV(DisplayLuaDebugInfo)
 
 	READ_BOOL_DEV(LuaDebugInfoGotoButtonEnabled)

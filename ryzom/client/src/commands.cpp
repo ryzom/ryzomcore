@@ -1432,9 +1432,13 @@ NLMISC_COMMAND(ah, "Launch an action handler", "<ActionHandler> <AHparam>")
 	if (args.empty())
 		return false;
 
-	if (!ClientCfg.AllowDebugLua && toLowerAscii(args[0]) == "lua")
+	// An action handler can run Lua in several ways: "lua" itself, also written with its parameters as
+	// "lua:...", "browse" with an "ah:" address, "command", "proc", "set" and the other handlers that evaluate
+	// an expression. So the command needs what the Lua commands need.
+	if (!ClientCfg.AllowDebugLua)
 	{
-		return false; // not allowed!!
+		log.displayNL("The ah command is available only if you add 'AllowDebugLua= 1;' in your client.cfg");
+		return true;
 	}
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -4156,9 +4160,22 @@ NLMISC_COMMAND(skillToInt, "Convert a skill to an int", "")
 	return true;
 }
 
+// The browse action handler runs an address that starts with "ah:" as action handlers with their parameters: that
+// is for the links of the pages of a trusted site. A command a player types, or that a macro runs, opens pages only.
+// The handler reads the address through getParam, which drops the blanks before it: so does this test.
+static bool isActionHandlerAddress(const std::string &url, NLMISC::CLog &log)
+{
+	std::string::size_type start = url.find_first_not_of(" \t\r\n");
+	if (start == std::string::npos || url.compare(start, 3, "ah:") != 0)
+		return false;
+	log.displayNL("'%s' is not the address of a page: this command opens pages, it runs no action handler", url.c_str());
+	return true;
+}
+
 NLMISC_COMMAND(browse, "Browse a HTML document with the internal help web browser.", "")
 {
 	if (args.size() != 1) return false;
+	if (isActionHandlerAddress(args[0], log)) return true;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:help_browser:content:html|url="+args[0]);
 	return true;
@@ -4175,6 +4192,7 @@ NLMISC_COMMAND(openRingWindow, "Browse the main page in the ring web browser.", 
 NLMISC_COMMAND(browseRingAdmin, "Browse a HTML document with the ring web browser.", "")
 {
 	if (args.size() != 1) return false;
+	if (isActionHandlerAddress(args[0], log)) return true;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+args[0]);
 	return true;
@@ -5252,6 +5270,9 @@ NLMISC_COMMAND(dumpSounds, "Dump names of all loaded sound", "<>")
 // ***************************************************************************
 // LUA
 // ***************************************************************************
+// The Lua commands are for development: a final version has neither them nor AllowDebugLua, which is only read
+// by a client that is not a final version
+#if !FINAL_VERSION
 const char	*LUADebugNotEnabledMsg= "Lua Commands are available only if you add 'AllowDebugLua= 1;' in your client.cfg";
 
 NLMISC_COMMAND(luaReload, "reload all .lua script files", "")
@@ -5357,10 +5378,6 @@ NLMISC_COMMAND(luaObject, "Dump the content of a lua object", "<table name> [max
 }
 
 
-
-
-// GC allowed only in Dev version
-#if !FINAL_VERSION
 NLMISC_COMMAND(luaGC, "Force a garbage collector of lua", "")
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();

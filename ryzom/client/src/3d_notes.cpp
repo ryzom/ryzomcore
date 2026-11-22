@@ -24,6 +24,8 @@
 #include "init_main_loop.h"
 #include "user_entity.h"
 
+#include "nel/gui/action_handler.h"
+
 using namespace std;
 using namespace NLMISC;
 
@@ -337,8 +339,8 @@ NLMISC_COMMAND(gotoNote, "go to a note", "<id>|<text>")
 NLMISC_COMMAND(debug, "open the debug window. alias to ah show_hide debug_info", "")
 {
 	if(args.size() != 0) return false;
-	string cmd("ah show debug_info");
-	ICommand::execute(cmd, log);
+	// the action handler itself: the ah command is for a client with AllowDebugLua
+	NLGUI::CAHManager::getInstance()->runActionHandler("show", nullptr, "debug_info");
 	return true;
 }
 #endif
