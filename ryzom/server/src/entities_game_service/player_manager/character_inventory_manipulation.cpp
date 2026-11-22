@@ -696,6 +696,15 @@ void CCharacter::destroyItem(INVENTORIES::TInventory invId, uint32 slot, uint32 
 		return;
 	}
 
+	// The hands and the equipment only refer to items of the bag: a whole item or stack destroyed through them was
+	// only taken off and stayed in the bag, while its owner was told that it is destroyed. The caller names the
+	// inventory the item is in.
+	if (inv->isRefInventory())
+	{
+		nlwarning("<CCharacter::destroyItem> %s: cannot destroy through inventory %u, which only refers to items", _Id.toString().c_str(), (uint)invId);
+		return;
+	}
+
 	// check if slot is valid
 	if (slot >= inv->getSlotCount())
 	{
@@ -2617,7 +2626,33 @@ void CCharacter::createRechargeItem(uint32 sapRecharge)
 #endif
 }
 
-// check if enchant or recharge an item 
+// ****************************************************************************
+bool CCharacter::isInventoryWithinReach(INVENTORIES::TInventory invId, const char *context)
+{
+	// The room and the pack animals must be within reach, as for moving an item (moveItem). The client grays the
+	// entries for an inventory that is not available, but its menu can be older than the state.
+	if (invId == INVENTORIES::player_room && !getRoomInterface().canUseInventory(this, this))
+	{
+		nldebug("<%s> %s uses its room inventory, which it cannot use, refused", context, _Id.toString().c_str());
+		return false; // canUseInventory has told a trial player why
+	}
+	if (invId >= INVENTORIES::pet_animal && invId < INVENTORIES::max_pet_animal)
+	{
+		// the availability the client grays on, which selling and crafting also use
+		const uint32 beastIndex = invId - INVENTORIES::pet_animal;
+		if (beastIndex >= _PlayerPets.size() || (_PlayerPets[beastIndex].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) == 0)
+		{
+			nldebug("<%s> %s uses the inventory of pack animal %u, which is out of reach, refused", context, _Id.toString().c_str(), beastIndex);
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
+			params[0].Int = beastIndex + 1;
+			sendDynamicSystemMessage(_Id, "ANIMAL_INVENTORY_INACCESSIBLE", params);
+			return false;
+		}
+	}
+	return true;
+}
+
+// check if enchant or recharge an item
 // ****************************************************************************
 void CCharacter::enchantOrRechargeItem(INVENTORIES::TInventory invId, uint32 slot)
 {
@@ -2627,26 +2662,8 @@ void CCharacter::enchantOrRechargeItem(INVENTORIES::TInventory invId, uint32 slo
 	if (!EnchantSystemEnabled)
 		return;
 
-	// The room and the pack animals must be within reach, as for moving an item (moveItem). The client grays the
-	// entries for an inventory that is not available, but its menu can be older than the state.
-	if (invId == INVENTORIES::player_room && !getRoomInterface().canUseInventory(this, this))
-	{
-		nldebug("<enchantOrRechargeItem> %s uses slot %u of its room inventory, which it cannot use, refused", _Id.toString().c_str(), slot);
-		return; // canUseInventory has told a trial player why
-	}
-	if (invId >= INVENTORIES::pet_animal && invId < INVENTORIES::max_pet_animal)
-	{
-		// the availability the client grays on, which selling and crafting also use
-		const uint32 beastIndex = invId - INVENTORIES::pet_animal;
-		if (beastIndex >= _PlayerPets.size() || (_PlayerPets[beastIndex].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) == 0)
-		{
-			nldebug("<enchantOrRechargeItem> %s uses slot %u of pack animal %u, which is out of reach, refused", _Id.toString().c_str(), slot, beastIndex);
-			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
-			params[0].Int = beastIndex + 1;
-			sendDynamicSystemMessage(_Id, "ANIMAL_INVENTORY_INACCESSIBLE", params);
-			return;
-		}
-	}
+	if (!isInventoryWithinReach(invId, "enchantOrRechargeItem"))
+		return;
 
 	CInventoryPtr inv = getInventory(invId);
 	if (inv == NULL)

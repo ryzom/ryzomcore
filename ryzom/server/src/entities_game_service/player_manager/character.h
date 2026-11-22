@@ -2554,6 +2554,10 @@ public:
 	/// destroy an item (or several items in a stack)
 	void destroyItem(INVENTORIES::TInventory invId, uint32 slot, uint32 quantity, bool sendChatMessage = false);
 
+	/// false, with a message to the player where there is one, if invId is the room or a pack animal that the
+	/// character cannot reach now; true for any other inventory. context names the caller in the log.
+	bool isInventoryWithinReach(INVENTORIES::TInventory invId, const char *context);
+
 	/// used for selectItems / destroyItems
 	class CItemSlotId
 	{

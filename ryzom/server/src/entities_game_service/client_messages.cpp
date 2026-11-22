@@ -197,6 +197,15 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 		return;
 	}
 
+	// The client offers destroy in the bag, the room and the pack animals, and names the bag for an item that is held
+	// or worn. The hands and the equipment only refer to items of the bag (destroyItem refuses them), and the client
+	// can name them when the item leaves its slot while the confirmation is open: a warning, no more.
+	if (inventory != INVENTORIES::bag && inventory != INVENTORIES::player_room && (inventory < INVENTORIES::pet_animal || inventory >= INVENTORIES::max_pet_animal))
+	{
+		nlwarning("<cbItemDestroy> player %s tried to destroy slot %u of inventory %u, refused", user.toString().c_str(), slot, (uint)inventory);
+		return;
+	}
+
 	// the client offers no destroy for an item its owner has locked, where it sees the lock: only the bag and the
 	// pack animals send their RESALE_FLAG, and a locked item moved to the apartment shows unlocked there
 	bool lockShown = inventory == INVENTORIES::bag || (inventory >= INVENTORIES::pet_animal1 && inventory <= INVENTORIES::pet_animal4);
@@ -211,6 +220,10 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 			return;
 		}
 	}
+
+	// the room and the pack animals must be within reach, as for moving an item, where the client grays the entry
+	if (!character->isInventoryWithinReach(INVENTORIES::TInventory(inventory), "cbItemDestroy"))
+		return;
 
 	character->setAfkState(false);
 	character->destroyItem( INVENTORIES::TInventory(inventory), slot, quantity, true );
