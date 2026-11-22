@@ -557,7 +557,7 @@ component.createGhostComponents = function(comp, act)
 		fire.Base = "palette.entities.botobjects.campfire"
 		fire.Position.x = comp.Position.x
 		fire.Position.y = comp.Position.y
-		fire.Position.z = 0
+		fire.Position.z = comp.Position.z
 		fire.Angle = 0
 		r2.requestInsertGhostNode(act.Features[0].InstanceId, "Components", -1, "", fire)
 	end
@@ -591,6 +591,8 @@ component.createGhostComponents = function(comp, act)
 		bandits = npcGroup
 		bandits.Position.x = x
 		bandits.Position.y = y
+		-- the bandits stand at the camp's height (their own z is relative to it)
+		bandits.Position.z = comp.Position.z
 		bandits.InheritPos = 0
 	end
 

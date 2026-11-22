@@ -84,7 +84,8 @@ public:
 };
 
 // add params to brick (input for code generator)
-void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &params);
+// A property the server does not know, or one with the wrong arguments, is reported with sheetName and left out.
+void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &params, const std::string &sheetName);
 
 /**
  * Faber class for sabrina bricks (for bricks are faber plan mandatory)

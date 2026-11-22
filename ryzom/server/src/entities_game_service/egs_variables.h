@@ -185,7 +185,6 @@ extern NLMISC::CVariable<uint16>				ResistIncreaseShockwave;
 extern NLMISC::CVariable<uint16>				IntangibleTimeAfterTP;
 extern NLMISC::CVariable<uint32>				AurasUpdateFrequency;
 extern NLMISC::CVariable<uint32>				ForageLocateDepositUpdateFrequency;
-extern NLMISC::CVariable<uint32>				CharacteristicBrickStep;
 extern NLMISC::CVariable<float>					RegenDivisor;
 extern NLMISC::CVariable<float>					RegenReposFactor;
 extern NLMISC::CVariable<float>					RegenOffset;

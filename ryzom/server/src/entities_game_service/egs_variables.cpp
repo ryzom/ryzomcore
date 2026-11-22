@@ -302,9 +302,6 @@ CVariable<uint32>			AurasUpdateFrequency("egs","AurasUpdateFrequency", "update f
 // update frequency of locate deposit effect
 CVariable<uint32>			ForageLocateDepositUpdateFrequency("egs","ForageLocateDepositUpdateFrequency", "update frequency of locate deposit effect", 25, 0, true );
 
-// characteristic brick progression step
-CVariable<uint32>			CharacteristicBrickStep("egs","CharacteristicBrickStep", "characteristic brick progression step(brick xxxx05 match a charac value of characteristic 5*CharacteristicBrickStep)", 5, 0, true);
-
 // Variable regen divisor & factor
 CVariable<float>			RegenDivisor("egs","RegenDivisor", "Divisor used for compute regenerate per seconde in repos (divide characteristics per divisor)", 16.0f, 0, true, CPlayerService::updateRegen );
 CVariable<float>			RegenReposFactor("egs","RegenReposFactor", "Divisor used for compute regenerate per seconde in action (regen repos / factor)", 2.0f, 0, true, CPlayerService::updateRegen );

@@ -44,11 +44,82 @@ static void fail( const std::string &message )
 }
 
 
-// Write a generated file, or stop the run
+// A file's path as pendingFiles keeps it
+static string writtenKey( const std::string &fileName )
+{
+	return toLowerAscii( CPath::standardizePath( CFile::getPath( fileName ) ) + CFile::getFilename( fileName ) );
+}
+
+
+// A file this run makes. Nothing is written while the run computes and checks: a stop leaves the leveldesign as it
+// was, and WritePendingFiles writes everything at the end. A file made twice must come out the same (a creature
+// material is made once per creature that gives it); different contents mean two table lines make one sheet.
 static void writeFile( const CSString &content, const std::string &fileName )
 {
-	if ( !content.writeToFile( fileName ) )
-		fail( toString( "Cannot write %s", fileName.c_str() ) );
+	const string key = writtenKey( fileName );
+	map<string, CPendingFile>::iterator it = pendingFiles.find( key );
+	if ( it != pendingFiles.end() )
+	{
+		if ( it->second.Content != content )
+			fail( toString( "%s would be made twice with different contents: two lines of the tables make the same file", fileName.c_str() ) );
+		return;
+	}
+	CPendingFile &file = pendingFiles[key];
+	file.Path = fileName;
+	file.Content = content;
+}
+
+
+// The content this run will write to a file, or NULL
+static CSString *pendingContent( const std::string &fileName )
+{
+	map<string, CPendingFile>::iterator it = pendingFiles.find( writtenKey( fileName ) );
+	return it == pendingFiles.end() ? NULL : &it->second.Content;
+}
+
+
+// The cells of a line of a table, empty ones included
+static void splitCells( const std::string &line, vector<CSString> &cells )
+{
+	cells.clear();
+	string::size_type pos = 0;
+	for ( ;; )
+	{
+		const string::size_type next = line.find( ';', pos );
+		cells.push_back( CSString( line.substr( pos, next == string::npos ? string::npos : next - pos ) ).strip() );
+		if ( next == string::npos )
+			break;
+		pos = next + 1;
+	}
+}
+
+
+// The stats of a raw material in an item part, by the names of _item_faber_mp_parameters.dfn; the tables name them so
+static const char *s_StatNames[] = {
+	"Durability", "Weight", "SapLoad", "DMG", "Speed", "Range", "DodgeModifier", "ParryModifier",
+	"AdversaryDodgeModifier", "AdversaryParryModifier", "ProtectionFactor", "MaxSlashingProtection",
+	"MaxBluntProtection", "MaxPiercingProtection", "ElementalCastingTimeFactor", "ElementalPowerFactor",
+	"OffensiveAfflictionCastingTimeFactor", "OffensiveAfflictionPowerFactor", "HealCastingTimeFactor",
+	"HealPowerFactor", "DefensiveAfflictionCastingTimeFactor", "DefensiveAfflictionPowerFactor", "AcidProtection",
+	"ColdProtection", "FireProtection", "RotProtection", "ShockWaveProtection", "PoisonProtection",
+	"ElectricityProtection", "DesertResistance", "ForestResistance", "LacustreResistance", "JungleResistance",
+	"PrimaryRootResistance",
+};
+
+
+// The index of a stat by its name, -1 for an empty cell; a name no raw material has stops the run
+static int statIndex( const CSString &cell, const char *table, const CSString &row )
+{
+	nlctassert( ( sizeof( s_StatNames ) / sizeof( s_StatNames[0] ) ) == NumMPStats );
+	if ( cell.empty() )
+		return -1;
+	for ( int i = 0; i < NumMPStats; ++i )
+	{
+		if ( cell == s_StatNames[i] )
+			return i;
+	}
+	fail( toString( "%s, %s: %s is no stat of a raw material (_item_faber_mp_parameters.dfn)", table, row.c_str(), cell.c_str() ) );
+	return -1;
 }
 
 
@@ -95,44 +166,88 @@ static bool isPlaceholderMaterial( const CSString &materialEntry )
 }
 
 
-// Write the raw materials assigned in this run into the creatures' assignment files. Entries already in a file stay,
-// except the placeholders, which give way to the materials of the creature.
+// A raw material sheet as this tool names them: m, the family number, the creature or source code, the ecosystem, the
+// class letter and the variant (m0692chdca01.sitem)
+static bool isRawMaterialSheetName( const string &name )
+{
+	if ( name.size() != 18 || name[0] != 'm' || name.substr( 12 ) != ".sitem" )
+		return false;
+	for ( uint i = 1; i < 12; ++i )
+	{
+		const bool digit = ( i <= 4 ) || ( i >= 10 );
+		if ( digit ? ( name[i] < '0' || name[i] > '9' ) : ( name[i] < 'a' || name[i] > 'z' ) )
+			return false;
+	}
+	return true;
+}
+
+
+// An entry of a quartering table that this tool owns: a material of one of the creature models of the tables
+// (m<family>c<model code>...), which the tool assigns; deposit, invasion and goo items (dxa, ixx, cxx) and anything
+// else in the table were put there by hand and stay
+static bool isOwnedMaterial( const string &item )
+{
+	string name = toLowerAscii( item );
+	if ( CFile::getExtension( name ).empty() )
+		name += ".sitem";
+	return isRawMaterialSheetName( name ) && name[5] == 'c' && creatureModelNames.count( CSString( name.substr( 6, 2 ) ) ) != 0;
+}
+
+
+// The quality of a creature's raw materials: its level (Basics.XPLevel of its sheet), which quartering gives the
+// materials (CCharacter::harvest takes the MaxQuality of the creature's entry), up to the 250 of a material sheet. The
+// sheet must name its assignment file as its parent, else what the tool writes there would do nothing.
+static uint creatureQuality( const string &creatureName )
+{
+	map<string, string>::const_iterator it = creatureFiles.find( creatureName );
+	if ( it == creatureFiles.end() )
+		fail( toString( "The creature sheet %s.creature is not below %s", creatureName.c_str(), CREATURE_PATH.c_str() ) );
+	CSString sheet;
+	if ( !sheet.readFromFile( it->second ) )
+		fail( toString( "Cannot read %s", it->second.c_str() ) );
+	if ( !sheet.contains( ( "<PARENT Filename=\"_" + creatureName + "_mp.creature\"/>" ).c_str() ) )
+		fail( toString( "%s does not name _%s_mp.creature as its parent: the raw materials written there would not be its own; generate_creature.py gives each creature sheet that parent",
+			it->second.c_str(), creatureName.c_str() ) );
+	const CSString level = sheet.splitFrom( "<ATOM Name=\"XPLevel\" Value=\"" ).splitTo( "\"" );
+	if ( level.empty() || level.atoi() < 1 )
+		fail( toString( "%s gives no Basics.XPLevel: its raw materials take that level as their quality", it->second.c_str() ) );
+	return (uint)std::min( level.atoi(), 250 );
+}
+
+
+// Write the raw materials of this run into the assignment files of the creatures it processed. The raw material
+// entries are this tool's: those of an earlier run give way to this run's, the placeholders too once the creature has
+// materials; any other entry stays, in front. Each material gets the creature's level as its quality.
 void SaveAssignments()
 {
 	printf( "-- SAVING RAW MATERIAL ASSIGNMENTS --\n" );
-	uint nbCreated = 0, nbChanged = 0, nbPlaceholders = 0;
+	uint nbChanged = 0, nbPlaceholders = 0, nbWithMaterials = 0;
 	// the files are written once all of them have been read and checked
 	vector<pair<string, CSString> > toWrite;
 
-	for ( map<string, vector<CSString> >::const_iterator it = creatureAssignments.begin(); it != creatureAssignments.end(); ++it )
+	for ( set<string>::const_iterator itCreature = processedCreatures.begin(); itCreature != processedCreatures.end(); ++itCreature )
 	{
-		const string baseName = "_" + it->first + "_mp";
-		CSString fileName;
-		CSString data;
-		bool created = false;
+		const string &creatureName = *itCreature;
+		map<string, vector<CSString> >::const_iterator itAssigned = creatureAssignments.find( creatureName );
+		const vector<CSString> noMaterials;
+		const vector<CSString> &materials = ( itAssigned != creatureAssignments.end() ) ? itAssigned->second : noMaterials;
+		if ( !materials.empty() )
+			++nbWithMaterials;
+
+		// the creature sheet names its assignment file as its parent: a file the sheet does not name would do nothing
+		const string baseName = "_" + creatureName + "_mp";
 		map<string, string>::const_iterator itFile = assignmentFiles.find( baseName );
-		if ( itFile != assignmentFiles.end() )
+		if ( itFile == assignmentFiles.end() )
 		{
-			fileName = itFile->second;
-			if ( !data.readFromFile( fileName ) )
-				fail( toString( "Cannot read the raw material assignment file %s", fileName.c_str() ) );
+			if ( materials.empty() )
+				continue;
+			fail( toString( "The creature %s has no raw material assignment file %s.creature below %s (RawMaterialAssignmentPath of raw_material_generation.cfg): generate_creature.py writes one for each creature, and the creature sheet names it as its parent",
+				creatureName.c_str(), baseName.c_str(), RAW_MATERIAL_ASSIGN.c_str() ) );
 		}
-		else
-		{
-			fileName = RAW_MATERIAL_ASSIGN + baseName + ".creature";
-			data = "<?xml version=\"1.0\"?>\n";
-			data += "<FORM Version=\"0.0\" State=\"modified\">\n";
-			data += "  <STRUCT>\n";
-			data += "    <STRUCT Name=\"Harvest\">\n";
-			data += "    </STRUCT>\n";
-			data += "  </STRUCT>\n";
-			data += "  <STRUCT/>\n";
-			data += "  <STRUCT/>\n";
-			data += "  <STRUCT/>\n";
-			data += "  <STRUCT/>\n";
-			data += "</FORM>\n";
-			created = true;
-		}
+		const string fileName = itFile->second;
+		CSString data;
+		if ( !data.readFromFile( fileName ) )
+			fail( toString( "Cannot read the raw material assignment file %s", fileName.c_str() ) );
 
 		// the Harvest struct, from its line to the line that closes it (both at the indentation the tools write)
 		const string text = data;
@@ -144,7 +259,7 @@ void SaveAssignments()
 		if ( end == string::npos )
 			fail( toString( "The raw material assignment file %s has no Harvest struct in the form this tool writes", fileName.c_str() ) );
 
-		// the entries already there, each from its "<STRUCT Name="MPn">" line to its "</STRUCT>" line
+		// the entries there, each from its "<STRUCT Name="MPn">" line to its "</STRUCT>" line
 		const string entryOpen = "      <STRUCT Name=\"MP";
 		const string entryClose = "\n      </STRUCT>" + eol;
 		vector<CSString> entries; // each entry from the quote after its number
@@ -155,105 +270,142 @@ void SaveAssignments()
 			const string::size_type entryEnd = text.find( entryClose, pos );
 			if ( text.compare( pos, entryOpen.size(), entryOpen ) != 0 || entryEnd == string::npos || entryEnd > end )
 				fail( toString( "The raw material assignment file %s has a Harvest struct this tool does not read", fileName.c_str() ) );
+			// an empty entry (<STRUCT Name="MPn"/>) on its own line: it would swallow the next one
+			const string::size_type lineEnd = text.find( eol, pos );
+			if ( lineEnd != string::npos && lineEnd < entryEnd && text.compare( lineEnd - 2, 2, "/>" ) == 0 )
+				fail( toString( "The raw material assignment file %s has an empty entry (%s), which this tool does not read: remove it", fileName.c_str(), text.substr( pos, lineEnd - pos ).c_str() ) );
 			const string entry = text.substr( pos, entryEnd + entryClose.size() - pos );
 			const CSString rest = entry.substr( entry.find( '"', entryOpen.size() ) );
+			const string item = rest.splitFrom( "Name=\"AssociatedItem\" Value=\"" ).splitTo( "\"" );
 			if ( isPlaceholderMaterial( rest ) )
-				placeholderDropped = true;
-			else
+			{
+				// until the creature has materials of its own
+				if ( materials.empty() )
+					entries.push_back( rest );
+				else
+					placeholderDropped = true;
+			}
+			else if ( !isOwnedMaterial( item ) )
+			{
 				entries.push_back( rest );
+			}
 			pos = entryEnd + entryClose.size();
 		}
 
-		bool changed = created || placeholderDropped;
-		for ( uint i=0; i<it->second.size(); ++i )
+		if ( !materials.empty() )
 		{
-			const string valueAttr = "Value=\"" + it->second[i] + "\"";
-			bool present = false;
-			for ( uint j=0; j<entries.size() && !present; ++j )
-				present = entries[j].contains( valueAttr.c_str() );
-			if ( !present )
+			const uint quality = creatureQuality( creatureName );
+			for ( uint i = 0; i < materials.size(); ++i )
 			{
-				entries.push_back( "\">" + eol + "        <ATOM Name=\"AssociatedItem\" " + valueAttr + "/>" + eol + "      </STRUCT>" + eol );
-				changed = true;
+				entries.push_back( "\">" + eol
+					+ toString( "        <ATOM Name=\"MinQuality\" Value=\"%u\"/>", quality ) + eol
+					+ toString( "        <ATOM Name=\"MaxQuality\" Value=\"%u\"/>", quality ) + eol
+					+ "        <ATOM Name=\"AssociatedItem\" Value=\"" + materials[i] + "\"/>" + eol
+					+ "      </STRUCT>" + eol );
 			}
 		}
-		if ( !changed )
-			continue;
+
+		// a creature that had materials and gets none would give nothing when quartered
+		if ( entries.empty() )
+			fail( toString( "The creature %s gets no raw material from the tables, and its quartering table %s would be left empty (the materials of an earlier run are this run's to replace): give its model a family for its level code, or put a placeholder (system_mp_basic.sitem, as generate_creature.py writes) back in that file",
+				creatureName.c_str(), fileName.c_str() ) );
 
 		// the creature sheets have room for ten (_creature_harvest.dfn, MP1 to MP10)
 		if ( entries.size() > 10 )
 			fail( toString( "%s would get %u raw materials, a creature has room for 10", fileName.c_str(), (uint)entries.size() ) );
 
 		string harvest;
-		for ( uint i=0; i<entries.size(); ++i )
+		for ( uint i = 0; i < entries.size(); ++i )
 			harvest += entryOpen + toString( "%u", i + 1 ) + entries[i];
+		const string result = text.substr( 0, begin + harvestOpen.size() ) + harvest + text.substr( end + 1 );
+		if ( result == text )
+			continue;
 
-		toWrite.push_back( make_pair( string( fileName ), CSString( text.substr( 0, begin + harvestOpen.size() ) + harvest + text.substr( end + 1 ) ) ) );
+		toWrite.push_back( make_pair( fileName, CSString( result ) ) );
 		++nbChanged;
-		if ( created )
-			++nbCreated;
 		if ( placeholderDropped )
 			++nbPlaceholders;
 	}
 
-	for ( uint i=0; i<toWrite.size(); ++i )
+	for ( uint i = 0; i < toWrite.size(); ++i )
 		writeFile( toWrite[i].second, toWrite[i].first );
 
-	printf( "    %u creatures, %u assignment files written (%u new), %u placeholders replaced\n",
-		(uint)creatureAssignments.size(), nbChanged, nbCreated, nbPlaceholders );
+	printf( "    %u creatures, %u with raw materials, %u assignment files to change, %u placeholders to replace\n",
+		(uint)processedCreatures.size(), nbWithMaterials, nbChanged, nbPlaceholders );
 }
 
 
 // save stats for each craft part
 void LoadCraftParts()
 {
-	CSString data, ligne, info;
-	data.readFromFile( ITEM_MP_PARAM_DFN );
+	CSString data, ligne;
 	int index;
 
 	printf( "-- LOADING CRAFT PARTS --\n" );
-	do 
+	if ( !data.readFromFile( ITEM_MP_PARAM_DFN ) )
+		fail( toString( "Cannot read %s", ITEM_MP_PARAM_DFN.c_str() ) );
+	// the item parts of the DFN, one per letter A to Z ("A MpL (Blade)")
+	bool named[NumMPCraftParts] = { false };
+	for ( CSString rest = data.splitFrom( "Name=\"" ); !rest.empty(); rest = rest.splitFrom( "Name=\"" ) )
 	{
-		data = data.splitFrom( "Name=\"" );
-		int index;
-		index = data.c_str()[0] - 'A';
-		craftParts[index].Desc = data.splitTo( "\"" );
-
-	} while ( data.c_str()[0] != 'Z' );
-
-	if ( ! CFile::fileExists( "rm_item_parts.csv" ) )
-	{
-		nlError( "rm_item_parts.csv not found\n");
-		exit( 1 );
+		index = rest[0] - 'A';
+		if ( index < 0 || index >= NumMPCraftParts || named[index] )
+			fail( toString( "%s: the element %s is no item part, or one twice (a letter A to Z, then the part's name)", ITEM_MP_PARAM_DFN.c_str(), rest.splitTo( "\"" ).c_str() ) );
+		craftParts[index].Desc = rest.splitTo( "\"" );
+		named[index] = true;
 	}
-	
-	data.readFromFile( "rm_item_parts.csv" );
-	
+	for ( int i = 0; i < NumMPCraftParts; ++i )
+	{
+		if ( !named[i] )
+			fail( toString( "%s has no item part %c", ITEM_MP_PARAM_DFN.c_str(), 'A' + i ) );
+	}
+
+	if ( !data.readFromFile( ITEM_PARTS_CSV ) )
+		fail( toString( "Cannot read %s", ITEM_PARTS_CSV.c_str() ) );
+	data = data.replace( "\r", "" );
+
+	// the first line names the columns: the part letter, its name, then the stats by their names; a part carries the
+	// stats whose cell is not empty
+	vector<CSString> cells;
+	do
+		ligne = data.splitTo( "\n", true );
+	while ( ligne.strip().empty() && !data.empty() );
+	splitCells( ligne, cells );
+	if ( cells.size() < 3 || cells[0] != "Part" || cells[1] != "Name" )
+		fail( toString( "%s must start with a line Part;Name;<stat>;...", ITEM_PARTS_CSV.c_str() ) );
+	vector<int> columns( cells.size(), -1 );
+	set<int> namedStats;
+	for ( uint c = 2; c < cells.size(); ++c )
+	{
+		if ( cells[c].empty() )
+			fail( toString( "%s: column %u of the first line is empty: every column after Part and Name names the stat it marks", ITEM_PARTS_CSV.c_str(), c + 1 ) );
+		columns[c] = statIndex( cells[c], "rm_item_parts.csv", "header" );
+		if ( !namedStats.insert( columns[c] ).second )
+			fail( toString( "%s: the first line names %s twice", ITEM_PARTS_CSV.c_str(), cells[c].c_str() ) );
+	}
+
+	bool found[NumMPCraftParts] = { false };
 	while ( !data.empty() )
 	{
 		ligne = data.splitTo( "\n", true );
-		
-		// look for line concerning our craft part
-		info = ligne.splitTo( ";", true );
-		if ( !info.empty() )
-		{
-			index = info.c_str()[0] - 'A';
-
-			for ( int i=0; i<6; i++ )
-				ligne.splitTo( ";", true );
-
-			// browse each characteristics
-			for ( int i=0; i<NumMPStats; i++ )
-			{
-				info = ligne.splitTo( ";", true ).left(1);
-
-				// if the cell is not empty, this characteristic is generated by craft part
-				if ( ( info == "C" ) || ( info == "D" ) || ( info == "X" ) )
-					craftParts[index].Carac[i] = true;
-				else
-					craftParts[index].Carac[i] = false;
-			}
-		}
+		if ( ligne.strip().empty() )
+			continue;
+		splitCells( ligne, cells );
+		if ( cells[0].size() != 1 || cells[0][0] < 'A' || cells[0][0] >= 'A' + NumMPCraftParts || cells.size() > columns.size() )
+			fail( toString( "%s: the line %s is no item part (a letter A to Z, then a cell per column)", ITEM_PARTS_CSV.c_str(), ligne.c_str() ) );
+		index = cells[0][0] - 'A';
+		if ( found[index] )
+			fail( toString( "%s has two lines for the item part %c", ITEM_PARTS_CSV.c_str(), cells[0][0] ) );
+		found[index] = true;
+		for ( int i = 0; i < NumMPStats; ++i )
+			craftParts[index].Carac[i] = false;
+		for ( uint c = 2; c < cells.size(); ++c )
+			craftParts[index].Carac[columns[c]] = !cells[c].empty();
+	}
+	for ( int i = 0; i < NumMPCraftParts; ++i )
+	{
+		if ( !found[i] )
+			fail( toString( "%s has no line for the item part %c", ITEM_PARTS_CSV.c_str(), 'A' + i ) );
 	}
 }
 
@@ -266,95 +418,126 @@ void LoadCreatureFiles()
 	// on parcours les fichiers dans le repertoire
 	CPath::getPathContent ( CREATURE_PATH, true, false, true, files );
 
+	uint nbCreatures = 0;
 	for (uint32 i=0; i<files.size(); ++i)
 	{
 		string filename = files[i];
+		if ( CFile::getExtension( filename ) != "creature" )
+			continue;
 		string filebase = CFile::getFilenameWithoutExtension( filename );
+		if ( creatureFiles.find( filebase ) != creatureFiles.end() )
+			fail( toString( "Two creature sheets have the name %s.creature: %s and %s; a sheet name is its id, so one of them must go",
+				filebase.c_str(), creatureFiles[filebase].c_str(), filename.c_str() ) );
 		creatureFiles[ filebase ] = filename;
+		if ( filebase.size() == 6 && filebase[0] == 'c' )
+			++nbCreatures;
 	}
+	if ( nbCreatures == 0 )
+		fail( toString( "No creature sheet (c<code><ecosystem><zone><digit>.creature) below %s: CreaturePath of raw_material_generation.cfg names the folder of the creature sheets, game_elem/creature in the leveldesign",
+			CREATURE_PATH.c_str() ) );
 }
 
 
 // Save items levels list to generate for each creature 
 void InitCreatureMP()
 {
-	CSString data, ligneN, ligneM;
-	CSString nom, code;
-	map<string,string>::const_iterator it;
+	CSString data, ligne;
+	vector<CSString> cells;
 
-	if ( ! CFile::fileExists( "creature_models.csv" ) )
-	{
-		nlError( "creature_models.csv not found\n");
-		exit( 1 );
-	}
-		
-	data.readFromFile( "creature_models.csv" );
+	printf( "-- LOADING CREATURE MODELS --\n" );
+	if ( !data.readFromFile( CREATURE_MODELS_CSV ) )
+		fail( toString( "Cannot read %s", CREATURE_MODELS_CSV.c_str() ) );
+	data = data.replace( "\r", "" );
 
+	// one line per creature model: its code, its name (the first word of the names of its families), its category;
+	// a line with an empty first cell is a comment
 	while ( !data.empty() )
 	{
-		ligneN = data.splitTo( "\n", true );
-		ligneM = data.splitTo( "\n", true );
-		
-		// check if line is valid
-		if ( !ligneN.splitTo( ";", true ).empty() )
+		ligne = data.splitTo( "\n", true );
+		splitCells( ligne, cells );
+		if ( cells[0].empty() )
+			continue;
+		if ( cells.size() < 2 || cells[0].size() != 2 || cells[1].empty() )
+			fail( toString( "%s: the line %s is no creature model (code;name;category)", CREATURE_MODELS_CSV.c_str(), ligne.c_str() ) );
+		const CSString code = cells[0].toLower();
+		const CSString &nom = cells[1];
+		if ( creatureModelNames.find( code ) != creatureModelNames.end() )
+			fail( toString( "%s has the creature code %s on two lines", CREATURE_MODELS_CSV.c_str(), code.c_str() ) );
+		creatureModelNames[code] = nom;
+
+		// the creatures of the model (c<code><ecosystem><zone><digit>.creature) in the ecosystems that get raw
+		// materials: the common one and the five regions; the goo and invasion creatures keep what they have
+		ListeCreatureMP listeCreatureMP;
+		static const char s_Ecosystems[] = "cdfjlp";
+		for ( const char *eco = s_Ecosystems; *eco; ++eco )
 		{
-			ligneM.splitTo( ";", true );
-
-			// move until data
-			ligneN.splitTo( ";", true );
-			ligneM.splitTo( ";", true );
-			ligneN.splitTo( ";", true );
-			ligneM.splitTo( ";", true );
-
-			while ( !ligneN.empty() )
+			for ( int level = 0; level < 10; level++ )
 			{
-				ListeCreatureMP listeCreatureMP;
-				
-				if ( ligneN.contains( ";" ) )
+				for ( int creatureLevel = 1; creatureLevel <= 8; creatureLevel++ )
 				{
-					code = ligneN.splitTo( ";", true );
-					nom = ligneM.splitTo( ";", true );
+					const string fileName = toString( "c%s%c%c%d", code.c_str(), *eco, 'a' + level, creatureLevel );
+					if ( creatureFiles.find( fileName ) == creatureFiles.end() )
+						continue;
+					if ( level > 5 )
+						fail( toString( "The creature sheet %s is of zone %c: the classes of raw materials (%s) and of mission materials (Plain in zone a to Magnificient in f) cover the zones a to f; give it a zone of those or extend both",
+							creatureFiles[fileName].c_str(), 'a' + level, CREATURE_CLASSES_CSV.c_str() ) );
+					CreatureMPItem *creatureMP = new CreatureMPItem;
+					creatureMP->creatureLevel = creatureLevel;
+					creatureMP->eco = *eco;
+					creatureMP->itemLevel = level;
+					creatureMP->codeCreature = code;
+					creatureMP->creatureFileName = fileName;
+					listeCreatureMP.push_back( creatureMP );
+					processedCreatures.insert( fileName );
 				}
-				else
-				{
-					code = ligneN.firstWord();
-					nom = ligneM.firstWord();
-					ligneN.clear();
-				}
-
-				if ( !code.empty() )
-					creatureModelNames[ code.toLower() ] = nom;
-
-				// save items to generate for each new creature name found
-				for ( char eco='a'; eco<='z'; eco++ )
-				{
-					for ( int level=0; level<10; level++ )
-					{
-						for ( int creatureLevel=1; creatureLevel<=8; creatureLevel++ )
-						{
-							CSString fileName = toString( "c%s%c%c%d", code.toLower().c_str(), eco, 
-								                          'a' + level, creatureLevel );
-							// look for corresponding creature
-							it = creatureFiles.find( fileName );
-
-							if ( it != creatureFiles.end() )
-							{			
-								// if yes, this item should be generated
-								CreatureMPItem* creatureMP = new CreatureMPItem;
-								creatureMP->creatureLevel = creatureLevel;
-								creatureMP->eco = eco;
-								creatureMP->itemLevel = level;
-								creatureMP->codeCreature = code;
-								creatureMP->creatureFileName = fileName;
-								listeCreatureMP.push_back( creatureMP );
-							}	
-						}
-					}
-				}
-
-				itemsAGenerer[ nom ] = listeCreatureMP;
 			}
 		}
+		if ( itemsAGenerer.find( nom ) != itemsAGenerer.end() )
+			fail( toString( "%s names the creature model %s twice", CREATURE_MODELS_CSV.c_str(), nom.c_str() ) );
+		// a model's families give the materials of its creatures: with none, they would give nothing
+		if ( listeCreatureMP.empty() )
+			fail( toString( "%s: the creature model %s (%s) has no creature sheet c%s<ecosystem><zone><digit>.creature of the common ecosystem or the five regions below %s (CreaturePath of raw_material_generation.cfg): take the model out of the tables (make_tables.py) or check CreaturePath",
+				CREATURE_MODELS_CSV.c_str(), nom.c_str(), code.c_str(), code.c_str(), CREATURE_PATH.c_str() ) );
+		itemsAGenerer[nom] = listeCreatureMP;
+	}
+	printf( "    %u creature models, %u creatures\n", (uint)itemsAGenerer.size(), (uint)processedCreatures.size() );
+}
+
+
+// The class of the craft materials of a creature by its level code, from rm_creature_classes.csv
+void LoadCreatureClasses()
+{
+	static const char *s_ClassNames[] = { "Basic", "Fine", "Choice", "Excellent", "Supreme" };
+	CSString data, ligne;
+	vector<CSString> cells;
+	if ( !data.readFromFile( CREATURE_CLASSES_CSV ) )
+		fail( toString( "Cannot read %s", CREATURE_CLASSES_CSV.c_str() ) );
+	data = data.replace( "\r", "" );
+
+	// a header line, then one line per level code: the zone letter and the digit of the creature sheet names, and the
+	// class of the creature's craft materials, or - for none
+	do
+		ligne = data.splitTo( "\n", true );
+	while ( ligne.strip().empty() && !data.empty() );
+	while ( !data.empty() )
+	{
+		ligne = data.splitTo( "\n", true );
+		if ( ligne.strip().empty() )
+			continue;
+		splitCells( ligne, cells );
+		int classIndex = -2;
+		if ( cells.size() >= 2 && cells[1] == "-" )
+			classIndex = -1;
+		for ( int i = 0; cells.size() >= 2 && i < 5; ++i )
+		{
+			if ( cells[1] == s_ClassNames[i] )
+				classIndex = i;
+		}
+		if ( cells[0].size() != 2 || cells[0][0] < 'a' || cells[0][0] > 'f' || cells[0][1] < '1' || cells[0][1] > '8' || classIndex == -2 )
+			fail( toString( "%s: the line %s is no level code (zone a to f, digit 1 to 8) and class (b3;Basic, Fine, Choice, Excellent, Supreme or -)", CREATURE_CLASSES_CSV.c_str(), ligne.c_str() ) );
+		if ( creatureClasses.find( cells[0] ) != creatureClasses.end() )
+			fail( toString( "%s has the level code %s on two lines", CREATURE_CLASSES_CSV.c_str(), cells[0].c_str() ) );
+		creatureClasses[cells[0]] = classIndex;
 	}
 }
 
@@ -388,12 +571,15 @@ void GetItemClass( int level, bool mission, bool creature, CSString& outClassNam
 	static CSString nonMissionClasses[] = { "", "Basic", "Fine", "Choice", 
 		                                    "Excellent", "Supreme" };
 
+	const int index = mission ? level : ( creature ? level + 1 : level );
+	// Plain to Magnificient are 0 to 5, Basic to Supreme 1 to 5
+	if ( index < ( mission ? 0 : 1 ) || index > 5 )
+		fail( toString( "No %s class of raw materials for the level %d: the classes go from %s to %s", mission ? "mission" : "craft", level,
+			mission ? "Plain (zone a)" : "Basic", mission ? "Magnificient (zone f)" : "Supreme" ) );
 	if ( mission )
-		outClassName = missionClasses[ level ];
-	else if ( creature )
-		outClassName = nonMissionClasses[ level+1 ];
+		outClassName = missionClasses[ index ];
 	else
-		outClassName = nonMissionClasses[ level ];
+		outClassName = nonMissionClasses[ index ];
 }
 
 
@@ -462,7 +648,7 @@ void GenerateItemNames( const CSString& nomMP, char eco, int level, bool mission
 		break;
 
 	case 'l' :
-		singularWithNoPrefix += "Lake ";
+		singularWithNoPrefix += "Lakes ";
 		break;
 
 	case 'p' :
@@ -529,115 +715,30 @@ void GenerateItemNames( const CSString& nomMP, char eco, int level, bool mission
 }
 
 
-// Return number of specified family
-int GetNumeroMP( const CSString& nomMP )
+// The number of a family in item_mp_family.typ (its whole label): the tables make no new family, and each family has its
+// text in wk.uxt (mpfam<number>), which the client shows
+int GetNumeroMP( const CSString& nomMP, uint lineNumber )
 {
-	CSString result;
-	char buffer[100];
-	char buffer2[100];
-	int res;
-
-	// *** Get the family number, and add it to faimly.typ if not already done
-	// look for raw mat existence in item_mp_family.typ file (the whole label, a name may end another one)
-	result = FamilyTypContent.splitFrom( toString( "Label=\"%s\" Value=\"", nomMP.c_str() ).c_str() );
-
-	// if yes, return raw mat number
-	if ( !result.empty() )
-		res = result.splitTo( "\"" ).atoi();
-	else
-	{
-		// else, generate a new number:
-		// get last raw mat number (the max)
-		result = FamilyTypContent.splitTo( "<LOG>" ).right(10);
-		result.splitTo( "\"", true );
-		result = result.splitTo( "\"" );
-
-		// increase by 1 to get the unused number
-		res = result.atoi() + 1;
-
-		// add new raw mat in file item_mp_family.typ
-		if ( !FamilyTypContent.contains( "<LOG>" ) )
-			fail( toString( "%s has no <LOG> line to add the family %s before", ITEM_MP_FAMILY_TYP.c_str(), nomMP.c_str() ) );
-		const string eol = FamilyTypContent.contains( "\r\n" ) ? "\r\n" : "\n";
-		FamilyTypContent= FamilyTypContent.replace( "<LOG>", toString( "  <DEFINITION Label=\"%s\" Value=\"%d\"/>%s<LOG>", nomMP.c_str(), res, eol.c_str() ).c_str() );
-		writeFile( FamilyTypContent, ITEM_MP_FAMILY_TYP );
-		printf( "    New family %d : %s, added to %s\n", res, nomMP.c_str(), ITEM_MP_FAMILY_TYP.c_str() );
-	}
-
-	// *** Add the text in wk.uxt (if not done)
-	// Exist in wk.uxt ???
-	sprintf( buffer, "mpfam%d\t", res );
-	sprintf( buffer2, "mpfam%d ", res );
-	// if not found
-	if ( !WKContent.contains(buffer) && !WKContent.contains(buffer2) )
-	{
-		// add it after the last family, before the blank line and the first group
-		const string eol = WKContent.contains( "\r\n" ) ? "\r\n" : "\n";
-		const string anchor = eol + "mpgroup0";
-		if ( !WKContent.contains( anchor.c_str() ) )
-			fail( toString( "%s has no mpgroup0 line to add the family %s before", WK_UXT.c_str(), nomMP.c_str() ) );
-		WKContent= WKContent.replace( anchor.c_str(), ( toString( "mpfam%d\t\t\t[%s]", res, nomMP.c_str() ) + eol + anchor ).c_str() );
-		writeFile( WKContent, WK_UXT );
-		printf( "    New family %d : %s, added to %s\n", res, nomMP.c_str(), WK_UXT.c_str() );
-	}
-
+	CSString result = FamilyTypContent.splitFrom( toString( "Label=\"%s\" Value=\"", nomMP.c_str() ).c_str() );
+	if ( result.empty() )
+		fail( toString( "%s, line %u: the family %s is not in %s: the tables make no new family (make_tables.py takes the families from the translation)",
+			FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), ITEM_MP_FAMILY_TYP.c_str() ) );
+	const int res = result.splitTo( "\"" ).atoi();
+	if ( !WKContent.contains( toString( "\nmpfam%d\t", res ).c_str() ) && !WKContent.contains( toString( "\nmpfam%d ", res ).c_str() ) )
+		fail( toString( "%s, line %u: the family %s (%d) has no text mpfam%d in %s", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), res, res, WK_UXT.c_str() ) );
 	return res;
 }
 
 
-// Return number from specified group
-int GetNumeroGroupe( const CSString& groupe )
+// The number of a group in item_mp_group.typ, likewise
+int GetNumeroGroupe( const CSString& groupe, uint lineNumber )
 {
-	CSString result;
-	char buffer[100];
-	char buffer2[100];
-	int res;
-
-	// *** Get the group number, and add it to group.typ if not already done
-	// look for group existence in item_mp_group.typ file (the whole label, a name may end another one)
-	result = GroupTypContent.splitFrom( toString( "Label=\"%s\" Value=\"", groupe.c_str() ).c_str() );
-
-	// if yes, return its group number
-	if ( !result.empty() )
-		res = result.splitTo( "\"" ).atoi();
-	else
-	{
-		// else, generate a new number :
-		// get the last group number (the max)
-		result = GroupTypContent.splitTo( "<LOG>" ).right(10);
-		result.splitTo( "\"", true );
-		result = result.splitTo( "\"" );
-
-		// increase by 1 to get the unused number
-		res = result.atoi() + 1;
-
-		// add new raw mat in file item_mp_group.typ
-		if ( !GroupTypContent.contains( "<LOG>" ) )
-			fail( toString( "%s has no <LOG> line to add the group %s before", ITEM_MP_GROUPE_TYP.c_str(), groupe.c_str() ) );
-		const string eol = GroupTypContent.contains( "\r\n" ) ? "\r\n" : "\n";
-		GroupTypContent= GroupTypContent.replace( "<LOG>", toString( "<DEFINITION Label=\"%s\" Value=\"%d\"/>%s<LOG>", groupe.c_str(), res, eol.c_str() ).c_str() );
-		writeFile( GroupTypContent, ITEM_MP_GROUPE_TYP );
-		printf( "    New group %d : %s, added to %s\n", res, groupe.c_str(), ITEM_MP_GROUPE_TYP.c_str() );
-	}
-
-
-	// *** Add the text in wk.uxt (if not done)
-	// Exist in wk.uxt ???
-	sprintf( buffer, "mpgroup%d\t", res );
-	sprintf( buffer2, "mpgroup%d ", res );
-	// if not found
-	if ( !WKContent.contains(buffer) && !WKContent.contains(buffer2) )
-	{
-		// add it after the last group, before the blank line and the source
-		const string eol = WKContent.contains( "\r\n" ) ? "\r\n" : "\n";
-		const string anchor = eol + "mpSource";
-		if ( !WKContent.contains( anchor.c_str() ) )
-			fail( toString( "%s has no mpSource line to add the group %s before", WK_UXT.c_str(), groupe.c_str() ) );
-		WKContent= WKContent.replace( anchor.c_str(), ( toString( "mpgroup%d\t\t\t[%s]", res, groupe.c_str() ) + eol + anchor ).c_str() );
-		writeFile( WKContent, WK_UXT );
-		printf( "    New group %d : %s, added to %s\n", res, groupe.c_str(), WK_UXT.c_str() );
-	}
-
+	CSString result = GroupTypContent.splitFrom( toString( "Label=\"%s\" Value=\"", groupe.c_str() ).c_str() );
+	if ( result.empty() )
+		fail( toString( "%s, line %u: the group %s is not in %s: the tables make no new group", FAM_PROP_CSV.c_str(), lineNumber, groupe.c_str(), ITEM_MP_GROUPE_TYP.c_str() ) );
+	const int res = result.splitTo( "\"" ).atoi();
+	if ( !WKContent.contains( toString( "\nmpgroup%d\t", res ).c_str() ) && !WKContent.contains( toString( "\nmpgroup%d ", res ).c_str() ) )
+		fail( toString( "%s, line %u: the group %s (%d) has no text mpgroup%d in %s", FAM_PROP_CSV.c_str(), lineNumber, groupe.c_str(), res, res, WK_UXT.c_str() ) );
 	return res;
 }
 
@@ -709,39 +810,14 @@ void CreateParentSItem( int numMP,
 
 
 // Fill information related to craft with an item
-void FillCraftData( char craft, int eco, int level, bool creature, int bestStat, 
+void FillCraftData( const CSString &nomMP, char craft, int eco, int level, bool creature, int bestStat,  
 				    int worstStat1, int worstStat2, CSString& outStr )
 {
 	CSString data;
 	char buf[10];
 	int index;
-	static CSString carac[] = { "Durability", "Weight", "SapLoad", "DMG", "Speed",
-			                    "Range", "DodgeModifier", "ParryModifier", 
-					            "AdversaryDodgeModifier", "AdversaryParryModifier",
-						        "ProtectionFactor", "MaxSlashingProtection",
-						        "MaxBluntProtection", "MaxPiercingProtection",
-						        "ElementalCastingTimeFactor", "ElementalPowerFactor",
-						        "OffensiveAfflictionCastingTimeFactor", 
-						        "OffensiveAfflictionPowerFactor", "HealCastingTimeFactor",
-						        "HealPowerFactor", "DefensiveAfflictionCastingTimeFactor",
-						        "DefensiveAfflictionPowerFactor",
-								"AcidProtection",
-								"ColdProtection",
-								"FireProtection",
-								"RotProtection",
-								"ShockWaveProtection",
-								"PoisonProtection",
-								"ElectricityProtection",
-								"DesertResistance",
-								"ForestResistance",
-								"LacustreResistance",
-								"JungleResistance",
-								"PrimaryRootResistance",
-							};
-	nlctassert((sizeof(carac)/sizeof(carac[0]))==NumMPStats);
-
 	static int mediumStatsByStatQuality[] = { 20, 35, 50, 65, 80 };
-	int stat, remaining, nbToRaise, ajout;
+	int stat, remaining;
 	int stats[NumMPStats];
 
 	index = craft - 'A';
@@ -750,9 +826,7 @@ void FillCraftData( char craft, int eco, int level, bool creature, int bestStat,
 	outStr += craftParts[index].Desc;
 	outStr += "\">\n";
 
-	nbToRaise = 0;
 	remaining = 0;
-	ajout = 0;
 
 	currentDocItem.push( DtCraftSlotName, craftParts[index].Desc.splitFrom( "(" ).splitTo( ")" ) );
 
@@ -761,10 +835,12 @@ void FillCraftData( char craft, int eco, int level, bool creature, int bestStat,
 	{
 		if ( craftParts[index].Carac[i]  )
 		{
-			if ( !creature )
-				stat = mediumStatsByStatQuality[ level-1 ];
-			else
-				stat = mediumStatsByStatQuality[ level ];
+			// Basic to Supreme: the level of a deposit or special item counts from 1, a creature's from 0
+			const int classIndex = creature ? level : level - 1;
+			if ( classIndex < 0 || classIndex > 4 )
+				fail( toString( "%s, %s: no craft class for the level %d of a %s raw material in the item part %s: the classes go from Basic to Supreme",
+					FAM_PROP_CSV.c_str(), nomMP.c_str(), level, creature ? "creature" : "deposit or special", craftParts[index].Desc.c_str() ) );
+			stat = mediumStatsByStatQuality[ classIndex ];
 			
 			// manage weak/strong points of a raw mat
 			if ( i == bestStat )
@@ -789,8 +865,6 @@ void FillCraftData( char craft, int eco, int level, bool creature, int bestStat,
 				if ( ( i == 0 ) && ( stat < 1 ) )
 					stat = 1;
 			}
-			else
-				nbToRaise++;
 
 			stats[i] = stat;
 		}
@@ -798,19 +872,32 @@ void FillCraftData( char craft, int eco, int level, bool creature, int bestStat,
 			stats[i] = -1;
 	}
 
-	if ( nbToRaise != 0 )
-		ajout = remaining/nbToRaise;
-	
+	// what the specialty has above 100 goes to the other stats, a point each in turn, so that the stats of the part
+	// add up to the class's total
+	while ( remaining > 0 )
+	{
+		bool given = false;
+		for ( int i = 0; i < NumMPStats && remaining > 0; ++i )
+		{
+			if ( stats[i] != -1 && i != bestStat && i != worstStat1 && i != worstStat2 && stats[i] < 100 )
+			{
+				++stats[i];
+				--remaining;
+				given = true;
+			}
+		}
+		if ( !given )
+			fail( toString( "%s, %s: its specialty in the item part %s goes above 100 and the part has no other stat to take the rest",
+				FAM_PROP_CSV.c_str(), nomMP.c_str(), craftParts[index].Desc.c_str() ) );
+	}
+
 	// add information for each characteristic
 	for ( int i=0; i<NumMPStats; i++ )
 	{
 		if ( stats[i] != -1 )
 		{
-			if ( ( i != bestStat ) && ( i != worstStat1 ) && ( i != worstStat2 ) )
-				stats[i] += ajout;
-		
 			outStr += "          <ATOM Name=\"";
-			outStr += carac[i];
+			outStr += s_StatNames[i];
 			outStr += "\" Value=\"";
 			
 			sprintf( buf, "%d", stats[i] );
@@ -864,8 +951,9 @@ void FillCraftData( char craft, int eco, int level, bool creature, int bestStat,
 
 
 // Create item sheets
-void CreateSheet( int numMP, const CSString& nomMP,
-				  const CSString& code, char eco,  
+// Returns false where the tool makes no sheet: a mission material of a creature of the common ecosystem
+bool CreateSheet( int numMP, const CSString& nomMP,
+				  const CSString& code, char eco,
 				  int level, const MPCraftStats& craftStats,
 				  bool specialItem = false, int variation = 1 )
 {
@@ -912,7 +1000,7 @@ void CreateSheet( int numMP, const CSString& nomMP,
 	}
 
 	if ( ( eco == 'c' ) && creature && ( craftStats.Craft.empty() ) )
-		return;
+		return false;
 
 	outputFileName = toString( "m%04d%s%c%c%02d.sitem", numMP, code.c_str(), eco, 
 		                     'a' + level, variation );
@@ -992,7 +1080,7 @@ void CreateSheet( int numMP, const CSString& nomMP,
 
 			currentDocItem.push( DtProp, toString( "%c", craftStats.Craft.c_str()[i] ).c_str() );
 			
-			FillCraftData( craftStats.Craft.c_str()[i], eco, level, creature, bestStat, 
+			FillCraftData( nomMP, craftStats.Craft.c_str()[i], eco, level, creature, bestStat,  
 					   worstStat1, worstStat2, craftInfo );
 			output += craftInfo;
 		}
@@ -1056,6 +1144,7 @@ void CreateSheet( int numMP, const CSString& nomMP,
 	currentDocItem.reset( DtCraftSlotName );
 	currentDocItem.reset( DtCraftCivSpec );
 	currentDocItem.reset( DtColor );
+	return true;
 }
 
 
@@ -1106,7 +1195,6 @@ void GenerateCreatureItems( int numMP, CSString& nomMP, const MPCraftStats& craf
 {
 	map<CSString, ListeCreatureMP>::const_iterator itLCMP;
 	int quality;
-	static int statQuality[] = { 0, 1, 0, 1, 3, 6, 4, 2 };
 
 	// Get items levels to generate for the creature
 	itLCMP = itemsAGenerer.find( nomMP.firstWord() );
@@ -1124,12 +1212,17 @@ void GenerateCreatureItems( int numMP, CSString& nomMP, const MPCraftStats& craf
 			int itemLevel = (*itMP)->itemLevel;
 			CSString creatureFileName = "c";
 			creatureFileName += (*itMP)->codeCreature.toLower();
-			
+
 			if ( !craftStats.Craft.empty() )
 			{
-				quality = statQuality[creatureLevel-1];
-				if ( quality != 6 )
-				{						
+				// the class of the craft materials by the creature's level code (rm_creature_classes.csv)
+				const string levelCode = toString( "%c%d", 'a' + itemLevel, creatureLevel );
+				map<string, int>::const_iterator itClass = creatureClasses.find( levelCode );
+				if ( itClass == creatureClasses.end() )
+					fail( toString( "%s gives no class for the level code %s of the creature %s", CREATURE_CLASSES_CSV.c_str(), levelCode.c_str(), (*itMP)->creatureFileName.c_str() ) );
+				quality = itClass->second;
+				if ( quality >= 0 )
+				{
 					if ( quality < 2 )
 					{
 						CreateSheet( numMP, nomMP, creatureFileName, 'c', quality, craftStats );
@@ -1151,11 +1244,9 @@ void GenerateCreatureItems( int numMP, CSString& nomMP, const MPCraftStats& craf
 			else
 			{
 				// pas de MP de mission pour les boss
-				if ( creatureLevel < 5 )
+				if ( creatureLevel < 5 && CreateSheet( numMP, nomMP, creatureFileName, eco, itemLevel, craftStats ) )
 				{
-					CreateSheet( numMP, nomMP, creatureFileName, eco, itemLevel, craftStats ); 
-
-					AssignerMP( (*itMP)->creatureFileName, 
+					AssignerMP( (*itMP)->creatureFileName,
 							toString( "m%04d%s%c%c01.sitem", numMP, creatureFileName.c_str(), eco, 'a' + itemLevel ) );
 
 					currentDocItem.push( DtCreature, (*itMP)->creatureFileName );
@@ -1182,6 +1273,16 @@ void GenerateSpecialItem( int numMP, const CSString& nomMP, const MPCraftStats& 
 	else
 		code = "cxx";
 
+	// its ecosystem letter and class letter (cf: common, Supreme); a craft material's classes go from b, Basic
+	const char lowestClass = craftStats.Craft.empty() ? 'a' : 'b';
+	if ( info.size() != 2 || string( "cdfjlp" ).find( info[0] ) == string::npos || info[1] < lowestClass || info[1] > 'f' )
+		fail( toString( "%s, %s: the special item %s must start with an ecosystem letter (c, d, f, j, l or p) and a class letter (%c to f)",
+			FAM_PROP_CSV.c_str(), nomMP.c_str(), info.c_str(), lowestClass ) );
+	const string directories = "cdfjlp";
+	static const char *s_Directories[] = { "common", "desert", "forest", "jungle", "lacustre", "prime_roots" };
+	const string sheet = toString( "%s%s/m%04d%s%s%02d.sitem", MP_DIRECTORY.c_str(), s_Directories[directories.find( info[0] )], numMP, code.c_str(), info.c_str(), variation );
+	if ( pendingContent( sheet ) )
+		fail( toString( "%s, %s: the special item %s makes %s, which the family already makes", FAM_PROP_CSV.c_str(), nomMP.c_str(), info.c_str(), CFile::getFilename( sheet ).c_str() ) );
 	CreateSheet( numMP, nomMP, code, info.c_str()[0], info.c_str()[1]-'a', craftStats, true, variation );
 
 	name = toString( "m%04d%s%s%02d\t", numMP, code.c_str(), info.c_str(), variation ); 
@@ -1199,8 +1300,9 @@ void GenerateSpecialItem( int numMP, const CSString& nomMP, const MPCraftStats& 
 }
 
 
-// Special Attrib parsing. craftStats must be good for extraInfo init
-void	parseSpecialAttributes(const CSString &specialAttributes, MPCraftStats &craftStats, CExtraInfo &extraInfo)
+// The attributes of a family (R used as a craft requirement, D0 and D1 cannot or can be dropped and sold), separated by
+// "-"; craftStats must be good for extraInfo init
+void	parseSpecialAttributes(const CSString &specialAttributes, MPCraftStats &craftStats, CExtraInfo &extraInfo, const CSString &nomMP, uint lineNumber)
 {
 	// evaluate DropOrSell according to CraftStats: can DropOrSell if it is a MP Craft
 	extraInfo.DropOrSell= !craftStats.Craft.empty();
@@ -1212,116 +1314,146 @@ void	parseSpecialAttributes(const CSString &specialAttributes, MPCraftStats &cra
 	{
 		if(nlstricmp(strArray[i], "R")==0)
 			craftStats.UsedAsCraftRequirement= true;
-		if(nlstricmp(strArray[i], "D0")==0)
+		else if(nlstricmp(strArray[i], "D0")==0)
 			extraInfo.DropOrSell= false;
-		if(nlstricmp(strArray[i], "D1")==0)
+		else if(nlstricmp(strArray[i], "D1")==0)
 			extraInfo.DropOrSell= true;
+		else
+			fail( toString( "%s, line %u: %s has the attribute %s; the attributes are R, D0 and D1", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), strArray[i].c_str() ) );
 	}
 }
 
 
+// The families of the tables so far, by name in lower case, and the line of each
+static map<string, uint> s_FamilyLines;
+
+
 // New raw mat to process
-void NewMP( CSString& ligne )
+void NewMP( const CSString& ligne, uint lineNumber )
 {
-	CSString nomMP, groupe, loc, icon, overlay, special, stat, specialAttributes;
+	CSString overlay;
 	MPCraftStats craftStats;
 	CExtraInfo	extraInfo;
 	int numMP;
-	bool specialOnly = false;
 	CSortedStringSet specialNames;
 
-	// nouveau nom de famille
-	nomMP = ligne.splitTo( ";", true );
+	// the cells: family, group, craft parts, attributes, -, location, icon, -, -, -, the specialty and weaknesses of the
+	// first part, those of the second, colour, -, special only, then the special items; a line with an empty first
+	// cell is a header or a comment
+	vector<CSString> cells;
+	splitCells( ligne, cells );
+	CSString nomMP = cells[0];
 	if ( nomMP.empty() )
-	{
-		// cette ligne ne contient pas d'info
 		return;
-	}
-	
-	// get information
-	groupe = ligne.splitTo( ";", true );
-	craftStats.Craft = ligne.splitTo( ";", true );
-	specialAttributes= ligne.splitTo( ";" , true );
-	parseSpecialAttributes(specialAttributes, craftStats, extraInfo);
-	ligne.splitTo( ";" , true );
-	loc = ligne.splitTo( ";" , true );
-	icon = ligne.splitTo( ";", true );
-	ligne.splitTo( ";", true );
-	ligne.splitTo( ";", true );
-	ligne.splitTo( ";", true );
+	if ( cells.size() < 19 )
+		fail( toString( "%s, line %u: %s has %u cells, a family line has 19 and its special items after them", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), (uint)cells.size() ) );
 
-	stat = ligne.splitTo( ";", true );
-	if ( !stat.firstWord().empty() )
-		craftStats.bestStatA = stat.atoi();
-	else
-		craftStats.bestStatA = -1;
-
-	stat = ligne.splitTo( ";", true );
-	if ( !stat.firstWord().empty() )
-		craftStats.worstStatA1 = stat.atoi();
-	else
-		craftStats.worstStatA1 = -1;
-
-	stat = ligne.splitTo( ";", true );
-	if ( !stat.firstWord().empty() )
-		craftStats.worstStatA2 = stat.atoi();
-	else
-		craftStats.worstStatA2 = -1;
-
-	stat = ligne.splitTo( ";", true );
-	if ( !stat.firstWord().empty() )
-		craftStats.bestStatB = stat.atoi();
-	else
-		craftStats.bestStatB = -1;
-
-	stat = ligne.splitTo( ";", true );
-	if ( !stat.firstWord().empty() )
-		craftStats.worstStatB1 = stat.atoi();
-	else
-		craftStats.worstStatB1 = -1;
-
-	stat = ligne.splitTo( ";", true );
-	if ( !stat.firstWord().empty() )
-		craftStats.worstStatB2 = stat.atoi();
-	else
-		craftStats.worstStatB2 = -1;
-
-	stat = ligne.splitTo( ";", true );
-	craftStats.color = stat.firstWord().atoi();
-
-	// JewelProt, a column of the table that this generator does not use
-	ligne.splitTo( ";", true );
-
-	stat = ligne.splitTo( ";", true );
-	specialOnly = stat.firstWord().contains( "x" );
-	
-	// cas particuliers
-	while ( !ligne.empty() )
+	// the name makes file names (the deposit family list of the World Editor) and translation keys
+	for ( uint i = 0; i < nomMP.size(); ++i )
 	{
-		if ( !ligne.contains( ";" ) ) 
+		const char c = nomMP[i];
+		if ( !( ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' ) || ( c >= '0' && c <= '9' ) || c == ' ' || c == '\'' || c == '-' ) )
+			fail( toString( "%s, line %u: the family %s has a character other than letters, digits, space, ' and -", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str() ) );
+	}
+	// one line per family, whatever the case of its letters
+	const string familyKey = toLowerAscii( nomMP );
+	if ( s_FamilyLines.find( familyKey ) != s_FamilyLines.end() )
+		fail( toString( "%s, line %u: the family %s has a line already, line %u", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), s_FamilyLines[familyKey] ) );
+	s_FamilyLines[familyKey] = lineNumber;
+
+	const CSString &groupe = cells[1];
+	craftStats.Craft = cells[2];
+	parseSpecialAttributes( cells[3], craftStats, extraInfo, nomMP, lineNumber );
+	const CSString &loc = cells[5];
+	const CSString &icon = cells[6];
+
+	// the location: deposits, creatures, goo creatures, or invasion and goo rewards (I and the kinds of creatures that
+	// give them), which are special items only
+	const string special = toLowerAscii( cells[18] );
+	if ( !special.empty() && special != "x" )
+		fail( toString( "%s, line %u: %s has %s for special only, which is x or empty", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), cells[18].c_str() ) );
+	const bool specialOnly = special == "x";
+	bool invasion = loc.size() > 1 && loc[0] == 'I';
+	for ( uint i = 1; invasion && i < loc.size(); ++i )
+		invasion = loc[i] >= 'a' && loc[i] <= 'z';
+	if ( loc != "D" && loc != "C" && loc != "G" && !invasion )
+		fail( toString( "%s, line %u: %s has the location %s; the locations are D (deposits), C (creatures), G (goo creatures) and I followed by the creature kinds (invasion and goo rewards)",
+			FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), loc.c_str() ) );
+	if ( invasion && !specialOnly )
+		fail( toString( "%s, line %u: %s is an invasion or goo reward (location %s), which has special items only", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), loc.c_str() ) );
+
+	// the craft parts, each once
+	for ( uint i = 0; i < craftStats.Craft.size(); ++i )
+	{
+		const int part = craftStats.Craft[i] - 'A';
+		if ( part < 0 || part >= NumMPCraftParts )
+			fail( toString( "%s, line %u: %s serves %c, which is no item part (A to Z)", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), craftStats.Craft[i] ) );
+		if ( craftStats.Craft.find_first_of( craftStats.Craft[i] ) != i )
+			fail( toString( "%s, line %u: %s serves the item part %c twice", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), craftStats.Craft[i] ) );
+	}
+
+	// the specialty and the weaknesses of the family in its first two item parts, by stat name
+	craftStats.bestStatA = statIndex( cells[10], "rm_fam_prop.csv", nomMP );
+	craftStats.worstStatA1 = statIndex( cells[11], "rm_fam_prop.csv", nomMP );
+	craftStats.worstStatA2 = statIndex( cells[12], "rm_fam_prop.csv", nomMP );
+	craftStats.bestStatB = statIndex( cells[13], "rm_fam_prop.csv", nomMP );
+	craftStats.worstStatB1 = statIndex( cells[14], "rm_fam_prop.csv", nomMP );
+	craftStats.worstStatB2 = statIndex( cells[15], "rm_fam_prop.csv", nomMP );
+	// a specialty comes with one or two weaknesses, the second after the first, three different stats, of the part they
+	// are given for, and none for a part the family does not serve: else the stats of the part would not add up to the
+	// class, or a cell would be ignored
+	const int profiles[2][3] = { { craftStats.bestStatA, craftStats.worstStatA1, craftStats.worstStatA2 },
+		{ craftStats.bestStatB, craftStats.worstStatB1, craftStats.worstStatB2 } };
+	static const char *s_Groups[] = { "first part (BestA, WorstA1, WorstA2)", "second part (BestB, WorstB1, WorstB2)" };
+	for ( uint i = 0; i < 2; ++i )
+	{
+		const int *p = profiles[i];
+		const bool given = p[0] >= 0 || p[1] >= 0 || p[2] >= 0;
+		if ( given && i >= craftStats.Craft.size() )
+			fail( toString( "%s, line %u: %s serves %u item parts and gives stats for its %s", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), (uint)craftStats.Craft.size(), s_Groups[i] ) );
+		if ( ( p[1] >= 0 && p[0] < 0 ) || ( p[2] >= 0 && p[1] < 0 ) )
+			fail( toString( "%s, line %u: %s gives a weakness in its %s without the specialty or the first weakness before it", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), s_Groups[i] ) );
+		if ( p[0] >= 0 && p[1] < 0 )
+			fail( toString( "%s, line %u: %s gives a specialty in its %s and no weakness to pay for it", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), s_Groups[i] ) );
+		if ( ( p[0] >= 0 && ( p[0] == p[1] || p[0] == p[2] ) ) || ( p[1] >= 0 && p[1] == p[2] ) )
+			fail( toString( "%s, line %u: %s gives one stat twice in the specialty and weaknesses of its %s", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), s_Groups[i] ) );
+		for ( uint k = 0; i < craftStats.Craft.size() && k < 3; ++k )
 		{
-			special = ligne;
-			if ( !special.firstWord().empty() )
-				specialNames.insert( special );
-			ligne.clear();
-		}
-		else
-		{
-			special = ligne.splitTo( ";", true );
-			if ( !special.empty() )
-				specialNames.insert( special );
+			// a stat the part does not carry would be dropped, and the stats of the family would not add up to its class
+			if ( p[k] >= 0 && !craftParts[craftStats.Craft[i] - 'A'].Carac[p[k]] )
+				fail( toString( "%s, line %u: %s gives %s in its %s, which the item part %c does not carry", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), s_StatNames[p[k]], s_Groups[i], craftStats.Craft[i] ) );
 		}
 	}
 
+	// the colour: an index into the colours of a class and ecosystem, a number
+	const CSString &color = cells[16];
+	for ( uint i = 0; i < color.size(); ++i )
+	{
+		if ( color[i] < '0' || color[i] > '9' || color.size() > 3 )
+			fail( toString( "%s, line %u: %s has the colour %s, which is a number up to 999", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), color.c_str() ) );
+	}
+	craftStats.color = color.atoi();
+
+	// the special items
+	for ( uint i = 19; i < cells.size(); ++i )
+	{
+		if ( !cells[i].empty() )
+			specialNames.insert( cells[i] );
+	}
+
+	// a creature family gives the materials of the model it is named after
+	if ( loc == "C" && itemsAGenerer.find( nomMP.firstWord() ) == itemsAGenerer.end() )
+		fail( toString( "%s, line %u: the creature family %s (location C) is named after no creature model of %s: its first word must be a model's name; add the model or give the family another location",
+			FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), CREATURE_MODELS_CSV.c_str() ) );
 
 	currentDocItem.push( DtRMFamily, nomMP );
 	currentDocItem.push( DtGroup, groupe );
-	
+
 	// get raw mat number
-	numMP = GetNumeroMP( nomMP );
+	numMP = GetNumeroMP( nomMP, lineNumber );
 	printf( "    Processing Family %d : %s\n", numMP, nomMP.c_str() );
 
-	GetNumeroGroupe( groupe );
+	GetNumeroGroupe( groupe, lineNumber );
 
 
 	// Add the MPFamily into the list
@@ -1330,25 +1462,21 @@ void NewMP( CSString& ligne )
 	MPFamilies[numMP].Name= nomMP;
 	MPFamilies[numMP].Icon= icon;
 
-	
+
 	// raw mats found in deposits or goo
-	if ( loc.left(1) != "C" )
+	if ( loc != "C" )
 	{
 		if ( !specialOnly )
 		{
 			// Generate items
 			GenerateDepositItems( numMP, nomMP, craftStats, loc );
 		}
-		
+
 		// on enregistre les items se trouvant dans les deposits
-		if ( loc.left(1) == "D" )
+		if ( loc == "D" )
 		{
 			// an empty file, its name is what the World Editor lists for the "mps" of a deposit
-			const string fileName = toString( "%s%s_%d.mp", DEPOSIT_MPS.c_str(), nomMP.toLower().replace( " ", "_" ).c_str(), numMP );
-			FILE *file = nlfopen( fileName, "wb" );
-			if ( file == NULL )
-				fail( toString( "Cannot write %s", fileName.c_str() ) );
-			fclose( file );
+			writeFile( CSString(), toString( "%s%s_%d.mp", DEPOSIT_MPS.c_str(), nomMP.toLower().replace( " ", "_" ).c_str(), numMP ) );
 		}
 
 		overlay = nomMP.firstWord().toUpper().left(6);
@@ -1368,7 +1496,7 @@ void NewMP( CSString& ligne )
 	while ( it != specialNames.end() )
 	{
 		CSString name = (*it);
-		
+
 		nouveauCode = name.left(2).toLower();
 
 		if ( nouveauCode == codeSpecial )
@@ -1380,8 +1508,8 @@ void NewMP( CSString& ligne )
 		codeSpecial = nouveauCode;
 		it++;
 	}
-		
-		
+
+
 	// Create parent sheet for raw mat
 	CreateParentSItem( numMP, nomMP, groupe, extraInfo.DropOrSell, icon, overlay );
 
@@ -1426,12 +1554,15 @@ void ItemNamesSave()
 		fail( toString( "Cannot read %s", ITEM_WORDS_WK.c_str() ) );
 	const string eol = data.contains( "\r\n" ) ? "\r\n" : "\n";
 
-	// the names of this run that the file does not have yet, by item id
+	// the names of this run that the file does not have yet, by item id; one name per id
 	string newNames;
 	uint nbNew = 0;
+	set<string> ids;
 	for ( CSortedStringSet::const_iterator it = itemNames.begin(); it != itemNames.end(); ++it )
 	{
 		const CSString id = (*it).splitTo( '\t' );
+		if ( !ids.insert( toLowerAscii( id ) ).second )
+			fail( toString( "Two names for the raw material %s: two lines of %s make the same sheet", id.c_str(), FAM_PROP_CSV.c_str() ) );
 		if ( !data.contains( ( "\n" + id + "\t" ).c_str() ) )
 		{
 			newNames += (*it) + eol;
@@ -1450,10 +1581,8 @@ void ItemNamesSave()
 	const string::size_type pos = text.find( anchor );
 	if ( pos == string::npos )
 		fail( toString( "%s has no prospector line to add the raw material names before", ITEM_WORDS_WK.c_str() ) );
-	data = CSString( text.substr( 0, pos + eol.size() ) + newNames + text.substr( pos + eol.size() ) );
-	if ( !data.writeToFile( ITEM_WORDS_WK ) )
-		fail( toString( "Cannot write %s", ITEM_WORDS_WK.c_str() ) );
-	printf( "    %u new names added to %s\n", nbNew, ITEM_WORDS_WK.c_str() );
+	writeFile( CSString( text.substr( 0, pos + eol.size() ) + newNames + text.substr( pos + eol.size() ) ), ITEM_WORDS_WK );
+	printf( "    %u new names for %s\n", nbNew, ITEM_WORDS_WK.c_str() );
 }
 
 
@@ -1464,8 +1593,13 @@ void LoadCustomizedProperties()
 
 	printf( "-- REGISTERING CUSTOMIZED PROPERTIES --\n" );
 
-	data.readFromFile( "raw_material_generation.cfg" );
-	CPath::addSearchPath( MP_DIRECTORY, true, false );
+	if ( !data.readFromFile( "raw_material_generation.cfg" ) )
+		fail( "raw_material_generation.cfg not found in the working folder" );
+
+	// the files this run makes, by file name in lower case: the properties go on them
+	map<string, string> byName;
+	for ( map<string, CPendingFile>::const_iterator it = pendingFiles.begin(); it != pendingFiles.end(); ++it )
+		byName[toLowerAscii( CFile::getFilename( it->second.Path ) )] = it->first;
 
 	// the quoted strings between "CustomizedProperties = {" and "};", three per property: sheet, property, value
 	const string list = data.splitFrom( "CustomizedProperties" ).splitFrom( "{" ).splitTo( "};" );
@@ -1492,14 +1626,15 @@ void LoadCustomizedProperties()
 		item.push( DtCustomizedProperties, prop );
 		SortableData.updateItemAppend( item, DtName );
 
-		CSString fileName, str, output;
-		fileName = CPath::lookup( name, false, false, true );
-		
-		// check if file exists
-		if ( !fileName.empty() )
+		CSString str, output;
+		map<string, string>::const_iterator itName = byName.find( toLowerAscii( name ) );
+
+		// a sheet this run makes
+		if ( itName != byName.end() )
 		{
 			CSString zone = prop.splitTo( ".", true );
-			str.readFromFile( fileName );
+			CSString &content = pendingFiles[itName->second].Content;
+			str = content;
 
 			if ( !str.contains( zone.c_str() ) )
 			{
@@ -1511,7 +1646,7 @@ void LoadCustomizedProperties()
 				if ( !str.contains( output.c_str() ) )
 				{
 					str = str.replace( "<STRUCT>", output.c_str() );
-					writeFile( str, fileName );
+					content = str;
 				}
 			}
 			else
@@ -1524,13 +1659,14 @@ void LoadCustomizedProperties()
 				if ( !str.contains( toString( "%s\" Value=\"%s\"/>\n", prop.c_str(), val.c_str() ).c_str() ) )
 				{
 					str = str.replace( toString( "    <STRUCT Name=\"%s\">\n", zone.c_str() ).c_str(), output.c_str() );
-					writeFile( str, fileName );
+					content = str;
 				}
 			}
 		}
 		else
 		{
-			nlwarning( "raw_material_generation.cfg sets %s on %s, which this run did not generate and which is not in %s", prop.c_str(), name.c_str(), MP_DIRECTORY.c_str() );
+			fail( toString( "raw_material_generation.cfg (CustomizedProperties) sets %s on %s, which this run does not make: correct the sheet name, or give the tables the material back",
+				prop.c_str(), name.c_str() ) );
 		}
 	}
 }
@@ -1568,8 +1704,7 @@ void SaveParentSItems()
 		output += toString( "      <ATOM Name=\"icon background\" Value=\"%s\"/>\n", ecosystemParents[i].Background );
 		output += "    </STRUCT>\n";
 		output += "  </STRUCT>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n</FORM>\n";
-		if ( !output.writeToFile( toString( "%s_parent/_m%c.sitem", MP_DIRECTORY.c_str(), ecosystemParents[i].Eco ) ) )
-			fail( toString( "Cannot write the parent sheet of the ecosystem %s", ecosystemParents[i].Ecosystem ) );
+		writeFile( output, toString( "%s_parent/_m%c.sitem", MP_DIRECTORY.c_str(), ecosystemParents[i].Eco ) );
 	}
 
 	for ( set<CSString>::const_iterator it = generatedCreatureCodes.begin(); it != generatedCreatureCodes.end(); ++it )
@@ -1584,11 +1719,171 @@ void SaveParentSItems()
 		output += toString( "      <ATOM Name=\"text overlay\" Value=\"%s\"/>\n", itName->second.toUpper().left( 6 ).c_str() );
 		output += "    </STRUCT>\n";
 		output += "  </STRUCT>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n</FORM>\n";
-		if ( !output.writeToFile( toString( "%s_parent/_m%s.sitem", MP_DIRECTORY.c_str(), (*it).c_str() ) ) )
-			fail( toString( "Cannot write the parent sheet of the creature code %s", (*it).c_str() ) );
+		writeFile( output, toString( "%s_parent/_m%s.sitem", MP_DIRECTORY.c_str(), (*it).c_str() ) );
 	}
 	printf( "    6 ecosystems, %u creature models\n", (uint)generatedCreatureCodes.size() );
 }
+
+// Stop if any file of the leveldesign names one of the files about to be removed (by its name without extension, as a
+// whole word: primitives write sheet names without .sitem). Not read: this tool's own outputs (the raw material
+// folders, the deposit family list, the family icons), its tables, the translation, the lists of all sheets the build
+// makes (sheets.txt, sheet_id.bin), and git's and Python's folders; but raw_material_generation.cfg is. A file the run
+// will write is read as it will be written, everything else as it is.
+static void CheckNoReferences( const set<string> &names )
+{
+	// names of letters, digits and underscores are found as words; the few with ' or - (deposit family files) as text
+	// between non-word characters
+	vector<string> otherNames;
+	for ( set<string>::const_iterator it = names.begin(); it != names.end(); ++it )
+	{
+		if ( it->find_first_of( "'-" ) != string::npos )
+			otherNames.push_back( *it );
+	}
+	printf( "    looking for references to the %u files to remove\n", (uint)names.size() );
+	const CSString skippedFolders[] = { MP_DIRECTORY + "_parent/", MP_DIRECTORY + "common/", MP_DIRECTORY + "desert/",
+		MP_DIRECTORY + "forest/", MP_DIRECTORY + "jungle/", MP_DIRECTORY + "lacustre/", MP_DIRECTORY + "prime_roots/",
+		DEPOSIT_MPS, TRANSLATION_PATH, TABLE_PATH, LEVEL_DESIGN_PATH + ".git/" };
+	const CSString skippedFiles[] = { IC_FAMILIES_FORAGE_SOURCE, LEVEL_DESIGN_PATH + "game_elem/sheets.txt",
+		LEVEL_DESIGN_PATH + "game_elem/sheet_id.bin" };
+	vector<string> files;
+	CPath::getPathContent( LEVEL_DESIGN_PATH, true, false, true, files );
+	// and the cfg, whose CustomizedProperties name sheets
+	files.push_back( CPath::getFullPath( "raw_material_generation.cfg", false ) );
+	uint nbRead = 0;
+	for ( uint i = 0; i < files.size(); ++i )
+	{
+		const string key = writtenKey( files[i] );
+		bool skip = key.find( "/__pycache__/" ) != string::npos;
+		for ( uint j = 0; !skip && j < sizeof( skippedFolders ) / sizeof( skippedFolders[0] ); ++j )
+			skip = key.compare( 0, skippedFolders[j].size(), toLowerAscii( skippedFolders[j] ) ) == 0;
+		for ( uint j = 0; !skip && j < sizeof( skippedFiles ) / sizeof( skippedFiles[0] ); ++j )
+			skip = key == writtenKey( skippedFiles[j] );
+		if ( skip )
+			continue;
+		// what the run will write there, or what is there now
+		CSString text;
+		const CSString *pending = pendingContent( files[i] );
+		if ( pending )
+			text = *pending;
+		else if ( !text.readFromFile( files[i] ) )
+			fail( toString( "Cannot read %s", files[i].c_str() ) );
+		++nbRead;
+		const string content = text;
+		if ( !otherNames.empty() )
+		{
+			const string lower = toLowerAscii( content );
+			for ( uint n = 0; n < otherNames.size(); ++n )
+			{
+				for ( string::size_type at = lower.find( otherNames[n] ); at != string::npos; at = lower.find( otherNames[n], at + 1 ) )
+				{
+					const string::size_type after = at + otherNames[n].size();
+					const bool wordBefore = at > 0 && ( isalnum( (unsigned char)lower[at - 1] ) || lower[at - 1] == '_' );
+					const bool wordAfter = after < lower.size() && ( isalnum( (unsigned char)lower[after] ) || lower[after] == '_' );
+					if ( !wordBefore && !wordAfter )
+						fail( toString( "%s names %s, which the tables no longer make and this run would remove: take that reference out, or give the tables the material back, before running again",
+							files[i].c_str(), otherNames[n].c_str() ) );
+				}
+			}
+		}
+		// every word of letters, digits and underscores, in lower case
+		string::size_type pos = 0;
+		while ( pos < content.size() )
+		{
+			string::size_type end = pos;
+			while ( end < content.size() && ( isalnum( (unsigned char)content[end] ) || content[end] == '_' ) )
+				++end;
+			if ( end > pos )
+			{
+				const string word = toLowerAscii( content.substr( pos, end - pos ) );
+				if ( names.count( word ) )
+					fail( toString( "%s names %s, which the tables no longer make and this run would remove: take that reference out, or give the tables the material back, before running again",
+						files[i].c_str(), word.c_str() ) );
+				pos = end;
+			}
+			else
+				++pos;
+		}
+	}
+	printf( "    %u files read, none names them\n", nbRead );
+}
+
+
+// The raw material sheets, their parents and the deposit family files that an earlier run wrote and this one does not:
+// these folders hold what this tool makes from the tables, so a material the tables no longer have goes once all is
+// written (RemoveStaleOutputs). Nothing may name them.
+vector<string> staleFiles;
+void FindStaleOutputs()
+{
+	printf( "-- RAW MATERIALS THE TABLES NO LONGER HAVE --\n" );
+	struct COutputFolder { CSString Folder; const char *Extension; };
+	const COutputFolder folders[] = { { MP_DIRECTORY + "_parent/", "sitem" }, { MP_DIRECTORY + "common/", "sitem" },
+		{ MP_DIRECTORY + "desert/", "sitem" }, { MP_DIRECTORY + "forest/", "sitem" }, { MP_DIRECTORY + "jungle/", "sitem" },
+		{ MP_DIRECTORY + "lacustre/", "sitem" }, { MP_DIRECTORY + "prime_roots/", "sitem" }, { DEPOSIT_MPS, "mp" } };
+	vector<string> stale;
+	set<string> staleSheets; // the names of the stale files without extension, in lower case
+	for ( uint i = 0; i < sizeof( folders ) / sizeof( folders[0] ); ++i )
+	{
+		vector<string> files;
+		CPath::getPathContent( folders[i].Folder, false, false, true, files );
+		for ( uint j = 0; j < files.size(); ++j )
+		{
+			if ( CFile::getExtension( files[j] ) != folders[i].Extension || pendingFiles.count( writtenKey( files[j] ) ) )
+				continue;
+			stale.push_back( files[j] );
+			staleSheets.insert( toLowerAscii( CFile::getFilenameWithoutExtension( files[j] ) ) );
+		}
+	}
+
+	if ( !stale.empty() )
+		CheckNoReferences( staleSheets );
+	staleFiles = stale;
+	printf( "    %u files to remove\n", (uint)stale.size() );
+}
+
+
+void RemoveStaleOutputs()
+{
+	printf( "-- REMOVING RAW MATERIALS THE TABLES NO LONGER HAVE --\n" );
+	for ( uint i = 0; i < staleFiles.size(); ++i )
+	{
+		if ( !CFile::deleteFile( staleFiles[i] ) )
+			fail( toString( "Cannot remove %s", staleFiles[i].c_str() ) );
+	}
+	printf( "    %u files removed\n", (uint)staleFiles.size() );
+}
+
+
+// Write what the run made, once every check has passed: the files whose content changes, in folders made as needed
+void WritePendingFiles()
+{
+	printf( "-- WRITING --\n" );
+	uint nbWritten = 0;
+	for ( map<string, CPendingFile>::const_iterator it = pendingFiles.begin(); it != pendingFiles.end(); ++it )
+	{
+		const CPendingFile &file = it->second;
+		CSString current;
+		if ( CFile::fileExists( file.Path ) && ( ( file.Content.empty() && CFile::getFileSize( file.Path ) == 0 ) || ( current.readFromFile( file.Path ) && current == file.Content ) ) )
+			continue;
+		const string folder = CFile::getPath( file.Path );
+		if ( !CFile::isDirectory( folder ) && !CFile::createDirectoryTree( folder ) )
+			fail( toString( "Cannot create the folder %s", folder.c_str() ) );
+		if ( file.Content.empty() )
+		{
+			// an empty file (the deposit family list), which CSString::writeToFile does not write
+			FILE *f = nlfopen( file.Path, "wb" );
+			if ( f == NULL )
+				fail( toString( "Cannot write %s", file.Path.c_str() ) );
+			fclose( f );
+		}
+		else if ( !file.Content.writeToFile( file.Path ) )
+		{
+			fail( toString( "Cannot write %s", file.Path.c_str() ) );
+		}
+		++nbWritten;
+	}
+	printf( "    %u files made, %u written (the others are as they were)\n", (uint)pendingFiles.size(), nbWritten );
+}
+
 
 // Generate _ic_families.forage_source()
 void	SaveFamiliesForageSource()
@@ -1722,22 +2017,31 @@ void SetupDirectories()
 {
 	CSString data;
 	
-	if ( ! CFile::fileExists( "raw_material_generation.cfg" ) )
-	{
-		nlError( "raw_material_generation.cfg not found\n");
-		exit( 1 );
-	}
-		
-	data.readFromFile( "raw_material_generation.cfg" );
+	if ( !data.readFromFile( "raw_material_generation.cfg" ) )
+		fail( "raw_material_generation.cfg not found in the working folder" );
 
 	// beurk :s Use CConfigFile instead
 	LEVEL_DESIGN_PATH = cfgPath( data, "LevelDesignPath" );
 	TRANSLATION_PATH = cfgPath( data, "TranslationPath" );
 	CREATURE_PATH = cfgPath( data, "CreaturePath" );
 	RAW_MATERIAL_ASSIGN = cfgPath( data, "RawMaterialAssignmentPath" );
+	TABLE_PATH = cfgPath( data, "TablePath" );
 
-	printf( "Level Design Path : %s\nTranslation Path : %s\nCreature Path : %s\nRaw Material Assignment Path : %s\n\n",
-		LEVEL_DESIGN_PATH.c_str(), TRANSLATION_PATH.c_str(), CREATURE_PATH.c_str(), RAW_MATERIAL_ASSIGN.c_str() );
+	printf( "Level Design Path : %s\nTranslation Path : %s\nCreature Path : %s\nRaw Material Assignment Path : %s\nTable Path : %s\n\n",
+		LEVEL_DESIGN_PATH.c_str(), TRANSLATION_PATH.c_str(), CREATURE_PATH.c_str(), RAW_MATERIAL_ASSIGN.c_str(), TABLE_PATH.c_str() );
+
+	// Ryzom Core's raw material tables
+	FAM_PROP_CSV = TABLE_PATH + "rm_fam_prop.csv";
+	ITEM_PARTS_CSV = TABLE_PATH + "rm_item_parts.csv";
+	CREATURE_MODELS_CSV = TABLE_PATH + "creature_models.csv";
+	CREATURE_CLASSES_CSV = TABLE_PATH + "rm_creature_classes.csv";
+	const CSString tables[] = { FAM_PROP_CSV, ITEM_PARTS_CSV, CREATURE_MODELS_CSV, CREATURE_CLASSES_CSV };
+	for ( uint i = 0; i < sizeof( tables ) / sizeof( tables[0] ); ++i )
+	{
+		if ( !CFile::fileExists( tables[i] ) )
+			fail( toString( "%s not found: TablePath of raw_material_generation.cfg names the folder of Ryzom Core's raw material tables, scripts/raw_material_tables in the leveldesign, where make_tables.py writes them",
+				tables[i].c_str() ) );
+	}
 
 	ITEM_MP_FAMILY_TYP = LEVEL_DESIGN_PATH + "DFN/game_elem/_item/item_mp_family.typ";
 	ITEM_MP_GROUPE_TYP = LEVEL_DESIGN_PATH + "DFN/game_elem/_item/item_mp_group.typ";
@@ -1759,16 +2063,9 @@ void SetupDirectories()
 	}
 	if ( !CFile::isDirectory( CREATURE_PATH ) )
 		fail( toString( "The creature folder %s (CreaturePath of raw_material_generation.cfg) not found", CREATURE_PATH.c_str() ) );
-
-	// and what is written gets its folders
-	const CSString outputs[] = { MP_DIRECTORY + "_parent/", MP_DIRECTORY + "common/", MP_DIRECTORY + "desert/",
-		MP_DIRECTORY + "forest/", MP_DIRECTORY + "jungle/", MP_DIRECTORY + "lacustre/", MP_DIRECTORY + "prime_roots/",
-		DEPOSIT_MPS, RAW_MATERIAL_ASSIGN, CFile::getPath( IC_FAMILIES_FORAGE_SOURCE ) };
-	for ( uint i=0; i<sizeof(outputs)/sizeof(outputs[0]); ++i )
-	{
-		if ( !CFile::isDirectory( outputs[i] ) && !CFile::createDirectoryTree( outputs[i] ) )
-			fail( toString( "Cannot create the folder %s", outputs[i].c_str() ) );
-	}
+	if ( !CFile::isDirectory( RAW_MATERIAL_ASSIGN ) )
+		fail( toString( "The folder %s (RawMaterialAssignmentPath of raw_material_generation.cfg) not found: it holds the creatures' quartering tables, game_elem/creature in the leveldesign",
+			RAW_MATERIAL_ASSIGN.c_str() ) );
 }
 
 
@@ -1787,23 +2084,21 @@ void LoadFamillesMP()
 
 	CSString fileData, ligne;
 
-	if ( ! CFile::fileExists( "rm_fam_prop.csv" ) )
-	{
-		nlError( "rm_fam_prop.csv not found\n");
-		exit( 1 );
-	}
-
-
-	fileData.readFromFile( "rm_fam_prop.csv" );
+	if ( !fileData.readFromFile( FAM_PROP_CSV ) )
+		fail( toString( "Cannot read %s", FAM_PROP_CSV.c_str() ) );
 
 	// the lines without their carriage returns: one left at the end would be read as a special item of the family
 	fileData = fileData.replace( "\r", "" );
-	ligne = fileData.splitTo( "\n", true );
 
-	while ( !ligne.empty() )
+	// every line, a blank one included: stopping at it would leave the families after it out, and their sheets removed
+	uint lineNumber = 0;
+	while ( !fileData.empty() )
 	{
-		NewMP( ligne );
 		ligne = fileData.splitTo( "\n", true );
+		++lineNumber;
+		if ( ligne.strip().empty() )
+			continue;
+		NewMP( ligne, lineNumber );
 	}
 
 	// we manually add Primitive Necklace because it's not specified in raw mats list
@@ -1827,6 +2122,9 @@ int main( int argc, char* argv[] )
 
 	InitCreatureMP();
 
+	LoadCreatureClasses();
+
+	// everything is made in memory and checked first: a stop leaves the leveldesign as it was
 	LoadFamillesMP();
 
 	SaveAssignments();
@@ -1838,7 +2136,14 @@ int main( int argc, char* argv[] )
 	LoadCustomizedProperties();
 
 	SaveFamiliesForageSource();
-	
+
+	FindStaleOutputs();
+
+	// then written
+	WritePendingFiles();
+
+	RemoveStaleOutputs();
+		
 	printf( "-- GENERATING DOCUMENTATION --\n" );
 	try
 	{

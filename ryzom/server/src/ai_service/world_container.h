@@ -153,7 +153,28 @@ public:
 		return	calcNearestWPosFromPosAnRadius(verticalPos, getWorldMap(), wpos, pos, radius, tries, validator);
 	}
 	
+	/// As calcNearestWPosFromPosAnRadius, each try on the layer nearest to a height in millimetres
+	/// (CWorldMap::setWorldPositionNearestHeight): for the positions of a Ring scenario, which have the heights of the
+	/// ground they were placed on
+	template <class T>
+	static bool calcNearestWPosAtHeight(sint32 height, const RYAI_MAP_CRUNCH::CWorldMap &worldMap, RYAI_MAP_CRUNCH::CWorldPosition &wpos, const T &pos, float radius, uint32 tries, const CPosValidator &validator)
+	{
+		H_AUTO(CalcNearestWPosAtHeight)
+		for (uint32 incTries = 0; incTries < tries; ++incTries)
+		{
+			double rad = (radius * incTries) / tries;
+			CAIVector rndPos(pos.x() + rad * cos((double)incTries), pos.y() + rad * sin((double)incTries));
+			if (worldMap.setWorldPositionNearestHeight(height, wpos, rndPos) && validator.check(wpos))
+				return true;
+		}
+		return false;
+	}
 	
+	template <class T>
+	static bool calcNearestWPosAtHeight(sint32 height, RYAI_MAP_CRUNCH::CWorldPosition &wpos, const T &pos, float radius, uint32 tries, const CPosValidator &validator)
+	{
+		return calcNearestWPosAtHeight(height, getWorldMap(), wpos, pos, radius, tries, validator);
+	}
 };
 
 

@@ -163,6 +163,13 @@ CJsonValue entityJson(uint slot, CEntityCL *e)
 	return o;
 }
 
+// The slots of the entity table: an entity can be in any of them (the frontend gives the slots), while
+// CEntityManager::nbEntitiesAllocated is how many are in use, not where they end
+uint slotCount()
+{
+	return (uint)EntitiesMngr.entities().size();
+}
+
 /// An entity by slot or name (as the target and move methods take it); nullptr with the call failed
 CEntityCL *findEntity(CCtrlCall &call, uint &slot)
 {
@@ -170,7 +177,7 @@ CEntityCL *findEntity(CCtrlCall &call, uint &slot)
 	if (args.get("slot").isNumber())
 	{
 		slot = (uint)args.get("slot").getInt(0);
-		CEntityCL *e = slot < EntitiesMngr.nbEntitiesAllocated() ? EntitiesMngr.entity(slot) : nullptr;
+		CEntityCL *e = slot < slotCount() ? EntitiesMngr.entity(slot) : nullptr;
 		if (e == nullptr)
 			call.fail(toString("no entity in slot %u", slot));
 		return e;
@@ -184,7 +191,7 @@ CEntityCL *findEntity(CCtrlCall &call, uint &slot)
 	// the nearest of that name
 	CEntityCL *best = nullptr;
 	double bestDistance = 1e30;
-	for (uint i = 1; i < EntitiesMngr.nbEntitiesAllocated(); ++i)
+	for (uint i = 1; i < slotCount(); ++i)
 	{
 		CEntityCL *e = EntitiesMngr.entity(i);
 		if (e == nullptr || toLowerAscii(e->getDisplayName()) != toLowerAscii(name))
@@ -251,7 +258,7 @@ void methodEntities(CCtrlCall &call)
 	// distance and slot
 	typedef std::pair<double, uint> TFound;
 	std::vector<TFound> found;
-	for (uint i = 1; i < EntitiesMngr.nbEntitiesAllocated(); ++i)
+	for (uint i = 1; i < slotCount(); ++i)
 	{
 		CEntityCL *e = EntitiesMngr.entity(i);
 		if (e == nullptr)
@@ -342,7 +349,7 @@ public:
 
 CEntityCL *moveEntity(const CMoveData &data)
 {
-	return data.Slot < EntitiesMngr.nbEntitiesAllocated() ? EntitiesMngr.entity(data.Slot) : nullptr;
+	return data.Slot < slotCount() ? EntitiesMngr.entity(data.Slot) : nullptr;
 }
 
 double moveDistance(const CMoveData &data)
@@ -879,7 +886,7 @@ void methodCollision(CCtrlCall &call)
 	CJsonValue entities = CJsonValue::array();
 	if (wantEntities)
 	{
-		for (uint i = 1; i < EntitiesMngr.nbEntitiesAllocated(); ++i)
+		for (uint i = 1; i < slotCount(); ++i)
 		{
 			CEntityCL *e = EntitiesMngr.entity(i);
 			if (e == nullptr || fabs(e->pos().x - centre.x) > radius || fabs(e->pos().y - centre.y) > radius)

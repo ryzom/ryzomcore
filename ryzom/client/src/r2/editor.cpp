@@ -1442,6 +1442,33 @@ int CEditor::luaIsInIslandRect(CLuaState &ls)
 }
 
 // *********************************************************************************************************
+int CEditor::luaIsValidPos(CLuaState &ls)
+{
+	const char *funcName = "isValidPos";
+	CLuaIHM::checkArgCount(ls, funcName, 3); // method with 2 args
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TNUMBER);
+	// ground of the island the AI can use, as the palette, drawing and move tools test a position: the tops of root
+	// mounds and pillars, cliffs and the rim of the island are not
+	ls.push(CTool::isValid2DPos(CVector2f((float)ls.toNumber(2), (float)ls.toNumber(3))));
+	return 1;
+}
+
+// *********************************************************************************************************
+int CEditor::luaIsValidPoly(CLuaState &ls)
+{
+	const char *funcName = "isValidPoly";
+	CLuaIHM::checkArgCount(ls, funcName, 2); // method with 1 arg
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TTABLE);
+	// a polygon as choosePos takes them (a table of CVector2f): its inside on ground the AI can use, as the palette
+	// tools test the zones of a trigger zone, a bandit camp or a herd (CToolChoosePos)
+	NLMISC::CPolygon2D poly;
+	CLuaIHM::getPoly2DOnStack(ls, 2, poly);
+	ls.push(getEditor().getIslandCollision().isValidPoly(poly));
+	return 1;
+}
+
+// *********************************************************************************************************
 int CEditor::luaGetCurrentIslandName(CLuaState &ls)
 {
 	//H_AUTO(R2_CEditor_luaGetCurrentIslandName)
@@ -2210,6 +2237,8 @@ void CEditor::registerLuaFunc()
 	registerEnvMethod("isCurrentSelectionPlayer", luaIsCurrentSelectionPlayer);
 	registerEnvMethod("findEmptyPlace", luaFindEmptyPlace);
 	registerEnvMethod("isInIslandRect", luaIsInIslandRect);
+	registerEnvMethod("isValidPos", luaIsValidPos);
+	registerEnvMethod("isValidPoly", luaIsValidPoly);
 	registerEnvMethod("getCurrentIslandName", luaGetCurrentIslandName);
 	registerEnvMethod("waitScenarioScreen", luaWaitScenarioScreen);
 	registerEnvMethod("isScenarioUpdating", luaIsScenarioUpdating);

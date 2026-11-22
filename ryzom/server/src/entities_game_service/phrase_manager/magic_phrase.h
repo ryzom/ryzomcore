@@ -186,6 +186,9 @@ public:
 	/// get used item stats
 	inline const CMagicFocusItemFactor &getUsedItemStats() const { return _UsedItemStats; }
 
+	/// true for a spell on the caster alone (a brick of the phrase is SelfOnly, or an enchant phrase)
+	inline bool isSelfSpell() const { return _TargetRestriction == TARGET::SelfOnly; }
+
 	/// get BrickMaxSabrinaCost
 	inline uint16 getBrickMaxSabrinaCost() const { return _BrickMaxSabrinaCost; }
 

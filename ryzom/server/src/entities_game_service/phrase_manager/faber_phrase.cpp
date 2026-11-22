@@ -139,7 +139,7 @@ bool CFaberPhrase::build( const TDataSetRow & actorRowId, const std::vector< con
 						break;
 					case TBrickParam::CR_SAP:
 						INFOLOG("SAP: %i",((CSBrickParamCraftSap *)param)->Sap);
-						_MBOSap = ((CSBrickParamCraftSap *)param)->Sap;
+						_MBOSap += ((CSBrickParamCraftSap *)param)->Sap;
 						break;
 					case TBrickParam::CR_STA:
 						INFOLOG("STA: %i",((CSBrickParamCraftSta *)param)->Stamina);
@@ -163,7 +163,8 @@ bool CFaberPhrase::build( const TDataSetRow & actorRowId, const std::vector< con
 						break;
 					case TBrickParam::CR_HITRATE:
 						INFOLOG("HITRATE: %.2f", ((CSBrickParamCraftHitRate *)param)->HitRate);
-						_MBODmg += ((CSBrickParamCraftHitRate *)param)->HitRate;
+						// the hit rate of a weapon follows its speed stat (CGameItem::hitRate)
+						_MBOSpeed += ((CSBrickParamCraftHitRate *)param)->HitRate;
 						break;
 					case TBrickParam::CR_RANGE:
 						INFOLOG("RANGE: %.2f", ((CSBrickParamCraftRange *)param)->Range);
@@ -175,7 +176,7 @@ bool CFaberPhrase::build( const TDataSetRow & actorRowId, const std::vector< con
 						break;
 					case TBrickParam::CR_SAPLOAD:
 						INFOLOG("SAPLOAD: %.2f", ((CSBrickParamCraftSapload *)param)->Sapload);
-						_MBOProtection += ((CSBrickParamCraftSapload *)param)->Sapload;
+						_MBOSapLoad += ((CSBrickParamCraftSapload *)param)->Sapload;
 						break;
 					case TBrickParam::CR_WEIGHT:
 						INFOLOG("WEIGHT: %.2f", ((CSBrickParamCraftWeight *)param)->Weight);

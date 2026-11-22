@@ -1262,6 +1262,8 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion orientati
 
 	string look = args[8];
 	NLMISC::fromString(args[9], cell);
+	// x and y place it, not at the player: the player's height is not the ground's there
+	bool heightKnown = false;
 
 	// See if another AI instance has been specified
 	if (botsName.find("@") != string::npos)
@@ -1280,7 +1282,7 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion orientati
 	CEntityId playerId = c->getId();
 
 	CMessage msgout("EVENT_CREATE_NPC_GROUP");
-	uint32 messageVersion = 1;
+	uint32 messageVersion = 2;
 	msgout.serial(messageVersion);
 	msgout.serial(instanceNumber);
 	msgout.serial(playerId);
@@ -1295,6 +1297,7 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion orientati
 	msgout.serial(botsName);
 	msgout.serial(look);
 	msgout.serial(cell);
+	msgout.serial(heightKnown);
 	CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
 
 	return true;

@@ -134,6 +134,11 @@ public:
 	RYAI_MAP_CRUNCH::CWorldPosition const& getDestPos() const { return _DestPos; }
 	void setDestination(RYAI_MAP_CRUNCH::CWorldPosition const& destPos);
 	void setDestination(AITYPES::TVerticalPos verticalPos, CAIVector const& destPos);
+	/// A destination already placed on its layer (a point of a shape, a random position of a place, a start position
+	/// with its height) stays on it, where the version above puts its 2D position on the layer of the vertical pos
+	/// rule again. The rule stays for the searches around a start or a destination that is not valid, and a
+	/// destination that is not valid is placed by it.
+	void setDestinationKeepingLayer(AITYPES::TVerticalPos verticalPos, RYAI_MAP_CRUNCH::CWorldPosition const &destPos);
 	//@}
 	
 	void clearPaths();

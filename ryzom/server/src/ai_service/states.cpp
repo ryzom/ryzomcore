@@ -105,6 +105,7 @@ bool	CShape::setPath(TVerticalPos verticalPos, const std::vector <CAIVector> &po
 	bool ret = true;
 
 	_VerticalPos = verticalPos;
+	takeHeights(points);
 
 	_Geometry.clear	();
 	_Geometry.reserve(points.size());
@@ -112,12 +113,12 @@ bool	CShape::setPath(TVerticalPos verticalPos, const std::vector <CAIVector> &po
 	for	(uint32 ind=0;ind<points.size();ind++)
 	{
 		RYAI_MAP_CRUNCH::CWorldPosition newpos;
-		CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, newpos, points[ind], 0, 1, CWorldContainer::CPosValidatorDefault());
+		placePoint(newpos, ind, points[ind], 0, 1);
 
 		if	(	!newpos.isValid()
 			&&	!_AcceptInvalidPos	)
 		{
-			CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, newpos, points[ind], 6, 100, CWorldContainer::CPosValidatorDefault());
+			placePoint(newpos, ind, points[ind], 6, 100);
 //#ifdef NL_DEBUG
 			if (newpos.isValid())
 			{
@@ -183,6 +184,7 @@ bool	CShape::setPatat(TVerticalPos verticalPos, const std::vector <CAIVector> &p
 {
 	bool ret = true;
 	_VerticalPos = verticalPos;
+	takeHeights(points);
 //	_Geometry=points;
 	_GeometryType=PATAT;
 	_Geometry.clear();
@@ -222,7 +224,7 @@ bool	CShape::setPatat(TVerticalPos verticalPos, const std::vector <CAIVector> &p
 	// find a valid position for every geometric 
 
 	RYAI_MAP_CRUNCH::CWorldPosition worldPos;
-	if	(!CWorldContainer::calcNearestWPosFromPosAnRadius	(_VerticalPos, worldPos, points[0], float((vMax-vMin).quickNorm()), 1000, CWorldContainer::CPosValidatorDefault()))
+	if (!placePoint(worldPos, 0, points[0], float((vMax - vMin).quickNorm()), 1000))
 	{
 //		nlwarning("Can't find valid pos for state position '%s'(%u)", getAliasFullName().c_str(), getAlias());
 		if	(!_AcceptInvalidPos)
@@ -242,12 +244,12 @@ bool	CShape::setPatat(TVerticalPos verticalPos, const std::vector <CAIVector> &p
 	for (uint32 ind=0;ind<points.size();ind++)
 	{
 		RYAI_MAP_CRUNCH::CWorldPosition newpos;
-		CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, newpos, points[ind], 0, 1, CWorldContainer::CPosValidatorDefault());
+		placePoint(newpos, ind, points[ind], 0, 1);
 		if	(	!newpos.isValid()
 			&&	!_AcceptInvalidPos)
 				
 		{
-			CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, newpos, points[ind], 6, 100, CWorldContainer::CPosValidatorDefault());
+			placePoint(newpos, ind, points[ind], 6, 100);
 //#ifdef NL_DEBUG
 			if (newpos.isValid())
 			{
@@ -312,4 +314,48 @@ bool CShape::calcRandomPos(CAIPos &pos)	const
 	return false;
 }
 
+void CShape::takeHeights(const std::vector<CAIVector> &points)
+{
+	m_Heights.clear();
+	m_HeightPoints.clear();
+	if (m_NextHeights.empty())
+		return;
 
+	if (m_NextHeights.size() != points.size())
+		nlwarning("CShape: %u heights for %u points, the points are placed by their vertical pos instead", (uint)m_NextHeights.size(), (uint)points.size());
+	else
+	{
+		m_Heights = m_NextHeights;
+		m_HeightPoints = points;
+	}
+	m_NextHeights.clear();
+}
+
+bool CShape::placePoint(RYAI_MAP_CRUNCH::CWorldPosition &wpos, uint32 index, const CAIVector &pos, float radius, uint32 tries) const
+{
+	if (index < m_Heights.size())
+		return CWorldContainer::calcNearestWPosAtHeight(m_Heights[index], wpos, pos, radius, tries, CWorldContainer::CPosValidatorDefault());
+	return CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, wpos, pos, radius, tries, CWorldContainer::CPosValidatorDefault());
+}
+
+sint32 CShape::heightAt(const CAIVector &pos) const
+{
+	// the heights of the points, weighted by the inverse of their squared distance
+	double sum = 0.0, weights = 0.0;
+	for (uint32 i = 0; i < m_HeightPoints.size(); ++i)
+	{
+		const double distSq = pos.distSqTo(m_HeightPoints[i]);
+		if (distSq < 0.01)
+			return m_Heights[i];
+		sum += m_Heights[i] / distSq;
+		weights += 1.0 / distSq;
+	}
+	return (sint32)(sum / weights);
+}
+
+bool CShape::placePos(RYAI_MAP_CRUNCH::CWorldPosition &wpos, const CAIVector &pos) const
+{
+	if (m_Heights.empty())
+		return CPlaceRandomPos::placePos(wpos, pos);
+	return CWorldContainer::getWorldMap().setWorldPositionNearestHeight(heightAt(pos), wpos, pos);
+}

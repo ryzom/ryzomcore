@@ -2291,6 +2291,41 @@ bool	CWorldMap::setWorldPosition(sint32 z, CWorldPosition	&wpos,	const CAIVector
 	return true;
 }
 
+bool CWorldMap::setWorldPositionNearestHeight(sint32 z, CWorldPosition &wpos, const CAIVector &pos, const CRootCell *originCell) const
+{
+	const CMapPosition mapPos(pos);
+	const CRootCell *cell = originCell ? originCell : getRootCellCst(mapPos);
+	if (!cell)
+	{
+		wpos = CWorldPosition(cell, mapPos, CSlot(), true);
+		return false;
+	}
+
+	sint64 minDistZ = 0;
+	CSlot bestSlot;
+	for (uint32 s = 0; s < 3; ++s)
+	{
+		if (!cell->isSlotUsed(mapPos, CSlot(s)))
+			continue;
+
+		sint64 dist = (sint64)z - (sint64)cell->getMetricHeight(CWorldPosition(cell, mapPos, CSlot(s)));
+		if (dist < 0)
+			dist = -dist;
+		if (!bestSlot.isValid() || dist < minDistZ)
+		{
+			minDistZ = dist;
+			bestSlot = CSlot(s);
+		}
+	}
+	if (!bestSlot.isValid())
+	{
+		wpos = CWorldPosition(cell, mapPos, bestSlot, true);
+		return false;
+	}
+	wpos = CWorldPosition(cell, mapPos, bestSlot);
+	return true;
+}
+
 bool	CWorldMap::setWorldPosition( double z, CWorldPosition	&wpos,	const CAIVector	&pos, const CRootCell	*originCell) const
 {
 	nlassert(false && "Double version of setWorldPosition isn't tested !!! Verify it's the same than above sint32 version !");

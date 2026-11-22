@@ -154,7 +154,7 @@ function component.createGhostComponents(this, act)
 
 end
 
-function onComponentCreated(this)
+local function onComponentCreated(this)
 	local x = this.Position.x + 3
 	local y = this.Position.y + 3
 	local zoneTrigger = r2.Features["ZoneTrigger"].Components.ZoneTrigger.createComponent(x, y)
@@ -166,6 +166,20 @@ function onComponentCreated(this)
 	this._zoneTriggerId = zoneTrigger.InstanceId
 end
 
+-- the dialog with the zone trigger it starts from, as the other features make theirs
+component.createComponent = function(x, y)
+	local proxDialog = r2.newComponent("ProximityDialog")
+	assert(proxDialog)
+	proxDialog.Name = r2:genInstanceName(i18n.get("uiR2EDProximityDialog"))
+	proxDialog.Base = r2.Translator.getDebugBase("palette.entities.botobjects.dialog")
+	proxDialog.Position.x = x
+	proxDialog.Position.y = y
+	proxDialog.Position.z = r2:snapZToGround(x, y)
+	proxDialog.AutoStart = 0
+	onComponentCreated(proxDialog)
+	return proxDialog
+end
+
 component.create = function()	
 	if r2:getLeftQuota() <= 0 then 
 		r2:makeRoomMsg()
@@ -174,15 +188,7 @@ component.create = function()
 
 	local function createComponent(x, y)
 		r2.requestNewAction(i18n.get("uiR2EDNewProximityDialogAction"))
-		local proxDialog = r2.newComponent("ProximityDialog")
-		assert(proxDialog)
-		proxDialog.Name = r2:genInstanceName(i18n.get("uiR2EDProximityDialog"))
-		proxDialog.Base = r2.Translator.getDebugBase("palette.entities.botobjects.dialog")
-		proxDialog.Position.x = x
-		proxDialog.Position.y = y
-		proxDialog.Position.z = r2:snapZToGround(x, y)
-		proxDialog.AutoStart = 0
-		onComponentCreated(proxDialog)
+		local proxDialog = component.createComponent(x, y)
 		r2:setCookie(proxDialog.InstanceId, "DisplayProp", 1)
 		r2.requestInsertNode(r2:getCurrentAct().InstanceId, "Features", -1, "", proxDialog)	
 	end

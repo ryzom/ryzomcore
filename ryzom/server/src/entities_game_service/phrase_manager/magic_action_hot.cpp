@@ -25,6 +25,7 @@
 #include "game_share/magic_fx.h"
 #include "s_link_effect_hot.h"
 #include "entity_structure/statistic.h"
+#include "entity_manager/entity_manager.h"
 #include "egs_sheets/egs_static_ai_action.h"
 
 using namespace NLNET;
@@ -98,16 +99,17 @@ protected:
 				return true;
 				
 			case TBrickParam::MA_HEAL:
-				INFOLOG("MA_HEAL: %u %u %u",((CSBrickParamMagicHeal *)param)->Hp,((CSBrickParamMagicHeal *)param)->Sap,((CSBrickParamMagicHeal *)param)->Sta);
+				INFOLOG("MA_HEAL: %d %d %d", ((CSBrickParamMagicHeal *)param)->Hp, ((CSBrickParamMagicHeal *)param)->Sap, ((CSBrickParamMagicHeal *)param)->Sta);
 				_HealHp = ((CSBrickParamMagicHeal *)param)->Hp;
 				_HealSap = ((CSBrickParamMagicHeal *)param)->Sap;
 				_HealSta = ((CSBrickParamMagicHeal *)param)->Sta;
 				phrase->setMagicFxType( MAGICFX::healtoMagicFx( _HealHp,_HealSap,_HealSta,true ), brick.SabrinaValue);
 				// set action sheetid
 				_ActionBrickSheetId = brick.SheetId;
-				
+				break;
+
 			case TBrickParam::MA_LINK_COST:
-				INFOLOG("MA_LINK_COST: %u",((CSBrickParamMagicLinkCost *)param)->Cost);
+				INFOLOG("MA_LINK_COST: %d", ((CSBrickParamMagicLinkCost *)param)->Cost);
 				_CostPerUpdate = ((CSBrickParamMagicLinkCost *)param)->Cost;
 				break;
 
@@ -173,18 +175,12 @@ protected:
 			if ( !target)
 				continue;
 
-			/// someone can only have 1 effect of a given type on a creature
-			const std::vector< CSEffectPtr> & effects = target->getSEffects();
-			for (uint j = 0; j < effects.size(); j++ )
-			{
-				if ( effects[j]->getFamily() == EFFECT_FAMILIES::Hot && effects[j]->getCreatorRowId() == phrase->getActor( ) )
-				{
-					continue;
-				}
-			}
+			// a caster keeps one heal over time on a target
+			if (hasHotFrom(target, phrase->getActor()))
+				continue;
 
 			string errorCode;
-			if (!isMad && !PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::CURATIVE_MAGIC, errorCode, i==0 ))
+			if (!isMad &&!PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::CURATIVE_MAGIC, errorCode, i==0 ))
 			{
 				// dont warn because of multi target
 				// PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
@@ -204,7 +200,8 @@ protected:
 			CTargetInfos targetInfos;
 			targetInfos.RowId		= target->getEntityRowId();
 			targetInfos.MainTarget	= (i == 0);
-			targetInfos.HealFactor	= float( successFactor * CSLinkEffect::getUpdatePeriod() );
+			// MA_HEAL gives the heal per second, as MA_DMG does for the damage over time links (CMagicActionDot)
+			targetInfos.HealFactor	= float(successFactor * CSLinkEffect::getUpdatePeriod(EFFECT_FAMILIES::Hot) * CTickEventHandler::getGameTimeStep());
 
 			_ApplyTargets.push_back(targetInfos);
 		}
@@ -215,13 +212,18 @@ protected:
 						const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport,
 						sint32 vamp, float vampRatio, bool reportXp ) NL_OVERRIDE
 	{
-		NL_ALLOC_CONTEXT(MAHAPY);
 		CEntityBase* actor = CEntityBaseManager::getEntityBasePtr( phrase->getActor() );
 		if (!actor)
 			return;
 
 		TReportAction reportAction = actionReport;
 		reportAction.DeltaLvl = deltaLevel;
+		if (!reportXp)
+		{
+			// no xp gain, as for the damage over time links (CMagicActionDot)
+			reportAction.Skill = SKILLS::unknown;
+			reportAction.SkillLevel = phrase->getBrickMaxSabrinaCost();
+		}
 
 		//behav.Spell.Resist = 0;
 		//behav.Spell.KillingBlow = 0;
@@ -240,15 +242,9 @@ protected:
 			if ( !target)
 				continue;
 
-			/// someone can only have 1 effect of a given type on a creature
-			const std::vector< CSEffectPtr> & effects = target->getSEffects();
-			for (uint j = 0; j < effects.size(); j++ )
-			{
-				if ( effects[j]->getFamily() == EFFECT_FAMILIES::Hot && effects[j]->getCreatorRowId() == phrase->getActor( ) )
-				{
-					continue;
-				}
-			}
+			// a caster keeps one heal over time on a target
+			if (hasHotFrom(target, phrase->getActor()))
+				continue;
 
 			string errorCode;
 			if (!PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::CURATIVE_MAGIC, errorCode, _ApplyTargets[i].MainTarget ))
@@ -275,18 +271,34 @@ protected:
 				uint32(_HealSap * factor),
 				uint32(_HealSta * factor ));
 
+			// the link slot of the database names the phrase, and focus items scale the cost by the spell's level
+			hot->setPhraseBookIndex(phrase->phraseBookIndex());
+			hot->setSpellPower(phrase->getBrickMaxSabrinaCost());
+
 			if (phrase->breakNewLink())
 			{
 				// use CEntityBase methods not to cancel the current action
 				actor->CEntityBase::addLink(hot);
 				target->addSabrinaEffect(hot);
-				actor->CEntityBase::removeLink(hot);
-				return;
+				actor->CEntityBase::removeLink(hot, 1.0f);
+				continue;
 			}
 
-			actor->addLink( hot );
+			// the links of the other targets join the static action of the first one
+			phrase->addLink(actor, hot);
 			target->addSabrinaEffect( hot );
 		}
+	}
+
+	static bool hasHotFrom(CEntityBase *target, const TDataSetRow &caster)
+	{
+		const std::vector<CSEffectPtr> &effects = target->getSEffects();
+		for (uint j = 0; j < effects.size(); ++j)
+		{
+			if (effects[j]->getFamily() == EFFECT_FAMILIES::Hot && effects[j]->getCreatorRowId() == caster)
+				return true;
+		}
+		return false;
 	}
 
 	sint32						_HealHp;

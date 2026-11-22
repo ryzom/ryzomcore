@@ -688,6 +688,39 @@ void CPathCont::setDestination(AITYPES::TVerticalPos verticalPos, CAIVector cons
 	}
 }
 
+void CPathCont::setDestinationKeepingLayer(AITYPES::TVerticalPos verticalPos, RYAI_MAP_CRUNCH::CWorldPosition const &destPos)
+{
+	if (!destPos.isValid())
+	{
+		setDestination(verticalPos, destPos.toAIVector());
+		return;
+	}
+
+	// the same 2D position can be on another layer
+	RYAI_MAP_CRUNCH::CMapPosition mapPos(destPos);
+	if (_DestinationMapPos == mapPos && _DestPos == destPos)
+		return;
+
+	_DestinationMapPos = mapPos;
+	_Destination = destPos;
+	_VerticalPos = verticalPos;
+	uint32 gameCycle = CTimeInterface::gameCycle();
+
+	if (destPos != _DestPos)
+	{
+		_DestPos = destPos;
+		_TimeDestChanged = gameCycle;
+
+		RYAI_MAP_CRUNCH::CTopology::TTopologyRef newTopo = _DestPos.getTopologyRef();
+		if (((RYAI_MAP_CRUNCH::CTopology::TTopologyId)newTopo) != _TopoRef)
+		{
+			_TimeTopoChanged = gameCycle;
+			clearPaths();
+			_TopoRef = newTopo;
+		}
+	}
+}
+
 bool CPathCont::getPathForSource(CPathPosition& pathPos, RYAI_MAP_CRUNCH::CWorldPosition const& startPos) const
 {
 	H_AUTO(getPathForSource);

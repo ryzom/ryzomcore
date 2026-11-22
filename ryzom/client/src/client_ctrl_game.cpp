@@ -38,6 +38,8 @@
 #include "game_share/slot_equipment.h"
 #include "nel/gui/db_manager.h"
 #include "r2/editor.h"
+#include "sheet_manager.h"
+#include "client_sheets/item_sheet.h"
 #include "string_manager_client.h"
 
 #ifdef DEBUG_NEW
@@ -360,8 +362,13 @@ bool itemJson(const std::string &base, CJsonValue &o)
 		return false;
 	CSheetId id(sheet);
 	o.set("sheet", id.toString());
+	// a plot item of a Ring scenario is named by the scenario, as the item's slot shows it (CDBCtrlSheet::getItemActualName)
+	const CItemSheet *itemSheet = dynamic_cast<const CItemSheet *>(SheetMngr.get(id));
+	const R2::TMissionItem *plotItem = itemSheet && itemSheet->Family == ITEMFAMILY::SCROLL_R2 ? R2::getEditor().getPlotItemInfos(sheet) : nullptr;
 	const char *localized = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(id);
-	if (localized != nullptr)
+	if (plotItem)
+		o.set("name", plotItem->Name.toUtf8());
+	else if (localized != nullptr)
 		o.set("name", localized);
 	o.set("quantity", leafValue(base + ":QUANTITY"));
 	o.set("quality", leafValue(base + ":QUALITY"));
@@ -544,6 +551,20 @@ bool requireEditor(CCtrlCall &call)
 	return true;
 }
 
+/// The scenario of the editor is there to read and change in edition mode only: a test or an animation holds the
+/// translated scenario, and the edited one is erased until the editor comes back.
+bool requireEdition(CCtrlCall &call)
+{
+	if (!requireEditor(call))
+		return false;
+	if (R2::getEditor().getMode() != R2::CEditor::EditionMode)
+	{
+		call.fail("the editor is not in edition mode: a test or an animation runs, and the scenario is read and changed in edition mode only (ring.state gives the mode and the act)");
+		return false;
+	}
+	return true;
+}
+
 /// Runs a Lua chunk of the editor's methods and answers with its first result. The chunk bounds what it returns
 /// itself (ring.tree has depth and max); the conversion only stops a runaway one, and says so.
 void ringLua(CCtrlCall &call, const char *code, const CJsonValue &args)
@@ -562,7 +583,20 @@ void ringLua(CCtrlCall &call, const char *code, const CJsonValue &args)
 	call.reply(r);
 }
 
-const char *const s_RingState = "local r = {}\n"
+// the same, with a prelude of Lua definitions run before the code, in the same chunk
+void ringLua(CCtrlCall &call, const char *prelude, const char *code, const CJsonValue &args)
+{
+	ringLua(call, (std::string(prelude) + code).c_str(), args);
+}
+
+// in a test or an animation the edited scenario is erased: the act is the index the server last gave (0 the
+// permanent act), and the other fields are left out; in edition mode that index means nothing
+const char *const s_RingState = "local edition = ...\n"
+                                "local r = {}\n"
+                                "if not edition then\n"
+                                "  r.current_act_index = r2.getCurrentActIndex()\n"
+                                "  return r\n"
+                                "end\n"
                                 "r.can_undo = r2:canUndo()\n"
                                 "r.can_redo = r2:canRedo()\n"
                                 "r.selected = r2:getSelectedInstanceId()\n"
@@ -598,6 +632,7 @@ void methodRingState(CCtrlCall &call)
 	if (!requireEditor(call))
 		return;
 	CJsonValue args = CJsonValue::array();
+	args.push(CJsonValue(R2::getEditor().getMode() == R2::CEditor::EditionMode));
 	CJsonValue results;
 	std::string error;
 	if (!runLua(s_RingState, args, 4, 1000, results, error))
@@ -615,7 +650,7 @@ void methodRingState(CCtrlCall &call)
 
 void methodRingTree(CCtrlCall &call)
 {
-	if (!requireEditor(call))
+	if (!requireEdition(call))
 		return;
 	CJsonValue args = CJsonValue::array();
 	args.push(call.getArgs().get("id").getString());
@@ -624,9 +659,67 @@ void methodRingTree(CCtrlCall &call)
 	ringLua(call, s_RingTree, args);
 }
 
+// The values of ring.set and ring.create as the editor stores them: {"ref": id} is a reference to an instance
+// (r2.RefId), an object with Class a new component of that class (r2.newComponent, then its own values), an object
+// without Class fills the sub-object of that name (Position, Event, Action), and an array appends its items to the
+// list of that name (Actions, Components, Conditions), as the editor's own code builds a handler with its steps.
+const char *const s_RingValues = "local function isRef(v)\n"
+                                 "  if type(v) ~= 'table' or type(v.ref) ~= 'string' then return false end\n"
+                                 "  for k in pairs(v) do if k ~= 'ref' then return false end end\n"
+                                 "  return true\n"
+                                 "end\n"
+                                 "local function propType(inst, name)\n"
+                                 "  local cls = r2.Classes[inst.Class]\n"
+                                 "  while cls do\n"
+                                 "    for _, prop in ipairs(cls.Prop or {}) do\n"
+                                 "      if prop.Name == name then return prop.Type end\n"
+                                 "    end\n"
+                                 "    cls = cls.BaseClass and r2.Classes[cls.BaseClass] or nil\n"
+                                 "  end\n"
+                                 "  return nil\n"
+                                 "end\n"
+                                 "local function newComponent(class, where)\n"
+                                 "  local c = r2.newComponent(class)\n"
+                                 "  if type(c) ~= 'table' or c.InstanceId == nil then error(where .. ': ' .. tostring(class) .. ' is not a component class') end\n"
+                                 "  return c\n"
+                                 "end\n"
+                                 "local fill\n"
+                                 "local function toRing(v, path, ptype)\n"
+                                 "  if type(v) ~= 'table' then\n"
+                                 "    if ptype == 'RefId' and type(v) == 'string' then return r2.RefId(v) end\n"
+                                 "    return v\n"
+                                 "  end\n"
+                                 "  if isRef(v) then return r2.RefId(v.ref) end\n"
+                                 "  if type(v.Class) ~= 'string' then error(path .. ': an object here needs Class (a new component) or ref (a reference)') end\n"
+                                 "  local c = newComponent(v.Class, path)\n"
+                                 "  fill(c, v, path)\n"
+                                 "  return c\n"
+                                 "end\n"
+                                 "fill = function(inst, values, path)\n"
+                                 "  for k, v in pairs(values) do\n"
+                                 "    if k ~= 'Class' then\n"
+                                 "      local where = path .. '.' .. tostring(k)\n"
+                                 "      local cur = inst[k]\n"
+                                 "      if type(v) == 'table' and not isRef(v) and type(v.Class) ~= 'string' then\n"
+                                 "        if r2.isRefId(cur) then error(where .. ': a reference, which takes an instance id or {ref = id}') end\n"
+                                 "        if type(cur) ~= 'table' then error(where .. ': not a sub-object nor a list of the component') end\n"
+                                 "        if v[1] ~= nil then\n"
+                                 "          if cur.Class ~= nil then error(where .. ': a sub-object, which takes an object of values, not a list') end\n"
+                                 "          for i, item in ipairs(v) do table.insert(cur, toRing(item, where .. '[' .. i .. ']')) end\n"
+                                 "        elseif next(v) ~= nil then\n"
+                                 "          if cur.Class == nil then error(where .. ': a list, which takes an array of components, not an object') end\n"
+                                 "          fill(cur, v, where)\n"
+                                 "        end\n"
+                                 "      else\n"
+                                 "        inst[k] = toRing(v, where, propType(inst, k))\n"
+                                 "      end\n"
+                                 "    end\n"
+                                 "  end\n"
+                                 "end\n";
+
 void methodRingSet(CCtrlCall &call)
 {
-	if (!requireEditor(call))
+	if (!requireEdition(call))
 		return;
 	if (!finiteNumbers(call.getArgs().get("value")))
 	{
@@ -637,42 +730,70 @@ void methodRingSet(CCtrlCall &call)
 	args.push(call.getArgs().get("id"));
 	args.push(call.getArgs().get("property"));
 	args.push(call.getArgs().get("value"));
-	ringLua(call,
+	ringLua(call, s_RingValues,
 	    "local id, prop, value = ...\n"
 	    "if not r2:getInstanceFromId(id) then error('no instance ' .. tostring(id)) end\n"
+	    "if type(value) == 'table' and not isRef(value) then error('value: a string, a number or {ref = id}; ring.create makes components') end\n"
 	    "r2.requestNewAction('Set ' .. tostring(prop))\n"
-	    "r2.requestSetNode(id, prop, value)\n"
+	    "r2.requestSetNode(id, prop, toRing(value, 'value', propType(r2:getInstanceFromId(id), prop)))\n"
 	    "return { id = id, property = prop, requested = true }\n",
 	    args);
 }
 
 void methodRingCreate(CCtrlCall &call)
 {
-	if (!requireEditor(call))
+	if (!requireEdition(call))
 		return;
-	if (!finiteNumbers(call.getArgs().get("values")))
+	if (!finiteNumbers(call.getArgs().get("values")) || !finiteNumbers(call.getArgs().get("args")))
 	{
-		call.fail("values holds a number that is not finite");
+		call.fail("values or args holds a number that is not finite");
+		return;
+	}
+	if (!call.getArgs().get("args").isNull() && !call.getArgs().get("args").isArray())
+	{
+		call.fail("args is a list of the arguments of the feature's createComponent after x and y");
 		return;
 	}
 	CJsonValue args = CJsonValue::array();
 	args.push(CJsonValue(call.getArgs().get("class").getString()));
 	args.push(CJsonValue(call.getArgs().get("base").getString()));
 	args.push(CJsonValue(call.getArgs().get("parent").getString()));
-	args.push(call.getArgs().get("property").isString() ? call.getArgs().get("property") : CJsonValue("Components"));
+	args.push(CJsonValue(call.getArgs().get("property").getString()));
 	args.push(CJsonValue((sint64)call.getArgs().get("position").getInt(-1)));
 	args.push(call.getArgs().get("values").isObject() ? call.getArgs().get("values") : CJsonValue::object());
+	args.push(call.getArgs().get("args").isArray() ? call.getArgs().get("args") : CJsonValue::array());
+	// the count of args, for a null among them: Lua's length of the table stops at the first one
+	args.push(CJsonValue((sint64)(call.getArgs().get("args").isArray() ? call.getArgs().get("args").size() : 0)));
 	// an entity of the scenario is made as the palette tool makes it (CToolCreateEntity): the class the palette
 	// element names (a creature's is NpcCreature or NpcPlant), Base the element, the element's name; without a base
-	// the editor cannot display it
-	ringLua(call,
-	    "local class, base, parent, prop, pos, values = ...\n"
+	// the editor cannot display it. A custom NPC (the civilians) gets the editor's random look of its element. A
+	// feature (TalkTo, Timer, ZoneTrigger...) is made by its own createComponent at x, y, as its palette tool makes it,
+	// with the parts it needs (a zone, a Base); it and a dialog (ChatSequence, which has no createComponent) go into
+	// an act's Features, as the palette puts them.
+	ringLua(call, s_RingValues,
+	    "local class, base, parent, prop, pos, values, extra, nextra = ...\n"
 	    "local botObject = string.sub(base, 1, 27) == 'palette.entities.botobjects'\n"
-	    "local parentId = parent\n"
-	    "if parentId == '' then\n"
-	    "  local act = botObject and r2.Scenario:getBaseAct() or r2.Scenario:getCurrentAct()\n"
-	    "  parentId = act.Features[0].InstanceId\n"
+	    "local creator\n"
+	    "if class ~= '' then\n"
+	    "  for _, f in pairs(r2.Features) do\n"
+	    "    if type(f) == 'table' and type(f.Components) == 'table' and f.Components[class] ~= nil then\n"
+	    "      creator = f.Components[class].createComponent or f.createComponent\n"
+	    "      if creator then break end\n"
+	    "    end\n"
+	    "  end\n"
 	    "end\n"
+	    "if creator and base ~= '' then error(class .. ' is a feature: it is made by its class, without base') end\n"
+	    "local actLevel = creator ~= nil or class == 'ChatSequence'\n"
+	    "local parentId, property = parent, prop\n"
+	    "if parentId == '' then\n"
+	    "  if actLevel then\n"
+	    "    parentId = r2.Scenario:getCurrentAct().InstanceId\n"
+	    "  else\n"
+	    "    local act = botObject and r2.Scenario:getBaseAct() or r2.Scenario:getCurrentAct()\n"
+	    "    parentId = act.Features[0].InstanceId\n"
+	    "  end\n"
+	    "end\n"
+	    "if property == '' then property = actLevel and 'Features' or 'Components' end\n"
 	    "if not r2:getInstanceFromId(parentId) then error('no parent instance ' .. tostring(parentId)) end\n"
 	    "if base ~= '' then\n"
 	    "  local act, baseAct = r2.Scenario:getCurrentAct(), r2.Scenario:getBaseAct()\n"
@@ -681,10 +802,19 @@ void methodRingCreate(CCtrlCall &call)
 	    "  elseif r2.getMaxNpcs() - baseAct:getLocalCost() - (act ~= baseAct and act:getLocalCost() or 0) < 1 then\n"
 	    "    error('no room left for an entity in the scenario')\n"
 	    "  end\n"
+	    "elseif creator then\n"
+	    "  -- the AI quota, as the palette tools check it (r2:checkAiQuota): a bandit camp needs its bandits, a fauna\n"
+	    "  -- feature its herds and itself\n"
+	    "  local need = 1\n"
+	    "  if class == 'BanditCamp' then need = tonumber(extra[1]) or 1\n"
+	    "  elseif class == 'Fauna' then need = (tonumber(extra[1]) or 0) + (tonumber(extra[4]) or 0) + 1 end\n"
+	    "  local _, leftAi = r2:getLeftQuota()\n"
+	    "  if leftAi < need then error('no room left in the act for ' .. tostring(need) .. ' more of its AI quota') end\n"
 	    "end\n"
+	    "local elt\n"
 	    "if base ~= '' then\n"
 	    "  if not r2.isInPalette(base) then error('no palette element ' .. base .. '; ring.palette lists them') end\n"
-	    "  local elt = r2.getPaletteElement(base)\n"
+	    "  elt = r2.getPaletteElement(base)\n"
 	    "  if class == '' then\n"
 	    "    class = (elt and elt.Class) or 'Npc'\n"
 	    "    if string.sub(base, 1, 26) == 'palette.entities.creatures' then\n"
@@ -692,25 +822,111 @@ void methodRingCreate(CCtrlCall &call)
 	    "      if elt and elt.SheetClient and r2:isNPCPlant(elt.SheetClient) then class = 'NpcPlant' end\n"
 	    "    end\n"
 	    "  end\n"
-	    "  if class == 'NpcCustom' then error('a custom NPC takes its look from an entity it is cloned from; use another palette element') end\n"
 	    "elseif class == '' or class == 'Npc' or class == 'NpcCreature' or class == 'NpcPlant' or class == 'NpcCustom' then\n"
 	    "  error('an entity needs base, a palette element id (ring.palette lists them): the editor never makes one without')\n"
 	    "end\n"
-	    "local inst = r2.newComponent(class)\n"
-	    "if not inst then error('no component class ' .. tostring(class)) end\n"
-	    "if base ~= '' then\n"
-	    "  inst.Base = base\n"
-	    "  inst.Name = r2.PaletteIdToTranslation[base] or class\n"
-	    "  -- as the palette names them: a creature keeps its name, the others get a number\n"
-	    "  if string.sub(base, 1, 26) ~= 'palette.entities.creatures' then inst.Name = r2:genInstanceName(inst.Name) end\n"
+	    "local p = values.Position\n"
+	    "local at = type(p) == 'table' and not isRef(p) and p.Class == nil and type(p.x) == 'number' and type(p.y) == 'number'\n"
+	    "local inst\n"
+	    "if creator then\n"
+	    "  if not at then error('a feature is made at values.Position {x, y}') end\n"
+	    "  inst = creator(p.x, p.y, (table.unpack or unpack)(extra, 1, nextra))\n"
+	    "  if type(inst) ~= 'table' or inst.InstanceId == nil then error('the createComponent of ' .. class .. ' made nothing') end\n"
+	    "  if p.z ~= nil then values.Position = { z = p.z } else values.Position = nil end\n"
+	    "else\n"
+	    "  if class == 'NpcCustom' then\n"
+	    "    -- the palette tool copies the look of the entity it shows while placing; without one the editor's own\n"
+	    "    -- random look of the element is taken, as a bandit camp makes its bandits, and a name of its people from\n"
+	    "    -- the list the palette tool draws from (randomNPCName)\n"
+	    "    inst = r2:randomNPC(base)\n"
+	    "    local sex = isR2PlayerMale(inst.SheetClient) and r2.male or r2.female\n"
+	    "    inst.Name = r2:randomNPCName(getR2PlayerRace(inst.SheetClient), sex)\n"
+	    "  else\n"
+	    "    inst = newComponent(class, 'class')\n"
+	    "  end\n"
+	    "  if base ~= '' and class ~= 'NpcCustom' then\n"
+	    "    inst.Base = base\n"
+	    "    inst.Name = r2.PaletteIdToTranslation[base] or class\n"
+	    "    -- as the palette names them: a creature keeps its name, the others get a number\n"
+	    "    if string.sub(base, 1, 26) ~= 'palette.entities.creatures' then inst.Name = r2:genInstanceName(inst.Name) end\n"
+	    "  elseif class == 'ChatSequence' then\n"
+	    "    -- as the dialog tool makes one (r2.dialogs:newSequenceInst)\n"
+	    "    inst.Base = r2.Translator.getDebugBase('palette.entities.botobjects.dialog')\n"
+	    "    inst.Name = r2:genInstanceName(i18n.get('uiR2EDDialog'))\n"
+	    "  end\n"
+	    "  -- what stands in the world (it has a Base) is put on the ground; a position below another is relative\n"
+	    "  if at and p.z == nil then\n"
+	    "    if (values.Base or inst.Base or '') ~= '' then p.z = r2:snapZToGround(p.x, p.y) else p.z = 0 end\n"
+	    "  end\n"
 	    "end\n"
-	    "for k, v in pairs(values) do\n"
-	    "  if k == 'Position' and type(v) == 'table' then inst.Position.x = v.x inst.Position.y = v.y inst.Position.z = v.z or 0\n"
-	    "  else inst[k] = v end\n"
+	    "fill(inst, values, 'values')\n"
+	    "if class == 'NpcCustom' and elt and (elt.SheetModel or '') ~= '' then\n"
+	    "  -- the combat sheet that goes with the weapons it holds, as the palette tool sets it (r2:searchSheet)\n"
+	    "  local sheet = r2:searchSheet(r2.getPropertyValue(inst, 'Equipment'), inst.WeaponRightHand, inst.WeaponLeftHand, r2.getPropertyValue(inst, 'Sheet'), elt.SheetModel)\n"
+	    "  if sheet == '' then error('no combat sheet of ' .. base .. ' goes with the weapons it holds') end\n"
+	    "  inst.Sheet = sheet\n"
+	    "end\n"
+	    "-- the position tests of the palette and drawing tools (r2:isValidPos, r2:isValidPoly), on ground the AI can use:\n"
+	    "-- what stands in the world, a feature and a dialog where it is put, an entity given in values, every point of a\n"
+	    "-- region or a route, and the zones of a trigger zone, a bandit camp or a herd, inside and at every point (their\n"
+	    "-- palette tools test them; the other features' tools test their own position only)\n"
+	    "local stands = base ~= '' or creator ~= nil or class == 'ChatSequence'\n"
+	    "if stands and not at then error('values.Position {x, y}: where it stands') end\n"
+	    "local drawn = class == 'Region' or class == 'Road'\n"
+	    "local zoned = class == 'ZoneTrigger' or class == 'BanditCamp' or class == 'Fauna'\n"
+	    "local function kindOf(cls, what)\n"
+	    "  local c = r2.Classes[cls]\n"
+	    "  while c do\n"
+	    "    if c.Name == what then return true end\n"
+	    "    c = c.BaseClass and r2.Classes[c.BaseClass] or nil\n"
+	    "  end\n"
+	    "  return false\n"
+	    "end\n"
+	    "local offX, offY = 0, 0\n"
+	    "local parentInst = r2:getInstanceFromId(parentId)\n"
+	    "if parentInst.getWorldPos then\n"
+	    "  local wp = parentInst:getWorldPos()\n"
+	    "  if type(wp) == 'table' and type(wp.x) == 'number' then offX, offY = wp.x, wp.y end\n"
+	    "end\n"
+	    "local bad = {}\n"
+	    "local function test(x, y, path)\n"
+	    "  if not r2:isValidPos(x, y) then table.insert(bad, string.format('%s at %.1f, %.1f', path, x, y)) end\n"
+	    "end\n"
+	    "local function walk(node, ox, oy, path, depth)\n"
+	    "  if depth > 20 then return end\n"
+	    "  local p = node.Position\n"
+	    "  if type(p) == 'table' and type(p.x) == 'number' and type(p.y) == 'number' then\n"
+	    "    if node.InheritPos == 0 then ox, oy = 0, 0 end\n"
+	    "    ox, oy = ox + p.x, oy + p.y\n"
+	    "    if depth == 0 then\n"
+	    "      -- a point added to a region or a route on its own is tested as the new vertex tool tests it\n"
+	    "      if stands or class == 'RegionVertex' or class == 'WayPoint' then test(ox, oy, path) end\n"
+	    "    elseif (drawn or zoned) and (node.Class == 'RegionVertex' or node.Class == 'WayPoint') then\n"
+	    "      test(ox, oy, path)\n"
+	    "    elseif creator == nil and type(node.Class) == 'string' and kindOf(node.Class, 'Npc') then\n"
+	    "      test(ox, oy, path)\n"
+	    "    end\n"
+	    "  end\n"
+	    "  if zoned and node.Class == 'Region' and type(node.Points) == 'table' then\n"
+	    "    local poly = {}\n"
+	    "    for _, v in ipairs(node.Points) do\n"
+	    "      if type(v.Position) == 'table' then table.insert(poly, CVector2f(ox + v.Position.x, oy + v.Position.y)) end\n"
+	    "    end\n"
+	    "    if #poly >= 3 and not r2:isValidPoly(poly) then table.insert(bad, path .. ', inside the zone') end\n"
+	    "  end\n"
+	    "  for k, v in pairs(node) do\n"
+	    "    if type(v) == 'table' and k ~= 'Position' and not r2.isRefId(v) then\n"
+	    "      walk(v, ox, oy, type(k) == 'number' and (path .. '[' .. (k - 1) .. ']') or (path .. '.' .. tostring(k)), depth + 1)\n"
+	    "    end\n"
+	    "  end\n"
+	    "end\n"
+	    "walk(inst, offX, offY, 'values', 0)\n"
+	    "if #bad > 0 then\n"
+	    "  error('off the ground the AI can use (the tops of root mounds and pillars, cliffs, the rim of the island), where the editor\\'s tools refuse it: ' .. table.concat(bad, '; '))\n"
 	    "end\n"
 	    "r2.requestNewAction('Create ' .. tostring(inst.Name or class))\n"
-	    "r2.requestInsertNode(parentId, prop, pos, '', inst)\n"
-	    "return { id = inst.InstanceId, class = class, base = base, parent = parentId, property = prop, requested = true }\n",
+	    "r2.requestInsertNode(parentId, property, pos, '', inst)\n"
+	    "return { id = inst.InstanceId, class = class, base = base, parent = parentId, property = property, requested = true }\n",
 	    args);
 }
 
@@ -741,7 +957,7 @@ void methodRingPalette(CCtrlCall &call)
 
 void methodRingErase(CCtrlCall &call)
 {
-	if (!requireEditor(call))
+	if (!requireEdition(call))
 		return;
 	CJsonValue args = CJsonValue::array();
 	args.push(call.getArgs().get("id"));
@@ -756,7 +972,7 @@ void methodRingErase(CCtrlCall &call)
 
 void methodRingMove(CCtrlCall &call)
 {
-	if (!requireEditor(call))
+	if (!requireEdition(call))
 		return;
 	double x = 0, y = 0;
 	if (!readNumber(call, "x", s_MaxCoordinate, x) || !readNumber(call, "y", s_MaxCoordinate, y))
@@ -773,6 +989,42 @@ void methodRingMove(CCtrlCall &call)
 	    "local inst = r2:getInstanceFromId(id)\n"
 	    "if not inst then error('no instance ' .. tostring(id)) end\n"
 	    "if x and y then\n"
+	    "  -- the position test of the move tool (r2:isValidPos), on ground the AI can use: the new place of what stands in\n"
+	    "  -- the world, or of every point of a region or a route and every member of a group, which the tool tests when\n"
+	    "  -- they all were on that ground before the move (CToolSelectMove, CDisplayerVisualGroup::isAccessible)\n"
+	    "  if not r2.isTable(inst.Position) or type(inst.Position.x) ~= 'number' then error(tostring(id) .. ' has no position') end\n"
+	    "  local dx, dy = x - inst.Position.x, y - inst.Position.y\n"
+	    "  local list, what\n"
+	    "  if inst.Class == 'Region' or inst.Class == 'Road' then list, what = inst.Points, 'point '\n"
+	    "  elseif inst.Class == 'NpcGrpFeature' then list, what = inst.Components, 'member ' end\n"
+	    "  local places = {}\n"
+	    "  if list then\n"
+	    "    for i = 0, list.Size - 1 do\n"
+	    "      if list[i].getWorldPos then table.insert(places, { wp = list[i]:getWorldPos(), name = what .. i }) end\n"
+	    "    end\n"
+	    "  elseif inst.getWorldPos then\n"
+	    "    places[1] = { wp = inst:getWorldPos(), name = tostring(id) }\n"
+	    "  end\n"
+	    "  local tested = true\n"
+	    "  if list then\n"
+	    "    for _, pl in ipairs(places) do\n"
+	    "      if not r2:isValidPos(pl.wp.x, pl.wp.y) then tested = false end\n"
+	    "    end\n"
+	    "  end\n"
+	    "  local bad = {}\n"
+	    "  local landed = false\n"
+	    "  for _, pl in ipairs(places) do\n"
+	    "    if r2:isValidPos(pl.wp.x + dx, pl.wp.y + dy) then\n"
+	    "      landed = true\n"
+	    "    elseif tested then\n"
+	    "      table.insert(bad, string.format('%s at %.1f, %.1f', pl.name, pl.wp.x + dx, pl.wp.y + dy))\n"
+	    "    end\n"
+	    "  end\n"
+	    "  -- partly off that ground before: the tool still takes it by a point on ground, so one at least lands on it\n"
+	    "  if not tested and not landed and #places > 0 then table.insert(bad, 'none of its ' .. #places .. ' points or members') end\n"
+	    "  if #bad > 0 then\n"
+	    "    error('off the ground the AI can use (the tops of root mounds and pillars, cliffs, the rim of the island), where the editor\\'s move tool refuses it: ' .. table.concat(bad, '; '))\n"
+	    "  end\n"
 	    "  r2.requestNewAction('Move ' .. tostring(id))\n"
 	    "  r2.requestSetNode(inst.Position.InstanceId, 'x', x)\n"
 	    "  r2.requestSetNode(inst.Position.InstanceId, 'y', y)\n"
@@ -787,7 +1039,7 @@ void methodRingMove(CCtrlCall &call)
 
 void methodRingUndo(CCtrlCall &call)
 {
-	if (!requireEditor(call))
+	if (!requireEdition(call))
 		return;
 	bool redo = call.getArgs().get("redo").getBool(false);
 	CAHManager::getInstance()->runActionHandler(redo ? "r2ed_redo" : "r2ed_undo", nullptr, std::string());
@@ -797,7 +1049,7 @@ void methodRingUndo(CCtrlCall &call)
 
 void methodRingSelect(CCtrlCall &call)
 {
-	if (!requireEditor(call))
+	if (!requireEdition(call))
 		return;
 	CJsonValue args = CJsonValue::array();
 	args.push(call.getArgs().get("id"));
@@ -836,7 +1088,9 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	    "index (the one CSR commands take), title, detail, finished (0 under way, 1 succeeded, 2 failed; state says it in words), goals and compass targets. strings_arrived false means some "
 	    "text is on its way: ask again.",
 	    CCtrlSchema(), true, methodMissions));
-	endpoint.addMethod(new CCtrlFunctionMethod("ring.state", "The scenario editor: its mode (edition, test, dm, animation...), the scenario and current act, the selection, and whether undo and redo can run.",
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.state",
+	    "The scenario editor: its mode (edition, test, dm, animation...) and the index of the current act (0 the permanent act); in edition mode also the "
+	    "scenario and current act, the selection, and whether undo and redo can run.",
 	    CCtrlSchema(), true, methodRingState));
 	endpoint.addMethod(new CCtrlFunctionMethod("ring.tree",
 	    "The scenario tree, or the tree below an instance (id): every property of every instance, with InstanceId and Class; arrays of the editor count from 0. depth (4 by default) and max (3000 items) bound it.",
@@ -849,7 +1103,7 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	// they run only in a client whose content is trusted. The co-editors get what they request.
 	ICtrlMethod *ringSet = new CCtrlFunctionMethod("ring.set",
 	    std::string("Sets a property of an instance through the editor's request, as its property windows do: it reaches the server and the co-editors, and can be undone.") + s_RingRequest,
-	    CCtrlSchema().str("id", "The instance id.", true).str("property", "The property name.", true).any("value", "The value: a string or a number.", true), false, methodRingSet);
+	    CCtrlSchema().str("id", "The instance id.", true).str("property", "The property name.", true).any("value", "The value: a string, a number, or {ref = id} for a reference to an instance.", true), false, methodRingSet);
 	ringSet->setPrivileged(true);
 	endpoint.addMethod(ringSet);
 	endpoint.addMethod(new CCtrlFunctionMethod("ring.palette",
@@ -858,16 +1112,24 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	    methodRingPalette));
 	ICtrlMethod *ringCreate = new CCtrlFunctionMethod("ring.create",
 	    "Creates an instance in the scenario through the editor's request, as its tools do: an entity (an NPC, a creature, an object) from a palette element (base, as ring.palette lists them), "
-	    "the way the palette makes it; other components by class (Region, Road, a feature...). values sets properties first (Name, Position {x, y, z}, Angle...). It goes below a parent (the current "
-	    "act's features by default). Returns its instance id."
+	    "the way the palette makes it (a custom NPC, such as a civilian, with a random look and name of its people: set SheetClient, the look properties and Name in values); a feature by class (TalkTo, Timer, ZoneTrigger...) as its own createComponent makes it at values.Position, with args after x and y "
+	    "for the ones that take more (Timer, Counter, Fauna, BanditCamp); other components by class (Region, Road, ChatSequence...). values sets properties first (Name, Position {x, y, z}, Angle...): {ref = id} is a "
+	    "reference to an instance, an object with Class a new component of that class built with its own values, an object without Class fills that sub-object (Event, Action), "
+	    "and an array appends to that list (Actions, Points), so an event handler comes with its steps in one request. It goes below a parent: by default an entity "
+	    "into the current act's default feature (an object into the permanent act's), a feature and a dialog into the current act's Features. A missing z of what "
+	    "stands in the world is the ground's, and what stands in the world needs values.Position. A position off the ground the AI can use (the tops of root mounds and "
+	    "pillars, cliffs, the rim) is refused where the editor's tools refuse it: what stands in the world, a feature or a dialog, an entity given in the values of a "
+	    "component that is not a feature (a group's members), a point of a region or route, and the zones of a ZoneTrigger, BanditCamp or Fauna (inside and at every "
+	    "point). Returns its instance id."
 	        + std::string(s_RingRequest),
 	    CCtrlSchema()
 	        .str("base", "A palette element id, for an entity.")
 	        .str("class", "The class: for a component that is not an entity, or to override the palette's.")
 	        .str("parent", "The parent instance id.")
-	        .str("property", "The property of the parent it goes in (Components by default).")
+	        .str("property", "The property of the parent it goes in (Components, or Features for an act).")
 	        .integer("position", "Where in it (-1, the end, by default).")
-	        .object("values", "Properties to set on it first."),
+	        .object("values", "Properties to set on it first.")
+	        .any("args", "For a feature, the arguments of its createComponent after x and y."),
 	    false, methodRingCreate);
 	ringCreate->setPrivileged(true);
 	endpoint.addMethod(ringCreate);
@@ -875,11 +1137,15 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	    CCtrlSchema().str("id", "The instance id.", true), false, methodRingErase);
 	ringErase->setPrivileged(true);
 	endpoint.addMethod(ringErase);
-	ICtrlMethod *ringMove = new CCtrlFunctionMethod("ring.move", std::string("Moves an instance to x, y in the world, or below another parent, through the editor's requests.") + s_RingRequest,
+	ICtrlMethod *ringMove = new CCtrlFunctionMethod("ring.move",
+	    std::string("Moves an instance, through the editor's requests: to x, y of its Position, which is relative to its parent (the world for what an act holds, the origin of "
+	                "the points of a drawn region or route), or below another parent. A place off the ground the AI can use is refused as the editor's move tool refuses it: "
+	                "what stands in the world, and every point of a region or route and every member of a group when they all were on that ground before.")
+	        + s_RingRequest,
 	    CCtrlSchema()
 	        .str("id", "The instance id.", true)
-	        .number("x", "World x.")
-	        .number("y", "World y.")
+	        .number("x", "x of its Position, relative to its parent.")
+	        .number("y", "y of its Position, relative to its parent.")
 	        .str("parent", "Or a new parent instance id.")
 	        .str("property", "Its property (Components by default).")
 	        .integer("position", "Where in it (-1 by default)."),

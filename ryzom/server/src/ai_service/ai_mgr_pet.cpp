@@ -259,7 +259,8 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 						}
 					}
 				case NEAR_POINT:
-					position = CAIPos(Coordinate_X*0.001f, Coordinate_Y*0.001f, (sint32)(Coordinate_H*0.001f), Heading);
+					// the height in millimetres, as the AI positions have it
+					position = CAIPos(Coordinate_X*0.001f, Coordinate_Y*0.001f, Coordinate_H, Heading);
 					break;
 				}
 				
