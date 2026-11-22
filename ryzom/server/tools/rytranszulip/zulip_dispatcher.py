@@ -54,6 +54,7 @@ class ZulipDispatcher(ZulipService):
 		self.version = "1.2"
 		self.scriptfile = __file__
 		self.stats = {"messages": 0}
+		self.player_subscriptions = set()
 
 	def getLang(self, lang):
 		return ":"+lang+":"
@@ -96,12 +97,14 @@ class ZulipDispatcher(ZulipService):
 			return None
 		# Normalize potential Zulip-style upload markdown to plain URLs before sending
 		clean_text = self.convert_zulip_upload_links(m.text)
+		content = clean_text if clean_text is not None else ""
 		if m.channel == "player":
 			message_type = "private"
 			if not m.channel_id:
 				print(f"Private message from {user} without recipient, skipped")
-				return None
-			channel = m.channel_id.lower()+"@ig.ryzom.com"
+				return -1
+			# A player of another shard is named Name(Shard) in the game
+			channel = re.sub(r"\([^)]*\)$", "", m.channel_id).lower()+"@ig.ryzom.com"
 		elif m.channel == "dyn":
 			channel = self.getRealChannel(m.channel_id)
 			if channel.startswith(u"❇️ League_"):
@@ -111,19 +114,32 @@ class ZulipDispatcher(ZulipService):
 			channel = self.getRealChannel(m.channel)
 		if not channel:
 			print(f"Message from {user} without channel, skipped")
-			return None
+			return -1
+		sender = self.zulip.ensurePlayer(user)
+		if not sender:
+			print(f"No Zulip account for {user}, message skipped")
+			return -1
 		request = {
 			"type": message_type,
 			"to": channel,
 			"topic": "",
+			"content": content,
+			"sender": sender,
 			"local_id": "ryzom-ig",
 			"queue_id": self.getZulipQueueId(),
 		}
+		if message_type == "private":
+			# Zulip only lets the bot write a private message in the name of
+			# another user when the message is flagged as forged
+			request["forged"] = "true"
 
 		try:
-			# The name stays first: the server reads the player from it
-			content = user[0].upper()+user[1:]+":"+self.quotePrefix(m)+(clean_text if clean_text is not None else "")
-			request["content"] = content
+			if message_type == "stream" and (channel, sender) not in self.player_subscriptions:
+				subscription = self.zulip.addIngameSubscription(channel, [sender])
+				if isinstance(subscription, dict) and subscription.get("result") == "success":
+					self.player_subscriptions.add((channel, sender))
+				else:
+					print("Error subscribing", sender, "to", channel, subscription)
 			result = self.zulip.send_message(request)
 			if message_type == "stream" and isinstance(result, dict) and result.get("code") == "STREAM_DOES_NOT_EXIST":
 				self.zulip.addIngameSubscription(channel)
