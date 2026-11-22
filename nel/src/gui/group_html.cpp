@@ -6116,11 +6116,18 @@ namespace NLGUI
 		// read general property
 		string id = elm.getAttribute("id");
 
-		// Widget template name (old)
-		string templateName = elm.getAttribute("z_btn_tmpl");
-		// Input name is the new
-		if (elm.hasNonEmptyAttribute("z_input_tmpl"))
-			templateName = elm.getAttribute("z_input_tmpl");
+		// The page names the template of the widget, as a div of the class ryzom-ui-grouptemplate does: only a
+		// page of a trusted domain may. A template is interface XML with actions of its own, and the name of
+		// the input goes into it as a parameter. Another page gets the default widget of this browser.
+		string templateName;
+		if (_TrustedDomain)
+		{
+			// Widget template name (old)
+			templateName = elm.getAttribute("z_btn_tmpl");
+			// Input name is the new
+			if (elm.hasNonEmptyAttribute("z_input_tmpl"))
+				templateName = elm.getAttribute("z_input_tmpl");
+		}
 
 		// Widget minimal width
 		uint32 minWidth = 0;
@@ -7046,8 +7053,8 @@ namespace NLGUI
 		// read general property
 		string templateName;
 
-		// Widget template name
-		if (elm.hasNonEmptyAttribute("z_input_tmpl"))
+		// Widget template name: only from a page of a trusted domain (see htmlINPUT)
+		if (_TrustedDomain && elm.hasNonEmptyAttribute("z_input_tmpl"))
 			templateName = elm.getAttribute("z_input_tmpl");
 
 		// Get the string name

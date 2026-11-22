@@ -252,8 +252,10 @@ void CGroupQuickHelp::beginElement(CHtmlElement &elm)
 			break;
 
 	case HTML_P:
-		// Get the action name
-		if (elm.hasAttribute("quick_help_events"))
+		// Get the action name. Only a page of a trusted domain is a quick help (the help pages of the client
+		// are local files, which are trusted): a step runs its link when it is shown, and the link can name
+		// action handlers.
+		if (_TrustedDomain && elm.hasAttribute("quick_help_events"))
 		{
 			// This page is a quick help
 			_IsQuickHelp = true;
