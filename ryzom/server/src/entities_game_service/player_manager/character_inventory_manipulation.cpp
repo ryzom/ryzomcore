@@ -800,6 +800,15 @@ void CCharacter::moveItem(INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVE
 		return;
 	}
 
+	// The hands and the equipment only refer to items of the bag: equipCharacter fills them and unequipCharacter
+	// empties them. Removing an item from one only unlinks it, so the destination would be given an item that is
+	// still in the bag, and inserting into one would take the item out of its real inventory.
+	if (srcInv->isRefInventory() || dstInv->isRefInventory())
+	{
+		nlwarning("<CCharacter::moveItem> %s: cannot move from inventory %u to inventory %u, one of them only refers to items", _Id.toString().c_str(), (uint)srcInvId, (uint)dstInvId);
+		return;
+	}
+
 	// check that slots are valid
 	if (srcSlot >= srcInv->getSlotCount())
 	{
