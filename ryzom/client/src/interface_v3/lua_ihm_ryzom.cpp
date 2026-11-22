@@ -119,6 +119,7 @@
 #include "../connection.h"
 #include "../login_patch.h"
 #include "../r2/tool.h"
+#include "../r2/editor.h"
 #include "../entities.h"
 #include "../misc.h"
 
@@ -974,6 +975,10 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 	const std::string &emoteMenu = ls.toString(1);
 	const std::string &luaParams = ls.toString(2);
 
+	// luaParams is the path of a function of the Ring editor's Lua (see where the lines are created)
+	if (!luaParams.empty() && !R2::getEditor().isInitialized())
+		nlwarning("initEmotesMenu: the lines get no action, '%s' is called through the Ring editor, which is not started", luaParams.c_str());
+
 	ls.newTable();
 	CLuaObject result(ls);
 	std::map<std::string, std::string> emoteList;
@@ -1082,9 +1087,23 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 					}
 					else
 					{
-						// Create a line
-						pMenu->addLine(CI18N::get(sTmp), "lua",
-							luaParams + "('" + sEmoteId + "', '" + toString(CI18N::get(sTmp)) + "')", sTmp);
+						// Create a line. Its action is the function named by luaParams, called with the id of
+						// the emote and its name. The callers are the menus of the Ring editor: the call is made
+						// with r2:uiCall (r2_ui_calls.lua), which keeps the two as values, where a name with a
+						// quote in it ended the text of a call. Without a function the line has no action.
+						std::string lineParams;
+						if (!luaParams.empty() && R2::getEditor().isInitialized())
+						{
+							CLuaState &lua = R2::getEditor().getLua();
+							int initialSize = lua.getTop();
+							lua.push(luaParams);
+							lua.push(sEmoteId);
+							lua.push(toString(CI18N::get(sTmp)));
+							if (R2::getEditor().callEnvMethod("uiCall", 3, 1))
+								lua.toString(initialSize + 1, lineParams);
+							lua.setTop(initialSize);
+						}
+						pMenu->addLine(CI18N::get(sTmp), "lua", lineParams, sTmp);
 						emoteList[sEmoteId] = (toLower(CI18N::get(sTmp)));
 					}
 				}

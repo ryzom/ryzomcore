@@ -3067,7 +3067,18 @@ void CMessageSpliter::sendSplitedMsg(uint32 charId, const NLNET::CMessage& msg, 
 // We received first a multiPartMsgHead, then X multiPartMsgBody, then one multiPartMsgFoot
 void CClientEditionModule::multiPartMsgHead(NLNET::IModuleProxy * /* sender */,  const std::string& msgName, uint32 nbPacket, uint32 size)
 {
-	R2::getEditor().getLua().executeScriptNoThrow( NLMISC::toString("r2:onMessageSendingStart('%s', %u, %u)",msgName.c_str(), nbPacket, size ) );
+	// This module also exists without the editor (a Ring session without the editor's interface), and outlives it
+	if (!R2::getEditor().isInitialized())
+	{
+		nlwarning("R2: the start of the message '%s' is not shown, the editor is not started", msgName.c_str());
+		return;
+	}
+	// the name comes from the service: it is given to the function as a value, not written into Lua source
+	CLuaState &lua = R2::getEditor().getLua();
+	lua.push(msgName);
+	lua.push(nbPacket);
+	lua.push(size);
+	R2::getEditor().callEnvMethod("onMessageSendingStart", 3, 0);
 }
 
 void CClientEditionModule::multiPartMsgBody(NLNET::IModuleProxy * /* sender */, uint32 packetId, uint32 packetSize)
