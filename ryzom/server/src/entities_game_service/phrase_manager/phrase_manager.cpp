@@ -2053,29 +2053,21 @@ const CEntityPhrases *CPhraseManager::getEntityPhrases(TDataSetRow rowId) const
 //--------------------------------------------------------------
 //						harvestDefault()  
 //--------------------------------------------------------------
-bool CPhraseManager::harvestDefault(const TDataSetRow &actorRowId, const CSheetId &rawMaterialSheet, uint16 minQuality, uint16 maxQuality, uint16 quantity, bool deposit )
+bool CPhraseManager::harvestDefault(const TDataSetRow &actorRowId, const CSheetId &rawMaterialSheet, uint16 minQuality, uint16 maxQuality, uint16 quantity)
 {
 	H_AUTO(CPhraseManager_harvestDefault);
-	
+
+	// quartering; the deposit harvest of bhf01.sbrick was replaced by the forage actions, and bhf01 has no sheet
 	vector<CSheetId> bricks;
 	static const CSheetId quarteringBrick("bhq01.sbrick");
-	static const CSheetId foragingBrick("bhf01.sbrick");
-	
+
 	if (quarteringBrick == CSheetId::Unknown)
 	{
 		nlwarning("ERROR : cannot find quartering brick : bhq01.sbrick.");
 		return false;
 	}
-	if (foragingBrick == CSheetId::Unknown)
-	{
-		nlwarning("ERROR : cannot find foraging brick : bhf01.sbrick.");
-		return false;
-	}
-	
-	if (deposit)
-		bricks.push_back( foragingBrick );
-	else
-		bricks.push_back( quarteringBrick );
+
+	bricks.push_back(quarteringBrick);
 	
 	TDataSetRow nullId;
 	

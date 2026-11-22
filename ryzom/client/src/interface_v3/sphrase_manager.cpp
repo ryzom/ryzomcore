@@ -192,7 +192,8 @@ void			CSPhraseManager::initInGame()
 	// compute and the progression phrase, and update DB
 	computePhraseProgression();
 
-	_EnchantWeaponMainBrick = NLMISC::CSheetId("bsxea10.sbrick");
+	// the enchant weapon effect of the powers (BSXEA index 11, the family's last; bsxea10 was never a sheet)
+	_EnchantWeaponMainBrick = NLMISC::CSheetId("bsxea11.sbrick");
 
 	// build map that gives its description for each built-in phrase
 	// slow test on all sheets here ...

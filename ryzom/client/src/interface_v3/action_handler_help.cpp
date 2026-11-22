@@ -3545,19 +3545,20 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
 	}
 	else
-	if( CSheetId(cs->getSheetId()).toString() == "mod_defense_success.sbrick" )
+	// the defense, dodge and parry modifiers show the sheets of their effect families (effect_families.cpp)
+	if( CSheetId(cs->getSheetId()).toString() == "mod_defense.sbrick" )
 	{
 		ustr = CI18N::get("uittModDefenseSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
-	if( CSheetId(cs->getSheetId()).toString() == "mod_dodge_success.sbrick" )
+	if( CSheetId(cs->getSheetId()).toString() == "mod_dodge.sbrick" )
 	{
 		ustr = CI18N::get("uittModDodgeSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
-	if( CSheetId(cs->getSheetId()).toString() == "mod_parry_success.sbrick" )
+	if( CSheetId(cs->getSheetId()).toString() == "mod_parry.sbrick" )
 	{
 		ustr = CI18N::get("uittModParrySuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:PARRY", false);

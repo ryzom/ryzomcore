@@ -2332,9 +2332,11 @@ bool CEntityBase::canEntityUseAction(CBypassCheckFlags bypassCheckFlags, bool se
 				case EFFECT_FAMILIES::Fear:
 					if (bypassCheckFlags.Flags.Fear)
 						continue;
+					break; // the invulnerability bypass is not a fear bypass
 				case EFFECT_FAMILIES::PowerInvulnerability:
 					if (bypassCheckFlags.Flags.Invulnerability)
 						continue;
+					break;
 				default:;
 				}
 

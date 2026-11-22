@@ -518,10 +518,9 @@ public:
 	 * \param minQuality harvested raw material min quality
 	 * \param maxQuality harvested raw material max quality
 	 * \param quantity harvested raw material quantity
-	 * \param deposit true if the entity harvest a deposit
 	 * \return false if the phrase cannot be built
 	 */
-	bool harvestDefault(const TDataSetRow &actorRowId, const NLMISC::CSheetId &rawMaterialSheet, uint16 minQuality, uint16 maxQuality, uint16 quantity, bool deposit = false );
+	bool harvestDefault(const TDataSetRow &actorRowId, const NLMISC::CSheetId &rawMaterialSheet, uint16 minQuality, uint16 maxQuality, uint16 quantity);
 		
 	/**
 	 * entity1 attacks entity2 using a default attack or any other attacks
