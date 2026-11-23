@@ -304,7 +304,8 @@ void CMemorizationSet::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases,
 		{
 			uint16 phraseId = Phrases[phraseIndex]->PhraseId;
 			forget(phraseIndex);
-			if(phraseId < knownPhrases.size())
+			// a known phrase without bricks (emptied) is no phrase the character has
+			if(phraseId < knownPhrases.size() && !knownPhrases[phraseId].PhraseDesc.Bricks.empty())
 			{
 				// check phrase validity and memorize it
 				if ( CPhraseManager::getInstance().checkPhraseValidity(knownPhrases[phraseId].PhraseDesc.Bricks) )
@@ -324,7 +325,7 @@ void CMemorizationSet::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases,
 					    TheDataset.getEntityId(rowId).toString().c_str(), (uint)phraseId, knownPhrases[phraseId].PhraseSheetId.toString().c_str(), phraseIndex);
 			}
 			else
-				nlwarning("<CMemorizationSet::fixPhrases> %s: memorized slot %u names known phrase %u, which the character does not have, the slot is emptied",
+				nlwarning("<CMemorizationSet::fixPhrases> %s: memorized slot %u names known phrase %u, which the character does not have or which has no bricks, the slot is emptied",
 				    TheDataset.getEntityId(rowId).toString().c_str(), phraseIndex, (uint)phraseId);
 		}
 	}

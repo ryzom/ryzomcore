@@ -1513,7 +1513,14 @@ CSPhrasePtr CPhraseManager::buildSabrinaPhrase( const TDataSetRow &actorRowId, c
 	CSPhrasePtr phrase = ISPhraseFactory::buildPhrase(actorRowId,brickIds, execution);
 	if (!phrase)
 	{
-		nlwarning("<CPhraseManager::buildSabrinaPhrase> For entity %s, factory returns a NULL pointer instead of phrase!. First brick is %s", actorRowId.toString().c_str(),brickIds[0].toString().c_str());
+		// a value a brick's action refuses (an unknown action type, effect family or damage type): the phrase may sit in
+		// a memorized slot (CMemorizationSet::fixPhrases keeps it), so its execution is refused with a word to the
+		// player, and the log names it once in a run, not at every try
+		static std::set<CSheetId> reported;
+		if (reported.insert(brickIds[0]).second)
+			nlwarning("<CPhraseManager::buildSabrinaPhrase> For entity %s, factory returns a NULL pointer instead of phrase!. First brick is %s", actorRowId.toString().c_str(),brickIds[0].toString().c_str());
+		if (execution && TheDataset.getEntityId(actorRowId).getType() == RYZOMID::player)
+			PHRASE_UTILITIES::sendDynamicSystemMessage(actorRowId, "EGS_ACTION_BROKEN");
 		return NULL;
 	}
 	

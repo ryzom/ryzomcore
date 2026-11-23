@@ -2879,8 +2879,9 @@ void CCharacter::procEnchantment()
 	{
 		if (rightHandItem->getEnchantment().size() > 0)
 		{
-			// a proc comes at every hit: the player is not told each time, the shard's log names the brick once
-			if (CPhraseManager::getInstance().refusesBrokenBricks(rightHandItem->getEnchantment(), _EntityRowId, "the enchantment", rightHandItem->getSheetId(), false))
+			// the player asks for the proc (a phrase with a BEPA root): the player is told, the shard's log names the
+			// brick once
+			if (CPhraseManager::getInstance().refusesBrokenBricks(rightHandItem->getEnchantment(), _EntityRowId, "the enchantment", rightHandItem->getSheetId(), true))
 				return;
 
 			CMagicPhrase phrase;

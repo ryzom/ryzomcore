@@ -18308,7 +18308,17 @@ void CCharacter::consumeItem( INVENTORIES::TInventory inventory, uint32 slot )
 	if (form->EffectWhenConsumed != CSheetId::Unknown)
 	{
 		const CStaticRolemasterPhrase *effect = CSheets::getSRolemasterPhrase(form->EffectWhenConsumed);
-		if (effect && CPhraseManager::getInstance().refusesBrokenBricks(effect->Bricks, _EntityRowId, "the effect", form->SheetId, true))
+		if (!effect)
+		{
+			// no phrase to build: the item would be used up for nothing
+			static std::set<CSheetId> reported;
+			if (reported.insert(form->SheetId).second)
+				nlwarning("<CCharacter::consumeItem> the consumable %s names the effect %s, which is no phrase sheet: it is refused",
+				    form->SheetId.toString().c_str(), form->EffectWhenConsumed.toString().c_str());
+			CCharacter::sendDynamicSystemMessage(_Id, "EGS_ACTION_BROKEN");
+			return;
+		}
+		if (CPhraseManager::getInstance().refusesBrokenBricks(effect->Bricks, _EntityRowId, "the effect", form->SheetId, true))
 			return;
 	}
 	else if (form->ConsumableItem->HasBadProperty)
