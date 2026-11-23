@@ -337,34 +337,44 @@ public:
 	 * file that has nothing of the kind has the signature it always had, the MD5 of the whole file.
 	 * removeCarriageReturns: of the file without its carriage returns as well (a client compares with both).
 	 * The hash is all zero if the file cannot be read.
-	 * With RYZOM_FORGE the signature is that of the file in the layout the shards and clients of that game have it
-	 * in (see splitAttributeLines), whether the file read has that layout or has each start tag on one line.
+	 * A file can name the signature of what it says (see findDeployedSignature): that one is given then, for both
+	 * forms, so that the layout of the file can change without its signature.
 	 */
 	static NLMISC::CHashKeyMD5	getSignature(const std::string &filename, bool removeCarriageReturns);
 
 	/**
 	 * The signature of a database.xml, compared at the same place as that of msg.xml: the MD5 of the file, or of
-	 * the file without its carriage returns. With RYZOM_FORGE it is that of the file in the layout of
-	 * splitAttributeLines as well. The hash is all zero if the file cannot be read.
+	 * the file without its carriage returns; or the one the file names for what it says, as for msg.xml. The hash
+	 * is all zero if the file cannot be read.
 	 */
 	static NLMISC::CHashKeyMD5	getDatabaseSignature(const std::string &filename, bool removeCarriageReturns);
 
 	/**
-	 * Give the text of a msg.xml or database.xml the layout with one attribute per line: of a start tag with two
-	 * attributes or more, each attribute after the first goes on a line of its own, aligned with the first one.
-	 * Everything else stays as it is, byte for byte: the indentation of the tags, the comments, the blank lines,
-	 * the tags with one attribute. The line ends added are those of the line that is split.
-	 * A start tag is split when it is the first thing on its line after spaces (not tabs, under which no column
-	 * is the same for everyone), its name and those of its attributes are ASCII without a colon, and its attributes
-	 * are each one space after what comes before, their values between double quotes that close on the line: the
-	 * split goes as far as the attributes are written that way. A tag inside a comment is not split, nor one that
-	 * follows the end of a comment on its line.
-	 * A file whose attribute lines were joined, each with one space, comes back as it was; a file that has one
-	 * attribute per line already is left as it is. The files of the game RYZOM_FORGE is built for are kept with
-	 * each start tag on one line, and their signature is made of this layout, the one its shards and clients
-	 * compare.
+	 * The hash of what a msg.xml or database.xml says, whatever its layout: the MD5 of its elements in their order,
+	 * each with its name, its attributes in their order with their values, and its text (CDATA too) with every run
+	 * of white space as one space and none at its ends. The comments, the indentation, the line ends, the spaces
+	 * that align attributes and the way a tag is closed do not count; nor do processing instructions, namespace
+	 * prefixes and declarations, and references in a text to entities of a document type, none of which these
+	 * files have. White space inside the value of an attribute does count. skipStreamClasses: the stream_class
+	 * elements and the stream attributes of a msg.xml do not count either, as its signature leaves them out.
+	 * The hash is all zero if the text is not well-formed XML.
 	 */
-	static void					splitAttributeLines(std::vector<uint8> &text);
+	static NLMISC::CHashKeyMD5	getContentHash(const std::vector<uint8> &text, bool skipStreamClasses);
+
+	/**
+	 * The signature a file names for its content as it is deployed. The clients and frontends that are out compare
+	 * the MD5 of the bytes of msg.xml and database.xml, so the same messages in another layout would not match
+	 * them: those of a release once the file is laid out again, or those of a game that keeps the files in a
+	 * layout of its own. A file names the MD5 that what it says has there, in a comment,
+	 *     <!-- deployed_signature content="<content hash>" md5="<MD5 of the deployed file>" ... -->
+	 * both as 32 hexadecimal digits (getContentHash; for a msg.xml without its stream classes, and the MD5 of the
+	 * file without them). deployed is set, and true returned, when such a comment names `content` (the text is
+	 * searched for it as bytes). A file whose content changed since has another content hash, and no signature
+	 * but that of its bytes: with a change of what the file says, take the comment out, or have it written again
+	 * with the MD5 of the new file. Never the new content hash beside the old MD5, which is that of files that say
+	 * something else.
+	 */
+	static bool					findDeployedSignature(const std::vector<uint8> &text, const NLMISC::CHashKeyMD5 &content, NLMISC::CHashKeyMD5 &deployed);
 
 	/**
 	 * Remove from the text of a msg.xml what declares the stream classes: the lines of the `stream_class` elements,
@@ -380,7 +390,8 @@ public:
 	 * not written that way, one line of text per fault (none if the file cannot be read): a `stream_class` element,
 	 * a `stream` attribute, or a comment that speaks of `stream_class`, that would stay in the signature, which
 	 * clients without it would then not match; a line that would be left out of the signature with something else
-	 * on it.
+	 * on it. A file that names the signature of what it says (findDeployedSignature) has nothing to report: its
+	 * bytes do not make its signature.
 	 */
 	static std::vector<std::string>	checkStreamClassesText(const std::string &filename);
 

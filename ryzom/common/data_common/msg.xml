@@ -1,4 +1,5 @@
 <client_messages_description>
+  <!-- deployed_signature content="ec77d8b78e8be83d1bf0a92f027fe942" md5="b820fd606f07032eee6b01fdb2006d7f" (what this file says, and the MD5 of the file as it is deployed: CGenericXmlMsgHeaderManager::findDeployedSignature) -->
   <!-- stream_class:
     The classes of messages that the frontend sends on QUIC streams instead of in the datagrams, to the clients of
     protocol level ryzomcore/4.2. Each class is one stream, in this order, of which a client allows 16. A branch or a

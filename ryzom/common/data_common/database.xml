@@ -1,4 +1,5 @@
 <database_description>
+  <!-- deployed_signature content="29902b5849f89967224453c11168538b" md5="decfd6a15c0cce2214fd5de706af0430" (what this file says, and the MD5 of the file as it is deployed: CGenericXmlMsgHeaderManager::findDeployedSignature) -->
   <!-- 2014-09-12: Now possible to use nullable="1" in leafs. This will
   add 1 additional bit to the field, which will be the only bit sent
   when the value of the field is 0. Use only for fields which are 
