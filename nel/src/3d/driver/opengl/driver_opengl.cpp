@@ -2047,8 +2047,8 @@ static const char *WaterCodeForARBFragmentProgram =
 // Calculated reflectivity variants: texture 2 is a reflection (realtime
 // planar RT or artist envmap, alpha channel ignored); the
 // blend alpha is the per-vertex reflectivity base (fragment.texcoord[2].z,
-// the shape's stylized fresnel) boosted by the reflection's gamma-space
-// luma, reproducing the original assets' luminance-derived envmap alpha.
+// the shape's stylized fresnel) boosted by the square of the reflection's
+// gamma-space luma (see CWaterVertexWriter).
 
 // Calculated reflectivity, no diffuse, no fog
 static const char *WaterCodeCalcNoDiffuseForARBFragmentProgram =
@@ -2066,6 +2066,7 @@ static const char *WaterCodeCalcNoDiffuseForARBFragmentProgram =
 "TEX R0.xyz, R0, texture[2], 2D;\n"
 "ADD R1.x, -fragment.texcoord[2].z, c[2].w;\n"
 "DP3 R0.w, R0, c[2];\n"
+"MUL R0.w, R0, R0;\n"
 "MAD R0.w, R0, R1.x, fragment.texcoord[2].z;\n"
 "MOV result.color, R0;\n"
 "END\n";
@@ -2086,6 +2087,7 @@ static const char *WaterCodeCalcNoDiffuseWithFogForARBFragmentProgram =
 "TEX R0.xyz, R0, texture[2], 2D;\n"
 "ADD R1.x, -fragment.texcoord[2].z, c[4].w;\n"
 "DP3 R0.w, R0, c[4];\n"
+"MUL R0.w, R0, R0;\n"
 "MAD R0.w, R0, R1.x, fragment.texcoord[2].z;\n"
 "ADD R0, R0, -c[3];\n"
 "MAD_SAT R1.x, fragment.fogcoord, c[2], c[2].y;\n"
@@ -2110,6 +2112,7 @@ static const char *WaterCodeCalcForARBFragmentProgram =
 "TEX R1, fragment.texcoord[3], texture[3], 2D;\n"
 "ADD R2.x, -fragment.texcoord[2].z, c[2].w;\n"
 "DP3 R0.w, R0, c[2];\n"
+"MUL R0.w, R0, R0;\n"
 "MAD R0.w, R0, R2.x, fragment.texcoord[2].z;\n"
 "MUL result.color, R0, R1;\n"
 "END\n";
@@ -2130,6 +2133,7 @@ static const char *WaterCodeCalcWithFogForARBFragmentProgram =
 "ADD R0.xy, R0, fragment.texcoord[2];\n"
 "TEX R0.xyz, R0, texture[2], 2D;\n"
 "DP3 R0.w, R0, c[4];\n"
+"MUL R0.w, R0, R0;\n"
 "ADD R2.x, -fragment.texcoord[2].z, c[4].w;\n"
 "TEX R1, fragment.texcoord[3], texture[3], 2D;\n"
 "MAD R0.w, R0, R2.x, fragment.texcoord[2].z;\n"

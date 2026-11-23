@@ -240,8 +240,8 @@ public:
 	/** Realtime planar reflection reflectivity base, an HL2-era stylized
 	  * fresnel evaluated per vertex:
 	  *   F = clamp(bias + scale * (1 - cosTheta)^power, 0, 1)
-	  * The water shader blends the reflection by lerp(F, 1, luminance) —
-	  * the luminance boost reproduces the original envmap alpha authoring.
+	  * The water shader blends the reflection by lerp(F, 1, luma^2) — the
+	  * boost by brightness follows the original envmap alpha authoring.
 	  * scale = 0 gives a flat, view-independent reflectivity of 'bias'. */
 	void				setReflectivityFresnel(float bias, float scale, float power) { _ReflFresnelBias = bias; _ReflFresnelScale = scale; _ReflFresnelPower = power; }
 	float				getReflectivityFresnelBias() const { return _ReflFresnelBias; }

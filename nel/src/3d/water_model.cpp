@@ -1732,10 +1732,12 @@ void computeWaterVertexHard(float px, float py, CVector &pos, const CVector &cam
 
 // ***********************************************************************************************************
 // Helper to write water vertices to the shared VB. The water FP blends the
-// planar reflection by alpha = lerp(base, 1, reflection luminance) — the
-// luminance term reproduces the original assets' luminance-derived envmap
-// alpha (Fyros day map: alpha = lerp(0.37, 1, lum)); the per-vertex base is
-// the shape's stylized fresnel (see CWaterShape::setReflectivityFresnel).
+// reflection, planar or from the envmap, by alpha = lerp(base, 1, luma^2),
+// with the gamma-space luma of the reflection. The luma term follows the
+// original assets, whose envmap alpha is painted by luminance (Fyros day map:
+// alpha = lerp(0.37, 1, lum)); the square was chosen in game, as the linear
+// rule came out too opaque. The per-vertex base is the shape's stylized
+// fresnel (see CWaterShape::setReflectivityFresnel).
 // When realtime planar reflections are active this frame, the VB carries a
 // Float3 TexCoord0 channel: planar surfaces get the reflection UV (vertex projected through
 // the reflected camera's sub-frustum, scaled to the active RT sub-region)
