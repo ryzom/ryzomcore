@@ -424,6 +424,15 @@ public:
 	 */
 	static bool			exists (const std::string &filename);
 
+	/** Call it when a file that must exist is missing (corrupted or incomplete installation).
+	 * Creates an empty file "needcheck.flag" in getLogDirectory(): the launcher sees it and rescans all
+	 * the files (with their hash) to repair the missing ones. The launcher removes the flag.
+	 * The flag is created only once per run, but each call logs a warning with the missing file.
+	 * Do NOT call it for optional files.
+	 * \param missingFile the name of the missing file, for the log only.
+	 */
+	static void			requestFileCheck (const std::string &missingFile);
+
 
 	/** Clears the map that contains all cached files (Use this function to take into account new files).
 	 */

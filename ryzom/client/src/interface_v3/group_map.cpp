@@ -23,6 +23,7 @@
 #include "stdpch.h"
 //
 #include "group_map.h"
+#include "chat_link_ui.h"
 #include "interface_manager.h"
 #include "../continent_manager.h"
 #include "../continent.h"
@@ -49,6 +50,7 @@
 #include "game_share/mission_desc.h"
 #include "game_share/inventories.h"
 #include "game_share/animal_type.h"
+#include "game_share/chat_message.h"
 //
 #include "nel/3d/u_material.h"
 #include "nel/3d/u_texture.h"
@@ -104,6 +106,24 @@ NLMISC::CRGBA	CUserLandMark::_LandMarksColor[CUserLandMark::UserLandMarkTypeCoun
 
 
 const uint32 ISLAND_PIXEL_PER_METER = 2;
+// time a position shown from the chat stays on the map (ms)
+const sint64 CHAT_POSITION_SHOW_TIME = 30000;
+
+// distance the player must go past a city map border before the auto zoom leaves it (avoids flickering)
+const float AUTO_MAP_MARGIN = 16.f;
+// zoom of the continent map when leaving a city the first time (0 = whole map, 1 = max zoom)
+const float AUTO_MAP_DEFAULT_ZOOM = 0.5f;
+
+static bool mapContains(const SMap &map, const NLMISC::CVector2f &pos, float margin = 0.f)
+{
+	return pos.x >= std::min(map.MinX, map.MaxX) - margin && pos.x <= std::max(map.MinX, map.MaxX) + margin
+		&& pos.y >= std::min(map.MinY, map.MaxY) - margin && pos.y <= std::max(map.MinY, map.MaxY) + margin;
+}
+
+static float mapArea(const SMap &map)
+{
+	return fabs((map.MaxX - map.MinX) * (map.MaxY - map.MinY));
+}
 
 static void setupFromZoom(CViewBase *pVB, CContLandMark::TContLMType t, float fMeterPerPixel);
 
@@ -115,7 +135,7 @@ static float distsqr(const CVector2f a, const CVector2f b)
 
 // popup the landmark name dialog
 
-static void popupLandMarkNameDialog()
+static void popupLandMarkNameDialog(const string &title = string())
 {
 	// pop the rename dialog
 	CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -148,7 +168,7 @@ static void popupLandMarkNameDialog()
 	else
 	{
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(CUserLandMark::Misc));
-		eb->setInputString(string());
+		eb->setInputString(title);
 	}
 
 	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
@@ -433,6 +453,7 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_Panning = false;
 	_HasMoved = false;
 	_RightClickLastPos.set(0.f, 0.f);
+	_ChatPositionEnd = 0;
 	// make room for mission targets
 	_MissionLM.resize(2 * MAX_NUM_MISSIONS * MAX_NUM_MISSION_TARGETS, nullptr);
 	_MissionTargetTextIDs.resize(2 * MAX_NUM_MISSIONS * MAX_NUM_MISSION_TARGETS, 0);
@@ -476,6 +497,8 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_SelectionAxisV = nullptr;
 	//
 	_IsIsland = false;
+	_AutoMap = nullptr;
+	_CenterOnPlayerPending = false;
 	//
 	_PanStartDateInMs = 0;
 	_DeltaTimeBeforePanInMs = 0;
@@ -817,7 +840,21 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
 		nlwarning("%s", e.what());
 	}
+
+	// the zoom of each map is saved in the character interface config, its db leaves
+	// must exist before the config is loaded (unknown leaves are skipped by older clients)
+	if (_MapMode == MapMode_Normal && _WorldSheet)
+	{
+		for (uint32 i = 0; i < _WorldSheet->Maps.size(); ++i)
+			getMapZoomLeaf(_WorldSheet->Maps[i].Name, true);
+	}
 	return true;
+}
+
+//============================================================================================================
+CCDBNodeLeaf *CGroupMap::getMapZoomLeaf(const std::string &mapName, bool create)
+{
+	return NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MAP:ZOOM:" + mapName, create);
 }
 
 //============================================================================================================
@@ -948,6 +985,7 @@ void CGroupMap::updateCoords()
 		updateLandMarkList(_ContinentLM);
 		updateLandMarkTextList(_ContinentText);
 		updateLandMarkList(_UserLM);
+		updateLandMarkList(_ChatPositionLM);
 		updateLandMarkList(_MissionLM);
 		// target
 		if (_TargetLM && _TargetLM->getActive()) updateButtonPos(*_TargetLM);
@@ -1141,7 +1179,15 @@ void CGroupMap::checkCoords()
 		loadMap();
 		invalidateCoords();
 	}
+	// a teleport while the map was closed centers it when it is shown again
+	if (_CenterOnPlayerPending && _MapTexW != 0 && _MapTexH != 0)
+	{
+		_CenterOnPlayerPending = false;
+		centerOnPlayer();
+	}
 	updateContinentInfo();
+	if (!_ChatPositionLM.empty() && T1 >= _ChatPositionEnd)
+		removeLandMarks(_ChatPositionLM);
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -2238,9 +2284,15 @@ void CGroupMap::loadMap()
 		{
 			// island are already pow2 textures
 			// compute the real size
-			// (1 pixel per metter, hardcoded for now)
-			_MapTexW = (uint32) (ISLAND_PIXEL_PER_METER * (_CurMap->MaxX - _CurMap->MinX));
-			_MapTexH = (uint32) (ISLAND_PIXEL_PER_METER * (_CurMap->MaxY - _CurMap->MinY));
+			// (2 pixels per meter, but the snapshots of big islands were made with
+			// 1 pixel per meter to fit in the texture)
+			float islandW = _CurMap->MaxX - _CurMap->MinX;
+			float islandH = _CurMap->MaxY - _CurMap->MinY;
+			float pixelPerMeter = (float) ISLAND_PIXEL_PER_METER;
+			while (pixelPerMeter > 0.25f && ((uint32) (pixelPerMeter * islandW) > w || (uint32) (pixelPerMeter * islandH) > h))
+				pixelPerMeter *= 0.5f;
+			_MapTexW = (uint32) (pixelPerMeter * islandW);
+			_MapTexH = (uint32) (pixelPerMeter * islandH);
 			if (_MapTexW > w)
 			{
 				nlwarning("Island real width > texture width, snapshot not up-to-date ? (island = %s)", _CurMap->Name.c_str());
@@ -2297,6 +2349,9 @@ void CGroupMap::setMap(SMap *map)
 	// Unload and reset all stuff
 	unloadMap();
 
+	// islands are not in the world sheet, they come from r2_islands.xml
+	_IsIsland = !_Islands.empty() && map >= &_Islands.front() && map <= &_Islands.back();
+
 	_CurMap = map;
 	_CurContinent = ContinentMngr.get(_CurMap->ContinentName);
 	_MapMinCorner.x = _CurMap->MinX;
@@ -2305,6 +2360,18 @@ void CGroupMap::setMap(SMap *map)
 	_MapMaxCorner.y = _CurMap->MaxY;
 	if (_MapMinCorner.x > _MapMaxCorner.x) std::swap(_MapMinCorner.x, _MapMaxCorner.x);
 	if (_MapMinCorner.y > _MapMaxCorner.y) std::swap(_MapMinCorner.y, _MapMaxCorner.y);
+
+	// player position in the new map, so it is centered on the player and not on the old position
+	if (_MapMode != MapMode_SpawnSquad && !EntitiesMngr.entities().empty() && EntitiesMngr.entity(0))
+	{
+		const NLMISC::CVectorD &playerPosD = EntitiesMngr.entity(0)->pos();
+		NLMISC::CVector2f playerPos((float) playerPosD.x, (float) playerPosD.y);
+		worldToMap(_PlayerPos, playerPos);
+		// whoever changed the map (player, link, teleport), the auto zoom
+		// only switches again when the player crosses a border from here
+		if (_MapMode == MapMode_Normal)
+			_AutoMap = findMapAtWorldPos(ContinentMngr.getCurrentContinentSelectName(), playerPos, true);
+	}
 
 	loadMap();
 	centerOnPlayer();
@@ -2342,12 +2409,7 @@ void CGroupMap::setMap(const string &mapName)
 {
 	if ((_CurMap != nullptr) && (_CurMap->Name == mapName)) return;
 
-	// Unload and reset all stuff
-	unloadMap();
-
-	_IsIsland = false;
-
-	// Acquire new map
+	// Acquire new map (an unknown name keeps the current map)
 	uint32 i;
 	for (i = 0; i < _WorldSheet->Maps.size(); ++i)
 		if (_WorldSheet->Maps[i].Name == mapName)
@@ -2626,6 +2688,7 @@ void CGroupMap::createContinentLandMarks()
 
 	// Remove all
 	removeLandMarks(_ContinentLM);
+	removeLandMarks(_ChatPositionLM);
 	for (k = 0; k < _ContinentText.size(); ++k)
 		delView(_ContinentText[k]);
 	_ContinentText.clear();
@@ -2992,6 +3055,95 @@ CUserLandMark CGroupMap::getUserLandMark(CCtrlButton *button) const
 }
 
 //============================================================================================================
+void CGroupMap::captureChatPosition(CCtrlButton *button) const
+{
+	CHAT_SHARE::setMapPosition(nullptr);
+	if (_MapMode != MapMode_Normal || _IsIsland || !_CurMap || !_MapTexW || !_MapTexH)
+		return;
+
+	CChatMessagePosition position;
+	position.Kind = CChatMessagePosition::MapPosition;
+	position.Continent = getContinentName();
+	CVector2f point;
+	TLandMarkButtonVect::const_iterator landmark = std::find(_UserLM.begin(), _UserLM.end(), button);
+	if (button && landmark != _UserLM.end() && _CurContinent)
+	{
+		const CUserLandMark &flag = _CurContinent->UserLandMarks[landmark - _UserLM.begin()];
+		if (flag.Type >= CUserLandMark::UserLandMarkTypeCount)
+			return;
+		point = flag.Pos;
+		position.Kind = CChatMessagePosition::UserLandMark;
+		position.FlagName = flag.Title;
+		position.FlagColor = flag.getColor();
+	}
+	else
+	{
+		if (button)
+			return;
+		mapToWorld(point, _RightClickLastPos);
+	}
+	const double x = double(point.x) * 1000, y = double(point.y) * 1000;
+	if (!isValidDouble(x) || !isValidDouble(y) ||
+		x < std::numeric_limits<sint32>::min() || x > std::numeric_limits<sint32>::max() ||
+		y < std::numeric_limits<sint32>::min() || y > std::numeric_limits<sint32>::max())
+		return;
+	position.X = (sint32)x;
+	position.Y = (sint32)y;
+	CHAT_SHARE::setMapPosition(&position);
+}
+
+//============================================================================================================
+SMap *CGroupMap::findMapAtWorldPos(const std::string &continent, const CVector2f &worldPos, bool smallest) const
+{
+	if (!_WorldSheet || continent.empty())
+		return nullptr;
+
+	SMap *best = nullptr;
+	for (uint i = 0; i < _WorldSheet->Maps.size(); ++i)
+	{
+		SMap &map = _WorldSheet->Maps[i];
+		if (map.ContinentName != continent || !mapContains(map, worldPos))
+			continue;
+		if (!best || (smallest ? mapArea(map) < mapArea(*best) : mapArea(map) > mapArea(*best)))
+			best = &map;
+	}
+	return best;
+}
+
+//============================================================================================================
+bool CGroupMap::showChatPosition(const CVector2f &worldPos, const std::string &continent,
+	const ucstring &title, CRGBA color)
+{
+	const SMap *best = findMapAtWorldPos(continent, worldPos, true);
+	if (!best || _MapMode != MapMode_Normal)
+		return false;
+
+	setMap(best->Name);
+	removeLandMarks(_ChatPositionLM);
+	CLandMarkOptions options(_UserLMOptions);
+	options.LandMarkMenu.clear();
+	options.ColorNormal = options.ColorOver = options.ColorPushed = color;
+	CVector2f mapPos;
+	worldToMap(mapPos, worldPos);
+	addLandMark(_ChatPositionLM, mapPos, title, options);
+	_ChatPositionEnd = T1 + CHAT_POSITION_SHOW_TIME;
+	centerOnWorldPos(worldPos);
+	return true;
+}
+
+//============================================================================================================
+void CGroupMap::createUserLandMarkAt(const CVector2f &worldPos, const ucstring &title)
+{
+	if (isInDeathMode())
+		return;
+	worldToMap(_RightClickLastPos, worldPos);
+	LastClickedMap = this;
+	LastSelectedLandMark = nullptr;
+	UseUserPositionForLandMark = false;
+	popupLandMarkNameDialog(title.toUtf8());
+}
+
+//============================================================================================================
 uint CGroupMap::getNumUserLandMarks() const
 {
 	if (_CurContinent == nullptr) return 0;
@@ -3028,34 +3180,207 @@ void CGroupMap::updatePlayerPos()
 		if (EntitiesMngr.entities().empty()) return;
 		if (!EntitiesMngr.entity(0)) return;
 		const NLMISC::CVectorD &playerPosD = EntitiesMngr.entity(0)->pos();
-		NLMISC::CVector pos((float) playerPosD.x, (float) playerPosD.y, (float) playerPosD.z);
-		// convert player pos into pos in map
-		worldToMap(_PlayerPos, pos);
+		NLMISC::CVector2f pos((float) playerPosD.x, (float) playerPosD.y);
 		// if player isn't in is last map anymore, see if in another island
-		bool isInX = false;
-		bool isInY = false;
-		if(_CurMap)
+		if (!_CurMap || !mapContains(*_CurMap, pos))
 		{
-			isInX = (_CurMap->MinX <= pos.x) && (pos.x <= _CurMap->MaxX);
-			isInY = (_CurMap->MinY <= pos.y) && (pos.y <= _CurMap->MaxY);
-		}
-		if(!isInX || !isInY)
-		{
-			_IsIsland = false;
 			for(uint k = 0; k < _Islands.size(); ++k)
 			{
-				if (pos.x >= _Islands[k].MinX &&
-					pos.y >= _Islands[k].MinY &&
-					pos.x <= _Islands[k].MaxX &&
-					pos.y <= _Islands[k].MaxY)
+				if (mapContains(_Islands[k], pos))
 				{
-					_IsIsland = true;
 					setMap(&_Islands[k]);
 					break;
 				}
 			}
 		}
+		if (_MapMode == MapMode_Normal && !_IsIsland)
+			updateAutoMap(pos);
+		// convert player pos into pos in map
+		worldToMap(_PlayerPos, pos);
 	}
+}
+
+//============================================================================================================
+bool CGroupMap::isAutoZoomEnabled() const
+{
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MAP:AUTO_ZOOM", false);
+	return node && node->getValueBool();
+}
+
+//============================================================================================================
+void CGroupMap::updateAutoMap(const NLMISC::CVector2f &pos)
+{
+	if (!isAutoZoomEnabled())
+	{
+		_AutoMap = nullptr;
+		return;
+	}
+
+	SMap *map = findMapAtWorldPos(ContinentMngr.getCurrentContinentSelectName(), pos, true);
+	if (!map || map == _AutoMap) return;
+
+	// stay on the city map until the player is really out of it
+	if (_AutoMap && mapContains(*_AutoMap, pos, AUTO_MAP_MARGIN) && mapArea(*_AutoMap) < mapArea(*map)) return;
+
+	// only follow the player when the displayed map shows where he is,
+	// a map opened by hand (other continent, world map) is kept
+	bool follow = !_CurMap || _CurMap == _AutoMap || mapContains(*_CurMap, pos);
+	_AutoMap = map;
+	if (!follow) return;
+
+	// each map keeps its own zoom, so leaving a city shows the continent map
+	// zoomed on the player as it was left, and not the whole continent
+	SMap *oldMap = _CurMap;
+	saveMapZoom();
+	setMap(map);
+	restoreMapZoom(oldMap && mapArea(*map) > mapArea(*oldMap));
+	centerOnPlayer();
+}
+
+//============================================================================================================
+void CGroupMap::saveMapZoom()
+{
+	CCDBNodeLeaf *zoom = _CurMap ? getMapZoomLeaf(_CurMap->Name, false) : nullptr;
+	if (zoom) zoom->setValue32((sint32) (_UserScale * 1000.f));
+}
+
+//============================================================================================================
+void CGroupMap::restoreMapZoom(bool zoomIfUnknown)
+{
+	CCDBNodeLeaf *zoom = _CurMap ? getMapZoomLeaf(_CurMap->Name, false) : nullptr;
+	if (zoom && zoom->getValue32() > 0)
+		setScale(zoom->getValue32() / 1000.f);
+	else if (zoomIfUnknown)
+		setZoomRatio(AUTO_MAP_DEFAULT_ZOOM);
+}
+
+//============================================================================================================
+void CGroupMap::setZoomRatio(float ratio)
+{
+	if (_MapTexW == 0 || _MapTexH == 0) return;
+	// log scale, like the zoom in / zoom out steps
+	float maxUserScale = computeUserScaleFromRealScale(getActualMaxScale());
+	setScale(maxUserScale > 1.f ? powf(maxUserScale, ratio) : 1.f);
+}
+
+//============================================================================================================
+void CGroupMap::showPlayerMap()
+{
+	if (_MapMode == MapMode_Normal && !EntitiesMngr.entities().empty() && EntitiesMngr.entity(0))
+	{
+		const NLMISC::CVectorD &playerPosD = EntitiesMngr.entity(0)->pos();
+		NLMISC::CVector2f pos((float) playerPosD.x, (float) playerPosD.y);
+		// go to the player map with its own zoom: with auto zoom the most detailed map
+		// (city) even when the continent map shows the player, without auto zoom a map
+		// showing the player is kept
+		bool autoZoom = isAutoZoomEnabled();
+		if (!_CurMap || autoZoom || !mapContains(*_CurMap, pos))
+		{
+			SMap *map = findMapAtWorldPos(ContinentMngr.getCurrentContinentSelectName(), pos, autoZoom);
+			if (map && map != _CurMap)
+			{
+				saveMapZoom();
+				setMap(map);
+				restoreMapZoom(true);
+			}
+		}
+	}
+	centerOnPlayer();
+}
+
+//============================================================================================================
+bool CGroupMap::showPos(const std::string &mapName, const NLMISC::CVector2f &pos, float zoomPercent)
+{
+	if (!_WorldSheet) return false;
+
+	SMap *map = nullptr;
+	if (!mapName.empty())
+	{
+		for (uint32 i = 0; i < _WorldSheet->Maps.size(); ++i)
+		{
+			if (_WorldSheet->Maps[i].Name == mapName)
+			{
+				map = &_WorldSheet->Maps[i];
+				break;
+			}
+		}
+	}
+	else if (_CurMap && mapContains(*_CurMap, pos))
+	{
+		map = _CurMap;
+	}
+	else
+	{
+		// most detailed map with this position (the world map has no world coordinates)
+		for (uint32 i = 0; i < _WorldSheet->Maps.size(); ++i)
+		{
+			SMap &m = _WorldSheet->Maps[i];
+			if (m.ContinentName.empty() || !mapContains(m, pos)) continue;
+			if (!map || mapArea(m) < mapArea(*map)) map = &m;
+		}
+	}
+	if (!map)
+	{
+		nlwarning("showPos: no map '%s' for position %.0f %.0f", mapName.c_str(), pos.x, pos.y);
+		return false;
+	}
+
+	if (map != _CurMap)
+	{
+		saveMapZoom();
+		setMap(map);
+	}
+	// the texture is unloaded while the map window is closed
+	if (!_MapTF) loadMap();
+
+	NLMISC::clamp(zoomPercent, 0.f, 100.f);
+	setZoomRatio(zoomPercent / 100.f);
+	updateScale();
+	centerOnWorldPos(pos);
+	return true;
+}
+
+//============================================================================================================
+void CGroupMap::selectMapAfterTeleport(const std::string &continent, const NLMISC::CVector2f &pos)
+{
+	bool autoZoom = isAutoZoomEnabled();
+	bool newContinent = continent != _AutoMapContinent;
+	_AutoMapContinent = continent;
+
+	// the view goes back to the player after any teleport, also when the map stays
+	_CenterOnPlayerPending = true;
+	centerOnPlayer();
+
+	// without auto zoom the map only changes with the continent
+	if (!autoZoom && !newContinent && _CurMap && !_IsIsland) return;
+
+	// auto zoom: most detailed map (city), else the whole continent
+	SMap *map = findMapAtWorldPos(continent, pos, autoZoom);
+	if (!map && _WorldSheet)
+	{
+		// not inside any map, take the first map of the continent
+		for (uint32 i = 0; i < _WorldSheet->Maps.size(); ++i)
+		{
+			if (_WorldSheet->Maps[i].ContinentName == continent)
+			{
+				map = &_WorldSheet->Maps[i];
+				break;
+			}
+		}
+	}
+	// no map for R2 continents, islands are found by updatePlayerPos()
+	if (!map || map == _CurMap)
+	{
+		if (map) _AutoMap = autoZoom ? map : nullptr;
+		return;
+	}
+
+	// each map keeps its own zoom, setMap() alone shows the whole map
+	saveMapZoom();
+	setMap(map);
+	restoreMapZoom(true);
+	centerOnPlayer();
+	_AutoMap = autoZoom ? map : nullptr;
 }
 
 //============================================================================================================
@@ -3253,6 +3578,18 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 				mapToWorld(ct.Pos, (*it)->Pos);
 				found = true;
 			}
+		}
+	}
+	if (!found)
+	{
+		// position shown from the chat
+		it = std::find(_ChatPositionLM.begin(), _ChatPositionLM.end(),lm);
+		if (it != _ChatPositionLM.end())
+		{
+			ct.setType(CCompassTarget::ContinentLandMark);
+			(*it)->getContextHelp(ct.Name);
+			mapToWorld(ct.Pos, (*it)->Pos);
+			found = true;
 		}
 	}
 	if (!found)
@@ -3807,7 +4144,7 @@ std::string CGroupMap::getMapTexture() const
 //=========================================================================================================
 std::string CGroupMap::getMap() const
 {
-	return _CurMap->Name;
+	return _CurMap ? _CurMap->Name : std::string();
 }
 
 //=========================================================================================================
@@ -3816,6 +4153,26 @@ int CGroupMap::luaReload(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "reload", 0);
 	reload();
 	return 0;
+}
+
+//=========================================================================================================
+int CGroupMap::luaShowPos(CLuaState &ls)
+{
+	const char *funcName = "showPos";
+	CLuaIHM::checkArgMin(ls, funcName, 3);
+	CLuaIHM::checkArgMax(ls, funcName, 4);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TNUMBER);
+	float zoomPercent = 50.f;
+	if (ls.getTop() >= 4)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TNUMBER);
+		zoomPercent = (float) ls.toNumber(4);
+	}
+	NLMISC::CVector2f pos((float) ls.toNumber(2), (float) ls.toNumber(3));
+	ls.push(showPos(ls.toString(1), pos, zoomPercent));
+	return 1;
 }
 
 //=========================================================================================================
@@ -3949,7 +4306,10 @@ class CAHMapLandmarkByIndex : public IActionHandler
 		if (menuId.empty())
 			map->targetLandmark(pButton);
 		else
+		{
+			map->captureChatPosition(pButton);
 			CAHManager::getInstance()->runActionHandler("active_menu", pButton, toString("pushmodal=true|popmodal=false|menu=%s", menuId.c_str()));
+		}
 	}
 };
 REGISTER_ACTION_HANDLER(CAHMapLandmarkByIndex, "map_landmark_by_index");
@@ -4179,7 +4539,7 @@ class CAHMapCenter : public IActionHandler
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
-		gm->centerOnPlayer();
+		gm->showPlayerMap();
 	}
 };
 REGISTER_ACTION_HANDLER(CAHMapCenter, "map_center");
@@ -4268,6 +4628,7 @@ class CAHWorldMapRightClick : public IActionHandler
 		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 
+		gm->captureChatPosition(dynamic_cast<CCtrlButton*>(pCaller));
 		if (gm->isIsland())
 		{
 			if (gm->getArkPowoMode() == "editor")

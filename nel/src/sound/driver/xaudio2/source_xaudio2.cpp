@@ -113,7 +113,12 @@ void CSourceXAudio2::release() // called by driver or destructor, whichever is f
 	if (_SoundDriver) 
 	{
 		_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
-		if (_SourceVoice) { _SoundDriver->destroySourceVoice(_SourceVoice); _SourceVoice = NULL; }
+		if (_SourceVoice)
+		{
+			nlcrashdbg(6524326, "release: destroy voice, source=%p voice=%p thread=%u playing=%d streaming=%d", (void *)this, (void *)_SourceVoice, (unsigned int)getThreadId(), (int)_IsPlaying, (int)_BufferStreaming);
+			_SoundDriver->destroySourceVoice(_SourceVoice);
+			_SourceVoice = NULL;
+		}
 	}
 	if (_AdpcmUtility) { delete _AdpcmUtility; _AdpcmUtility = NULL; }
 	stop();
@@ -283,6 +288,18 @@ void CSourceXAudio2::submitBuffer(CBufferXAudio2 *ibuffer)
 	nlassert(ibuffer->getFormat() == _Format
 		&& ibuffer->getChannels() == _Channels
 		&& ibuffer->getBitsPerSample() == _BitsPerSample);
+	// the nlasserts above do nothing in release: log the cases they would catch, without changing the behavior
+	if (!_SourceVoice || !ibuffer->getSize() || !ibuffer->getData()
+		|| ibuffer->getFormat() != _Format
+		|| ibuffer->getChannels() != _Channels
+		|| ibuffer->getBitsPerSample() != _BitsPerSample)
+	{
+		nlcrashdbg(6435168, "submitBuffer: voice=%p size=%u data=%p buffer(format=%d channels=%u bits=%u) source(format=%d channels=%u bits=%u) adpcm=%d streaming=%d looping=%d",
+			(void *)_SourceVoice, (unsigned int)ibuffer->getSize(), (const void *)ibuffer->getData(),
+			(int)ibuffer->getFormat(), (unsigned int)ibuffer->getChannels(), (unsigned int)ibuffer->getBitsPerSample(),
+			(int)_Format, (unsigned int)_Channels, (unsigned int)_BitsPerSample,
+			_AdpcmUtility ? 1 : 0, _BufferStreaming ? 1 : 0, _IsLooping ? 1 : 0);
+	}
 	if (_AdpcmUtility)
 	{
 		nlassert(!_BufferStreaming);
@@ -567,6 +584,7 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 		// nlwarning(NLSOUND_XAUDIO2_PREFIX "Switching format %u to %u!", (uint32)_Format, (uint32)bufferFormat);
 		// destroy existing voice (it was not stopped first when playing, see above: it is no longer playing)
 		_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
+		nlcrashdbg(6524326, "preparePlay: destroy voice (format change), source=%p voice=%p thread=%u playing=%d streaming=%d", (void *)this, (void *)_SourceVoice, (unsigned int)getThreadId(), (int)_IsPlaying, (int)_BufferStreaming);
 		_SoundDriver->destroySourceVoice(_SourceVoice); _SourceVoice = NULL;
 		_IsPlaying = false;
 		_IsPaused = false;

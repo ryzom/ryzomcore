@@ -2753,6 +2753,15 @@ void CCharacter::applyRegenAndClipCurrentValue()
 		_PhysScores._PhysicalScores[ i ].RegenerateTickUpdate = CTickEventHandler::getGameCycle();
 	}
 
+	applyCurrentSpeed();
+} // applyRegenAndClipCurrentValue //
+
+//---------------------------------------------------
+// CCharacter::applyCurrentSpeed
+// Compute the current walk/run speed (forced to 0 while sitting, AFK, stunned or rooted)
+//---------------------------------------------------
+void CCharacter::applyCurrentSpeed()
+{
 	// restore value without weight malus
 	_PhysScores.SpeedVariationModifier -= _LastAppliedWeightMalus;
 
@@ -2809,7 +2818,7 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	// Speed
 	// while stunned/root/mezzed etc speed is forced to 0
 	float oldCurrentSpeed;
-	if( _Mode().Mode != MBEHAV::SIT && canEntityMove() && !PlayerManager.isRootedByGM( _Id ) )
+	if( _Mode().Mode != MBEHAV::SIT && !_ContextualProperty.directAccessForStructMembers().afk() && canEntityMove() && !PlayerManager.isRootedByGM( _Id ) )
 	{
 		float pcSpeed = 1.0f + speedVariationModifier / 100.0f;
 		oldCurrentSpeed = _PhysScores.CurrentWalkSpeed;
@@ -2852,7 +2861,7 @@ void CCharacter::applyRegenAndClipCurrentValue()
 		CBankAccessor_PLR::getUSER().setSPEED_FACTOR(_PropertyDatabase, 0 );
 	}
 
-} // applyRegenAndClipCurrentValue //
+} // applyCurrentSpeed //
 
 
 //---------------------------------------------------
@@ -12794,6 +12803,14 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 			return;
 		}
 
+		// same rule as for an exchange with a player, see validateExchange()
+		if (_ExchangeView->removeInaccessibleItems())
+		{
+			invalidateExchange();
+			checkBotGift();
+			return;
+		}
+
 		removeExchangeItems(vect, exchangePlayerPets);
 
 		if (mission)
@@ -12881,6 +12898,16 @@ bool CCharacter::validateExchange()
 
 	// pet animals are checked when their ticket goes into the exchange, but can be filled or mounted afterwards
 	if (!_ExchangeView->checkPetTickets() || !interlocutor->_ExchangeView->checkPetTickets())
+	{
+		invalidateExchange();
+		return false;
+	}
+
+	// an item of a pack animal, a room or a guild inventory can only be given while its owner has access to it
+	bool removed = _ExchangeView->removeInaccessibleItems();
+	removed = interlocutor->_ExchangeView->removeInaccessibleItems() || removed;
+
+	if (removed)
 	{
 		invalidateExchange();
 		return false;
@@ -18671,6 +18698,12 @@ void CCharacter::onDisconnection(bool bCrashed)
 //----------------------------------------------------------------------------
 void CCharacter::setAfkState( bool isAfk )
 {
+	// can't go afk while mounted
+	if (isAfk && _Mode.getValue().isMountMode())
+	{
+		return;
+	}
+
 	if (_ContextualProperty.directAccessForStructMembers().afk() != isAfk)
 	{
 		_ContextualProperty.directAccessForStructMembers().afk(isAfk);
@@ -18687,6 +18720,9 @@ void CCharacter::setAfkState( bool isAfk )
 				setMode(MBEHAV::NORMAL);
 			}
 		}
+
+		// speed is forced to 0 while afk: update it now instead of waiting for the next tickUpdate
+		applyCurrentSpeed();
 	}
 }
 

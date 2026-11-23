@@ -3107,6 +3107,10 @@ void CUserEntity::setAFK(bool b, string afkTxt)
 		}
 	}
 
+	// an autowalk running before going afk would leave the afk right away
+	if (b)
+		UserControls.autowalkState(false);
+
 	// send afk state
 	static const string msgName = "COMMAND:AFK";
 	CBitMemStream out;

@@ -295,6 +295,8 @@ public:
 	/// inventory management
 	///\name inventory management
 	//@{
+	/// return true if user can take the item of this slot out of the guild inventory, else tell him why not
+	bool	canTakeItem( CCharacter * user, uint32 slot );
 	/// take an item from guild inventory (set quantity to UINT_MAX for 'all stack')
 	void	takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session );
 	/// put an item in guild inventory (set quantity to UINT_MAX for 'all stack')

@@ -40,6 +40,7 @@
 #include "game_share/rolemaster_flags.h"
 #include "game_share/people.h"
 #include "nel/gui/lua_ihm.h"
+#include "nel/gui/lua_manager.h"
 #include "../time_client.h"
 
 
@@ -4674,6 +4675,34 @@ void CSPhraseManager::setRegenTickRange(uint powerIndex, const CTickRange &tickR
 	}
 }
 
+
+// ***************************************************************************
+string CSPhraseComAdpater::updateTooltip()
+{
+	string help;
+	CLuaState *ls = CLuaManager::getInstance().getLuaState();
+	CLuaStackRestorer lsr(ls, 0);
+	CLuaIHM::pushReflectableOnStack(*ls, this);
+	ls->pushGlobalTable();
+	CLuaObject game(*ls);
+	game = game["game"];
+	game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
+	if (!ls->empty())
+	{
+#ifdef RYZOM_LUA_UCSTRING
+		CLuaIHM::getUCStringOnStack(*ls, -1, help); // Compatibility
+#else
+		help = ls->toString();
+#endif
+		ls->pop();
+	}
+	else
+	{
+		nlwarning("Ucstring result expected when calling 'game:updatePhraseTooltip', possible script error");
+	}
+
+	return help;
+}
 
 // ***************************************************************************
 int CSPhraseComAdpater::luaGetCastTime(CLuaState &ls)

@@ -540,6 +540,12 @@ void CGuildMemberModule::clearOnlineGuildProperties()
 {
 	CGuildCharProxy targetProxy;
 	getProxy(targetProxy);
+
+	// an exchange may hold items of the guild inventory, release them while the character still has access to it
+	CCharacter *c = PlayerManager.getChar(targetProxy.getId());
+	if (c)
+		c->abortExchange();
+
 	targetProxy.setGuildId(0);
 	targetProxy.updateTargetingChars();
 

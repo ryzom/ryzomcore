@@ -2948,6 +2948,14 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:CHAT:FONT_SIZE"
             type="sint32"
             value="10" />
+  <!-- 0 = plain text, 1 = unicode from the font, 2 = images from the emoji atlas -->
+  <variable entry="UI:SAVE:CHAT:EMOJI_MODE"
+            type="sint32"
+            value="2" />
+  <!-- 0 = chat text height, 1 = medium, 2 = the atlas tile's own size -->
+  <variable entry="UI:SAVE:CHAT:EMOJI_SIZE"
+            type="sint32"
+            value="0" />
   <variable entry="UI:SAVE:CHAT:MULTI_LINE_SPACE"
             type="sint32"
             value="0" />

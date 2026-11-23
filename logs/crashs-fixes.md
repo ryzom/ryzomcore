@@ -1,5 +1,83 @@
 # Crash fixes
 
+## 2026-11-11 — 🐛 CCharacter3D::createInstance: delete the advantage fx before its parent instance
+
+Crash group `CParticleSystemModel::traverseClip` (3 reports, all in the character selection screen, `globalMenu` -> `CInterface3DScene::draw`). `AdvantageFx` is a Hrc son of the part instance (`parent(_Instances[i])`). `createInstance` deleted the instance first; `~CTransform` then `hrcUnlink`s its sons without relinking them to the scene root, so the fx became an orphan outside the Hrc graph, never refreshed, with a `_AncestorSkeletonModel` that became stale when the skeleton was later deleted by `setSkeleton`. If the new instance was not created (empty name, `none.shape`, failure), the function returned before the old fx was handled. The advantage fx is now deleted before the instance. Cause not proven (no crash log); not compiled or tested.
+
+## 2026-11-11 — 🐛 XAudio2 voice lifecycle: crash logs for crash group 6524326
+
+Not a fix: debug logging for the `CSourceXAudio2::updateState` crash group (8
+reports, first 6524326, `GetState` at `source_xaudio2.cpp:268`, with another
+thread inside `submitBuffer` in 3 of them). The hypothesis is a race between the
+main thread (`commit3DChanges` -> `updateState`) and the stream thread
+(`submitStreamingBuffer` -> `preparePlay`) destroying the voice. New `nlcrashdbg`
+lines in `client.log`: when a voice is destroyed in `release()` or in
+`preparePlay()` (format change), and when `updateState` finds a playing source
+without voice; each one with the source, the voice, the thread id, `_IsPlaying`
+and the streaming flag. One more line gives the thread id of the driver creation
+(main thread) to compare with. Nothing is logged on the normal path. Remove with
+`grep nlcrashdbg` once the group is fixed. Not compiled (XAudio2 is Windows only).
+
+## 2026-11-11 — 🐛 CWidgetManager::checkCoords: iterate on a copy of the window lists
+
+12 dumps (first 6540032) still crashed in the first loop of `checkCoords()`
+(`widget_manager.cpp:1088` and `:1090`) with builds that already contain the NULL
+checks of the 2026-10-26 fix, with garbage fault addresses (`0xffffffffffff0010`,
+`0xffffffffffffffff`...), not NULL. The loop keeps an iterator on the next window
+of `PrioritizedWindows` while `pIG->checkCoords()` runs scripts (lua `on_draw`,
+action handlers) that can move (`setTopWindow`, `setWindowPriority`), remove
+(`delWindow`, `unMakeWindow`) or destroy windows: the saved node is then freed. Both
+`checkCoords` loops (check and updateCoords) now iterate on a copy of the list and
+skip a window that is no longer in it. Not proven that a script is the cause (no
+script identified in the reports). The other loops over `PrioritizedWindows`
+(new screen size, invalidate, draw) call no external code and are unchanged. Not
+compiled.
+
+## 2026-11-11 — ✨ needcheck.flag: ask the launcher to rescan the files when a required file is missing
+
+Follow-up of the `waitEndOfAsyncLoading` fix (dump 6576819): the missing `.lr`
+file is a symptom of an incomplete installation. New global method
+`CPath::requestFileCheck(missingFile)`: logs a warning and creates an empty
+`needcheck.flag` in `getLogDirectory()` (once per run). The launcher (ryztart)
+rescans all the files with their hash and removes the flag. It is called by
+`CLrLoader::run` when the `.lr` is not found. It is not called from
+`CPath::lookup`, to avoid a rescan at every start because of optional files:
+other call sites are added one by one. See `docs/needcheck-flag.md`. Not compiled.
+
+## 2026-11-11 — 🐛 CGlobalRetriever::waitEndOfAsyncLoading: do not load a retriever whose file was not found
+
+One dump (6576819) crashed with an unhandled `EStreamOverflow` while teleporting:
+`CContinent::select` -> `refreshLrAroundNow` -> `waitEndOfAsyncLoading` ->
+`CLocalRetriever::serial` -> `serialVersion`. When the `.lr` file is not found,
+`CLrLoader::run()` clears the buffer and sets `Finished = true` with
+`Successful = false`. `waitEndOfAsyncLoading()` only tested `Finished`, so it
+streamed the empty buffer into the retriever bank and the read overflowed. It now
+skips the load when `Successful` is false, logs a warning with the file name and
+still removes the loader from the list (otherwise the wait loop would never end).
+The non blocking `refreshLrAround` is unchanged. A truncated or too old `.lr` still
+throws. Not compiled.
+
+## 2026-10-30 — 🐛 submitBuffer: log invalid buffer/source state for crash group 6435168
+
+Not a fix: debug logging for the 18 `EXCEPTION_BREAKPOINT` reports raised inside
+`IXAudio2SourceVoice::SubmitSourceBuffer` (first report 6435168). The `nlassert`s
+at the top of `CSourceXAudio2::submitBuffer()` do nothing in release, so a NULL
+voice, an empty buffer or a buffer whose format/channels/bits differ from the
+source reach XAudio2 silently. Those cases now write an `nlcrashdbg` line (voice,
+size, data pointer, both formats, ADPCM/streaming/looping flags) to `client.log`,
+before the call, without changing the behavior. Nothing is logged when the state
+is valid, to avoid flooding the log while streaming. Remove with
+`grep nlcrashdbg` once the group is fixed. Not compiled (XAudio2 is Windows only).
+
+## 2026-10-30 — 🐛 createUserLandMark: the map that launched the menu may not exist
+
+Two dumps crashed in `createUserLandMark()` (read at 0xac0, a small offset from
+NULL) when clicking the "create landmark" entries of the map menu. The map is
+taken with a `dynamic_cast` of the control that launched the modal menu, which is
+NULL when no modal is active or when the menu was not launched by a map, and was
+dereferenced without a test. The handler now does nothing in that case. How the
+modal stack can be empty at that point is not established.
+
 ## 2026-10-27 — 🐛 CWidgetManager::checkCoords: ignore NULL master groups
 
 Two more dumps of the `checkCoords()` crash (read at 0x78, a small offset from

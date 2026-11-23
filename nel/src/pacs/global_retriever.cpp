@@ -2690,6 +2690,7 @@ void	NLPACS::CGlobalRetriever::CLrLoader::run()
 	if (!f.open(CPath::lookup(LoadFile, false)))
 	{
 		nlwarning("ASSET ERROR: local retriever file '%s' not found, its area has no collision data", LoadFile.c_str());
+		CPath::requestFileCheck(LoadFile);
 		_Buffer.clear();
 		Finished = true;
 		return;

@@ -139,6 +139,10 @@ namespace CHATUNI
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
 
+			res = handlers.insert(std::make_pair(std::string("CURFGCS"), &CChatUnifierClientSkel::farGuildChatShared_skel));
+			// if this assert, you have a doubly message name in your interface definition !
+			nlassert(res.second);
+
 			res = handlers.insert(std::make_pair(std::string("CURFGC2"), &CChatUnifierClientSkel::farGuildChat2_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
@@ -151,7 +155,15 @@ namespace CHATUNI
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
 
+			res = handlers.insert(std::make_pair(std::string("CURUBS"), &CChatUnifierClientSkel::universeBroadcastShared_skel));
+			// if this assert, you have a doubly message name in your interface definition !
+			nlassert(res.second);
+
 			res = handlers.insert(std::make_pair(std::string("CUDCB"), &CChatUnifierClientSkel::dynChanBroadcast_skel));
+			// if this assert, you have a doubly message name in your interface definition !
+			nlassert(res.second);
+
+			res = handlers.insert(std::make_pair(std::string("CUDCBS"), &CChatUnifierClientSkel::dynChanBroadcastShared_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
 
@@ -222,6 +234,18 @@ namespace CHATUNI
 		farGuildChat(sender, senderName, guildId, text);
 	}
 
+	void CChatUnifierClientSkel::farGuildChatShared_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	{
+		H_AUTO(CChatUnifierClientSkel_farGuildChatShared_CURFGCS);
+		ucstring	senderName;
+			nlRead(__message, serial, senderName);
+		uint32	guildId;
+			nlRead(__message, serial, guildId);
+		CChatMessage	chatMessage;
+			nlRead(__message, serial, chatMessage);
+		farGuildChatShared(sender, senderName, guildId, chatMessage);
+	}
+
 	void CChatUnifierClientSkel::farGuildChat2_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CChatUnifierClientSkel_farGuildChat2_CURFGC2);
@@ -258,6 +282,18 @@ namespace CHATUNI
 		universeBroadcast(sender, senderName, senderHomeSession, text);
 	}
 
+	void CChatUnifierClientSkel::universeBroadcastShared_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	{
+		H_AUTO(CChatUnifierClientSkel_universeBroadcastShared_CURUBS);
+		ucstring	senderName;
+			nlRead(__message, serial, senderName);
+		uint32	senderHomeSession;
+			nlRead(__message, serial, senderHomeSession);
+		CChatMessage	chatMessage;
+			nlRead(__message, serial, chatMessage);
+		universeBroadcastShared(sender, senderName, senderHomeSession, chatMessage);
+	}
+
 	void CChatUnifierClientSkel::dynChanBroadcast_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CChatUnifierClientSkel_dynChanBroadcast_CUDCB);
@@ -268,6 +304,18 @@ namespace CHATUNI
 		ucstring	text;
 			nlRead(__message, serial, text);
 		dynChanBroadcast(sender, chanId, senderName, text);
+	}
+
+	void CChatUnifierClientSkel::dynChanBroadcastShared_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	{
+		H_AUTO(CChatUnifierClientSkel_dynChanBroadcastShared_CUDCBS);
+		NLMISC::CEntityId	chanId;
+			nlRead(__message, serial, chanId);
+		ucstring	senderName;
+			nlRead(__message, serial, senderName);
+		CChatMessage	chatMessage;
+			nlRead(__message, serial, chatMessage);
+		dynChanBroadcastShared(sender, chanId, senderName, chatMessage);
 	}
 
 	void CChatUnifierClientSkel::recvBroadcastMessage_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
@@ -331,6 +379,24 @@ namespace CHATUNI
 			_ModuleProxy->sendModuleMessage(sender, __message);
 		}
 	}
+		// IOS forwards a shared guild chat message to the IOS
+	void CChatUnifierClientProxy::farGuildChatShared(NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, const CChatMessage &chatMessage)
+	{
+		if (_LocalModuleSkel && _LocalModule->isImmediateDispatchingSupported())
+		{
+			// immediate local synchronous dispatching
+			_LocalModuleSkel->farGuildChatShared(_ModuleProxy->getModuleGateway()->getPluggedModuleProxy(sender), senderName, guildId, chatMessage);
+		}
+		else
+		{
+			// send the message for remote dispatching and execution or local queing
+			NLNET::CMessage __message;
+
+			buildMessageFor_farGuildChatShared(__message, senderName, guildId, chatMessage);
+
+			_ModuleProxy->sendModuleMessage(sender, __message);
+		}
+	}
 		// IOS forward a guild chat message to the IOS
 	void CChatUnifierClientProxy::farGuildChat2(NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, const ucstring &phraseName)
 	{
@@ -385,6 +451,24 @@ namespace CHATUNI
 			_ModuleProxy->sendModuleMessage(sender, __message);
 		}
 	}
+		// IOS forwards a shared universe chat message to the IOSs
+	void CChatUnifierClientProxy::universeBroadcastShared(NLNET::IModule *sender, const ucstring &senderName, uint32 senderHomeSession, const CChatMessage &chatMessage)
+	{
+		if (_LocalModuleSkel && _LocalModule->isImmediateDispatchingSupported())
+		{
+			// immediate local synchronous dispatching
+			_LocalModuleSkel->universeBroadcastShared(_ModuleProxy->getModuleGateway()->getPluggedModuleProxy(sender), senderName, senderHomeSession, chatMessage);
+		}
+		else
+		{
+			// send the message for remote dispatching and execution or local queing
+			NLNET::CMessage __message;
+
+			buildMessageFor_universeBroadcastShared(__message, senderName, senderHomeSession, chatMessage);
+
+			_ModuleProxy->sendModuleMessage(sender, __message);
+		}
+	}
 		// IOS forward a dyn chat chat message to the IOSs
 	void CChatUnifierClientProxy::dynChanBroadcast(NLNET::IModule *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text)
 	{
@@ -399,6 +483,24 @@ namespace CHATUNI
 			NLNET::CMessage __message;
 
 			buildMessageFor_dynChanBroadcast(__message, chanId, senderName, text);
+
+			_ModuleProxy->sendModuleMessage(sender, __message);
+		}
+	}
+		// IOS forwards a shared dynamic chat message to the IOSs
+	void CChatUnifierClientProxy::dynChanBroadcastShared(NLNET::IModule *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &chatMessage)
+	{
+		if (_LocalModuleSkel && _LocalModule->isImmediateDispatchingSupported())
+		{
+			// immediate local synchronous dispatching
+			_LocalModuleSkel->dynChanBroadcastShared(_ModuleProxy->getModuleGateway()->getPluggedModuleProxy(sender), chanId, senderName, chatMessage);
+		}
+		else
+		{
+			// send the message for remote dispatching and execution or local queing
+			NLNET::CMessage __message;
+
+			buildMessageFor_dynChanBroadcastShared(__message, chanId, senderName, chatMessage);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
 		}
@@ -461,6 +563,18 @@ namespace CHATUNI
 	}
 
 	// Message serializer. Return the message received in reference for easier integration
+	const NLNET::CMessage &CChatUnifierClientProxy::buildMessageFor_farGuildChatShared(NLNET::CMessage &__message, const ucstring &senderName, uint32 guildId, const CChatMessage &chatMessage)
+	{
+		__message.setType("CURFGCS");
+			nlWrite(__message, serial, const_cast < ucstring& > (senderName));
+			nlWrite(__message, serial, guildId);
+			nlWrite(__message, serial, const_cast < CChatMessage& > (chatMessage));
+
+
+		return __message;
+	}
+
+	// Message serializer. Return the message received in reference for easier integration
 	const NLNET::CMessage &CChatUnifierClientProxy::buildMessageFor_farGuildChat2(NLNET::CMessage &__message, const ucstring &senderName, uint32 guildId, const ucstring &phraseName)
 	{
 		__message.setType("CURFGC2");
@@ -497,12 +611,36 @@ namespace CHATUNI
 	}
 
 	// Message serializer. Return the message received in reference for easier integration
+	const NLNET::CMessage &CChatUnifierClientProxy::buildMessageFor_universeBroadcastShared(NLNET::CMessage &__message, const ucstring &senderName, uint32 senderHomeSession, const CChatMessage &chatMessage)
+	{
+		__message.setType("CURUBS");
+			nlWrite(__message, serial, const_cast < ucstring& > (senderName));
+			nlWrite(__message, serial, senderHomeSession);
+			nlWrite(__message, serial, const_cast < CChatMessage& > (chatMessage));
+
+
+		return __message;
+	}
+
+	// Message serializer. Return the message received in reference for easier integration
 	const NLNET::CMessage &CChatUnifierClientProxy::buildMessageFor_dynChanBroadcast(NLNET::CMessage &__message, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text)
 	{
 		__message.setType("CUDCB");
 			nlWrite(__message, serial, const_cast < NLMISC::CEntityId& > (chanId));
 			nlWrite(__message, serial, const_cast < ucstring& > (senderName));
 			nlWrite(__message, serial, const_cast < ucstring& > (text));
+
+
+		return __message;
+	}
+
+	// Message serializer. Return the message received in reference for easier integration
+	const NLNET::CMessage &CChatUnifierClientProxy::buildMessageFor_dynChanBroadcastShared(NLNET::CMessage &__message, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &chatMessage)
+	{
+		__message.setType("CUDCBS");
+			nlWrite(__message, serial, const_cast < NLMISC::CEntityId& > (chanId));
+			nlWrite(__message, serial, const_cast < ucstring& > (senderName));
+			nlWrite(__message, serial, const_cast < CChatMessage& > (chatMessage));
 
 
 		return __message;

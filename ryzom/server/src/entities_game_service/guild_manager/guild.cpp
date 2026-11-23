@@ -1133,6 +1133,42 @@ void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 
 }
 
 //----------------------------------------------------------------------------
+bool CGuild::canTakeItem( CCharacter * user, uint32 slot )
+{
+	nlassert( user );
+
+	if( canAccessToGuildInventory( user ) == false )
+	{
+		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
+		return false;
+	}
+
+	// check if user is trial
+	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
+	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return false);
+	if ( p->isTrialPlayer() )
+	{
+		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_GUILD_INV_IS_TRIAL_PLAYER" );
+		return false;
+	}
+
+	CGuildMember* member = getMemberFromEId(user->getId());
+	if (!member)
+		return false;
+
+	uint8 chest = floor((float)slot / (float)GuildChestSlots);
+
+
+	if (!haveChestViewGrade(chest, member->getGrade()) || !haveChestGetGrade(chest, member->getGrade()))
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
+		return false;
+	}
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
 void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session )
 {
 	// the session system works that way :
@@ -1141,35 +1177,8 @@ void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32
 	// The item session is incremented and the highest session value is then sent to the clients
 	// sessions are reseted when nobody uses the inventory
 
-	nlassert( user );
-
-	if( canAccessToGuildInventory( user ) == false )
-	{
-		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
+	if ( !canTakeItem( user, slot ) )
 		return;
-	}
-
-	// check if user is trial
-	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
-	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return);
-	if ( p->isTrialPlayer() )
-	{
-		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_GUILD_INV_IS_TRIAL_PLAYER" );
-		return;
-	}
-
-	CGuildMember* member = getMemberFromEId(user->getId());
-	if (!member)
-		return;
-
-	uint8 chest = floor((float)slot / (float)GuildChestSlots);
-
-
-	if (!haveChestViewGrade(chest, member->getGrade()) || !haveChestGetGrade(chest, member->getGrade()))
-	{
-		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
-		return;
-	}
 
 	// get the source item
 	CInventoryPtr srcItems = (CGuildInventory *)_Inventory;
@@ -1213,35 +1222,11 @@ void CGuild::moveItem( CCharacter * user, uint32 slot, uint32 dstSlot, uint32 qu
 	// The item session is incremented and the highest session value is then sent to the clients
 	// sessions are reseted when nobody uses the inventory
 
-	nlassert( user );
-
-	if( canAccessToGuildInventory( user ) == false )
-	{
-		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
+	if ( !canTakeItem( user, slot ) )
 		return;
-	}
-
-	// check if user is trial
-	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
-	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return);
-	if ( p->isTrialPlayer() )
-	{
-		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_GUILD_INV_IS_TRIAL_PLAYER" );
-		return;
-	}
 
 	CGuildMember* member = getMemberFromEId(user->getId());
-	if (!member)
-		return;
-
-	uint8 srcChest = floor((float)slot / (float)GuildChestSlots);
 	uint8 dstChest = floor((float)dstSlot / (float)GuildChestSlots);
-
-	if (!haveChestViewGrade(srcChest, member->getGrade()) || !haveChestGetGrade(srcChest, member->getGrade()))
-	{
-		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
-		return;
-	}
 
 	if (!haveChestViewGrade(dstChest, member->getGrade()) || !haveChestPutGrade(dstChest, member->getGrade()))
 	{

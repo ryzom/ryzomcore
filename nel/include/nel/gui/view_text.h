@@ -194,6 +194,11 @@ namespace NLGUI
 		 */
 		void	setTextFormatTaged(const std::string &text);
 
+		/// Length of the format tag at index, 0 if none starts there.
+		static uint			getFormatTagLength(const std::string &text, uint index);
+		/// Color and tooltip tags in effect at pos, to render text.substr(pos) alone. Empty for untagged text.
+		static std::string	getFormatTagPrefixAt(const std::string &text, uint pos);
+
 		void	setSingleLineTextFormatTaged(const std::string &text);
 
 		// Remove end space
