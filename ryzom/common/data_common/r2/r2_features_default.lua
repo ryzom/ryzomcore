@@ -1026,7 +1026,17 @@ local registerFeature = function ()
 						-- add delta to have primitive center in world over player pos
 						src.Position.x = src.Position.x + px - mx + 4 * (math.random() - 0.5)
 						src.Position.y = src.Position.y + py - my + 4 * (math.random() - 0.5)
-						src.Position.z = src.Position.z + pz - mz + 4 * (math.random() - 0.5)
+						-- at the height of the player, and every vertex on the ground under its new place in the world,
+						-- relative to the primitive: the AI service puts a point on the layer nearest to its height. A vertex
+						-- off the ground the AI can use, where the editor may find no height, keeps its height relative to
+						-- the primitive, as before.
+						src.Position.z = src.Position.z + pz - mz
+						for k, v in pairs(src.Points) do
+							local wx, wy = src.Position.x + v.Position.x, src.Position.y + v.Position.y
+							if r2:isValidPos(wx, wy) then
+								v.Position.z = r2:snapZToGround(wx, wy) - src.Position.z
+							end
+						end
 					--end
 				end						
 				r2.requestInsertNode(r2.Scenario:getBaseAct():getDefaultFeature().InstanceId, "Components", -1, "", src)

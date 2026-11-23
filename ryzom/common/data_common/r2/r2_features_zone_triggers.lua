@@ -267,12 +267,14 @@ component.createComponent = function(x, y)
 	comp.Position.z = r2:snapZToGround(x, y)
 
 	local zone = r2.newComponent("Region")
-	r2.Utils.createTriggerRegion(zone, 0, 0, ZoneTriggerRadius) -- the region doesn't inherit the feature position, so must give its pos
+	-- the region inherits the feature position (InheritPos below, its own position is 0): its points get the ground
+	-- under them around the feature
+	r2.Utils.createTriggerRegion(zone, 0, 0, ZoneTriggerRadius, comp.Position)
 	zone.Deletable = 0
 	zone.Position.x = 0 -- comp.Position.x
 	zone.Position.y = 0 --  comp.Position.y
 	zone.Position.z = 0 -- comp.Position.z
-	zone.InheritPos = 1 -- don't inherit position of parents
+	zone.InheritPos = 1 -- inherits the position of the feature
 	zone.Name = r2:genInstanceName(i18n.get("uiR2EDPlaces"))			
 	comp._Zone = zone.InstanceId
 	table.insert(comp.Components, zone)

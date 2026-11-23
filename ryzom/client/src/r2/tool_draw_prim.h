@@ -43,6 +43,12 @@ class CToolDrawPrim : public CTool
 {
 public:
 	enum { PrimMaxNumPoints = 16 };
+	// the fewest points a drawn primitive is committed with (canTerminate): a route needs one, a region three
+	enum
+	{
+		RoadMinNumPoints = 1,
+		RegionMinNumPoints = 3
+	};
 	enum TPrimType { Road = 0, Region, PrimTypeCount };
 	NLMISC_DECLARE_CLASS(R2::CToolDrawPrim);
 	// ctor

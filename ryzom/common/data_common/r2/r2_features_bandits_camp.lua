@@ -406,7 +406,8 @@ component.createComponent = function(x, y, banditsCount, race, banditsLevel, Zon
 	comp.ZoneSize = tostring(ZoneSize)
 
 	local zone = r2.newComponent("Region")		
-	r2.Utils.createNonDeleteableRegion(zone, 0, 0, BanditZoneRadius, BanditZoneNumCorners) -- the region doesn't inherit the feature position, so must give its pos
+	-- the region does not inherit the feature position, so must give its pos: its points get the ground under them
+	r2.Utils.createNonDeleteableRegion(zone, 0, 0, BanditZoneRadius, BanditZoneNumCorners, comp.Position)
 	zone.Deletable = 0
 	zone.Position.x = comp.Position.x
 	zone.Position.y = comp.Position.y

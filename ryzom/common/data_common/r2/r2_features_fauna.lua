@@ -716,33 +716,34 @@ component.createComponent = function(x, y, carnCount, carnivoreBase, carnivoresN
 
 	-- Herbivore sleep zone
 	local zoneSleep1 = r2.newComponent("Region")		
-	r2.Utils.createRegion(zoneSleep1, 0, 0, FaunaRegionRadius, FaunaRegionNumCorners)
 	zoneSleep1.Deletable = 1
 	zoneSleep1.Position.x = comp.Position.x + FaunaRegionOffsets[1].x
 	zoneSleep1.Position.y = comp.Position.y + FaunaRegionOffsets[1].y
 	zoneSleep1.Position.z = comp.Position.z
+	-- (once the zone has its place, for the ground under its points)
+	r2.Utils.createRegion(zoneSleep1, 0, 0, FaunaRegionRadius, FaunaRegionNumCorners, zoneSleep1.Position)
 	zoneSleep1.InheritPos = 0 
 	zoneSleep1.Name = r2:genInstanceName(i18n.get("uiR2EDNameSleepRegion"))			
 	table.insert(comp.Components, zoneSleep1)	
 	
 	-- Carnivore sleep zone
 	local zoneSleep2 = r2.newComponent("Region")		
-	r2.Utils.createRegion(zoneSleep2, 0, 0, FaunaRegionRadius, FaunaRegionNumCorners)
 	zoneSleep2.Deletable = 1
 	zoneSleep2.Position.x = comp.Position.x + FaunaRegionOffsets[2].x
 	zoneSleep2.Position.y = comp.Position.y + FaunaRegionOffsets[2].y
 	zoneSleep2.Position.z = comp.Position.z
+	r2.Utils.createRegion(zoneSleep2, 0, 0, FaunaRegionRadius, FaunaRegionNumCorners, zoneSleep2.Position)
 	zoneSleep2.InheritPos = 0 
 	zoneSleep2.Name = r2:genInstanceName(i18n.get("uiR2EDNameSleepRegion"))			
 	table.insert(comp.Components, zoneSleep2)				
 	
 	--Herbivore sleep zone
 	local zoneFood = r2.newComponent("Region")		
-	r2.Utils.createRegion(zoneFood, 0, 0, FaunaRegionRadius, FaunaRegionNumCorners)
 	zoneFood.Deletable = 1
 	zoneFood.Position.x = comp.Position.x + FaunaRegionOffsets[3].x
 	zoneFood.Position.y = comp.Position.y + FaunaRegionOffsets[3].y
 	zoneFood.Position.z = comp.Position.z
+	r2.Utils.createRegion(zoneFood, 0, 0, FaunaRegionRadius, FaunaRegionNumCorners, zoneFood.Position)
 	zoneFood.InheritPos = 0
 	zoneFood.Name = r2:genInstanceName(i18n.get("uiR2EDNameFoodRegion"))			
 	table.insert(comp.Components, zoneFood)	
