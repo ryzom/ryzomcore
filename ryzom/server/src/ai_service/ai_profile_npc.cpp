@@ -1809,6 +1809,8 @@ void	CGrpProfileFollowRoute::assignGeometryFromState()
 	else
 	{
 		_Geometry = &(sp->shape().getGeometry());
+		// the rule of the new state's shape, for the searches that fall back on it
+		_VerticalPos = sp->shape().getVerticalPos();
 		_GeometryComeFromState = true;
 		_MustCalcRatios = true;
 	}
@@ -3161,7 +3163,11 @@ CGrpProfileStandAtStartPoint::CBotPositionner::CBotPositionner(TVerticalPos vert
 void CGrpProfileStandAtStartPoint::CBotPositionner::goToStart()
 {
 	if (_StartWorldPos.isValid())
-		_PathCont.setDestinationKeepingLayer(_VerticalPos, _StartWorldPos);
+	{
+		// the start position itself, on the layer of its height
+		const CAIVector start(_Position);
+		_PathCont.setDestinationKeepingLayer(_VerticalPos, _StartWorldPos, &start);
+	}
 	else
 		_PathCont.setDestination(_VerticalPos, _Position);
 }

@@ -1161,13 +1161,14 @@ void CBotNpc::setStartHeight(sint32 height)
 {
 	m_HasStartHeight = true;
 	m_StartHeight = height;
+	m_StartHeightReported = false;
 }
 
 RYAI_MAP_CRUNCH::CWorldPosition CBotNpc::getStartWorldPos() const
 {
 	RYAI_MAP_CRUNCH::CWorldPosition pos;
 	if (m_HasStartHeight)
-		CWorldContainer::getWorldMap().setWorldPositionNearestHeight(m_StartHeight, pos, _StartPos);
+		CWorldContainer::getWorldMap().setWorldPositionNearestHeight(m_StartHeight, 0.0, _VerticalPos, pos, _StartPos);
 	return pos;
 }
 
@@ -1175,6 +1176,7 @@ void CBotNpc::init()
 {
 	m_HasStartHeight = false;
 	m_StartHeight = 0;
+	m_StartHeightReported = false;
 	_ChatProfile = NULL;
 	_MaxHitRangeForPC = -1.0f;
 //	_MissionIconFlags.IsMissionStepIconDisplayable = true;
@@ -1199,11 +1201,19 @@ void CBotNpc::getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& 
 		calcSpawnPos(worldMap);
 	
 	if ((isStuck() || IsRingShard) && m_HasStartHeight)
-		worldMap.setWorldPositionNearestHeight(m_StartHeight, pos, _StartPos);
+	{
+		bool atHeight;
+		if (worldMap.setWorldPositionNearestHeight(m_StartHeight, 0.0, _VerticalPos, pos, _StartPos, NULL, &atHeight) && !atHeight && !m_StartHeightReported)
+		{
+			m_StartHeightReported = true;
+			nlwarning("CBotNpc: '%s' at %s has a height of %.1f m that no layer there is near, it stands on the layer of its vertical pos",
+			    getAliasFullName().c_str(), _StartPos.toString().c_str(), m_StartHeight / 1000.0);
+		}
+	}
 	else if (isStuck() || IsRingShard)
 		worldMap.setWorldPosition(_VerticalPos, pos, _StartPos);
 	else if (m_HasStartHeight)
-		CWorldContainer::calcNearestWPosAtHeight(m_StartHeight, worldMap, pos, _StartPos, 10, 200, CWorldContainer::CPosValidatorDefault());
+		CWorldContainer::calcNearestWPosAtHeight(m_StartHeight, 0.0, _VerticalPos, worldMap, pos, _StartPos, 10, 200, CWorldContainer::CPosValidatorDefault());
 	else
 		CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, worldMap, pos, _StartPos, 10, 200, CWorldContainer::CPosValidatorDefault());
 	

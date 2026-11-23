@@ -126,7 +126,7 @@ public:
 	template <class T>
 	bool findPlacedPos(RYAI_MAP_CRUNCH::CWorldPosition &wpos, const T &pos, float radius, uint32 tries) const
 	{
-		H_AUTO(CalcNearestWPos)
+		H_AUTO(FindPlacedPos)
 		for (uint32 incTries = 0; incTries < tries; ++incTries)
 		{
 			double rad = (radius * incTries) / tries;

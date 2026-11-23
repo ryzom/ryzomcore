@@ -2291,8 +2291,13 @@ bool	CWorldMap::setWorldPosition(sint32 z, CWorldPosition	&wpos,	const CAIVector
 	return true;
 }
 
-bool CWorldMap::setWorldPositionNearestHeight(sint32 z, CWorldPosition &wpos, const CAIVector &pos, const CRootCell *originCell) const
+bool CWorldMap::setWorldPositionNearestHeight(sint32 z, double distance, AITYPES::TVerticalPos fallback, CWorldPosition &wpos, const CAIVector &pos, const CRootCell *originCell, bool *atHeight) const
 {
+	if (atHeight)
+		*atHeight = false;
+	if (distance > (double)HeightReach)
+		return setWorldPosition(fallback, wpos, pos, originCell);
+
 	const CMapPosition mapPos(pos);
 	const CRootCell *cell = originCell ? originCell : getRootCellCst(mapPos);
 	if (!cell)
@@ -2308,7 +2313,7 @@ bool CWorldMap::setWorldPositionNearestHeight(sint32 z, CWorldPosition &wpos, co
 		if (!cell->isSlotUsed(mapPos, CSlot(s)))
 			continue;
 
-		sint64 dist = (sint64)z - (sint64)cell->getMetricHeight(CWorldPosition(cell, mapPos, CSlot(s)));
+		sint64 dist = (sint64)z - (sint64)getLayerHeight(CWorldPosition(cell, mapPos, CSlot(s)));
 		if (dist < 0)
 			dist = -dist;
 		if (!bestSlot.isValid() || dist < minDistZ)
@@ -2322,7 +2327,11 @@ bool CWorldMap::setWorldPositionNearestHeight(sint32 z, CWorldPosition &wpos, co
 		wpos = CWorldPosition(cell, mapPos, bestSlot, true);
 		return false;
 	}
+	if (minDistZ > (sint64)HeightTolerance + (sint64)(distance * 1000.0))
+		return setWorldPosition(fallback, wpos, pos, originCell);
 	wpos = CWorldPosition(cell, mapPos, bestSlot);
+	if (atHeight)
+		*atHeight = true;
 	return true;
 }
 

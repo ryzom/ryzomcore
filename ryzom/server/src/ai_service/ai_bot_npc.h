@@ -350,6 +350,8 @@ protected:
 	CAIPos _StartPos;
 	bool m_HasStartHeight;
 	sint32 m_StartHeight;
+	/// that no layer is near the start height was reported (once for each height, not at every respawn)
+	bool m_StartHeightReported;
 	
 	std::vector<NLMISC::CSheetId> _LootList;
 

@@ -3124,10 +3124,24 @@ public:
 	bool setWorldPosition(sint32 z, CWorldPosition& wpos, CAIVector const& pos, CRootCell const* originCell = NULL) const;
 	// Double version isn't tested !!! Verify it's the same than above sint32 version !
 	bool setWorldPosition(double z, CWorldPosition& wpos, CAIVector const& pos, CRootCell const* originCell = NULL) const;
-	// The slot nearest to a height in millimetres, however far from it. A position given with the height of the ground
-	// it was placed on (one of a Ring scenario) stands on that layer, where a vertical pos rule takes the same layer
-	// whatever the height, and the version above refuses a slot more than 2 metres away.
-	bool setWorldPositionNearestHeight(sint32 z, CWorldPosition &wpos, CAIVector const &pos, CRootCell const *originCell = NULL) const;
+	// The slot nearest to z, a height in millimetres of the ground measured distance metres from pos (0 when it is the
+	// height of pos itself). A position given with the height of the ground it was placed on (one of a Ring scenario)
+	// stands on that layer, where a vertical pos rule takes the same layer whatever the height, and the version above
+	// refuses a slot more than 2 metres away. The height chooses only near where it was measured, within HeightReach,
+	// and only a layer within HeightTolerance of it plus the distance, as the ground climbs or falls about as much as one
+	// walks along it. Otherwise the vertical pos rule fallback takes the layer, and atHeight, when given, is false.
+	// Returns whether wpos is a valid position.
+	bool setWorldPositionNearestHeight(sint32 z, double distance, AITYPES::TVerticalPos fallback, CWorldPosition &wpos, CAIVector const &pos, CRootCell const *originCell = NULL, bool *atHeight = NULL) const;
+	// The height in millimetres of the layer of wpos as setWorldPositionNearestHeight compares it: the builder stores
+	// floor(z / 2 + 0.5) for a surface at z metres (pacs_scan.cpp), and getMetricHeight gives the lowest height of that
+	// step, a metre below its middle
+	static sint32 getLayerHeight(CWorldPosition const &wpos) { return wpos.getMetricHeight() + 1000; }
+	// How far in millimetres from the height of the ground at a place its layer may be: the ground of a Ring scenario
+	// is the height the client found under the point, the layer of the AI's map has its height in steps of 2 metres
+	static const sint32 HeightTolerance = 4000;
+	// How far in metres from where a height was measured it still says which layer is meant: further away, a layer at
+	// the same height (a tunnel under a hill, 200 metres from a GM in a valley) has nothing to do with it
+	static const uint32 HeightReach = 50;
 	
 	CTopology::TTopologyRef	getTopologyRef(CTopology::TTopologyId const& id) const;
 	

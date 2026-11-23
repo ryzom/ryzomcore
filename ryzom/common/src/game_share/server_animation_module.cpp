@@ -643,33 +643,66 @@ public:
 		}
 	}
 
-	void setPrimPoint()
+	/// Returns whether the point has a z: the data comes from the client, and a coordinate it lacks is 0
+	bool setPrimPoint()
 	{
 		CObject* attr = nullptr;
 		CPrimPoint* point = dynamic_cast<CPrimPoint*>(_Primitive);
 
 		nlassert(point);
+		point->Point = CPrimVector(NLMISC::CVector::Null);
+		bool hasZ = false;
 		CObject* pt = _Object->getAttr("Pt");
 		if (pt)
-		{
-			attr = pt->getAttr("x");
-			if (attr && attr->isNumber()) {	point->Point.x = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("y");
-			if (attr && attr->isNumber()) {	point->Point.y = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("z");
-			if (attr && attr->isNumber()) { point->Point.z = static_cast<float>(attr->toNumber()); }
-		}
+			hasZ = readPoint(pt, point->Point);
 
 		attr = _Object->getAttr("Angle");
 		if (attr && attr->isNumber()) {	point->Angle =  static_cast<float>(attr->toNumber()); 	}
+		return hasZ;
 	}
 
-	void setPrimPath();
-	void setPrimZone();
+	/// As setPrimPoint: whether every point has a z
+	bool setPrimPath();
+	bool setPrimZone();
 
 private:
+	/// Reads x, y and z of a point into vector, which keeps its value for a coordinate the point lacks; returns
+	/// whether the point has a z
+	static bool readPoint(CObject *pt, CPrimVector &vector)
+	{
+		CObject *attr = pt->getAttr("x");
+		if (attr && attr->isNumber()) { vector.x = static_cast<float>(attr->toNumber()); }
+
+		attr = pt->getAttr("y");
+		if (attr && attr->isNumber()) { vector.y = static_cast<float>(attr->toNumber()); }
+
+		attr = pt->getAttr("z");
+		if (attr && attr->isNumber())
+		{
+			vector.z = static_cast<float>(attr->toNumber());
+			return true;
+		}
+		return false;
+	}
+
+	/// Reads the points of Pts, each 0 for a coordinate it lacks; returns whether there are points and every one has a z
+	bool readPoints(std::vector<CPrimVector> &points) const
+	{
+		CObject *pts = _Object->getAttr("Pts");
+		if (!pts)
+			return false;
+		bool hasZ = true;
+		uint32 first(0), last(pts->getSize());
+		points.assign(last, CPrimVector(NLMISC::CVector::Null));
+		for (; first != last; ++first)
+		{
+			CObject *pt = pts->getValueAtPos(first);
+			if (!pt || !readPoint(pt, points[first]))
+				hasZ = false;
+		}
+		return hasZ && last != 0;
+	}
+
 	CObject* _Object;
 	IPrimitive* _Primitive;
 };
@@ -706,63 +739,19 @@ void CAttributeToProperty::setAiStateName(const std::string& prefix)
 }
 
 
-void CAttributeToProperty::setPrimPath()
+bool CAttributeToProperty::setPrimPath()
 {
-	CObject* attr = nullptr;
 	CPrimPath* points = dynamic_cast<CPrimPath*>(_Primitive);
 	nlassert(points);
-	CObject* pts = _Object->getAttr("Pts");
-	if (pts)
-	{
-
-		uint32 first(0), last( pts->getSize() );
-		points->VPoints.resize(last);
-		for ( ; first != last ; ++first )
-		{
-			CObject* pt = pts->getValueAtPos(first);
-
-			attr = pt->getAttr("x");
-			if (attr && attr->isNumber()) {	points->VPoints[first].x = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("y");
-			if (attr && attr->isNumber()) {	points->VPoints[first].y = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("z");
-			if (attr && attr->isNumber()) {	points->VPoints[first].z = static_cast<float>(attr->toNumber()); 	}
-
-		}
-
-	}
+	return readPoints(points->VPoints);
 }
 
 
-void CAttributeToProperty::setPrimZone()
+bool CAttributeToProperty::setPrimZone()
 {
-	CObject* attr = nullptr;
 	CPrimZone* points = dynamic_cast<CPrimZone*>(_Primitive);
 	nlassert(points);
-	CObject* pts = _Object->getAttr("Pts");
-	if (pts)
-	{
-
-		uint32 first(0), last( pts->getSize() );
-		points->VPoints.resize(last);
-		for ( ; first != last ; ++first )
-		{
-			CObject* pt = pts->getValueAtPos(first);
-
-			attr = pt->getAttr("x");
-			if (attr && attr->isNumber()) {	points->VPoints[first].x = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("y");
-			if (attr && attr->isNumber()) {	points->VPoints[first].y = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("z");
-			if (attr && attr->isNumber()) {	points->VPoints[first].z = static_cast<float>(attr->toNumber()); 	}
-
-		}
-
-	}
+	return readPoints(points->VPoints);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -1542,8 +1531,6 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 			state->addPropertyByName("ai_type", new CPropertyString("NPC_STATE_ROUTE"));	// AJM
 			state->addPropertyByName("ai_profile_params", new CPropertyStringArray());	// AJM
 			state->addPropertyByName("vertical_pos", new CPropertyString("auto"));	// AJM
-			// the editor placed its points on the ground: their z is the height of the layer they are on
-			state->addPropertyByName("point_heights", new CPropertyString("true"));
 		}
 		else
 		{
@@ -1552,21 +1539,17 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 			state->addPropertyByName("ai_type", new CPropertyString("NPC_STATE_ZONE"));	// AJM
 			state->addPropertyByName("ai_profile_params", new CPropertyStringArray());	// AJM
 			state->addPropertyByName("vertical_pos", new CPropertyString("auto"));	// AJM
-			// the editor placed its points on the ground: their z is the height of the layer they are on
-			state->addPropertyByName("point_heights", new CPropertyString("true"));
 			state->addPropertyByName("keywords", new CPropertyStringArray());	// AJM
 		}
 
 		CAttributeToProperty a2pAiState(aiState, state);
 
-		if (aiMovement == "follow_route")
-		{
-			a2pAiState.setPrimPath();
-		}
-		else
-		{
-			a2pAiState.setPrimZone();
-		}
+		const bool pointHeights = aiMovement == "follow_route" ? a2pAiState.setPrimPath() : a2pAiState.setPrimZone();
+		// the editor's tools give each point the height of the ground they placed it on: the AI service puts it on the
+		// layer nearest to its z when a layer is near it (CWorldMap::setWorldPositionNearestHeight). Without a z on
+		// every point, the vertical pos takes the layer of each one
+		if (pointHeights)
+			state->addPropertyByName("point_heights", new CPropertyString("true"));
 
 		a2pAiState.setAttributeAsStringWithPrefix("Id", "name", prefix);
 		a2pAiState.setAttributeAsString("AiActivity", "ai_activity");
@@ -1685,12 +1668,14 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 				CAttributeToProperty a2p(objectNpc, npc_bot);
 
-				a2p.setPrimPoint();
+				const bool pointHeight = a2p.setPrimPoint();
 				npc_bot->addPropertyByName("class", new CPropertyString("npc_bot"));
 				npc_bot->addPropertyByName("ai_type", new CPropertyString("BOT_NPC"));	// AJM
 				npc_bot->addPropertyByName("vertical_pos", new CPropertyString("auto"));	// AJM
-				// the editor placed it on the ground: its z is the height of the layer it stands on
-				npc_bot->addPropertyByName("point_heights", new CPropertyString("true"));
+				// the editor's tools give it the height of the ground they placed it on: the AI service puts it on the
+				// layer nearest to its z when a layer is near it. Without a z, the vertical pos takes its layer
+				if (pointHeight)
+					npc_bot->addPropertyByName("point_heights", new CPropertyString("true"));
 				std::string botname = objectNpc->toString("Name");
 				if (botname.length()==0)
 				{

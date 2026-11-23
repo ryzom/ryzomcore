@@ -688,21 +688,25 @@ void CPathCont::setDestination(AITYPES::TVerticalPos verticalPos, CAIVector cons
 	}
 }
 
-void CPathCont::setDestinationKeepingLayer(AITYPES::TVerticalPos verticalPos, RYAI_MAP_CRUNCH::CWorldPosition const &destPos)
+void CPathCont::setDestinationKeepingLayer(AITYPES::TVerticalPos verticalPos, RYAI_MAP_CRUNCH::CWorldPosition const &destPos, CAIVector const *exactDest)
 {
+	const CAIVector destination = exactDest ? *exactDest : destPos.toAIVector();
 	if (!destPos.isValid())
 	{
-		setDestination(verticalPos, destPos.toAIVector());
+		setDestination(verticalPos, destination);
 		return;
 	}
 
 	// the same 2D position can be on another layer
 	RYAI_MAP_CRUNCH::CMapPosition mapPos(destPos);
 	if (_DestinationMapPos == mapPos && _DestPos == destPos)
+	{
+		_Destination = destination;
 		return;
+	}
 
 	_DestinationMapPos = mapPos;
-	_Destination = destPos;
+	_Destination = destination;
 	_VerticalPos = verticalPos;
 	uint32 gameCycle = CTimeInterface::gameCycle();
 

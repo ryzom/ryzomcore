@@ -723,12 +723,14 @@ static float randomAngle()
 	return val;
 }
 
-// A place of an event bot: on the layer nearest to the height given with the group when there is one (the player's,
-// or a z given with the command), else on the layer the vertical pos rule auto takes
-static bool placeEventBot(bool heightKnown, sint32 height, RYAI_MAP_CRUNCH::CWorldPosition &wp, const CAIVector &pos)
+// A place of an event bot at pos: on the layer nearest to the height given with the group at center when there is one
+// (the player's, or a z given with the command) and pos is near enough to center for it to tell, else on the layer
+// the vertical pos rule auto takes. atHeight says whether the height chose the layer.
+static bool placeEventBot(bool heightKnown, sint32 height, const CAIVector &center, RYAI_MAP_CRUNCH::CWorldPosition &wp, const CAIVector &pos, bool &atHeight)
 {
+	atHeight = false;
 	if (heightKnown)
-		return CWorldContainer::getWorldMap().setWorldPositionNearestHeight(height, wp, pos);
+		return CWorldContainer::getWorldMap().setWorldPositionNearestHeight(height, pos.distTo(center), AITYPES::vp_auto, wp, pos, NULL, &atHeight);
 	return CWorldContainer::getWorldMap().setWorldPosition(AITYPES::vp_auto, wp, pos);
 }
 
@@ -780,6 +782,12 @@ CGroupNpc *CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const 
 			bot->equipmentInit();
 			bot->initEnergy(/*groupEnergyCoef()*/0);
 			CAIVector rpos(pos);
+			// the height of the bot's own spot: the group's at the point, that of the layer the group's height chose
+			// at a spot near it, none where the vertical pos rule chose
+			bool hasStartHeight = heightKnown;
+			sint32 startHeight = height;
+			RYAI_MAP_CRUNCH::CWorldPosition wp;
+			bool atHeight = false;
 			if (dispersionRadius == 0)
 			{
 				nlinfo("Stucked !");
@@ -788,23 +796,33 @@ CGroupNpc *CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const 
 				{
 					const double a = circleStart + 2.0 * NLMISC::Pi * i / nbBots;
 					rpos += CAIVector(cos(a) * circleRadius, sin(a) * circleRadius);
-					RYAI_MAP_CRUNCH::CWorldPosition wp;
-					if (!placeEventBot(heightKnown, height, wp, rpos))
+					if (placeEventBot(heightKnown, height, pos, wp, rpos, atHeight))
+					{
+						hasStartHeight = atHeight;
+						startHeight = atHeight ? RYAI_MAP_CRUNCH::CWorldMap::getLayerHeight(wp) : 0;
+					}
+					else
 						rpos = pos;
 				}
 			}
 			// Spawn all randomly except if only 1 bot
 			else if (nbBots > 1)
 			{
-				RYAI_MAP_CRUNCH::CWorldPosition	wp;
 				uint32 maxTries = 100;
+				bool placed;
 				do
 				{
 					rpos = pos;
 					rpos += randomPos(dispersionRadius);
 					--maxTries;
-				} while (!placeEventBot(heightKnown, height, wp, rpos) && maxTries > 0);
-				if (maxTries<=0)
+					placed = placeEventBot(heightKnown, height, pos, wp, rpos, atHeight);
+				} while (!placed && maxTries > 0);
+				if (placed)
+				{
+					hasStartHeight = atHeight;
+					startHeight = atHeight ? RYAI_MAP_CRUNCH::CWorldMap::getLayerHeight(wp) : 0;
+				}
+				else
 					rpos = pos;
 			}
 
@@ -815,8 +833,8 @@ CGroupNpc *CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const 
 				angle = randomAngle();
 
 			bot->setStartPos(rpos.x().asDouble(),rpos.y().asDouble(), angle, AITYPES::vp_auto);
-			if (heightKnown)
-				bot->setStartHeight(height);
+			if (hasStartHeight)
+				bot->setStartHeight(startHeight);
 		}
 	}
 

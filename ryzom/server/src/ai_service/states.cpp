@@ -123,15 +123,13 @@ bool	CShape::setPath(TVerticalPos verticalPos, const std::vector <CAIVector> &po
 			if (newpos.isValid())
 			{
 				if (LogAcceptablePos)
-					nlinfo("StatePositionnal 'ss'(uu): Path pos Error at position %s, an acceptable position could be %s (in 'ss')", 
-						/*getAliasFullName().c_str(),	getAlias(),*/
-						points[ind].toString().c_str(), newpos.toString().c_str()/*,	getAliasFullName().c_str()*/);
+					nlinfo("StatePositionnal '%s': Path pos Error at position %s, an acceptable position could be %s",
+						ownerName(), points[ind].toString().c_str(), newpos.toString().c_str());
 			}
 			else
 			{
-				nlwarning("StatePositionel 'ss'(uu): Path pos Error at position %s, no acceptable position found around (in 'ss')", 
-					/*getAliasFullName().c_str(),	getAlias(),*/
-					points[ind].toString().c_str()/*,	getAliasFullName().c_str()*/);
+				nlwarning("StatePositionel '%s': Path pos Error at position %s, no acceptable position found around",
+					ownerName(), points[ind].toString().c_str());
 				ret = false;
 			}
 //#endif
@@ -139,6 +137,7 @@ bool	CShape::setPath(TVerticalPos verticalPos, const std::vector <CAIVector> &po
 		_Geometry.push_back(newpos);
 	}
 	_GeometryType=PATH;
+	warnHeightsOffLayers();
 
 	return ret;
 }
@@ -226,10 +225,9 @@ bool	CShape::setPatat(TVerticalPos verticalPos, const std::vector <CAIVector> &p
 	RYAI_MAP_CRUNCH::CWorldPosition worldPos;
 	if (!placePoint(worldPos, 0, points[0], float((vMax - vMin).quickNorm()), 1000))
 	{
-//		nlwarning("Can't find valid pos for state position '%s'(%u)", getAliasFullName().c_str(), getAlias());
 		if	(!_AcceptInvalidPos)
 		{
-			nlwarning("Can't find valid pos for state at position %s", points[0].toString().c_str());
+			nlwarning("Can't find valid pos for state '%s' at position %s", ownerName(), points[0].toString().c_str());
 			ret = false;
 		}
 	}
@@ -254,27 +252,20 @@ bool	CShape::setPatat(TVerticalPos verticalPos, const std::vector <CAIVector> &p
 			if (newpos.isValid())
 			{
 				if (LogAcceptablePos)
-					nlinfo("Path pos Error at position %s, an acceptable position could be %s", 
-						points[ind].toString().c_str(), 
-						newpos.toString().c_str());
-
-//				nlinfo("StatePrositionnal '%s'(%u): Path pos Error at position %s, an acceptable position could be %s (in '%s')", 
-//					getAliasFullName().c_str(),
-//					getAlias(),
-//					points[ind].toString().c_str(), 
-//					newpos.toString().c_str(),
-//					getAliasFullName().c_str());
+					nlinfo("StatePositionnal '%s': Path pos Error at position %s, an acceptable position could be %s",
+						ownerName(), points[ind].toString().c_str(), newpos.toString().c_str());
 			}
 			else
 			{
-				nlwarning("Path pos Error at position %s, no acceptable position found around", 
-					points[ind].toString().c_str());
+				nlwarning("StatePositionnal '%s': Path pos Error at position %s, no acceptable position found around",
+					ownerName(), points[ind].toString().c_str());
 				ret = false;
 			}
 //#endif
 		}
 		_Geometry.push_back(newpos);
 	}
+	warnHeightsOffLayers();
 
 	return ret;
 }
@@ -322,7 +313,7 @@ void CShape::takeHeights(const std::vector<CAIVector> &points)
 		return;
 
 	if (m_NextHeights.size() != points.size())
-		nlwarning("CShape: %u heights for %u points, the points are placed by their vertical pos instead", (uint)m_NextHeights.size(), (uint)points.size());
+		nlwarning("CShape: '%s' has %u heights for %u points, its points are placed by their vertical pos instead", ownerName(), (uint)m_NextHeights.size(), (uint)points.size());
 	else
 	{
 		m_Heights = m_NextHeights;
@@ -331,25 +322,44 @@ void CShape::takeHeights(const std::vector<CAIVector> &points)
 	m_NextHeights.clear();
 }
 
+void CShape::warnHeightsOffLayers() const
+{
+	for (uint32 i = 0; i < m_HeightPoints.size(); ++i)
+	{
+		RYAI_MAP_CRUNCH::CWorldPosition wpos;
+		bool atHeight;
+		if (CWorldContainer::getWorldMap().setWorldPositionNearestHeight(m_Heights[i], 0.0, _VerticalPos, wpos, m_HeightPoints[i], NULL, &atHeight) && !atHeight)
+			nlwarning("CShape: point %u of '%s' at %s has a height of %.1f m that no layer there is near, it stands on the layer of its vertical pos",
+			    i, ownerName(), m_HeightPoints[i].toString().c_str(), m_Heights[i] / 1000.0);
+	}
+}
+
 bool CShape::placePoint(RYAI_MAP_CRUNCH::CWorldPosition &wpos, uint32 index, const CAIVector &pos, float radius, uint32 tries) const
 {
 	if (index < m_Heights.size())
-		return CWorldContainer::calcNearestWPosAtHeight(m_Heights[index], wpos, pos, radius, tries, CWorldContainer::CPosValidatorDefault());
+		return CWorldContainer::calcNearestWPosAtHeight(m_Heights[index], 0.0, _VerticalPos, wpos, pos, radius, tries, CWorldContainer::CPosValidatorDefault());
 	return CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, wpos, pos, radius, tries, CWorldContainer::CPosValidatorDefault());
 }
 
-sint32 CShape::heightAt(const CAIVector &pos) const
+sint32 CShape::heightAt(const CAIVector &pos, double &distance) const
 {
 	// the heights of the points, weighted by the inverse of their squared distance
-	double sum = 0.0, weights = 0.0;
+	double sum = 0.0, weights = 0.0, minDistSq = 0.0;
 	for (uint32 i = 0; i < m_HeightPoints.size(); ++i)
 	{
 		const double distSq = pos.distSqTo(m_HeightPoints[i]);
 		if (distSq < 0.01)
+		{
+			distance = 0.0;
 			return m_Heights[i];
+		}
+		if (i == 0 || distSq < minDistSq)
+			minDistSq = distSq;
 		sum += m_Heights[i] / distSq;
 		weights += 1.0 / distSq;
 	}
+	// how far it is from a height that was measured
+	distance = sqrt(minDistSq);
 	return (sint32)(sum / weights);
 }
 
@@ -357,5 +367,11 @@ bool CShape::placePos(RYAI_MAP_CRUNCH::CWorldPosition &wpos, const CAIVector &po
 {
 	if (m_Heights.empty())
 		return CPlaceRandomPos::placePos(wpos, pos);
-	return CWorldContainer::getWorldMap().setWorldPositionNearestHeight(heightAt(pos), wpos, pos);
+	double distance;
+	const sint32 height = heightAt(pos, distance);
+	// inside the shape its points around the position measured the ground there: the height chooses however far the
+	// nearest point is (a large zone in a cave or under an arch), with the widest tolerance
+	if (distance > (double)RYAI_MAP_CRUNCH::CWorldMap::HeightReach && contains(pos))
+		distance = (double)RYAI_MAP_CRUNCH::CWorldMap::HeightReach;
+	return CWorldContainer::getWorldMap().setWorldPositionNearestHeight(height, distance, _VerticalPos, wpos, pos);
 }

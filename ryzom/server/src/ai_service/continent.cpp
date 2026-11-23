@@ -346,7 +346,8 @@ void CNpcZonePlaceNoPrim::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) con
 	}
 	if (!foundRandomPos)
 	{
-		const bool found = m_HasHeight ? CWorldContainer::calcNearestWPosAtHeight(m_Height, pos, _WorldValidPos, _Radius, 1000, CWorldContainer::CPosValidatorDefault())
+		// the height was measured at the centre, the search starts from the valid position found near it
+		const bool found = m_HasHeight ? CWorldContainer::calcNearestWPosAtHeight(m_Height, _WorldValidPos.toAIVector().distTo(_Pos), _VerticalPos, pos, _WorldValidPos, _Radius, 1000, CWorldContainer::CPosValidatorDefault())
 		                               : CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, pos, _WorldValidPos, _Radius, 1000, CWorldContainer::CPosValidatorDefault());
 		if (!found)
 		{
@@ -367,7 +368,7 @@ void CNpcZonePlaceNoPrim::setPosAndRadius(AITYPES::TVerticalPos verticalPos, con
 	_Pos = pos;
 	_Radius = float(radius)/1000.0f;
 	
-	const bool found = m_HasHeight ? CWorldContainer::calcNearestWPosAtHeight(m_Height, _WorldValidPos, _Pos, _Radius, 1000, CWorldContainer::CPosValidatorDefault())
+	const bool found = m_HasHeight ? CWorldContainer::calcNearestWPosAtHeight(m_Height, 0.0, _VerticalPos, _WorldValidPos, _Pos, _Radius, 1000, CWorldContainer::CPosValidatorDefault())
 	                               : CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, _WorldValidPos, _Pos, _Radius, 1000, CWorldContainer::CPosValidatorDefault());
 	if (!found)
 	{
@@ -385,7 +386,7 @@ void CNpcZonePlaceNoPrim::setHeight(sint32 height)
 bool CNpcZonePlaceNoPrim::placeAt(RYAI_MAP_CRUNCH::CWorldPosition &wpos, const CAIVector &pos) const
 {
 	if (m_HasHeight)
-		return CWorldContainer::getWorldMap().setWorldPositionNearestHeight(m_Height, wpos, pos);
+		return CWorldContainer::getWorldMap().setWorldPositionNearestHeight(m_Height, pos.distTo(_Pos), _VerticalPos, wpos, pos);
 	return CWorldContainer::getWorldMap().setWorldPosition(_VerticalPos, wpos, pos);
 }
 

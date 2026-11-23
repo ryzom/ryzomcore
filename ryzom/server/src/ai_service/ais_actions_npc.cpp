@@ -463,6 +463,7 @@ DEFINE_ACTION(ContextPositionalState,PATH)
 		points.push_back(CAIVector(x,y));
 		LOG("----  - (%.3f,%.3f)",x,y);
 	}
+	state->shape().setOwnerName(state->getAliasFullName());
 	if (!state->shape().setPath(state->shape().getVerticalPos(), points))
 	{
 		nlwarning("CAIStatePositional: error while placing the points of '%s'", 
@@ -488,6 +489,7 @@ DEFINE_ACTION(ContextPositionalState,PATAT)
 		points.push_back(CAIVector(x,y));
 		LOG("----  - (%.3f,%.3f)",x,y);
 	}
+	state->shape().setOwnerName(state->getAliasFullName());
 	if (!state->shape().setPatat(state->shape().getVerticalPos(), points))
 	{
 		nlwarning("CAIStatePositional: error while placing the points of '%s'", 

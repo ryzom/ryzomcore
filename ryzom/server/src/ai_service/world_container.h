@@ -154,26 +154,27 @@ public:
 	}
 	
 	/// As calcNearestWPosFromPosAnRadius, each try on the layer nearest to a height in millimetres
-	/// (CWorldMap::setWorldPositionNearestHeight): for the positions of a Ring scenario, which have the heights of the
-	/// ground they were placed on
+	/// (CWorldMap::setWorldPositionNearestHeight): for the positions of a Ring scenario, which carry the heights the
+	/// editor gave them. The height was measured distance metres from pos at most; a try further from that
+	/// place, or with no layer near the height, takes the layer of the vertical pos rule fallback.
 	template <class T>
-	static bool calcNearestWPosAtHeight(sint32 height, const RYAI_MAP_CRUNCH::CWorldMap &worldMap, RYAI_MAP_CRUNCH::CWorldPosition &wpos, const T &pos, float radius, uint32 tries, const CPosValidator &validator)
+	static bool calcNearestWPosAtHeight(sint32 height, double distance, AITYPES::TVerticalPos fallback, const RYAI_MAP_CRUNCH::CWorldMap &worldMap, RYAI_MAP_CRUNCH::CWorldPosition &wpos, const T &pos, float radius, uint32 tries, const CPosValidator &validator)
 	{
 		H_AUTO(CalcNearestWPosAtHeight)
 		for (uint32 incTries = 0; incTries < tries; ++incTries)
 		{
 			double rad = (radius * incTries) / tries;
 			CAIVector rndPos(pos.x() + rad * cos((double)incTries), pos.y() + rad * sin((double)incTries));
-			if (worldMap.setWorldPositionNearestHeight(height, wpos, rndPos) && validator.check(wpos))
+			if (worldMap.setWorldPositionNearestHeight(height, distance + rad, fallback, wpos, rndPos) && validator.check(wpos))
 				return true;
 		}
 		return false;
 	}
-	
+
 	template <class T>
-	static bool calcNearestWPosAtHeight(sint32 height, RYAI_MAP_CRUNCH::CWorldPosition &wpos, const T &pos, float radius, uint32 tries, const CPosValidator &validator)
+	static bool calcNearestWPosAtHeight(sint32 height, double distance, AITYPES::TVerticalPos fallback, RYAI_MAP_CRUNCH::CWorldPosition &wpos, const T &pos, float radius, uint32 tries, const CPosValidator &validator)
 	{
-		return calcNearestWPosAtHeight(height, getWorldMap(), wpos, pos, radius, tries, validator);
+		return calcNearestWPosAtHeight(height, distance, fallback, getWorldMap(), wpos, pos, radius, tries, validator);
 	}
 };
 
