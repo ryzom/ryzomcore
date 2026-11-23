@@ -142,7 +142,7 @@ public:
 	static ISoundDriver *createDriver(IStringMapperProvider *stringMapper, TDriver driverType = DriverAuto);
 
 	/// Constructor
-	ISoundDriver() { }
+	ISoundDriver() : m_DriverType(DriverAuto) { }
 	/// Destructor
 	virtual	~ISoundDriver() {}
 
@@ -161,6 +161,10 @@ public:
 	 *	\param options The features you want enabled. Verify after init() with getOption() or getOptions().
 	*/
 	virtual void initDevice(const std::string &device, TSoundOptions options) = 0;
+	/** The device that is open, by the name getDevices() has for it: the one that was opened too when the
+	 * default device was asked. Empty when no device is open, and from a driver that does not tell.
+	 */
+	virtual std::string getDeviceName() const { return std::string(); }
 
 	/// Return options that are enabled (including those that cannot be disabled on this driver).
 	virtual TSoundOptions getOptions() = 0;
@@ -193,6 +197,8 @@ public:
 
 	/// Filled at createDriver()
 	const std::string &getDllName() const { return _DllName; }
+	/// Filled at createDriver(): the driver this is, which is the one that was chosen when DriverAuto was asked
+	TDriver getDriverType() const { return m_DriverType; }
 	
 	/// \name Stuff for drivers that have native music support
 	//@{
@@ -212,6 +218,7 @@ public:
 	
 private:
 	std::string _DllName;
+	TDriver m_DriverType;
 };
 
 

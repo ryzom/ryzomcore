@@ -45,6 +45,7 @@ using namespace NLMISC;
 using namespace NL3D;
 
 void updateVRDevicesComboUI(); // from action_handler_game.cpp
+void updateDriversInUseConfigUI(); // from action_handler_game.cpp
 void initStereoDisplayDevice(); // from init.cpp
 void releaseStereoDisplayDevice(); // from release.cpp
 
@@ -64,6 +65,9 @@ static void resetSoundManager()
 		delete SoundMngr;
 		SoundMngr = NULL;
 	}
+
+	// the configuration window tells which sound driver and device are in use
+	updateDriversInUseConfigUI();
 }
 
 //---------------------------------------------------
@@ -406,6 +410,9 @@ void updateFromClientCfg()
 		{
 			nlwarning("Sound config error !");
 		}
+
+		// the configuration window tells which sound driver and device are in use
+		updateDriversInUseConfigUI();
 
 		mustReloadSoundMngrContinent= true;
 	}

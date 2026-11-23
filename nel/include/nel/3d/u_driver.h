@@ -571,7 +571,7 @@ public:
 
 	/**
 	  * Get driver information.
-	  * get the nel name of the driver (ex: "Opengl 1.2 NeL Driver")
+	  * get the nel name of the driver (ex: "OpenGL 1.2 NeL Driver")
 	  */
 	virtual const char*		getDriverInformation () = 0;
 

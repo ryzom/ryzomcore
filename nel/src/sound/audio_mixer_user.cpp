@@ -459,7 +459,7 @@ void CAudioMixerUser::initDriver(const std::string &driverName)
 		nlassert(_SoundDriver);
 		m_SoundDriverName = _SoundDriver->getDllName();
 		if (m_SoundDriverName.empty())
-			m_SoundDriverName = ISoundDriver::getDriverName(driverType);
+			m_SoundDriverName = ISoundDriver::getDriverName(_SoundDriver->getDriverType());
 	}
 	catch (const ESoundDriver &e)
 	{
@@ -484,6 +484,38 @@ void CAudioMixerUser::getDevices(std::vector<std::string> &devices)
 	}
 
 	_SoundDriver->getDevices(devices);
+}
+
+/// The driver that initDriver made, NumDrivers without one.
+UAudioMixer::TDriver CAudioMixerUser::getCurrentDriver() const
+{
+	if (!_SoundDriver)
+		return NumDrivers;
+
+	switch (_SoundDriver->getDriverType())
+	{
+	case ISoundDriver::DriverFMod:
+		return DriverFMod;
+	case ISoundDriver::DriverOpenAl:
+		return DriverOpenAl;
+	case ISoundDriver::DriverDSound:
+		return DriverDSound;
+	case ISoundDriver::DriverXAudio2:
+		return DriverXAudio2;
+	default:
+		// ISoundDriver::createDriver makes no other
+		nlstop;
+		return NumDrivers;
+	}
+}
+
+/// The device that initDevice opened, by its name of getDevices(), if the driver tells.
+std::string CAudioMixerUser::getCurrentDeviceName() const
+{
+	if (!_SoundDriver)
+		return std::string();
+
+	return _SoundDriver->getDeviceName();
 }
 
 /// Initialize the selected device on the currently initialized driver. Leave deviceName empty to select the default device.

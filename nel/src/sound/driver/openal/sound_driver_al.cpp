@@ -286,6 +286,21 @@ static const ALchar *getDeviceInternal(const std::string &device)
 	return nullptr;
 }
 
+/// The device that is open, by its name of getDevices() if the devices are listed.
+std::string CSoundDriverAL::getDeviceName() const
+{
+	if (!_AlDevice)
+		return std::string();
+	// asked of a device, the list of all devices is the name of that one
+	const ALchar *name = alcGetString(_AlDevice, AlEnumerateAllExt ? ALC_ALL_DEVICES_SPECIFIER : ALC_DEVICE_SPECIFIER);
+	if (!name)
+	{
+		nlwarning("AL: The device that is open has no name");
+		return std::string();
+	}
+	return name;
+}
+
 /// Initialize the driver with a user selected device. If device.empty(), the default or most appropriate device is used.
 void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundOptions options)
 {
@@ -319,7 +334,7 @@ void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundO
 	//                   ALC_STEREO_SOURCES, 4, 
 	//                   ALC_INVALID };
 	_AlContext = alcCreateContext(_AlDevice, nullptr); // attrlist);
-	if (!_AlContext) { alcCloseDevice(_AlDevice); throw ESoundDriver("AL: Failed to create context"); }
+	if (!_AlContext) { alcCloseDevice(_AlDevice); _AlDevice = nullptr; throw ESoundDriver("AL: Failed to create context"); }
 	alcMakeContextCurrent(_AlContext);
 	alTestError();
 
