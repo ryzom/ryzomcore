@@ -27,6 +27,7 @@
 #include "nel/misc/path.h"
 
 #include <cstdio>
+#include <cstring>
 #include <string>
 
 #include "game_share/generic_xml_msg_mngr.h"
@@ -95,31 +96,33 @@ static std::string stripped(const std::string &text)
 	return std::string(buffer.begin(), buffer.end());
 }
 
-static std::string splitLines(const std::string &text)
+// A text without the lines of the comments that name a deployed signature
+static std::string withoutDeployedSignature(const std::string &text)
 {
-	std::vector<uint8> buffer(text.begin(), text.end());
-	CGenericXmlMsgHeaderManager::splitAttributeLines(buffer);
-	return std::string(buffer.begin(), buffer.end());
+	std::string out;
+	size_t pos = 0;
+	while (pos < text.size())
+	{
+		size_t end = text.find('\n', pos);
+		end = end == std::string::npos ? text.size() : end + 1;
+		const std::string line = text.substr(pos, end - pos);
+		if (line.find("<!-- deployed_signature ") == std::string::npos)
+			out += line;
+		pos = end;
+	}
+	return out;
 }
 
-// The text a signature is the MD5 of, once the stream classes are out: with RYZOM_FORGE the file with one attribute
-// per line
-static std::string signed_(const std::string &text)
-{
-#ifdef RYZOM_FORGE
-	return splitLines(text);
-#else
-	return text;
-#endif
-}
-
-// The signature of msg.xml leaves the stream classes out: the file of the repository has the signature of the file
-// before any class was declared (argument 3), byte for byte
+// The signature of msg.xml leaves the stream classes out: the file of the repository, without the comment that
+// names its signature, has the signature of the file before any class was declared, byte for byte
 TEST(MsgXmlStreams, SignatureLeavesTheClassesOut)
 {
-	const char *current = RYZOM_MSG_XML;
 	const std::string dir = testDirectory();
-	const std::string now = readFile(current);
+	const std::string repository = readFile(RYZOM_MSG_XML);
+	const std::string now = withoutDeployedSignature(repository);
+	const std::string currentFile = dir + "/current.xml";
+	writeFile(currentFile, now);
+	const char *current = currentFile.c_str();
 	// The file as it was before it had stream classes (ryzomcore4 797099490), which is known by its MD5
 	const std::string old = stripped(now);
 	CHECK(md5Of(old).toString() == "b820fd606f07032eee6b01fdb2006d7f");
@@ -131,9 +134,9 @@ TEST(MsgXmlStreams, SignatureLeavesTheClassesOut)
 
 	CHECK(stripped(now) == old);
 	CHECK(stripped(old) == old); // a file without classes is left as it is
-	CHECK(CGenericXmlMsgHeaderManager::getSignature(current, false) == md5Of(signed_(old)));
-	CHECK(CGenericXmlMsgHeaderManager::getSignature(before, false) == md5Of(signed_(old)));
-	CHECK(CGenericXmlMsgHeaderManager::getSignature(current, true) == md5Of(signed_(old))); // (the file has no carriage returns)
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(current, false) == md5Of(old));
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(before, false) == md5Of(old));
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(current, true) == md5Of(old)); // (the file has no carriage returns)
 
 	// The same file with the line ends of a Windows checkout: the frontend's signature of it is that of the old
 	// file with those line ends, and the client's second signature that of the old file without them
@@ -152,8 +155,29 @@ TEST(MsgXmlStreams, SignatureLeavesTheClassesOut)
 	}
 	writeFile(dir + "/crlf.xml", nowCrlf);
 	CHECK(stripped(nowCrlf) == oldCrlf);
-	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/crlf.xml", false) == md5Of(signed_(oldCrlf)));
-	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/crlf.xml", true) == md5Of(signed_(old)));
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/crlf.xml", false) == md5Of(oldCrlf));
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/crlf.xml", true) == md5Of(old));
+
+	// The file of the repository names that signature for what it says, so it has it whatever its line ends are,
+	// and will have it in another layout
+	CHECK(repository != now);
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(RYZOM_MSG_XML, false).toString() == "b820fd606f07032eee6b01fdb2006d7f");
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(RYZOM_MSG_XML, true).toString() == "b820fd606f07032eee6b01fdb2006d7f");
+	CHECK(CGenericXmlMsgHeaderManager::checkStreamClassesText(RYZOM_MSG_XML).empty());
+	std::string repositoryCrlf;
+	for (size_t i = 0; i < repository.size(); ++i)
+	{
+		if (repository[i] == '\n')
+			repositoryCrlf += '\r';
+		repositoryCrlf += repository[i];
+	}
+	writeFile(dir + "/repository_crlf.xml", repositoryCrlf);
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/repository_crlf.xml", false) == md5Of(old));
+	// and so does database.xml: the MD5 of the file as it was when the comment was written (ryzomcore4 0c484611d)
+	const std::string database = readFile(RYZOM_DATABASE_XML);
+	CHECK(withoutDeployedSignature(database) != database);
+	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(RYZOM_DATABASE_XML, false).toString() == "decfd6a15c0cce2214fd5de706af0430");
+	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(RYZOM_DATABASE_XML, true).toString() == "decfd6a15c0cce2214fd5de706af0430");
 
 	// More classes, more attributes, tabs, several attributes on a line, a class on the last line without a line end
 	const std::string plain = "<client_messages_description>\n\t<branch name=\"A\">\n\t\t<leaf name=\"X\" description=\"a stream=of words\"/>\n\t\t<leaf name=\"Y\" format=\"u8\"/>\n\t</branch>\n  <leaf name=\"C\"/>\n</client_messages_description>\n";
@@ -223,123 +247,171 @@ TEST(MsgXmlStreams, SignatureLeavesTheClassesOut)
 	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/not_there.xml", false) == none);
 }
 
-// The layout with one attribute per line, which the signature of a RYZOM_FORGE build is made of: a file written
-// with each start tag on one line comes back as the file whose attribute lines were joined to make it
-TEST(MsgXmlStreams, OneAttributePerLine)
+static NLMISC::CHashKeyMD5 contentOf(const std::string &text, bool skipStreamClasses)
 {
-	// tags with one attribute or none, closing tags, text and blank lines stay as they are
-	const std::string plain = "<root>\n"
-	                          "  <branch name=\"A\">\n"
-	                          "    <leaf name=\"B\" />\n"
-	                          "\n"
-	                          "    <verbatime>a = b; c = \"d\" e=\"f\"</verbatime>\n"
-	                          "  </branch>\n"
-	                          "</root>\n";
-	CHECK(splitLines(plain) == plain);
+	std::vector<uint8> buffer(text.begin(), text.end());
+	return CGenericXmlMsgHeaderManager::getContentHash(buffer, skipStreamClasses);
+}
 
-	// the second and later attributes go under the first one, the last with what follows it on the line
-	const std::string follow = "    <leaf name=\"FOLLOW\"\n"
-	                           "          sendto=\"AIS\"\n"
-	                           "          format=\"\"\n"
-	                           "          description=\"The client follows its target\" />\n";
-	CHECK(splitLines("    <leaf name=\"FOLLOW\" sendto=\"AIS\" format=\"\" description=\"The client follows its target\" />\n") == follow);
-	// and a text that has one attribute per line already is left as it is
-	CHECK(splitLines(follow) == follow);
-	CHECK(splitLines("  <branch name=\"E\" count=\"256\">\n")
-	    == "  <branch name=\"E\"\n"
-	       "          count=\"256\">\n");
-	CHECK(splitLines("      <branch name=\"\" count=\"10\"> <!-- Change in local_database.xml -->\n")
-	    == "      <branch name=\"\"\n"
-	       "              count=\"10\"> <!-- Change in local_database.xml -->\n");
+static bool deployedOf(const std::string &text, const NLMISC::CHashKeyMD5 &content, NLMISC::CHashKeyMD5 &deployed)
+{
+	std::vector<uint8> buffer(text.begin(), text.end());
+	return CGenericXmlMsgHeaderManager::findDeployedSignature(buffer, content, deployed);
+}
 
-	// the indentation of the tag is kept as it is, also where it is not the one of its neighbours
-	CHECK(splitLines("      <leaf name=\"SELFKILL\" sendto=\"EGS\" />\n")
-	    == "      <leaf name=\"SELFKILL\"\n"
-	       "            sendto=\"EGS\" />\n");
-
-	// a value with spaces, with a '>' or with what looks like an attribute is one value
-	CHECK(splitLines("<leaf name=\"A B\" format=\"u8 u8 c=&quot;d&quot; e='f' x>y\"/>\n")
-	    == "<leaf name=\"A B\"\n"
-	       "      format=\"u8 u8 c=&quot;d&quot; e='f' x>y\"/>\n");
-
-	// attributes more than one space apart, or after a tab, are not the layout this splits: the line is left,
-	// or split as far as the one-space attributes go; so is a tag indented with a tab
-	CHECK(splitLines("<leaf name=\"A\"  sendto=\"EGS\" format=\"\" />\n") == "<leaf name=\"A\"  sendto=\"EGS\" format=\"\" />\n");
-	CHECK(splitLines("<leaf name=\"A\" sendto=\"EGS\"\tformat=\"\" />\n") == "<leaf name=\"A\"\n      sendto=\"EGS\"\tformat=\"\" />\n");
-	CHECK(splitLines("\t<leaf name=\"A\" sendto=\"EGS\" />\n") == "\t<leaf name=\"A\" sendto=\"EGS\" />\n");
-
-	// a comment is left as it is, with the tags inside it, to the line that ends it
-	const std::string comment = "  <!-- ****OUT OF DATE COMMANDS****\n"
-	                            "<branch name=\"CHEAT\">\n"
-	                            "        <leaf name=\"GOD\"   sendto=\"EGS\" format=\"\" />\n"
-	                            "        <leaf name=\"X\" sendto=\"EGS\" format=\"\" />\n"
-	                            "</branch>\n"
-	                            "-->\n"
-	                            "  <!-- one line --> \n"
-	                            "  <leaf name=\"A\" sendto=\"EGS\" />\n";
-	CHECK(splitLines(comment)
-	    == "  <!-- ****OUT OF DATE COMMANDS****\n"
-	       "<branch name=\"CHEAT\">\n"
-	       "        <leaf name=\"GOD\"   sendto=\"EGS\" format=\"\" />\n"
-	       "        <leaf name=\"X\" sendto=\"EGS\" format=\"\" />\n"
-	       "</branch>\n"
-	       "-->\n"
-	       "  <!-- one line --> \n"
-	       "  <leaf name=\"A\"\n"
-	       "        sendto=\"EGS\" />\n");
-
-	// a comment that a tag's line leaves open goes on below it, and a tag after the end of a comment on its line
-	// is not split
-	const std::string open = "  <branch name=\"\" count=\"10\"> <!-- the slots:\n"
-	                         "    <leaf name=\"OLD\" type=\"I32\" />\n"
-	                         "  --> <leaf name=\"KEPT\" type=\"I32\" />\n"
-	                         "    <leaf name=\"NEW\" type=\"I32\" /> <!-- one --> <!-- two\n"
-	                         "    <leaf name=\"OLD2\" type=\"I32\" />\n"
-	                         "    -->\n";
-	CHECK(splitLines(open)
-	    == "  <branch name=\"\"\n"
-	       "          count=\"10\"> <!-- the slots:\n"
-	       "    <leaf name=\"OLD\" type=\"I32\" />\n"
-	       "  --> <leaf name=\"KEPT\" type=\"I32\" />\n"
-	       "    <leaf name=\"NEW\"\n"
-	       "          type=\"I32\" /> <!-- one --> <!-- two\n"
-	       "    <leaf name=\"OLD2\" type=\"I32\" />\n"
-	       "    -->\n");
-	// "<!-->" does not end the comment it starts
-	CHECK(splitLines("<!-->\n<leaf name=\"A\" b=\"c\" />\n-->\n") == "<!-->\n<leaf name=\"A\" b=\"c\" />\n-->\n");
-
-	// the line ends added are those of the line, and a last line without one is split all the same
-	CHECK(splitLines("  <leaf name=\"A\" sendto=\"EGS\" format=\"\" />\r\n<x a=\"1\" b=\"2\"/>")
-	    == "  <leaf name=\"A\"\r\n"
-	       "        sendto=\"EGS\"\r\n"
-	       "        format=\"\" />\r\n"
-	       "<x a=\"1\"\n"
-	       "   b=\"2\"/>");
-
-	// nothing, and a text of line ends only
-	CHECK(splitLines("") == "");
-	CHECK(splitLines("\n\r\n\n") == "\n\r\n\n");
-
-	// the signature of a database.xml: the MD5 of the file, or of the file without its carriage returns; with
-	// RYZOM_FORGE that of the file in this layout
-	const std::string dir = testDirectory();
-	const std::string compact = "<database_description>\r\n  <branch name=\"E\" count=\"256\">\r\n  </branch>\r\n</database_description>\r\n";
-	writeFile(dir + "/database.xml", compact);
-#ifdef RYZOM_FORGE
-	const std::string compared = splitLines(compact);
-#else
-	const std::string compared = compact;
-#endif
-	std::string comparedText;
-	for (size_t i = 0; i < compared.size(); ++i)
-	{
-		if (compared[i] != '\r')
-			comparedText += compared[i];
-	}
-	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(dir + "/database.xml", false) == md5Of(compared));
-	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(dir + "/database.xml", true) == md5Of(comparedText));
+// The hash of what a file says, which its layout does not change, and the signature a file names for its content
+// as it is deployed, which is then its signature
+TEST(MsgXmlStreams, ContentHashAndDeployedSignature)
+{
 	NLMISC::CHashKeyMD5 none;
 	none.clear();
+
+	const std::string sample = "<root a=\"1\" b=\"x &amp; y\">\n"
+	                           "  <!-- comment <leaf name=\"no\"/> -->\n"
+	                           "  <branch name=\"A\"   count=\"2\">text  one\n"
+	                           "    two<!-- c -->three <leaf name=\"B\" type=\"I8\"/> tail\n"
+	                           "    <![CDATA[ raw <x> ]]>\n"
+	                           "  </branch>\n"
+	                           "  <stream_class name=\"s\" />\n"
+	                           "  <leaf name=\"C\" stream=\"s\" format=\"u8 u8\"></leaf>\n"
+	                           "</root>\n";
+	// what the tool that writes the deployed signatures computes for this text (its own reading of the rule)
+	CHECK(contentOf(sample, false).toString() == "6336b78c5aad7535b85eda4a080ead69");
+	CHECK(contentOf(sample, true).toString() == "8539516f5937a5c5df7d0a8ce2c5123f");
+
+	// a value or a text does not read as an attribute or an element
+	CHECK(contentOf("<a b=\"x&quot; c=&quot;y\"/>", false) != contentOf("<a b=\"x\" c=\"y\"/>", false));
+	CHECK(contentOf("<a>&lt;b&gt;&lt;/b&gt;</a>", false) != contentOf("<a><b/></a>", false));
+	CHECK(contentOf("<a>&amp;lt;</a>", false) != contentOf("<a>&lt;</a>", false));
+	// a stream class that is left out does not part the text around it
+	CHECK(contentOf("<a>foo\n  <stream_class name=\"s\" />\n  bar</a>", true) == contentOf("<a>foo\n  bar</a>", true));
+	CHECK(contentOf("<a>foo<stream_class name=\"s\" />bar</a>", true) == contentOf("<a>foobar</a>", true));
+
+	// the same content in another layout: one attribute per line, other indentation and line ends, no comments,
+	// more comments, the empty element closed the other way, the text wrapped elsewhere
+	const std::string other = "<?xml version=\"1.0\"?>\r\n"
+	                          "<!-- a header -->\r\n"
+	                          "<root a=\"1\"\r\n"
+	                          "      b=\"x &amp; y\">\r\n"
+	                          "\t<branch name=\"A\"\r\n"
+	                          "\t        count=\"2\">text one twothree\r\n"
+	                          "\t\t<leaf   name=\"B\"   type=\"I8\"   ></leaf>\r\n"
+	                          "\t\ttail raw\r\n"
+	                          "\t\t&lt;x&gt;</branch>\r\n"
+	                          "<stream_class name=\"s\"/><!-- the classes -->\r\n"
+	                          "<leaf name=\"C\" stream=\"s\" format=\"u8 u8\" />\r\n"
+	                          "</root>";
+	CHECK(contentOf(other, false) == contentOf(sample, false));
+	CHECK(contentOf(other, true) == contentOf(sample, true));
+
+	// without the stream classes, a msg.xml that declares other classes, or none, says the same
+	const std::string noClasses = "<root a=\"1\" b=\"x &amp; y\"><branch name=\"A\" count=\"2\">text one twothree<leaf name=\"B\" type=\"I8\"/>tail raw &lt;x&gt;</branch>"
+	                              "<leaf name=\"C\" format=\"u8 u8\"/></root>";
+	CHECK(contentOf(noClasses, true) == contentOf(sample, true));
+	CHECK(contentOf(noClasses, false) != contentOf(sample, false));
+
+	// what the file says: a value, a name, the order of the attributes or of the elements, an element more, a text
+	struct CChange
+	{
+		const char *From;
+		const char *To;
+	};
+	const CChange changes[] = {
+		{ "count=\"2\"", "count=\"3\"" },
+		{ "name=\"B\"", "name=\"b\"" },
+		{ "name=\"B\" type=\"I8\"", "type=\"I8\" name=\"B\"" },
+		{ "format=\"u8 u8\"", "format=\"u8  u8\"" },
+		{ "<leaf name=\"C\" format=\"u8 u8\"/>", "<leaf name=\"C\" format=\"u8 u8\"/><leaf name=\"D\"/>" },
+		{ "<leaf name=\"B\" type=\"I8\"/>tail", "tail<leaf name=\"B\" type=\"I8\"/>" },
+		{ "text one", "text on e" },
+		{ "<root a=\"1\"", "<root a=\"1\" c=\"\"" },
+	};
+	for (uint i = 0; i < sizeof(changes) / sizeof(changes[0]); ++i)
+	{
+		std::string changed = noClasses;
+		const std::string::size_type at = changed.find(changes[i].From);
+		CHECK(at != std::string::npos);
+		if (at == std::string::npos)
+			continue;
+		changed.replace(at, strlen(changes[i].From), changes[i].To);
+		if (contentOf(changed, true) == contentOf(noClasses, true))
+			printf("change %u is not seen in the content hash\n", i);
+		CHECK(contentOf(changed, true) != contentOf(noClasses, true));
+		CHECK(contentOf(changed, true) != none);
+	}
+
+	// a text that is no XML has no content
+	CHECK(contentOf("", false) == none);
+	CHECK(contentOf("<root><leaf></root>", false) == none);
+	CHECK(contentOf("not xml", false) == none);
+
+	// the files of the repository, with either line ends; the hashes are printed for the tool's to be compared with
+	const std::string msg = readFile(RYZOM_MSG_XML);
+	const std::string database = readFile(RYZOM_DATABASE_XML);
+	std::string msgCrlf;
+	for (size_t i = 0; i < msg.size(); ++i)
+	{
+		if (msg[i] == '\n')
+			msgCrlf += '\r';
+		msgCrlf += msg[i];
+	}
+	CHECK(contentOf(msg, true) != none && contentOf(database, false) != none);
+	CHECK(contentOf(msg, true) == contentOf(msgCrlf, true));
+	CHECK(contentOf(msg, true) == contentOf(stripped(msg), false)); // (the file without its stream classes)
+	CHECK(contentOf(msg, false) != contentOf(msg, true));
+	printf("content hash of msg.xml without its stream classes: %s, of database.xml: %s\n",
+	    contentOf(msg, true).toString().c_str(), contentOf(database, false).toString().c_str());
+
+	// the signature a file names for its content
+	const NLMISC::CHashKeyMD5 content = contentOf(sample, true);
+	const NLMISC::CHashKeyMD5 md5 = md5Of("the deployed file");
+	const std::string record = "<!-- deployed_signature content=\"" + content.toString() + "\" md5=\"" + md5.toString() + "\" -->";
+	NLMISC::CHashKeyMD5 found;
+	CHECK(deployedOf("<root>\n  " + record + "\n</root>\n", content, found) && found == md5);
+	// the comment does not change what the file says
+	CHECK(contentOf(sample + record, true) == content);
+	// several, of which one names the content
+	const std::string records = "<!-- deployed_signature content=\"" + md5.toString() + "\" md5=\"" + content.toString() + "\" -->\n" + record;
+	found.clear();
+	CHECK(deployedOf(records, content, found) && found == md5);
+	// another content, no content, and comments that are not written that way
+	found.clear();
+	CHECK(!deployedOf(record, contentOf(sample, false), found));
+	CHECK(!deployedOf(record, none, found));
+	CHECK(!deployedOf("", content, found));
+	CHECK(!deployedOf("<!-- deployed_signature content=\"" + content.toString() + "\" md5=\"" + md5.toString().substr(0, 31) + "\" -->", content, found));
+	CHECK(!deployedOf("<!-- deployed_signature content=\"" + content.toString() + "\" md5=\"" + md5.toString().substr(0, 31) + "g\" -->", content, found));
+	CHECK(!deployedOf("<!-- deployed_signature content=\"" + content.toString() + "\"  md5=\"" + md5.toString() + "\" -->", content, found));
+	CHECK(!deployedOf("<!--deployed_signature content=\"" + content.toString() + "\" md5=\"" + md5.toString() + "\" -->", content, found));
+	CHECK(!deployedOf("<!-- deployed_signature content=\"" + content.toString() + "\" md5=\"" + md5.toString(), content, found));
+	CHECK(found == none);
+
+	// the signature of a file that names one for what it says: that one, for both forms of the signature and for
+	// both files. A file whose content changed since has the signature of its bytes.
+	const std::string dir = testDirectory();
+	const std::string named = "<root a=\"1\">\r\n  " + record + "\r\n" + sample.substr(sample.find('\n') + 1);
+	CHECK(contentOf(named, true) != content); // (the root lost an attribute)
+	const std::string namedRight = "<root a=\"1\" b=\"x &amp; y\">\r\n  " + record + "\r\n" + sample.substr(sample.find('\n') + 1);
+	CHECK(contentOf(namedRight, true) == content);
+	std::string namedRightText;
+	for (size_t i = 0; i < namedRight.size(); ++i)
+	{
+		if (namedRight[i] != '\r')
+			namedRightText += namedRight[i];
+	}
+	writeFile(dir + "/named.xml", namedRight);
+	writeFile(dir + "/changed.xml", named);
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/named.xml", false) == md5);
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/named.xml", true) == md5);
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/changed.xml", false) == md5Of(stripped(named)));
+	// database.xml: the stream classes are part of what it says, so this file names the content of another one
+	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(dir + "/named.xml", false) == md5Of(namedRight));
+	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(dir + "/named.xml", true) == md5Of(namedRightText));
+	const NLMISC::CHashKeyMD5 contentAll = contentOf(sample, false);
+	const std::string namedAll = "<!-- deployed_signature content=\"" + contentAll.toString() + "\" md5=\"" + md5.toString() + "\" -->\n" + sample;
+	writeFile(dir + "/named_database.xml", namedAll);
+	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(dir + "/named_database.xml", false) == md5);
+	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(dir + "/named_database.xml", true) == md5);
 	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(dir + "/not_there.xml", false) == none);
 }
 

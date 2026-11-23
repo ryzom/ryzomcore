@@ -28,4 +28,5 @@ target_link_libraries(ryzom_frontend_streams_test
 target_compile_definitions(ryzom_frontend_streams_test
         PRIVATE
         RYZOM_MSG_XML="${CMAKE_SOURCE_DIR}/ryzom/common/data_common/msg.xml"
+        RYZOM_DATABASE_XML="${CMAKE_SOURCE_DIR}/ryzom/common/data_common/database.xml"
 )
