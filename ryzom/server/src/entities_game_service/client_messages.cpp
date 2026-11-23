@@ -655,6 +655,16 @@ void cbClientPhraseExecuteFaber( NLNET::CMessage& msgin, const std::string &serv
 		return;
 	}
 
+	// the brick must be a craft plan: only the bricks of the plan families carry what the craft reads (the materials,
+	// the item made). The client names the plan of its craft window.
+	const CStaticBrick *planBrick = CSheets::getSBrickForm( craftPlan );
+	if ( planBrick == NULL || planBrick->Faber == NULL )
+	{
+		nlwarning("HACK: %s sent EXECUTE_FABER with the brick %s, which is not a craft plan, refused", Id.toString().c_str(), craftPlan.toString().c_str());
+		reportRefusedClientMessage(Id);
+		return;
+	}
+
 	// A craft in progress consumes the materials selected for it when it ends, and the phrase manager refuses a
 	// second craft only after the lists below are replaced, so they are left alone. The phrase is still executed:
 	// the phrase manager refuses it and acknowledges the client's execution counter, which the client has already

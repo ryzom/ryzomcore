@@ -343,6 +343,12 @@ void  CFaberPhrase::execute()
 		nlwarning("<CFaberPhrase::execute> Can't found static form of craft plan %s", player->getCraftPlan().toString().c_str() );
 		return;
 	}
+	// only a brick of the plan families has the craft data
+	if( plan->Faber == 0 )
+	{
+		nlwarning("<CFaberPhrase::execute> The brick %s is not a craft plan", player->getCraftPlan().toString().c_str() );
+		return;
+	}
 
 	/// set Faber time if not set (default is 2 sec)
 	if ( !_FaberTime)
@@ -397,6 +403,14 @@ void CFaberPhrase::apply()
 	if( plan == 0 )
 	{
 		nlwarning("<CFaberPhrase::apply> Can't found static form of craft plan %s", c->getCraftPlan().toString().c_str() );
+		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "UNKNOWN_CRAFT_PLAN");
+		stop();
+		return;
+	}
+	// only a brick of the plan families has the craft data that is read from here on
+	if( plan->Faber == 0 )
+	{
+		nlwarning("<CFaberPhrase::apply> The brick %s is not a craft plan", c->getCraftPlan().toString().c_str() );
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "UNKNOWN_CRAFT_PLAN");
 		stop();
 		return;
