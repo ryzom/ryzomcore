@@ -36,7 +36,7 @@ function r2:switchChatWindow()
 end
 
 function r2:switchWebAdminWindow()
-	self:switchWindow("ui:interface:r2ed_ring_window")
+	self:switchWindow("ui:interface:r2ed_web_admin")
 end
 
 function r2:switchMailBoxWindow()

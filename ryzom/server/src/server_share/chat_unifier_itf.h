@@ -32,6 +32,8 @@
 
 #include "nel/misc/entity_id.h"
 
+#include "game_share/chat_message.h"
+
 namespace CHATUNI
 {
 
@@ -349,13 +351,19 @@ namespace CHATUNI
 
 		void farGuildChat_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
+		void farGuildChatShared_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
+
 		void farGuildChat2_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void farGuildChat2Ex_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void universeBroadcast_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
+		void universeBroadcastShared_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
+
 		void dynChanBroadcast_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
+
+		void dynChanBroadcastShared_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void recvBroadcastMessage_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
@@ -375,14 +383,20 @@ namespace CHATUNI
 		virtual void recvFarTell(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const ucstring &text) =0;
 		// IOS forward a guild chat message to the IOS
 		virtual void farGuildChat(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const ucstring &text) =0;
+		// IOS forwards a shared guild chat message to the IOS
+		virtual void farGuildChatShared(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const CChatMessage &chatMessage) =0;
 		// IOS forward a guild chat message to the IOS
 		virtual void farGuildChat2(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const ucstring &phraseName) =0;
 		// IOS forward a guild chat message to the IOS
 		virtual void farGuildChat2Ex(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, uint32 phraseId) =0;
 		// IOS forward a univers chat message to the IOSs
 		virtual void universeBroadcast(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 senderHomeSession, const ucstring &text) =0;
+		// IOS forwards a shared universe chat message to the IOSs
+		virtual void universeBroadcastShared(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 senderHomeSession, const CChatMessage &chatMessage) =0;
 		// IOS forward a dyn chat chat message to the IOSs
 		virtual void dynChanBroadcast(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text) =0;
+		// IOS forwards a shared dynamic chat message to the IOSs
+		virtual void dynChanBroadcastShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &chatMessage) =0;
 		// SU send a broadcast message to the IOS
 		virtual void recvBroadcastMessage(NLNET::IModuleProxy *sender, const ucstring &message) =0;
 
@@ -440,14 +454,20 @@ namespace CHATUNI
 		void recvFarTell(NLNET::IModule *sender, const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const ucstring &text);
 		// IOS forward a guild chat message to the IOS
 		void farGuildChat(NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, const ucstring &text);
+		// IOS forwards a shared guild chat message to the IOS
+		void farGuildChatShared(NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, const CChatMessage &chatMessage);
 		// IOS forward a guild chat message to the IOS
 		void farGuildChat2(NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, const ucstring &phraseName);
 		// IOS forward a guild chat message to the IOS
 		void farGuildChat2Ex(NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, uint32 phraseId);
 		// IOS forward a univers chat message to the IOSs
 		void universeBroadcast(NLNET::IModule *sender, const ucstring &senderName, uint32 senderHomeSession, const ucstring &text);
+		// IOS forwards a shared universe chat message to the IOSs
+		void universeBroadcastShared(NLNET::IModule *sender, const ucstring &senderName, uint32 senderHomeSession, const CChatMessage &chatMessage);
 		// IOS forward a dyn chat chat message to the IOSs
 		void dynChanBroadcast(NLNET::IModule *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text);
+		// IOS forwards a shared dynamic chat message to the IOSs
+		void dynChanBroadcastShared(NLNET::IModule *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &chatMessage);
 		// SU send a broadcast message to the IOS
 		void recvBroadcastMessage(NLNET::IModule *sender, const ucstring &message);
 		// IOS forward a guild chat message to the IOS
@@ -460,6 +480,23 @@ namespace CHATUNI
 
 			// create the message to send to multiple dest
 			buildMessageFor_farGuildChat(message , senderName, guildId, text);
+
+			for (; first != last; ++first)
+			{
+				(*first)->sendModuleMessage(sender, message);
+			}
+
+		}
+		// IOS forwards a shared guild chat message to the IOS
+
+		// This is the broadcast version of the method.
+		template < class ProxyIterator >
+		static void broadcast_farGuildChatShared(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, const CChatMessage &chatMessage)
+		{
+			NLNET::CMessage message;
+
+			// create the message to send to multiple dest
+			buildMessageFor_farGuildChatShared(message , senderName, guildId, chatMessage);
 
 			for (; first != last; ++first)
 			{
@@ -518,6 +555,23 @@ namespace CHATUNI
 			}
 
 		}
+		// IOS forwards a shared universe chat message to the IOSs
+
+		// This is the broadcast version of the method.
+		template < class ProxyIterator >
+		static void broadcast_universeBroadcastShared(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const ucstring &senderName, uint32 senderHomeSession, const CChatMessage &chatMessage)
+		{
+			NLNET::CMessage message;
+
+			// create the message to send to multiple dest
+			buildMessageFor_universeBroadcastShared(message , senderName, senderHomeSession, chatMessage);
+
+			for (; first != last; ++first)
+			{
+				(*first)->sendModuleMessage(sender, message);
+			}
+
+		}
 		// IOS forward a dyn chat chat message to the IOSs
 
 		// This is the broadcast version of the method.
@@ -528,6 +582,23 @@ namespace CHATUNI
 
 			// create the message to send to multiple dest
 			buildMessageFor_dynChanBroadcast(message , chanId, senderName, text);
+
+			for (; first != last; ++first)
+			{
+				(*first)->sendModuleMessage(sender, message);
+			}
+
+		}
+		// IOS forwards a shared dynamic chat message to the IOSs
+
+		// This is the broadcast version of the method.
+		template < class ProxyIterator >
+		static void broadcast_dynChanBroadcastShared(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &chatMessage)
+		{
+			NLNET::CMessage message;
+
+			// create the message to send to multiple dest
+			buildMessageFor_dynChanBroadcastShared(message , chanId, senderName, chatMessage);
 
 			for (; first != last; ++first)
 			{
@@ -546,6 +617,9 @@ namespace CHATUNI
 		static const NLNET::CMessage &buildMessageFor_farGuildChat(NLNET::CMessage &__message, const ucstring &senderName, uint32 guildId, const ucstring &text);
 
 		// Message serializer. Return the message received in reference for easier integration
+		static const NLNET::CMessage &buildMessageFor_farGuildChatShared(NLNET::CMessage &__message, const ucstring &senderName, uint32 guildId, const CChatMessage &chatMessage);
+
+		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_farGuildChat2(NLNET::CMessage &__message, const ucstring &senderName, uint32 guildId, const ucstring &phraseName);
 
 		// Message serializer. Return the message received in reference for easier integration
@@ -555,7 +629,13 @@ namespace CHATUNI
 		static const NLNET::CMessage &buildMessageFor_universeBroadcast(NLNET::CMessage &__message, const ucstring &senderName, uint32 senderHomeSession, const ucstring &text);
 
 		// Message serializer. Return the message received in reference for easier integration
+		static const NLNET::CMessage &buildMessageFor_universeBroadcastShared(NLNET::CMessage &__message, const ucstring &senderName, uint32 senderHomeSession, const CChatMessage &chatMessage);
+
+		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_dynChanBroadcast(NLNET::CMessage &__message, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text);
+
+		// Message serializer. Return the message received in reference for easier integration
+		static const NLNET::CMessage &buildMessageFor_dynChanBroadcastShared(NLNET::CMessage &__message, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &chatMessage);
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_recvBroadcastMessage(NLNET::CMessage &__message, const ucstring &message);

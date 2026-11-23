@@ -75,6 +75,7 @@ CStaticBrick::CStaticBrick()
 	CraftingDuration = 2.f;
 	MinFameValue = (sint32)0x80000000;
 	UsableWithEmptyHands = true;
+	HasBadProperty = false;
 } // constructor //
 
 
@@ -131,10 +132,12 @@ void CStaticBrick::serial(class NLMISC::IStream &f)
 
 	// Params
 		Params.clear();
+		HasBadProperty = false;
 		size = (uint16)StringParams.size();
 		for (uint i = 0 ; i < size ; ++i)
 		{
-			addParam(StringParams[i], Params);
+			if (!addParam(StringParams[i], Params, SheetId.toString()))
+				HasBadProperty = true;
 		}
 
 	// Grammar
@@ -366,8 +369,8 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 			SKILLS::ESkills skill = SKILLS::toSkill(sav);
 			if ( skill != SKILLS::unknown ) // discard the skill if unknown
 				Skills.push_back( skill );
-//			else
-//				nlwarning( "<CStaticBrick::readGeorges> Invalid Skill value '%s' in sheet %s", sav.c_str(), sheetId.toString().c_str() );
+			else if (NLMISC::nlstricmp(sav, "None") != 0) // the default of _skills.typ, a brick without a skill
+				nlwarning("<CStaticBrick::readGeorges> Invalid Skill value '%s' in sheet %s", sav.c_str(), sheetId.toString().c_str());
 		}
 	}
 	else
@@ -508,10 +511,12 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 	}
 	// Parse Params
 	Params.clear();
+	HasBadProperty = false;
 	const uint size = (uint)StringParams.size();
 	for (uint i = 0 ; i < size ; ++i)
 	{
-		addParam(StringParams[i], Params);
+		if (!addParam(StringParams[i], Params, sheetId.toString()))
+			HasBadProperty = true;
 	}
 
 	// Load Faber tools
@@ -561,7 +566,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 			if(bf != BRICK_FAMILIES::Unknown)
 				MandatoryFamilies.insert( bf );
 			else
-				nlwarning("Unknown Mandatory family %s",value.c_str());
+				nlwarning("Unknown Mandatory family %s in sheet %s", value.c_str(), sheetId.toString().c_str());
 		}
 	}
 
@@ -577,7 +582,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 			if(bf != BRICK_FAMILIES::Unknown)
 				OptionalFamilies.insert( bf );
 			else
-				nlwarning("Unknown optional family %s",value.c_str());
+				nlwarning("Unknown optional family %s in sheet %s", value.c_str(), sheetId.toString().c_str());
 		}
 	}
 
@@ -593,7 +598,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 			if(bf != BRICK_FAMILIES::Unknown)
 				MandatoryFamilies.insert( bf );
 			else
-				nlwarning("Unknown Parameter family %s",value.c_str());
+				nlwarning("Unknown Parameter family %s in sheet %s", value.c_str(), sheetId.toString().c_str());
 		}
 	}
 
@@ -608,6 +613,8 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 			BRICK_FAMILIES::TBrickFamily	bf= BRICK_FAMILIES::toSBrickFamily(value);
 			if(bf != BRICK_FAMILIES::Unknown)
 				CreditFamilies.insert( bf );
+			else
+				nlwarning("Unknown credit family %s in sheet %s", value.c_str(), sheetId.toString().c_str());
 		}
 	}
 
@@ -650,11 +657,12 @@ bool	CPlayerSkill::initFromString( const string& skillAndValue )
 //--------------------------------------------------------------
 //					addParam()
 //--------------------------------------------------------------
-void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Params)
+bool addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Params, const std::string &sheetName)
 {
 	std::string keyword;
 	std::string tail;
 	stringToKeywordAndTail(paramStr,keyword,tail);
+	const size_t nbParamsBefore = Params.size();
 
 	// $*ENUM TBrickParam
 	switch(TBrickParam(keyword))
@@ -1715,6 +1723,23 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 		Params.push_back(new CSBrickParamJewelAttrs(tail));
 		break;
 	}
+
+	if (Params.size() == nbParamsBefore)
+	{
+		// the client reads these, the server has no use for them
+		if (NLMISC::nlstricmp(keyword, "FPLAN") == 0 || NLMISC::nlstricmp(keyword, "INFO") == 0 || NLMISC::nlstricmp(keyword, "BHFECA_TAG") == 0)
+			return true;
+		nlwarning("Sheet %s: unknown property '%s', left out", sheetName.c_str(), paramStr.c_str());
+		return false;
+	}
+	if (!Params.back()->ParsedOk)
+	{
+		// its values would be the defaults
+		nlwarning("Sheet %s: property '%s' has the wrong number of arguments, left out", sheetName.c_str(), paramStr.c_str());
+		Params.pop_back();
+		return false;
+	}
+	return true;
 } // addParam //
 
 //--------------------------------------------------------------

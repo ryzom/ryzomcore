@@ -1,7 +1,10 @@
 #include "nel_launcher_dlg.h"
 #include "connection.h"
+#include <cerrno>
 
 #include <QMessageBox>
+#include <QDesktopServices>
+#include <QUrl>
 
 #ifndef NL_OS_WINDOWS
 #define _chdir chdir
@@ -11,6 +14,12 @@
 #endif // NL_OS_WINDOWS
 
 NLMISC::CConfigFile ConfigFile;
+
+// the page the Sign Up button opens, empty when the config file has none
+static std::string signUpUrl()
+{
+	return ConfigFile.exists("SignUpURL") ? ConfigFile.getVar("SignUpURL").asString() : std::string();
+}
 
 CNelLauncherDlg::CNelLauncherDlg(QWidget *parent)
 {
@@ -24,6 +33,7 @@ CNelLauncherDlg::CNelLauncherDlg(QWidget *parent)
 	connect( pbLogin, SIGNAL( clicked() ), this, SLOT( clickedLogin() ) );
 	connect( tblShardList, SIGNAL( cellDoubleClicked(int,int) ), this, SLOT( doubleClickedShard(int,int) ) );
 	connect( pbConnect, SIGNAL( clicked() ), this, SLOT( clickedConnect() ) );
+	connect( pbSignup, SIGNAL( clicked() ), this, SLOT( clickedSignUp() ) );
 
 	// Set up the table.
 	QStringList tableLabels;
@@ -50,6 +60,8 @@ CNelLauncherDlg::CNelLauncherDlg(QWidget *parent)
 
 	if(verboseLog) nlinfo("Using verbose log mode");
 
+	// without a page to open, the Sign Up button stays disabled
+	pbSignup->setEnabled(!signUpUrl().empty());
 }
 
 CNelLauncherDlg::~CNelLauncherDlg()
@@ -67,7 +79,25 @@ CNelLauncherDlg::~CNelLauncherDlg()
 
 void CNelLauncherDlg::clickedSignUp()
 {
+	std::string url = signUpUrl();
+	if(url.empty())
+		return;
 
+	// a web page only, never a local file or another program's scheme
+	QUrl pageUrl(QString::fromUtf8(url.c_str()));
+	if(!pageUrl.isValid() || (pageUrl.scheme().compare("http", Qt::CaseInsensitive) != 0 && pageUrl.scheme().compare("https", Qt::CaseInsensitive) != 0))
+	{
+		nlwarning("SignUpURL '%s' in nel_launcher.cfg is not an http or https address, nothing is opened", url.c_str());
+		QMessageBox::about(this, "Sign Up", QString("SignUpURL in nel_launcher.cfg is not an http or https address, nothing is opened: %1").arg(QString::fromUtf8(url.c_str())));
+		return;
+	}
+
+	nlinfo("opening the sign up page %s", url.c_str());
+	if(!QDesktopServices::openUrl(pageUrl))
+	{
+		nlwarning("Can't open the sign up page '%s'", url.c_str());
+		QMessageBox::about(this, "Sign Up", "Can't open the sign up page " + QString::fromUtf8(url.c_str()));
+	}
 }
 
 void CNelLauncherDlg::clickedLogin()
@@ -122,7 +152,7 @@ void CNelLauncherDlg::clickedLogin()
 		QMessageBox::about(this, "Failed Login", "Failed to log in to Login Service: " + QString(res.c_str()));
 		// Enable buttons if logging in fails.
 		pbLogin->setEnabled(true);
-		pbSignup->setEnabled(true);
+		pbSignup->setEnabled(!signUpUrl().empty());
 		pbConnect->setEnabled(false);
 	}
 }
@@ -140,9 +170,11 @@ void CNelLauncherDlg::clickedConnect()
 	pbConnect->setEnabled(false);
 	TShardList shards = m_Connection.getShards();
 	nlinfo("a shard was double clicked. row selected: %d", tblShardList->currentRow());
-	if(tblShardList->currentRow() < 0)
+	if(tblShardList->currentRow() < 0 || tblShardList->currentRow() >= (int)shards.size())
 	{
 		QMessageBox::about(this, "Connect to Shard", "Please, select a shard and then press Connect button.");
+		pbConnect->setEnabled(true);
+		return;
 	}
 
 	pbConnect->setEnabled(false);
@@ -152,6 +184,8 @@ void CNelLauncherDlg::clickedConnect()
 	if(!shard.Online)
 	{
 		QMessageBox::about(this, "Connect to Shard", "You can't connect to an offline shard (error code 15)");
+		pbConnect->setEnabled(true);
+		return;
 	}
 
 	// TODO implement the patching stuff.
@@ -177,7 +211,7 @@ void CNelLauncherDlg::clickedConnect()
 		char **buf = new char*[nArgs + 1];
 		for(uint i=0; i<nArgs; ++i)
 		{
-			buf[i] = new char(vargs[i].size() + 1);
+			buf[i] = new char[vargs[i].size() + 1];
 			strcpy(buf[i], vargs[i].c_str());
 			//strcat(buf[i], '\0');
 		}
@@ -186,18 +220,17 @@ void CNelLauncherDlg::clickedConnect()
 		if(!dir.empty())
 			_chdir(dir.c_str());
 
-		if(_execvp(rapp.c_str(), buf) == -1)
-		{
-			QMessageBox::about(this, "Launch Client", "Can't execute the game (error code 17)");
-			pbConnect->setEnabled(true);
-		}
-		else
-		{
-			for(uint i=0; i<nArgs; ++i)
-				delete [] buf[i];
-			delete buf;
-			exit(0);
-		}
+		// _execvp only returns when it could not start the game
+		_execvp(rapp.c_str(), buf);
+		int execError = errno;
+
+		for(uint i=0; i<nArgs; ++i)
+			delete [] buf[i];
+		delete [] buf;
+
+		nlwarning("Can't execute the game '%s' in '%s': %s", rapp.c_str(), dir.c_str(), strerror(execError));
+		QMessageBox::about(this, "Launch Client", QString("Can't execute the game '%1' (error code 17): %2").arg(QString::fromUtf8(rapp.c_str()), QString::fromLocal8Bit(strerror(execError))));
+		pbConnect->setEnabled(true);
 	}
 	else
 	{

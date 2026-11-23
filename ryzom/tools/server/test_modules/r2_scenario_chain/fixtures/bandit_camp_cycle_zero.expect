@@ -1,0 +1,27 @@
+# A bandit camp of the first editors with a cycle of 0: its bandits did not change between the camp
+# and the zone. The property sheet of the camp of this editor has no duration below 10: the camp gets
+# the durations of a new camp, and the author is told.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteConvertedClasses(1)
+version_update_note: uiR2EDVersionNoteBanditCampCycle(1)
+scenario_at: Acts[1].Features[1].Class = BanditCamp
+scenario_at: Acts[1].Features[1].Cycle = <none>
+scenario_at: Acts[1].Features[1].SitDuration = <none>
+scenario_at: Acts[1].Features[1].WanderDuration = <none>

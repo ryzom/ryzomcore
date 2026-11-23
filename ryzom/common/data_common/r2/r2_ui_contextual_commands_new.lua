@@ -85,7 +85,7 @@ end
 function r2:updateContextualCommandTooltip(index)
 	local command = r2.ContextualCommands.ToolbarCommands[index + 1]
 	assert(command)
-	local keyName = ucstring(runExpr(string.format("getKey('r2ed_context_command', 'commandId=%s')", command.Id)))
+	local keyName = ucstring(r2:getKeyName("r2ed_context_command", "commandId=" .. tostring(command.Id)))
 	if keyName == i18n.get("uiNotAssigned") then
 		-- no associated key
 		setContextHelpText(i18n.get(command.TextId))
@@ -164,7 +164,7 @@ function r2.ContextualCommands:setupMenu(instance, menu)
 				destNode = menuRoot
 			end
 			destNode:addLineAtIndex(line, i18n.get(command.TextId), "lua", 
-                                                    "r2.ContextualCommands:runMenuCommand(" .. tostring(table.getn(self.MenuCommands) + 1) .. ")", "dyn_command_" .. tostring(commandIndex))
+                                                    r2:uiCall("r2.ContextualCommands:runMenuCommand", table.getn(self.MenuCommands) + 1), "dyn_command_" .. tostring(commandIndex))
 			-- if there's a bitmap, build a group with the buitmap in it, and add to menu
 			if command.ButtonBitmap and command.ButtonBitmap ~= "" then
 				local smallIcon   = nlfile.getFilenameWithoutExtension(command.ButtonBitmap) .. 
@@ -181,7 +181,7 @@ function r2.ContextualCommands:setupMenu(instance, menu)
 			end
          local keyNameGroup = createGroupInstance("r2_keyname", "", { id = command.Id })
          if keyNameGroup then
-            local keyName = ucstring(runExpr(string.format("getKey('r2ed_context_command', 'commandId=%s')", command.Id)))
+            local keyName = ucstring(r2:getKeyName("r2ed_context_command", "commandId=" .. tostring(command.Id)))
             if keyName == i18n.get("uiNotAssigned") then
                -- no associated key
             keyNameGroup:find("t").uc_hardtext = keyName
@@ -281,7 +281,7 @@ function r2.ContextualCommands:setupButton(button, commandDesc, buttonIndex)
 	
 	
 	selectedButton.onclick_l = "lua"
-	selectedButton.params_l  = "r2.runBaseToolbarCommand(getUICaller().parent.Env.Toolbar, " .. tostring(buttonIndex) .. ")"
+	selectedButton.params_l  = r2:uiCall("r2.runCallerToolbarCommand", buttonIndex)
 	unselectedButton.onclick_l = "lua"
 	unselectedButton.params_l  = selectedButton.params_l
 	

@@ -14,7 +14,10 @@
 # Base class for Ryzom <-> Deepl <-> Zulip system
 #
 
+import configparser
+import json
 import re
+import secrets
 import time
 import traceback
 import zulip
@@ -22,7 +25,77 @@ import requests
 
 from ryzom_service import RyzomService, RyzomMessage
 
+NETWORK_ERRORS = (requests.exceptions.Timeout, requests.exceptions.SSLError, requests.exceptions.ConnectionError,
+	requests.exceptions.ChunkedEncodingError)
+EVENT_TYPES = ["message", "update_message", "reaction"]
+
+# Ids of the groups and of the folder used by the in-game channels of the Zulip instance.
+# These are the ids of the live instance, overridden by the [zulip] section of /etc/ryzom/rtz.ini
+OWNER_GROUP=10
+PLAYER_GROUP=73
+INGAME_FOLDER_ID=2
+
+# Players of the game have a Zulip account named after their character
+PLAYER_EMAIL_DOMAIN = "ig.ryzom.com"
+
 class ZulipClient(zulip.Client):
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.known_player_emails = set()
+		config = configparser.ConfigParser()
+		config.read("/etc/ryzom/rtz.ini")
+		self.owner_group = config.getint("zulip", "owner_group", fallback=OWNER_GROUP)
+		self.player_group = config.getint("zulip", "player_group", fallback=PLAYER_GROUP)
+		self.ingame_folder_id = config.getint("zulip", "ingame_folder_id", fallback=INGAME_FOLDER_ID)
+
+	def ensurePlayer(self, name):
+		# Returns the email of the Zulip account of a player, created when it doesn't exist yet
+		email = name.lower()+"@"+PLAYER_EMAIL_DOMAIN
+		if email in self.known_player_emails:
+			return email
+		result = self.call_endpoint(url="/users/"+email, method="GET")
+		if not (isinstance(result, dict) and result.get("result") == "success"):
+			# Players log in with Ryzom, so this random password is never used
+			result = self.call_endpoint(
+				url="/users",
+				method="POST",
+				request={
+					"email": email,
+					"password": secrets.token_urlsafe(32),
+					"full_name": name[0].upper()+name[1:],
+				},
+			)
+			if not (isinstance(result, dict) and result.get("result") == "success"):
+				print("Error creating player", email, result)
+				return None
+			result = self.call_endpoint(
+				url=f"/user_groups/{self.player_group}/members",
+				method="POST",
+				request={"add": json.dumps([result["user_id"]])},
+			)
+			if not (isinstance(result, dict) and result.get("result") == "success"):
+				print("Error adding player to its group", email, result)
+		self.known_player_emails.add(email)
+		return email
+
+	def addIngameSubscription(self, name, principals = None):
+		# Subscribing creates the channel when it doesn't exist yet
+		options = {"principals": principals} if principals else {}
+		return self.add_subscriptions(
+			streams = [{"name": name}],
+			invite_only = True,
+			history_public_to_subscribers = False,
+			topics_policy = json.dumps("empty_topic_only"),
+			message_retention_days = "7",
+			can_add_subscribers_group = self.owner_group,
+			can_remove_subscribers_group = self.owner_group,
+			can_send_message_group = self.player_group,
+			send_new_subscription_messages = False,
+			folder_id = self.ingame_folder_id,
+			**options,
+		)
+
 	def doRegister(self, event_types, narrow, **kwargs):
 		while True:
 			if event_types is None:
@@ -38,7 +111,7 @@ class ZulipClient(zulip.Client):
 				self.last_event_id = res["last_event_id"]
 				return self.queue_id
 
-	def call(self, callback, event_types, narrow, **kwargs):
+	def call(self, callback, event_types, narrow, on_register=None, on_poll=None, **kwargs):
 		if narrow is None:
 			narrow = []
 
@@ -47,12 +120,20 @@ class ZulipClient(zulip.Client):
 		# making a new long-polling request.
 		while True:
 			try:
-				res = self.get_events(queue_id=self.queue_id, last_event_id=self.last_event_id)
-			except (
-				requests.exceptions.Timeout,
-				requests.exceptions.SSLError,
-				requests.exceptions.ConnectionError,
-			):
+				pending = bool(on_poll()) if on_poll is not None else False
+			except NETWORK_ERRORS:
+				if self.verbose:
+					print(f"Connection error checking pending quotes:\n{traceback.format_exc()}")
+				time.sleep(1)
+				continue
+			if pending:
+				time.sleep(1)
+			try:
+				request = {"queue_id": self.queue_id, "last_event_id": self.last_event_id}
+				if pending:
+					request["dont_block"] = True
+				res = self.get_events(**request)
+			except NETWORK_ERRORS:
 				if self.verbose:
 					print(f"Connection error fetching events:\n{traceback.format_exc()}")
 				# TODO: Make this use our backoff library
@@ -91,8 +172,9 @@ class ZulipClient(zulip.Client):
 						# we can do about it other than resuming
 						# getting new ones.
 						#
-						# Reset queue_id to register a new event queue.
-						self.queue_id = None
+						self.doRegister(event_types, narrow, **kwargs)
+						if on_register is not None:
+							on_register(self.queue_id)
 				# Add a pause here to cover against potential bugs in this library
 				# causing a DoS attack against a server when getting errors.
 				# TODO: Make this back off exponentially.
@@ -104,9 +186,10 @@ class ZulipClient(zulip.Client):
 					print(f"Invalid event: {event!r}")
 					continue
 				try:
-					self.last_event_id = max(self.last_event_id, int(event.get("id", -1)))
+					event_id = int(event.get("id", -1))
 				except (TypeError, ValueError):
 					print(f"Invalid event id: {event!r}")
+					event_id = -1
 
 				if event.get("type") == "heartbeat":
 					# Heartbeat events are sent to clients regardless
@@ -114,21 +197,26 @@ class ZulipClient(zulip.Client):
 					# intended to be an internal part of the Zulip
 					# longpolling protocol, not something that clients
 					# need to handle.
+					self.last_event_id = max(self.last_event_id, event_id)
 					continue
-				# A bad event must never kill the long-polling loop
+				# A network error retries the event, any other bad event
+				# must never kill the long-polling loop
 				try:
 					callback(event)
+				except NETWORK_ERRORS:
+					if self.verbose:
+						print(f"Connection error processing event:\n{traceback.format_exc()}")
+					time.sleep(1)
+					break
 				except Exception:
 					print(f"Error handling event {event.get('id')}:\n{traceback.format_exc()}")
+				self.last_event_id = max(self.last_event_id, event_id)
 
 	def registerMessages(self, **kwargs):
-		self.doRegister(["message", "update_message"], None, **kwargs)
+		self.doRegister(EVENT_TYPES, None, **kwargs)
 
 	def manageMessages(self, callback, **kwargs):
-		def event_callback(event):
-			if event.get("type") in ("message", "update_message"):
-				callback(event)
-		self.call(event_callback, ["message", "update_message"], None, **kwargs)
+		self.call(callback, EVENT_TYPES, None, **kwargs)
 
 
 class ZulipService(RyzomService):
@@ -137,7 +225,7 @@ class ZulipService(RyzomService):
 		super().__init__()
 		while True:
 			try:
-				self.zulip = ZulipClient(config_file=".zuliprc")#email=self.config["zulip"]["email"], api_key=self.config["zulip"]["key"], site=self.base_url)
+				self.zulip = ZulipClient(config_file=".zuliprc")
 			except Exception as e:
 				print("Error Zulip server", self.config["zulip"]["site"])
 				print(e)
@@ -147,6 +235,16 @@ class ZulipService(RyzomService):
 				break
 		print("Connected! to", self.base_url, "!")
 
+
+	def retryError(self, result):
+		if result.get("retry-after"):
+			time.sleep(float(result["retry-after"]))
+		if result.get("result") == "http-error":
+			status = result.get("status_code", 500)
+			return status in (408, 429) or status >= 500
+		if result.get("result") == "error" and result.get("code") is None:
+			return False
+		return result.get("code") in (None, "RATE_LIMIT_HIT", "BAD_EVENT_QUEUE_ID")
 
 	def setZulipQueueId(self, queue_id):
 		self.client.set("Zulip-Queue-Id", self.zulip.queue_id)

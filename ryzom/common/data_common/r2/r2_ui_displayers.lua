@@ -451,11 +451,11 @@ function r2:defaultUIDisplayer()
 				
 				treeNode.Id = instance.InstanceId
 				treeNode.AHName = "lua"
-				local ahParams = "r2:onInstanceSelectedInTree('" .. instance.InstanceId .. "')"
+				local ahParams = r2:uiCall("r2:onInstanceSelectedInTree", instance.InstanceId)
 				--eventDebugInfo(ahParams)
 				treeNode.AHParams = ahParams 
 				treeNode.AHNameRight = "lua"
-				treeNode.AHParamsRight = "r2:onInstanceRightClickInTree('" .. instance.InstanceId .. "')"
+				treeNode.AHParamsRight = r2:uiCall("r2:onInstanceRightClickInTree", instance.InstanceId)
 				treeNode.AHNameClose = "lua"
 				treeNode.AHParamsClose = "r2.storedClosedTreeNodes = {}"
 

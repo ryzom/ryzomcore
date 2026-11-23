@@ -227,7 +227,11 @@ public:
 	virtual void		initDriver(const std::string &driverName) = 0;
 	/// Get the available devices on the loaded driver.
 	virtual void		getDevices(std::vector<std::string> &devices) = 0;	
-	/// Initialize the selected device on the currently initialized driver. Leave deviceName empty to select the default device.
+	/** Initialize the selected device on the currently initialized driver. Leave deviceName empty to select the default device.
+	 *	A deviceName that is not one of getDevices() is refused: ESoundDriverDeviceNotFound is thrown
+	 *	(nel/sound/driver/sound_driver.h), the default device is not opened in its place. As for any other
+	 *	ESoundDriver thrown here, the driver is released: initDriver must be called again before a new try.
+	 */
 	virtual void		initDevice(const std::string &deviceName, const CInitInfo &initInfo, NLMISC::IProgressCallback *progressCallback = nullptr) = 0;
 
 	/** Initialisation of the clustered sound system.

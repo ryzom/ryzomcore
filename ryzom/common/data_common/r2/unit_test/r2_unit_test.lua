@@ -21,7 +21,12 @@ UnitTest.testAddSecondaryActUi = function()
 end
 
 
-UnitTest.testLoadAnimationScenarioUi = function()
+-- The author of an animation gets the file to load: the file the animation was launched with at the Ring
+-- terminal is loaded, and the form in which a file is chosen comes up when there is none or when it
+-- cannot be loaded.
+-- With 'formOnly' no file is loaded: the load of a file has ended without a start (the scenario service
+-- refused it, see r2.onSystemMessageReceived), and the form comes back for another choice.
+UnitTest.testLoadAnimationScenarioUi = function(formOnly)
 	
 	local function onOk(form)
 		if (form.LoadScenario_Name ~= nil and type(form.LoadScenario_Name) == "string") then						
@@ -85,6 +90,19 @@ UnitTest.testLoadAnimationScenarioUi = function()
 
 	end
 	
+	if formOnly then
+		local ui = r2:getForm("LoadScenario")
+		if r2.CurrentForm == ui then
+			-- the form the author chose the file in, hidden since: it comes back as it was
+			ui.active = true
+			ui.Env.Choice = nil
+		else
+			-- the file was the one of the Ring terminal, which is not tried again: the form comes up
+			r2:doForm("LoadScenario", {}, onOk, onCancel)
+		end
+		return
+	end
+
 	local str = r2:getStartingAnimationFilename();
 	local ok, errStr = r2.RingAccess.loadAnimation(str)
 
@@ -759,7 +777,7 @@ function RingAccess.errorMessageImpl(errorType, name, package, entityLevel, char
 		trad =  i18n.get("uiR2EDErrMessageDataCorrupted")
 		package = nil
 		entityLevel = nil
-		chatLevel = nil
+		charLevel = nil
 		entityName = nil
 	end
 
@@ -767,18 +785,24 @@ function RingAccess.errorMessageImpl(errorType, name, package, entityLevel, char
 
 	local str = trad:toUtf8()
 
+	-- the texts go in as they are: in a replacement string of string.gsub "%" is an escape, and the name of an NPC
+	-- that holds one raises an error
+	local function insert(text, tag, value)
+		return (string.gsub(text, tag, function() return value end))
+	end
+
 	if package  and string.len(package) ~= 0 then
 		local category = i18n.get(string.format("uiR2EDRingAccessCategory_%s", package))
-		str=string.gsub (str, "<Package>", category:toUtf8())
+		str = insert(str, "<Package>", category:toUtf8())
 	end
 	if entityLevel then
-		str=string.gsub (str, "<EntityLevel>", tostring(entityLevel))
+		str = insert(str, "<EntityLevel>", tostring(math.floor(entityLevel)))
 	end
 	if charLevel then
-		str=string.gsub (str, "<CharLevel>", tostring(charLevel))
+		str = insert(str, "<CharLevel>", tostring(math.floor(charLevel)))
 	end
 	if entityName then
-		str=string.gsub (str, "<EntityName>", entityName)
+		str = insert(str, "<EntityName>", entityName)
 	end
 
 	local err = {}
@@ -985,7 +1009,7 @@ function RingAccess.verifyEntityRec(node, level, allowed, ok, err )
 				local test = RingAccess.updateLevel(node.RingAccess, level, allowed)
 				if not test and  ok then
 					ok = false
-					err = RingAccess.errorMessageGeneric(node.access, allowed)
+					err = RingAccess.errorMessageGeneric(node.RingAccess, allowed)
 				end
 
 			end

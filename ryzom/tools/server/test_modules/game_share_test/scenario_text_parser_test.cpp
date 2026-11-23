@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "nel/misc/types_nl.h"
+#include "nel/misc/file.h"
+#include "nel/misc/path.h"
 #include "game_share/object.h"
 #include "game_share/scenario.h"
 #include "game_share/scenario_text_parser.h"
@@ -310,6 +312,46 @@ TEST(ScenarioTextParser, IntegerLimits)
 	ASSERT_TRUE(again != nullptr);
 	EXPECT_TRUE(again->isInteger("Two"));
 	EXPECT_DOUBLE_EQ(2.0, again->toNumber("Two"));
+}
+
+// A header that stops before HeaderMD5 or BodyMD5, from a hand-made or truncated file, is read as
+// an unsigned file: the validators look only at the entries it has
+TEST(ScenarioValidator, HeaderWithoutTheMD5EntriesIsUnsigned)
+{
+	const char *headers[] = {
+		"-- Version = '1'\n-- Signature = 'abc'\n",
+		"-- Version = '1'\n-- Signature = 'abc'\n-- HeaderMD5 = '0123'\n",
+	};
+	// in the working directory: CPath needs a NeL context, which this test has not
+	const std::string path = "ryzom_game_share_scenario_header_test.r2";
+	for (uint i = 0; i < sizeof(headers) / sizeof(headers[0]); ++i)
+	{
+		std::string text = std::string("---- Header\n") + headers[i] + "---- /Header\n\nscenario = {}\n";
+		{
+			NLMISC::COFile out;
+			ASSERT_TRUE(out.open(path)) << path;
+			out.serialBuffer((uint8 *)&text[0], (uint)text.size());
+			out.close();
+		}
+		for (uint check = 0; check < 2; ++check)
+		{
+			CScenarioValidator scenario;
+			CScenarioValidator::TValues values;
+			std::string md5, signature;
+			EXPECT_TRUE(scenario.setScenarioToLoad(path, values, md5, signature, check != 0)) << headers[i];
+			EXPECT_EQ(i + 2, values.size()) << headers[i];
+			EXPECT_TRUE(md5.empty()) << headers[i];
+			EXPECT_TRUE(signature.empty()) << headers[i];
+
+			CUserComponentValidator component;
+			values.clear();
+			EXPECT_TRUE(component.setUserComponentToLoad(path, values, md5, signature, check != 0)) << headers[i];
+			EXPECT_EQ(i + 2, values.size()) << headers[i];
+			EXPECT_TRUE(md5.empty()) << headers[i];
+			EXPECT_TRUE(signature.empty()) << headers[i];
+		}
+	}
+	NLMISC::CFile::deleteFile(path);
 }
 
 #ifdef RYZOM_EXAMPLES_DIR

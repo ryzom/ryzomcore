@@ -2384,8 +2384,8 @@ args.addArg("", "instances", "NxM",
 		// --save --thumbnail without --screenshot: one-shot display capture then exit (xvfb-friendly)
 		if (needThumbDisplay && screenshotPath.empty())
 		{
-			NLMISC::CFile::createDirectoryTree("/tmp/zp_ui");
-			screenshotPath = "/tmp/zp_ui/_thumb_capture.tga";
+			NLMISC::CFile::createDirectoryTree(NLMISC::CPath::getTemporaryDirectory() + "zp_ui");
+			screenshotPath = NLMISC::CPath::getTemporaryDirectory() + "zp_ui/_thumb_capture.tga";
 		}
 		rc = runViewer(zones, bank, &core, lm, screenshotPath, fontPath, scriptPath, savePath,
 		               sharedDriver, sharedEditorUI);

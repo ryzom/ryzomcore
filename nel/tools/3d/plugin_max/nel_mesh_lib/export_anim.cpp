@@ -1520,6 +1520,134 @@ NL3D::TAnimationTime	CExportNel::convertTime (TimeValue time)
 
 // --------------------------------------------------
 
+// The time range covered by the keys of the X, Y and Z sub-controllers of a controller made of three
+// tracks (Euler XYZ rotation, Position XYZ), false when it has no such sub-controller with keys.
+// The out of range type is the one of the first sub-controller with keys: Euler XYZ and Position XYZ
+// forward theirs to the X sub-controller, Local Euler XYZ keeps it on the sub-controllers only.
+static bool getXYZSubControllerRange(Control &c, Interval &range, int &oRT)
+{
+	Control *subControllers[3] = { c.GetXController(), c.GetYController(), c.GetZController() };
+	bool found = false;
+	TimeValue start = 0;
+	TimeValue end = 0;
+	for (uint i = 0; i < 3; ++i)
+	{
+		if (!subControllers[i])
+			continue;
+		Interval subRange = subControllers[i]->GetTimeRange(TIMERANGE_ALL);
+		if ((FOREVER == subRange) || (NEVER == subRange))
+			continue;
+		if (!found)
+			oRT = subControllers[i]->GetORT(ORT_AFTER);
+		if (!found || (subRange.Start() < start))
+			start = subRange.Start();
+		if (!found || (subRange.End() > end))
+			end = subRange.End();
+		found = true;
+	}
+	if (found)
+		range = Interval(start, end);
+	return found;
+}
+
+// --------------------------------------------------
+
+// Biped controllers, whose tracks the biped path builds or leaves out by design
+static bool isBipedController(Control *c)
+{
+	return c && ((c->ClassID() == BIPSLAVE_CONTROL_CLASS_ID) || (c->ClassID() == BIPBODY_CONTROL_CLASS_ID) || (c->ClassID() == FOOTPRINT_CLASS_ID));
+}
+
+// --------------------------------------------------
+
+static const char *getValueTypeName(TNelValueType type)
+{
+	switch (type)
+	{
+	case typeFloat: return "float";
+	case typePos: return "position";
+	case typeScale: return "scale";
+	case typeRotation: return "rotation";
+	case typeColor: return "color";
+	case typeInt: return "integer";
+	case typeBoolean: return "boolean";
+	case typeString: return "string";
+	case typeMatrix: return "matrix";
+	}
+	return "value";
+}
+
+// --------------------------------------------------
+
+// Sample a controller without a key interface once per frame over a range, the value the
+// controller gives at each frame becomes a linear key, rotations as quaternions.
+static ITrack *buildSampledTrack(Control &c, TNelValueType type, const Interval &range, int oRT)
+{
+	nlassert((type == typeRotation) || (type == typePos));
+
+	CTrackKeyFramerLinearQuat *rotTrack = NULL;
+	CTrackKeyFramerLinearVector *posTrack = NULL;
+	ITrack *track;
+	if (type == typeRotation)
+		track = rotTrack = new CTrackKeyFramerLinearQuat;
+	else
+		track = posTrack = new CTrackKeyFramerLinearVector;
+
+	const float startTime = CExportNel::convertTime(range.Start());
+	const float endTime = CExportNel::convertTime(range.End());
+	if (rotTrack)
+	{
+		rotTrack->unlockRange(startTime, endTime);
+		rotTrack->setLoopMode(oRT == ORT_LOOP);
+	}
+	else
+	{
+		posTrack->unlockRange(startTime, endTime);
+		posTrack->setLoopMode(oRT == ORT_LOOP);
+	}
+
+	const TimeValue step = GetTicksPerFrame();
+	CQuat previous;
+	TimeValue t = range.Start();
+	for (;;)
+	{
+		Interval valid = FOREVER;
+		if (rotTrack)
+		{
+			Quat value;
+			c.GetValue(t, &value, valid, CTRL_ABSOLUTE);
+
+			// same conversion as the rotation keys, kept closest to the previous sample
+			CQuat rot(value.x, value.y, value.z, -value.w);
+			rot.normalize();
+			if (t != range.Start())
+				rot.makeClosest(previous);
+			previous = rot;
+
+			CKeyQuat key;
+			key.Value = rot;
+			rotTrack->addKey(key, CExportNel::convertTime(t));
+		}
+		else
+		{
+			Point3 value;
+			c.GetValue(t, &value, valid, CTRL_ABSOLUTE);
+
+			CKeyVector key;
+			key.Value = CVector(value.x, value.y, value.z);
+			posTrack->addKey(key, CExportNel::convertTime(t));
+		}
+
+		if (t >= range.End())
+			break;
+		t = std::min(t + step, range.End());
+	}
+
+	return track;
+}
+
+// --------------------------------------------------
+
 // Build a NeL track with a 3dsmax controler.
 ITrack* CExportNel::buildATrack (CAnimation& animation, Control& c, TNelValueType type, Animatable& node, const CExportDesc& desc,
 								 CAnimationBuildCtx	*animBuildCtx, bool bodyBiped)
@@ -1558,9 +1686,13 @@ ITrack* CExportNel::buildATrack (CAnimation& animation, Control& c, TNelValueTyp
 	 * SURF_CONTROL_CLASSID
 	 * LINKCTRL_CLASSID
 	 *
+	 * Sampled once per frame, as they have no key interface:
+	 *
+	 * EULER_CONTROL_CLASS_ID (Euler XYZ rotation)
+	 * Position XYZ
+	 *
 	 * May be supported in futur:
 	 *
-	 * EULER_CONTROL_CLASS_ID
 	 * FLOATNOISE_CONTROL_CLASS_ID
 	 * POSITIONNOISE_CONTROL_CLASS_ID
 	 * POINT3NOISE_CONTROL_CLASS_ID
@@ -1772,7 +1904,46 @@ ITrack* CExportNel::buildATrack (CAnimation& animation, Control& c, TNelValueTyp
 			}
 		}
 	}
-	
+
+	// The biped path is in charge of biped controllers and of the nodes they drive, a NULL track is its
+	// designed outcome there (bones outside mustExportBipedBonePos have no position track, for one)
+	const bool isNode = (node.SuperClassID() == BASENODE_CLASS_ID);
+	const bool bipedInCharge = bodyBiped || isBipedController(&c) || (isNode && isBipedController(((INode *)&node)->GetTMController()));
+
+	// Controllers made of X, Y and Z tracks (Euler XYZ rotation, the default rotation controller, and
+	// Position XYZ) have no key interface, their value is sampled. GetValue writes the value type of
+	// the controller kind, so only a rotation controller is sampled for a rotation and a position
+	// controller for a position.
+	if (!pTrack && !bipedInCharge
+	    && (((type == typeRotation) && (c.SuperClassID() == CTRL_ROTATION_CLASS_ID)) || ((type == typePos) && (c.SuperClassID() == CTRL_POSITION_CLASS_ID))))
+	{
+		Interval sampleRange;
+		int sampleORT = oRT;
+		if (getXYZSubControllerRange(c, sampleRange, sampleORT))
+			pTrack = buildSampledTrack(c, type, sampleRange, sampleORT);
+	}
+
+	// Anything else that is animated loses its animation, the caller reports these once at the end of the export
+	if (!pTrack && !bipedInCharge && c.IsAnimated())
+	{
+		TSTR controllerClass;
+		c.GetClassName(controllerClass);
+		std::string owner;
+		if (isNode)
+		{
+			owner = getName(*(INode *)&node);
+		}
+		else
+		{
+			TSTR ownerClass;
+			node.GetClassName(ownerClass);
+			owner = MaxTStrToUtf8(ownerClass);
+		}
+		std::string entry = NLMISC::toString("%s of %s (%s)", MaxTStrToUtf8(controllerClass).c_str(), owner.c_str(), getValueTypeName(type));
+		if (std::find(_UnexportedAnimations.begin(), _UnexportedAnimations.end(), entry) == _UnexportedAnimations.end())
+			_UnexportedAnimations.push_back(entry);
+	}
+
 	// Return the track
 	return pTrack;
 }

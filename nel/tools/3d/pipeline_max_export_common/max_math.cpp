@@ -93,6 +93,16 @@ Matrix3M inverseM3(const Matrix3M &a)
 	return r;
 }
 
+Matrix3M rotateAxisM3(const Matrix3M &m, int axis, double angle)
+{
+	Matrix3M r = Matrix3M::identity();
+	float c = (float)cos(angle), s = (float)sin(angle);
+	int a = (axis + 1) % 3, b = (axis + 2) % 3;
+	r.m[a][a] = c; r.m[a][b] = s;
+	r.m[b][a] = -s; r.m[b][b] = c;
+	return m * r;
+}
+
 Matrix3M quatToMatrix3(const QuatM &q)
 {
 	// Max Quat::MakeMatrix(mat, flag=false). Max quats follow the inverse convention relative

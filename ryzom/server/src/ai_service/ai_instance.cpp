@@ -98,10 +98,8 @@ void CAIInstance::removeZone(string const& zoneName, CNpcZone* zone)
 	zoneList.erase(it);
 }
 
-void CAIInstance::updateZoneTrigger(CBotPlayer* player)
+void CAIInstance::getZoneTriggerManagers(std::list<CMgrNpc *> &zoneTriggerManager)
 {
-	std::list<CMgrNpc*> zoneTriggerManager;
-
 	FOREACH(it, CCont<CManager>, _Managers)
 	{
 		std::string name = it->getName();
@@ -116,6 +114,66 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 			}
 		}
 	}
+}
+
+void CAIInstance::processZoneTriggerLeave(const std::list<CMgrNpc *> &zoneTriggerManager, const CBotPlayer *player, const std::vector<uint32> &leaveZone)
+{
+	static NLMISC::TStringId s_NbPlayer = CStringMapper::map("NbPlayer");
+
+	FOREACHC(zoneIt, std::vector<uint32>, leaveZone)
+	{
+		FOREACHC(it, std::list<CMgrNpc *>, zoneTriggerManager)
+		{
+			// A zone that is gone (its act was unloaded) has no count left to keep
+			CGroup *grp = (*it)->groups().getChildByAlias(*zoneIt);
+			if (grp)
+			{
+				CGroupNpc *grpNpc = dynamic_cast<CGroupNpc *>(grp);
+				CPersistentStateInstance *sa = grpNpc->getPersistentStateInstance();
+				if (sa)
+				{
+					float count = sa->getLogicVar(s_NbPlayer);
+					if (count < 1.f)
+					{
+						// The player was counted in when it entered, a count that does not hold it is a bookkeeping error
+						nlwarning("Trigger zone '%s' %s of AI instance %u: player %s leaves the zone while its NbPlayer count is %g, the count is set to 0",
+						    grpNpc->getName().c_str(), grpNpc->getAliasString().c_str(), getInstanceNumber(),
+						    player->getEntityId().toString().c_str(), count);
+						count = 0.f;
+					}
+					else
+					{
+						count -= 1.f;
+					}
+					sa->setLogicVar(s_NbPlayer, count);
+				}
+				grpNpc->processStateEvent(grpNpc->getEventContainer().EventPlayerLeaveTriggerZone);
+			}
+		}
+	}
+}
+
+void CAIInstance::removePlayerFromZoneTriggers(CBotPlayer *player)
+{
+	// the player is in no zone anymore
+	std::set<uint32> insideZone;
+	std::vector<uint32> enterZone;
+	std::vector<uint32> leaveZone;
+	player->updateInsideTriggerZones(insideZone, enterZone, leaveZone);
+	if (leaveZone.empty())
+	{
+		return;
+	}
+
+	std::list<CMgrNpc *> zoneTriggerManager;
+	getZoneTriggerManagers(zoneTriggerManager);
+	processZoneTriggerLeave(zoneTriggerManager, player, leaveZone);
+}
+
+void CAIInstance::updateZoneTrigger(CBotPlayer* player)
+{
+	std::list<CMgrNpc*> zoneTriggerManager;
+	getZoneTriggerManagers(zoneTriggerManager);
 	if ( zoneTriggerManager.empty() )
 	{
 		return;
@@ -124,7 +182,14 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 	uint64 whoSeesMe = CMirrors::whoSeesMe(player->dataSetRow());
 	if (!R2_VISION::isEntityVisibleToPlayers(whoSeesMe))
 	{
-		// The player is invisible, its a Dm / Gm: no zone event must be triggered
+		// The player is invisible, its a Dm / Gm: its moves trigger no zone event. A player who
+		// became invisible inside zones is not there anymore for the scenario, it leaves them;
+		// visible again, its next position update counts it back in
+		std::set<uint32> insideZone;
+		std::vector<uint32> enterZone;
+		std::vector<uint32> leaveZone;
+		player->updateInsideTriggerZones(insideZone, enterZone, leaveZone);
+		processZoneTriggerLeave(zoneTriggerManager, player, leaveZone);
 		return;
 	}
 
@@ -181,24 +246,7 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 		}
 	}
 
-	FOREACH(zoneIt, std::vector<uint32>, leaveZone)
-	{
-		FOREACH(it, std::list<CMgrNpc*>, zoneTriggerManager)
-		{
-			CGroup* grp = (*it)->groups().getChildByAlias(*zoneIt);
-			if (grp)
-			{
-				CGroupNpc* grpNpc = dynamic_cast<CGroupNpc*>(grp);
-				CPersistentStateInstance* sa = grpNpc->getPersistentStateInstance();
-				if (sa)
-				{
-					sa->setLogicVar(nbPlayer, sa->getLogicVar(nbPlayer) - 1);
-				}
-				grpNpc->processStateEvent(grpNpc->getEventContainer().EventPlayerLeaveTriggerZone);
-			}
-		}
-	}
-
+	processZoneTriggerLeave(zoneTriggerManager, player, leaveZone);
 }
 
 CNpcZone* CAIInstance::getZone(TStringId zoneName)
@@ -209,6 +257,19 @@ CNpcZone* CAIInstance::getZone(TStringId zoneName)
 std::string CAIInstance::getManagerIndexString(CManager const* manager) const
 {
 	return getIndexString()+NLMISC::toString(":m%u", manager->getChildIndex());
+}
+
+void CAIInstance::setRingSession(TSessionId sessionId)
+{
+	if (_RingSession.asInt() != 0 && _RingSession != sessionId)
+	{
+		// The edition session and the animation session of one owner have one instance, and the scenario
+		// of the one is unloaded when the other goes live: the instance is then of the session that
+		// goes live. This is the usual course, and is only noted.
+		nlinfo("RING: AI instance %u goes from the scenario of session %u to the scenario of session %u",
+		    _InstanceNumber, _RingSession.asInt(), sessionId.asInt());
+	}
+	_RingSession = sessionId;
 }
 
 void CAIInstance::initInstance(string const& continentName, uint32 instanceNumber)
@@ -387,6 +448,11 @@ std::string const& CAIInstance::findMissionName(uint32 alias)
 
 void CAIInstance::update()
 {
+	// The scripts of the scenario of a Ring session have a number of operations from one update of
+	// the instance to the next: what they run in this update, and for the messages and the tasks
+	// that come before the next one
+	_RingUpdateBudget.reset();
+
 	// Call the player manager's updates
 	{
 		H_AUTO(PlayerMgrUpdate)
@@ -675,7 +741,7 @@ static float randomAngle()
 	return val;
 }
 
-CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &grpName, const std::string &look, sint32 cell, const std::string &botsName, const std::string &vpx) {
+CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &grpName, const std::string &look, sint32 cell, const std::string &botsName, const std::string &vpx, bool heightKnown, sint32 height) {
 	if (!_EventNpcManager)
 		return NULL;
 
@@ -688,6 +754,15 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 	_LastGroupAlias++;
 	string name = grpName.empty() ? NLMISC::toString("event_group_%u", _LastGroupAlias):grpName;
+	if (heightKnown)
+	{
+		// a z given with the command that no layer at the point is near places the group by the vertical pos rule
+		RYAI_MAP_CRUNCH::CWorldPosition centre;
+		bool atHeight;
+		if (CWorldContainer::getWorldMap().setWorldPositionNearestHeight(height, 0.0, AITYPES::vp_auto, centre, pos, NULL, &atHeight) && !atHeight)
+			nlwarning("eventCreateNpcGroup: no layer at %s is near the height of %.1f m, the bots are placed on the layer of the vertical pos auto", pos.toString().c_str(), height / 1000.0);
+	}
+
 	// Create a group
 	CGroupNpc* grp = new CGroupNpc(_EventNpcManager, _LastGroupAlias, name, RYAI_MAP_CRUNCH::Nothing);
 	// Register it in the manager
@@ -707,7 +782,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	grp->clrBotsAreNamedFlag();
 
 	if (nbBots > 0)
-		eventCreateNpcBot(grp, nbBots, false, sheetId, pos, "", orientation, dispersionRadius, look, botsName, vpx);
+		eventCreateNpcBot(grp, nbBots, false, sheetId, pos, "", orientation, dispersionRadius, look, botsName, vpx, heightKnown, height);
 
 	grp->spawn();
 	CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
@@ -722,6 +797,8 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	spawnGroup->setCell(cell);
 
 	NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> destZone = NLMISC::CSmartPtr<CNpcZonePlaceNoPrim>(new CNpcZonePlaceNoPrim());
+	if (heightKnown)
+		destZone->setHeight(height);
 	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(pos, 0, 0), (uint32)(dispersionRadius*1000.));
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
 
@@ -750,7 +827,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	return grp;
 }
 
-bool CAIInstance::eventCreateNpcBot(CGroupNpc* grp, uint nbBots, bool spawnBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, const std::string &name, double orientation, double dispersionRadius, const std::string &look, const std::string &botname, const std::string &vpx)
+bool CAIInstance::eventCreateNpcBot(CGroupNpc* grp, uint nbBots, bool spawnBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, const std::string &name, double orientation, double dispersionRadius, const std::string &look, const std::string &botname, const std::string &vpx, bool heightKnown, sint32 height)
 {
 	uint32 offset = grp->bots().size();
 	for	(uint i=0; i<nbBots; ++i)
@@ -803,7 +880,13 @@ bool CAIInstance::eventCreateNpcBot(CGroupNpc* grp, uint nbBots, bool spawnBots,
 			bot->setStartPos(pos.x().asDouble(), pos.y().asDouble(), angle, AITYPES::vp_auto);
 		}
 		else
+		{
 			bot->setStartPos(rpos.x().asDouble(),rpos.y().asDouble(), angle, AITYPES::vp_auto);
+			// the bot stands at the point the height was measured at: it takes the layer nearest to it
+			// (a bot dispersed around the point is placed by the vertical pos rule, as before)
+			if (heightKnown)
+				bot->setStartHeight(height);
+		}
 	}
 
 	if (spawnBots)
@@ -939,7 +1022,8 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	sint32 cell;
 	CEntityId targetEntityId;
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1 || messageVersion==2);
+	// 1: the first form; 2: with the entity the group takes the place of; 3: with heightKnown
+	nlassert(messageVersion >= 1 && messageVersion <= 3);
 	msgin.serial(instanceNumber);
 	msgin.serial(playerId);
 	msgin.serial(x);
@@ -956,6 +1040,10 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	nlinfo("cbEventCreateNpcGroup: message v%u", messageVersion);
 	if (messageVersion>=2)
 		msgin.serial(targetEntityId);
+	// whether z is the height of the ground at x, y (at the player's place, or given with the command)
+	bool heightKnown = false;
+	if (messageVersion >= 3)
+		msgin.serial(heightKnown);
 
 	// REPLACE_ENTITY: despawn the targeted bot synchronously and spawn the NPC group at its position/heading
 	if (!targetEntityId.isUnknownId())
@@ -987,7 +1075,7 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	CAIInstance* instance = CAIS::instance().getAIInstance(instanceNumber);
 	if (instance)
 	{
-		CGroupNpc* npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(((double)x)/1000.0, ((double)y)/1000.0), dispersionRadius, spawnBots, ((double)orientation)/1000.0, botsName, look, cell);
+		CGroupNpc* npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(((double)x)/1000.0, ((double)y)/1000.0), dispersionRadius, spawnBots, ((double)orientation)/1000.0, botsName, look, cell, "", "", heightKnown, z);
 		if (npcGroup != NULL)
 		{
 			_PlayersLastCreatedNpcGroup[playerId] = npcGroup->getName();
@@ -1032,6 +1120,15 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 	nlassert(messageVersion==1);
 	msgin.serial(nbString);
 
+	// The two strings read below are in every form of this message: the content comes from
+	// a GM command line, a message that is too short is refused and not read past its end
+	if (nbString < 2)
+	{
+		nlwarning("EVENT_NPC_GROUP_SCRIPT from service '%s' refused: the message carries %u strings, an entity id and at least a script line or a group name are needed",
+		    serviceName.c_str(), nbString);
+		return;
+	}
+
 	string eid;
 	string firstCommand;
 	msgin.serial(eid); // Player or boteid
@@ -1042,7 +1139,7 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 		strings.resize(nbString);
 		strings[0] = eid;
 		strings[1] = firstCommand;
-		for (uint32 i=2; i<nbString-2; ++i)
+		for (uint32 i = 2; i < nbString; ++i)
 		{
 			msgin.serial(strings[i]);
 		}

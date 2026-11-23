@@ -987,7 +987,7 @@ void VerifyPrimitivesStructures()
 				end = errors.find_first_of ("\n", end+1);
 			}
 
-			theApp.errorMessage (errors.c_str());
+			theApp.errorMessage("%s", errors.c_str());
 		}
 	}
 	getMainFrame()->terminateLoadingDialog();

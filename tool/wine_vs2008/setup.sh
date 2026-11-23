@@ -4,7 +4,7 @@
 #
 #   NL_WINE_VS2008_PREFIX    the extracted prefix   (default $HOME/toolchain_v90_prefix)
 #   NL_WINE_VS2008_SHADOW    shadow VC dir to create (default <prefix>-msvc-shadow)
-#   NL_WINE_VS2008_EXTERNAL  externals root          (default <prefix>/drive_c/2019q4_external_v90_x86)
+#   NL_WINE_VS2008_EXTERNAL  externals root          (default <prefix>/drive_c/2026q4_external_v90_x86)
 #
 # What it does:
 #   1. dosdevices links (packaged prefix ships without symlinks - 7z would
@@ -18,7 +18,7 @@ set -e
 HERE="$(cd "$(dirname "$0")" && pwd)"
 PREFIX="${NL_WINE_VS2008_PREFIX:-$HOME/toolchain_v90_prefix}"
 SHADOW="${NL_WINE_VS2008_SHADOW:-$PREFIX-msvc-shadow}"
-EXTERNAL="${NL_WINE_VS2008_EXTERNAL:-$PREFIX/drive_c/2019q4_external_v90_x86}"
+EXTERNAL="${NL_WINE_VS2008_EXTERNAL:-$PREFIX/drive_c/2026q4_external_v90_x86}"
 PFX="$PREFIX/drive_c"
 VC="$PFX/Program Files/Microsoft Visual Studio 9.0/VC"
 
@@ -35,11 +35,19 @@ ln -sfn "$VC/include" "$SHADOW/VC/include"
 ln -sfn "$VC/lib" "$SHADOW/VC/lib"
 ln -sfn "$VC/atlmfc" "$SHADOW/VC/atlmfc"
 ln -sfn "$VC/redist" "$SHADOW/VC/redist"
-cp "$HERE/winecl-env" "$SHADOW/VC/bin/winecl-env"
-cp "$HERE/winecl-cc" "$SHADOW/VC/bin/cl.exe"
-cp "$HERE/winecl-link" "$SHADOW/VC/bin/link.exe"
-cp "$HERE/winecl-lib" "$SHADOW/VC/bin/lib.exe"
-chmod +x "$SHADOW/VC/bin/cl.exe" "$SHADOW/VC/bin/link.exe" "$SHADOW/VC/bin/lib.exe"
+# The wrappers are copied with their line endings normalized: a checkout mounted from Windows (the quick
+# start) may carry CRLF, which bash does not forgive. mt and rc go along so that toolchain.cmake can
+# take every wrapper from here.
+install_wrapper() {
+	sed 's/\r$//' "$HERE/$1" > "$SHADOW/VC/bin/$2"
+	chmod +x "$SHADOW/VC/bin/$2"
+}
+install_wrapper winecl-env winecl-env
+install_wrapper winecl-cc cl.exe
+install_wrapper winecl-link link.exe
+install_wrapper winecl-lib lib.exe
+install_wrapper winecl-mt winecl-mt
+install_wrapper winecl-rc winecl-rc
 
 # 2b. maxscript SDK patch: maxsdk/include/maxscrpt/value.h declares a global
 #     'extern ScripterExport Empty empty;' that collides with VC's ivec.h

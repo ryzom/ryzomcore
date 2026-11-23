@@ -505,6 +505,8 @@ private:
 
 	/// The sound driver instance
 	ISoundDriver				*_SoundDriver;
+	/// What names the sound driver in a message: its library file, or the name of its type when it is linked in
+	std::string					m_SoundDriverName;
 
 	/// The sound bank used, contains georges sound sheets
 	CSoundBank					*_SoundBank;

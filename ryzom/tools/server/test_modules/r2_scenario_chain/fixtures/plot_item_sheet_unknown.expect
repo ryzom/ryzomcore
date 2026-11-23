@@ -1,0 +1,34 @@
+# Plot items whose sheet is no plot item sheet and is not in the table of the update: a number that is no
+# sheet at all, a raw material the table does not have (system_mp_fine.sitem), and a number that lies
+# between the numbers of two plot item sheets and is a sheet of another type. The update guesses nothing
+# for a sheet it does not know: they keep their sheet, the scenario is as it was (but for its list of
+# versions), and the author is told which plot items to choose an icon for. The scenario service refuses
+# them when the scenario starts, as before.
+
+upgrade: unchanged
+version_update: unchanged
+version_update_note: uiR2EDVersionNotePlotItemUnknown(Nothing, 12345)
+version_update_note: uiR2EDVersionNotePlotItemUnknown(Between the numbers, 8630313)
+version_update_note: uiR2EDVersionNotePlotItemUnknown(Fine material, 8387118)
+no_line: version_update_note: uiR2EDVersionNotePlotItemUnknown(Old key
+no_line: version_update_note: uiR2EDVersionNotePlotItemIcon
+
+scenario_vs_file: same
+save: ok
+roundtrip: ok
+reload_version_update: current
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+rt_plot_item_sheets:
+no_line: rt_plot_item_sheets: ok
+absent: version_update_failure
+
+scenario_at: Versions.PlotItem = 1
+scenario_at: PlotItems[0].SheetId = 12345
+scenario_at: PlotItems[1].SheetId = 8632366
+scenario_at: PlotItems[2].SheetId = 8630313
+scenario_at: PlotItems[3].SheetId = 8387118
+rt_at: PlotItems[0].SheetId = 12345
+rt_at: PlotItems[2].SheetId = 8630313
+rt_at: PlotItems[3].SheetId = 8387118

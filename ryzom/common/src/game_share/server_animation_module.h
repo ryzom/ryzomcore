@@ -20,6 +20,7 @@
 
 #include <queue>
 #include <memory>
+#include <set>
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/entity_id.h"
@@ -220,6 +221,7 @@ namespace R2
 		bool getPosition(TSessionId sessionId, double& x, double& y, double& orient, uint8& season, uint32 actIndex = 0) NL_OVERRIDE;
 
 		virtual bool isSessionRunning(TSessionId sessionId) const NL_OVERRIDE;
+		virtual bool isSessionStartingOrRunning(TSessionId sessionId) const NL_OVERRIDE;
 
 		virtual uint32 getCurrentAct(TSessionId sessionId) const NL_OVERRIDE;
 		virtual bool mustReloadPosition(TSessionId sessionId, TCharId charId) const NL_OVERRIDE;
@@ -321,10 +323,16 @@ namespace R2
 		void removeIncarningPlayer(TSessionId sessionId, const NLMISC::CEntityId& creatureId, const NLMISC::CEntityId& eid);
 
 		bool doMakeAnimationSession(CAnimationSession* animSession);
+		// Removes and deletes a session doMakeAnimationSession could not make, and reports the failure to the
+		// edition module, which tells the clients of the session
+		void releaseFailedSession(CAnimationSession *animSession);
 		void requestReleaseChannels(TSessionId sessionId);
 		void requestLoadTable(CAnimationSession* session);
 		void requestUnloadTable(TSessionId sessionId);
 		TSessionId getScenarioId(TCharId charId);
+		// true if the character may use the animator and DM functions of the animation session it is attached to;
+		// if not, logs the refusal of the operation named
+		bool isAnimator(TCharId charId, const char *operation) const;
 		void broadcastMessage(CAnimationSession* session, const NLNET::CMessage& msg);
 		NLMISC::CEntityId getEid(NLNET::TModuleProxyPtr senderModuleProxy);
 		// message from  Server Admin Module for starting Animation Session (calle queueSession)
@@ -336,7 +344,8 @@ namespace R2
 
 
 
-		/// Queue the creation of an animation session (+ output Debug)
+		/// Queue the creation of an animation session (+ output Debug). The run time scenario of the session is
+		/// checked first: false if it is refused, and the session stays with the caller.
 		bool queueSession(CAnimationSession* session, bool runTest = true);
 		/// for queueSession implementation
 		bool makeAnimationSession(CAnimationSession* animSession, bool runTest);
@@ -393,6 +402,9 @@ namespace R2
 		// Only one session can be performed by update
 		TSessionsQ	_QueuedSessions;
 		bool		_ReadyForNextSession;
+
+		// The sessions whose start was asked for (scheduleStartSession) and is neither made nor given up yet
+		std::set<TSessionId> m_StartingSessions;
 
 		// Task that are waiting to be executed (like starting an act in 30 seconds...)
 		CTaskList<NLMISC::TTime> _Tasks;

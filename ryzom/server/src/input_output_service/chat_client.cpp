@@ -446,8 +446,9 @@ void CChatClient::updateAudience( CEntityId &audienceId, sint maxDist, TTime& la
 					}
 				}
 			}
+			// only a rescan restarts the period: lines less than a period apart must not hold the audience back forever
+			lastAudienceUpdateTime = currentTime;
 		}
-		lastAudienceUpdateTime = currentTime;
 	}
 
 } // updateAudience //

@@ -25,22 +25,27 @@
 // client
 #include "stdpch.h"
 
+#include "game_share/chat_message.h"
 #include "game_share/shard_names.h"
 
 #include "../r2/editor.h"
 
 #include "chat_window.h"
+#include "chat_link_ui.h"
 #include "chat_text_manager.h"
 #include "../user_entity.h"
 #include "people_interraction.h"
 #include "../connection.h"
 //
 #include "nel/gui/group_container.h"
+#include "nel/gui/group_scrolltext.h"
 #include "nel/gui/group_editbox.h"
 #include "nel/gui/group_tab.h"
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "../client_chat_manager.h"
+#include "../client_cfg.h"
+#include "../client_ctrl.h"
 //
 #include "../session_browser_impl.h"
 
@@ -204,7 +209,9 @@ bool CChatWindow::isVisible() const
 }
 
 //=================================================================================
-void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
+void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt,
+	uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= nullptr*/,
+	const CChatMessage *sharedMessage, const string &senderName)
 {
 	if (!_Chat)
 	{
@@ -236,10 +243,15 @@ void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGrou
 		}
 	}
 
-	CViewBase *child = ctm.createMsgText(msgNoTranslate, col);
+	CViewBase *child = sharedMessage ? ctm.createMsgText(msgNoTranslate, *sharedMessage, col, false, gt) : ctm.createMsgText(msgNoTranslate, col);
 	if (child)
 	{
-		if (gl)	gl->addChild(child);
+		ctm.setMessageTarget(child, gt, dynamicChatDbIndex, string(), senderName);
+		if (gl)
+		{
+			gl->addChild(child);
+			ctm.setMentionTab(child, nullptr);
+		}
 
 		// if the group is closed, make it blink
 		if (!_Chat->isOpen())
@@ -254,7 +266,7 @@ void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGrou
 				father->enableBlink(numBlinks);
 			}
 		}
-	if (windowVisible != nullptr)
+		if (windowVisible != nullptr)
 		{
 			*windowVisible = isVisible();
 		}
@@ -553,7 +565,9 @@ void CChatWindow::clearMessages(CChatGroup::TGroupType /* gt */, uint32 /* dynam
 // CChatGroupWindow //
 //////////////////////
 
-void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks, bool *windowVisible)
+void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt,
+	uint32 dynamicChatDbIndex, uint numBlinks, bool *windowVisible,
+	const CChatMessage *sharedMessage, const string &senderName)
 {
 	if (!_Chat)
 	{
@@ -598,13 +612,21 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 	CViewBase *child = NULL;
 	if (gl != NULL)
 	{
-		child = ctm.createMsgText(newmsg, col);
+		child = sharedMessage ? ctm.createMsgText(newmsg, *sharedMessage, col, false, gt) : ctm.createMsgText(newmsg, col);
 		if (child)
 		{
+			ctm.setMessageTarget(child, gt, dynamicChatDbIndex, string(), senderName);
 			gl->addChild(child);
+			ctm.setMentionTab(child, tab);
 			if (!gl->getParent()->getActive())
-			if (tab != nullptr)
-					tab->setTextColorNormal(newMsgColor);
+			{
+				CGroupScrollText *scroll = dynamic_cast<CGroupScrollText *>(gl->getParent());
+				if (scroll)
+					scroll->markUnread(child);
+				if (tab != nullptr)
+					if (!ctm.hasUnreadMention(tab))
+						tab->setTextColorNormal(newMsgColor);
+			}
 		}
 	}
 
@@ -672,13 +694,21 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 
 		if (gl != nullptr)
 		{
-			child = ctm.createMsgText(newmsg, col);
+			child = sharedMessage ? ctm.createMsgText(newmsg, *sharedMessage, col, false, gt) : ctm.createMsgText(newmsg, col);
 			if (child)
 			{
+				ctm.setMessageTarget(child, gt, dynamicChatDbIndex, string(), senderName);
 				gl->addChild(child);
+				ctm.setMentionTab(child, tab);
 				if (!gl->getParent()->getActive())
-				if (tab != nullptr)
-						tab->setTextColorNormal(newMsgColor);
+				{
+					CGroupScrollText *scroll = dynamic_cast<CGroupScrollText *>(gl->getParent());
+					if (scroll)
+						scroll->markUnread(child);
+					if (tab != nullptr)
+						if (!ctm.hasUnreadMention(tab))
+							tab->setTextColorNormal(newMsgColor);
+				}
 			}
 		}
 	}
@@ -699,7 +729,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 				father->enableBlink(numBlinks);
 			}
 		}
-	if (windowVisible != nullptr)
+		if (windowVisible != nullptr)
 		{
 			*windowVisible = isVisible();
 		}
@@ -707,7 +737,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 }
 
 //=================================================================================
-void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, const string &sender)
+void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, const string &sender, const CChatMessage *sharedMessage)
 {
 	// If we are here with a tell message this is because the teller doesn't belong to any people list
 	CGroupContainer *gcChat = createFreeTeller(sender);
@@ -728,9 +758,14 @@ void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, 
 		nlwarning("<CChatGroupWindow::displayTellMessage> can't get text_list.");
 		return;
 	}
-	CViewBase *child = getChatTextMngr().createMsgText(msg, col);
+	CViewBase *child = sharedMessage ? getChatTextMngr().createMsgText(msg, *sharedMessage, col, false, CChatGroup::tell) :
+		getChatTextMngr().createMsgText(msg, col);
 	if (child)
+	{
+		getChatTextMngr().setMessageTarget(child, CChatGroup::tell, 0, sender, sender);
 		gl->addChild(child);
+		getChatTextMngr().setMentionTab(child, nullptr);
+	}
 }
 
 //=================================================================================
@@ -771,13 +806,54 @@ const string CChatGroupWindow::getValidUiStringId(const string &stringId)
 }
 
 //=================================================================================
-CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, const string &winColor)
+// The title of the window of a free teller, from the name of the entity
+static string getFreeTellerTitle(const string &winNameIn)
 {
 	// must parse the entity name, and eventually make it Full with shard name (eg: 'ani.yoyo' becomes 'yoyo(Aniro)')
 	string winNameFull= CShardNames::getInstance().makeFullNameFromRelative(PlayerSelectedMainland, winNameIn);
 
 	// remove shard name if necessary
-	string winName= CEntityCL::removeShardFromName(winNameFull);
+	return CEntityCL::removeShardFromName(winNameFull);
+}
+
+//=================================================================================
+uint CChatGroupWindow::getFreeTellerIndex(const string &winNameIn) const
+{
+	uint i;
+	string sWinName = toLower(getFreeTellerTitle(winNameIn));
+	for (i = 0; i < _FreeTellers.size(); ++i)
+	{
+		CGroupContainer *pGC = _FreeTellers[i];
+		if (toLower(pGC->getTitle()) == sWinName)
+			break;
+	}
+	return i;
+}
+
+//=================================================================================
+CGroupContainer *CChatGroupWindow::findFreeTeller(const string &winName) const
+{
+	uint i = getFreeTellerIndex(winName);
+	return i < _FreeTellers.size() ? _FreeTellers[i] : NULL;
+}
+
+//=================================================================================
+// True when the user owns the animation session of the Ring he is in, from the load of its scenario on: a
+// tell window has its INVITE button then.
+static bool userCanInviteToRingSession()
+{
+	R2::CEditor::TMode mode = R2::getEditor().getMode();
+	if (mode == R2::CEditor::NotInitialized)
+		return false;
+	return R2::getEditor().getDMC().getEditionModule().isSessionOwner()
+		&& uint32(R2::CEditor::AnimationModeLoading) <= uint32(mode)
+		&& uint32(mode) <= uint32(R2::CEditor::AnimationModeGoingToPlay);
+}
+
+//=================================================================================
+CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, const string &winColor)
+{
+	string winName = getFreeTellerTitle(winNameIn);
 
 	// get the color
 	string sWinColor = winColor;
@@ -785,15 +861,8 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, con
 		sWinColor = "UI:SAVE:WIN:COLORS:COM";
 
 	// Look if the free teller do not already exists
-	uint32 i;
-	string sWinName = winName;
-	sWinName = toLower(sWinName);
-	for (i = 0; i < _FreeTellers.size(); ++i)
-	{
-		CGroupContainer *pGC = _FreeTellers[i];
-		if (toLower(pGC->getTitle()) == sWinName)
-			break;
-	}
+	string sWinName = toLower(winName);
+	uint i = getFreeTellerIndex(winNameIn);
 	// Create container if not present
 	if (i == _FreeTellers.size())
 	{
@@ -831,23 +900,14 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, con
 		pGC->center();
 		_FreeTellers.push_back(pGC);
 
-		CInterfaceElement *result = pRoot->findFromShortId(string("invite"));
-		if(result)
-		{
-			CCtrlBaseButton * inviteButton = dynamic_cast<CCtrlBaseButton*>(result);
-			if(inviteButton)
-			{
-				bool isDM = false;
-				R2::CEditor::TMode mode = R2::getEditor().getMode();
-				if (mode != R2::CEditor::NotInitialized )
-				{
-					isDM =  R2::getEditor().getDMC().getEditionModule().isSessionOwner()
-						&& uint32(R2::CEditor::AnimationModeLoading) <= uint32(mode)
-						&& uint32(mode) <= uint32(R2::CEditor::AnimationModeGoingToPlay);
-				}
-				inviteButton->setActive(isDM);
-			}
-		}
+		// The INVITE button of this window. (It was looked up from the root of the interface, by its short
+		// id: that finds the first control named 'invite' of all the windows, and the Invite button of the
+		// Ring's list of characters comes before any tell window. The button of this window stayed hidden
+		// until a contact list changed.)
+		// The FRIEND and IGNORE buttons are set with it: they were set only when a contact list changed, so the
+		// tell window of a friend had a FRIEND button to press until then (in an animation, where the lists
+		// rarely change, for as long as the window was there).
+		updateFreeTellerHeader(*pGC);
 
 		// the group is only active on the current desktop
 		pGC->setActive(true);
@@ -891,14 +951,7 @@ void CChatGroupWindow::updateFreeTellerHeader(CGroupContainer &ft)
 
 	if (inviteBut)
 	{
-		bool isDM = false;
-		R2::CEditor::TMode mode = R2::getEditor().getMode();
-		if (mode != R2::CEditor::NotInitialized )
-		{
-			isDM =  R2::getEditor().getDMC().getEditionModule().isSessionOwner()
-				&& uint32(R2::CEditor::AnimationModeLoading) <= uint32(mode)
-				&& uint32(mode) <= uint32(R2::CEditor::AnimationModeGoingToPlay);
-		}
+		bool isDM = userCanInviteToRingSession();
 
 		inviteBut->setActive(isDM);
 		if (isDM)
@@ -1328,12 +1381,68 @@ public:
 			nlwarning("No chat box associated with %s", pEB->getId().c_str());
 			return;
 		}
+		CChatMessageRequest linkRequest;
+		bool hasLinks = CHAT_SHARE::hasReferences(pEB);
+		bool keepQuote = false;
+		CRefPtr<CGroupEditBox> quoteEditBox;
+		if (hasLinks)
+		{
+			if (!CHAT_SHARE::buildRequest(pEB, linkRequest))
+			{
+				CHAT_SHARE::reportInvalidLink();
+				return;
+			}
+			text = linkRequest.Text.toUtf8();
+			if (text[0] == '/')
+			{
+				if (linkRequest.References[0].Start != 0)
+				{
+					CChatWindow::_ChatWindowLaunchingCommand = chat;
+					CHAT_SHARE::executeCommand(linkRequest, pEB);
+					return;
+				}
+				if (!getChatTextMngr().getQuoteMessageId(pEB).empty())
+				{
+					CHAT_SHARE::CRequestScope requestScope(&linkRequest, pEB);
+					CHAT_SHARE::sendRequest(CChatGroup::nbChatMode, CEntityId::Unknown, string(), false);
+					return;
+				}
+				if (chat->getListener() && !ClientCfg.Local)
+				{
+					linkRequest.ClientRequestId = getChatTextMngr().beginQuoteSend(pEB);
+					if (linkRequest.ClientRequestId == 0)
+						return;
+					CHAT_SHARE::CRequestScope requestScope(&linkRequest);
+					chat->getListener()->msgEntered(text, chat);
+					if (!requestScope.wasSent())
+						getChatTextMngr().finishQuoteSend(linkRequest.ClientRequestId, false);
+					return;
+				}
+				CHAT_SHARE::reportInvalidLink();
+				return;
+			}
+		}
 
 		// Parse any tokens in the text
-		if ( ! CInterfaceManager::parseTokens(text))
+		if (!hasLinks && !CInterfaceManager::parseTokens(text))
 		{
-			pEB->setInputString(std::string());
+			if (getChatTextMngr().getQuoteMessageId(pEB).empty())
+				pEB->setInputString(std::string());
 			return;
+		}
+
+		if (!hasLinks && text[0] == '/' && !getChatTextMngr().getQuoteMessageId(pEB).empty())
+		{
+			linkRequest.Text = CUtfStringView(text).toUtf16();
+			string commandName;
+			if (CHAT_SHARE::isChatCommand(linkRequest, commandName))
+			{
+				CChatWindow::_ChatWindowLaunchingCommand = chat;
+				CHAT_SHARE::executeCommand(linkRequest, pEB);
+				return;
+			}
+			keepQuote = true;
+			quoteEditBox = pEB;
 		}
 
 		// if, it s a command, execute it and don't send the command to the server
@@ -1354,7 +1463,13 @@ public:
 				}
 			}
 
-			if ( NLMISC::ICommand::exists( cmd ) )
+			// a control tool that drives a client whose content is not trusted may type what it read there: the command
+			// would do what the privileged methods of the endpoint are refused for
+			if (ClientCtrl::refuseTypedCommand(cmdWithArgs))
+			{
+				// the warning and the system message say why
+			}
+			else if ( NLMISC::ICommand::exists( cmd ) )
 			{
 				NLMISC::ICommand::execute( cmdWithArgs, g_log );
 			}
@@ -1366,13 +1481,37 @@ public:
 		}
 		else
 		{
+			if (getChatTextMngr().sendQuote(pEB, text, hasLinks ? &linkRequest : nullptr))
+				return;
 			if (chat->getListener())
 			{
+				if (hasLinks && !ClientCfg.Local)
+				{
+					linkRequest.ClientRequestId = getChatTextMngr().beginQuoteSend(pEB);
+					if (linkRequest.ClientRequestId == 0)
+						return;
+				}
+				CHAT_SHARE::CRequestScope requestScope(hasLinks ? &linkRequest : nullptr);
 				chat->getListener()->msgEntered(text, chat);
+				if (hasLinks && !ClientCfg.Local)
+				{
+					if (!requestScope.wasSent())
+						getChatTextMngr().finishQuoteSend(linkRequest.ClientRequestId, false);
+					return;
+				}
+			}
+			else if (hasLinks)
+			{
+				CHAT_SHARE::reportInvalidLink();
+				return;
 			}
 		}
+		if (keepQuote && quoteEditBox == nullptr)
+			return;
 		// Clear input string
 		pEB->setInputString (std::string());
+		if (!keepQuote)
+			getChatTextMngr().clearQuote(pEB);
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pEB->getEnclosingContainer() );
 
 		if (gc)
@@ -1468,17 +1607,26 @@ public:
 		string playerName = ::getFreeTellerName(pCaller);
 		if (!playerName.empty())
 		{
-			// ask the SBS to invite the character in the session
-			CSessionBrowserImpl::getInstance().inviteCharacterByName(CSessionBrowserImpl::getInstance().getCharId(), playerName);
-			// additionaly, send a tell to signal the player he has been invited to a ring session
-			ChatMngr.tell(playerName, CI18N::get("uiRingInviteNotification"));
-			//
-			CInterfaceManager *im = CInterfaceManager::getInstance();
-			im->displaySystemInfo("@{6F6F}" +  playerName +" @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
-			// force a refresh of the ui
-			CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
+			// ask the SBS to invite the character in the session, and wait for the answer: the session manager
+			// can refuse (the character is already invited, a newcomer or free trial rule, a scenario that is
+			// not started). The player is told a refusal, and the other player is told nothing. An invitation
+			// that is granted is told to both, and the list of the characters of the session is asked for again.
+			CSessionBrowserImpl::getInstance().inviteCharacterByNameAndWait(playerName, pCaller);
 		}
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerInviteToRingSession, "invite_to_ring_session");
+
+// ***************************************************************************************
+// The buttons in the header of the tell windows are set again: the INVITE button depends on the mode of the
+// Ring editor, whose scripts run this at each change of mode (r2:onModeChanged).
+class CHandlerUpdateFreeTellerHeaders : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
+	{
+		PeopleInterraction.updateAllFreeTellerHeaders();
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerUpdateFreeTellerHeaders, "update_free_teller_headers");
 

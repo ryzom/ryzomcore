@@ -373,10 +373,6 @@ NLMISC_COMMAND (putFileBase64Content, "fill file with content in Base64 encoded 
 	if (args.size() < 2)
 		return false;
 
-	COFile	f;
-	if (!f.open(args[0]))
-		return false;
-
 	std::string	encoded;
 	uint	i;
 	for (i=1; i<args.size(); ++i)
@@ -384,6 +380,18 @@ NLMISC_COMMAND (putFileBase64Content, "fill file with content in Base64 encoded 
 
 	std::vector<uint8>	buffer;
 	base64Decode(buffer, encoded);
+
+	// Content that decodes to nothing is refused before the file is opened, which would empty it: the command
+	// is there to fill a file, and getFileBase64Content gives no content to put back for a file without any
+	if (buffer.empty())
+	{
+		log.displayNL("putFileBase64Content: the content decodes to nothing, file '%s' is not written", args[0].c_str());
+		return false;
+	}
+
+	COFile	f;
+	if (!f.open(args[0]))
+		return false;
 
 	f.serialBuffer(&(buffer[0]), (uint)buffer.size());
 	f.close();

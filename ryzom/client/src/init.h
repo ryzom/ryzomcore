@@ -30,11 +30,21 @@ namespace NLMISC
 	class IProgressCallback;
 }
 
+namespace NL3D
+{
+	class UDriver;
+}
+
 // Initialize the log
 void initLog();
 
 // Initialize the application before login step
 void prelogInit();
+
+/** The default window size (the client area): 1024x768 scaled for the display, shrunk to the room a window has
+ * (on Windows the work area less the frame of the window, elsewhere the screen)
+ */
+void getDefaultWindowSize(NL3D::UDriver *driver, uint16 &width, uint16 &height);
 
 // Initialize the application after login step
 void postlogInit();

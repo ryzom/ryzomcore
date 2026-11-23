@@ -97,7 +97,8 @@ public:
 
 	void clear();
 
-	void memorize(uint8 i, const std::vector<NLMISC::CSheetId> &bricks, uint16 id, const TDataSetRow &rowId);
+	/// returns whether the phrase could be built and was memorized
+	bool memorize(uint8 i, const std::vector<NLMISC::CSheetId> &bricks, uint16 id, const TDataSetRow &rowId);
 
 	void memorizeWithoutCheck(uint8 i, const std::vector<NLMISC::CSheetId> &bricks, uint16 id);
 

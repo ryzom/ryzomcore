@@ -1,0 +1,11 @@
+# The behavior of an npc is of a class the editor does not have. It can not be taken out, as a component
+# of a list is: the npc would lack its behavior. The update fails, the author is told the class and
+# what holds it, and the scenario is not loaded (the program ends with 4, which is what is expected
+# here).
+result: 4
+upgrade: unknown_class
+version_update: failed
+version_update_failure: the 'Behavior' of a component of the class 'Npc' is of the class 'MadeUpBehavior', which this editor does not have
+absent: save
+absent: translate
+absent: dropped_update

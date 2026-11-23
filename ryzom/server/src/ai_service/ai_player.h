@@ -61,6 +61,11 @@ public:
 	
 	void setAggroable(bool aggroable = true) { _Aggroable = aggroable; }
 	bool isAggroable() const { return _Aggroable; }
+
+	/// The WhoSeesMe mirror property of the player (see R2_VISION). It is read through a mirror
+	/// member like the other properties of the entity, with no test on the row: the row of a
+	/// player who leaves goes offline before the AI service removes the player
+	uint64 whoSeesMe() const { return m_WhoSeesMe(); }
 	
 	// player are always attackable (this is a IA point of view, it mean that IA can attack player)
 	virtual bool isBotAttackable() const NL_OVERRIDE { return true; }
@@ -121,6 +126,7 @@ private:
 	std::vector<TDataSetRow>	_AggroerList;
 	std::set<uint32>	_InsideTriggerZones;
 	AISHEETS::IRaceStatsCPtr	_Sheet;
+	CMirrorPropValueRO<TYPE_WHO_SEES_ME> m_WhoSeesMe;
 };
 
 //////////////////////////////////////////////////////////////////////////////

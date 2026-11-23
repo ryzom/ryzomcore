@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from quick_start.common import *
 from quick_start.find_external import *
 from quick_start.find_targets import *
+from quick_start.find_docker import *
 
 NeLSpecClient = 1
 NeLSpecServer = 2
@@ -22,7 +23,8 @@ NeLParallelFiles = int(max(NeLParallel // NeLParallelProjects, 1))
 Targets = {
 	"Native": { },
 	"Client": { },
-	"PluginMax": { }
+	"PluginMax": { },
+	"XplatTools": None
 }
 
 def EscapeArg(arg):
@@ -46,6 +48,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 		maxSdk = target["MaxSDK"]
 	isDocker = "Docker" in tc and tc["Docker"]
 	isHunter = "Hunter" in tc and tc["Hunter"]
+	isWine = "Wine" in tc and tc["Wine"]
 	opts = []
 	
 	# Generator
@@ -57,6 +60,10 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 			opts += [ "-G", "%RC_GENERATOR%" ]
 		else:
 			opts += [ "-G", gen ]
+	
+	# Windows toolchain under Wine: the toolchain file of the layer drives the compiler through its wrapper scripts
+	if isWine:
+		opts += [ "-DCMAKE_TOOLCHAIN_FILE=" + DockerRootPath("code/" + tc["WineLayer"]["Dir"] + "/toolchain.cmake") ]
 	
 	# Visual Studio Toolset and Platform
 	if gen and gen.startswith("Visual Studio") and "Toolset" in tc and tc["Toolset"].startswith("v"):
@@ -189,8 +196,8 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 		opts += [ "-DWITH_DRIVER_OPENGL3=OFF" ]
 		opts += [ "-DWITH_DRIVER_OPENAL=OFF" ]
 	
-	# CMake Prefix
-	if "Prefix" in tc and len(tc["Prefix"]) > 0:
+	# CMake Prefix (the Wine toolchain file sets it from the externals folder of the prefix)
+	if "Prefix" in tc and len(tc["Prefix"]) > 0 and not isWine:
 		opts += [ "-DCMAKE_PREFIX_PATH=%RC_PREFIX_PATH%" ]
 	
 	if spec == NeLSpecClient:
@@ -259,7 +266,7 @@ def FilterPrefix(target, spec):
 	global NeLSpecTools
 	global NeLSpecSamples
 	global NeLSpecPluginMax
-	nelDirs = [ "zlib", "openssl", "curl", "libjpeg", "libpng", "iconv", "libxml2", "freetype2", "ogg", "vorbis", "openal", "gl", "gles", "lua", "boost", "luabind" , "mariadb" ]
+	nelDirs = [ "zlib", "openssl", "curl", "libjpeg", "libpng", "giflib", "iconv", "libxml2", "freetype2", "ogg", "vorbis", "openal", "gl", "gles", "lua", "boost", "luabind" , "mariadb" ]
 	toolsDirs = [ "squish", "assimp" ]
 	serverClientDirs = [ "msquic" ]
 	tc = NeLToolchains[target["Toolchain"]]
@@ -281,13 +288,40 @@ def FilterPrefix(target, spec):
 				break
 	return res
 
+# The signtool of SignTool/Executable, or else the one of the newest Windows SDK (signing uses /fd, /tr and /td,
+# which the old SDKs do not have)
+def FindSignTool():
+	if NeLConfig["SignTool"]["Executable"]:
+		return NeLConfig["SignTool"]["Executable"]
+	if os.name != 'nt':
+		return ""
+	found = []
+	kitsBin = os.path.join(os.getenv("ProgramFiles(x86)", "C:\\Program Files (x86)"), "Windows Kits", "10", "bin")
+	if os.path.isdir(kitsBin):
+		for version in os.listdir(kitsBin):
+			signTool = os.path.join(kitsBin, version, "x64", "signtool.exe")
+			if version.startswith("10.") and os.path.isfile(signTool):
+				found += [ (tuple(int(v) for v in version.split(".") if v.isdigit()), signTool) ]
+	if not len(found):
+		if NeLConfig["SignTool"]["Sha1"]:
+			print("WARNING: SignTool/Sha1 is set but no signtool was found in " + kitsBin + ", set SignTool/Executable in .nel/config.json")
+		return ""
+	found.sort()
+	return found[-1][1]
+
 def GeneratePathScript():
 	fo = open(NeLPathScript, 'w')
 	fo.write("set " + EscapeArg("RC_ROOT=" + NeLRootDir) + "\n")
 	fo.write("set " + EscapeArg("RC_ROOT_FW=" + NeLRootDir.replace("\\", "/")) + "\n")
 	fo.write("set " + EscapeArg("RC_CODE_DIR=" + NeLCodeDir) + "\n")
-	fo.write("set " + EscapeArg("RC_PYTHON27_DIR=" + NeLPython27Dir) + "\n")
 	fo.write("set " + EscapeArg("RC_PYTHON3_DIR=" + NeLPython3Dir) + "\n")
+	fo.write("set " + EscapeArg("RC_UTILS_DIR=" + NeLUtilsDir) + "\n")
+	fo.write("set " + EscapeArg("RC_RRDTOOL_DIR=" + NeLRRDtoolDir) + "\n")
+	fo.write("set " + EscapeArg("RC_MARIADB_DIR=" + NeLMariaDBDir) + "\n")
+	fo.write("set " + EscapeArg("RC_NGINX_DIR=" + NeLNginxDir) + "\n")
+	fo.write("set " + EscapeArg("RC_PHP_DIR=" + NeLPHPDir) + "\n")
+	fo.write("set " + EscapeArg("RC_PHPMYADMIN_DIR=" + NeLphpMyAdminDir) + "\n")
+	fo.write("set " + EscapeArg("RC_WEB_DIR=" + NeLWebDir) + "\n")
 	fo.write("set " + EscapeArg("RC_PERL_DIRS=" + os.path.join(NeLPerlDir, os.path.normcase("perl/site/bin")) + os.pathsep + os.path.join(NeLPerlDir, os.path.normcase("perl/bin")) + os.pathsep + NeLPerlDir) + "\n")
 	envPath = ""
 	for path in NeLEnvPaths:
@@ -355,13 +389,24 @@ def GeneratePathScript():
 		fo.write("set " + EscapeArg("RC_QT_PLUGIN_DIR=" + Targets["Native"]["client_dev"]["QtPluginBin"]) + "\n")
 	else:
 		fo.write("set " + EscapeArg("RC_QT_PLUGIN_DIR=" + NeLConfig["Fallback"]["QtPluginBin"]) + "\n")
+	# The cross-platform tools (servdash_cli) as the Docker build leaves them, per platform
+	xplatDir = os.path.join(NeLRootDir, os.path.normcase(NeLBuildDockerDirName + "/tools_xplat"))
+	if Targets["XplatTools"]:
+		xplatDir = os.path.join(NeLRootDir, os.path.normcase(Targets["XplatTools"]["BuildDir"]))
+	fo.write("set " + EscapeArg("RC_TOOLS_XPLAT_DIR_WIN=" + os.path.join(xplatDir, NeLXplatToolsTargets["win"], "release")) + "\n")
+	fo.write("set " + EscapeArg("RC_TOOLS_XPLAT_DIR_LINUX=" + os.path.join(xplatDir, NeLXplatToolsTargets["linux"], "release")) + "\n")
+	# The service dashboard the shard scripts open: servdash_gui in a window, or servdash_cli in the console when Headless
+	if NeLConfig["Headless"]:
+		fo.write("set RC_HEADLESS=1\n")
+	else:
+		fo.write("set RC_HEADLESS=0\n")
 	exedll = []
 	for client in NeLTargetClient:
 		exedll += [ "common/exedll_" + client ]
 	fo.write("set " + EscapeArg("RC_EXEDLL_PROJECTS=" + " ".join(exedll)) + "\n")
 	fo.write("set " + EscapeArg("RC_3DSMAX_EXE=" + NeLConfig["3dsMax"]["Executable"]) + "\n")
 	fo.write("set " + EscapeArg("RC_3DSMAX_USER_DIR=" + NeLConfig["3dsMax"]["UserDirectory"]) + "\n")
-	fo.write("set " + EscapeArg("RC_SIGNTOOL_EXE=" + NeLConfig["SignTool"]["Executable"]) + "\n")
+	fo.write("set " + EscapeArg("RC_SIGNTOOL_EXE=" + FindSignTool()) + "\n")
 	fo.write("set " + EscapeArg("RC_SIGNTOOL_SHA1=" + NeLConfig["SignTool"]["Sha1"]) + "\n")
 	fo.write("set " + EscapeArg("RC_SIGNTOOL_TIMESTAMP=" + NeLConfig["SignTool"]["Timestamp"]) + "\n")
 	fo.write("call " + EscapeArg(os.path.join(NeLRootDir, os.path.normcase(".nel/web_config.bat"))))
@@ -404,6 +449,47 @@ def GenerateDockerEnv(file, relBuildDir, buildDir, tc):
 	if len(dockerCmdStr) > 0:
 		fo.write(dockerCmdStr[:-1])
 	fo.write("\n")
+	fo.close()
+
+# The environment of a Windows toolchain under Wine: what its toolchain layer reads for the prefix, the
+# shadow VC folder and the externals, and what the Find modules read for the SDKs
+def WineEnv(tc):
+	layer = tc["WineLayer"]
+	env = {}
+	env[layer["Prefix"]] = tc["WinePrefix"]
+	env[layer["Shadow"]] = tc["WinePrefix"] + "-msvc-shadow"
+	env[layer["External"]] = tc["ExternalDir"]
+	if "ProgramFiles" in tc:
+		env["PROGRAMFILES"] = tc["ProgramFiles"]
+	if "WindowsSDK" in tc:
+		env["WINSDK_DIR"] = tc["WindowsSDK"]
+	if "DirectXSDK" in tc:
+		env["DXSDK_DIR"] = tc["DirectXSDK"]
+	return env
+
+def GenerateWineEnv(file, relBuildDir, buildDir, tc):
+	fo = open(file, 'w')
+	fo.write("@echo off\n")
+	fo.write("rem " + tc["DisplayName"] + "\n")
+	fo.write("cd /d " + EscapeArg(buildDir) + "\n")
+	fo.write("call " + EscapeArg(NeLPathScript) + "\n")
+	fo.write("set PATH=%RC_PATH%;%PATH%\n")
+	fo.write("set " + EscapeArg("RC_GENERATOR=" + tc["Generator"]) + "\n")
+	platform = tc["Platform"]
+	if platform == "x86" or platform == "386":
+		platform = "Win32"
+	else:
+		platform = "x64"
+	fo.write("set " + EscapeArg("RC_PLATFORM=" + platform) + "\n")
+	fo.write("set " + EscapeArg("RC_TOOLSET=" + tc["Toolset"]) + "\n")
+	fo.write("set " + EscapeArg("RC_BUILD_DIR=" + buildDir) + "\n")
+	env = WineEnv(tc)
+	for varName, interactive in [ ("RC_DOCKER", False), ("RC_DOCKER_IT", True) ]:
+		fo.write("set " + varName + "=")
+		dockerCmdStr = ""
+		for cmd in DockerWineCommand(tc["Image"], relBuildDir, env, interactive=interactive):
+			dockerCmdStr += EscapeArgOpt(cmd) + " "
+		fo.write(dockerCmdStr[:-1] + "\n")
 	fo.close()
 
 _pause_goto_counter = 0
@@ -453,7 +539,7 @@ def WriteHeader(fo):
 def WriteFooter(fo, title):
 	fo.write("title " + title + ": Ready\n")
 	fo.write("echo Ready\n")
-	fo.write("echo OK > " + EscapeArg("%RC_ROOT%\.nel\code_build.tag") + "\n")
+	fo.write("echo OK > " + EscapeArg("%RC_ROOT%\\.nel\\code_build.tag") + "\n")
 	fo.write("pause\n")
 
 def GenerateMsvcEnv(file, buildDir, generator, tc, filteredPrefix):
@@ -678,6 +764,7 @@ def ConfigureTarget(spec, name, fv, target):
 	buildRootDir = None
 	isDocker = "Docker" in tc and tc["Docker"]
 	isHunter = "Hunter" in tc and tc["Hunter"]
+	isWine = "Wine" in tc and tc["Wine"]
 	if isDocker:
 		relPath = os.path.join(NeLBuildDockerDirName, relPath)
 		relBuildRootDir = NeLBuildDockerDirName
@@ -710,7 +797,17 @@ def ConfigureTarget(spec, name, fv, target):
 	configureScript = os.path.join(buildRootDir, safeName + "_configure." + NeLScriptExt)
 	buildScript = os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt)
 	scriptOk = False
-	if tc["Compiler"] == "MSVC":
+	if isWine:
+		# Windows toolchain under Wine: Docker scripts around the toolchain file of the layer; the externals
+		# live in the prefixes volume, out of reach of the host
+		res["PrefixPath"] = []
+		res["PrefixBin"] = []
+		GenerateWineEnv(envScript, relPath, buildDir, tc)
+		GenerateDockerCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
+		GenerateCMakeCreate(configureScript, envScript, spec, gen, fv, target, buildDir, [])
+		GenerateBuild(buildScript, envScript, spec, gen, fv, target, buildDir)
+		scriptOk = True
+	elif tc["Compiler"] == "MSVC":
 		filteredPrefix = FilterPrefix(target, spec)
 		res["PrefixPath"] = filteredPrefix
 		res["PrefixBin"] = FindBinPaths(filteredPrefix)
@@ -744,6 +841,74 @@ def ConfigureTarget(spec, name, fv, target):
 			WriteCmdCall(fo_build_game_dev, buildScript, safeName + "_bld")
 	return res
 
+# *** cross-platform tools: Rust crates built in Docker, no CMake ***
+
+def GenerateXplatEnv(file, relBuildDir, buildDir, image):
+	fo = open(file, 'w')
+	fo.write("@echo off\n")
+	fo.write("rem Ryzom Core Cross-Platform Tools (" + image + ")\n")
+	fo.write("cd /d " + EscapeArg(buildDir) + "\n")
+	fo.write("call " + EscapeArg(NeLPathScript) + "\n")
+	fo.write("set PATH=%RC_PATH%;%PATH%\n")
+	fo.write("set " + EscapeArg("RC_BUILD_DIR=" + buildDir) + "\n")
+	for var, interactive in [ ("RC_DOCKER", False), ("RC_DOCKER_IT", True) ]:
+		fo.write("set " + var + "=")
+		dockerCmdStr = ""
+		for cmd in DockerXplatCommand(image, relBuildDir, interactive):
+			dockerCmdStr += EscapeArgOpt(cmd) + " "
+		fo.write(dockerCmdStr[:-1] + "\n")
+	fo.close()
+
+def GenerateXplatCmd(file, envScript, image):
+	fo = open(file, 'w')
+	fo.write("@echo off\n")
+	fo.write("call " + EscapeArg(envScript) + "\n")
+	fo.write("title Terminal - Ryzom Core Cross-Platform Tools - " + image + "\n")
+	fo.write("%RC_DOCKER_IT% bash\n")
+	fo.close()
+
+def GenerateXplatBuild(file, envScript, image):
+	fo = open(file, 'w')
+	fo.write("@echo off\n")
+	fo.write("call " + EscapeArg(envScript) + "\n")
+	fo.write("title Build - Ryzom Core Cross-Platform Tools - " + image + "\n")
+	for crate in NeLXplatTools:
+		safeName = crate.replace("/", "_")
+		for key in NeLXplatToolsTargets:
+			label = safeName + "_" + key
+			fo.write(":" + label + "\n")
+			fo.write("@echo on\n")
+			cargo = "cargo xwin build" if key == "win" else "cargo build"
+			fo.write("%RC_DOCKER% " + cargo + " --release --target " + NeLXplatToolsTargets[key] + " --manifest-path " + DockerRootPath("code/" + crate + "/Cargo.toml") + "\n")
+			fo.write("@echo off\n")
+			WritePauseGoto(fo, ":" + label)
+	fo.write(":done\n")
+	fo.close()
+
+def ConfigureXplatTools():
+	image = NeLXplatToolsImage
+	if not FoundDocker or not image in FoundDocker:
+		return None
+	res = { }
+	relPath = os.path.join(NeLBuildDockerDirName, "tools_xplat")
+	buildDir = os.path.join(NeLRootDir, relPath)
+	os.makedirs(buildDir, exist_ok=True)
+	res["BuildScriptDir"] = NeLBuildDockerDirName
+	res["BuildDir"] = relPath.replace("\\", "/")
+	res["Image"] = image
+	res["Tools"] = NeLXplatTools
+	res["Targets"] = NeLXplatToolsTargets
+	envScript = os.path.join(NeLBuildDockerDir, "tools_xplat_env." + NeLScriptExt)
+	buildScript = os.path.join(NeLBuildDockerDir, "tools_xplat_build." + NeLScriptExt)
+	GenerateXplatEnv(envScript, relPath, buildDir, image)
+	GenerateXplatCmd(os.path.join(NeLBuildDockerDir, "tools_xplat_terminal." + NeLScriptExt), envScript, image)
+	GenerateXplatBuild(buildScript, envScript, image)
+	# cargo configures by itself, so only the build is called from the combined scripts
+	WriteCmdCall(fo_configure_rebuild_all, buildScript, "tools_xplat_bld")
+	WriteCmdCall(fo_build_all, buildScript, "tools_xplat_bld")
+	WriteCmdCall(fo_build_game_dev, buildScript, "tools_xplat_bld")
+	return res
+
 Targets["Native"]["client_dev"] = ConfigureTarget(NeLSpecClient, "client_dev", False, NeLTargetClientDev)
 Targets["Native"]["server_dev"] = ConfigureTarget(NeLSpecServer, "server_dev", False, NeLTargetServerDev)
 for client in NeLTargetClient:
@@ -753,6 +918,7 @@ Targets["Native"]["tools"] = ConfigureTarget(NeLSpecTools, "tools", False, NeLTa
 Targets["Native"]["samples"] = ConfigureTarget(NeLSpecSamples, "samples", False, NeLTargetSamples)
 for pluginMax in NelTargetPluginMax:
 	Targets["PluginMax"][pluginMax] = ConfigureTarget(NeLSpecPluginMax, "plugin_max/" + pluginMax, False, NelTargetPluginMax[pluginMax])
+Targets["XplatTools"] = ConfigureXplatTools()
 
 GeneratePathScript()
 GeneratePatchVersionScript()

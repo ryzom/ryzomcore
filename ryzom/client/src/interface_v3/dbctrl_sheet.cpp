@@ -260,7 +260,10 @@ int CDBCtrlSheet::luaBuildCrystallizedSpellListBrick(CLuaState &ls)
 
 	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
-	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
+	// Until the info of the slot is up to date it may be the info of an item that was there before: no brick then
+	CClientItemInfo itemInfo;
+	if (getInventory().isItemInfoUpToDate(itemSlotId))
+		itemInfo = getInventory().getItemInfo(itemSlotId);
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CSBrickManager		*pBM= CSBrickManager::getInstance();
@@ -954,6 +957,10 @@ uint CDBCtrlSheet::getInventorySlot( const string &dbBranchId )
 	case 'G':
 		if( !strncmp( "GUILD:INVENTORY", szName, 15 ) )
 			return INVENTORIES::guild;
+		break;
+	case 'T':
+		if( !strncmp( "TRADING", szName, 7 ) )
+			return INVENTORIES::trading;
 		break;
 	case 'I':
 		if( strncmp( "INVENTORY:", szName, 10 ) )
@@ -1827,6 +1834,9 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 			setupCharBitmaps(26-2, 1);
 		}
 	}
+
+	_LastSheetId = _SheetId.getSInt32();
+	_NeedSetup = false;
 }
 
 // ***************************************************************************
@@ -2464,6 +2474,27 @@ static inline CRGBA	fastMulRGB(CRGBA sheetColor, CRGBA iconColor)
 }
 
 // ----------------------------------------------------------------------------
+// True if the phrase is a special power with a taunt brick.
+// Called for each drawn phrase while nothing is targeted: the root brick is tested first (one lookup),
+// only the few bricks of a special power are walked.
+static bool isTauntPhrase(const CSPhraseCom &phrase)
+{
+	CSBrickManager *pBM = CSBrickManager::getInstance();
+	if (phrase.Bricks.empty())
+		return false;
+	const CSBrickSheet *rootBrick = pBM->getBrick(phrase.Bricks[0]);
+	if (!rootBrick || !rootBrick->isSpecialPower())
+		return false;
+	for (uint i = 0; i < phrase.Bricks.size(); i++)
+	{
+		const CSBrickSheet *brick = pBM->getBrick(phrase.Bricks[i]);
+		if (brick && brick->BrickFamily == BRICK_FAMILIES::BSFMA)
+			return true;
+	}
+	return false;
+}
+
+// ----------------------------------------------------------------------------
 void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelectionBorder /*= true*/)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2851,8 +2882,8 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 										maxRange= min(maxRange, (uint)brick->MaxRange);
 										if(brick->BrickFamily == BRICK_FAMILIES::BSFMA)
 										{
-
-											forceGrayed = target->isNeutral();
+											// a taunt is for an attackable creature or NPC: the server refuses it on any player
+											forceGrayed = target->isNeutral() || target->isPlayer() || target->isUser();
 											isTaunt = true;
 										}
 									}
@@ -2870,6 +2901,9 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 							}
 						}
 					}
+					// a taunt needs a target: the server refuses it without one
+					if ((targetSlot >= CLFECOMMON::INVALID_SLOT || EntitiesMngr.entity(targetSlot) == NULL) && isTauntPhrase(phrase))
+						forceGrayed = true;
 					// in every cases, test against current gauges to see if the action is possible
 					if (UserEntity)
 					{
@@ -3698,34 +3732,9 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 		}
 		else
 		{
-			// delegate setup of context he help ( & window ) to lua
-			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CLuaState *ls= CLuaManager::getInstance().getLuaState();
-			{
-				CLuaStackRestorer lsr(ls, 0);
-				CSPhraseManager	*pPM= CSPhraseManager::getInstance();
-				_PhraseAdapter = new CSPhraseComAdpater;
-				_PhraseAdapter->Phrase = pPM->getPhrase(phraseId);
-				CLuaIHM::pushReflectableOnStack(*ls, _PhraseAdapter);
-				ls->pushGlobalTable();
-				CLuaObject game(*ls);
-				game = game["game"];
-				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
-				// retrieve result from stack
-				if (!ls->empty())
-				{
-#ifdef RYZOM_LUA_UCSTRING
-					CLuaIHM::getUCStringOnStack(*ls, -1, help); // Compatibility
-#else
-					help = ls->toString();
-#endif
-					ls->pop();
-				}
-				else
-				{
-					nlwarning("Ucstring result expected when calling 'game:updatePhraseTooltip', possible script error");
-				}
-			}
+			_PhraseAdapter = new CSPhraseComAdpater;
+			_PhraseAdapter->Phrase = CSPhraseManager::getInstance()->getPhrase(phraseId);
+			help = _PhraseAdapter->updateTooltip();
 		}
 		/*
 		CSPhraseManager	*pPM= CSPhraseManager::getInstance();
@@ -3780,6 +3789,10 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 				if (!getInventory().isItemInfoUpToDate(_ItemInfoWaiter.ItemSlotId))
 					_ItemInfoWaiter.sendRequest();
 				help = _ItemInfoWaiter.infoValidated();
+				// its expected to get at least item name back: the waiter has no script to call
+				// for a control without serial, and the interface drops an empty tooltip
+				if (help.empty())
+					help = getItemActualName();
 				return;
 			}
 		}
@@ -3788,6 +3801,30 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 	// Default
 	getContextHelp(help);
 }
+
+#ifndef RYZOM_FORGE
+// ***************************************************************************
+bool	CDBCtrlSheet::getCrystallizedSpellInfoSlot(uint &itemSlotId) const
+{
+	if (getType() != CCtrlSheetInfo::SheetType_Item)
+		return false;
+	const CItemSheet *item = asItemSheet();
+	if (!item || item->Family != ITEMFAMILY::CRYSTALLIZED_SPELL)
+		return false;
+
+	// The item info is the info of a slot of an inventory the server knows. A control on another branch
+	// of the database has none: it must be the slot that holds this item (the trade list is not checked,
+	// as for the item info waiters).
+	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet *>(this);
+	uint slotId = getInventory().getItemSlotId(ctrlSheet);
+	bool isItemFromTrading = (slotId >> CItemInfos::SlotIdIndexBitSize) == INVENTORIES::trading;
+	if (!isItemFromTrading && getInventory().getItemSheetForSlotId(slotId) != (uint)getSheetId())
+		return false;
+
+	itemSlotId = slotId;
+	return true;
+}
+#endif
 
 // ***************************************************************************
 bool	CDBCtrlSheet::canDropItem(CDBCtrlSheet *src) const

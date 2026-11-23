@@ -114,11 +114,41 @@ CraftPart craftParts[NumMPCraftParts];
 // .creature files list
 map<string, string>	creatureFiles;
 
+// The raw material assignment files that exist (_<creature>_mp.creature), by file name without extension
+map<string, string>	assignmentFiles;
+
+// The raw materials assigned to each creature in this run, in order, by creature file name without extension
+map<string, vector<CSString> >	creatureAssignments;
+
+// The creatures of the models of creature_models.csv in the ecosystems that get raw materials, by file name without
+// extension: the tool owns the raw material entries of their assignment files
+set<string> processedCreatures;
+
+// The class of the craft materials of a creature by its level code (zone letter and digit, "b3"), from
+// rm_creature_classes.csv: 0 Basic to 4 Supreme, -1 for none
+map<string, int> creatureClasses;
+
+// A file the run makes, written once every check has passed
+struct CPendingFile
+{
+	std::string Path;
+	CSString Content;
+};
+
+// The files the run makes, by their standardized path in lower case
+map<string, CPendingFile> pendingFiles;
+
 // generated names for each item
 CSortedStringSet itemNames;
 
 // Items list to generate for each creature code
 map<CSString, ListeCreatureMP> itemsAGenerer;
+
+// The creature model name of each creature code of creature_models.csv, by code in lower case
+map<CSString, CSString> creatureModelNames;
+
+// The creature codes ("chd") whose raw materials were generated, each needs its parent sheet (_mchd.sitem)
+set<CSString> generatedCreatureCodes;
 
 // MP Family list
 class CMPFamily
@@ -140,11 +170,19 @@ CSString ITEM_MP_FAMILY_TYP;
 CSString ITEM_MP_GROUPE_TYP;
 CSString ITEM_MP_PARAM_DFN;
 CSString MP_DIRECTORY;
-CSString DEPOSIT_MPS; 
+CSString DEPOSIT_MPS;
+CSString CREATURE_PATH;
 CSString RAW_MATERIAL_ASSIGN;
 CSString IC_FAMILIES_FORAGE_SOURCE;
 
 CSString WK_UXT;
 CSString ITEM_WORDS_WK;
+
+// Ryzom Core's raw material tables (TablePath of raw_material_generation.cfg)
+CSString TABLE_PATH;
+CSString FAM_PROP_CSV;
+CSString ITEM_PARTS_CSV;
+CSString CREATURE_MODELS_CSV;
+CSString CREATURE_CLASSES_CSV;
 
 #endif

@@ -44,9 +44,10 @@ FpsSmoothing = 64;
 // Use OpenGL, set to 1, Direc3D (Windows) set to 0.
 OpenGL = 1;
 
-// Resolution of the screen
-ScreenWidth = 800;
-ScreenHeight = 600;
+// Resolution of the screen; an installed client starts in a window, fullscreen and its mode are the
+// choice of each user, in their own snowballs_client.cfg
+ScreenWidth = 1024;
+ScreenHeight = 768;
 ScreenDepth = 32;
 
 // If 1, run in fullscreen mode, 0 for windowed
@@ -55,18 +56,31 @@ ScreenFull = 0;
 // Start position of the player (the z is always 0)
 StartPoint = { 1840.0, -970.0, 0.0 };
 
+// Anti-Aliasing
+EnableFXAA = 0;
+
+
+//////////////////////////////////////////////////////////////////////////////
+// HMD Variables /////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+HMDEnable = 1;
+HMDDeviceId = 0;
+HMDDevice = "Auto";
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Sound Variables ///////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
 // The sound driver, choose between "Auto", "FMod", "DSound" and "OpenAl"
-SoundDriver          = "FMod";
+SoundDriver          = "OpenAl";
 SoundMaxTracks       = 32;
 SoundUseEax          = 1;
 SoundUseADPCM        = 1;
 SoundForceSoftware   = 1;
 SoundEnabled         = 1;
+MusicVolume          = 0.2;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -188,10 +202,11 @@ RadarParticularPlaces = {
 // If 1, launch snowballs in offline mode (not server), otherwise 0 for connecting to a server
 Local = 1;
 
-// Address of the login system (should be itsalive.nevrax.org)
-LSHost = "localhost";
+// Address of the login service, with its ClientsPort (49997 in nelns/login_service/login_service.cfg); the NeLNS
+// login service only opens that port with UseDirectClient = 1, its shipped configuration has 0
+LSHost = "localhost:49997";
 
-// Address of the frontend system (should be itsalive.nevrax.org)
+// Address of the frontend service, when the login service gives none
 FSHost = "localhost";
 
 // Your login
@@ -207,7 +222,7 @@ ShardId = 300;
 // If 0, the client connects to the web server and the web server connects to the LS
 UseDirectClient = 1;
 
-ClientApplication = "sample";
+ClientApplication = "snowballs";
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -252,6 +267,15 @@ FogColor = { 80, 77, 118 };
 
 RetrieverBankName = "snowballs.rbank";
 GlobalRetrieverName = "snowballs.gr";
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Bloom Variables ///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+SquareBloom = 1;
+DensityBloom = 128;
+EnableBloom = 1;
 
 
 //////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,104 @@
+# An npc with four chat sequences, as the first editors kept them: two started by activity steps (one
+# of them repeating), one started by an action, one without a step that nothing names. Handlers of the
+# npc wait for the end of a sequence and of a step, and conditions test a sequence and a step.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteChatSequences(3)
+version_update_note: uiR2EDVersionNoteEmptyChatSequences(1)
+version_update_note: uiR2EDVersionNoteChatSequenceConditions(1)
+version_update_note: uiR2EDVersionNoteChatStepEvents(1)
+rt: acts=2 texts=4
+
+# the dialogs, in the act of the npc and named after the npc and the sequence
+scenario_at: Acts[1].Features = <size 4>
+scenario_at: Acts[1].Features[1].Class = ChatSequence
+scenario_at: Acts[1].Features[1].Name = Zora Greeting
+scenario_at: Acts[1].Features[1].Base = palette.entities.botobjects.dialog
+scenario_at: Acts[1].Features[1].AutoStart = 0
+scenario_at: Acts[1].Features[1].Active = 1
+scenario_at: Acts[1].Features[1].Repeating = 0
+scenario_at: Acts[1].Features[1].Position.x = 24371
+scenario_at: Acts[1].Features[1].Components = <size 2>
+scenario_at: Acts[1].Features[1].Components[0].Actions[0].Says = Client1_730
+scenario_at: Acts[1].Features[1].Components[0].Actions[0].Who = Client1_700
+scenario_at: Acts[1].Features[1].Components[1].Time = 3
+scenario_at: Acts[1].Features[1].Components[1].Actions[0].Emote = Bow
+scenario_at: Acts[1].Features[1].Components[1].Actions[0].Who = Client1_701
+scenario_at: Acts[1].Features[1].Components[1].Actions[0].Facing = Client1_700
+scenario_at: Acts[1].Features[2].Name = Zora Chat2
+scenario_at: Acts[1].Features[2].Repeating = 1
+scenario_at: Acts[1].Features[3].Name = Zora Farewell
+scenario_at: Acts[1].Features[3].Components = <size 1>
+scenario_lacks: Name = [[Zora Chat3]]
+
+# The npc has no chat sequence left; its activity steps start the dialogs through handlers. The step
+# that lasted as long as its chat sequence lasts the three seconds the steps of the sequence took and
+# what its dialog takes besides to its end, which a handler waits for (61 ticks for a dialog of two
+# steps, see npc_chat_time_limit.expect): 91 ticks, 10 seconds.
+scenario_at: Acts[1].Features[0].Components[0].Behavior.ChatSequences = <size 0>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].Chat = <empty>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimit = Few Sec
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimitValue = 10
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[1].Chat = <empty>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[1].TimeLimit = Few Sec
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[1].TimeLimitValue = 20
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions = <size 3>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Name = <empty>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Event.Type = begin of activity step
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Event.Value = Client1_740
+# an npc played one sequence at a time: the other dialogs of the npc are deactivated first
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions = <size 4>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[0].Action.Type = deactivate
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[0].Entity = @Acts[1].Features[2].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[1].Action.Type = deactivate
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[1].Entity = @Acts[1].Features[3].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[2].Action.Type = activate
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[2].Entity = @Acts[1].Features[1].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[3].Action.Type = starts dialog
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[3].Entity = @Acts[1].Features[1].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[2].Event.Value = Client1_741
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[2].Actions[3].Entity = @Acts[1].Features[2].InstanceId
+
+# the condition on a step of a sequence is one on the step of its dialog
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Event.Type = death
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Conditions[0].Condition.Type = is in chat
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Conditions[0].Entity = @Acts[1].Features[2].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Conditions[0].Condition.Value = @Acts[1].Features[2].Components[0].InstanceId
+
+# the handlers of the events of a sequence are handlers of its dialog
+scenario_at: Acts[1].Features[1].Behavior.Actions = <size 2>
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Event.Type = end of chat
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Event.Value = @Acts[1].Features[1].Components[1].InstanceId
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Event.Type = end of dialog
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Event.Value = <empty>
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Actions = <size 4>
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Actions[0].Action.Type = deactivate
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Actions[0].Entity = @Acts[1].Features[1].InstanceId
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Actions[1].Entity = @Acts[1].Features[2].InstanceId
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Actions[2].Action.Type = activate
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Actions[3].Action.Type = starts dialog
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Actions[3].Entity = @Acts[1].Features[3].InstanceId
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Conditions[0].Condition.Type = is in dialog
+scenario_at: Acts[1].Features[1].Behavior.Actions[1].Conditions[0].Entity = @Acts[1].Features[2].InstanceId
+scenario_lacks: Type = [[begin chat sequence]]
+scenario_lacks: Type = [[end of chat sequence]]
+scenario_lacks: Type = [[end of chat step]]
+scenario_lacks: Type = [[is in chat sequence]]
+scenario_lacks: Type = [[is in chat step]]
+scenario_at: Versions.Scenario = 6

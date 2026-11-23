@@ -1,6 +1,6 @@
 /**
  * \file physique_skin.h
- * \brief Decode Physique (and eventually Skin) per-node vertex weights into NeL CMeshBuild
+ * \brief Decode Physique and Skin per-node vertex weights into NeL CMeshBuild
  * skinning fields — the headless counterpart of CExportNel::buildSkinning for the Physique
  * path (plugin_max/nel_mesh_lib/export_skinning.cpp). Format: max_geometry_formats.md Part M;
  * design doc §10z-quat / §10z-six.
@@ -16,7 +16,9 @@
  *  - Vertices that resolve to no valid skeleton bone fall back to skeleton root weight 1.0
  *    (covers the ConvertToRigid root-link promotion class approximately; see Part M §M.3).
  *
- * Skin modifier is detected but not decoded (zero corpus hits under Max 3-era assets).
+ * Skin: the bone table on the modifier and the per-vertex records of the per-node data (see
+ * decodeSkinWeights in the source); a node with both modifiers exports through the Skin, as the
+ * reference does. Its errors fail the node instead of the root fallback.
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
  */
@@ -58,8 +60,8 @@
 
 namespace PHYSIQUESKIN {
 
-// Physique = Class_ID(0x100, 0) with SuperClassId 0x810 (OSModifier) — ClassId alone is shared
-// with Placement/Output/Shadow Map. Skin = Class_ID(0x0095c6a3, 0x00015666).
+// Physique = (0x100, 0) with SuperClassId 0x810 (object-space modifier); the class id alone is shared
+// with three classes of other superclasses. Skin = (0x0095c723, 0x00015666), SuperClassId 0x810.
 extern const NLMISC::CClassId CLASSID_PHYSIQUE;
 extern const NLMISC::CClassId CLASSID_SKIN;
 const PIPELINE::MAX::TSClassId SCLASS_OSMODIFIER = 0x00000810;
@@ -93,7 +95,7 @@ void buildSkeletonBoneMap(PIPELINE::MAX::BUILTIN::INode *root,
 /// Climb to the top-level skeleton root (child of the scene root) from any bone node.
 PIPELINE::MAX::BUILTIN::INode *skeletonRootOf(PIPELINE::MAX::BUILTIN::INode *bone);
 
-/// Full Physique → CMeshBuild.SkinWeights + BonesNames. Looks for a Physique modifier on the
+/// Full Skin or Physique -> CMeshBuild.SkinWeights + BonesNames. Looks for a Skin, then a Physique on the
 /// node (via the supplied mods/modApps parallel arrays from baseObjectOf). `ssc` is needed for
 /// orderedChildrenOf during the skeleton walk. On success, `buildMesh.SkinWeights` has one entry
 /// per vertex (same count as buildMesh.Vertices) and `BonesNames` is the full skeleton bone list

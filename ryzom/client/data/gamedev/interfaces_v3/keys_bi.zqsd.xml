@@ -266,7 +266,7 @@
       <key name="N/A" action="show_hide" params="appzone"/>
 	<key name="KeyG" shift="1" action="show_hide" params="guild_forum" />
 	<key name="KeyF5" action="talk_untalk" />
-	<key name="N/A" action="show_hide" params="r2ed_ring_window" />
+	<key name="N/A" action="show_hide" params="r2ed_web_admin" />
 	<!--
 	<key name="KeyS" shift="1" action="show_hide" params="r2ed_scenario_scores" />
 	-->

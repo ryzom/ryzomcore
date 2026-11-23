@@ -249,7 +249,10 @@ public:
 
 	// Write accessors for NPC base parameters --------------------------
 	void setStartPos(double x, double y, float theta, AITYPES::TVerticalPos verticalPos);
-
+	/// The height in millimetres of the start position: the bot spawns on the layer nearest to it, not on the one
+	/// its vertical pos rule takes (a bot of a Ring scenario). setStartPos forgets it.
+	void setStartHeight(sint32 height);
+	
 	void setColour(uint8 colour);
 	void setColours(std::string colours);
 
@@ -265,7 +268,9 @@ public:
 	NLMISC::CSheetId getStats() const { return getSheet()->SheetId(); }
 	CAIPos const& getStartPos() const { return _StartPos; }
 	AITYPES::TVerticalPos getStartVerticalPos() const { return _VerticalPos; }
-
+	/// The start position on the layer of its height; not valid for a bot without one
+	RYAI_MAP_CRUNCH::CWorldPosition getStartWorldPos() const;
+	
 	// Callback called on state change of parent group (including changes to/from punctual states)
 
 	// the update routine (delegates control to the _aiProfile object) --
@@ -345,6 +350,11 @@ protected:
 
 	// spawn place -------------------------------
 	CAIPos _StartPos;
+	bool m_HasStartHeight;
+	sint32 m_StartHeight;
+	/// that no layer is near the start height was reported (once for each height, not at every respawn)
+	bool m_StartHeightReported;
+	
 	CAIVector _FirstPosition;
 	uint8 _DispersionRadius;
 

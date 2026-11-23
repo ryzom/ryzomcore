@@ -310,6 +310,7 @@ void CTextureFile::dupInfo(const CTextureFile &other)
 	_MipMapSkipAtLoad = other._MipMapSkipAtLoad;
 	_EnlargeCanvasNonPOW2Tex   = other._EnlargeCanvasNonPOW2Tex;
 	m_UntrustedMaxSize = other.m_UntrustedMaxSize;
+	m_AsyncShareGroup = other.m_AsyncShareGroup;
 }
 
 
@@ -328,10 +329,14 @@ void			CTextureFile::setMipMapSkipAtLoad(uint8 level)
 // ***************************************************************************
 std::string		CTextureFile::getShareName() const
 {
+	std::string shareName = toLowerAscii(_FileName);
 	// an untrusted file (see setUntrustedMaxSize) is read with other checks, and is never shared with the trusted one
 	if (m_UntrustedMaxSize)
-		return toLowerAscii(_FileName) + toString("@Untrusted:%u", m_UntrustedMaxSize);
-	return toLowerAscii(_FileName);
+		shareName += toString("@Untrusted:%u", m_UntrustedMaxSize);
+	// the driver texture of the async texture manager is not the whole file (see enableAsyncShareGroup)
+	if (m_AsyncShareGroup)
+		shareName += "@Async";
+	return shareName;
 }
 
 

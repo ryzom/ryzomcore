@@ -63,6 +63,11 @@ public:
 
 	// send the whole encyclopedia to the client (just the opened or completed parts)
 	void sendEncycloToClient();
+
+	// The bot of the rite (bit 0 of riteTasks) or of tasks (bits 1 and up) of a thema (from 1) has its name, or has
+	// another name: the thema is sent again if the character has one of them in its encyclopedia, their titles made
+	// again. Nothing is sent before the client has the whole encyclopedia, which has the name then. true if it was sent.
+	bool botNameChanged(uint32 nAlbum, uint32 nThema, uint8 riteTasks);
 	
 	// return true if all ritual tasks of a thema are done (we do not test the rite of course)
 	bool isAllTaskDone(uint32 nAlbum, uint32 nThema);
@@ -75,13 +80,18 @@ private:
 	// helpers for sending messages to client
 	bool checkIfThemaCompleted(uint32 nAlbum, uint32 nThemaInt, bool bSendMsg=true);
 	bool checkIfAlbumCompleted(uint32 nAlbum);
-	void sendAlbumMessage(uint32 nAlbum, uint32 nThema);
-	void makeThemaMessage(CEncyMsgThema &outThema, uint32 nAlbum, uint32 nThema);
+	// warnBotAway: warn of a rite or task whose bot is not there (not when the thema is sent for the name of one bot:
+	// the others say so themselves when they come)
+	void sendAlbumMessage(uint32 nAlbum, uint32 nThema, bool warnBotAway = true);
+	void makeThemaMessage(CEncyMsgThema &outThema, uint32 nAlbum, uint32 nThema, bool warnBotAway = true);
 	
 private:
 	
 	// The parent class
 	CCharacter &_Char;
+
+	// The client has the whole encyclopedia (sendEncycloToClient): botNameChanged sends nothing before
+	bool _SentToClient;
 
 	// State of tasks and rite is
 	// 0 - not displayed

@@ -83,7 +83,7 @@ public:
 
 		RYAI_MAP_CRUNCH::CWorldPosition	worldValidPos;
 
-		if	(!CWorldContainer::calcNearestWPosFromPosAnRadius	(_VerticalPos, worldValidPos, validPos, radius, 1000, CWorldContainer::CPosValidatorDefault()))
+		if (!findPlacedPos(worldValidPos, validPos, radius, 1000))
 		{
 			if (LogAcceptablePos)
 				nlwarning("Unvalid place (no collision free position found) at %d %d", validPos.toAIVector().x().asInt(), validPos.toAIVector().y().asInt());
@@ -103,7 +103,7 @@ public:
 			while (!foundRandomPos)
 			{
 				if (calcRandomPos(dummyPos))
-					foundRandomPos=CWorldContainer::getWorldMap().setWorldPosition(_VerticalPos, _PosList[_MaxPlacesFound], dummyPos);
+					foundRandomPos = placePos(_PosList[_MaxPlacesFound], dummyPos);
 				maxTries--;
 				if (maxTries<=0)
 					break;
@@ -112,6 +112,29 @@ public:
 				break;
 			_MaxPlacesFound++;
 		}
+	}
+
+	/// A position of the place on the map: on the layer the vertical pos rule takes. A place that has the heights of
+	/// its points (a shape of a Ring scenario) puts it on the layer nearest to the height there.
+	virtual bool placePos(RYAI_MAP_CRUNCH::CWorldPosition &wpos, const CAIVector &pos) const
+	{
+		return CWorldContainer::getWorldMap().setWorldPosition(_VerticalPos, wpos, pos);
+	}
+
+	/// The first position placePos takes around a position, tried in the order
+	/// CWorldContainer::calcNearestWPosFromPosAnRadius tries them
+	template <class T>
+	bool findPlacedPos(RYAI_MAP_CRUNCH::CWorldPosition &wpos, const T &pos, float radius, uint32 tries) const
+	{
+		H_AUTO(FindPlacedPos)
+		for (uint32 incTries = 0; incTries < tries; ++incTries)
+		{
+			double rad = (radius * incTries) / tries;
+			CAIVector rndPos(pos.x() + rad * cos((double)incTries), pos.y() + rad * sin((double)incTries));
+			if (placePos(wpos, rndPos))
+				return true;
+		}
+		return false;
 	}
 
 	// virtual to overload to generate a random pos inside the place.

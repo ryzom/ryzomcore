@@ -38,9 +38,7 @@ LIST(REMOVE_ITEM SRC_PHRASE_MANAGER
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_bleed_effect.h
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_stun_effect.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_stun_effect.h
-			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/magic_action_cure.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/magic_action_debuff.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/magic_action_hot.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/slow_move_effect.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/slow_move_effect.h)
 LIST(REMOVE_ITEM SRC_SHOP_TYPE
@@ -108,10 +106,14 @@ TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 						Ryzom::gameplaymodule
 						NeL::misc
 						NeL::net
-						NeL::web
 						NeL::georges
 						NeL::ligo
 )
+
+# only the code guarded by RYZOM_FORGE makes web requests (the admin command audit post)
+IF(WITH_RYZOM_FORGE)
+	TARGET_LINK_LIBRARIES(ryzom_entities_game_service PRIVATE NeL::web)
+ENDIF()
 
 NL_DEFAULT_PROPS(ryzom_entities_game_service "Ryzom, Services: Entities Game Service (EGS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_entities_game_service)

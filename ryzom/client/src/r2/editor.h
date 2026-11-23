@@ -211,6 +211,10 @@ public:
 	// Release what's need to be released depending on the configuration
 	void autoConfigRelease(bool serverIsRingSession);
 
+	// Save what release() saves (the keys and the interface of the current mode) and release nothing, for a
+	// client that ends without releasing
+	void saveConfigWithoutRelease();
+
 	// initialisation of modules & gw
 	void initModules(bool connectDMC);
 	void releaseModules();
@@ -244,6 +248,15 @@ public:
 	// set current mode of the editor
 	void	setMode(TMode mode);
 	TMode	getMode() const { return _Mode; }
+
+	/** True when the current mode is one the editor stays in until the user or the session changes it, and
+	  * the user sees the game: false while the mode is the one chosen from the role of the user and the server
+	  * has not said yet what the session is doing (it sets the mode again), while the wait screen for a
+	  * scenario is wanted or shown, while the start of a test or of an animation is wanted, and while the
+	  * first frames after a teleport are drawn without being shown. Every change of mode closes the message
+	  * box: the scripts hold a message for the author until this is true (r2:isModeSettled).
+	  */
+	bool	isModeSettled() const;
 
 	// test if user is DMing (be it masterless or not)
 	bool isDMing() const;
@@ -617,7 +630,9 @@ private:
 	NLMISC::CArray2D<uint8>						 _KindOfTable;      // Table to test if one class derives from another (filled at init)
 	std::vector<sint>							 _BaseClassIndices; // for each class, give index of thebase class (vector ordered by classes indices)
 
-	typedef CHashMultiMap<ucstring, CInstance *, NLMISC::CUCStringHashMapTraits> TInstanceByName;
+	// an ordered map: inserting never invalidates its iterators, and erasing invalidates only those of the erased
+	// entries, so the iterators that CSortedInstances keeps stay valid (a hash map invalidates them all on a rehash)
+	typedef std::multimap<ucstring, CInstance *> TInstanceByName;
 
 	bool										_MaxVisibleEntityExceededFlag;
 
@@ -726,6 +741,7 @@ private:
 	bool										_TPReceivedFlag; // for the wait screen ...
 	bool										_WaitScenarioScreenWanted;	// lua requests that we display the 'wait scenario' screen
 	bool										_WaitScenarioScreenActive;	// the 'wait scenario' screen is being displayed
+	bool										m_ModeConfirmed;	// false while the server's word on the session is awaited, which sets the mode again (see isModeSettled)
 	bool										_EditionModeDisconnectedFlag;
 	CObject::TSmartPtr							_NewScenario; // new scenario that will be updated just after the wait screen is over
 	uint32										_NewScenarioInitialAct;// the start at which the user start an edition session (can be ~= from 1 after a test session)
@@ -861,11 +877,14 @@ private:
 	static int luaFindEmptyPlace(CLuaState &ls);
 	static int luaIsInIslandRect(CLuaState &ls); // test if pos is in the current island (not necessarily a valid pos, but inside the island rect)
 												 // takes x, y as entry, returns true on success
+	static int luaIsValidPos(CLuaState &ls); // whether the palette, drawing and move tools accept a position (CTool::isValid2DPos)
+	static int luaIsValidPoly(CLuaState &ls); // whether the palette tools accept the inside of a zone (CIslandCollision::isValidPoly)
 
 	static int luaGetCurrentIslandName(CLuaState &ls);
 
 	static int luaWaitScenarioScreen(CLuaState &ls); // display the wait screen after the scenario creation has been launched
 	static int luaIsScenarioUpdating(CLuaState &ls);
+	static int luaIsModeSettled(CLuaState &ls);
 
 	// undo / redo possible ?
 	static int luaCanUndo(CLuaState &ls);
@@ -994,6 +1013,14 @@ public:
 
 // shortcut function to get the editor
 inline CEditor &getEditor() { return CEditor::getInstance(); }
+
+// The file where the editor keeps the scenario of the selected character: save/r2_buffer_<character>.dat, the
+// character named as for its other files (PlayerSelectedFileName), as two clients may run from one folder. A test
+// is translated from it, it is read back when the server does not send the scenario again after a test, and the
+// autosaves are copies of it.
+std::string getScenarioBufferFileName();
+// The Lua that saves the scenario of the editor in that file
+std::string getScenarioBufferSaveScript();
 
 // test whether editor is currently enabled and is in EDITION mode. (In this mode, selection is managed by the editor rather than by the entity manager)
 bool isEditionCurrent();

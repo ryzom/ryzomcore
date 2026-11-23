@@ -171,13 +171,15 @@ public:
 private:
 	TState				_CurrentState;
 	std::list<TEvent>	_NextEvents;
+	bool				_HoldEvents;
 public:
 
 	// Create the state machine with the wanted start.
 	// Note that, because it is a co-task, restarting the state machine after it has finished
 	// require to delete then recreate this object
 	CLoginStateMachine() :
-		_CurrentState(st_start)
+		_CurrentState(st_start),
+		_HoldEvents(false)
 	{
 
 	}
@@ -188,6 +190,11 @@ public:
 	}
 
 	void pushEvent(TEvent eventId);
+
+	/// Hold the events while the main thread does the work of the current state, which waits for it: pushEvent() only
+	/// queues them, as it does when the co-task itself does the work of a state. When the hold ends, the state
+	/// machine gets them in the order they came.
+	void holdEvents(bool hold);
 
 	TEvent waitEvent();
 
@@ -248,6 +255,10 @@ public:
 	// Get the address of a front-end service via http, then begin Far TP
 	bool requestFarTPToSession(TSessionId sessionId, uint8 charSlot, CFarTP::TJoinMode joinMode, bool bailOutIfSessionVanished);
 
+	/// The id of the text that tells the player why the session manager refused a join with 'result' (not 0).
+	/// A result without a text of its own gets the text that has %code in it, to replace with the result.
+	static const char *joinRefusalTextId(uint32 result);
+
 	// Ask the EGS to pop the top position if applicable
 	void requestReturnToPreviousSession(TSessionId rejectedSessionId=TSessionId(0));
 
@@ -256,6 +267,8 @@ public:
 
 	// Tell to ignore the next Far TP request, it will be replaced by a Far TP to the edition session (allows to shortcut anim-mainland-edition by anim-edition)
 	void hookNextFarTPForEditor();
+	// The next Far TP request is followed (a stop of the live session refused, or the player leaves on their own)
+	void unhookNextFarTPForEditor();
 
 	/// Begin a Character Reselect sequence
 	void requestReconnection();
@@ -294,6 +307,10 @@ public:
 	/// that wait for the new shard on the main thread (farTPmainLoop, sendReady, initMainLoop on a reselect).
 	void exitIfFailedOrDisconnected();
 	void onDssDown(bool forceReturn=false);
+	/// Shows again, in the interface of the game, what the player was told when the client was sent back to the
+	/// mainland by itself (m_ReturnMessage), with an OK button. Called when the main loop is entered and at the end
+	/// of a far TP in game: the first box is gone with the interface it was shown in.
+	void showReturnMessage();
 
 	void setIngame() { _InGameMode = true; }
 	void setOutgame() { _InGameMode = false; }
@@ -302,6 +319,7 @@ public:
 		setIngame();
 		_ReselectingChar = false;
 		m_ReselectThroughLimbo = false;
+		showReturnMessage();
 	}
 	void beginEmbeddedServerHop()
 	{
@@ -338,6 +356,7 @@ private:
 //	bool _SelfReconnecting; // allows to disconnect after character selection and reconnect until the player can choose another character
 	bool m_ReselectThroughLimbo; // the current character reselect keeps the connection (see requestReselectThroughLimbo)
 	std::string m_FailureMessage; // set by onFailure (see exitIfFailed)
+	std::string m_ReturnMessage; // the message of an automatic return to the mainland, until it is shown on arrival (see showReturnMessage)
 
 };
 

@@ -1,0 +1,11 @@
+FILE(GLOB SRC *.cpp *.h)
+
+SOURCE_GROUP("" FILES ${SRC})
+
+ADD_EXECUTABLE(nel_mcp ${SRC})
+
+TARGET_LINK_LIBRARIES(nel_mcp PRIVATE NeL::misc)
+NL_DEFAULT_PROPS(nel_mcp "NeL, Tools, Misc: nel_mcp")
+NL_ADD_RUNTIME_FLAGS(nel_mcp)
+
+INSTALL(TARGETS nel_mcp RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT toolsmisc)

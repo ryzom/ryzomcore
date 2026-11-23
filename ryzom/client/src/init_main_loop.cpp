@@ -112,6 +112,7 @@
 #include "landscape_poly_drawer.h"
 #include "session_browser_impl.h"
 #include "nel/gui/lua_manager.h"
+#include "client_ctrl.h"
 
 
 // ProgressBar steps in init main loop
@@ -449,9 +450,11 @@ static void initWeather()
 //---------------------------------------------------
 void initMainLoop()
 {
+	ClientCtrl::setPhase("entering_game");
 	StartInitTime = NLMISC::CTime::getLocalTime();
 
 	Driver->clearBuffers(CRGBA::Black);
+	ClientCtrl::beforeSwap();
 	Driver->swapBuffers();
 	CNiceInputAuto niceInputs;
 	bool WantStartupProfiling = false;
@@ -473,6 +476,10 @@ void initMainLoop()
 	NLMISC::TTime initStart = ryzomGetLocalTime();
 	NLMISC::TTime initLast = initStart;
 	NLMISC::TTime initCurrent = initLast;
+
+	// The loading began before the character selection (connection, reconnection): the keys that were pushed there are
+	// not keys of the loading that goes on here (see beginLoading)
+	Driver->AsyncListener.reset();
 
 	// Progress bar for init_main_loop()
 	ProgressBar.reset (BAR_STEP_INIT_MAIN_LOOP);
@@ -640,7 +647,9 @@ void initMainLoop()
 		Scene->setGroupLoadMaxPolygon("Skin", ClientCfg.SkinNbMaxPoly);
 		Scene->setGroupLoadMaxPolygon("Fx", ClientCfg.FxNbMaxPoly);
 		Scene->setMaxSkeletonsInNotCLodForm(ClientCfg.NbMaxSkeletonNotCLod);
-		Scene->enableGPUSkinning(ClientCfg.GPUSkinning);
+		// (with a driver that has no GPU skinning the scene does without it, whatever the configuration says:
+		// the configuration is left as it is, for a driver that has it)
+		Scene->enableGPUSkinning(ClientCfg.GPUSkinning && Driver->supportGPUSkinning());
 		// separate group for mouse/target selection reticle
 		Scene->setGroupLoadMaxPolygon("SelectionFx", 10000);
 		// enable Scene Lighting
@@ -796,6 +805,9 @@ void initMainLoop()
 			Landscape = Scene->createLandscape();
 			if(Landscape == nullptr)
 				nlerror("initMainLoop : Cannot create a Landscape.");
+
+			// the new landscape has not seen the light of the light cycle yet
+			LightCycleManager.touch();
 
 			if (!ClientCfg.Light)
 			{
@@ -1414,8 +1426,6 @@ void initMainLoop()
 	}*/
 
 	SetMouseCursor ();
-	SetMouseSpeed (ClientCfg.CursorSpeed);
-	SetMouseAcceleration (ClientCfg.CursorAcceleration);
 
 	FPU_CHECKER_ONCE
 
@@ -1487,6 +1497,11 @@ void initMainLoop()
 
 	// disable woopra stats
 	//startStatThread();
+
+	// Escape quits the client during the loading that ends here only. In game the progress bar is also asked without a
+	// loading that sets this (the landscape zones of a larger view distance, a teleport of the Ring editor that runs
+	// without a shard), and there an Escape that was pushed in game is not a wish to quit
+	UseEscapeDuringLoading = false;
 
 }// initMainLoop //
 
@@ -1639,6 +1654,11 @@ void loadBackgroundBitmap (TBackground background)
 
 void beginLoading (TBackground background)
 {
+	// A key that was pushed stays pushed for the async listener until its state is asked, and in game nothing asks for
+	// Escape or Shift: without this, an Escape of long before quits the client (CProgress::internalProgress, where
+	// UseEscapeDuringLoading allows it), and a Shift and an Escape of long before cancel a teleport that can be cancelled
+	Driver->AsyncListener.reset();
+
 	LoadingContinent = nullptr;
 	if (!LoadingBackgroundBG.empty())
 	{
@@ -1705,7 +1725,7 @@ void initHardwareCursor(bool secondCall)
 			if(ClientCfg.SaveConfig)
 			{
 				ClientCfg.writeBool("HardwareCursor", true);
-				ClientCfg.ConfigFile.save ();
+				ClientCfg.saveConfigFile ();
 				ClientCfg.IsInvalidated = true;
 			}
 			// else, only the first time after this patch, open popup to propose hardare cursor mode
@@ -1791,11 +1811,8 @@ void initGPUSkinningConfigUI()
 	CCtrlBaseButton *button = dynamic_cast<CCtrlBaseButton *>(
 		CWidgetManager::getInstance()->getElementFromId(
 			"ui:interface:game_config:content:char:gpu_skinning:c"));
+	// A driver that has no GPU skinning freezes the checkbox. The value of the setting is left as it is in the
+	// configuration, for a driver that has it; the scene is given the setting together with the driver's answer.
 	if (button)
 		button->setFrozen(!supported);
-
-	if (!supported)
-	{
-		ClientCfg.writeBool("GPUSkinning", false);
-	}
 }

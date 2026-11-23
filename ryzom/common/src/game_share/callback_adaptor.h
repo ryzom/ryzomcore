@@ -46,6 +46,7 @@ public:
 	virtual void setConnectionCallback(NLNET::TNetCallback cb, void *arg) =0;
 	virtual void setDisconnectionCallback(NLNET::TNetCallback cb, void *arg) =0;
 	virtual void init(uint16 port) =0;
+	virtual void init(const NLNET::CInetAddress &addr) =0;
 	virtual void disconnect( NLNET::TSockId hostid) =0;
 	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid, bool log = true) =0;
 	virtual void update() =0;
@@ -106,6 +107,10 @@ protected:
 	virtual void init(uint16 port) NL_OVERRIDE
 	{
 		_CallbackServer.init(port);
+	}
+	virtual void init(const NLNET::CInetAddress &addr) NL_OVERRIDE
+	{
+		_CallbackServer.init(addr);
 	}
 	virtual void disconnect( NLNET::TSockId hostid) NL_OVERRIDE
 	{

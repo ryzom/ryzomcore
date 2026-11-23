@@ -122,6 +122,15 @@ namespace R2
 				const std::string& instanceId, const std::string& attrName, sint32 position,
 				const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition);
 
+		/** Edits of another editor of the session, which the server forwards. The edits of this editor that
+		  * wait for the end of the frame are shown first, in the order the undo history has them; then the
+		  * undo history and the scenario take the edit.
+		  */
+		void otherEditorNodeSet(const std::string &instanceId, const std::string &attrName, CObject *value);
+		void otherEditorNodeInserted(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, CObject *value);
+		void otherEditorNodeErased(const std::string &instanceId, const std::string &attrName, sint32 position);
+		void otherEditorNodeMoved(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &destInstanceId, const std::string &destAttrName, sint32 destPosition);
+
 		virtual void scenarioUpdated(CObject* highLevel, bool willTP, uint32 startingActIndex);
 
 		virtual void onEditionModeConnected( uint32 userSlotId, uint32 adventureId, CObject* highLevel, const std::string& versionName, bool willTP, uint32 initialActIndex);

@@ -37,6 +37,7 @@
 #include "nel/misc/window_displayer.h"
 #include "nel/misc/gtk_displayer.h"
 #include "nel/misc/win_displayer.h"
+#include "nel/misc/socket_displayer.h"
 #include "nel/misc/path.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/report.h"
@@ -675,7 +676,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 				ConfigFile.getVar("DefaultEmailSMTP").asString(),
 				ConfigFile.exists("DefaultEmailFrom")
 				? ConfigFile.getVar("DefaultEmailFrom").asString()
-				: "service@opennel.org",
+				: "service@example.ryzom.dev",
 				ConfigFile.getVar("DefaultEmailTo").asString());
 
 		//
@@ -798,7 +799,23 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Create the window if needed
 		//
 
-		if ((var = ConfigFile.getVarPtr ("WindowStyle")) != nullptr)
+		if (haveLongArg("ctrl"))
+		{
+			// A dashboard in another process owns the console. This overrides WindowStyle,
+			// so an instance started by hand outside the dashboard still follows its config file.
+			WindowDisplayer = new CSocketDisplayer(getLongArg("ctrl"), "DEFAULT_WD");
+			// The dashboard shows the log over the channel. The echo on stdout goes (on Windows it
+			// is already silent without a console), so what still reaches stdout and stderr is
+			// what bypasses the log; unbuffered, it reaches the dashboard's pipe as it happens.
+			DebugLog->removeDisplayer("DEFAULT_SD");
+			InfoLog->removeDisplayer("DEFAULT_SD");
+			WarningLog->removeDisplayer("DEFAULT_SD");
+			ErrorLog->removeDisplayer("DEFAULT_SD");
+			AssertLog->removeDisplayer("DEFAULT_SD");
+			setvbuf(stdout, NULL, _IONBF, 0);
+			setvbuf(stderr, NULL, _IONBF, 0);
+		}
+		else if ((var = ConfigFile.getVarPtr("WindowStyle")) != nullptr)
 		{
 			string disp = var->asString ();
 #ifdef NL_USE_GTK
@@ -1052,6 +1069,22 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		{
 			// command line override
 			_DontUseNS = true;
+		}
+
+		//
+		// Bind the listening sockets to one address instead of all interfaces (must be before anything listens)
+		// BindAddress = "127.0.0.1" keeps the service ports of a development shard off the network
+		//
+
+		if ((var = ConfigFile.getVarPtr("BindAddress")) != nullptr && !var->asString().empty())
+		{
+			CIPv6Address bindAddress(var->asString());
+			if (!bindAddress.isValid())
+			{
+				nlerror("SERVICE: BindAddress '%s' is not an IP address, use for example \"127.0.0.1\" to listen on localhost only", var->asString().c_str());
+			}
+			CSock::setDefaultBindAddress(bindAddress);
+			nlinfo("SERVICE: Listening sockets bind to %s", bindAddress.toString().c_str());
 		}
 
 		//
@@ -1744,7 +1777,7 @@ void IService::unregisterUpdatable(IServiceUpdatable *updatable)
 NLMISC_CATEGORISED_DYNVARIABLE(nel, string, LaunchingDate, "date of the launching of the program")
 {
 	nlunreferenced(human);
-	if (get) *pointer = asctime (localtime ((time_t*)&LaunchingDate));
+	if (get) *pointer = timestampToHumanReadable(LaunchingDate);
 }
 
 NLMISC_CATEGORISED_DYNVARIABLE(nel, string, Uptime, "time from the launching of the program")

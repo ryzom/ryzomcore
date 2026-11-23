@@ -94,6 +94,17 @@ public:
 	//Uundo supported only if 'clear' was called with a scenario pointer
 	//Only 'redo' supported else
 	bool isUndoSupported() const { return _Scenario.getHighLevel() != nullptr; }
+	/** Edits of another editor of the session, which the server forwards. The anticipated scenario takes
+	  * them, so that what the next actions keep for undo comes from the scenario the editors share. An edit
+	  * that changes the shape of the tree drops the recorded actions: they name nodes by their position and
+	  * keep copies made before it, and undoing or redoing them could change other nodes than their own. A
+	  * pending action, which sent some of its edits already, is not added to them when it ends, and is not
+	  * rolled back when it is cancelled.
+	  */
+	void otherEditorSetNode(const std::string &instanceId, const std::string &attrName, const CObject *value);
+	void otherEditorInsertNode(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const CObject *value);
+	void otherEditorEraseNode(const std::string &instanceId, const std::string &attrName, sint32 position);
+	void otherEditorMoveNode(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &destInstanceId, const std::string &destAttrName, sint32 destPosition);
 private:
 	// base for all requests
 	class CRequestBase : public NLMISC::CRefCount
@@ -228,6 +239,8 @@ private:
 	ucstring							  _NewActionName;
 	uint								  _SubActionCount;
 	bool								  _NewActionIsPending;
+	// another editor changed the tree while the pending action was being recorded: it can not be undone
+	bool								  m_NewActionDropped;
 	// anticipated scenario state,
 	CScenario							  _Scenario;
 	//
@@ -236,6 +249,8 @@ private:
 	sint getPreviousActionIndex() const;
 	// return next action absolute index, or -1 if there's no next action that can be undone.
 	sint getNextActionIndex() const;
+	// forget the actions that can be undone or redone, after an edit of another editor changed the tree
+	void dropActions();
 };
 
 } // R2

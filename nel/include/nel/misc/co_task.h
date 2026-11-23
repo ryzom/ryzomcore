@@ -137,9 +137,16 @@ namespace NLMISC
 		 */
 		static CCoTask *getCurrentTask();
 
+		/** Tell if a task runs in a thread of its own (every platform but Windows) instead of in a fiber of the
+		 *	thread that resumes it.
+		 *	A threaded task still runs only while its parent waits in resume(), but it has nothing of what is bound
+		 *	to the parent thread, such as a current OpenGL context: the code of such a task must leave drawing and
+		 *	the release of driver resources to its parent.
+		 */
+		static bool isThreaded();
+
 		/** Constructor with stack size for the task.
-		 *	The default stack size is 8 KB because it sound cool and because
-		 *	I found many coroutine code that use a 8 KB stack.
+		 *	The default stack size is NL_TASK_STACK_SIZE, 1 MiB.
 		 *	If you need to start many (more than some 10th) tasks with very
 		 *	little stack usage, you could reduce you coroutine memory overhead
 		 *	by lowering the stack size.

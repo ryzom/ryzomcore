@@ -27,9 +27,15 @@
 #include "nel/misc/sstring.h"
 #include "nel/misc/xml_pack.h"
 #include "nel/misc/streamed_package_manager.h"
+#include "nel/misc/time_nl.h"
+
+#include <errno.h>
 
 #ifndef NL_OS_WINDOWS
-#include <errno.h>
+#	include <fcntl.h>
+#	include <sys/file.h>
+#	include <unistd.h>
+#	include <cstring>
 #endif
 
 using namespace std;
@@ -226,7 +232,7 @@ bool		CIFile::open(const std::string &path, bool text)
 			std::string filePath;
 			if (CStreamedPackageManager::getInstance().getFile (filePath, path.substr(pos+1)))
 			{
-				_F = fopen (filePath.c_str(), mode);
+				_F = nlfopen(filePath, mode);
 				if (_F != nullptr)
 				{
 					_FileSize=CFile::getFileSize(_F);
@@ -629,12 +635,16 @@ uint	CIFile::getDbgStreamSize() const
 COFile::COFile() : IStream(false)
 {
 	_F = nullptr;
+	m_WriteFailed = false;
+	m_WriteErrno = 0;
 }
 
 // ======================================================================================================
 COFile::COFile(const std::string &path, bool append, bool text, bool useTempFile) : IStream(false)
 {
 	_F = nullptr;
+	m_WriteFailed = false;
+	m_WriteErrno = 0;
 	open(path, append, text, useTempFile);
 }
 
@@ -654,6 +664,8 @@ bool	COFile::open(const std::string &path, bool append, bool text, bool useTempF
 
 	_FileName = path;
 	_TempFileName.clear();
+	m_WriteFailed = false;
+	m_WriteErrno = 0;
 
 	char mode[3];
 	mode[0] = (append)?'a':'w';
@@ -669,63 +681,128 @@ bool	COFile::open(const std::string &path, bool append, bool text, bool useTempF
 	}
 
 	// if appending to file and using a temporary file, copycat temporary file from original...
+	bool copied = false;
 	if (append && useTempFile && CFile::fileExists(_FileName))
 	{
 		// open fails if can't copy original content
-		if (!CFile::copyFile(_TempFileName, _FileName))
+		copied = CFile::copyFile(_TempFileName, _FileName);
+		if (!copied)
+		{
+			// a part of the copy is not left behind
+			if (CFile::isExists(_TempFileName))
+				CFile::deleteFile(_TempFileName);
+			_TempFileName.clear();
 			return false;
+		}
 	}
 
 	_F = nlfopen(fileToOpen, mode);
+	if (_F == nullptr && useTempFile)
+	{
+		// nor is the copy when it cannot be opened
+		if (copied)
+			CFile::deleteFile(_TempFileName);
+		_TempFileName.clear();
+	}
 
 	return _F != nullptr;
 }
 // ======================================================================================================
-void	COFile::close()
+bool COFile::close()
 {
-	internalClose(true);
+	return internalClose(true);
 }
 // ======================================================================================================
-void	COFile::internalClose(bool success)
+// ENOSPC, and the quota of a user where the system has one: there is no room for the data
+static bool isDiskFullErrno(int error)
 {
+#ifdef EDQUOT
+	if (error == EDQUOT)
+		return true;
+#endif
+	return error == ENOSPC;
+}
+// ======================================================================================================
+void COFile::rememberWriteError(int error) const
+{
+	// the first failure is the one that tells why
+	if (!m_WriteFailed)
+	{
+		m_WriteFailed = true;
+		m_WriteErrno = error;
+	}
+}
+// ======================================================================================================
+bool COFile::internalClose(bool success)
+{
+	resetPtrTable();
+	bool written = true;
 	if(_F)
 	{
-		fclose(_F);
-
-		// Temporary filename ?
-		if (!_TempFileName.empty())
+		// What was written reaches the disk here at the latest: a small file is still entirely in the buffer
+		// of the stream, so a full disk first shows when the close fails. A failed close is a failed write,
+		// and so is an earlier write, flush or seek that failed: after a failed flush the close itself
+		// succeeds, so those are remembered in the object and in the error flag of the stream.
+		bool writeFailed = m_WriteFailed || ferror(_F) != 0;
+		int writeErrno = m_WriteErrno;
+		if (fclose(_F) != 0)
 		{
-			// Delete old
-			if (success)
-			{
-				// Bug under windows, sometimes the file is not deleted
-				uint retry = 1000;
-				while (--retry)
-				{
-					if (CFile::fileExists(_FileName))
-						CFile::deleteFile (_FileName);
-
-					if (CFile::moveFile(_FileName, _TempFileName))
-						break;
-					nlSleep (0);
-				}
-				if (!retry)
-					throw ERenameError (_FileName, _TempFileName);
-			}
-			else
-				CFile::deleteFile (_TempFileName);
+			if (writeErrno == 0)
+				writeErrno = errno;
+			writeFailed = true;
 		}
 
+		// closed, whatever follows: the temporary file is dealt with below, and the destructor has nothing
+		// left to close, to move or to delete
 		_F = nullptr;
+		m_WriteFailed = false;
+		m_WriteErrno = 0;
+		std::string tempFileName;
+		tempFileName.swap(_TempFileName);
+
+		if (tempFileName.empty())
+		{
+			// A plain file: nothing can be kept from being lost here, and close() is called from destructors
+			// and from code that expects no exception of it. close() and the destructor log the failure,
+			// and close() returns it to the callers that ask.
+			if (writeFailed)
+			{
+				nlwarning("FILE: The file '%s' is not written completely, a write to it or its close failed, error %d : %s",
+				    _FileName.c_str(), writeErrno, writeErrno != 0 ? strerror(writeErrno) : "no error code was kept");
+				written = false;
+			}
+		}
+		else if (!success || writeFailed)
+		{
+			// given up or incomplete: the temporary file goes, the file is not touched
+			CFile::deleteFile(tempFileName);
+			// The caller asked for the file to be replaced safely and has to know that it was not.
+			// The destructor does not throw: it gives the writing up, which is what happened.
+			if (success)
+			{
+				if (isDiskFullErrno(writeErrno))
+					throw EDiskFullError(_FileName);
+				throw EWriteError(_FileName);
+			}
+		}
+		else
+		{
+			// The file is replaced in one step and is never deleted first. If it cannot be replaced it is
+			// left as it was, and the temporary file is kept: it is the only copy of what was written.
+			if (!CFile::replaceFile(_FileName, tempFileName))
+				throw ERenameError(_FileName, tempFileName);
+		}
 	}
-	resetPtrTable();
+	return written;
 }
 // ======================================================================================================
 void	COFile::flush()
 {
 	if(_F)
 	{
-		fflush(_F);
+		// nothing tells the caller that a flush failed, and the close after it succeeds: it is remembered
+		if (fflush(_F) != 0)
+			rememberWriteError(errno);
 	}
 }
 
@@ -735,12 +812,18 @@ void		COFile::serialBuffer(uint8 *buf, uint len)
 {
 	if(!_F)
 		throw	EFileNotOpened(_FileName);
+	// nothing to write, as in CIFile::serialBuffer: fwrite returns 0 for it, which is no failed write
+	if (len == 0)
+		return;
 	if(fwrite(buf, len, 1, _F) != 1)
 //	if(fwrite(buf, 1, len, _F) != len)
 	{
-		if (ferror(_F) && errno == 28 /*ENOSPC*/)
+		const int writeErrno = errno;
+		if (ferror(_F))
 		{
-			throw EDiskFullError(_FileName);
+			rememberWriteError(writeErrno);
+			if (isDiskFullErrno(writeErrno))
+				throw EDiskFullError(_FileName);
 		}
 		throw	EWriteError(_FileName);
 	}
@@ -773,9 +856,14 @@ bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 			nlstop;
 		}
 
-		if (nlfseek64 (_F, offset, origin_c)!=0)
-			return false;
-		return true;
+		// A seek first writes what the stream has buffered. When that write fails the data is lost, and the
+		// callers that seek back to fill in a size do not look at what the seek returns: the error flag of
+		// the stream tells, and close() reports it.
+		const bool seekFailed = nlfseek64(_F, offset, origin_c) != 0;
+		const int seekErrno = errno;
+		if (ferror(_F))
+			rememberWriteError(seekErrno);
+		return !seekFailed;
 	}
 	return false;
 }
@@ -880,6 +968,148 @@ NLMISC_CATEGORISED_COMMAND(nel, iFileAccessLogDisplay, "Display file access logs
 	log.displayNL("-- FILE ACCESS LOG END (%d Unique Files Accessed) --",count);
 
 	return true;
+}
+
+// ======================================================================================================
+
+CFileLock::CFileLock()
+#ifdef NL_OS_WINDOWS
+	: m_Handle(INVALID_HANDLE_VALUE)
+#else
+	: m_Fd(-1)
+#endif
+{
+}
+
+CFileLock::~CFileLock()
+{
+	unlock();
+}
+
+CFileLock::TResult CFileLock::lock(const std::string &path, uint32 timeoutMs)
+{
+	if (timeoutMs == 0)
+		return lockImpl(path, true);
+
+	// a wait of the system can't be given a time: try again until the time runs out
+	TTime start = CTime::getLocalTime();
+	for (;;)
+	{
+		TResult result = lockImpl(path, false);
+		if (result != Held)
+			return result;
+		if (CTime::getLocalTime() - start >= (TTime)timeoutMs)
+		{
+			m_Error = toString("another process held it for more than %u ms", timeoutMs);
+			return Held;
+		}
+		nlSleep(20);
+	}
+}
+
+CFileLock::TResult CFileLock::tryLock(const std::string &path)
+{
+	return lockImpl(path, false);
+}
+
+bool CFileLock::isLocked() const
+{
+#ifdef NL_OS_WINDOWS
+	return m_Handle != INVALID_HANDLE_VALUE;
+#else
+	return m_Fd != -1;
+#endif
+}
+
+CFileLock::TResult CFileLock::lockImpl(const std::string &path, bool wait)
+{
+	unlock();
+	m_Error.clear();
+#ifdef NL_OS_WINDOWS
+	// the file is shared for reading and writing: what excludes the other processes is the locked range below. It
+	// is not shared for deletion: a held lock file that could be deleted would let another process create and lock
+	// a new file of the name. A file that can't be opened for writing (made by another user) is locked through a
+	// handle for reading.
+	HANDLE handle = CreateFileW(nlUtf8ToWide(path), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	DWORD openError = handle == INVALID_HANDLE_VALUE ? GetLastError() : 0;
+	if (handle == INVALID_HANDLE_VALUE && openError == ERROR_ACCESS_DENIED)
+	{
+		handle = CreateFileW(nlUtf8ToWide(path), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		// a file that isn't there can't be read either: the denied creation is the error to tell
+		if (handle == INVALID_HANDLE_VALUE && GetLastError() != ERROR_FILE_NOT_FOUND)
+			openError = GetLastError();
+	}
+	if (handle == INVALID_HANDLE_VALUE)
+	{
+		m_Error = "it can't be created or opened: " + formatErrorMessage(openError);
+		return Failed;
+	}
+	OVERLAPPED overlapped;
+	memset(&overlapped, 0, sizeof(overlapped));
+	if (!LockFileEx(handle, LOCKFILE_EXCLUSIVE_LOCK | (wait ? 0 : LOCKFILE_FAIL_IMMEDIATELY), 0, MAXDWORD, MAXDWORD, &overlapped))
+	{
+		DWORD error = GetLastError();
+		CloseHandle(handle);
+		if (!wait && error == ERROR_LOCK_VIOLATION)
+			return Held;
+		m_Error = "it can't be locked: " + formatErrorMessage(error);
+		return Failed;
+	}
+	m_Handle = handle;
+#else
+	// a file that can't be opened for writing (made by another user) is locked through a descriptor for reading
+	int fd = ::open(path.c_str(), O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+	int openError = fd == -1 ? errno : 0;
+	if (fd == -1 && (openError == EACCES || openError == EROFS))
+	{
+		fd = ::open(path.c_str(), O_RDONLY | O_CLOEXEC);
+		// a file that isn't there can't be read either: the denied creation is the error to tell
+		if (fd == -1 && errno != ENOENT)
+			openError = errno;
+	}
+	if (fd == -1)
+	{
+		m_Error = std::string("it can't be created or opened: ") + strerror(openError);
+		return Failed;
+	}
+	// flock and not fcntl: an fcntl lock ends when the process closes any handle of the file
+	int res;
+	do
+	{
+		res = flock(fd, LOCK_EX | (wait ? 0 : LOCK_NB));
+	} while (res == -1 && errno == EINTR);
+	if (res == -1)
+	{
+		int error = errno;
+		::close(fd);
+		if (!wait && error == EWOULDBLOCK)
+			return Held;
+		m_Error = std::string("it can't be locked: ") + strerror(error);
+		return Failed;
+	}
+	m_Fd = fd;
+#endif
+	return Locked;
+}
+
+void CFileLock::unlock()
+{
+	if (!isLocked())
+		return;
+#ifdef NL_OS_WINDOWS
+	// the lock is released before the handle is closed: the release that the close does may come later
+	OVERLAPPED overlapped;
+	memset(&overlapped, 0, sizeof(overlapped));
+	UnlockFileEx((HANDLE)m_Handle, 0, MAXDWORD, MAXDWORD, &overlapped);
+	CloseHandle((HANDLE)m_Handle);
+	m_Handle = INVALID_HANDLE_VALUE;
+#else
+	// closing the descriptor releases the lock
+	::close(m_Fd);
+	m_Fd = -1;
+#endif
 }
 
 }

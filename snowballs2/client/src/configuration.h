@@ -54,7 +54,13 @@ public:
 	static bool getValue(const std::string &varName, bool defaultValue);
 	static NLMISC::CRGBA getValue(const std::string &varName, const NLMISC::CRGBA &defaultValue);
 	static NLMISC::CRGBA getValue(const NLMISC::CConfigFile::CVar &var, const NLMISC::CRGBA &defaultValue);
-	
+
+	/// the directory of the default configuration, which relative search paths are relative to (see main)
+	static void setDefaultConfigDirectory(const std::string &directory);
+
+private:
+	static std::string s_DefaultConfigDirectory;
+
 }; /* class CConfiguration */
 
 } /* namespace SBCLIENT */

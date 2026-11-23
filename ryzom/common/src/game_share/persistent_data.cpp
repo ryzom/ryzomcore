@@ -762,6 +762,13 @@ bool CPersistentDataRecord::writeToBinFile(const std::string &fileName)
 		DROP(NLMISC::toString("Failed to write output file: %s", fileName.c_str()),return false);
 	}
 
+	// the file is written once it is closed: what the stream has buffered is written there
+	if (!f.close())
+	{
+		nlwarning("Failed to write output file: %s", fileName.c_str());
+		return false;
+	}
+
 	// rewind the read pointer 'cos it's at the end of file
 	rewind();
 
@@ -789,6 +796,13 @@ bool CPersistentDataRecord::writeToTxtFile(const std::string &fileName,TStringFo
 	catch(...)
 	{
 		DROP(NLMISC::toString("Failed to write output file: %s", fileName.c_str()), return false);
+	}
+
+	// the file is written once it is closed: what the stream has buffered is written there
+	if (!f.close())
+	{
+		nlwarning("Failed to write output file: %s", fileName.c_str());
+		return false;
 	}
 
 	// rewind the read pointer 'cos it's at the end of file
@@ -946,7 +960,7 @@ bool CPersistentDataRecord::fromXML(const std::string& s)
 	H_AUTO(CPersistentDataRecordFromXML);
 
 	// we need to treat our input data as a CSString - we static cast because CSStrings are not supposed
-	// to contain any data of their own - they are just a fonctionality wrapper round a std::string
+	// to contain any data of their own - they are just a functionality wrapper round a std::string
 	nlctassert(sizeof(string)==sizeof(CSString));
 	const CSString& buff= static_cast<const CSString&>(s);
 	uint32 len=(uint32)s.size();

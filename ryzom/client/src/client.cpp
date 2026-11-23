@@ -57,6 +57,9 @@
 #include "client_cfg.h"
 #include "far_tp.h"
 #include "user_agent.h"
+#include "global.h"
+#include "client_ctrl.h"
+#include "window_desktop.h"
 
 #ifdef RZ_USE_STEAM
 #include "steam_client.h"
@@ -68,6 +71,9 @@
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
+
+// The instance file this client holds while it runs (ClientInstanceSuffix)
+static CFileLock ClientInstanceLock;
 
 //
 // Macros
@@ -150,7 +156,7 @@ INT_PTR CALLBACK MyDialogProc(
 HWND SlashScreen = NULL;
 HINSTANCE HInstance;
 
-int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR cmdline, int /* nCmdShow */)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR /* cmdline */, int /* nCmdShow */)
 #else
 int main(int argc, char **argv)
 #endif
@@ -187,6 +193,8 @@ int main(int argc, char **argv)
 	Args.addAdditionalArg("password", "Password to use", true, false);
 	Args.addAdditionalArg("shard_id", "Shard ID to use", true, false);
 	Args.addAdditionalArg("slot", "Char slot to use", true, false);
+	ClientCtrl::addArgs(Args);
+	WindowDesktop::addArgs(Args);
 
 #ifdef TEST_CRASH_COUNTER
 	Args.addArg("", "crash", "", "Crash client before init");
@@ -196,10 +204,13 @@ int main(int argc, char **argv)
 
 	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
 #ifdef NL_OS_WINDOWS
-	if (!Args.parse(cmdline)) return 1;
+	// the command line as the system has it, in UTF-8: the one of WinMain is in the code page of the system, without
+	// the characters that page does not have (the name of a virtual desktop, a login, a path)
+	if (!Args.parseCommandLine()) return 1;
 #else
 	if (!Args.parse(argc, argv)) return 1;
 #endif
+	WindowDesktop::init(Args);
 
 	// no shard id in ring mode
 	std::string sLoginShardId;
@@ -239,8 +250,21 @@ int main(int argc, char **argv)
 	if (sLoginShardId.empty() || !fromString(sLoginShardId, LoginShardId))
 		LoginShardId = std::numeric_limits<uint32>::max();
 
-	// if client_default.cfg is not in current directory, use application default directory
-	if (Args.haveArg("p") || Args.haveLongArg("profile") || !CFile::isExists("client_default.cfg"))
+	// if client_default.cfg is not in current directory, use application default directory.
+	// Where the client keeps its files is decided by these two rules only: a startup directory that holds
+	// client_default.cfg and can't be written to is an error (CClientConfig::init), not a reason to go elsewhere.
+	// The reason is logged once the log file exists, which is created in the directory chosen here.
+	const char *profileDirectoryReason = nullptr;
+	if (Args.haveArg("p") || Args.haveLongArg("profile"))
+	{
+		profileDirectoryReason = "a profile is given on the command line";
+	}
+	else if (!CFile::isExists("client_default.cfg"))
+	{
+		profileDirectoryReason = "the startup directory has no client_default.cfg";
+	}
+
+	if (profileDirectoryReason)
 	{
 		std::string currentPath = CPath::getApplicationDirectory("Ryzom");
 
@@ -268,6 +292,48 @@ int main(int argc, char **argv)
 			: Args.getLongArg("logsdir").front();
 		if (!CFile::isExists(logsPath)) CFile::createDirectoryTree(logsPath);
 		changeLogDirectory(logsPath);
+	}
+
+	// The client keeps client.cfg, its logs and its saves in the current directory, which the rules above chose.
+	// It has to be able to write there: stop now and say what to do, and not later on the first file that fails.
+	// (This is before the log file exists: the error is shown, and can't be written to that directory anyway.)
+	if (!CFile::isDirectoryWritable("."))
+	{
+		if (profileDirectoryReason)
+		{
+			nlerror("The client can't write to '%s', the directory where it keeps its files (client.cfg, logs, saves): make that directory writable",
+			    CPath::getCurrentPath().c_str());
+		}
+		else
+		{
+			nlerror("The client can't write to '%s', the directory it is started from. It keeps its files (client.cfg, logs, saves) there because that directory holds client_default.cfg: make that directory writable, or start the client with the option --profile to keep them in the per-user directory",
+			    CPath::getCurrentPath().c_str());
+		}
+	}
+
+	// Several clients may run from this directory. Each holds the lock of an instance file while it runs, the first
+	// one that no other client holds, and names the files of its process after it: client.lock and client.log, then
+	// clientb.lock and clientb.log, up to clientz (a log that grows too big goes to client000.log, clientb000.log ...).
+	// This is before anything of the process is written there, its log first.
+	for (char instance = 'a'; instance <= 'z' && !ClientInstanceLock.isLocked(); ++instance)
+	{
+		std::string suffix = instance == 'a' ? std::string() : std::string(1, instance);
+		std::string lockFileName = "client" + suffix + ".lock";
+		CFileLock::TResult result = ClientInstanceLock.tryLock(lockFileName);
+		if (result == CFileLock::Locked)
+		{
+			ClientInstanceSuffix = suffix;
+		}
+		else if (result == CFileLock::Failed)
+		{
+			nlerror("The client can't lock its instance file '%s' in '%s' (%s). The clients of a directory each hold one of client.lock and clientb.lock to clientz.lock while they run. On a drive where files can't be locked, start the client with the option --profile to keep its files in a per-user directory",
+			    lockFileName.c_str(), CPath::getCurrentPath().c_str(), ClientInstanceLock.getError().c_str());
+		}
+	}
+	if (!ClientInstanceLock.isLocked())
+	{
+		nlerror("The client can't take any of the instance files client.lock and clientb.lock to clientz.lock in '%s': 26 clients run from this directory already. Close one of them, or start this one with the option --profile to keep its files in a per-user directory",
+		    CPath::getCurrentPath().c_str());
 	}
 
 #ifdef TEST_CRASH_COUNTER
@@ -299,17 +365,24 @@ int main(int argc, char **argv)
 	int height = bitmap->bmHeight;
 
 	// Look the command line to see if we have a cookie and a addr
-	SlashScreen = CreateDialog (hInstance, MAKEINTRESOURCE(IDD_SLASH_SCREEN), NULL, MyDialogProc);
-	RECT rect;
-	RECT rectDesktop;
-	GetWindowRect (SlashScreen, &rect);
-	GetWindowRect (GetDesktopWindow (), &rectDesktop);
-	SetWindowPos (SlashScreen, HWND_TOP, (rectDesktop.right-rectDesktop.left-width)/2, (rectDesktop.bottom-rectDesktop.top-height)/2, width, height, 0);
-	ShowWindow (SlashScreen, SW_SHOW);
+	// A client on another virtual desktop (--desktop) has no splash screen: the system would show it on the desktop
+	// shown for a moment before it moves it there (WindowDesktop)
+	if (!WindowDesktop::isRequested())
+	{
+		SlashScreen = CreateDialog (hInstance, MAKEINTRESOURCE(IDD_SLASH_SCREEN), NULL, MyDialogProc);
+		RECT rect;
+		RECT rectDesktop;
+		GetWindowRect (SlashScreen, &rect);
+		GetWindowRect (GetDesktopWindow (), &rectDesktop);
+		SetWindowPos (SlashScreen, HWND_TOP, (rectDesktop.right-rectDesktop.left-width)/2, (rectDesktop.bottom-rectDesktop.top-height)/2, width, height, 0);
+		ShowWindow (SlashScreen, SW_SHOW);
+	}
 
 	pump ();
 
-	// Delete all the .ttf file in the /data directory
+	// Delete all the .ttf file in the /data directory: only the client holding client.lock does, the clients started
+	// beside it don't (ClientInstanceSuffix)
+	if (ClientInstanceSuffix.empty())
 	{
 		vector<string> files;
 		NLMISC::CPath::getPathContent ("data", false, false, true, files, NULL, true);
@@ -327,6 +400,15 @@ int main(int argc, char **argv)
 
 	// initialize log
 	initLog();
+
+	// the control endpoint, when asked for: it serves the log from here on
+	ClientCtrl::start(Args);
+
+	if (profileDirectoryReason)
+	{
+		nlinfo("The client files (client.cfg, logs, saves) are in '%s' and not in the startup directory '%s': %s",
+		    CPath::getCurrentPath().c_str(), Args.getStartupPath().c_str(), profileDirectoryReason);
+	}
 
 #ifdef RZ_USE_STEAM
 	CSteamClient steamClient;
@@ -375,6 +457,7 @@ int main(int argc, char **argv)
 			//ICommand::execute("iFileAccessLogClear",*NLMISC::InfoLog);
 #endif
 
+			ClientCtrl::release("the login screen was left");
 			release();
 
 			// delete all logs and displayers when we're not using logs macros anymore
@@ -464,6 +547,8 @@ int main(int argc, char **argv)
 #endif // TEST_CRASH_COUNTER
 
 	// Final release
+	// the endpoint goes first: nothing it serves may run on what the release takes down
+	ClientCtrl::release("the client quit", true);
 	RYZOM_TRY("Releasing")
 		release();
 	RYZOM_CATCH("Releasing")

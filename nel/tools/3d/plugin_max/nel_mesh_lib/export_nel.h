@@ -286,6 +286,9 @@ public:
 	/// Constructor
 	CExportNel (bool errorInDialog, bool view, bool absolutePath, Interface *ip, std::string errorTitle, CExportNelOptions *opt);
 
+	/// Destructor, logs the animated controllers that were not reported yet
+	~CExportNel();
+
 	// *********************
 	// *** Export mesh
 	// *********************
@@ -672,6 +675,9 @@ public:
 	// Output error message
 	void							outputErrorMessage (const std::string &message);
 	void							outputWarningMessage(const std::string &message);
+
+	// One warning listing the animated controllers that gave no track since the last call, if any
+	void							outputUnexportedAnimations();
 
 
 	// Get an appData VertexProgram WindTree (ensure same default values for all retrieve).
@@ -1091,6 +1097,9 @@ private:
 
 	// Build options
 	CExportNelOptions				_Options;
+
+	// Animated controllers that gave no track, as "class of owner (value)", in the order they were met
+	std::vector<std::string>		_UnexportedAnimations;
 };
 
 /** replacment for sprintf scanf (because of localisation in max)

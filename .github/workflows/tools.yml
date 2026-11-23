@@ -1,0 +1,165 @@
+name: "Ryzom Core: Tools"
+
+# The tools under tool/ that are not part of the C++ build presets.
+# - servdash_cli, the Rust service dashboard, is built for a generic Linux (static musl, the
+#   binary that goes into admin_install.tgz) and for Windows (MSVC), as the quick start does in
+#   its ryzombuild_xplat_tools Docker image.
+# - servdash_gui, the Qt service dashboard, is built on its own against the Qt 5 and Qt 6 of
+#   Ubuntu and against Qt 6.8 on Windows. The Linux Ryzom job of ci.yml builds it in the tree
+#   as well (WITH_RYZOM_TOOLS with Qt 5).
+
+on:
+  push:
+    branches: [ "core4", "feature/*", "bugfix/*" ]
+    paths:
+      - .github/workflows/tools.yml
+      - tool/servdash_cli/**
+      - tool/servdash_gui/**
+  pull_request:
+    branches: [ "core4", "feature/core4-*" ]
+    paths:
+      - .github/workflows/tools.yml
+      - tool/servdash_cli/**
+      - tool/servdash_gui/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  strings:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.strings.outputs.version }}
+    steps:
+      - name: Set reusable strings
+        id: strings
+        shell: bash
+        run: |
+          COMMIT_HASH=${{ github.sha }}
+          echo "version=sha.${COMMIT_HASH:0:8}" >> "$GITHUB_OUTPUT"
+
+  servdash-cli:
+    name: "servdash_cli ${{ matrix.target }}"
+    needs: [ strings ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-musl
+            artifact: servdash_cli-linux-x86_64
+            exe: servdash_cli
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+            artifact: servdash_cli-windows-x86_64
+            exe: servdash_cli.exe
+    defaults:
+      run:
+        working-directory: tool/servdash_cli
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Dependencies Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends musl-tools
+
+      - name: Rust toolchain
+        shell: bash
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt,clippy
+          rustup default stable
+          rustup target add ${{ matrix.target }}
+          cargo --version
+          rustc --version
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: tool/servdash_cli
+          key: ${{ matrix.target }}
+
+      - name: Format
+        run: cargo fmt --check
+
+      - name: Lint
+        run: cargo clippy --locked --release --all-targets --target ${{ matrix.target }} -- -D warnings
+
+      - name: Test
+        run: cargo test --locked --release --target ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --locked --release --target ${{ matrix.target }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.artifact }}-${{ needs.strings.outputs.version }}
+          path: tool/servdash_cli/target/${{ matrix.target }}/release/${{ matrix.exe }}
+          if-no-files-found: error
+
+  servdash-gui:
+    name: "servdash_gui ${{ matrix.name }}"
+    needs: [ strings ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            name: ubuntu-22.04-qt5
+            apt: qtbase5-dev
+          - os: ubuntu-24.04
+            name: ubuntu-24.04-qt6
+            apt: qt6-base-dev
+          - os: windows-2022
+            name: windows-qt6
+            qt-version: "6.8.3"
+            qt-arch: win64_msvc2022_64
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "^3.31.11"
+
+      - name: Dependencies Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends build-essential ninja-build ${{ matrix.apt }}
+
+      - name: Qt Windows
+        if: runner.os == 'Windows'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ matrix.qt-version }}
+          arch: ${{ matrix.qt-arch }}
+          cache: true
+
+      - name: Configure CMake Linux
+        if: runner.os == 'Linux'
+        run: cmake -S tool/servdash_gui -B build/servdash_gui -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Configure CMake Windows
+        if: runner.os == 'Windows'
+        run: cmake -S tool/servdash_gui -B build/servdash_gui -G "Visual Studio 17 2022" -A x64
+
+      - name: Build
+        run: cmake --build build/servdash_gui --config Release
+
+      - name: Deploy Qt Windows
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          mkdir -p build/servdash_gui/dist
+          cp build/servdash_gui/Release/servdash_gui.exe build/servdash_gui/dist/
+          windeployqt --release --no-translations --no-system-d3d-compiler --no-opengl-sw build/servdash_gui/dist/servdash_gui.exe
+
+      - uses: actions/upload-artifact@v7
+        if: runner.os == 'Windows'
+        with:
+          name: servdash_gui-windows-x86_64-${{ needs.strings.outputs.version }}
+          path: build/servdash_gui/dist
+          if-no-files-found: error

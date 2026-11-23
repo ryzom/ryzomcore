@@ -214,13 +214,15 @@ function component:textAdapter(text)
 		end
 		id = id + 1
 	end
+	-- a text that the component does not have (one of an older editor) is an empty text
+	if text == nil then text = "" end
 	local str = text
-	str=string.gsub (str, "<qt1>", tostring(qts[1]))
-	str=string.gsub (str, "<qt2>", tostring(qts[2]))
-	str=string.gsub (str, "<qt3>", tostring(qts[3]))
-	str=string.gsub (str, "<item1>", tostring(items[1]))
-	str=string.gsub (str, "<item2>", tostring(items[2]))
-	str=string.gsub (str, "<item3>", tostring(items[3]))
+	str = replaceTag(str, "<qt1>", numberText(qts[1]))
+	str = replaceTag(str, "<qt2>", numberText(qts[2]))
+	str = replaceTag(str, "<qt3>", numberText(qts[3]))
+	str = replaceTag(str, "<item1>", tostring(items[1]))
+	str = replaceTag(str, "<item2>", tostring(items[2]))
+	str = replaceTag(str, "<item3>", tostring(items[3]))
 
 	local sceneryObjectName = ""
 	if self.SceneryObject == nil then return end
@@ -228,7 +230,7 @@ function component:textAdapter(text)
 	if sceneryObject then
 		sceneryObjectName = sceneryObject.Name
 	end
-	str=string.gsub(str, "<object_name>", tostring(sceneryObjectName))
+	str = replaceTag(str, "<object_name>", tostring(sceneryObjectName))
 	return str
 end
 

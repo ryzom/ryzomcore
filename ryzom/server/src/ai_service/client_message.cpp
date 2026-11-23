@@ -30,9 +30,8 @@ using namespace NLMISC;
 using namespace NLNET;
 
 // a big bad global var !
-extern CAIEntityPhysical	*TempSpeaker;
-extern CBotPlayer			*TempPlayer;
-
+extern NLMISC::CRefPtr<CAIEntityPhysical> TempSpeaker;
+extern NLMISC::CRefPtr<CBotPlayer> TempPlayer;
 
 void cbClientFollowTarget( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId )
 {

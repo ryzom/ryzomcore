@@ -27,6 +27,7 @@
 #include <nel/misc/path.h>
 
 // Qt includes
+#include <QtCore/QCoreApplication>
 #include <QtCore/QSettings>
 #include <QWidget>
 #include <QFileDialog>
@@ -125,8 +126,11 @@ void SearchPathsSettingsPage::applySearchPaths()
 	for (int i = 1; i < remapExt.size(); i += 2)
 		NLMISC::CPath::remapExtension(remapExt.at(i - 1).toUtf8().constData(), remapExt.at(i).toUtf8().constData(), true);
 
-#if !defined NL_OS_WINDOWS
-    NLMISC::CPath::addSearchPath(std::string(STUDIO_DATA_DIR), false, false);
+#if defined NL_OS_WINDOWS
+	// the Studio data is installed next to the executable
+	NLMISC::CPath::addSearchPath(QCoreApplication::applicationDirPath().toUtf8().constData(), false, false);
+#else
+	NLMISC::CPath::addSearchPath(std::string(STUDIO_DATA_DIR), false, false);
 #endif
 
 	Q_FOREACH(QString path, paths)
@@ -153,8 +157,7 @@ void SearchPathsSettingsPage::addPath()
 void SearchPathsSettingsPage::delPath()
 {
 	QListWidgetItem *removeItem = m_ui.pathsListWidget->takeItem(m_ui.pathsListWidget->currentRow());
-	if (!removeItem)
-		delete removeItem;
+	delete removeItem;
 
 	checkEnabledButton();
 }

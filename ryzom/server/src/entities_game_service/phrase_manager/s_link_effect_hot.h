@@ -47,7 +47,8 @@ public:
 	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 
 protected:
-	void applyOnScore( CEntityBase * caster, CEntityBase * target,SCORES::TScores scoreType, sint32& value );
+	/// heal a score of the target by value, up to its max. Returns the points really given.
+	sint32 applyOnScore( CEntityBase * caster, CEntityBase * target,SCORES::TScores scoreType, sint32 value );
 	sint32 _HealHp;
 	sint32 _HealSap;
 	sint32 _HealSta;

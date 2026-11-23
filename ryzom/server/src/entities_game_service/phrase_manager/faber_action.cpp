@@ -485,7 +485,9 @@ protected:
 				Params.MaxBluntProtection = Params.MaxBluntProtection + phrase->getMBOProtection();
 				Params.MaxPiercingProtection = Params.MaxPiercingProtection + phrase->getMBOProtection();
 
-				float buffFactor = successFactor * ((float)((sint32)min((sint32)phrase->getLowerRmQuality(),(sint32)phrase->getRecommendedSkill()))) / (float)phrase->getRecommendedSkill();
+				// the bonus is scaled down by materials below the stanza's level: compare them with the level the
+				// option bricks were bought at, the wearing penalty must not raise the ratio back towards 1
+				float buffFactor = successFactor * ((float)((sint32)min((sint32)phrase->getLowerRmQuality(), (sint32)phrase->getRecommendedSkill()))) / (float)phrase->getNominalRecommendedSkill();
 
 				Params.HpBuff = (sint32)( ( Params.HpBuff + phrase->getMBOHitPoint() ) *  buffFactor );
 				Params.SapBuff = (sint32)( ( Params.SapBuff + phrase->getMBOSap() ) * buffFactor );

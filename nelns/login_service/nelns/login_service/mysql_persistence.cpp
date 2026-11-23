@@ -103,7 +103,12 @@ pair<optional<LoginUserProjection>, string> CMysqlPersistence::createUser(const 
 	CMysqlResult result;
 	MYSQL_ROW row;
 	sint32 nbrow;
-	string reason = sqlQuery("insert into user (Login, Password) values ('" + sqlEscape(login) + "', '" + sqlEscape(cpassword) + "')", nbrow, row, result);
+	// nel.user.Email is unique and not null and there is no address to write,
+	// so the row gets a placeholder made from the login: left empty, only the
+	// first account created this way would insert. Same form and domain as
+	// the web login scripts use (web/public_php/tools/account_name.php).
+	string email = login + "@example.ryzom.dev";
+	string reason = sqlQuery("insert into user (Login, Password, Email) values ('" + sqlEscape(login) + "', '" + sqlEscape(cpassword) + "', '" + sqlEscape(email) + "')", nbrow, row, result);
 
 	if (!reason.empty())
 	{

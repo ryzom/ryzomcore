@@ -27,7 +27,7 @@ createItemInBag				:DEV:SGM:GM:EM:			audit	// Create an item and put it in the p
 createItemInInv				:DEV:							// Create an item and put it in the given player inventory: <invId> <sheetId>|<sheetName> <quantity> <quality>
 createItemInTmpInv			:DEV:SGM:GM:EM:			audit	// Create an item and put it in the player temp inventory: <sheetId>|<sheetName> <quantity> <quality>
 createNamedItemInBag		:DEV:SGM:				audit	// Create a named item and put it in the player bag: <item name> [<quantity>]
-createFullArmorSet			:DEV:SGM:GM:EM:			audit	// Create and equip player with chosen full armor set: <race (fyros/matis/zorai/tryker)> <type (light/medium/heavy)> <quality>
+createFullArmorSet			:DEV:SGM:GM:EM:			audit	// Create a full armor set in the player bag: <race (fyros/matis/zorai/tryker)> <type (light/medium/heavy)> <quality> [<variant (1/2/3)>]
 delPosFlag					:DEV:SGM:GM:EM:					// Delete a position flag: <flag name>
 dismiss						:DEV:SGM:GM:VG:SG:EM:EG:		// Teleport a player back to its former position (before last call to summonPlayer): <player name>
 displayForageRM				:DEV:SGM:GM:EM:					// Display forageable raw materials near by or at the exact position of a player: <exactPos=1> <extendedInfo=0>

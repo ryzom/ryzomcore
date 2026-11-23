@@ -24,4 +24,5 @@ IF(WITH_PCH)
   target_precompile_headers(nel_3dsmax_shared PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h)
 ENDIF()
 
-INSTALL(TARGETS nel_3dsmax_shared RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
+# The DLLs the plugins load go to the folder of the program, like the object viewer and the drivers
+INSTALL(TARGETS nel_3dsmax_shared RUNTIME DESTINATION maxplugin LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)

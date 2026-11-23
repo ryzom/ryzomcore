@@ -41,6 +41,12 @@ static void windowDidMove(NSWindow* window, CDriverGL* driver)
 	if((self = [super init])) 
 	{
 		_driver = driver;
+
+		// the key state of the driver's window is read again whenever any window becomes or resigns key
+		NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+		[center addObserver:self selector:@selector(anyWindowDidChangeKey:) name:NSWindowDidBecomeKeyNotification object:nil];
+		[center addObserver:self selector:@selector(anyWindowDidChangeKey:) name:NSWindowDidResignKeyNotification object:nil];
+
 		return self;
 	}
 
@@ -55,19 +61,32 @@ static void windowDidMove(NSWindow* window, CDriverGL* driver)
 	windowDidMove([notification  object], _driver);
 }
 
-- (void)windowDidBecomeKey:(NSNotification *)notification
+-(void)detachDriver
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	_driver = nullptr;
+}
+
+-(void)anyWindowDidChangeKey:(NSNotification *)notification
 {
 	if (!_driver)
 		return;
 
-	_driver->_WindowFocus = true;
+	_driver->updateWindowFocus();
 }
-- (void)windowDidResignKey:(NSNotification *)notification;
-{
-	if(!_driver)
-		return;
 
-	_driver->_WindowFocus = false;
+@end
+
+@implementation CocoaWindow
+
+- (BOOL)canBecomeKeyWindow
+{
+	return YES;
+}
+
+- (BOOL)canBecomeMainWindow
+{
+	return YES;
 }
 
 @end

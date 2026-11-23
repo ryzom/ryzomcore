@@ -129,6 +129,9 @@ public:
 	/// Singleton method : Get the unique interface loader instance
 	static CInterfaceManager* getInstance();
 
+	/// Whether the instance exists, for code that must not create it
+	static bool hasInstance() { return _Instance != nullptr; }
+
 	/// Destroy singleton
 	static void destroy ();
 
@@ -228,15 +231,11 @@ public:
 	// Save config to default location, if verbose is true, display message in game sysinfo
 	bool saveConfig (bool verbose = false);
 	bool saveConfig (const std::string &filename);
-	// delete the user config (give the player ident fileName)
-	bool deletePlayerConfig (const std::string &playerFileIdent);
 
 	// Save keys to default location, if verbose is true, display message in game sysinfo
 	bool saveKeys (bool verbose = false);
 	// Save the keys config file
 	bool saveKeys (const std::string &filename);
-	// delete the user Keysconfig (give the player ident fileName)
-	bool deletePlayerKeys (const std::string &playerFileIdent);
 
 	// Log system (all chat/tell
 	void setLogState(bool state) { _LogState = state; }
@@ -304,15 +303,17 @@ public:
 
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok button
 	 *	ui:interface:message_box must be defined in xml, with a "text" ViewText son
+	 *	The text is shown as it is written (a translated text has the case its language wants, and a
+	 *	name or a path has its own), unless another case mode is given.
 	 */
-	void	messageBox(const std::string &text, const std::string &masterGroup="ui:interface", TCaseMode caseMode = CaseFirstSentenceLetterUp);
+	void	messageBox(const std::string &text, const std::string &masterGroup="ui:interface", TCaseMode caseMode = CaseNormal);
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok and a HELP button.
 	 *  The help button with open a browser on ryzom.com faq
 	 *	ui:interface:message_box_with_help must be defined in xml, with a "text" ViewText son
 	 */
 	void	messageBoxWithHelp(const std::string &text, const std::string &masterGroup="ui:interface",
 							   const std::string &ahOnOk = std::string(), const std::string &paramsOnOk= std::string(),
-							   TCaseMode caseMode = CaseFirstSentenceLetterUp);
+							   TCaseMode caseMode = CaseNormal);
 
 	/** Open a MessageBox with validation question. this is a simple ModalWindow with a Ok / Cancel button
 	 *	ui:interface:valid_message_box must be defined in xml, with a "text" ViewText son, and a "ok" button

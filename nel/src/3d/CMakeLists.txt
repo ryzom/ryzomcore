@@ -759,6 +759,11 @@ IF(WITH_PCH)
   target_precompile_headers(nel3d PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/std3d.h)
 ENDIF()
 
+# what a static nel3d needs, for nel-3d.pc
+SET(PC_REQUIRES_PRIVATE "")
+IF(FREETYPE_FOUND)
+  SET(PC_REQUIRES_PRIVATE "freetype2")
+ENDIF()
 NL_GEN_PC(nel-3d.pc)
 
 IF(WITH_INSTALL_LIBRARIES OR NOT WITH_STATIC)

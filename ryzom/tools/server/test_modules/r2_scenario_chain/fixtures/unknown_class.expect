@@ -1,0 +1,29 @@
+# A scenario with a component of a class the editor does not have, an action on it and a handler with a
+# condition on it: the component and the action are removed, and so is the handler, which must not run
+# without its condition. The author is told the class, and the scenario loads without them.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteRemovedClasses(MadeUpFeature (1))
+version_update_note: uiR2EDVersionNoteRemovedClassReferences(2)
+scenario_lacks: Class = [[MadeUpFeature]]
+scenario_at: Acts[1].Features = <size 1>
+scenario_at: Acts[1].Features[0].Components[1].Behavior.Actions = <size 1>
+scenario_at: Acts[1].Features[0].Components[1].Behavior.Actions[0].Actions = <size 1>
+scenario_at: Acts[1].Features[0].Components[1].Behavior.Actions[0].Actions[0].Action.Type = Kill
+scenario_at: Versions.MadeUpFeature = <none>

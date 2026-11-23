@@ -165,6 +165,13 @@ function r2.runBaseToolbarCommand(toolbar, index)
 	toolbar:runCommand(index  + 1)	
 end
 
+----------------------------------------------------------------------------
+-- Private : the action of a toolbar button: execute its command in the toolbar that the group of the
+-- clicked button belongs to (the "Toolbar" field of that group)
+function r2.runCallerToolbarCommand(index)
+	r2.runBaseToolbarCommand(getUICaller().parent.Env.Toolbar, index)
+end
+
 
 
 

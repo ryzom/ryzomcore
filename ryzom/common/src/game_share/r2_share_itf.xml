@@ -85,6 +85,7 @@
 			<property type="uint32"					name="SessionAnimatorCharId"	/>
 			<property type="bool"					name="DMLess"	/>
 			<property type="std::string"			name="MissionTag" byref="true" />
+			<property type="bool"					name="TrialAllowed"	default="false"	doc="True for a scenario that trial accounts may play (its header says NevraxScenario and TrialAllowed)"/>
 		</class>
 
 

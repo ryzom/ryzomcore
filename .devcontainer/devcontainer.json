@@ -14,7 +14,7 @@
           "-DWITH_NEL_TESTS=OFF",
           "-DWITH_NEL_SAMPLES=ON",
           "-DWITH_LUA51=OFF",
-          "-DWITH_LUA52=ON",
+          "-DWITH_LUA54=ON",
           "-DWITH_RYZOM=ON",
           "-DWITH_RYZOM_SERVER=ON",
           "-DWITH_RYZOM_CLIENT=ON",

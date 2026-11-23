@@ -762,6 +762,9 @@ namespace NLGUI
 				groupMenu->setCloseSubMenuUsingPopModal(false);
 				CWidgetManager::getInstance()->enableModalWindow (pCB, groupMenu);
 			}
+
+			// the list does not stay on screen without its combo box (the window of the combo box gets hidden)
+			CWidgetManager::getInstance()->setModalExitLauncherHidden(groupMenu);
 		}
 	};
 	REGISTER_ACTION_HANDLER (CHandlerComboBoxSelectStart, "combo_box_select_start");

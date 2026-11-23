@@ -85,7 +85,18 @@ public:
 	
 	/// apply xp to skill
 	bool applyXp( CCharacter * c, float xpGainPerOpponent );
-	
+
+	/// true if an action with a known skill is counted, enchantment uses have none
+	bool hasSkillAction() const
+	{
+		for (uint i = 0; i < _SkillsProgress.size(); ++i)
+		{
+			if (_SkillsProgress[i].Skill != SKILLS::unknown)
+				return true;
+		}
+		return false;
+	}
+
 	/// return reference on __SkillsProgress
 	std::vector< TSkillProgress >& getSkillsProgress() { return _SkillsProgress; }
 
@@ -121,7 +132,17 @@ public:
 	
 	// forget xp gain of one creature
 	bool forgetXpGain( TDataSetRow creature );
-	
+
+	// true if an action on this opponent is remembered (until its death or its aggro is lost)
+	bool hasActedOn(TDataSetRow opponent) const { return _SkillProgressPerOpponent.find(opponent) != _SkillProgressPerOpponent.end(); }
+
+	// true if an action with a known skill on this opponent is remembered, so not only enchantment uses
+	bool hasSkillActionOn(TDataSetRow opponent) const
+	{
+		TSkillProgressPerOpponentContainer::const_iterator it = _SkillProgressPerOpponent.find(opponent);
+		return it != _SkillProgressPerOpponent.end() && it->second->hasSkillAction();
+	}
+
 private:
 	// TOffensiveCharacter struct per creature
 	TSkillProgressPerOpponentContainer _SkillProgressPerOpponent;
@@ -182,6 +203,17 @@ public:
 		TeamMembers.resize(TeamMembers.size()+1);
 		TeamMembers[TeamMembers.size()-1].Id = playerId;
 		TeamMembers[TeamMembers.size()-1].GainXp = true;
+	}
+
+	/// true if the player is one of the team members fighting this creature
+	bool hasMember(const NLMISC::CEntityId &playerId) const
+	{
+		for (uint i = 0; i < TeamMembers.size(); ++i)
+		{
+			if (TeamMembers[i].Id == playerId)
+				return true;
+		}
+		return false;
 	}
 
 	/// remove a team member
@@ -280,10 +312,21 @@ struct CCreatureTakenDamage
 		return sint16(-1);
 	}
 
-	/// return index of the team which has inflicted the most damage, returns -1 if most damage have been made by other creatures
-	sint16 getMaxInflictedDamageTeamIndex()
+	/// damage held by the fictitious creature: what players gave up by losing aggro or entering water
+	float getTransferedDamage() const
 	{
-		float maxDmg = 0;//TotalCreatureInflictedDamage;
+		for (uint i = 0; i < CreatureInflictedDamage.size(); ++i)
+		{
+			if (CreatureInflictedDamage[i].CreatureId == NLMISC::CEntityId::Unknown)
+				return CreatureInflictedDamage[i].TotalDamage;
+		}
+		return 0.0f;
+	}
+
+	/// return index of the team which has inflicted the most damage, more than nonPlayerDamage, returns -1 if no team did
+	sint16 getMaxInflictedDamageTeamIndex(float nonPlayerDamage)
+	{
+		float maxDmg = nonPlayerDamage;
 		sint16 index = -1;
 		const uint size = (uint)PlayerInflictedDamage.size();
 		for ( uint i = 0 ; i < size ; ++i)
@@ -382,10 +425,16 @@ struct CCreatureTakenDamage
 	/// tranfer player damage on a fictious creature (when player enters water), return true if entry hve been erased
 	bool transferDamageOnFictitiousCreature(const NLMISC::CEntityId &playerId, uint16 teamId = CTEAM::InvalidTeamId);
 
+	/// tranfer all the damage of a team on a fictious creature and erase its entry (when the whole team lost aggro)
+	void transferTeamDamageOnFictitiousCreature(uint16 teamId);
+
 	/// attribute kills for mission system
 	void attributeKillsForMission(TDataSetRow victimRowId);
 
 private:
+	/// add damage given up by players to the fictious creature
+	void addFictitiousDamage(float damage);
+
 	/// attribute kill to an entity for mission system
 	static void attributeKill( TDataSetRow killerRowId, TDataSetRow victimRowId);
 	
@@ -487,6 +536,10 @@ private:
 
 	/// check at least a team member has aggro with given creature, return true if aggro exists
 	bool checkAggroForTeam( uint16 teamId, TDataSetRow creatureRowId );
+
+	/// true if an action of the player on another creature of the fight may also count on this one: he used a known skill
+	/// on it, or, if he did nothing on it, a member of his team did
+	bool canCopyActionTo(const CCharacter *player, TDataSetRow creature) const;
 
 private:	
 	// singleton instance

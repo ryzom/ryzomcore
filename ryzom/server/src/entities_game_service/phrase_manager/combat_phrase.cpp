@@ -156,7 +156,7 @@ bool CDamageFactor::entityMatchRequirements(CEntityBase *entity)
 				return false;
 		}
 	}
-	if (Season != EGSPD::CSeason::EndSeason && EGSPD::CSeason::Invalid && CTimeDateSeasonManager::getRyzomTimeReference().getRyzomSeason() != Season)
+	if (Season != EGSPD::CSeason::EndSeason && CTimeDateSeasonManager::getRyzomTimeReference().getRyzomSeason() != Season)
 		return false;
 
 	return true;
@@ -386,6 +386,7 @@ void CCombatPhrase::init()
 	
 	_ExecutionEndDate				= 0;
 	_LatencyEndDate					= 0.0;
+	_PreviousLatencyEndDate			= 0.0;
 
 	_SabrinaCost					= 0;
 	_SabrinaRelativeCost			= 1.0f;
@@ -711,6 +712,7 @@ void CCombatPhrase::addBrick( const CStaticBrick &brick )
 			_OpeningNeededFlags[1] = BRICK_FLAGS::toBrickFlag(((CSBrickParamOpening3 *)param)->EventFlag2);
 			_OpeningNeededFlags[2] = BRICK_FLAGS::toBrickFlag(((CSBrickParamOpening3 *)param)->EventFlag3);
 			}
+			break;
 
 		case TBrickParam::BLEED_FACTOR:
 			{
@@ -1708,6 +1710,10 @@ bool CCombatPhrase::launch()
 	_LatencyEndDate = 0.0;
 	_ApplyDate = 0;
 
+	// handed over by the phrase manager for this launch only
+	const double previousLatencyEndDate = _PreviousLatencyEndDate;
+	_PreviousLatencyEndDate = 0.0;
+
 	if ( !_Attacker ) 
 	{
 		nlwarning("<CCombatPhrase::launch> found NULL attacker or defender.");
@@ -2182,10 +2188,10 @@ bool CCombatPhrase::launch()
 	if (latency>600.0f || latency < 0.0f)
 	{
 		nlwarning("<CCombatPhrase::launch> entity %s, combat action latency = %f ticks ! set it to 30 ticks only", actingEntity->getId().toString().c_str(), latency);
-		nlwarning("\t\tweapon latency : %u",_RightWeapon.LatencyInTicks);
+		nlwarning("\t\tweapon latency : %.2f",_RightWeapon.LatencyInTicks);
 		nlwarning("\t\t_LatencyFactorOnSuccess : %f",_LatencyFactorDyn.applyValue(_WeaponSabrinaValue));
-		nlwarning("\t\tlatencyMod : %u",latencyMod);
-		nlwarning("\t\t_HitRateModifier : %u",_HitRateModifier);
+		nlwarning("\t\tlatencyMod : %d",latencyMod);
+		nlwarning("\t\t_HitRateModifier : %d",_HitRateModifier);
 		nlwarning("\t\tcombatAttackSlow effect mod value : %d",combatAttackSlowMod);
 		nlwarning("\t\tslowMelee effect value : %d",slowMeleeMod);
 					
@@ -2193,10 +2199,18 @@ bool CCombatPhrase::launch()
 	}
 	
 	// set latency end date
+	// An action ends at the first tick at or after its latency end date, and the next one is launched in that
+	// same tick. When this action follows the previous combat action of the attacker that way, its latency
+	// counts from that end date: counted from the tick, every swing would last its latency rounded up to whole
+	// ticks (a hit every 31 ticks for a weapon with a latency of 30.3). In any other case (first swing, a tick
+	// or more spent on something else) the latency counts from the current tick. A latency under one tick is
+	// left to the tick as well: carried over, it would launch several actions in one tick.
+	// Either way the end date is in ]time + latency - 1, time + latency].
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	if (_LatencyEndDate > 0) 
+	const double sincePreviousEnd = (double)time - previousLatencyEndDate;
+	if (previousLatencyEndDate > 0.0 && sincePreviousEnd >= 0.0 && sincePreviousEnd < 1.0 && latency >= 1.0)
 	{
-		_LatencyEndDate += latency;
+		_LatencyEndDate = previousLatencyEndDate + latency;
 	}
 	else
 	{
@@ -2650,8 +2664,8 @@ void CCombatPhrase::launchAttackOnTarget(uint8 targetIndex, bool rightHand, bool
 		// apply area damage reduction
 		factor += _Targets[targetIndex].DamageFactor - 1.0f;
 
-		// brick damage modifiers (only on right hand attack)
-		if (rightHand)
+		// brick damage modifiers (only on right hand attack, and only on a target that matches the restrictions of the brick)
+		if (rightHand && _DamageFactorOnSuccess.entityMatchRequirements(defender))
 			factor += _DamageFactorOnSuccess.applyValue(_WeaponSabrinaValue) - 1.0f;
 
 		// if PVP, apply PVP damage factor
@@ -4533,6 +4547,10 @@ void CCombatPhrase::buildTargetList(bool rightHand, bool isMad)
 		uint targetIndex = 1;
 		for ( uint i = 1; i <  areaSelector.getEntities().size() ; i++ )
 		{
+			// the attacker is not hit by his own area, as with area spells
+			if (areaSelector.getEntities()[i]->getEntityRowId() == _Attacker->getEntityRowId())
+				continue;
+
 			if ( PHRASE_UTILITIES::testOffensiveActionAllowed(_Attacker->getEntityRowId(), areaSelector.getEntities()[i]->getEntityRowId(), dummy, false) )
 			{
 				CCombatDefenderPtr defender = createDefender(areaSelector.getEntities()[i]->getEntityRowId());

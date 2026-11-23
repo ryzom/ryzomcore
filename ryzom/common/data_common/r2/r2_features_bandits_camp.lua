@@ -118,23 +118,41 @@ feature.Components.BanditCamp =
 			r2.Translator.createAiGroup(this, context)
 		end,
 
-		updateVersion = function(this, scenarioValue, currentValue )
+		updateVersion = function(this, scenarioValue, currentValue, update)
 			local patchValue = scenarioValue
 			if patchValue < 1 then
-				r2.requestEraseNode(this.InstanceId, "Cost", -1)				
+				-- The cost of a camp is kept by the editor, not in the scenario: the first version saved
+				-- the number of bandits there. A camp of this editor has the attribute at 0, and keeps it.
+				if this.Cost ~= nil and this.Cost ~= 0 then
+					update:erase(this, "Cost")
+				end
 				patchValue = 1
 			end
 			if patchValue < 2 then
-				local invalidEvents = {}
-				invalidEvents["desactivation"] = "deactivation"
-				r2.updateLogicEvents(this, invalidEvents)
-				r2.requestSetNode(this.InstanceId, "BanditsLevel", "22")
+				-- "desactivation" is the name earlier versions gave the event "deactivation"
+				local behavior = this.Behavior
+				if type(behavior) == "table" and type(behavior.Actions) == "table" then
+					for k, handler in pairs(behavior.Actions) do
+						local event = handler.Event
+						if type(event) == "table" and event.Type == "desactivation" then
+							update:set(event, "Type", "deactivation")
+						end
+					end
+				end
+				-- BanditsLevel is the name of the level the camp has, which the property sheet shows.
+				-- A camp that has it keeps it; one without it gets the name of its level (_BanditsLevel).
+				if this.BanditsLevel == nil and type(this._BanditsLevel) == "number" then
+					local levelId = feature.Components.BanditCamp.LevelsId[this._BanditsLevel + 1]
+					if levelId ~= nil then
+						update:set(this, "BanditsLevel", levelId)
+					end
+				end
 				patchValue = 2
 			end
-			
+
 			if patchValue == currentValue then return true end
 			return false
-		end,	
+		end,
 
 	}
 local component = feature.Components.BanditCamp 
@@ -388,7 +406,8 @@ component.createComponent = function(x, y, banditsCount, race, banditsLevel, Zon
 	comp.ZoneSize = tostring(ZoneSize)
 
 	local zone = r2.newComponent("Region")		
-	r2.Utils.createNonDeleteableRegion(zone, 0, 0, BanditZoneRadius, BanditZoneNumCorners) -- the region doesn't inherit the feature position, so must give its pos
+	-- the region does not inherit the feature position, so must give its pos: its points get the ground under them
+	r2.Utils.createNonDeleteableRegion(zone, 0, 0, BanditZoneRadius, BanditZoneNumCorners, comp.Position)
 	zone.Deletable = 0
 	zone.Position.x = comp.Position.x
 	zone.Position.y = comp.Position.y
@@ -539,7 +558,7 @@ component.createGhostComponents = function(comp, act)
 		fire.Base = "palette.entities.botobjects.campfire"
 		fire.Position.x = comp.Position.x
 		fire.Position.y = comp.Position.y
-		fire.Position.z = 0
+		fire.Position.z = comp.Position.z
 		fire.Angle = 0
 		r2.requestInsertGhostNode(act.Features[0].InstanceId, "Components", -1, "", fire)
 	end
@@ -573,6 +592,8 @@ component.createGhostComponents = function(comp, act)
 		bandits = npcGroup
 		bandits.Position.x = x
 		bandits.Position.y = y
+		-- the bandits stand at the camp's height (their own z is relative to it)
+		bandits.Position.z = comp.Position.z
 		bandits.InheritPos = 0
 	end
 

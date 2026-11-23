@@ -42,12 +42,6 @@ public:
 	// GuildXP is for guild role master
 	enum TBuyMean { Money, SkillPoints, MoneyGuildXP, GuildXP, MoneyFactionPoints, GuildMoneyGuildXP, GuildMoney };
 
-	// At Max +9999% resale margin
-	enum
-	{
-		MaxResaleMargin= 9999
-	};
-
 public:
 	CBotChatPageTrade();
 	virtual void begin() NL_OVERRIDE;
@@ -67,6 +61,10 @@ public:
 	void		 endTradeModal();
 	// test if trade can be confirmed yet (price & quantity valid)
 	bool		 isTradeValid( bool enableResale ) const;
+	// clang-format off
+	// the question before buying a building that replaces the one owned: a guild hall or an apartment
+	const char	*getBuildingLossWarning() const;
+	// clang-format on
 	// set the page to diplay buy interface (no sell of player item is done)
 	void		 setBuyOnly(bool buyOnly) { _BuyOnly = buyOnly; }
 	bool		 getBuyOnly() const { return _BuyOnly; }
@@ -165,6 +163,8 @@ private:
 	void				getItemFactionTypePoints(CDBCtrlSheet *sheet, PVP_CLAN::TPVPClan &pvpClan, uint32 &points) const;
 	void				getCurrItemFactionTypePoints(PVP_CLAN::TPVPClan &pvpClan, uint32 &points) const;
 	uint32				getUserFactionPoints(PVP_CLAN::TPVPClan clan) const;
+	// true if the item is paid in dappers: on the money page, or on the faction page without a faction price
+	bool				isPricedInDappers(CDBCtrlSheet *sheet) const;
 
 	// setup display of buy mean (skill points & money) in the modal
 	void		setupBuyMeanInModal(CInterfaceGroup *modal);

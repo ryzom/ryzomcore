@@ -28,6 +28,7 @@
 
 #include "ai_script_data_manager.h"
 #include "ai_logic_action.h"
+#include "ring_scenario_guard.h"
 using std::string;
 using std::vector;
 using namespace NLMISC;
@@ -54,7 +55,7 @@ Arguments: f(EventId) ->
 // CStateInstance
 void setEvent_f_(CStateInstance* entity, CScriptStack& stack)
 {
-	size_t const eventIndex = (size_t)(float)stack.top();
+	float const eventArg = (float)stack.top();
 	stack.pop();
 	
 	if (!entity)
@@ -63,7 +64,14 @@ void setEvent_f_(CStateInstance* entity, CScriptStack& stack)
 		return;
 	}
 	
-	nlassert(eventIndex<10);
+	// The number comes from a script, which can be the script of a scenario a client uploaded: a
+	// number that is not one of the user events is refused, and does not stop the service
+	if (!(eventArg >= 0.f && eventArg < 10.f))
+	{
+		RYAI_SCRIPT_WARNING(entity, toString("setEvent: %g is not a user event (0 to 9), nothing is triggered", (double)eventArg));
+		return;
+	}
+	size_t const eventIndex = (size_t)eventArg;
 
 
 	if (IsRingShard.get())
@@ -112,10 +120,12 @@ void setTimer_ff_(CStateInstance* si, CScriptStack& stack)
 	
 	if (timerId<0 || timerId>3)
 	{
+		// the script can be the script of a scenario a client uploaded: the timer is not set, and
+		// the service goes on, as the other timer functions do
 		string errStr("critical, native function setTimer used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning("%s", errStr.c_str());
-		nlassert(false);
+		RYAI_SCRIPT_WARNING(si, errStr);
+		return;
 	}
 	
 	si->timerUser((uint)timerId).set((uint32)deltaTime);
@@ -179,7 +189,7 @@ void timerSetRyzomDaytime_fff_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerSetRyzomDaytime used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning("%s", errStr.c_str());
+		RYAI_SCRIPT_WARNING(si, errStr);
 		return;
 	}
 	
@@ -208,9 +218,11 @@ void timerIsEnabled_f_f(CStateInstance* si, CScriptStack& stack)
 	stack.pop();
 	
 	
+	// the script takes a result from the stack whatever happens here
 	if (!si)
 	{
 		nlwarning("timerIsEnabled failed");
+		stack.push(0.f);
 		return;
 	}
 	
@@ -218,7 +230,8 @@ void timerIsEnabled_f_f(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerIsEnabled used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning("%s", errStr.c_str());
+		RYAI_SCRIPT_WARNING(si, errStr);
+		stack.push(0.f);
 		return;
 	}
 	
@@ -248,9 +261,11 @@ void timerIsSuspended_f_f(CStateInstance* si, CScriptStack& stack)
 	stack.pop();
 	
 	
+	// the script takes a result from the stack whatever happens here
 	if (!si)
 	{
 		nlwarning("timerIsSuspended failed");
+		stack.push(0.f);
 		return;
 	}
 	
@@ -258,7 +273,8 @@ void timerIsSuspended_f_f(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerIsSuspended used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning("%s", errStr.c_str());
+		RYAI_SCRIPT_WARNING(si, errStr);
+		stack.push(0.f);
 		return;
 	}
 	
@@ -297,7 +313,7 @@ void timerSuspend_f_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerSuspend used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning("%s", errStr.c_str());
+		RYAI_SCRIPT_WARNING(si, errStr);
 		return;
 	}
 	
@@ -335,7 +351,7 @@ void timerDisable_f_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerDisable used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning("%s", errStr.c_str());
+		RYAI_SCRIPT_WARNING(si, errStr);
 		return;
 	}
 	
@@ -373,7 +389,7 @@ void timerResume_f_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerResume used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning("%s", errStr.c_str());
+		RYAI_SCRIPT_WARNING(si, errStr);
 		return;
 	}
 	
@@ -416,7 +432,7 @@ void timerAdd_ff_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerAdd used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning("%s", errStr.c_str());
+		RYAI_SCRIPT_WARNING(si, errStr);
 		return;
 	}
 	
@@ -460,12 +476,16 @@ void dssStartAct_ff_(CStateInstance* si, CScriptStack& stack)
 	stack.pop();
 
 	
-	if ( !(0 <= actId && 0 <= sessionId) )
+	// the act is one of the scenario of the caller, and an index the scenario service can test
+	if (!(0 <= actId && actId < 65536.f))
 	{
 		return;
 	}
 
-	CAILogicActionDssStartActHelper::dssStartAct(TSessionId(static_cast<uint32>(sessionId)), static_cast<uint32>(actId));
+	TSessionId session;
+	if (!CRingScenarioGuard::checkScriptSession(si, sessionId, "dssStartAct", session)) { return; }
+
+	CAILogicActionDssStartActHelper::dssStartAct(session, static_cast<uint32>(actId));
 }
 
 //----------------------------------------------------------------------------
@@ -501,7 +521,7 @@ void postNextState_s_(CStateInstance* si, CScriptStack& stack)
 			errStr="state "+NextStateName+" not found for "+si->getGroup()->getName();
 		else
 			errStr="state "+NextStateName+" not found for unnamed group";
-		nlwarning("%s", errStr.c_str());
+		RYAI_SCRIPT_WARNING(si, errStr);
 		return;
 	}
 

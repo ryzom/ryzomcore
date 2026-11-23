@@ -146,6 +146,11 @@ void CGenNpcDescMsgImp::callback (const std::string &serviceName, NLNET::TServic
 		creature->setBotDescription( *this );
 		CAIAliasTranslator::getInstance()->updateAssociation(_Alias,Eid);
 
+		// The name of the bot can be there before its description: the characters that have an encyclopedia mission of
+		// the bot in their encyclopedia get the name now (it is found by the alias, set just above). When the name comes
+		// after the description, the change of the name does it (processMirrorUpdates).
+		creature->sendEncyclopediaNpcName();
+
 		if (_BuildingBot)
 			COutpostManager::getInstance().onBuildingSpawned(creature);
 	}
@@ -259,6 +264,14 @@ void CCreatureSetUrlImp::callback(const string &, NLNET::TServiceId sid)
 {
 	H_AUTO(CCreatureSetUrlImp);
 
+	// The AI script function clearUrl removes the web page action of the bots
+	bool clear = Clear;
+#ifdef RYZOM_FORGE
+	// "*" as the url removes it as well
+	if (Url == "*")
+		clear = true;
+#endif
+
 	// for each creature set url
 	for ( uint i = 0; i < Entities.size(); ++i )
 	{
@@ -266,24 +279,21 @@ void CCreatureSetUrlImp::callback(const string &, NLNET::TServiceId sid)
 		if ( c )
 		{
 			uint32 program = c->getBotChatProgram();
-			if(!(program & (1<<BOTCHATTYPE::WebPageFlag)))
-			{
-				program |= 1 << BOTCHATTYPE::WebPageFlag;
-				c->setBotChatProgram(program);
-			}
-			
 			const string &wp = c->getWebPage();
-			if(Url == "*") {
+			const string &wpn = c->getWebPageName();
+			if (clear)
+			{
 				(string &)wp = "";
+				(string &)wpn = "";
 				program &= ~(1 << BOTCHATTYPE::WebPageFlag);
-				c->setBotChatProgram(program);
-				continue;
 			}
 			else
+			{
 				(string &)wp = Url;
-
-			const string &wpn = c->getWebPageName();
-			(string &)wpn = ActionName;
+				(string &)wpn = ActionName;
+				program |= 1 << BOTCHATTYPE::WebPageFlag;
+			}
+			c->setBotChatProgram(program);
 		}
 	}
 }

@@ -25,7 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ui_objectviewer_form.h"
 
 // Qt includes
-#include <QtOpenGL/QGLWidget>
 #include <QDockWidget>
 #include <QTimer>
 
@@ -36,14 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
 
-#ifdef NL_OS_WINDOWS
-//typedef QDockWidget QNLWidget;
+// the object viewer widget is a plain QWidget on every platform
 typedef QWidget QNLWidget;
-#elif defined(NL_OS_MAC)
-typedef QWidget QNLWidget;
-#else // NL_OS_UNIX
-typedef QGLWidget QNLWidget;
-#endif // NL_OS_UNIX
 
 class QAction;
 

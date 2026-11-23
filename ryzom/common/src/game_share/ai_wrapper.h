@@ -133,7 +133,9 @@ public:
 	{
 	}
 
-	virtual void triggerUserTrigger(const std::string& groupName, uint32 triggerId)
+	/// Triggers a user event of a group of a scenario: the group is named by the AI instance of its
+	/// session and by the alias the translation of its act gave it
+	virtual void triggerUserTrigger(uint32 aiInstance, TAIAlias groupAlias, uint32 triggerId)
 	{
 	}
 
@@ -190,7 +192,7 @@ public:
 
 	virtual void stopControlNpc(NLMISC::CEntityId clientId, NLMISC::CEntityId npc) NL_OVERRIDE;
 
-	virtual void triggerUserTrigger(const std::string& groupName, uint32 triggerId) NL_OVERRIDE;
+	virtual void triggerUserTrigger(uint32 aiInstance, TAIAlias groupAlias, uint32 triggerId) NL_OVERRIDE;
 
 	virtual void askBotDespawnNotification(NLMISC::CEntityId creatureId, TAIAlias alias) NL_OVERRIDE;
 

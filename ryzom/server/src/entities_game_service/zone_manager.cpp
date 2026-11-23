@@ -1370,10 +1370,15 @@ bool CZoneManager::parseStartPoints( const NLLIGO::IPrimitive* prim )
 				{
 					CStartPoint point;
 					child->getPropertyByName( "mission", value );
-					point.Mission = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName( value );
-					if ( point.Mission == CAIAliasTranslator::Invalid )
+					// an empty name is a start point without a welcome mission
+					point.Mission = CAIAliasTranslator::Invalid;
+					if (!value.empty())
 					{
-						nlwarning("<parseStartPoints> invalid mission %s",value.c_str() );
+						point.Mission = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName(value);
+						if (point.Mission == CAIAliasTranslator::Invalid)
+						{
+							nlwarning("<parseStartPoints> invalid mission %s", value.c_str());
+						}
 					}
 					child->getPropertyByName( "welcomer", value );
 					point.Welcomer = CAIAliasTranslator::Invalid;
@@ -1792,21 +1797,22 @@ void CZoneManager::updateCharacterPosition( CCharacter * user, uint32 elapsedTim
 			// notify player respawn points system that continent changed
 			user->getRespawnPoints().cbContinentChanged(oldContinent);
 			// update newbieland flag (defailt to 1 if there's aproblem determining the true value)
-			bool newbie = user->isNewbie();
+			bool newbie = true;
+			bool newbieKnown = user->findNewbie(newbie);
 //			user->_PropertyDatabase.setProp("USER:IS_NEWBIE", newbie);
 			CBankAccessor_PLR::getUSER().setIS_NEWBIE(user->_PropertyDatabase, newbie);
 
 			bool trialPlayer = false;
 			CPlayer *player = PlayerManager.getPlayer( PlayerManager.getPlayerId(user->getId()));
 			if (!player)
-			{
 				nlwarning("Error %s was not found in player manager.",user->getId().toString().c_str());
+			else
 				trialPlayer = player->isTrialPlayer();
-			}
 //			user->_PropertyDatabase.setProp("USER:IS_TRIAL", trialPlayer);
 			CBankAccessor_PLR::getUSER().setIS_TRIAL(user->_PropertyDatabase, trialPlayer);
 
-			if (updateSU)
+			// the shard unifier only hears a flag this shard can tell
+			if (updateSU && newbieKnown)
 			{
 				if (IShardUnifierEvent::getInstance() != NULL)
 					IShardUnifierEvent::getInstance()->onUpdateCharNewbieFlag(user->getId(), newbie);

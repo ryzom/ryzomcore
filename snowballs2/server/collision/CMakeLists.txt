@@ -1,3 +1,6 @@
 ADD_SUBDIRECTORY(src)
 
-INSTALL(FILES collision_service.cfg DESTINATION etc/snowballs COMPONENT services)
+SET(database "${SNOWBALLS_DATA_ABSOLUTE_FILE}")
+CONFIGURE_FILE(collision_service.cfg.in collision_service.cfg @ONLY)
+
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/collision_service.cfg DESTINATION ${SNOWBALLS_CONFIG_FILE} COMPONENT services)

@@ -192,7 +192,7 @@ public:
 	 * If you seek back and want to return to the end of the serialized data, you have to
 	 * store the position (a better way is to use reserve()/poke()).
 	 *
-	 * NB: If the stream doesn't support the seek fonctionnality, it throws ESeekNotSupported.
+	 * NB: If the stream doesn't support the seek functionality, it throws ESeekNotSupported.
 	 * Default implementation:
 	 * { throw ESeekNotSupported; }
 	 * \param offset is the wanted offset from the origin.
@@ -205,7 +205,7 @@ public:
 	/**
 	 * Get the location of the stream pointer.
 	 *
-	 * NB: If the stream doesn't support the seek fonctionnality, it throws ESeekNotSupported.
+	 * NB: If the stream doesn't support the seek functionality, it throws ESeekNotSupported.
 	 * Default implementation:
 	 * { throw ESeekNotSupported; }
 	 * \param offset is the wanted offset from the origin.

@@ -192,7 +192,11 @@ public:
 	/// cehck if mission is successfull
 	bool isMissionSuccessfull(CCharacter* user,TAIAlias  alias);
 	/// instanciate a mission for a specific player 
+	/// 0 if the mission was given, else the reason it was not (prerequisites, a full journal...); a mission that was
+	/// given can have ended already, by its first actions
 	uint8 instanciateMission(CCharacter* user,TAIAlias alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission = CAIAliasTranslator::Invalid);
+	/// a mission loaded with its character is an instance of its template again, and holds its mono mission again
+	void instanciateLoadedMission(CMission * mission);
 	/// deinstanciate a mission From this manager. It doesnt delete it, nor does it remove it from a character
 	void deInstanciateMission(CMission * mission);
 	/// tell the system that a mission was done for the first time
@@ -228,6 +232,10 @@ public:
 	void dynChatChoice( CCharacter * user, const TDataSetRow & botRow,uint8 choice );	
 	/// const access to the template pool
 	const CHashMap< uint,CMissionTemplate* > &getMissionTemplates()	{ return _MissionTemplates;}
+	/// number of reference missions that were kept when the missions were built
+	uint getNbRefMissions() const { return (uint)_RefMissions.size(); }
+	/// number of missions that were refused when the missions were built (the mission log says why)
+	uint getNbRefusedMissions() const { return m_NbRefusedMissions; }
 
 	/// check the place constraints of a mission
 	void checkPlaceConstraints ( CMission* mission);
@@ -311,6 +319,9 @@ private:
 
 	/// map linking a referenced mission aliases to the real mission alias
 	CHashMap<uint,TAIAlias>					_RefMissions;
+
+	/// missions refused by the constructor: those that could not be built, and the copies and references of such
+	uint m_NbRefusedMissions;
 
 	/// npc groups being escorted. The key is the group alias. The data is the Alias of the mission linked to the group
 	CHashMap<uint,TAIAlias>					_EscortGroups;

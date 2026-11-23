@@ -20,6 +20,7 @@
 #include "nel/net/module_gateway.h"
 // client include
 #if !defined(RZ_CLIENT_DRONE)
+#  include "client_ctrl.h"
 #  include "net_manager.h"
 #  include "network_connection.h"
 #else
@@ -79,6 +80,11 @@ public:
 	// send a bit mem stream to the server
 	void sendRawMessage(CBitMemStream &message) const
 	{
+#if !defined(RZ_CLIENT_DRONE)
+		// the record of a control tool counts it as CNetManager::push does for the other impulses (the drone has no
+		// control endpoint)
+		ClientCtrl::netImpulse(true, message);
+#endif
 		NetConn->push(message);
 	}
 };

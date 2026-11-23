@@ -493,19 +493,15 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 				NLMISC::CClassId mcid = mods[m]->classDesc()->classId();
 				TSClassId mscid = mods[m]->classDesc()->superClassId();
 				if ((mcid == SCENELIB::CLASSID_PHYSIQUE && mscid == SCLASS_OSMODIFIER)
-					|| PHYSIQUESKIN::isPhysiqueModifier(mods[m]))
-					hasPhysique = true;
-				else if (PHYSIQUESKIN::isSkinModifier(mods[m]) || mcid == SCENELIB::CLASSID_SKIN)
-				{
-					skipClass = "skinned-skin";
-					break;
-				}
+					|| PHYSIQUESKIN::isPhysiqueModifier(mods[m])
+					|| PHYSIQUESKIN::isSkinModifier(mods[m]))
+					hasPhysique = true; // Skin or Physique, both decoded by PHYSIQUESKIN
 			}
 		}
 		else
 		{
 			for (uint m = 0; m < mods.size(); ++m)
-				if (PHYSIQUESKIN::isPhysiqueModifier(mods[m]))
+				if (PHYSIQUESKIN::isPhysiqueModifier(mods[m]) || PHYSIQUESKIN::isSkinModifier(mods[m]))
 				{
 					hasPhysique = true;
 					break;
@@ -636,7 +632,7 @@ static int exportFile(const std::string &maxPath, const std::string &outPath, bo
 					{
 						extras->setString("nel_skip_class", "skinned-physique");
 						stats.skip("skinned-physique");
-						fprintf(stderr, "SKIP gltf '%s': Physique skinning failed: %s\n",
+						fprintf(stderr, "SKIP gltf '%s': skinning failed: %s\n",
 						        name.c_str(), err.c_str());
 						physOk = false;
 						if (!isSlave)

@@ -69,6 +69,7 @@
 
 #ifdef NL_OS_WINDOWS
 #include "nel/misc/win_event_emitter.h"
+#include "nel/misc/win_minimized_picture.h"
 #elif defined(NL_OS_MAC)
 #include "mac/cocoa_event_emitter.h"
 #elif defined (NL_OS_UNIX)
@@ -529,6 +530,17 @@ public:
 
 	virtual bool			isActive ();
 
+	virtual bool			isWindowMinimized() const;
+	virtual void			restoreWindow();
+
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied);
+	virtual bool			isMinimizedWindowPictureWanted() const;
+
+	/// The frame buffer that takes what is drawn for the window, bound while no texture is the render target:
+	/// the frame buffer of the window (0), or in picture mode the one the driver draws the frames of the
+	/// minimized window into (see setMinimizedWindowPictureSupplied)
+	GLuint					getWindowFrameBuffer() const { return m_WindowFrameBuffer; }
+
 	virtual uint8			getBitPerPixel ();
 
 	virtual void			showCursor (bool b);
@@ -725,6 +737,12 @@ public:
 
 #ifdef NL_OS_MAC
 	NLMISC::CCocoaEventEmitter _EventEmitter;
+
+	/// the focus is the key state of the window holding the view, see the definition
+	void						updateWindowFocus();
+
+	/// the mouse is relative while the cursor is captured, hidden and in the focused window, see the definition
+	void						updateMouseRelative();
 #endif
 
 private:
@@ -831,14 +849,45 @@ private:
 	DEVMODE						_OldScreenMode;
 	NLMISC::CEventEmitterMulti	_EventEmitter; // this can contains a win emitter and eventually a direct input emitter
 
+	// The pictures of the minimized window that the driver supplies to the desktop compositor, out of the
+	// frames the application draws
+	NLMISC::CWinMinimizedPicture	m_MinimizedPicture;
+	// Picture mode: the window is minimized and the desktop compositor shows a picture of it. The frames are
+	// drawn into a frame buffer object of the driver's own, of the size the window had before it was minimized
+	// (m_WindowFrameBuffer is that object, and getWindowSize gives that size), and read back from it at the
+	// swap. Entered and left at the end of a frame only (see updateMinimizedPictureMode)
+	bool						m_MinimizedPictureMode;
+	uint32						m_MinimizedPictureWidth;
+	uint32						m_MinimizedPictureHeight;
+	// The render buffers of that frame buffer object: the colors, and the depth and stencil in one
+	GLuint						m_MinimizedPictureColorBuffer;
+	GLuint						m_MinimizedPictureDepthStencilBuffer;
+	// It was said in the log that the pictures cannot be supplied with this display adapter
+	bool						m_MinimizedPictureUnsupportedReported;
+	// At the swap in picture mode: the frame that ends is handed over as a picture when one is due, and is
+	// copied to the window when the window was restored while it was drawn
+	void						endMinimizedPictureFrame();
+	// After the swap: picture mode is entered or left for the next frame
+	void						updateMinimizedPictureMode();
+	bool						enterMinimizedPictureMode();
+	void						leaveMinimizedPictureMode();
+
 #elif defined(NL_OS_MAC)
 
 	friend bool							GlWndProc(CDriverGL*, const void*);
 
 	CocoaOpenGLView*           _glView;
+	id                         m_WindowDelegate; // CocoaWindowDelegate of the window the driver made
 	NSAutoreleasePool*         _autoreleasePool;
 	uint16                     _backBufferHeight;
 	uint16                     _backBufferWidth;
+
+	// in fullscreen the window covers the screen without a title bar (see setWindowStyle), and the title bar bits of
+	// its style mask, its frame and the presentation options it had before are kept
+	bool                       m_FullscreenWindow;
+	NSUInteger                 m_WindowedStyleMask;
+	NSRect                     m_WindowedFrame;
+	NSUInteger                 m_WindowedPresentationOptions;
 
 	NSView* containerView() { return (NSView*)_win; }
 	void setupApplicationMenu();
@@ -850,6 +899,9 @@ private:
 	friend bool GlWndProc(CDriverGL *driver, XEvent &e);
 
 	Display*					_dpy;
+	// the window manager lists the window as hidden in _NET_WM_STATE, which is how it states a minimized window;
+	// kept up to date by the changes of that property (see GlWndProc)
+	bool						_WindowMinimized;
 	NLMISC::CUnixEventEmitter	_EventEmitter;
 	XVisualInfo*				_visual_info;
 	uint32						_xrandr_version;
@@ -932,6 +984,13 @@ private:
 
 	// Current FBO render target
 	CSmartPtr<ITexture>		_RenderTargetFBO;
+
+	// The frame buffer that is bound while no texture is the render target (see getWindowFrameBuffer): 0, the
+	// frame buffer of the window, but in the picture mode of a minimized window
+	GLuint					m_WindowFrameBuffer;
+
+	// A render target without area was refused and reported (setRenderTarget reports it once)
+	bool					m_ZeroAreaRenderTargetReported;
 
 	// Share the same backbuffer for FBO render targets with window size
 	std::vector<CDepthStencilFBO *>	_DepthStencilFBOs;
@@ -1029,6 +1088,15 @@ private:
 	// Return monitor info and positon in multi monitor setup or false if monitor not found.
 	bool					getMonitorByName(const std::string &name, sint32 &x, sint32 &y, uint32 &w, uint32 &h) const;
 
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	// The rectangles of the monitors of the X screen, the primary monitor first.
+	void					getMonitorRects(std::vector<NLMISC::CRect> &monitors) const;
+#endif
+
+	// Brings a position of the window of the driver that is on no monitor back onto the primary monitor
+	// (IDriver::keepWindowOnMonitors). Returns true if the position was changed.
+	bool					keepWindowPosOnMonitors(sint32 &x, sint32 &y);
+
 	enum EWindowStyle { EWSWindowed, EWSFullscreen };
 
 	void					setWindowSize(uint32 width, uint32 height);
@@ -1044,6 +1112,10 @@ private:
 	// Test if cursor is in the client area. always true when software cursor is used and window visible
 	// (displayed in software when DirectInput is used)
 	bool					isSystemCursorInClientArea();
+
+	// Whether the driver may move the system cursor, which is the user's: on Windows only for a window that is
+	// activated (setWindowActivation) and in the foreground
+	bool					mayMoveSystemCursor();
 
 	// Check if RGBA cursors are supported
 	bool					isAlphaBlendedCursorSupported();

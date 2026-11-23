@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, argparse
+import time, sys, os, shutil, subprocess, argparse
 sys.path.append("configuration")
 
 parser = argparse.ArgumentParser(description='Ryzom Core - Build Gamedata - Setup')
@@ -39,12 +39,12 @@ parser.add_argument('--excludeprocess', '-epc', nargs='+')
 args = parser.parse_args()
 
 if not args.includeproject == None and not args.excludeproject == None:
-	print "ERROR --includeproject cannot be combined with --excludeproject, exit."
-	exit()
+	print("ERROR --includeproject cannot be combined with --excludeproject, exit.")
+	sys.exit()
 
 if not args.includeprocess == None and not args.excludeprocess == None:
-	print "ERROR --includeprocess cannot be combined with --excludeprocess, exit."
-	exit()
+	print("ERROR --includeprocess cannot be combined with --excludeprocess, exit.")
+	sys.exit()
 
 if os.path.isfile("log.log"):
 	os.remove("log.log")
@@ -56,7 +56,7 @@ except ImportError:
 	printLog(log, "*** FIRST RUN ***")
 	if args.noconf:
 		printLog(log, "ERROR --noconf is invalid on first run, exit.")
-		exit()
+		sys.exit()
 from tools import *
 
 NeLToolsDirsRelease = os.getenv("RC_TOOLS_DIRS_RELEASE")
@@ -69,6 +69,8 @@ if NeLPath:
 NeLServerDirsFv = os.getenv("RC_SERVER_DIRS_FV")
 if NeLServerDirsFv:
 	NeLServerDirsFv = NeLServerDirsFv.split(os.pathsep)
+
+NeLToolsXplatDirLinux = os.getenv("RC_TOOLS_XPLAT_DIR_LINUX")
 
 NeL3dsMaxExe = os.getenv('RC_3DSMAX_EXE')
 NeL3dsMaxUserDir = os.getenv('RC_3DSMAX_USER_DIR')
@@ -106,7 +108,7 @@ if not args.noconf:
 			for i in range(len(ToolDirectories)):
 				ToolDirectories[i] = ToolDirectories[i].replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom)
 		else:
-			ToolDirectories = [ "R:/build_win32/tools/bin/Release", "R:/build_win32/tools/bin", "R:/build_win32/server_dev/bin/Release", "R:/build_win32/server_dev/bin", "R:/external/dependencies" ]
+			ToolDirectories = [ "R:/build_win32/tools/bin/Release", "R:/build_win32/tools/bin", "R:/build_win32/server_dev/bin/Release", "R:/build_win32/server_dev/bin" ]
 	try:
 		ToolSuffix
 	except NameError:
@@ -252,6 +254,12 @@ if not args.noconf:
 	try:
 		if args.preset:
 			DummyUnknownName
+		ExamplesDirectory
+	except NameError:
+		ExamplesDirectory = "R:/code/ryzom/client/examples"
+	try:
+		if args.preset:
+			DummyUnknownName
 		DataCommonDirectory
 	except NameError:
 		DataCommonDirectory = "R:/code/ryzom/common/data_common"
@@ -279,6 +287,16 @@ if not args.noconf:
 				LinuxServiceExecutableDirectories[i] = LinuxServiceExecutableDirectories[i].replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom)
 		else:
 			LinuxServiceExecutableDirectories = [ "R:/build_docker/server/bin" ]
+	try:
+		if args.preset:
+			DummyUnknownName
+		LinuxToolExecutableDirectories
+	except NameError:
+		# the cross-platform tools of the quick start (servdash_cli), built for a generic Linux
+		if NeLToolsXplatDirLinux:
+			LinuxToolExecutableDirectories = [ NeLToolsXplatDirLinux.replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom) ]
+		else:
+			LinuxToolExecutableDirectories = [ "R:/build_docker/tools_xplat/x86_64-unknown-linux-musl/release" ]
 	try:
 		if args.preset:
 			DummyUnknownName
@@ -312,7 +330,7 @@ if not args.noconf:
 		if SignToolExecutable:
 			SignToolExecutable = SignToolExecutable.replace("\\", "/")
 		else:
-			SignToolExecutable = "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Bin/signtool.exe"
+			SignToolExecutable = "signtool.exe"
 	try:
 		if args.preset:
 			DummyUnknownName
@@ -328,7 +346,7 @@ if not args.noconf:
 	except NameError:
 		SignToolTimestamp = os.getenv('RC_SIGNTOOL_TIMESTAMP')
 		if not SignToolTimestamp:
-			SignToolTimestamp = "http://timestamp.comodoca.com/authenticode"
+			SignToolTimestamp = "http://timestamp.sectigo.com"
 	try:
 		if args.preset:
 			DummyUnknownName
@@ -403,6 +421,7 @@ if not args.noconf:
 		LeveldesignWorldDirectory = askVar(log, "[IN] Leveldesign World Directory", LeveldesignWorldDirectory).replace("\\", "/")
 		PrimitivesDirectory = askVar(log, "[IN] Primitives Directory", PrimitivesDirectory).replace("\\", "/")
 		GamedevDirectory = askVar(log, "[IN] Gamedev Directory", GamedevDirectory).replace("\\", "/")
+		ExamplesDirectory = askVar(log, "[IN] Examples Directory", ExamplesDirectory).replace("\\", "/")
 		DataShardDirectory = askVar(log, "[IN] Data Shard Directory", DataShardDirectory).replace("\\", "/")
 		DataCommonDirectory = askVar(log, "[IN] Data Common Directory", DataCommonDirectory).replace("\\", "/")
 		TranslationDirectory = askVar(log, "[IN] Translation Directory", TranslationDirectory).replace("\\", "/")
@@ -417,6 +436,7 @@ if not args.noconf:
 		ExeDllCfgDirectories[5] = askVar(log, "[IN] Senary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[5]).replace("\\", "/")
 		ExeDllCfgDirectories[6] = askVar(log, "[IN] Septenary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[6]).replace("\\", "/")
 		LinuxServiceExecutableDirectories[0] = askVar(log, "[IN] Linux Service Executable Directory", LinuxServiceExecutableDirectories[0]).replace("\\", "/")
+		LinuxToolExecutableDirectories[0] = askVar(log, "[IN] Linux Tool Executable Directory", LinuxToolExecutableDirectories[0]).replace("\\", "/")
 		PatchmanDevDirectory = askVar(log, "[IN] Patchman Directory", PatchmanDevDirectory).replace("\\", "/")
 		PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
 		PatchmanCfgDefaultDirectory = askVar(log, "[IN] Patchman Cfg Default Directory", PatchmanCfgDefaultDirectory).replace("\\", "/")
@@ -504,6 +524,8 @@ if not args.noconf:
 	sf.write("if NeLServerDirsFv:\n")
 	sf.write("	NeLServerDirsFv = NeLServerDirsFv.split(os.pathsep)\n")
 	sf.write("\n")
+	sf.write("NeLToolsXplatDirLinux = os.getenv(\"RC_TOOLS_XPLAT_DIR_LINUX\")\n")
+	sf.write("\n")
 	sf.write("# Quality option for this site (1 for BEST, 0 for DRAFT)\n")
 	sf.write("BuildQuality = " + str(BuildQuality) + "\n")
 	sf.write("\n")
@@ -552,10 +574,12 @@ if not args.noconf:
 	sf.write("\n")
 	sf.write("# Misc data directories\n")
 	sf.write("GamedevDirectory = \"" + str(GamedevDirectory) + "\"\n")
+	sf.write("ExamplesDirectory = \"" + str(ExamplesDirectory) + "\"\n")
 	sf.write("DataCommonDirectory = \"" + str(DataCommonDirectory) + "\"\n")
 	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("ExeDllCfgDirectories = " + str(ExeDllCfgDirectories) + "\n")
 	sf.write("LinuxServiceExecutableDirectories = " + str(LinuxServiceExecutableDirectories) + "\n")
+	sf.write("LinuxToolExecutableDirectories = " + str(LinuxToolExecutableDirectories) + "\n")
 	sf.write("PatchmanDevDirectory = \"" + str(PatchmanDevDirectory) + "\"\n")
 	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
 	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
@@ -565,6 +589,8 @@ if not args.noconf:
 	sf.write("	LinuxServiceExecutableDirectories = [] + NeLServerDirsFv\n")
 	sf.write("	for i in range(len(LinuxServiceExecutableDirectories)):\n")
 	sf.write("		LinuxServiceExecutableDirectories[i] = LinuxServiceExecutableDirectories[i].replace('\\\\', '/')\n")
+	sf.write("if NeLToolsXplatDirLinux:\n")
+	sf.write("	LinuxToolExecutableDirectories = [ NeLToolsXplatDirLinux.replace('\\\\', '/') ]\n")
 	sf.write("\n")
 	sf.write("# Sign tool\n")
 	sf.write("SignToolExecutable = \"" + str(SignToolExecutable) + "\"\n")
@@ -620,15 +646,15 @@ for projectName in ProjectsToProcess:
 				subprocess.call([ "python", "0_setup.py", "--excludeprocess" ] + args.excludeprocess)
 			else:
 				subprocess.call([ "python", "0_setup.py" ])
-		except Exception, e:
+		except Exception as e:
 			printLog(log, "<" + projectName + "> " + str(e))
 		os.chdir("..")
 		try:
-			projectLog = open("processes/log.log", "r")
+			projectLog = open("processes/log.log", "r", errors="replace")
 			projectLogData = projectLog.read()
 			projectLog.close()
 			log.write(projectLogData)
-		except Exception, e:
+		except Exception as e:
 			printLog(log, "<" + projectName + "> " + str(e))
 	else:
 		printLog(log, "IGNORE PROJECT " + projectName)

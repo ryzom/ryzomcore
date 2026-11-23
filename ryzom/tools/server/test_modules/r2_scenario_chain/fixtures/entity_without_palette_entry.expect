@@ -1,0 +1,17 @@
+# An npc of the scenario has a palette entry this editor does not have (Base, as in a file edited by
+# hand), and with it no sheet for the client. The scenario loads and is saved as it is: the entity is
+# not removed or replaced. The translation stops at that npc with a message for the author that names
+# it (uiR2EDTranslateUnknownBase), so the test does not start and nothing is uploaded.
+
+upgrade: unchanged
+scenario_vs_file: same
+save: ok
+roundtrip: ok
+scenario_at: Acts[1].Features[0].Components[1].Base = palette.entities.npcs.bandits.no_such_bandit
+scenario_at: Acts[1].Features[0].Components[1].Name = Stranger
+
+translate: fail
+translate_note: Translation Error
+absent: rt
+absent: rt_check
+result: 6

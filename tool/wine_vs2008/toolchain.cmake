@@ -3,7 +3,7 @@
 # toolchain_v90_prefix wine prefix package. Environment:
 #   NL_WINE_VS2008_PREFIX    extracted prefix       (default $HOME/toolchain_v90_prefix)
 #   NL_WINE_VS2008_SHADOW    shadow VC dir           (default <prefix>-msvc-shadow)
-#   NL_WINE_VS2008_EXTERNAL  externals root          (default <prefix>/drive_c/2019q4_external_v90_x86)
+#   NL_WINE_VS2008_EXTERNAL  externals root          (default <prefix>/drive_c/2026q4_external_v90_x86)
 # Configure-time environment expected by the Find modules (see setup.sh /
 # the workflow): PROGRAMFILES, WINSDK_DIR, DXSDK_DIR.
 
@@ -23,7 +23,7 @@ endif()
 if(DEFINED ENV{NL_WINE_VS2008_EXTERNAL})
 	set(_NLWINE_EXTERNAL "$ENV{NL_WINE_VS2008_EXTERNAL}")
 else()
-	set(_NLWINE_EXTERNAL "${_NLWINE_PREFIX}/drive_c/2019q4_external_v90_x86")
+	set(_NLWINE_EXTERNAL "${_NLWINE_PREFIX}/drive_c/2026q4_external_v90_x86")
 endif()
 
 # ryzomcore/CMakeModules/nel.cmake uses its own TARGET_CPU convention, not
@@ -43,8 +43,16 @@ set(CMAKE_C_COMPILER   "${_NLWINE_SHADOW}/VC/bin/cl.exe")
 set(CMAKE_CXX_COMPILER "${_NLWINE_SHADOW}/VC/bin/cl.exe")
 set(CMAKE_LINKER       "${_NLWINE_SHADOW}/VC/bin/link.exe")
 set(CMAKE_AR           "${_NLWINE_SHADOW}/VC/bin/lib.exe")
-set(CMAKE_MT           "${CMAKE_CURRENT_LIST_DIR}/winecl-mt")
-set(CMAKE_RC_COMPILER  "${CMAKE_CURRENT_LIST_DIR}/winecl-rc")
+# setup.sh copies the mt and rc wrappers next to the compiler wrappers with normalized line
+# endings and the execute bit (a checkout mounted from Windows has neither for sure); a shadow
+# dir made by an older setup.sh falls back to the wrappers in this folder.
+if(EXISTS "${_NLWINE_SHADOW}/VC/bin/winecl-mt")
+	set(CMAKE_MT           "${_NLWINE_SHADOW}/VC/bin/winecl-mt")
+	set(CMAKE_RC_COMPILER  "${_NLWINE_SHADOW}/VC/bin/winecl-rc")
+else()
+	set(CMAKE_MT           "${CMAKE_CURRENT_LIST_DIR}/winecl-mt")
+	set(CMAKE_RC_COMPILER  "${CMAKE_CURRENT_LIST_DIR}/winecl-rc")
+endif()
 
 # NEVER, not ONLY: ONLY restricts find_path/find_library to paths prefixed
 # by CMAKE_FIND_ROOT_PATH, which we never set (empty) - with an empty root
@@ -77,7 +85,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "/MD /Z7 /Ob0 /Od /RTC1" CACHE STRING "" FORCE)
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "/MD /Z7 /O2 /Ob1 /DNDEBUG" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MD /Z7 /O2 /Ob1 /DNDEBUG" CACHE STRING "" FORCE)
 
-# The 2019q4_external_v90_x86 archive is one subfolder per library
+# The externals archive (2026q4_external_v90_x86) is one subfolder per library
 # (zlib/include, zlib/lib, boost/include, boost/lib, ...), not the single
 # unified include/+lib/ tree CMakeModules/FindExternal.cmake's generic
 # EXTERNAL_PATH mechanism expects - left alone, that mechanism falls back
@@ -90,7 +98,7 @@ file(GLOB NLWINE_EXTERNAL_DIRS "${_NLWINE_EXTERNAL}/*")
 if(NOT NLWINE_EXTERNAL_DIRS)
 	# Fail fast: with an empty prefix path the Find modules silently fall back to
 	# the Linux host's own headers (host zlib.h found, no matching .lib ever).
-	message(FATAL_ERROR "No externals found under ${_NLWINE_EXTERNAL} — extract 2019q4_external_v90_x86 there or set NL_WINE_VS2008_EXTERNAL")
+	message(FATAL_ERROR "No externals found under ${_NLWINE_EXTERNAL} — extract 2026q4_external_v90_x86 there or set NL_WINE_VS2008_EXTERNAL")
 endif()
 set(CMAKE_PREFIX_PATH ${NLWINE_EXTERNAL_DIRS} CACHE STRING "" FORCE)
 

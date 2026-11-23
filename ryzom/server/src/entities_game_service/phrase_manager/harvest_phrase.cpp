@@ -212,6 +212,7 @@ bool CHarvestPhrase::validate()
 	if ( state() == Evaluated)
 	{
 	// TEMPORARY CHANGE THIS WHEN THE BRICK WILL HAVE THE RIGHT PARAMS-------
+#if 0 // the deposit harvest of bhf01.sbrick, replaced by the forage actions (bhf01 has no sheet); its body was already out
 		if (_RootSheetId == CSheetId("bhf01.sbrick"))
 		{
 			// this is the forage action
@@ -246,6 +247,7 @@ bool CHarvestPhrase::validate()
 				return false;
 			}*/
 		}
+#endif
 	// TEMPORARY ---------------------------------------------
 		const CStaticItem *item = CSheets::getForm(_RawMaterialId);
 		if (item != 0)

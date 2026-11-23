@@ -103,6 +103,9 @@ static const sint32 TIME_POS_INFINITY = 0x7fffffff;
 static const NLMISC::CClassId CLASSID_BIPED_VHT_CTRL(0x00009156, 0x00000000);
 static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
 static const NLMISC::CClassId CLASSID_PARAM_BLOCK_2(0x00000082, 0x00000000);
+// Controllers that split a value into one float controller per component
+static const NLMISC::CClassId CLASSID_EULER_XYZ(0x00002012, 0x00000000);
+static const NLMISC::CClassId CLASSID_POSITION_XYZ(0x118f7e02, 0xffee238a);
 // Scripted-plugin class ids carry a per-script-edit PartB; match PartA only, like the
 // reference exporter (export_nel.h NEL_PARTICLE_SYSTEM_CLASS_ID / BOOL_CONTROL_CLASS_ID).
 static const uint32 CLASSID_PARTA_ONOFF_CTRL = 0x984b8d27;
@@ -797,6 +800,32 @@ static void addNoteTrack(NL3D::CAnimation &animation, INode &node)
 // ---------------------------------------------------------------------------------------------
 // Node walk, replicating addNodeTracks / addBoneTracks.
 
+// The exporter plugin samples an animated Euler XYZ or Position XYZ controller into a linear track,
+// this tool builds none for them yet: say so when one of their component controllers has keys.
+static void warnUnsampledXYZ(INode &node, CReferenceMaker *ctrl, const char *value)
+{
+	CSceneClass *sc = dynamic_cast<CSceneClass *>(ctrl);
+	if (!sc)
+		return;
+	const char *className = NULL;
+	if (sc->classDesc()->classId() == CLASSID_EULER_XYZ)
+		className = "Euler XYZ";
+	else if (sc->classDesc()->classId() == CLASSID_POSITION_XYZ)
+		className = "Position XYZ";
+	else
+		return;
+	for (uint i = 0; i < 3 && i < ctrl->nbReferences(); ++i)
+	{
+		CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl->getReference(i));
+		if (kf && kf->keyCount())
+		{
+			fprintf(stderr, "WARNING: node %s: its %s controller (%s) is animated, the exporter plugin samples it but this tool does not, no %s track\n",
+			    ucstring(node.userName()).toUtf8().c_str(), value, className, value);
+			return;
+		}
+	}
+}
+
 static void addTrackChecked(NL3D::CAnimation &animation, const std::string &name, NL3D::ITrack *track)
 {
 	if (!track) return;
@@ -845,10 +874,14 @@ static void addNodeTracks(NL3D::CAnimation &animation, INode &node, const std::s
 		if (prs)
 		{
 			track = buildATrack(prs->rotationController(), typeRotation);
+			if (!track)
+				warnUnsampledXYZ(node, prs->rotationController(), "rotation");
 			addTrackChecked(animation, parentName + NL3D::ITransformable::getRotQuatValueName(), track);
 		}
 
 		track = buildATrack(prs ? prs->positionController() : lookAt->positionController(), typePos);
+		if (!track)
+			warnUnsampledXYZ(node, prs ? prs->positionController() : lookAt->positionController(), "position");
 		addTrackChecked(animation, parentName + NL3D::ITransformable::getPosValueName(), track);
 
 		// Camera roll + target position (reference: only when isCamera(node)).

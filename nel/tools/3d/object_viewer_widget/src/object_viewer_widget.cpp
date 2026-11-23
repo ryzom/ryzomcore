@@ -44,6 +44,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Qt includes
 #include <QIcon>
+#include <QResizeEvent>
+#include <QSurfaceFormat>
+#include <QWindow>
 
 // Project includes
 
@@ -61,6 +64,19 @@ using namespace std;
 
 namespace NLQT
 {
+	// The mode of the driver for a size of the widget: on X11 the driver takes the size of the window
+	// from the mode, and the native window is in device pixels
+	static NL3D::UDriver::CMode driverMode(const QWidget *widget, const QSize &size)
+	{
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		const qreal ratio = widget->devicePixelRatioF();
+		return NL3D::UDriver::CMode((uint16)qRound(size.width() * ratio), (uint16)qRound(size.height() * ratio), 32);
+#else
+		nlunreferenced(widget);
+		return NL3D::UDriver::CMode((uint16)size.width(), (uint16)size.height(), 32);
+#endif
+	}
+
 	CObjectViewerWidget *CObjectViewerWidget::_objectViewerWidget = NULL;
 
 	CObjectViewerWidget::CObjectViewerWidget(QWidget *parent)
@@ -72,6 +88,20 @@ namespace NLQT
 		setMouseTracking(true);
 		setFocusPolicy(Qt::StrongFocus);
 		_objectViewerWidget = this;
+
+		// the driver renders into the native window of this widget with its own context
+		setAttribute(Qt::WA_NativeWindow);
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		// on X11 the driver renders with the visual of this window, so a depth and stencil buffer
+		// are asked for before the window is created
+		if (QWindow *window = windowHandle())
+		{
+			QSurfaceFormat format = window->requestedFormat();
+			format.setDepthBufferSize(24);
+			format.setStencilBufferSize(8);
+			window->setFormat(format);
+		}
+#endif
 
 		_isGraphicsEnabled = true;
 
@@ -95,6 +125,17 @@ namespace NLQT
 		{
 			_mainTimer->start(25);
 		}
+	}
+
+	void CObjectViewerWidget::resizeEvent(QResizeEvent *resizeEvent)
+	{
+		QWidget::resizeEvent(resizeEvent);
+
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		// on X11 the driver gets no events of this window, it takes its size from setMode
+		if (_Driver && resizeEvent->size().width() > 0 && resizeEvent->size().height() > 0)
+			_Driver->setMode(driverMode(this, resizeEvent->size()));
+#endif
 	}
 
 	void CObjectViewerWidget::setNelContext(NLMISC::INelContext &nelContext)
@@ -148,7 +189,16 @@ namespace NLQT
 		nlassert(_Driver);
 
 		// initialize the window with config file values
-		_Driver->setDisplay(wnd, NL3D::UDriver::CMode(w, h, 32));
+		if (!_Driver->setDisplay(wnd, driverMode(this, size())))
+		{
+			// graphics are switched off, so that the 3D view is not set up again on every update
+			nlwarning("The 3D driver cannot render into the window of the object viewer widget, the 3D view stays empty");
+			_Driver->release();
+			delete _Driver;
+			_Driver = NULL;
+			_isGraphicsEnabled = false;
+			return;
+		}
 
 		//_Light = ULight::createLight();
 
@@ -202,6 +252,10 @@ namespace NLQT
 		//H_AUTO2
 		nldebug("");
 
+		// the driver is made when the 3D view is first shown, before that there is nothing to release
+		if (!_Driver)
+			return;
+
 		_Driver->delete3dMouseListener(_MouseListener);
 
 		// delete all entities
@@ -211,9 +265,11 @@ namespace NLQT
 
 		// delete the scene
 		_Driver->deleteScene(_Scene);
+		_Scene = NULL;
 
 		// delete the light
 		delete _Light;
+		_Light = NULL;
 
 		// release driver
 		nlassert(_Driver);
@@ -269,7 +325,8 @@ namespace NLQT
 
 
 			//updateAnimation(_AnimationDialog->getTime());
-			updateAnimatePS();
+			if (_isGraphicsInitialized)
+				updateAnimatePS();
 			// 10. Update Camera (depends on entities)
 			// ...
 
@@ -348,7 +405,7 @@ namespace NLQT
 				if (wantGraphics)
 				{
 					init();
-					_isGraphicsInitialized = true;
+					_isGraphicsInitialized = (_Driver != NULL);
 					_mainTimer->start(25);
 					//done = false;
 				}
@@ -397,6 +454,13 @@ namespace NLQT
 	{
 		//H_AUTO2
 
+		// without a driver there is nothing to take
+		if (!_Driver)
+		{
+			nlwarning("The 3D view is not shown, no screenshot is taken");
+			return;
+		}
+
 		// FIXME: create screenshot path if it doesn't exist!
 
 		// empty bitmap
@@ -431,6 +495,12 @@ namespace NLQT
 
 	bool CObjectViewerWidget::loadMesh(const std::string &meshFileName, const std::string &skelFileName)
 	{
+		if (!_Driver || !_Scene)
+		{
+			nlwarning("The 3D view is not shown yet, cannot load '%s'", meshFileName.c_str());
+			return false;
+		}
+
 		std::string fileName = CFile::getFilenameWithoutExtension(meshFileName);
 		if ( _Entities.count(fileName) != 0)
 			return false;
@@ -487,6 +557,10 @@ namespace NLQT
 
 	void CObjectViewerWidget::resetScene()
 	{
+		// before the 3D view is first shown there is no scene and nothing in it
+		if (!_Scene)
+			return;
+
 		deleteEntities();
 
 		// Reset camera.
@@ -523,6 +597,10 @@ namespace NLQT
 
 	void CObjectViewerWidget::setSizeViewport(uint16 w, uint16 h)
 	{
+		// without a driver there is no scene and no camera
+		if (!_Scene)
+			return;
+
 		_Scene->getCam().setPerspective(_CameraFocal * (float)Pi/180.f, (float)w/h, 0.1f, 1000);
 	}
 
@@ -663,6 +741,10 @@ namespace NLQT
 	{
 		int output_width = 128;
 		int output_height = 128;
+
+		// the driver is made when the 3D view is first shown, there is no preview before
+		if (!_Driver)
+			return 0;
 
 		// Create a scene
 		NL3D::UScene* Scene = _Driver->createScene(true);

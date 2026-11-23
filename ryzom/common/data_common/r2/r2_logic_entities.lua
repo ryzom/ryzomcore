@@ -238,9 +238,8 @@ local logicEntity =
 			end
 
 			if addLine then
-				uc_eventType:fromUtf8(menuTitle.menu)
-				subMenu:addLine(uc_eventType, "lua", 
-					"r2.events:setEventType('".. eventType .."','" .. tostring(endRequest) .. "','" .. eventCategory .. "')", eventType)
+				subMenu:addLine(menuTitle.menu, "lua", 
+					r2:uiCall("r2.events:setEventType", eventType, tostring(endRequest), eventCategory), eventType)
 			end
 		end
 
@@ -338,9 +337,7 @@ function logicEntity.initLogicEntitiesInstancesMenu(this, subMenu, calledFunctio
 		local entity = enumerator:next()
 		if not entity then break end
 		found= true
-		local uc_name = ucstring()
-		uc_name:fromUtf8(entity.Name)
-		subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+		subMenu:addLine(entity.Name, "lua", r2:uiCall(calledFunction, entity.InstanceId), entity.InstanceId)
 	end
 	if not found then
 		subMenu:addLine(i18n.get("uiR2EdNoSelelection"), "", "", "")

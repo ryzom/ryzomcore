@@ -77,6 +77,9 @@ public:
 	/// player charId accepts an invitation
 	void joinAccept( const NLMISC::CEntityId &charId );
 
+	/// a character leaves the game: the invitations it sent are withdrawn, the one it got is forgotten
+	void playerDisconnects( CCharacter * user );
+
 	/// a character quits its team
 	void quitTeam( const NLMISC::CEntityId &charId );
 
@@ -142,6 +145,21 @@ public:
 	
 	
 private:
+	/// an invitation to join a team that waits for its answer (the invited character knows its invitor too, getTeamInvitor)
+	struct CTeamInvitation
+	{
+		NLMISC::CEntityId	Invited;
+		NLMISC::CEntityId	Invitor;
+		NLMISC::TGameCycle	Date;
+	};
+
+	/// forget the invitation a character got
+	void removeInvitation( CCharacter * invited );
+
+	/// end an invitation that got no answer: the window of the invited character closes, and both are told
+	/// (invitorPhrase may be NULL)
+	void endInvitation( const CTeamInvitation &invitation, const char *invitedPhrase, const char *invitorPhrase );
+
 	/// the managed teams
 	std::vector< CTeam >	_Teams;
 
@@ -150,6 +168,9 @@ private:
 
 	/// Allocation step for the team container
 	const uint				_TeamAllocStep;
+
+	/// the invitations that wait for an answer, the oldest first
+	std::list< CTeamInvitation >	m_Invitations;
 
 };
 

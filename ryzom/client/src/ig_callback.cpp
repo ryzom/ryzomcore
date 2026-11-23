@@ -219,6 +219,30 @@ void CIGCallback::CIGInstance::instanceGroupAdded()
 			// Yoyo: For each primitive, increment its height, to avoid blocking bugs
 			for(uint i=0;i<addedPrims.size();i++)
 			{
+				// A primitive larger than a cell of the grid does not collide over its whole size
+				if(addedPrims[i])
+				{
+					float sizeX, sizeY;
+					if(addedPrims[i]->getPrimitiveType() == NLPACS::UMovePrimitive::_2DOrientedBox)
+					{
+						float width, depth;
+						addedPrims[i]->getSize(width, depth);
+						double orientation = addedPrims[i]->getOrientation(addedPrims[i]->getFirstWorldImageV());
+						float cosa = (float)fabs(cos(orientation));
+						float sina = (float)fabs(sin(orientation));
+						sizeX = width * cosa + depth * sina;
+						sizeY = width * sina + depth * cosa;
+					}
+					else
+					{
+						sizeX = sizeY = 2.f * addedPrims[i]->getRadius();
+					}
+					if(sizeX > (float)RYZOM_PACS_PRIMITIVE_SIZE_MAX || sizeY > (float)RYZOM_PACS_PRIMITIVE_SIZE_MAX)
+					{
+						nlwarning("ASSET ERROR: the collision %u of '%s' at (%.1f, %.1f) is %.2f x %.2f m with the scale %.3f of its instance, the largest that collides over its whole size is %d m; reduce the scale of the instance or the collision of the shape",
+							i, _IG->getShapeName(k).c_str(), pos.x, pos.y, sizeX, sizeY, scale.x, (int)RYZOM_PACS_PRIMITIVE_SIZE_MAX);
+					}
+				}
 				// do it only for obstacle, non trigerrable(?) prims
 				if(addedPrims[i] && addedPrims[i]->getObstacle() && addedPrims[i]->getTriggerType()==NLPACS::UMovePrimitive::NotATrigger)
 				{

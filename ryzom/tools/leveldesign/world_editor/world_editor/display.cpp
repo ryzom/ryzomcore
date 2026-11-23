@@ -1492,10 +1492,11 @@ void CDisplay::OnDraw (CDC* pDC)
 	if (_MainFrame->_Mode == 3) // Disply the plugin position control ?
 		renderPluginPosition();
 
-	CNELU::swapBuffers ();
-
+	// the selection rectangle is drawn into the frame: under desktop composition, GDI drawing on the window over the 3D surface leaves trails
 	if (_DrawSelection)
 		drawSelection ();
+
+	CNELU::swapBuffers();
 }
 
 // ***************************************************************************
@@ -2472,9 +2473,9 @@ void CDisplay::buttonDown (TButton button, UINT nFlags, CPoint point)
 				// No action performed ?
 				if (!_TranformAction)
 				{
-					// Remove old selection
-					drawSelection ();
+					// Show the selection rectangle
 					_DrawSelection = true;
+					Invalidate(FALSE);
 				}
 			}
 			else
@@ -2693,8 +2694,8 @@ void CDisplay::OnLButtonUp (UINT nFlags, CPoint point)
 			else
 			{
 				// Erase selection
-				drawSelection ();
 				_DrawSelection = false;
+				Invalidate(FALSE);
 
 				// Pick position
 				CVector pickPosMin ((float)_SelectionMin.x, (float)(_WindowHeight-_SelectionMin.y-1), 0);
@@ -2751,8 +2752,8 @@ void CDisplay::OnLButtonUp (UINT nFlags, CPoint point)
 			else
 			{
 				// Erase selection
-				drawSelection ();
 				_DrawSelection = false;
+				Invalidate(FALSE);
 			}
 
 			// Pick position
@@ -2872,21 +2873,22 @@ void CDisplay::OnRButtonUp (UINT nFlags, CPoint point)
 
 void CDisplay::drawSelection ()
 {
-	// Get the DC
-	CDC *pDC = GetDC ();
+	if ((_WindowWidth == 0) || (_WindowHeight == 0))
+		return;
 
-	// Rect
-	RECT rect;
-	rect.left = std::min (_SelectionMin.x, _SelectionMax.x);
-	rect.top = std::min (_SelectionMin.y, _SelectionMax.y);
-	rect.right = std::max (_SelectionMin.x, _SelectionMax.x);
-	rect.bottom = std::max (_SelectionMin.y, _SelectionMax.y);
+	// The rectangle in window pixels, through the pixel centres, with y going up
+	const float width = (float)_WindowWidth;
+	const float height = (float)_WindowHeight;
+	const float left = ((float)std::min(_SelectionMin.x, _SelectionMax.x) + 0.5f) / width;
+	const float right = ((float)std::max(_SelectionMin.x, _SelectionMax.x) + 0.5f) / width;
+	const float top = 1.f - ((float)std::min(_SelectionMin.y, _SelectionMax.y) + 0.5f) / height;
+	const float bottom = 1.f - ((float)std::max(_SelectionMin.y, _SelectionMax.y) + 0.5f) / height;
 
-	// Draw a xor focus rect
-	pDC->DrawFocusRect (&rect);
-
-	// Release the DC
-	ReleaseDC (pDC);
+	// A dark frame around a light one shows on any background
+	const float pixelX = 1.f / width;
+	const float pixelY = 1.f / height;
+	CDRU::drawWiredQuad(left - pixelX, bottom - pixelY, right + pixelX, top + pixelY, *CNELU::Driver, CRGBA(0, 0, 0, 255), CViewport());
+	CDRU::drawWiredQuad(left, bottom, right, top, *CNELU::Driver, CRGBA(255, 255, 255, 255), CViewport());
 }
 
 // ***************************************************************************
@@ -3033,15 +3035,13 @@ void CDisplay::OnMouseMove (UINT nFlags, CPoint point)
 			}
 			else
 			{
-				// Remove old selection
 				nlassert (_DrawSelection);
-				drawSelection ();
 
 				// New position
 				_SelectionMax = point;
 
 				// Draw new selection
-				drawSelection ();
+				Invalidate(FALSE);
 			}
 		}
 		break;

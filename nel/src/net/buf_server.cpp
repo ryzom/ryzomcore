@@ -107,7 +107,25 @@ void CBufServer::init( uint16 port )
 	}
 	else
 	{
-		LNETL1_DEBUG( "LNETL1: Binding listen socket to any address, port %hu", port );
+		LNETL1_DEBUG( "LNETL1: Binding listen socket to the default bind address, port %hu", port );
+	}
+}
+
+
+/*
+ * Listens on the specified address
+ */
+void CBufServer::init( const CInetAddress& addr )
+{
+	nlnettrace( "CBufServer::init" );
+	if ( ! _ReplayMode )
+	{
+		_ListenTask->init( addr, maxExpectedBlockSize() );
+		_ListenThread->start();
+	}
+	else
+	{
+		LNETL1_DEBUG( "LNETL1: Binding listen socket to %s", addr.asString().c_str() );
 	}
 }
 
@@ -119,6 +137,17 @@ void CListenTask::init( uint16 port, sint32 maxExpectedBlockSize )
 {
 	nlnettrace( "CListenTask::init" );
 	_ListenSock.init( port );
+	_MaxExpectedBlockSize = maxExpectedBlockSize;
+}
+
+
+/*
+ * Begins to listen on the specified address (call before running thread)
+ */
+void CListenTask::init( const CInetAddress& addr, sint32 maxExpectedBlockSize )
+{
+	nlnettrace( "CListenTask::init" );
+	_ListenSock.init( addr );
 	_MaxExpectedBlockSize = maxExpectedBlockSize;
 }
 

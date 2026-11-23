@@ -263,7 +263,11 @@ void CWorkspaceNode::savePSAs(const std::string &fullPath)
 std::string CWorkspaceNode::getFullPath() const
 {
 	nlassert(_WS);
-	return _WS->getPath() + _RelativePath.c_str();
+	// workspaces written by the MFC object viewer separate their relative paths with backslashes
+	std::string path = NLMISC::CPath::standardizePath(_RelativePath, false);
+	if (NLMISC::CPath::isAbsolutePath(path))
+		return path;
+	return _WS->getPath() + path;
 }
 
 bool CWorkspaceNode::loadPS()
@@ -291,6 +295,7 @@ bool CWorkspaceNode::loadPS()
 	{
 		// Not a particle system
 		Modules::psEdit().getScene()->deleteInstance(trs);
+		Modules::psEdit().getScene()->setShapeBank(oldSB);
 		return false;
 	}
 	if (oldSB)
@@ -351,24 +356,9 @@ CWorkspaceNode *CParticleWorkspace::addNode(const std::string &filenameWithFullP
 	{
 		if (NLMISC::nlstricmp(_Nodes[k]->getFilename(), fileName) == 0) return NULL;
 	}
-//	char resultPath[MAX_PATH];
-//	std::string dosPath = NLMISC::CPath::standardizeDosPath(getPath());
-	std::string relativePath;
-//	if (!PathRelativePathTo(resultPath, dosPath.c_str(), FILE_ATTRIBUTE_DIRECTORY, filenameWithFullPath.c_str(), 0))
-//	{
-	relativePath = filenameWithFullPath;
-//	}
-//	else
-//	{
-//		relativePath = resultPath;
-//	}
-	if (relativePath.size() >= 2)
-	{
-		if (relativePath[0] == '\\' && relativePath[1] != '\\')
-		{
-			relativePath = relativePath.substr(1);
-		}
-	}
+	// relative to the workspace when possible, else (such as on another drive) absolute
+	std::string relativePath = NLMISC::CPath::standardizePath(filenameWithFullPath, false);
+	NLMISC::CPath::makePathRelative(getPath(), relativePath);
 	CWorkspaceNode *newNode = new CWorkspaceNode();
 	newNode->init(this);
 	newNode->setRelativePath(relativePath);
@@ -380,7 +370,7 @@ CWorkspaceNode *CParticleWorkspace::addNode(const std::string &filenameWithFullP
 void CParticleWorkspace::removeNode(uint index)
 {
 	nlassert(index < _Nodes.size());
-	_Nodes[index] = NULL; // delete the smart-ptr target
+	// the vector holds weak references, so the node is deleted here, which also unloads its system
 	delete _Nodes[index];
 	_Nodes.erase(_Nodes.begin() + index);
 	touch();
@@ -396,7 +386,8 @@ void CParticleWorkspace::removeNode(CWorkspaceNode *ptr)
 void CParticleWorkspace::save()
 {
 	NLMISC::COFile stream;
-	stream.open(_Filename);
+	if (!stream.open(_Filename))
+		throw NLMISC::EFileNotOpened(_Filename);
 	NLMISC::COXml xmlStream;
 	xmlStream.init(&stream);
 	this->serial(xmlStream);
@@ -406,7 +397,8 @@ void CParticleWorkspace::save()
 void CParticleWorkspace::load()
 {
 	NLMISC::CIFile stream;
-	stream.open(_Filename);
+	if (!stream.open(_Filename))
+		throw NLMISC::EFileNotOpened(_Filename);
 	NLMISC::CIXml xmlStream;
 	xmlStream.init(stream);
 	this->serial(xmlStream);

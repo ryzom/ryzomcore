@@ -85,6 +85,9 @@ namespace R2
 		// getEditing position (use AdminModule::getPosition for having a position in editing and animation mode)
 		virtual	bool getPosition(TSessionId sessionId, double& x, double& y, double& orient, uint8& season, uint32 locationIndex = 0) = 0;
 		virtual TSessionId getSessionIdByCharId(TCharId charId) const = 0;
+		// true if the character may use the animator and DM functions of the session it is connected to
+		// (sessionId and role receive that session and the role of the character in it)
+		virtual bool isCharAnimator(TCharId charId, TSessionId &sessionId, TUserRole &role) const = 0;
 		virtual bool isClientAuthorized(uint32 charId) const = 0;
 		virtual void disconnectChar(uint32 charId) = 0;
 		virtual const NLNET::TModuleProxyPtr * getClientProxyPtr(TCharId charId) const = 0;
@@ -99,6 +102,16 @@ namespace R2
 		virtual void updateCharPioneerRight(TCharId charId) = 0;
 		virtual void characterReady(TCharId charId) =0;
 		virtual void returnToPreviousSession(TCharId charId) = 0;
+		// true if the run time scenario and the act it is to start in pass the checks of rt_scenario_check.h with
+		// the limits of this service; if not, error receives what is refused. overQuota, when given, receives
+		// whether the refusal is for a scenario that is well formed and too large.
+		virtual bool checkRtScenario(CObject *rtScenario, uint32 startingAct, std::string &error, bool *overQuota = nullptr) const = 0;
+		// a scenario that was accepted for the session, and whose start was answered to the clients, could not be
+		// started by the animation module: the session leaves the test mode and its clients are told
+		virtual void animationSessionStartFailed(TSessionId sessionId, uint32 startingAct, const std::string &errorReason) = 0;
+		// stop the animation of a session: the scenario of the session goes back to edition, the animation module
+		// stops the animation (IServerAnimationModule::stopTest) and the clients of the session are told
+		virtual void stopTest(TSessionId sessionId) = 0;
 
 
 	};
@@ -121,6 +134,9 @@ namespace R2
 		virtual NLNET::IModule* getModule() const = 0;
 
 		virtual bool isSessionRunning(TSessionId sessionId) const = 0;
+		// true if an animation of this very session (not of a session linked to it) runs, or was asked for with
+		// scheduleStartSession and is not made yet
+		virtual bool isSessionStartingOrRunning(TSessionId sessionId) const = 0;
 		virtual uint32 getCurrentAct(TSessionId sessionId) const = 0;
 		virtual void stopControlNpcs(TCharId charId) = 0;
 		virtual void setSessionStartParams(TSessionId sessionId, sint32 x, sint32 y, uint8 season) = 0;
@@ -186,6 +202,15 @@ namespace R2
 
 	// get the security info of the module and verify that the su has allowed the client to connect to the dss
 	bool checkSecurityInfo(NLNET::IModuleProxy *senderModuleProxy, uint32 & charId, NLMISC::CEntityId & clientEid, std::string & userPriv, std::string &extendedPriv);
+
+	// true if the module is one of a game client: the frontend attaches the client info to every module of its clients,
+	// and a client can neither set nor remove it. Always false when there is no network (the DSS runs inside the
+	// client and all the modules are in one process).
+	bool isClientModule(NLNET::IModuleProxy *moduleProxy);
+
+	// true if what the module sends comes from a game client: the module is one of a client, or it is the session
+	// browser server, which forwards the messages that its clients give it. Always false when there is no network.
+	bool isClientSender(NLNET::IModuleProxy *moduleProxy);
 
 } // namespace R2
 

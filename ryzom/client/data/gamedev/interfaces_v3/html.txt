@@ -26,14 +26,14 @@
 		value = "value"						// Use for hidden
 		alt = "uiGo"						// Tooltip text (not localized, CI18N string id) used for buttons (type == image or type == checkbox)
 		global_color						// global color flag. If set, the button bitmap will be modulated by the interface global color.
-		z_btn_tmpl="template_name"			// (deprecated, use z_input_tmpl instead) if type==button, used to specify the ryzom interface template to use for the button, this allow to customize each button (NB : the template must exist in the client xml files)
-		z_input_tmpl="template_name"		// if type==button|text|checkbox, used to specify the ryzom interface template to use for the widget, this allow to customize each widget (NB : the template must exist in the client xml files)
+		z_btn_tmpl="template_name"			// (deprecated, use z_input_tmpl instead) if type==button, used to specify the ryzom interface template to use for the button, this allow to customize each button (NB : the template must exist in the client xml files; only read on a page of a trusted domain)
+		z_input_tmpl="template_name"		// if type==button|text|checkbox, used to specify the ryzom interface template to use for the widget, this allow to customize each widget (NB : the template must exist in the client xml files; only read on a page of a trusted domain)
 		z_input_width="template_name"		// if type==button|text|checkbox, used to specify the minimal witdh of the widget (cool to line up widget)
 
 	<TEXTAREA>
 		name = "value0"						// The name of the form input
 		cols = "10"							// Number of text columns
-		z_input_tmpl="template_name"		// if type==button|text|checkbox, used to specify the ryzom interface template to use for the widget, this allow to customize each widget (NB : the template must exist in the client xml files)
+		z_input_tmpl="template_name"		// if type==button|text|checkbox, used to specify the ryzom interface template to use for the widget, this allow to customize each widget (NB : the template must exist in the client xml files; only read on a page of a trusted domain)
 		z_input_width="template_name"		// if type==button|text|checkbox, used to specify the minimal witdh of the widget (cool to line up widget)
 
 	<SELECT name="selectName">				// a combo box that return selected value in 'selecteName' var

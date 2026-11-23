@@ -122,11 +122,32 @@ namespace STRING_MANAGER
 
 		if (_CacheInited)
 		{
+			// clear all current data: they belong to the shard and the timestamp of before, whether the cache is
+			// used or not
+			_ReceivedStrings.clear();
+			_ReceivedDynStrings.clear();
+			_CacheStringToSave.clear();
+			// NB : we keep the waiting strings and dyn strings
+
+			// insert the empty string.
+			_ReceivedStrings.insert(make_pair((uint)EmptyStringId, string()));
+
 			bool readingRecords = false;
+			// the clients of a folder share the cache of a shard and a language: each reads, resets and deletes it
+			// under the lock (held until the end of this function, also when the load fails)
+			CFileLock cacheLock;
 			try
 			{
 				const uint currentVersion = 1;
 				_CacheFilename = std::string("save/") + _ShardId.substr(0, _ShardId.find(":")) + ".string_cache";
+
+				if (cacheLock.lock(_CacheFilename + ".lock", 5000) != CFileLock::Locked)
+				{
+					nlwarning("SM : the string cache %s is not used, the strings come from the server: its lock %s.lock can't be taken (%s)",
+						_CacheFilename.c_str(), _CacheFilename.c_str(), cacheLock.getError().c_str());
+					_CacheFilename.erase();
+					return;
+				}
 
 				nlinfo("SM : Try to open the string cache : %s", _CacheFilename.c_str());
 
@@ -164,14 +185,6 @@ namespace STRING_MANAGER
 					file.serialVersion(currentVersion);
 					file.serial(timestamp);
 				}
-
-				// clear all current data.
-				_ReceivedStrings.clear();
-				_ReceivedDynStrings.clear();
-				// NB : we keep the waiting strings and dyn strings
-
-				// insert the empty string.
-				_ReceivedStrings.insert(make_pair((uint)EmptyStringId, string()));
 
 				// load the cache file
 				NLMISC::CIFile file(_CacheFilename);
@@ -354,6 +367,32 @@ restartLoop4:
 	}
 
 
+
+	bool CStringManagerClient::getReceivedString(uint32 stringId, string &result) const
+	{
+		TStringsContainer::const_iterator it(_ReceivedStrings.find(stringId));
+		if (it == _ReceivedStrings.end())
+		{
+			result.clear();
+			return false;
+		}
+		// as getString gives a string that has arrived
+		if (ClientCfg.DebugStringManager)
+		{
+			result = toString("<STR %u>", stringId) + it->second;
+		}
+		else
+		{
+			result = it->second;
+			if (result.size() > 9 && result.substr(0, 9) == "<missing:")
+			{
+				map<string, string>::const_iterator itds = _DynStrings.find(result.substr(9, result.size() - 10));
+				if (itds != _DynStrings.end())
+					result = itds->second;
+			}
+		}
+		return true;
+	}
 
 	bool CStringManagerClient::getString(uint32 stringId, string &result)
 	{
@@ -555,9 +594,39 @@ restartLoop:
 	{
 		if(!_CacheStringToSave.empty())
 		{
+			// another client of this folder may have reset the cache for a new timestamp of the server since this one
+			// loaded it: the strings received here belong to the timestamp loaded then, and are only added to a cache
+			// that still has it. The check and the write are under the lock of the cache.
+			CFileLock cacheLock;
+			if (cacheLock.lock(_CacheFilename + ".lock", 5000) != CFileLock::Locked)
+			{
+				nlwarning("SM : the %u strings received are not added to the string cache %s: its lock %s.lock can't be taken (%s)",
+					(uint)_CacheStringToSave.size(), _CacheFilename.c_str(), _CacheFilename.c_str(), cacheLock.getError().c_str());
+				_CacheStringToSave.clear();
+				return;
+			}
+
 			// the cache is only an optimization, a write error (disk full, file locked) must not be fatal
 			try
 			{
+				uint32 fileTimestamp = ~_Timestamp;
+				{
+					NLMISC::CIFile header;
+					if (header.open(_CacheFilename))
+					{
+						header.setVersionException(false, false);
+						header.serialVersion(1);
+						if (header.getPos() + sizeof(fileTimestamp) <= header.getFileSize())
+							header.serial(fileTimestamp);
+					}
+				}
+				if (fileTimestamp != _Timestamp)
+				{
+					nlinfo("SM : the %u strings received are not added to the string cache %s: another client reset it for another timestamp of the server, or removed it", (uint)_CacheStringToSave.size(), _CacheFilename.c_str());
+					_CacheStringToSave.clear();
+					return;
+				}
+
 				NLMISC::COFile file(_CacheFilename, true);
 				for (uint i = 0; i < _CacheStringToSave.size(); i++)
 				{

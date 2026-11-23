@@ -16,6 +16,14 @@
 
 #include "empty_service.h"
 
+#ifndef SNOWBALLS_CONFIG
+#define SNOWBALLS_CONFIG ""
+#endif // SNOWBALLS_CONFIG
+
+#ifndef SNOWBALLS_LOGS
+#define SNOWBALLS_LOGS ""
+#endif // SNOWBALLS_LOGS
+
 using namespace SBSERVICE;
 using namespace NLMISC;
 using namespace NLNET;
@@ -204,6 +212,6 @@ TUnifiedCallbackItem CallbackArray[] =
  *    - and callback actions set to "CallbackArray"
  *
  ****************************************************************************/
-NLNET_SERVICE_MAIN(CEmptyService, "EMPTY", "empty_service", 0, CallbackArray, "", "")
+NLNET_SERVICE_MAIN(CEmptyService, "EMPTY", "empty_service", 0, CallbackArray, SNOWBALLS_CONFIG, SNOWBALLS_LOGS)
 
 /* end of file */
