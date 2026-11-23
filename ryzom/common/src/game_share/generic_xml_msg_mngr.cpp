@@ -220,6 +220,11 @@ std::vector<std::string>	CGenericXmlMsgHeaderManager::checkStreamClassesText(con
 	if (!text.empty())
 		file.serialBuffer(&text[0], (uint)text.size());
 
+	// A file that names the signature of what it says has that one, however its classes are written
+	NLMISC::CHashKeyMD5 deployed;
+	if (findDeployedSignature(text, getContentHash(text, true), deployed))
+		return problems;
+
 	// The file is gone through as XML text: comments, and tags with their quoted values. A comment or an element of
 	// the stream classes has to be on lines of its own, as removeStreamClasses takes whole lines out; a stream
 	// attribute has to be written exactly as it is taken out.
@@ -364,134 +369,178 @@ std::vector<std::string>	CGenericXmlMsgHeaderManager::checkStreamClassesText(con
 	return problems;
 }
 
-// true if text has, at pos, a name of an XML element or attribute in ASCII; end is set past it
-static bool	xmlNameAsciiAt(const uint8 *text, size_t size, size_t pos, size_t &end)
+// add a character of a name, a value or a text to the content: those the content is marked up with are written
+// as XML writes them, so that no value or text reads as an attribute or an element
+static void	appendContentChar(std::vector<uint8> &content, char c)
 {
-	if (pos >= size)
-		return false;
-	uint8 c = text[pos];
-	if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_'))
-		return false;
-	end = pos + 1;
-	while (end < size)
-	{
-		c = text[end];
-		if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '-' || c == '.'))
-			break;
-		++end;
-	}
-	return true;
+	const char *escaped = NULL;
+	if (c == '&')
+		escaped = "&amp;";
+	else if (c == '<')
+		escaped = "&lt;";
+	else if (c == '"')
+		escaped = "&quot;";
+	if (escaped)
+		content.insert(content.end(), (const uint8 *)escaped, (const uint8 *)escaped + strlen(escaped));
+	else
+		content.push_back((uint8)c);
 }
 
-// whether a comment is open at the end of a line, read from `from` on, where one is open or not
-static bool	xmlCommentOpenAfter(const uint8 *line, size_t size, size_t from, bool inComment)
+// add the text of consecutive text nodes to the content, every run of white space as one space and none at its
+// ends
+static void	appendContentText(std::vector<uint8> &content, const std::string &text)
 {
-	static const char s_CommentStart[] = "<!--";
-	static const char s_CommentEnd[] = "-->";
-	const size_t commentStartSize = sizeof(s_CommentStart) - 1;
-	const size_t commentEndSize = sizeof(s_CommentEnd) - 1;
-
-	size_t i = from;
-	while (i < size)
+	bool word = false;
+	bool any = false;
+	for (size_t i = 0; i < text.size(); ++i)
 	{
-		if (inComment && size - i >= commentEndSize && !memcmp(line + i, s_CommentEnd, commentEndSize))
+		const char c = text[i];
+		if (c == ' ' || c == '\t' || c == '\r' || c == '\n')
 		{
-			inComment = false;
-			i += commentEndSize;
+			word = false;
+			continue;
 		}
-		else if (!inComment && size - i >= commentStartSize && !memcmp(line + i, s_CommentStart, commentStartSize))
-		{
-			inComment = true;
-			i += commentStartSize;
-		}
-		else
-		{
-			++i;
-		}
+		if (!word && any)
+			content.push_back(' ');
+		word = true;
+		any = true;
+		appendContentChar(content, c);
 	}
-	return inComment;
 }
 
-// the text of a msg.xml or database.xml with one attribute per line
-void	CGenericXmlMsgHeaderManager::splitAttributeLines(std::vector<uint8> &text)
+static void	appendContentString(std::vector<uint8> &content, const char *text)
 {
-	std::vector<uint8> out;
-	out.reserve(text.size() + text.size() / 2);
-	bool inComment = false;
-	size_t pos = 0;
-	while (pos < text.size())
+	for (; *text; ++text)
+		appendContentChar(content, *text);
+}
+
+// add an element to the content: its name, its attributes, its text and its elements
+static void	appendContentElement(std::vector<uint8> &content, xmlNodePtr element, bool skipStreamClasses)
+{
+	content.push_back('<');
+	appendContentString(content, (const char *)element->name);
+	for (xmlAttrPtr attribute = element->properties; attribute != NULL; attribute = attribute->next)
 	{
-		// One line, with its end
-		size_t end = pos;
-		while (end < text.size() && text[end] != '\n')
-			++end;
-		if (end < text.size())
-			++end;
-		const uint8 *line = &text[pos];
-		const size_t size = end - pos;
-		pos = end;
-
-		// A line that begins inside a comment is left as it is, whatever it has after the end of the comment
-		if (inComment)
-		{
-			inComment = xmlCommentOpenAfter(line, size, 0, true);
-			out.insert(out.end(), line, line + size);
+		if (skipStreamClasses && !strcmp((const char *)attribute->name, "stream"))
 			continue;
-		}
-
-		// The attributes of a start tag that is the first thing on its line, after spaces: each one space after
-		// what comes before it, its value between double quotes
-		size_t first = 0;
-		while (first < size && line[first] == ' ')
-			++first;
-		size_t nameEnd = 0;
-		std::vector<std::pair<size_t, size_t> > attributes;
-		size_t tagEnd = 0;
-		if (first < size && line[first] == '<' && xmlNameAsciiAt(line, size, first + 1, nameEnd))
+		content.push_back(' ');
+		appendContentString(content, (const char *)attribute->name);
+		content.push_back('=');
+		content.push_back('"');
+		xmlChar *value = xmlNodeListGetString(element->doc, attribute->children, 1);
+		if (value != NULL)
 		{
-			tagEnd = nameEnd;
-			for (;;)
-			{
-				size_t attributeEnd = 0;
-				if (!(tagEnd < size && line[tagEnd] == ' ' && xmlNameAsciiAt(line, size, tagEnd + 1, attributeEnd)))
-					break;
-				if (!(attributeEnd + 1 < size && line[attributeEnd] == '=' && line[attributeEnd + 1] == '"'))
-					break;
-				size_t close = attributeEnd + 2;
-				while (close < size && line[close] != '"')
-					++close;
-				if (close >= size)
-					break;
-				attributes.push_back(std::make_pair(tagEnd + 1, close + 1));
-				tagEnd = close + 1;
-			}
+			appendContentString(content, (const char *)value);
+			xmlFree(value);
 		}
-
-		// A comment that the line leaves open (one that starts the line, or one after its tag) goes on below
-		inComment = xmlCommentOpenAfter(line, size, 0, false);
-
-		if (attributes.size() < 2)
-		{
-			out.insert(out.end(), line, line + size);
-			continue;
-		}
-
-		// The tag with its first attribute, then each other attribute under the first one, the last of them
-		// with what follows on the line
-		const bool carriageReturn = size >= 2 && line[size - 2] == '\r' && line[size - 1] == '\n';
-		const size_t column = attributes[0].first;
-		out.insert(out.end(), line, line + attributes[0].second);
-		for (size_t i = 1; i < attributes.size(); ++i)
-		{
-			if (carriageReturn)
-				out.push_back('\r');
-			out.push_back('\n');
-			out.insert(out.end(), column, (uint8)' ');
-			out.insert(out.end(), line + attributes[i].first, line + attributes[i].second);
-		}
-		out.insert(out.end(), line + tagEnd, line + size);
+		content.push_back('"');
 	}
-	text.swap(out);
+	content.push_back('>');
+
+	// the text between two elements is one text, also where a comment is in it
+	std::string text;
+	for (xmlNodePtr child = element->children; child != NULL; child = child->next)
+	{
+		if (child->type == XML_TEXT_NODE || child->type == XML_CDATA_SECTION_NODE)
+		{
+			if (child->content != NULL)
+				text += (const char *)child->content;
+		}
+		else if (child->type == XML_ELEMENT_NODE)
+		{
+			// (an element that is left out does not part the text around it, no more than a comment does)
+			if (skipStreamClasses && !strcmp((const char *)child->name, "stream_class"))
+				continue;
+			appendContentText(content, text);
+			text.clear();
+			appendContentElement(content, child, skipStreamClasses);
+		}
+	}
+	appendContentText(content, text);
+
+	content.push_back('<');
+	content.push_back('/');
+	appendContentString(content, (const char *)element->name);
+	content.push_back('>');
+}
+
+// the hash of what a msg.xml or database.xml says
+NLMISC::CHashKeyMD5	CGenericXmlMsgHeaderManager::getContentHash(const std::vector<uint8> &text, bool skipStreamClasses)
+{
+	NLMISC::CHashKeyMD5 hash;
+	hash.clear();
+	if (text.empty())
+		return hash;
+
+	xmlDocPtr document = xmlReadMemory((const char *)&text[0], (int)text.size(), NULL, NULL, XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
+	if (document == NULL)
+		return hash;
+	xmlNodePtr root = xmlDocGetRootElement(document);
+	if (root != NULL)
+	{
+		std::vector<uint8> content;
+		content.reserve(text.size());
+		appendContentElement(content, root, skipStreamClasses);
+		hash = NLMISC::getMD5(&content[0], (uint32)content.size());
+	}
+	xmlFreeDoc(document);
+	return hash;
+}
+
+// the hash of 32 hexadecimal digits at pos, if that is what is there
+static bool	hashAt(const std::vector<uint8> &text, size_t pos, NLMISC::CHashKeyMD5 &hash)
+{
+	const size_t digits = 32;
+	if (pos + digits > text.size())
+		return false;
+	for (size_t i = 0; i < digits; ++i)
+	{
+		const uint8 c = text[pos + i];
+		if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')))
+			return false;
+	}
+	return hash.fromString(std::string(text.begin() + pos, text.begin() + pos + digits));
+}
+
+// the signature a file names for its content as it is deployed
+bool	CGenericXmlMsgHeaderManager::findDeployedSignature(const std::vector<uint8> &text, const NLMISC::CHashKeyMD5 &content, NLMISC::CHashKeyMD5 &deployed)
+{
+	static const char s_Start[] = "<!-- deployed_signature content=\"";
+	static const char s_Middle[] = "\" md5=\"";
+	const size_t startSize = sizeof(s_Start) - 1;
+	const size_t middleSize = sizeof(s_Middle) - 1;
+	const size_t digits = 32;
+
+	// a text that is no XML has no content to name
+	NLMISC::CHashKeyMD5 none;
+	none.clear();
+	if (content == none)
+		return false;
+
+	for (size_t pos = 0; pos + startSize <= text.size(); ++pos)
+	{
+		if (memcmp(&text[pos], s_Start, startSize))
+			continue;
+		size_t at = pos + startSize;
+		NLMISC::CHashKeyMD5 named, md5;
+		if (!hashAt(text, at, named))
+			continue;
+		at += digits;
+		if (at + middleSize > text.size() || memcmp(&text[at], s_Middle, middleSize))
+			continue;
+		at += middleSize;
+		if (!hashAt(text, at, md5))
+			continue;
+		at += digits;
+		if (at >= text.size() || text[at] != '"')
+			continue;
+		if (named == content)
+		{
+			deployed = md5;
+			return true;
+		}
+	}
+	return false;
 }
 
 // the signature of a file: its MD5, once it is the text the signature is made of
@@ -510,12 +559,24 @@ static NLMISC::CHashKeyMD5	signatureOfFile(const string &filename, bool streamCl
 	if (!text.empty())
 		file.serialBuffer(&text[0], (uint)text.size());
 
+	// The signature the file names for what it says, whatever its layout is now
+	static const char s_Record[] = "<!-- deployed_signature ";
+	if (std::search(text.begin(), text.end(), s_Record, s_Record + sizeof(s_Record) - 1) != text.end())
+	{
+		const NLMISC::CHashKeyMD5 content = CGenericXmlMsgHeaderManager::getContentHash(text, streamClasses);
+		if (CGenericXmlMsgHeaderManager::findDeployedSignature(text, content, signature))
+			return signature;
+		NLMISC::CHashKeyMD5 none;
+		none.clear();
+		if (content == none)
+			nlwarning("'%s' names a deployed signature but is not well-formed XML: the signature of its bytes is used", filename.c_str());
+		else
+			nlwarning("'%s' names a deployed signature, but not for what it says now (content hash %s): the signature of its bytes is used. If what it says was changed on purpose, take the comment out, or have it written again for the new content with the MD5 of the new file: the MD5 it names is that of files that say something else",
+			    filename.c_str(), content.toString().c_str());
+	}
+
 	if (streamClasses)
 		CGenericXmlMsgHeaderManager::removeStreamClasses(text);
-#ifdef RYZOM_FORGE
-	// the shards and clients of that game have these files with one attribute per line, and compare that
-	CGenericXmlMsgHeaderManager::splitAttributeLines(text);
-#endif
 	if (removeCarriageReturns)
 		text.erase(std::remove(text.begin(), text.end(), (uint8)'\r'), text.end());
 
