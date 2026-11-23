@@ -80,8 +80,9 @@ void npcChatToChannelSentence(const TDataSetRow &senderId, CChatGroup::TGroupTyp
  *	Request to the DSS to send a chat line from a bot in a chat channel
  *	Chat group can be constructed from CChatGroup class.
  *	sentenceId is the id of the sentence that must be sent by the DSS
+ *	logSentence false: the caller writes the line of the log for the sentence, or counts it
  */
-void forwardToDss(const TDataSetRow &senderId, CChatGroup::TGroupType groupType, std::string& sentenceId,uint32 scenarioId);
+void forwardToDss(const TDataSetRow &senderId, CChatGroup::TGroupType groupType, std::string& sentenceId,uint32 scenarioId, bool logSentence = true);
 
 /**
  *	Request to the DSS to send a chat line from a bot in a chat channel

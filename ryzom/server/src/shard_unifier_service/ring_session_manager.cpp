@@ -35,9 +35,12 @@
 #include "game_share/security_check.h"
 
 #include "ring_session_manager.h"
+#include "shard_access.h"
 #include "database_mapping.h"
 #include "nel_database_mapping.h"
 #include "character_sync.h"
+
+#include <random>
 
 // defined by MySQL config file
 #ifdef access
@@ -55,12 +58,23 @@ using namespace R2;
 
 CVariable<uint32>	ShardAssocTimeout( "su", "ShardAssocTimeout", "Timeout (in s)before a temporary shard assoc is removed after the session is closed", 10*60, 0, true );
 CVariable<uint32>	ForceWelcomerShard( "su", "ForceWelcomerShard", "SessionId of a shard to promote when joining any mainland (0=none)", 0, 0, true );
+CVariable<bool>	PreferLastPlayedShard( "su", "PreferLastPlayedShard", "When joining any mainland, promote the home shard of the character the account played last (after ForceWelcomerShard, before the load)", true, 0, true );
 CVariable<string>	DomainName("su", "DomainName", "The name of the domain", "ryzom", 0, true);
-CVariable<string>	PrivilegeForSessionAccess("su", "PrivilegeForSessionAccess", "A list of privilege allowed to join any animation session", ":GM:SGM:", 0, true);
-CVariable<string>	SecurityCheck("su", "SecurityCheck", "A Security Check", "", 0, true);
+CVariable<string>	PrivilegeForSessionAccess("su", "PrivilegeForSessionAccess", "A list of privileges whose accounts enter any Ring session by its id (an animation session as a player, an edit session as an editor) and may kick and unkick the characters of any Ring session", ":GM:SGM:", 0, true);
 
 namespace RSMGR
 {
+	const std::string &getFastDisconnectionSecret()
+	{
+		static std::string secret;
+		if (secret.empty())
+		{
+			std::random_device device;
+			for (uint i = 0; i < 4; ++i)
+				secret += NLMISC::toString("%08x", (uint32)device());
+		}
+		return secret;
+	}
 
 	class CRingSessionManager :
 		public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
@@ -197,6 +211,16 @@ namespace RSMGR
 			uint32		CharId;
 			/// Optional Security Code
 			COptionalSecurityCode OptSecurityCode;
+			/// For a join of the mainland that went to the shard of the last played character: the mainland session
+			/// to go to when that shard refuses the entry (0 for none)
+			TSessionId MainlandFallback;
+			/// The client application of the join, for the join of the fallback
+			std::string ClientApplication;
+			/// The participation the join goes by (0 for none: a mainland, or an account that enters by its
+			/// privilege), which gets EnteredStatus when the welcome service lets the character in
+			uint32 EnteredPartId;
+			/// The status of a character that is in the session with the role of the join
+			TSessionPartStatus EnteredStatus;
 		};
 
 		typedef list<TPendingJoinSession>	TPendingJoins;
@@ -544,7 +568,10 @@ namespace RSMGR
 			}
 
 			session->setState(TSessionState::ss_closed);
-			session->setFinalDuration(uint32(session->getStartDate() - NLMISC::CTime::getSecondsSince1970()));
+			// the time the session ran, from its start to now (none without a start date, or with one after now)
+			uint32 startDate = session->getStartDate();
+			uint32 closeDate = NLMISC::CTime::getSecondsSince1970();
+			session->setFinalDuration((startDate != 0 && closeDate > startDate) ? closeDate - startDate : 0);
 			session->update(_RingDb);
 
 //			// update the temporary shard assocs if needed
@@ -571,8 +598,9 @@ namespace RSMGR
 							session->getSessionParticipants()[i]->getCharId() & 0xf,
 							charId);
 					}
-					else
+					else if (character->getCurrentSession() == sessionId.asInt())
 					{
+						// (a participant that has gone on to another session keeps that one)
 						character->setCurrentSession(0);
 						character->update(_RingDb);
 					}
@@ -583,18 +611,37 @@ namespace RSMGR
 		}
 
 
-		bool checkAccessRight(const vector<string> &userAccessPriv, const TAccessLevel &accessLevel)
+		/** True when an account with these permission rows may enter the shard at the access level the shard asks for.
+		 *	Every join goes through here, and the choice of a shard for the character selection or for a new session
+		 *	(the rule itself is in shard_access.h): the access of an account on a shard is what its row for all shards
+		 *	holds together with what its row for that shard holds. A closed shard takes nobody, also when the
+		 *	permission table is not used.
+		 */
+		bool mayUseShard(const TPermissionRows &permissionRows, TShardId shardId, const TAccessLevel &accessLevel)
 		{
-			for (uint i=0; i<userAccessPriv.size(); ++i)
-			{
-				string access("ds_");
-				access += toLowerAscii(userAccessPriv[i]);
+			if (accessPrivilegeOfLevel(accessLevel.toString()).empty())
+				return false;
+			if (_DontUsePerm)
+				return true;
+			return hasShardAccess(permissionRows, shardId, accessLevel.toString());
+		}
 
-				if (accessLevel.toString() == access)
-					return true;
-			}
+		/** How a refusal names a shard: by its shard id, which is the id the permission rows go by, and by its mainland
+		 *	session too when the shard has one with another number: "shard 301 (session 302)".
+		 */
+		static std::string shardLabel(TShardId shardId, TSessionId mainlandSessionId)
+		{
+			if (mainlandSessionId.asInt() != 0 && mainlandSessionId.asInt() != shardId)
+				return toString("shard %u (session %u)", shardId, mainlandSessionId.asInt());
+			return toString("shard %u", shardId);
+		}
 
-			return false;
+		/// The reason given when mayUseShard refuses a shard
+		std::string shardRefusalReason(const TPermissionRows &permissionRows, TShardId shardId, const TAccessLevel &accessLevel)
+		{
+			if (accessPrivilegeOfLevel(accessLevel.toString()).empty())
+				return toString("closed (%s)", accessLevel.toString().c_str());
+			return toString("restricted to %s access, the account has %s there", accessLevel.toString().c_str(), describeShardAccess(permissionRows, shardId).c_str());
 		}
 
 
@@ -605,16 +652,8 @@ namespace RSMGR
 			CNelUserPtr user = CNelUser::load(_NelDb, userId, __FILE__, __LINE__);
 			if (user != NULL)
 			{
-				vector<string> userPriv;
-				explode(user->getPrivilege(), string(":"), userPriv, true);
-				for (uint i=0; i<userPriv.size(); ++i)
-				{
-					if (PrivilegeForSessionAccess.toString().find(userPriv[i]) != string::npos)
-					{
-						// ok, the user have the required access
-						return true;
-					}
-				}
+				// a privilege of the account counts when it is a whole name of the list, not a part of one
+				return hasPrivilegeOfList(user->getPrivilege(), PrivilegeForSessionAccess.toString());
 			}
 
 			return false;
@@ -647,33 +686,93 @@ namespace RSMGR
 //			return CNelShard::load(_NelDb, prim, __FILE__, __LINE__);
 //		}
 
-		bool loadUserAccessPrivileges(uint32 userId, vector<string> &userAccessPriv)
+		/** Load the permission rows of an account for the domain: its row for all shards and its rows for single
+		 *	shards. What they give on a shard is for mayUseShard to say.
+		 *	\return false when the query failed; an account without any row gives true and no row
+		 */
+		bool loadUserPermissionRows(uint32 userId, TPermissionRows &permissionRows)
 		{
-			userAccessPriv.clear();
+			permissionRows.clear();
 			CSString query;
-			query << "SELECT AccessPrivilege FROM permission";
+			query << "SELECT ShardId, AccessPrivilege FROM permission";
 			query << " WHERE UId = " << userId << " AND permission.ClientApplication = '" << MSW::escapeString(DomainName, _NelDb) << "'";
+			query << " ORDER BY ShardId";
 
 			if (!_NelDb.query(query))
-			{
-				// can't find a permission record
-//				joinSessionResult(from, charId>>4, 0, 12, "failed to request for access permission", TSessionPartStatus::invalid_val);
 				return false;
-			}
 			CUniquePtr<CStoreResult> result(_NelDb.storeResult());
-			if (result->getNumRows() == 0)
+			uint32 nbRows = result->getNumRows();
+			for (uint32 i = 0; i < nbRows; ++i)
 			{
-				return false;
-				// can't find a permission record
-//				joinSessionResult(from, charId>>4, 0, 13, "can't find access permission for user and domain", TSessionPartStatus::invalid_val);
-//				return;
+				result->fetchRow();
+				CPermissionRow row;
+				result->getField(0, row.ShardId);
+				// On this branch a row counts on every shard of the domain, whatever its ShardId: the login pages
+				// of the game write each row with one fixed shard id, and no shard was ever chosen by it.
+				row.ShardId = -1;
+				result->getField(1, row.AccessPrivilege);
+				permissionRows.push_back(row);
 			}
-			result->fetchRow();
-			string accessString;
-			result->getField(0, accessString);
 
-			NLMISC::explode(accessString, string(","), userAccessPriv, false);
+			return true;
+		}
 
+		/** Load the permission rows of an account for a join, and answer the join when there is nothing to go by.
+		 *	When the permission table is not used, nothing is read.
+		 *	\return false when the join has been refused and answered
+		 */
+		bool loadPermissionRowsForJoin(NLNET::TSockId from, uint32 userId, TSessionId sessionId, TPermissionRows &permissionRows)
+		{
+			permissionRows.clear();
+			if (_DontUsePerm)
+				return true;
+			BOMB_IF(!loadUserPermissionRows(userId, permissionRows), "RSM : failed to load the permission rows of user " << userId, joinSessionResult(from, userId, sessionId, 12, "failed to request for access permission", TSessionPartStatus::invalid_val); return false;);
+			if (permissionRows.empty())
+			{
+				// No row: the account has no permission for the domain, or the nel database has no domain of the name
+				// this shard unifier is set to, which refuses every account. Say which of the two it is.
+				CSString query;
+				query << "SELECT domain_id FROM domain WHERE domain_name = '" << MSW::escapeString(DomainName, _NelDb) << "'";
+				BOMB_IF(!_NelDb.query(query), "RSM : failed to look for the domain of this shard unifier (DomainName) in the nel database", joinSessionResult(from, userId, sessionId, 12, "failed to request for access permission", TSessionPartStatus::invalid_val); return false;);
+				CUniquePtr<CStoreResult> result(_NelDb.storeResult());
+				if (result->getNumRows() == 0)
+				{
+					nlwarning("RSM : the nel database has no domain named '%s', the DomainName of this shard unifier: no account can be given access to a shard", DomainName.get().c_str());
+					joinSessionResult(from, userId, sessionId, 12, toString("failed to request for access permission: the nel database has no domain named '%s'", DomainName.get().c_str()), TSessionPartStatus::invalid_val);
+					return false;
+				}
+				nlinfo("RSM : user %u has no permission row for the domain '%s', the join is refused", userId, DomainName.get().c_str());
+				joinSessionResult(from, userId, sessionId, 13, toString("can't find access permission for user %u and domain '%s'", userId, DomainName.get().c_str()), TSessionPartStatus::invalid_val);
+				return false;
+			}
+			return true;
+		}
+
+		/** The home mainland session of the character the account played last, 0 when no character of the account
+		 *	has a date of play (the entity locator writes it when a character enters or leaves the game).
+		 *	\return false when the query failed
+		 */
+		bool loadLastPlayedMainland(uint32 userId, uint32 &mainlandSessionId)
+		{
+			mainlandSessionId = 0;
+			CSString query;
+			// The characters of an account are found through the index on user_id. A character that never played has
+			// a date before any real one. A date after tomorrow is no date of play either (a row made outside the
+			// shard unifier with the zero date of the column reads back as one); the bound is written as the dates
+			// are, in the local time of this service.
+			query << "SELECT home_mainland_session_id FROM characters";
+			query << " WHERE user_id = " << userId << " AND last_played_date >= '2000-01-01 00:00:00'";
+			query << " AND last_played_date <= '" << MSW::encodeDate(CTime::getSecondsSince1970() + 24 * 60 * 60) << "'";
+			query << " ORDER BY last_played_date DESC LIMIT 1";
+
+			if (!_RingDb.query(query))
+				return false;
+			CUniquePtr<CStoreResult> result(_RingDb.storeResult());
+			if (result->getNumRows() != 0)
+			{
+				result->fetchRow();
+				result->getField(0, mainlandSessionId);
+			}
 			return true;
 		}
 
@@ -1021,6 +1120,17 @@ restartLoop:
 
 				scenario = CScenario::load(_RingDb, scenarioId, __FILE__, __LINE__);
 				BOMB_IF(scenario == NULL, "Failed to load the scenario "<<scenarioId, return);
+
+				// Whether trial accounts may play the scenario is what the scenario service reads in the header of
+				// each start: the record follows the latest start (the update below stores it). The record is one
+				// per scenario key, and the checks of an invitation and of a join read it through the log of their
+				// session: two sessions that run the same key are both judged by the later start.
+				if (scenario->getAllowFreeTrial() != scenarioInfo.getTrialAllowed())
+				{
+					nlinfo("RSM : scenarioStarted : session %u starts the scenario %u, which is %s to trial accounts from now on",
+						sessionId.asInt(), scenario->getObjectId(), scenarioInfo.getTrialAllowed() ? "open" : "closed");
+					scenario->setAllowFreeTrial(scenarioInfo.getTrialAllowed());
+				}
 			}
 			else
 			{
@@ -1035,14 +1145,26 @@ restartLoop:
 				scenario->setOrientation(session->getOrientation());
 				scenario->setRRPTotal(0);
 				scenario->setTitle(session->getTitle());
+				// (the free trial checks of an invitation and of a join read it, and the session list shows it)
+				scenario->setAllowFreeTrial(scenarioInfo.getTrialAllowed());
 
 				scenario->create(_RingDb);
 			}
 
 			scenario->update(_RingDb);
 
-			// update the author
-			// create the session log record
+			// The session log record, one per session: the scenario service announces every start of the scenario
+			// of a session, and a second one (a start after one that failed, a restart) finds the record and keeps
+			// it, as scenarioEnded creates it only when it is missing. It names the scenario of the latest start,
+			// which the free trial checks and the ratings read.
+			CSessionLogPtr existingLog = CSessionLog::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
+			if (existingLog != NULL)
+			{
+				nldebug("scenarioStarted : session %u has its session log already, it is kept with the scenario %u", sessionId.asInt(), scenario->getObjectId());
+				existingLog->setScenarioId(scenario->getObjectId());
+				existingLog->update(_RingDb);
+				return;
+			}
 			CSessionLogPtr sessionLog = CSessionLog::createTransient(__FILE__, __LINE__);
 			sessionLog->setObjectId(sessionId.asInt());
 			sessionLog->setScenarioId(scenario->getObjectId());
@@ -1072,8 +1194,8 @@ restartLoop:
 			DROP_IF(session == NULL, ("RSM : reportCharacterKicked : failed to load the session "+toString(sessionId)+" from database"), return);
 			DROP_IF(!session->loadSessionParticipants(_RingDb, __FILE__, __LINE__), ("RSM : reportCharacterKicked : failed to load particpants of session "+toString(sessionId)), return);
 
-			// a little survival check
-			DROP_IF(session->getOwnerId() == (charId >> 4), ("RSM : reportCharacterKicked : session server "+sender->getModuleName()+" try to kick a character of the session owner, forbidden"), return);
+			// a little survival check (the owner of a session is a character, as for the kick the web asks for)
+			DROP_IF(session->getOwnerId() == charId, ("RSM : reportCharacterKicked : session server "+sender->getModuleName()+" try to kick the owner "+toString(charId)+" of the session "+toString(sessionId)+", forbidden"), return);
 
 			// iterate over the participation, looking for the kicked character
 			const std::vector<CSessionParticipantPtr> &parts = session->getSessionParticipants();
@@ -1166,6 +1288,9 @@ restartLoop:
 				scenario->setOrientation(session->getOrientation());
 				scenario->setRRPTotal(0);
 				scenario->setTitle(session->getTitle());
+				// (as scenarioStarted records it. A record that is there keeps what the latest start said: the info
+				// of an end is the one of the start of its session, which can be older.)
+				scenario->setAllowFreeTrial(scenarioInfo.getTrialAllowed());
 
 				scenario->create(_RingDb);
 			}
@@ -1215,8 +1340,9 @@ restartLoop:
 				author->update(_RingDb);
 			}
 
-			// update the animator
-			if (scenarioInfo.getDMLess())
+			// update the animator: the rating of the session's scheduled rule type, the one it was listed and
+			// joined with (the start's header can say otherwise, for a file whose header and body disagree)
+			if (session->getRuleType() == TRuleType::rt_liberal)
 				animator->setRRPMasterless(animator->getRRPMasterless() + rrpScored);
 			else
 				animator->setRRPAM(animator->getRRPAM() + rrpScored);
@@ -1381,14 +1507,32 @@ restartLoop:
 							{
 								nlwarning("welcomeUserResult : character %u is not found", pjs.CharId);
 
-								// char not found
+								// char not found (the join failed: the ring user is not recorded as entering the session)
+								ok = false;
 								joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 1, "Character not found", TSessionPartStatus::invalid_val);
 							}
 							else
 							{
 								// load the session info
 								CSessionPtr session = CSession::load(_RingDb, pjs.SessionId, __FILE__, __LINE__);
-								BOMB_IF(session == NULL, "welcomeUserResult : the session "<<pjs.SessionId<<" cannot be loaded from database", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Failed to load the session", TSessionPartStatus::invalid_val); goto endOfWelcomeUserResult;);
+								BOMB_IF(session == NULL, "welcomeUserResult : the session "<<pjs.SessionId<<" cannot be loaded from database", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Failed to load the session", TSessionPartStatus::invalid_val); ok = false; goto endOfWelcomeUserResult;);
+								// The character is let in: the participation its join went by says so from now on (the
+								// join only noted which one, see _joinSessionCommon)
+								if (pjs.EnteredPartId != 0)
+								{
+									CSessionParticipantPtr enteredPart = CSessionParticipant::load(_RingDb, pjs.EnteredPartId, __FILE__, __LINE__);
+									if (enteredPart != NULL && enteredPart->getPersistentState() != NOPE::os_removed
+									    && enteredPart->getCharId() == pjs.CharId && enteredPart->getSessionId() == pjs.SessionId.asInt())
+									{
+										enteredPart->setStatus(pjs.EnteredStatus);
+										enteredPart->update(_RingDb);
+									}
+									else
+									{
+										nlwarning("RSM : welcomeUserResult : the participation %u that the join of char %u in session %u went by is gone, no participation gets the status '%s'",
+										    pjs.EnteredPartId, pjs.CharId, pjs.SessionId.asInt(), pjs.EnteredStatus.toString().c_str());
+									}
+								}
 								// retrieve the session participant
 								character->loadSessionParticipants(_RingDb, __FILE__, __LINE__);
 								TSessionPartStatus status;
@@ -1474,8 +1618,23 @@ restartLoop:
 									break;
 								}
 							}
-							BOMB_IF(itw == _WelcomeServices.end(), "RSM:welcomeUserResult: WSModule sender not found", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Unknown welcome service responded", TSessionPartStatus::invalid_val); goto endOfWelcomeUserResult;);
+							BOMB_IF(itw == _WelcomeServices.end(), "RSM:welcomeUserResult: WSModule sender not found", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Unknown welcome service responded", TSessionPartStatus::invalid_val); ok = false; goto endOfWelcomeUserResult;);
 						}
+					}
+					else if (pjs.MainlandFallback.asInt() != 0 && pjs.From != NULL)
+					{
+						// conn refused by the mainland of the last played character: the join goes on to the mainland
+						// chosen by load (see on_joinMainland), which answers the web. The pending record goes first,
+						// a welcome service in this process answers before the join returns.
+						nldebug("RSM : joinMainland : the mainland of the last played character of user %u refused the entry ('%s'), joining mainland %u instead (lowest load)",
+						    userId, errorMsg.c_str(), pjs.MainlandFallback.asInt());
+						TSockId fallbackFrom = pjs.From;
+						uint32 fallbackCharId = pjs.CharId;
+						TSessionId fallbackSessionId = pjs.MainlandFallback;
+						string fallbackClientApplication = pjs.ClientApplication;
+						_PendingJoins.erase(first);
+						_joinSessionCommon(fallbackFrom, fallbackCharId, fallbackSessionId, fallbackClientApplication, false);
+						return;
 					}
 					else
 					{
@@ -1605,17 +1764,22 @@ endOfWelcomeUserResult:
 
 			uint32 userId = charId >> 4;
 
+			// The scenario service hosts edition and animation sessions only (CServerEditionModule::createSession)
 			TSessionType st(sessionType);
-			if (st == TSessionType::invalid_val)
+			if (st != TSessionType::st_edit && st != TSessionType::st_anim)
 			{
 				// failed !, invalid session type
 				scheduleSessionResult(from, charId, TSessionId(0), 1, "Invalid session type");
+				return;
 			}
+			// A value outside an enum (serialEnum takes any number) is refused: the database would store the default
 			TSessionLevel sl(sessionLevel);
-			if (sl == TSessionLevel::invalid_val)
+			if (!sl.isValid())
 			{
 				// failed !, invalid level
+				nlwarning("RSM : on_scheduleSession : char %u sent the session level %d, which is not a session level: refused", charId, (sint32)sl.getValue());
 				scheduleSessionResult(from, charId, TSessionId(0), 2, "Invalid level");
+				return;
 			}
 //			TAccessType at(accessType);
 //			if (at == TAccessType::invalid_val)
@@ -1624,16 +1788,20 @@ endOfWelcomeUserResult:
 //				scheduleSessionResult(from, charId, TSessionId(0), 5, "Invalid access type");
 //			}
 			TRuleType rt(ruleType);
-			if (rt == TRuleType::invalid_val)
+			if (!rt.isValid())
 			{
 				// failed !, invalid rule type
+				nlwarning("RSM : on_scheduleSession : char %u sent the rule type %d, which is not a rule type: refused", charId, (sint32)rt.getValue());
 				scheduleSessionResult(from, charId, TSessionId(0), 6, "Invalid rule type");
+				return;
 			}
 			TEstimatedDuration ed(estimatedDuration);
-			if (ed == TEstimatedDuration::invalid_val)
+			if (!ed.isValid())
 			{
 				// failed !, invalid estimated duration
+				nlwarning("RSM : on_scheduleSession : char %u sent the estimated duration %d, which is not an estimated duration: refused", charId, (sint32)ed.getValue());
 				scheduleSessionResult(from, charId, TSessionId(0), 7, "Invalid estimated duration");
+				return;
 			}
 
 			// first, check for session already in hands of this character
@@ -1661,7 +1829,8 @@ endOfWelcomeUserResult:
 				}
 				*/
 
-				if (nelUser->getExtendedPrivilege().find(":R2_BAN:") != string::npos)
+				// (a privilege counts as a whole name of the list, as for the scenario service)
+				if (hasPrivilegeOfList(nelUser->getExtendedPrivilege(), ":R2_BAN:"))
 				{
 					// this guy is banned from ring anim session
 					scheduleSessionResult(from, charId, TSessionId(0), 10, "User is banned from ring animation session");
@@ -1694,7 +1863,11 @@ endOfWelcomeUserResult:
 			session->setEstimatedDuration(ed);
 			session->setFinalDuration(0);
 			session->setFolderId(0);
-			session->setAnimMode(animMode);
+			// The animation mode follows the rule type: a mastered session (rt_strict) is one an animator runs, a
+			// masterless one (rt_liberal) runs by itself. The animMode of the request is not stored: the client and
+			// the ring web pages send am_dm with every session, whatever its rules, so it says nothing, and the
+			// session list would show every session as one with an animator.
+			session->setAnimMode(TAnimMode(rt == TRuleType::rt_liberal ? TAnimMode::am_autonomous : TAnimMode::am_dm));
 			session->setRaceFilter(raceFilter);
 			session->setReligionFilter(religionFilter);
 			session->setGuildFilter(guildFilter);
@@ -1773,11 +1946,14 @@ endOfWelcomeUserResult:
 			TSessionLevel level(sessionLevel);
 //			TAccessType	access(accessType);
 			TEstimatedDuration duration(estimatedDuration);
-			if (level == TSessionLevel::invalid_val
+			// a value outside an enum (serialEnum takes any number) is refused, as in on_scheduleSession
+			if (!level.isValid()
 //				|| access == TAccessType::invalid_val
-				|| duration == TEstimatedDuration::invalid_val)
+				|| !duration.isValid())
 			{
 				// invalid parameters
+				nlwarning("RSM : on_updateSessionInfo : char %u sent the session level %d and the estimated duration %d for session %u, one of which is out of range: refused",
+				    charId, (sint32)level.getValue(), (sint32)duration.getValue(), sessionId.asInt());
 				invokeResult(from, charId>>4, 5, "Invalid parameters");
 				return;
 			}
@@ -1891,9 +2067,11 @@ endOfWelcomeUserResult:
 		//                         1 : char not found
 		//                         2 : session not found
 		//                         3 : session not owned by char
-		//                         4 : user already has a runnning session of this type
+		//                         4 : user already has a runnning session of this type, or this session runs already
 		//                         5 : database/internal failure
 		//                         6 : nel user not found
+		//                         8 : a session type the scenario service does not host
+		//                         9 : the session is closed
 		virtual void on_startSession(NLNET::TSockId from, uint32 charId, TSessionId sessionId)
 		{
 			nldebug("RSM : web start session %u with char %u", sessionId.asInt(), charId);
@@ -1916,6 +2094,54 @@ endOfWelcomeUserResult:
 			{
 				invokeResult(from, charId>>4, 3, "Character not owner of session");
 				return;
+			}
+
+			// The scenario service hosts edition and animation sessions only (CServerEditionModule::createSession)
+			if (session->getSessionType() != TSessionType::st_edit && session->getSessionType() != TSessionType::st_anim)
+			{
+				nlwarning("RSM : on_startSession : session %u of char %u is of type '%s', which no scenario service hosts: not started",
+				    sessionId.asInt(), charId, session->getSessionType().toString().c_str());
+				invokeResult(from, charId>>4, 8, "Session type not hosted");
+				return;
+			}
+
+			// Only a planned session is started. One that is open or locked runs already, and a closed one is
+			// planned again before its start, which the join of the edit session of its owner does
+			// (on_joinEditSession).
+			if (session->getState() != TSessionState::ss_planned)
+			{
+				nlwarning("RSM : on_startSession : session %u of char %u is in state '%s', only a planned session is started: not started",
+				    sessionId.asInt(), charId, session->getState().toString().c_str());
+				if (session->getState() == TSessionState::ss_closed)
+					invokeResult(from, charId>>4, 9, "Session is closed");
+				else
+					invokeResult(from, charId>>4, 4, "Session is already running");
+				return;
+			}
+
+			// A locked session of the owner has lost its session server. It is closed here, as closeAnimSessionsOfOwner
+			// closes one, so that it does not keep the owner from starting a session for as long as that server
+			// stays away. (A session server that comes back with it is told to close it, see registerDSS.)
+			CSString lockedQuery;
+			lockedQuery << "SELECT session_id FROM sessions WHERE owner = "<<charId<<" AND state = '"<<TSessionState::toString(TSessionState::ss_locked)<<"' AND session_type = '"<<session->getSessionType().toString()<<"'";
+			BOMB_IF(!_RingDb.query(lockedQuery), "Failed to look for the locked sessions of character "<<charId, invokeResult(from, charId>>4, 5, "Database failure"); return);
+			std::vector<uint32> lockedSessions;
+			{
+				CUniquePtr<MSW::CStoreResult> lockedResult(_RingDb.storeResult());
+				for (uint32 i = 0; i < lockedResult->getNumRows(); ++i)
+				{
+					uint32 lockedId;
+					lockedResult->fetchRow();
+					lockedResult->getField(0, lockedId);
+					lockedSessions.push_back(lockedId);
+				}
+			}
+			for (uint i = 0; i < lockedSessions.size(); ++i)
+			{
+				nlinfo("RSM : on_startSession : char %u starts session %u, its locked session %u of the same type is closed",
+				    charId, sessionId.asInt(), lockedSessions[i]);
+				closeSession(TSessionId(lockedSessions[i]));
+				_TemporaryLockedSession.erase(TSessionId(lockedSessions[i]));
 			}
 
 			// check that the user don't run more one session of the same type
@@ -1961,14 +2187,19 @@ endOfWelcomeUserResult:
 //				nlassert(best != _SessionServers.end());
 //			}
 //			else
+			// why the session servers that are up were not taken, for the answer when none is
+			string refusedDetail;
 			if (best == _SessionServers.end())
 			{
 				// still no server choose, choose the best one
-				vector<string>	userAccessPriv;
+				TPermissionRows permissionRows;
 				// load the nel user for permissions
 				CNelUserPtr nelUser = CNelUser::load(_NelDb, character->getUserId(), __FILE__, __LINE__);
 				BOMB_IF(nelUser == NULL, "RSM:on_StartSession: failed to load ring user "<<character->getUserId()<<"from the database", invokeResult(from, charId>>4, 6, "Nel user not found"); return);
-				BOMB_IF(!loadUserAccessPrivileges(charId >> 4, userAccessPriv), "RSM:on_startSession : failed to load privileges for user "<<(charId >> 4), invokeResult(from, charId>>4, 6, "Nel user not found"); return);
+				if (!_DontUsePerm)
+				{
+					BOMB_IF(!loadUserPermissionRows(charId >> 4, permissionRows), "RSM:on_startSession : failed to load the permission rows of user " << (charId >> 4), invokeResult(from, charId >> 4, 5, "Database failure"); return);
+				}
 
 				// otherwise, look for the least loaded one
 				TSessionServers::iterator first(_SessionServers.begin()), last(_SessionServers.end());
@@ -1984,25 +2215,26 @@ endOfWelcomeUserResult:
 							continue;
 						if (shard->getWSOnline() && shard->getRequiredState() != TAccessLevel::ds_close)
 						{
-							// check the permission of the player
-							for (uint i=0; i<userAccessPriv.size(); ++i)
+							// check the permission of the player on this shard
+							if (mayUseShard(permissionRows, ssi.ShardId, shard->getRequiredState()))
 							{
-								if (_DontUsePerm || string("ds_")+toLower(userAccessPriv[i]) == shard->getRequiredState().toString())
-								{
-									// ok, this one is accessible
-									// this server is better (i.e had less player in it)
-									best = first;
+								// ok, this one is accessible
+								// this server is better (i.e had less player in it)
+								best = first;
 
-//									// Store the temporary assoc between character and shard
-//									TTemporaryShardAssoc tsa;
-//									tsa.SessionId = sessionId.asInt();
-//									tsa.SessionClosedDate = 0;
-//									tsa.DSSProxy = best->first;
-//									_TemporaryShardAssocs[charId] = tsa;
+//								// Store the temporary assoc between character and shard
+//								TTemporaryShardAssoc tsa;
+//								tsa.SessionId = sessionId.asInt();
+//								tsa.SessionClosedDate = 0;
+//								tsa.DSSProxy = best->first;
+//								_TemporaryShardAssocs[charId] = tsa;
 //
-									// stop iterating over user access
-									break;
-								}
+							}
+							else
+							{
+								if (!refusedDetail.empty())
+									refusedDetail += "; ";
+								refusedDetail += toString("%s is %s", shardLabel(ssi.ShardId, TSessionId(0)).c_str(), shardRefusalReason(permissionRows, ssi.ShardId, shard->getRequiredState()).c_str());
 							}
 						}
 					}
@@ -2011,7 +2243,10 @@ endOfWelcomeUserResult:
 			if (best == _SessionServers.end())
 			{
 				// oups! no server to host this session !
-				invokeResult(from, charId>>4, 5, "No server to host the session");
+				if (refusedDetail.empty())
+					invokeResult(from, charId >> 4, 5, "No server to host the session");
+				else
+					invokeResult(from, charId >> 4, 5, "No server to host the session (" + refusedDetail + ")");
 				return;
 			}
 
@@ -2102,9 +2337,11 @@ endOfWelcomeUserResult:
 
 
 		// Close the current edit session of the character
-		// Return 'invokeResult' : 0 : ok, session closed (or about to close)
-		//                         1 : char not found
-		//                         2 : failed to close the session, internal error
+		// Return 'invokeResult' : 0 : ok, session closed (or about to close), or the removal of its saved file asked for
+		//                         2 : the edit session could not be looked up, database error
+		//                         3 : no session server to remove the saved file of a session that does not run
+		//                         4 : the character has no edit session
+		//                         5 : the edit session could not be loaded
 		virtual void on_closeEditSession(NLNET::TSockId from, uint32 charId)
 		{
 			nldebug("RSM : web close edit session of char %u", charId);
@@ -2242,63 +2479,120 @@ endOfWelcomeUserResult:
 
 			// Close anim sessions
 			{
-
-				CSString query;
-				query << "SELECT session_id FROM sessions";
-				query << " WHERE owner = "<<charId<<" AND session_type ='st_anim'";
-				BOMB_IF(!_RingDb.query(query), "on_hibernateEditSession : Failed to request in database", invokeResult(from, charId>>4, 1, "Database error"); return);
-				CUniquePtr<CStoreResult> result(_RingDb.storeResult());
-
-				// 1.1 : if no session so no need to hibernate (not an error)
-				if (result->getNumRows() > 1)
+				uint32 nbClosed;
+				if (!closeAnimSessionsOfOwner(charId, "on_hibernateEditSession", nbClosed))
 				{
-					nlwarning("RSM : on_hibernateEditSession : character %u has %u anim session in DB, should only have 1",
-						charId, result->getNumRows());
-				}
-
-
-				unsigned int firstSession = 0;
-				unsigned int lastSession = result->getNumRows();
-
-
-				for (;firstSession != lastSession; ++firstSession)
-				{
-					result->fetchRow();
-					// get the session id
-
-					uint32 sessionNum;
-					result->getField(0, sessionNum);
-					TSessionId sessionId(sessionNum);
-
-					CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
-					if (session != NULL)
-					{
-
-						if ( session->getState() != TSessionState::ss_closed && session->getState() != TSessionState::ss_planned)
-						{
-							// ask the session server to close this session
-							TSessionServersIdx::iterator it(_SessionIndex.find(sessionId));
-							if (it == _SessionIndex.end())
-							{
-								nlwarning("RSM:closeSession : could not find server for opened session %u, closing the session", sessionId.asInt());
-
-								closeSession(sessionId);
-							}
-							else
-							{
-								TModuleProxyPtr proxy = it->second;
-
-								CRingSessionManagerClientProxy ss(proxy);
-
-								ss.closeSession(this, sessionId);
-							}
-
-						}
-					}
+					invokeResult(from, charId >> 4, 1, "Database error");
+					return;
 				}
 			}
 			// ok, all is good
 			invokeResult(from, charId>>4, 0, "");
+		}
+
+		/** Close the animation sessions that a character owns and that are not closed or only planned: the session
+		 *	server that hosts one is asked to close it, as closeSession asks it, and one that no server hosts is
+		 *	closed here.
+		 *	\param requestName the request this is done for, for the log
+		 *	\param nbClosed the number of sessions that were closed or that a session server was asked to close
+		 *	\return false when the sessions of the character could not be read from the database
+		 */
+		bool closeAnimSessionsOfOwner(uint32 charId, const char *requestName, uint32 &nbClosed)
+		{
+			nbClosed = 0;
+
+			// The sessions to close are the ones that are open or locked. A closed session stays in the database,
+			// and a character can have several planned ones: neither is closed below, and neither counts for
+			// the warning.
+			CSString query;
+			query << "SELECT session_id FROM sessions";
+			query << " WHERE owner = " << charId << " AND session_type ='st_anim'";
+			query << " AND state NOT IN ('ss_closed', 'ss_planned')";
+			BOMB_IF(!_RingDb.query(query), requestName << " : Failed to request in database", return false);
+			CUniquePtr<CStoreResult> result(_RingDb.storeResult());
+
+			// 1.1 : if no session so no need to hibernate (not an error)
+			if (result->getNumRows() > 1)
+			{
+				nlwarning("RSM : %s : character %u has %u open anim sessions in DB, should only have 1",
+					requestName, charId, result->getNumRows());
+			}
+
+
+			unsigned int firstSession = 0;
+			unsigned int lastSession = result->getNumRows();
+
+
+			for (;firstSession != lastSession; ++firstSession)
+			{
+				result->fetchRow();
+				// get the session id
+
+				uint32 sessionNum;
+				result->getField(0, sessionNum);
+				TSessionId sessionId(sessionNum);
+
+				CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
+				if (session != NULL)
+				{
+
+					if ( session->getState() != TSessionState::ss_closed && session->getState() != TSessionState::ss_planned)
+					{
+						// ask the session server to close this session
+						TSessionServersIdx::iterator it(_SessionIndex.find(sessionId));
+						if (it == _SessionIndex.end())
+						{
+							nlwarning("RSM:closeSession : could not find server for opened session %u, closing the session", sessionId.asInt());
+
+							closeSession(sessionId);
+						}
+						else
+						{
+							TModuleProxyPtr proxy = it->second;
+
+							CRingSessionManagerClientProxy ss(proxy);
+
+							ss.closeSession(this, sessionId);
+						}
+						++nbClosed;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		// Close the animation sessions that the character owns and that are open, and nothing else
+		// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+		//                         1 : char not found
+		//                         2 : failed to close the sessions, internal error
+		//                         3 : the character owns no open animation session
+		virtual void on_closeAnimSessions(NLNET::TSockId from, uint32 charId)
+		{
+			nldebug("RSM : web close the animation sessions of char %u", charId);
+
+			CCharacterPtr character = CCharacter::load(_RingDb, charId, __FILE__, __LINE__);
+			if (character == NULL)
+			{
+				invokeResult(from, charId >> 4, 1, "Character not found");
+				return;
+			}
+
+			// The sessions are looked up by their owner: the request names the character and no session
+			uint32 nbClosed;
+			if (!closeAnimSessionsOfOwner(charId, "on_closeAnimSessions", nbClosed))
+			{
+				invokeResult(from, charId >> 4, 2, "Database error");
+				return;
+			}
+			if (nbClosed == 0)
+			{
+				invokeResult(from, charId >> 4, 3, "No open animation session found");
+				return;
+			}
+
+			// ok, all is good
+			invokeResult(from, charId >> 4, 0, "");
 		}
 
 		// Add a character in a user friend list
@@ -2881,24 +3175,31 @@ endOfWelcomeUserResult:
 				else if (role == TSessionPartStatus::sps_play_invited)
 				{
 					// check that free trial account can't access non authorised scenarios
-					CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
-					if (sessionLog == NULL)
+					// (The scenario of the session is looked up for such an invitee only: it is known once it has
+					// started, when the session gets its session log. Any other character is invited before that
+					// too, as the team of the owner is right after the launch.)
+					if (hasPrivilegeOfList(invitedNelUser->getExtendedPrivilege(), ":TRIAL:"))
 					{
-						// the scenario is not started, can't accept invitation now
-						invokeResult(from, ownerCharId>>4, 13, "scenario not started, can't validate invitation now");
-						return;
-					}
+						CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
+						if (sessionLog == NULL)
+						{
+							// the scenario is not started, can't accept invitation now
+							nlwarning("RSM : on_inviteCharacter : char %u invites char %u, of a free trial account, in session %u whose scenario has not started: the invitation can't be validated now, refused",
+							    ownerCharId, invitedCharId, sessionId.asInt());
+							invokeResult(from, ownerCharId>>4, 13, "scenario not started, can't validate invitation now");
+							return;
+						}
 
-					CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
-					BOMB_IF(scenario == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
+						CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
+						BOMB_IF(scenario == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
 
-					if (invitedNelUser->getExtendedPrivilege().find(":TRIAL:") != string::npos
-						&& !scenario->getAllowFreeTrial())
-					{
-						// free trial are not allowed in this scenario
-						invokeResult(from, ownerCharId>>4, 14, "free trial character are not allowed in user scenario");
-						return;
+						if (!scenario->getAllowFreeTrial())
+						{
+							// free trial are not allowed in this scenario
+							invokeResult(from, ownerCharId>>4, 14, "free trial character are not allowed in user scenario");
+							return;
 
+						}
 					}
 
 					if (session->getOwnerId() != ownerCharId)
@@ -2940,6 +3241,27 @@ endOfWelcomeUserResult:
 				else
 				{
 					invokeResult(from, ownerCharId>>4, 7, "Invalid invitation role for this session");
+					return;
+				}
+			}
+			else
+			{
+				// A character invites itself: that is how the owner of a session takes its place in it, as an editor
+				// of its edit session, or as the animator or a player of its animation session. It is the owner's
+				// alone, with a role of the type of the session.
+				if (session->getOwnerId() != ownerCharId)
+				{
+					invokeResult(from, ownerCharId >> 4, 4, "Only the owner of a session invites itself in it");
+					return;
+				}
+				bool roleFitsSession = false;
+				if (session->getSessionType() == TSessionType::st_edit)
+					roleFitsSession = (role == TSessionPartStatus::sps_edit_invited);
+				else if (session->getSessionType() == TSessionType::st_anim)
+					roleFitsSession = (role == TSessionPartStatus::sps_anim_invited || role == TSessionPartStatus::sps_play_invited);
+				if (!roleFitsSession)
+				{
+					invokeResult(from, ownerCharId >> 4, 6, "The role of the invitation and the type of the session don't match");
 					return;
 				}
 			}
@@ -3050,13 +3372,35 @@ endOfWelcomeUserResult:
 			invokeResult(from, ownerCharId>>4, 0, "");
 		}
 
+		/** Whether a character of the account is kicked from the session: a kick holds for the account (see
+		 *	_joinSessionCommon). The ids of the characters of an account are the sixteen that follow its user id
+		 *	shifted by four bits.
+		 *	\return false when the request failed or gave no count, kicked is not set then
+		 */
+		bool isAccountKickedFromSession(uint32 userId, TSessionId sessionId, bool &kicked)
+		{
+			CSString kickQuery;
+			kickQuery << "SELECT COUNT(*) FROM session_participant WHERE session_id = " << sessionId.asInt();
+			kickQuery << " AND kicked <> 0 AND char_id >= " << (userId << 4) << " AND char_id <= " << ((userId << 4) + 15);
+			if (!_RingDb.query(kickQuery))
+				return false;
+			CUniquePtr<MSW::CStoreResult> kickResult(_RingDb.storeResult());
+			if (kickResult->getNumRows() != 1)
+				return false;
+			uint32 nbKicks = 0;
+			kickResult->fetchRow();
+			kickResult->getField(0, nbKicks);
+			kicked = nbKicks > 0;
+			return true;
+		}
+
 		// A character subscribe to a public animation session
 		// invokeReturn : 0 : ok, subscription accepted
 		//                1 : char not found
 		//                2 : session not found
 		//                3 : character already subscribed to or invited in the session
-		//                4 : session not public
-		//                5 : character banned
+		//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
+		//                5 : character banned, or a character of its account is kicked from the session
 		//				  6 : no place left, session is full
 		//				  7 : session owner not found
 		//				  8 : internal error
@@ -3071,6 +3415,46 @@ endOfWelcomeUserResult:
 			// load the session
 			CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
 			BOMB_IF(session == NULL, "RSM:on_subscribeSession : failed to load session "<<sessionId<<" from database", invokeResult(from, charId>>4, 2, "session not found"); return);
+
+			// a subscription is for an animation session of public access that takes subscriptions
+			if (session->getSessionType() != TSessionType::st_anim)
+			{
+				invokeResult(from, charId >> 4, 4, "not an animation session");
+				return;
+			}
+			if (session->getAccessType() != TAccessType::at_public)
+			{
+				invokeResult(from, charId >> 4, 4, "session not public");
+				return;
+			}
+			if (session->getSubscriptionClosed())
+			{
+				invokeResult(from, charId >> 4, 4, "the subscription of the session is closed");
+				return;
+			}
+
+			// a character that has an entry in the session, subscribed or invited, gets no second one
+			BOMB_IF(!character->loadSessionParticipants(_RingDb, __FILE__, __LINE__), "RSM:on_subscribeSession : failed to load the participations of character " << charId, invokeResult(from, charId >> 4, 8, "failed to load the participations of the character"); return);
+			for (uint i = 0; i < character->getSessionParticipants().size(); ++i)
+			{
+				if (character->getSessionParticipants()[i]->getSessionId() == sessionId.asInt())
+				{
+					invokeResult(from, charId >> 4, 3, "character already subscribed to or invited in the session");
+					return;
+				}
+			}
+
+			// an account that has a character kicked from the session does not subscribe to it with another one:
+			// it would hold a place of the session and be refused at the join (the answer is the one of a ban)
+			// (the owner of the session and an account with the session access privilege are not held back, as
+			// at the join)
+			bool accountKicked = false;
+			BOMB_IF(!isAccountKickedFromSession(charId >> 4, sessionId, accountKicked), "RSM:on_subscribeSession : failed to look for the kicks of the account of character " << charId << " in session " << sessionId, invokeResult(from, charId >> 4, 8, "failed to look for the kicks of the account"); return);
+			if (accountKicked && session->getOwnerId() != charId && !hasSessionAccessPrivilege(charId >> 4))
+			{
+				invokeResult(from, charId >> 4, 5, "a character of the account is kicked from the session");
+				return;
+			}
 
 			// check for free slot before more time consuming processing
 			if (session->getReservedSlots() >= session->getSubscriptionSlots() )
@@ -3147,8 +3531,10 @@ endOfWelcomeUserResult:
 				const CSessionParticipantPtr &part = session->getSessionParticipantsByIndex(i);
 				BOMB_IF(part == NULL, "RSM:on_unsubsribeSession : error accessing participants at index "<<i<<", part is NULL", invokeResult(from, charId>>4, 4, "failed to accesss participants record"); return);
 
+				// (the entry of a kicked character stays: removing it would remove the kick with it)
 				if (part->getCharId() == charId
-					&& part->getStatus() == TSessionPartStatus::sps_play_subscribed)
+					&& part->getStatus() == TSessionPartStatus::sps_play_subscribed
+					&& !part->getKicked())
 				{
 					// ok, we found it, we can erase it
 					if (CSessionParticipant::removeById(_RingDb, part->getObjectId()))
@@ -3181,7 +3567,10 @@ endOfWelcomeUserResult:
 			_joinSessionCommon(from, charId, sessionId, clientApplication,false);
 		}
 
-		void _joinSessionCommon(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::string &clientApplication,bool isEditSessionRequested)
+		/** \param mainlandFallback for a join of the mainland that goes to the shard of the last played character: the
+		 *	mainland session to join when the welcome service of that shard refuses the entry (0 for none)
+		 */
+		void _joinSessionCommon(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::string &clientApplication, bool isEditSessionRequested, TSessionId mainlandFallback = TSessionId(0))
 		{
 			nldebug("RSM : web asks char %u to join the session %u", charId, sessionId.asInt());
 
@@ -3194,12 +3583,10 @@ endOfWelcomeUserResult:
 				return;
 			}
 
-			// load access privilege for the user
-			vector<string> userAccessPriv;
-			if (!_DontUsePerm)
-			{
-				BOMB_IF (!loadUserAccessPrivileges(userId, userAccessPriv), "RSM:on_joinSession : failed to load privileges for user "<<userId, joinSessionResult(from, userId, sessionId, 12, "failed to request for access permission", TSessionPartStatus::invalid_val); return;);
-			}
+			// load the permission rows of the user: what they give depends on the shard, see mayUseShard
+			TPermissionRows permissionRows;
+			if (!loadPermissionRowsForJoin(from, userId, sessionId, permissionRows))
+				return;
 
 			// load the session
 			CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
@@ -3209,8 +3596,12 @@ endOfWelcomeUserResult:
 				return;
 			}
 
-			// Make sure that we don't enter an edit sessino when we wanted to go to an anim / mainland and vice versa
-			if ( (session->getSessionType()==TSessionType::st_edit) != isEditSessionRequested )
+			// Make sure that a request for the edit session of a character does not end in an anim session or on a
+			// mainland. The other way round is allowed: an edit session is entered by its id too, which is how the
+			// editors its owner invited come in (and the owner, from the ring web pages). What lets a character into
+			// an edit session is checked below: the participation of its owner, or an editor's participation in
+			// it from which the character is not kicked, or the session access privilege of its account.
+			if (isEditSessionRequested && session->getSessionType() != TSessionType::st_edit)
 			{
 				STOP("We have a BUG - character trying to go to a session of the wrong type "<<charId);
 				joinSessionResult(from, charId>>4, sessionId, 2, "Session type error", TSessionPartStatus::invalid_val);
@@ -3224,6 +3615,9 @@ endOfWelcomeUserResult:
 			uint32 storedSessionId = sessionId.asInt();
 			WS::TUserRole enterAs = WS::TUserRole::invalid_val;
 			uint32 instanceId = INVALID_AI_INSTANCE;
+			// the participation that says the character is in the session once the welcome service lets it in
+			uint32 enteredPartId = 0;
+			TSessionPartStatus enteredStatus;
 			if (session->getSessionType() != TSessionType::st_mainland)
 			{
 				// This is a Ring session
@@ -3252,7 +3646,7 @@ endOfWelcomeUserResult:
 
 					CNelUserPtr nelUser = CNelUser::load(_NelDb, userId, __FILE__, __LINE__);
 					BOMB_IF(nelUser == NULL, "Failed to load nel user "<<userId, joinSessionResult(from, charId>>4, sessionId, 7, "Nel user not found", TSessionPartStatus::invalid_val); return;);
-					if (nelUser->getExtendedPrivilege().find(":R2_BAN:") != string::npos)
+					if (hasPrivilegeOfList(nelUser->getExtendedPrivilege(), ":R2_BAN:"))
 					{
 						// this guy is banned from ring anim session
 						joinSessionResult(from, charId>>4, sessionId, 16, "User is banned from ring", TSessionPartStatus::invalid_val);
@@ -3260,7 +3654,7 @@ endOfWelcomeUserResult:
 					}
 
 					if (session->getOwnerId() != charId
-						&& nelUser->getExtendedPrivilege().find(":TRIAL:") != string::npos)
+						&& hasPrivilegeOfList(nelUser->getExtendedPrivilege(), ":TRIAL:"))
 					{
 						// check that the scenario launched allow free trials players
 						CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
@@ -3288,20 +3682,64 @@ endOfWelcomeUserResult:
 				charac->loadSessionParticipants(_RingDb, __FILE__, __LINE__);
 
 				CSessionParticipantPtr sessionPart;
-				// look for the entry pertaining to the session
+				bool kicked = false;
+				// look for the entry pertaining to the session (the first one that counts is the participation, and
+				// a kick counts on any of them: a character can have more than one from the time when subscribing
+				// did not look for an entry that is already there)
 				for (uint i=0; i<charac->getSessionParticipants().size(); ++i)
 				{
 					if (charac->getSessionParticipants()[i]->getSessionId() == sessionId.asInt())
 					{
-						// we found it
-						sessionPart.assign(charac->getSessionParticipants()[i], __FILE__, __LINE__);
-						break;
+						// we found one
+						// An entry counts when its role is one of the type of the session. The session server makes
+						// an editor of every character it is told about for an edit session, and an animator of one
+						// that is announced as an editor for an animation session, whatever the entry says. So an
+						// edit session takes the entries of editors, and its owner; an animation session takes the
+						// entries of animators and players.
+						TSessionPartStatus partStatus = charac->getSessionParticipants()[i]->getStatus();
+						bool editorPart = (partStatus == TSessionPartStatus::sps_edit_invited || partStatus == TSessionPartStatus::sps_editing);
+						bool partCounts = true;
+						if (session->getSessionType() == TSessionType::st_edit)
+							partCounts = editorPart || session->getOwnerId() == charId;
+						else if (session->getSessionType() == TSessionType::st_anim)
+							partCounts = !editorPart;
+						if (sessionPart == NULL && partCounts)
+							sessionPart.assign(charac->getSessionParticipants()[i], __FILE__, __LINE__);
+						if (charac->getSessionParticipants()[i]->getKicked())
+							kicked = true;
 					}
 				}
+
+				// The kick holds for the account: a character is kept out as well while another character of its
+				// account is kicked from the session (the ids of the characters of an account are the sixteen that
+				// follow its user id shifted by four bits). It is tested here, at the join, and nowhere written: the
+				// participations of the other characters stay as they are, so the list of the session shows the
+				// kick on the character that was kicked and says nothing about which characters share its account,
+				// and an invitation of one of them is taken as any other.
+				if (!kicked)
+				{
+					BOMB_IF(!isAccountKickedFromSession(userId, sessionId, kicked), "RSM : joinSession : failed to look for the kicks of the account of char " << charId << " in session " << sessionId,
+					    joinSessionResult(from, charId >> 4, sessionId, 11, "Database error", TSessionPartStatus::invalid_val); return);
+				}
+
+				// A character that was kicked from the session stays out of it until it is unkicked. The session
+				// server lets in whoever is announced to it, so this is the place that refuses: without it a kick
+				// lasts until the character asks to join again. The owner of a session is never kicked from it, and
+				// an account that enters any session by its privilege is not held back by a kick either.
+				if (kicked && session->getOwnerId() != charId && !hasSessionAccessPrivilege(userId))
+				{
+					nlinfo("RSM : char %u asks to join session %u, from which it or another character of its account was kicked: refused", charId, sessionId.asInt());
+					joinSessionResult(from, charId >> 4, sessionId, 21, "Character is kicked from the session", TSessionPartStatus::invalid_val);
+					return;
+				}
+
 				if (sessionPart == NULL)
 				{
-					// if the session is public, automatically create an invitation as player
-					if (session->getAccessType() == TAccessType::at_public)
+					// if the session is a public animation session, automatically create an invitation as player
+					// (public access is the players' way into an animation: an edit session has no players, and
+					// the client and the ring web pages schedule every edit session with public access)
+					if (session->getAccessType() == TAccessType::at_public
+					    && session->getSessionType() == TSessionType::st_anim)
 					{
 						sessionPart = CSessionParticipant::createTransient(__FILE__, __LINE__);
 						sessionPart->setCharId(charId);
@@ -3352,13 +3790,13 @@ endOfWelcomeUserResult:
 				if (!wsi.ShardInfo->getWSOnline())
 				{
 					// the shard reports itself as down
-					joinSessionResult(from, charId >>4, sessionId, 14, string("Shard is down : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+					joinSessionResult(from, charId >> 4, sessionId, 14, toString("%s is down : %s", shardLabel(it3->first, wsi.FixedSessionId).c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 					return;
 				}
-				if (!_DontUsePerm && !checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+				if (!mayUseShard(permissionRows, it3->first, wsi.ShardInfo->getRequiredState()))
 				{
-					// the shard is up but restricted to another access level
-					joinSessionResult(from, charId >>4, sessionId, 14, toString("Shard is restricted to %s access : %s", wsi.ShardInfo->getRequiredState().toString().c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
+					// the shard is up but the account does not have the access it asks for
+					joinSessionResult(from, charId >> 4, sessionId, 14, toString("%s is %s : %s", shardLabel(it3->first, wsi.FixedSessionId).c_str(), shardRefusalReason(permissionRows, it3->first, wsi.ShardInfo->getRequiredState()).c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 					return;
 				}
 
@@ -3374,7 +3812,9 @@ endOfWelcomeUserResult:
 				if (sessionPart != NULL)
 				{
 					// normal user with participation
-					if (	sessionPart->getStatus() == TSessionPartStatus::sps_edit_invited
+					// (the participation that counts in an edit session is an editor's or the owner's, see above)
+					if (	session->getSessionType() == TSessionType::st_edit
+						||	sessionPart->getStatus() == TSessionPartStatus::sps_edit_invited
 						||	sessionPart->getStatus() == TSessionPartStatus::sps_editing)
 					{
 						// warn the session server that an editor come in
@@ -3382,8 +3822,8 @@ endOfWelcomeUserResult:
 						ss.addCharacterInSession(this, sessionId, charId, enterAs, charac->getRingAccess(), charac->getNewcomer());
 
 
-						// update the participant status
-						sessionPart->setStatus(TSessionPartStatus::sps_editing);
+						// the participant status of an editor that is in
+						enteredStatus = TSessionPartStatus::sps_editing;
 					}
 					else if (	sessionPart->getStatus() == TSessionPartStatus::sps_anim_invited
 						||	sessionPart->getStatus() == TSessionPartStatus::sps_animating)
@@ -3391,24 +3831,27 @@ endOfWelcomeUserResult:
 						// warn the session server that an animator come in
 						enterAs = WS::TUserRole::ur_animator;
 						ss.addCharacterInSession(this, sessionId, charId, enterAs, charac->getRingAccess(), charac->getNewcomer());
-						// update the participant status
-						sessionPart->setStatus(TSessionPartStatus::sps_animating);
+						// the participant status of an animator that is in
+						enteredStatus = TSessionPartStatus::sps_animating;
 						mustGrantFastDisconnection = true;
 					}
 					else
 					{
 						enterAs = WS::TUserRole::ur_player;
 						ss.addCharacterInSession(this, sessionId, charId, enterAs, charac->getRingAccess(), charac->getNewcomer());
-						// update the participant status
-						sessionPart->setStatus(TSessionPartStatus::sps_playing);
+						// the participant status of a player that is in
+						enteredStatus = TSessionPartStatus::sps_playing;
 						mustGrantFastDisconnection = true;
 					}
-					// save the participant status
-					sessionPart->update(_RingDb);
+					// The participation gets this status when the welcome service lets the character in
+					// (welcomeUserResult). Until then, and when the entry is refused or gets no answer, it stays the
+					// invitation it is, which the owner of the session can still remove.
+					enteredPartId = sessionPart->getObjectId();
 				}
 				else
 				{
-					// this is for a GM without participation
+					// this is for a GM without participation (an account with a privilege of PrivilegeForSessionAccess):
+					// it enters an edit session as an editor, and any other Ring session as a player
 					if (session->getSessionType() == TSessionType::st_edit)
 						enterAs = WS::TUserRole::ur_editor;
 					else
@@ -3431,13 +3874,13 @@ endOfWelcomeUserResult:
 						if (!wsi.ShardInfo->getWSOnline())
 						{
 							// the shard reports itself as down
-							joinSessionResult(from, charId >>4, sessionId, 14, string("Shard is down : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+							joinSessionResult(from, charId >> 4, sessionId, 14, toString("%s is down : %s", shardLabel(itws->first, wsi.FixedSessionId).c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 							return;
 						}
-						if (!checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						if (!mayUseShard(permissionRows, itws->first, wsi.ShardInfo->getRequiredState()))
 						{
-							// the shard is up but restricted to another access level
-							joinSessionResult(from, charId >>4, sessionId, 14, toString("Shard is restricted to %s access : %s", wsi.ShardInfo->getRequiredState().toString().c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
+							// the shard is up but the account does not have the access it asks for
+							joinSessionResult(from, charId >> 4, sessionId, 14, toString("%s is %s : %s", shardLabel(itws->first, wsi.FixedSessionId).c_str(), shardRefusalReason(permissionRows, itws->first, wsi.ShardInfo->getRequiredState()).c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 							return;
 						}
 
@@ -3486,13 +3929,31 @@ endOfWelcomeUserResult:
 			pjs.CharId = charId;
 			pjs.From = from;
 			pjs.SessionId = TSessionId(storedSessionId);
+			pjs.MainlandFallback = mainlandFallback;
+			pjs.ClientApplication = clientApplication;
+			pjs.EnteredPartId = enteredPartId;
+			pjs.EnteredStatus = enteredStatus;
 
-			if (mustGrantFastDisconnection)
+			// (the code is made from the cookie, which the login service clears when the user leaves)
+			if (mustGrantFastDisconnection && cookie.isValid())
 			{
 				CSecurityCheckForFastDisconnection securityCheck;
 				securityCheck.setSessionId(sessionId);
 				securityCheck.setCookie(cookie); // must not be changed by joinSession(), because the client sends the one he knows before Far TPing
-				pjs.OptSecurityCode.setSecurityCode(securityCheck.encode(SecurityCheck));
+				pjs.OptSecurityCode.setSecurityCode(securityCheck.encode(getFastDisconnectionSecret().c_str()));
+			}
+			// One pending join per user: a welcome service answers for a user, not for a join, so an older join
+			// that got no answer would take the answer of this one, and its participation the status
+			for (TPendingJoins::iterator itp = _PendingJoins.begin(); itp != _PendingJoins.end();)
+			{
+				if (itp->UserId == userId)
+				{
+					nlwarning("RSM : char %u joins session %u : the join of char %u in session %u of the same user got no answer of its welcome service, it is dropped",
+					    charId, storedSessionId, itp->CharId, itp->SessionId.asInt());
+					itp = _PendingJoins.erase(itp);
+				}
+				else
+					++itp;
 			}
 			_PendingJoins.push_back(pjs);
 
@@ -3510,17 +3971,21 @@ endOfWelcomeUserResult:
 		}
 
 		// A character asks to join a shard.
-		// The actual shard will be chosen according to current load.
+		// The actual shard is chosen among the mainland shards that are online and that the account may use (see
+		// mayUseShard): the shard the operator promotes (ForceWelcomerShard), else the home mainland of the character
+		// the account played last (unless PreferLastPlayedShard is off), else the one with the lowest load (see
+		// chooseMainland).
 		virtual void on_joinMainland(NLNET::TSockId from, uint32 charId, const std::string &clientApplication)
 		{
 			nldebug("RSM : web asks char %u to join mainland", charId);
 
 			uint32 userId = charId >> 4;
-			// load access privilege for the user
-			vector<string> userAccessPriv;
-			BOMB_IF (!loadUserAccessPrivileges(userId, userAccessPriv), "RSM:on_joinMainland : failed to load privileges for user "<<userId, joinSessionResult(from, userId, TSessionId(0), 12, "failed to request for access permission", TSessionPartStatus::invalid_val); return;);
+			// load the permission rows of the user
+			TPermissionRows permissionRows;
+			if (!loadPermissionRowsForJoin(from, userId, TSessionId(0), permissionRows))
+				return;
 
-			multimap<uint32, TSessionId> mainlandShardsByAscLoad;
+			vector<CMainlandCandidate> candidates;
 			// remember why each candidate was rejected, so a failure can say
 			// whether the shard is down, closed or restricted instead of the
 			// ambiguous 'no shard available'
@@ -3541,29 +4006,18 @@ endOfWelcomeUserResult:
 						{
 							if (!rejectedDetail.empty())
 								rejectedDetail += "; ";
-							rejectedDetail += toString("shard %u is down (%s)", wsi.FixedSessionId.asInt(), wsi.ShardInfo->getMOTD().c_str());
+							rejectedDetail += toString("%s is down (%s)", shardLabel(itw->first, wsi.FixedSessionId).c_str(), wsi.ShardInfo->getMOTD().c_str());
 						}
-						else if (!checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						else if (!mayUseShard(permissionRows, itw->first, wsi.ShardInfo->getRequiredState()))
 						{
 							if (!rejectedDetail.empty())
 								rejectedDetail += "; ";
-							rejectedDetail += toString("shard %u is restricted to %s access", wsi.FixedSessionId.asInt(), wsi.ShardInfo->getRequiredState().toString().c_str());
+							rejectedDetail += toString("%s is %s", shardLabel(itw->first, wsi.FixedSessionId).c_str(), shardRefusalReason(permissionRows, itw->first, wsi.ShardInfo->getRequiredState()).c_str());
 						}
 						else
 						{
-							if ( ForceWelcomerShard.get() != 0 )
-							{
-								// If ForceWelcomeShard set and found online, bypass remaining shards and select this one
-								if ( wsi.FixedSessionId.asInt() == ForceWelcomerShard.get() )
-								{
-									nlinfo( "Selecting mainland %u (ForceWelcomerShard)", ForceWelcomerShard.get() );
-									_joinSessionCommon(from, charId, wsi.FixedSessionId, clientApplication, false );
-									return;
-								}
-							}
-
 							// ok, the user is granted access
-							mainlandShardsByAscLoad.insert(make_pair(wsi.NbOnlinePlayers+wsi.NbPendingPlayers, wsi.FixedSessionId));
+							candidates.push_back(CMainlandCandidate(wsi.FixedSessionId.asInt(), wsi.NbOnlinePlayers + wsi.NbPendingPlayers));
 						}
 					}
 					else
@@ -3571,11 +4025,11 @@ endOfWelcomeUserResult:
 						nlwarning( "Ignoring mainland session %u (not registered in db)", wsi.FixedSessionId.asInt() );
 						if (!rejectedDetail.empty())
 							rejectedDetail += "; ";
-						rejectedDetail += toString("shard %u is not registered as a mainland session in the database", wsi.FixedSessionId.asInt());
+						rejectedDetail += toString("%s is not registered as a mainland session in the database", shardLabel(itw->first, wsi.FixedSessionId).c_str());
 					}
 				}
 			}
-			if (mainlandShardsByAscLoad.empty())
+			if (candidates.empty())
 			{
 				// a welcome service that dies is erased from _WelcomeServices,
 				// so 'nothing connected' and 'nothing configured' both end up
@@ -3588,7 +4042,38 @@ endOfWelcomeUserResult:
 				joinSessionResult(from, charId>>4, TSessionId(0), 10, reason, TSessionPartStatus::invalid_val);
 				return;
 			}
-			_joinSessionCommon(from, charId, (*mainlandShardsByAscLoad.begin()).second, clientApplication, false);
+
+			uint32 lastPlayedSessionId = 0;
+			TMainlandChoice choice;
+			uint chosen = chooseMainland(candidates, ForceWelcomerShard.get(), 0, choice);
+			if (choice == mc_lowest_load && candidates.size() > 1 && PreferLastPlayedShard.get())
+			{
+				// several shards and the load would decide: the home mainland of the character the account played
+				// last comes before it. When it cannot be looked up, the load decides as it does without the
+				// preference: the login does not depend on it.
+				if (loadLastPlayedMainland(userId, lastPlayedSessionId))
+					chosen = chooseMainland(candidates, ForceWelcomerShard.get(), lastPlayedSessionId, choice);
+				else
+					nlwarning("RSM : joinMainland : failed to look up the last played character of user %u in the ring database, the mainland is chosen by load", userId);
+			}
+			TSessionId chosenSessionId(candidates[chosen].SessionId);
+
+			// The shard of the last played character can refuse the entry where another shard would not (it is full, or
+			// its welcome service is closed): the choice by load among the other shards stands behind it
+			TSessionId fallbackSessionId(0);
+			if (choice == mc_last_played && candidates.size() > 1)
+			{
+				candidates.erase(candidates.begin() + chosen);
+				TMainlandChoice fallbackChoice;
+				fallbackSessionId = TSessionId(candidates[chooseMainland(candidates, 0, 0, fallbackChoice)].SessionId);
+			}
+
+			if (choice == mc_forced)
+				nlinfo("Selecting mainland %u (ForceWelcomerShard)", chosenSessionId.asInt());
+			nldebug("RSM : joinMainland : user %u goes to mainland %u, chosen by: %s (mainland of the last played character: %u, 0 when none or not asked for; fallback: %u, 0 for none)",
+			    userId, chosenSessionId.asInt(), mainlandChoiceName(choice), lastPlayedSessionId, fallbackSessionId.asInt());
+
+			_joinSessionCommon(from, charId, chosenSessionId, clientApplication, false, fallbackSessionId);
 		}
 
 		// Ask to join the edit session for the specified character.
@@ -3726,6 +4211,7 @@ endOfWelcomeUserResult:
 		//                3 : character has no participation in the session
 		//                4 : internal error
 		//				  5 : owner char don't own the session
+		//				  6 : the owner of the session can't be kicked
 		void on_kickCharacter(NLNET::TSockId from, uint32 ownerCharId, TSessionId sessionId, uint32 charId)
 		{
 			nldebug("RSM : on_kickCharacter : web ask to kick character %u from session %u",
@@ -3745,6 +4231,13 @@ endOfWelcomeUserResult:
 					invokeResult(from, ownerCharId>>4, 5, "Owner char don't own the session");
 					return;
 				}
+			}
+
+			// a kicked character is refused when it asks to join: the owner is the one character that always comes in
+			if (session->getOwnerId() == charId)
+			{
+				invokeResult(from, ownerCharId >> 4, 6, "The owner of the session can't be kicked");
+				return;
 			}
 
 			// load the participants
@@ -4191,7 +4684,7 @@ endOfWelcomeUserResult:
 
 			// load the scenario data
 			CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
-			BOMB_IF(sessionLog == NULL, "Failed to load the scenario "<<sessionLog->getScenarioId(), invokeResult(from, charId>>4, 7, "No scenario info found for the session"); return);
+			BOMB_IF(scenario == NULL, "Failed to load the scenario "<<sessionLog->getScenarioId()<<" of session "<<sessionId.asInt()<<" for the rating of char "<<charId, invokeResult(from, charId>>4, 7, "No scenario info found for the session"); return);
 
 			// lookup for an existing rating to update
 			CPlayerRatingPtr playerRating;
@@ -4448,7 +4941,8 @@ endOfWelcomeUserResult:
 
 		NLMISC_CLASS_COMMAND_DECL(forceSessionCleanup)
 		{
-			if (!_RingDb.query(string("SELECT session_id FROM sessions WHERE state = ")+toString(uint32(TSessionState::ss_open))))
+			// (the state by its name, as the column holds it)
+			if (!_RingDb.query(string("SELECT session_id FROM sessions WHERE state = '")+TSessionState::toString(TSessionState::ss_open)+"'"))
 			{
 				log.displayNL("Error while running database query");
 				return true;
@@ -4475,10 +4969,10 @@ endOfWelcomeUserResult:
 			{
 				TSessionId sessionId(*sessionToClose.begin());
 				log.displayNL("Closing session %u", sessionId.asInt());
-				CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
-
-				session->setState(TSessionState::ss_closed);
-				session->update(_RingDb);
+				// closed as a session whose server reports its end: with its duration, and the characters of an
+				// edit session are no longer in it
+				if (!closeSession(sessionId))
+					log.displayNL("Session %u is not closed: it is gone, or no longer open", sessionId.asInt());
 
 				sessionToClose.erase(sessionToClose.begin());
 			}

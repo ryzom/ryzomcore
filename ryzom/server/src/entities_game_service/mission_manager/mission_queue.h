@@ -99,8 +99,20 @@ public:
 	///remove a player from queue
 	void removePlayer(const NLMISC::CEntityId &id);
 
+	/// the entity that waits for this mission or is in the critical part with it, or CEntityId::Unknown
+	NLMISC::CEntityId getEntityWaitingFor(const CMission *mission) const;
+
+	/// true if the entity waits in this queue, or is in its critical part, with no mission known: the entry of a player
+	/// who went offline holds none until the player is back (and none then if no mission of the player waits in the
+	/// queue), nor does one restored when the queue is loaded
+	bool waitsWithoutMission(const NLMISC::CEntityId &id) const;
+
 	///remove a player from queue
 	void disconnectPlayer(const NLMISC::CEntityId &id);
+
+	/// a player whose critical part a restart ended no longer needs its rollback: its character was saved with it on
+	/// disconnection, it entered the critical part again, or it left the queue
+	void forgetRollBack(const NLMISC::CEntityId &id);
 
 	/// add player in queue
 	void addPlayer(const NLMISC::CEntityId &id, CMission *mission, bool forceTopOfQueue = false);
@@ -169,10 +181,14 @@ private:
 
 	///\name Entity in critical area
 	//@{
+	// clang-format off
 	/// Id of the player currently in critical area
 	NLMISC::CEntityId	_CriticalPartEntityId;
+	/// the mission of the player in critical area (not saved: a player in critical area at load goes back to the queue)
+	CMissionRefPtr		m_CriticalPartMission;
 	/// the date when the player in critical area will fail his mission
 	uint32				_CriticalPartTimer;
+	// clang-format on
 	//@}
 
 	/** 

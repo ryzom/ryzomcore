@@ -245,7 +245,7 @@ class CAHSaveCameraRecord : public IActionHandler
 		}
 		catch(const EStream &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 		}
 	}
 };
@@ -289,7 +289,7 @@ NLMISC_COMMAND(loadCamRec, "Load a camera path record file (.cr)", "<filename>")
 		}
 		catch(const EStream &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 		}
 	}
 	return true;

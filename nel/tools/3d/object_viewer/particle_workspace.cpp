@@ -279,7 +279,11 @@ void CParticleWorkspace::CNode::savePSAs(const std::string &fullPath)
 std::string CParticleWorkspace::CNode::getFullPath() const
 {
 	nlassert(_WS);
-	return NLMISC::CPath::makePathAbsolute(_RelativePath, _WS->getPath(), true);
+	// makePathAbsolute ends what it returns with a slash, which only a directory may have
+	std::string fullPath = NLMISC::CPath::makePathAbsolute(_RelativePath, _WS->getPath(), true);
+	if (!fullPath.empty() && fullPath[fullPath.size() - 1] == '/')
+		fullPath.resize(fullPath.size() - 1);
+	return fullPath;
 }
 
 //***********************************************************************************************
@@ -308,6 +312,7 @@ bool CParticleWorkspace::CNode::loadPS()
 	{
 		// Not a particle system
 		NL3D::CNELU::Scene->deleteInstance(trs);
+		NL3D::CNELU::Scene->setShapeBank(oldSB);
 		return false;
 	}
 	NL3D::CNELU::Scene->setShapeBank(oldSB);		

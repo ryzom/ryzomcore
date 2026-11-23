@@ -1968,7 +1968,7 @@ struct cf_value
 	cf_type	Type;
 	int		Int;
 	double	Real;
-	char	String[1024];
+	const char	*String;	// in cf_Strings, see cf_newString()
 };
 // use to parse the file, opened by CConfigFile::reparse()
 CMemStream cf_ifile;
@@ -1993,6 +1993,8 @@ CMemStream cf_ifile;
 /* Externals */
 
 extern int cf_CurrentLine;
+
+extern const char *cf_newString (const string &str);
 
 /* Variables */
 
@@ -2314,8 +2316,7 @@ YY_RULE_SETUP
 				if (!cf_Ignore)
 				{
 					cflval.Val.Type = T_STRING;
-					strcpy (cflval.Val.String, yytext+1);
-					cflval.Val.String[strlen(cflval.Val.String)-1] = '\0';
+					cflval.Val.String = cf_newString (string (yytext+1, yyleng-2));
 					DEBUG_PRINTF("lex: string '%s' '%s'\n", yytext, cflval.Val.String);
 					return STRING;
 				}
@@ -2328,7 +2329,7 @@ YY_RULE_SETUP
 				if (!cf_Ignore)
 				{
 					cflval.Val.Type = T_STRING;
-					strcpy (cflval.Val.String, yytext);
+					cflval.Val.String = cf_newString (string (yytext, yyleng));
 					DEBUG_PRINTF("lex: variable '%s' '%s'\n", yytext, cflval.Val.String);
 					return VARIABLE;
 				}

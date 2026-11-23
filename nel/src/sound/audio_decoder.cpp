@@ -95,7 +95,14 @@ IAudioDecoder *IAudioDecoder::createAudioDecoder(const std::string &type, NLMISC
 	std::string type_lower = toLowerAscii(type);
 	if (type_lower == "ogg")
 	{
-		return new CAudioDecoderVorbis(stream, loop);
+		// a stream that is not Ogg Vorbis gives no decoder: the decoder warned, with the name of the stream
+		CAudioDecoderVorbis *decoder = new CAudioDecoderVorbis(stream, loop);
+		if (!decoder->isFormatSupported())
+		{
+			delete decoder;
+			return nullptr;
+		}
+		return decoder;
 	}
 #if !defined(NL_OS_WINDOWS) || (NL_COMP_VC_VERSION > 90) /* VS2008 does not have stdint.h */
 	else if (type_lower == "mp3")

@@ -69,6 +69,8 @@
 #include "user_agent.h"
 
 #include "main_loop_debug.h"
+#include "client_ctrl.h"
+#include "window_desktop.h"
 
 void ConnectToShard();
 
@@ -158,17 +160,26 @@ uint32 TotalPatchSize;
 
 CLoginStateMachine LoginSM;
 
+// Time limits, in seconds, of the login and create account requests. They run on the main thread, so a host that does
+// not answer must not hold the login screen for minutes. The request limit leaves room for the login script's own
+// waits on the login service and the shard unifier (a connection and a read of 10 s for each, 40 s at worst), so
+// that its error message reaches the player.
+static const uint s_LoginConnectTimeout = 10;
+static const uint s_LoginRequestTimeout = 60;
+
 // TODO : nico : put this in an external file, this way it isn't included by the background downloader
 #ifndef RY_BG_DOWNLOADER
 
 bool CStartupHttpClient::connectToLogin()
 {
-	bool checkConnect = connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0));
+	if (!connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0)))
+		return false;
 
+	setTimeout(s_LoginConnectTimeout, s_LoginRequestTimeout);
 	if (ClientCfg.ConfigFile.exists("StartupVerify"))
-		checkConnect = checkConnect && verifyServer(ClientCfg.ConfigFile.getVar("StartupVerify").asBool(0));
+		return verifyServer(ClientCfg.ConfigFile.getVar("StartupVerify").asBool(0));
 
-	return checkConnect;
+	return true;
 }
 
 CStartupHttpClient HttpClient;
@@ -463,7 +474,11 @@ void loginMainLoop()
 			nlSleep(ClientCfg.Sleep);
 		}
 		// Display
+		ClientCtrl::beforeSwap();
 		Driver->swapBuffers();
+
+		// This screen needs no more frames than a display shows
+		limitOutgameFrameRate();
 
 //		sint32 screen = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32();
 		if (LoginSM.getCurrentState() == CLoginStateMachine::st_check_patch)
@@ -504,7 +519,8 @@ void loginMainLoop()
 						if (!windowBlinkDone)
 						{
 							bgDownloader.hideDownloader();
-							ShowWindow (hWnd, SW_RESTORE);
+							// not activated on another virtual desktop (WindowDesktop)
+							ShowWindow (hWnd, WindowDesktop::isRequested() ? SW_SHOWNOACTIVATE : SW_RESTORE);
 							windowBlinkDone = true;
 						}
 
@@ -839,6 +855,9 @@ void initLoginScreen()
 	setLoginFinished( false );
 	loginOK = false;
 }
+// Login with LoginLogin / LoginPassword. On failure the error is shown and ev_bad_login is pushed; on success the
+// caller pushes ev_login_ok once it is ready to go on (auto login first selects the shard in legacy mode).
+static bool tryLogin(bool vanishScreen);
 
 void initAutoLogin()
 {
@@ -847,9 +866,12 @@ void initAutoLogin()
 	CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 	pGEBLog->setInputString(LoginLogin);
 	pGEBPwd->setInputString(LoginPassword);
-	CAHManager::getInstance()->runActionHandler("on_login", nullptr, "");
 
-/*	if (ClientCfg.R2Mode)
+	// a failed login shows the error and pushes ev_bad_login, the state machine returns to the login screen
+	if (!tryLogin(true))
+		return;
+
+	if (ClientCfg.R2Mode)
 	{
 		LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
 	}
@@ -873,12 +895,10 @@ void initAutoLogin()
 		}
 		else
 		{
-			
 			LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
 			//		CAHManager::getInstance()->runActionHandler("login_connect_2", NULL);
 		}
 	}
-	* */
 }
 
 void initAltLogin()
@@ -936,6 +956,7 @@ void initAltLogin()
 bool login()
 {
 	CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_LoginScreen, "login_step_login_screen"));
+	ClientCtrl::setPhase("login");
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CPatchManager *pPM = CPatchManager::getInstance();
@@ -952,8 +973,6 @@ bool login()
 	Driver->showCursor (false);
 	SetMouseFreeLook ();
 	SetMouseCursor (false);
-	SetMouseSpeed (ClientCfg.CursorSpeed);
-	SetMouseAcceleration (ClientCfg.CursorAcceleration);
 	SetMousePosFirstTime = true;
 	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
 
@@ -1242,7 +1261,7 @@ void initShardDisplay()
 
 // ***************************************************************************
 
-void onlogin(bool vanishScreen = true)
+static bool tryLogin(bool vanishScreen)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -1260,14 +1279,8 @@ void onlogin(bool vanishScreen = true)
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(-1);
 
 	// Check the login/pass
-
-	// main menu page for r2mode
 	string res = checkLogin(LoginLogin, LoginPassword, ClientApp, LoginCustomParameters);
-	if (res.empty())
-	{
-		LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
-	}
-	else
+	if (!res.empty())
 	{
 		// close the socket in case of error
 		HttpClient.disconnect();
@@ -1275,7 +1288,17 @@ void onlogin(bool vanishScreen = true)
 		pIM->messageBoxWithHelp("Error : " + res, "ui:login");
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_bad_login);
+		return false;
 	}
+	return true;
+}
+
+// ***************************************************************************
+
+void onlogin(bool vanishScreen = true)
+{
+	if (tryLogin(vanishScreen))
+		LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
 }
 
 class CAHOnLogin : public IActionHandler
@@ -1312,7 +1335,11 @@ class CAHOnGameConfiguration : public IActionHandler
 
 		static string Configurator = "ryzom_configuration_rd.exe";
 
-		if (CFile::fileExists (Configurator))
+		if (!CFile::fileExists (Configurator))
+		{
+			nlwarning("<CAHOnGameConfiguration::execute> can't find ryzom configurator : %s",Configurator.c_str());
+		}
+		else if (WindowDesktop::mayOpen("the configurator"))
 		{
 			// launch the ryzom configurator
 			launchProgram(Configurator, "");
@@ -1320,10 +1347,6 @@ class CAHOnGameConfiguration : public IActionHandler
 			loginOK = false;
 
 			LoginSM.pushEvent(CLoginStateMachine::ev_quit);
-		}
-		else
-		{
-			nlwarning("<CAHOnGameConfiguration::execute> can't find ryzom configurator : %s",Configurator.c_str());
 		}
 	}
 };
@@ -1921,9 +1944,12 @@ class CAHOpenURL : public IActionHandler
 			}
 		}
 
-		openURL(url);
+		if (WindowDesktop::mayOpen("a browser for " + url))
+		{
+			openURL(url);
 
-		nlinfo("openURL %s", url.c_str());
+			nlinfo("openURL %s", url.c_str());
+		}
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOpenURL, "open_url");
@@ -1957,9 +1983,13 @@ class CAHInitResLod : public IActionHandler
 		// If the client is in windowed mode, still in windowed mode and do not change anything
 		if (ClientCfg.Windowed)
 			CurrentMode = 0;
-		// If we have not found the mode so it can be an error or machine change, so propose the first available
+		// The configured mode is not in the list (a mode the list leaves out, another machine): it is listed
+		// as it is, so that leaving this screen keeps the configuration unless the player picks another mode
 		else if (CurrentMode == -1)
+		{
+			StringModeList.insert(StringModeList.begin() + 1, toString(ClientCfg.Width) + " x " + toString(ClientCfg.Height));
 			CurrentMode = 1;
+		}
 		// We inserted 'Windowed' as first mode, so index needs to move too
 		else
 			++CurrentMode;
@@ -2126,6 +2156,13 @@ class CAHUninitResLod : public IActionHandler
 		// If the mode requested is a windowed mode do nothnig
 		if (CurrentMode == 0)
 		{
+			if (!ClientCfg.Windowed)
+			{
+				// leaving fullscreen: the size of the screen is no size for a window
+				getWindowSizeLeavingFullscreen(ClientCfg.Width, ClientCfg.Height);
+				ClientCfg.writeInt("Width", ClientCfg.Width);
+				ClientCfg.writeInt("Height", ClientCfg.Height);
+			}
 			ClientCfg.Windowed = true;
 			ClientCfg.writeBool("FullScreen", false);
 		}
@@ -2170,7 +2207,7 @@ class CAHUninitResLod : public IActionHandler
 
 		// **** Save the config
 		if (ClientCfg.SaveConfig)
-			ClientCfg.ConfigFile.save ();
+			ClientCfg.saveConfigFile ();
 		ClientCfg.IsInvalidated = true;
 	}
 };
@@ -2330,6 +2367,7 @@ bool initCreateAccount()
 			nlwarning("Can't connect");
 			return false;
 		}
+		CurlHttpClient.setTimeout(s_LoginConnectTimeout, s_LoginRequestTimeout);
 
 		std::string lang = ClientCfg.LanguageCode;
 		if(lang=="wk") lang = "uk";
@@ -2345,7 +2383,7 @@ bool initCreateAccount()
 		{
 			string errorMessage("Can't send (error code 60)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.c_str());
+			nlwarning("%s", errorMessage.c_str());
 			return false;
 		}
 
@@ -2354,7 +2392,7 @@ bool initCreateAccount()
 		{
 			string errorMessage("Can't receive (error code 61)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.c_str());
+			nlwarning("%s", errorMessage.c_str());
 			return false;
 		}
 
@@ -2362,7 +2400,7 @@ bool initCreateAccount()
 		{
 			string errorMessage("Empty result (error code 13)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.c_str());
+			nlwarning("%s", errorMessage.c_str());
 			return false;
 		}
 
@@ -2521,9 +2559,10 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			{
 				string errorMessage("Can't connect");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.c_str());
+				nlwarning("%s", errorMessage.c_str());
 				return;
 			}
+			CurlHttpClient.setTimeout(s_LoginConnectTimeout, s_LoginRequestTimeout);
 
 			std::string params = "Username=" + results[0] + "&Password=" + results[1]
 				+ "&ConfirmPass=" + results[2] + "&Email=" + results[3];
@@ -2548,7 +2587,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			{
 				string errorMessage("Can't send (error code 60)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.c_str());
+				nlwarning("%s", errorMessage.c_str());
 				return;
 			}
 
@@ -2557,7 +2596,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			{
 				string errorMessage("Can't receive (error code 61)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.c_str());
+				nlwarning("%s", errorMessage.c_str());
 				return;
 			}
 
@@ -2565,7 +2604,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			{
 				string errorMessage("Empty result (error code 13)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.c_str());
+				nlwarning("%s", errorMessage.c_str());
 				return;
 			}
 

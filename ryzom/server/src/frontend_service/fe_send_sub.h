@@ -90,6 +90,21 @@ public:
 	/// Set of ids of buffers to enable in the flushing buffers before the next swapping
 	typedef std::set<TClientId> TBuffersToEnable;
 
+	// clang-format off
+	/// Bytes taken out of the stream queues of a QUIC connection, to send on the stream of a class at the next flush
+	struct CStreamPost
+	{
+		CStreamPost(CQuicUserContext *user, uint8 streamClass, CQuicStreamSend *send) : User(user), StreamClass(streamClass), Send(send) {}
+		CQuicUserContextPtr		User;
+		uint8					StreamClass;
+		CQuicStreamSend			*Send;
+	};
+	typedef std::vector<CStreamPost> TStreamPosts;
+
+	/// Destructor
+	~CFeSendSub();
+	// clang-format on
+
 	/// Constructor
 	CFeSendSub() :
 		_DataSock( NULL ),
@@ -102,7 +117,13 @@ public:
 		//_OutputBits(0),
 		_SendCounter(0),
 		_NbActions(0),
-		_NbImpulseActions(0)
+		_NbImpulseActions(0),
+		m_FillingStreamPosts(NULL),
+		m_FlushingStreamPosts(NULL),
+		m_StreamLastTime(0),
+		m_StreamLastEgress(0),
+		m_StreamStarted(false),
+		m_StreamBudgetShort(false)
 		{}
 
 	/// Init
@@ -124,6 +145,9 @@ public:
 	}
 
 	uint32 clientBandwidth() const { return _ClientBitBandwidth; }
+
+	/// The same for a client whose connection has QUIC streams (StreamClientBandwidth), in bits
+	uint32 streamClientBandwidth() const;
 	
 	uint32 totalBandwidth() const { return _TotalBitBandwidth; }
 
@@ -134,33 +158,25 @@ public:
 	/// Set the address for send buffer, to match a connected client
 	void					setSendBufferAddress( TClientId id, const NLNET::CInetAddress *addr, CQuicUserContext *quicUser )
 	{
-		// We set the address for both, but we can't enable the buffer yet
-		((*_CurrentFillingBuffers)[id]).setAddress( addr, quicUser, false /*true*/ );
-		((*_CurrentFlushingBuffers)[id]).setAddress( addr, quicUser, false );
-		//_BuffersToEnable.insert( id ); // OBSOLETE: now it is enabled/disabled in CFeSendSub::fillPrioritizedActions
+		// The flushing buffers may be in use by the send thread: only the filling one is set now, the other one when
+		// they are swapped (see swapSendBuffers()). The buffer is enabled in CFeSendSub::fillPrioritizedActions.
+		((*_CurrentFillingBuffers)[id]).setAddress(addr, quicUser, false);
+		m_PendingSendBufferIds.push_back(id);
 	}
 
 	/// Unset a send buffer, when a client disconnects
 	void					disableSendBuffer( TClientId id )
 	{
-		// We can disable both, because no problem if the flushing thread sees the state of a buffer change to unused
-		// ((*_CurrentFillingBuffers)[id]).enableSendBuffer( false );
-		// ((*_CurrentFlushingBuffers)[id]).enableSendBuffer( false );
+		// As in setSendBufferAddress(), the flushing buffers are left to the send thread until they are swapped
 		NLNET::CInetAddress nullAddr(false);
 		((*_CurrentFillingBuffers)[id]).setAddress( &nullAddr, NULL, false );
-		((*_CurrentFlushingBuffers)[id]).setAddress( &nullAddr, NULL, false );
-
-		// But we must remove the id for _BuffersToEnable in the case when there was
-		// a connection and then a disconnection for the same client in the same cycle
-		// (maybe, not necessary to manage, because unlikely to happen)
-		//_BuffersToEnable.erase( id ); // OBSOLETE
+		m_PendingSendBufferIds.push_back(id);
 	}
 
-	/// Enable a send buffer, the first time when the buffer is ready to be flushed out
+	/// Enable a send buffer, to flush its outbox at the next swap (sendServerProblemStateToClients())
 	void					enableSendBuffer( TClientId id )
 	{
-		// In the filling one, we enabled the buffer as soon as the client connected
-		((*_CurrentFlushingBuffers)[id]).enableSendBuffer( true );
+		((*_CurrentFillingBuffers)[id]).enableSendBuffer(true);
 	}
 
 	/// Access the outbox (for filling)
@@ -181,6 +197,15 @@ public:
 
 	/// Fill prioritized actions into outgoing messages (only if there are clients)
 	void					fillPrioritizedActions();
+
+	// clang-format off
+	/// Take out of the stream queues of the QUIC connections what each may send this cycle (after the datagrams are
+	/// filled, before the swap, every cycle)
+	void					grantStreams();
+
+	/// What shares the frontend's budget among the streams (for statistics)
+	const CStreamScheduler	&streamScheduler() const { return m_StreamScheduler; }
+	// clang-format on
 
 	/// Swap send buffers
 	void					swapSendBuffers();
@@ -233,6 +258,30 @@ private:
 
 	TSendBuffers			_SendBuffers1, _SendBuffers2;
 	TSendBuffers			*_CurrentFillingBuffers, *_CurrentFlushingBuffers;
+
+	// clang-format off
+	/// Buffers whose address was set or unset in the filling buffers only, to be copied to the others when swapping
+	std::vector<TClientId>	m_PendingSendBufferIds;
+
+	/// Stream data of this cycle and of the cycle being flushed, swapped with the send buffers. They do not depend on the
+	/// send buffers: what was taken out of a queue is sent whether or not the connection sends a datagram.
+	TStreamPosts			m_StreamPosts1, m_StreamPosts2;
+	TStreamPosts			*m_FillingStreamPosts, *m_FlushingStreamPosts;
+
+	/// The budget of the frontend for all it sends, and the turns of the clients (main thread)
+	CStreamScheduler		m_StreamScheduler;
+	std::vector<CStreamScheduler::CEntry> m_StreamEntries;
+	/// What each class of a client gets of its grant (scratch), and the weights of the classes with the text of
+	/// StreamClassWeights that they were read from
+	std::vector<uint32>		m_StreamShares;
+	std::vector<uint32>		m_StreamClassWeights;
+	std::string				m_StreamClassWeightsText;
+	NLMISC::TTime			m_StreamLastTime;
+	uint64					m_StreamLastEgress;
+	bool					m_StreamStarted;
+	/// The frontend holds its streams to less than TotalOutgoingBandwidth (for the log)
+	bool					m_StreamBudgetShort;
+	// clang-format on
 
 	/// MD5 hash keys of msg.xml and database.xml
 	NLMISC::CHashKeyMD5		_MsgXmlMD5;

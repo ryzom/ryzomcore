@@ -34,7 +34,7 @@
 </template>
 
 <template name="server_box" posref="TL TL" x="0" y="0" w="64" h="16"  id="" posparent="parent" sizeref="" keep="true" >
-	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref">
+	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref" >
 		<group id="bg" sizeref="hw" h="0" w="0" />
 		<view type="bitmap" id="bk" scale="true" posparent="bg" posref="MM MM" sizeref="hw" w="-16" h="-16" texture="log_eb_m.tga" />
 		<view type="bitmap" id="tl" texture="log_eb_tl.tga" posref="TL TL" />
@@ -239,7 +239,7 @@
 	<instance template="log_box_frame" id="bk" posref="MM MM" sizeref="wh" w="0" h="0" />
 	
 	<view type="text" id="text" posref="MM MM" line_maxw="420" w="420" x="0" y="12"
-		color="135 243 28 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+		color="135 243 28 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
 	
 	<ctrl style="log_std_but" id="but_ok" posparent="text" posref="BM TM" y="-6" onclick_l="leave_modal" hardtext="uittOK"/>
 	
@@ -274,7 +274,7 @@
 	<instance template="log_box_frame" id="bk" posref="MM MM" sizeref="wh" w="0" h="0" />
 	
 	<view type="text" id="text" posref="MM MM" line_maxw="420" w="420" x="0" y="12"
-		color="135 243 28 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+		color="135 243 28 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
 	
 	<ctrl style="log_std_but" id="but_ok" posparent="text" posref="BM TL" x="2" y="-6" onclick_l="proc" params_l="proc_message_box_with_help_ok" hardtext="uittOK"/>
 	<ctrl style="log_std_but" id="but_help" posparent="text" posref="BM TR" x="-2" y="-6" onclick_l="proc" params_l="proc_browse_faq" hardtext="uittBrowseFaq"/>
@@ -792,7 +792,7 @@
 >
 	<view type="bitmap" posref="MM MM" id="log" texture="new_launcher_bg.tga" global_color="false" render_layer="-1" />
 	
-	<view type="text" id="text" posref="MM MM" line_maxw="412" w="412" x="0" y="0" color="135 243 28 255" fontsize="18" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+	<view type="text" id="text" posref="MM MM" line_maxw="412" w="412" x="0" y="0" color="135 243 28 255" fontsize="18" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
 	
 	
 	<ctrl type="button" button_type="push_button" id="but_cancel" posref="BR BR" x="-304" y="157"

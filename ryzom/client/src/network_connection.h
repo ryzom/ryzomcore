@@ -41,6 +41,7 @@
 #include <nel/misc/md5.h>
 
 #include "quic_connection.h"
+#include "game_share/datagram_lateness.h"
 #include "time_client.h"
 #include "game_share/entity_types.h"
 #include "property_decoder.h"
@@ -80,7 +81,7 @@ H_AUTO_DECL ( RZ_Client_Network_Connection_Set_Reference_Position )
 
 //#define MEASURE_FE_SENDING
 
-extern const char * ConnectionStateCStr [9];
+extern const char *ConnectionStateCStr[10];
 
 
 /**
@@ -521,6 +522,22 @@ public:
 		return m_Connection.UdpSock; // FIXME: QUIC
 	}
 
+	/// Get the QUIC connection, to tell why it could not be established
+	const CQuicConnection&		getQuicConnection() const
+	{
+		return m_QuicConnection;
+	}
+
+	/// What the connection to the frontend is made of
+	enum TTransport
+	{
+		TransportNone, ///< there is no connection
+		TransportUdp, ///< UDP, not encrypted
+		TransportQuicDatagrams, ///< QUIC, datagrams only (protocol level ryzomcore/4.1)
+		TransportQuicStreams ///< QUIC, datagrams and streams (protocol level ryzomcore/4.2)
+	};
+	TTransport					transport() const;
+
 	/// Get userId
 	uint32						getUserId()
 	{
@@ -580,6 +597,9 @@ protected:
 
 	/// The QUIC connection to the frontend
 	CQuicConnection				m_QuicConnection;
+
+	/// How late the datagrams of the frontend arrive (protocol level ryzomcore/4.2), which the client reports
+	CDatagramLateness			m_DatagramLateness;
 	
 	/// Whether to use QUIC or not
 	bool						m_UseQuic;
@@ -816,6 +836,12 @@ protected:
 
 	void						reinit();
 
+	// clang-format off
+	/// Reset the data of the session but keep the connection, for going back to the character selection on it after
+	/// quit() (the frontend's limbo mode); reinit() also resets the connection
+	void						resetSession();
+	// clang-format on
+
 private:
 
 	/// Set MsPerTick value
@@ -845,6 +871,12 @@ private:
 	void						receiveNormalMessage(NLMISC::CBitMemStream &msgin);
 	void						sendNormalMessage();
 	bool						stateConnected();
+	// clang-format off
+	/// Receive the datagrams in the Connected state, returns true if the state changed
+	bool						receiveConnectedDatagrams();
+	/// Give the messages that arrived on the streams of a QUIC connection to the impulse callback (Connected state)
+	void						dispatchStreamRecords();
+	// clang-format on
 	CLFECOMMON::TPacketNumber	_LastReceivedAck;
 	uint						_NormalPacketsReceived;
 
@@ -870,6 +902,9 @@ private:
 	uint32						_QuitId;
 	bool						_ReceivedAckQuit;
 	NLMISC::TTime				_LatestQuitTime;
+	// clang-format off
+	NLMISC::TTime				m_QuitTime; // when quit() was called, for QuitTimeOut
+	// clang-format on
 
 	//
 	void						reset();

@@ -31,8 +31,10 @@
 #include "time_client.h"
 #include "input.h"
 #include "interface_v3/interface_manager.h"
+#include "interface_v3/action_handler_base.h"
 #include "global.h"
 #include "item_group_manager.h"
+#include "client_ctrl.h"
 
 using namespace NLMISC;
 
@@ -115,6 +117,13 @@ void CEventsListener::removeFromServer (CEventServer& server)
 	server.removeListener(EventSetFocusId,		this);
 }// removeFromServer //
 
+/// Whether a master group of the interface (ui:login, ui:outgame, ui:interface) exists and is shown
+static bool isMasterGroupActive(const char *name)
+{
+	CInterfaceGroup *group = CWidgetManager::getInstance()->getMasterGroupFromId(name);
+	return group != nullptr && group->getActive();
+}
+
 static bool s_MouseFreeLookReady = false;
 static sint s_MouseFreeLookLastX;
 static sint s_MouseFreeLookLastY;
@@ -132,6 +141,9 @@ void CEventsListener::operator()(const CEvent& event)
 	// Window closed.
 	if(event == EventDestroyWindowId)
 	{
+		// the endpoint goes first: nothing it serves may run on what the release takes down
+		ClientCtrl::release("the window was closed");
+
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
 		CItemGroupManager::getInstance()->uninit();
@@ -156,7 +168,44 @@ void CEventsListener::operator()(const CEvent& event)
 	// Window close button pressed.
 	if(event == EventCloseWindowId)
 	{
-		CAHManager::getInstance()->runActionHandler("enter_modal", nullptr, "group=ui:interface:quit_dialog");
+		// In game the close request asks for confirmation in the quit dialog. When the dialog does not exist
+		// (its interface XML is missing or failed to load) the request quits as the dialog's quit button does:
+		// it asks the server, which answers when the character may leave. The window that offers to quit at
+		// once while waiting does not exist either then, so a further close request while one is pending (the
+		// server does not answer, for example after a disconnection) quits at once.
+		if (CInterfaceManager::getInstance()->isInGame() && CWidgetManager::getInstance()->getElementFromId("ui:interface:quit_dialog") == nullptr)
+		{
+			if (game_exit_request)
+			{
+				nlwarning("Interface element 'ui:interface:quit_dialog' not found and a quit request is pending, the close request quits at once");
+				CAHManager::getInstance()->runActionHandler("quit_ryzom_now", nullptr, "");
+			}
+			else
+			{
+				nlwarning("Interface element 'ui:interface:quit_dialog' not found, the close request quits without confirmation");
+				CAHManager::getInstance()->runActionHandler("quit_ryzom", nullptr, "");
+			}
+		}
+		else if (!CInterfaceManager::getInstance()->isInGame() && isMasterGroupActive("ui:login"))
+		{
+			// The login screens have no quit dialog: the close request leaves as their exit button does
+			CAHManager::getInstance()->runActionHandler("login_quit", nullptr, "");
+		}
+		else if (!CInterfaceManager::getInstance()->isInGame() && isMasterGroupActive("ui:outgame"))
+		{
+			// Nor have the character selection and creation screens: the close request quits as their quit
+			// button does
+			CAHManager::getInstance()->runActionHandler("quit_ryzom", nullptr, "");
+		}
+		else
+		{
+			// A minimized window can be asked to close as well (from the task bar). The quit dialog is drawn in
+			// the window, where nobody would see the question, so the window is restored first.
+			// (out of game this branch has no dialog to show, see above)
+			if (CInterfaceManager::getInstance()->isInGame() && Driver != nullptr && Driver->isWindowMinimized())
+				Driver->restoreWindow();
+			CAHManager::getInstance()->runActionHandler("enter_modal", nullptr, "group=ui:interface:quit_dialog");
+		}
 	}
 	// Event from the Mouse (MOVE)
 	else if(event == EventMouseMoveId)

@@ -18,10 +18,12 @@
 
 #include "stdpch.h"
 #include "server_share/r2_variables.h"
+#include "server_share/r2_vision.h"
 #include "ai_mgr.h"
 #include "ai_entity_physical.h"
 #include "ai_entity_physical_inline.h"
 #include "ai_instance.h"
+#include "ai_player.h"
 
 
 //	critical routine, get backward of weak technical design legacy.
@@ -229,7 +231,7 @@ bool	CModEntityPhysical::calcStraightRepulsionFrom(const CAIVector& pos, const s
 	return	true;
 }
 
-CAIVector	CModEntityPhysical::calcRepulsion(const	CAIPos&	pos)	const
+CAIVector	CModEntityPhysical::calcRepulsion(const	CAIPos&	pos, bool withPlayers)	const
 {
 	H_AUTO(CalcRepulsion)
 
@@ -254,13 +256,17 @@ CAIVector	CModEntityPhysical::calcRepulsion(const	CAIPos&	pos)	const
 		}
 
 		// get nearby players
-		for (it=getAIInstance()->playerMatrix().beginEntities(CAIS::instance().bestLinearMatrixIteratorTbl((uint32) humanDist),pos);!it.end();++it)
+		for (it=getAIInstance()->playerMatrix().beginEntities(CAIS::instance().bestLinearMatrixIteratorTbl((uint32) humanDist),pos);withPlayers && !it.end();++it)
 		{
 			const	CAIEntityPhysical*	entityPhysical=(*it).getSpawnObj();
 			if (	entityPhysical
 				&&	entityPhysical->isAlive()
 				&&	entityPhysical!=this)
 			{
+				// an invisible player (GM, Ring DM) repulses nobody: a bot that steers around it gives its position away
+				if (!R2_VISION::isEntityVisibleToPlayers(NLMISC::safe_cast<const CBotPlayer *>(&*it)->whoSeesMe()))
+					continue;
+
 				nearbyEntities.push_back(entityPhysical);
 			}
 		}
@@ -269,7 +275,7 @@ CAIVector	CModEntityPhysical::calcRepulsion(const	CAIPos&	pos)	const
 	return	calcRepulsionFrom(pos, nearbyEntities);
 }
 
-bool	CModEntityPhysical::calcStraightRepulsion(CAIPos const& pos, CAIVector& repulsion)	const
+bool	CModEntityPhysical::calcStraightRepulsion(CAIPos const& pos, CAIVector& repulsion, bool withPlayers)	const
 {
 	H_AUTO(CalcStraightRepulsion)
 
@@ -312,13 +318,17 @@ bool	CModEntityPhysical::calcStraightRepulsion(CAIPos const& pos, CAIVector& rep
 		}
 
 		// get nearby players
-		for (it=getAIInstance()->playerMatrix().beginEntities(CAIS::instance().bestLinearMatrixIteratorTbl((uint32) humanDist),pos);!it.end();++it)
+		for (it=getAIInstance()->playerMatrix().beginEntities(CAIS::instance().bestLinearMatrixIteratorTbl((uint32) humanDist),pos);withPlayers && !it.end();++it)
 		{
 			const	CAIEntityPhysical*	entityPhysical=(*it).getSpawnObj();
 			if (	entityPhysical
 				&&	entityPhysical->isAlive()
 				&&	entityPhysical!=this)
 			{
+				// an invisible player (GM, Ring DM) repulses nobody: a bot that steers around it gives its position away
+				if (!R2_VISION::isEntityVisibleToPlayers(NLMISC::safe_cast<const CBotPlayer *>(&*it)->whoSeesMe()))
+					continue;
+
 				nearbyEntities.push_back(entityPhysical);
 			}
 		}

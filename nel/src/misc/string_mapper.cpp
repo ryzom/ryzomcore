@@ -63,6 +63,18 @@ TStringId CStringMapper::localMap(const std::string &str)
 	return (TStringId)(*it);
 }
 
+// ****************************************************************************
+TStringId CStringMapper::localFind(const std::string &str)
+{
+	if (str.empty())
+		return nullptr;
+
+	CAutoFastMutex autoMutex(&m_Mutex);
+
+	TStringTable::const_iterator it = m_StringTable.find((const std::string *)&str);
+	return it == m_StringTable.end() ? nullptr : (TStringId)(*it);
+}
+
 #ifdef NL_CPP14
 // ****************************************************************************
 TStringId CStringMapper::localMap(const char *str)

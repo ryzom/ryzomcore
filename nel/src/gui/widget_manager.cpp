@@ -92,6 +92,7 @@ namespace NLGUI
 			}
 		}
 		PrioritizedWindows[nPrio].push_back(pIG);
+		++WindowListChanges;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -105,6 +106,7 @@ namespace NLGUI
 				if ((*it) == pIG)
 				{
 					PrioritizedWindows[i].erase(it);
+					++WindowListChanges;
 					return;
 				}
 				it++;
@@ -157,6 +159,7 @@ namespace NLGUI
 				{
 					PrioritizedWindows[i].erase(it);
 					PrioritizedWindows[i].push_back(pIG);
+					++WindowListChanges;
 					LastTopWindowPriority= i;
 					return;
 				}
@@ -179,6 +182,7 @@ namespace NLGUI
 				{
 					PrioritizedWindows[i].erase(it);
 					PrioritizedWindows[i].push_front(pIG);
+					++WindowListChanges;
 					return;
 				}
 				it++;
@@ -186,6 +190,14 @@ namespace NLGUI
 		}
 		// todo hulud interface syntax error
 		nlwarning("window %s do not exist in a priority list", pIG->getId().c_str());
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CWidgetManager::SMasterGroup::isWindowStillListed(const std::list<CInterfaceGroup*> &rList, uint32 changes, CInterfaceGroup *pIG) const
+	{
+		if (WindowListChanges == changes)
+			return true;
+		return std::find(rList.begin(), rList.end(), pIG) != rList.end();
 	}
 
 	// ----------------------------------------------------------------------------
@@ -269,6 +281,8 @@ namespace NLGUI
 
 	void CWidgetManager::SMasterGroup::sortWorldSpaceGroup ()
 	{
+		H_AUTO ( RZ_Interface_sortWorldSpaceGroup )
+
 		static std::vector<CElementToSort> sortTable;
 		sortTable.clear ();
 
@@ -763,9 +777,50 @@ namespace NLGUI
 		}
 	}
 
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::setModalExitLauncherHidden(CInterfaceGroup *pIG)
+	{
+		if (!_ModalStack.empty() && _ModalStack.back().ModalWindow == pIG)
+			_ModalStack.back().ModalExitLauncherHidden = true;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::closeModalsOfHiddenLaunchers()
+	{
+		while (!_ModalStack.empty() && _ModalStack.back().ModalExitLauncherHidden)
+		{
+			// The launching control shows when it still exists and it and all its parents are active
+			bool launcherShown = false;
+			CCtrlBase *ctrl = _ModalStack.back().CtrlLaunchingModal;
+			if (ctrl)
+			{
+				launcherShown = true;
+				for (CInterfaceElement *elm = ctrl; elm; elm = elm->getParent())
+				{
+					if (!elm->getActive())
+					{
+						launcherShown = false;
+						break;
+					}
+				}
+			}
+			if (launcherShown)
+				break;
+
+			// Close it the way it was launched: a modal pushed over another one leaves that one in place
+			if (_ModalStack.size() > 1)
+				popModalWindow();
+			else
+				disableModalWindow();
+		}
+	}
+
 	// ***************************************************************************
 	void CWidgetManager::hideAllWindows()
 	{
+		// setActive puts a container at the back of its list and runs its on_deactive handler, which may move, remove or
+		// delete other windows: the list is walked through a copy, as in checkCoords()
+		std::vector<CInterfaceGroup*> windows;
 		for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
 			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -774,11 +829,13 @@ namespace NLGUI
 				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 				{
 					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-					std::list<CInterfaceGroup*>::const_iterator itw;
-					for (itw = rList.begin(); itw!= rList.end();)
+					windows.assign(rList.begin(), rList.end());
+					const uint32 changes = rMG.WindowListChanges;
+					for (size_t iw = 0; iw < windows.size(); ++iw)
 					{
-						CInterfaceGroup *pIG = *itw;
-						itw++;	// since setActive invalidate the iterator, be sure we move to the next one before
+						CInterfaceGroup *pIG = windows[iw];
+						if (!rMG.isWindowStillListed(rList, changes, pIG))
+							continue;
 						pIG->setActive(false);
 					}
 				}
@@ -789,6 +846,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void CWidgetManager::hideAllNonSavableWindows()
 	{
+		// the list is walked through a copy, see hideAllWindows()
+		std::vector<CInterfaceGroup*> windows;
 		for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
 			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -797,12 +856,14 @@ namespace NLGUI
 				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 				{
 					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-					std::list<CInterfaceGroup*>::const_iterator itw;
-					for (itw = rList.begin(); itw!= rList.end();)
+					windows.assign(rList.begin(), rList.end());
+					const uint32 changes = rMG.WindowListChanges;
+					for (size_t iw = 0; iw < windows.size(); ++iw)
 					{
-						CInterfaceGroup *pIG = *itw;
+						CInterfaceGroup *pIG = windows[iw];
+						if (!rMG.isWindowStillListed(rList, changes, pIG))
+							continue;
 						CGroupContainer *cont = dynamic_cast<CGroupContainer *>(pIG);
-						itw++;	// since setActive invalidate the iterator, be sure we move to the next one before
 						if (!cont || !cont->isSavable())
 						{
 							pIG->setActive(false);
@@ -1043,6 +1104,11 @@ namespace NLGUI
 				i--;
 			}
 		}
+
+		// A window deleted without unMakeWindow (CInterfaceGroup::delGroup, a Lua delGroup) must leave the window lists of
+		// its master group, which check, update and draw it every frame. Only pointers are compared, so this is safe from
+		// the destructor, and while the master group itself is deleted.
+		unMakeWindow(group, true);
 	}
 
 
@@ -1081,6 +1147,13 @@ namespace NLGUI
 
 		uint32 nMasterGroup;
 
+		// checkCoords and updateCoords of a window run scripts and action handlers, which may put a window on top,
+		// remove one or delete one (a deleted window leaves the lists, see removeRefOnGroup). That changes the list
+		// being walked, so both loops walk a copy of it, and skip a window that is no more in the list. This covers
+		// the other windows: a window that deletes itself from its own checkCoords or updateCoords still returns
+		// into its own deleted code.
+		std::vector<CInterfaceGroup*> windows;
+
 		{
 			H_AUTO ( RZ_Interface_checkCoords )
 
@@ -1093,11 +1166,13 @@ namespace NLGUI
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
 						std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-						std::list<CInterfaceGroup*>::const_iterator itw;
-						for (itw = rList.begin(); itw!= rList.end();)
+						windows.assign(rList.begin(), rList.end());
+						const uint32 changes = rMG.WindowListChanges;
+						for (size_t iw = 0; iw < windows.size(); ++iw)
 						{
-							CInterfaceGroup *pIG = *itw;
-							itw++;	// since checkCoords invalidate the iterator, be sure we move to the next one before
+							CInterfaceGroup *pIG = windows[iw];
+							if (!rMG.isWindowStillListed(rList, changes, pIG))
+								continue;
 							if (pIG->getActive())
 								pIG->checkCoords ();
 						}
@@ -1119,24 +1194,27 @@ namespace NLGUI
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
 						std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-						std::list<CInterfaceGroup*>::const_iterator itw;
-						for (itw = rList.begin(); itw!= rList.end(); itw++)
+						windows.assign(rList.begin(), rList.end());
+						const uint32 changes = rMG.WindowListChanges;
+						for (size_t iw = 0; iw < windows.size(); ++iw)
 						{
-							CInterfaceGroup *pIG = *itw;
+							CInterfaceGroup *pIG = windows[iw];
+							if (!rMG.isWindowStillListed(rList, changes, pIG))
+								continue;
 							bool		updateCoordCalled= false;
 							// updateCoords the window only if the master group is his parent and if need it
 							// do it until updateCoords() no more invalidate coordinates!!
 
 							// add deadlock counter to prevent endless loop (Issue #73: web browser long scroll lockup)
 							int deadlock = 10;
-							while (--deadlock > 0 && pIG->getParent()==rMG.Group && (pIG->getInvalidCoords()>0))
+							while (--deadlock > 0 && rMG.isWindowStillListed(rList, changes, pIG) && pIG->getParent()==rMG.Group && (pIG->getInvalidCoords()>0))
 							{
 								bRecomputeCtrlUnderPtr = true;
 								// Update as many pass wanted (3 time for complex resizing, 1 for scroll for example)
 								uint	numPass= pIG->getInvalidCoords();
 								// reset before updateCoords
 								pIG->resetInvalidCoords();
-								for(uint i=0;i<numPass;i++)
+								for(uint i=0;i<numPass && rMG.isWindowStillListed(rList, changes, pIG);i++)
 								{
 									pIG->updateCoords ();
 								}
@@ -1144,7 +1222,7 @@ namespace NLGUI
 							}
 							// If the group need to update pos each frame (eg: CGroupInScene),
 							// and updateCoords not called
-							if(pIG->getParent()==rMG.Group && !updateCoordCalled && pIG->isNeedFrameUpdatePos())
+							if(!updateCoordCalled && pIG->getParent()==rMG.Group && pIG->isNeedFrameUpdatePos())
 							{
 								// This Group will compute the delta to apply.
 								pIG->onFrameUpdateWindowPos(0,0);
@@ -1781,9 +1859,8 @@ namespace NLGUI
 				// if present, get the ctx help text.
 				if(newCtrl)
 				{
-					// get the text
-					//newCtrl->getContextHelpToolTip(_ContextHelpText);
-					newCtrl->getContextHelp( getContextHelpText() );
+					// get the text, with what a control does only for its tooltip (as asking for the info of an item)
+					newCtrl->getContextHelpToolTip( getContextHelpText() );
 					// UserDefined context help
 					if( !newCtrl->getContextHelpActionHandler().empty() )
 					{
@@ -2136,6 +2213,8 @@ namespace NLGUI
 		CViewRenderer::getInstance()->activateWorldSpaceMatrix (false);
 		NL3D::UDriver *driver = CViewRenderer::getInstance()->getDriver();
 
+		H_BEFORE ( RZ_Interface_DrawViews_Setup )
+
 		// If an element has captured the keyboard, make sure it is alway visible (all parent windows active)
 		if( getCaptureKeyboard() != nullptr)
 		{
@@ -2151,7 +2230,10 @@ namespace NLGUI
 			}
 			while (cb);
 		}
-		
+
+		// The same for a modal window that follows its launching control (the list of a combo box)
+		closeModalsOfHiddenLaunchers();
+
 		// Check if screen size changed
 		uint32 w, h;
 		CViewRenderer::getInstance()->checkNewScreenSize ();
@@ -2191,6 +2273,9 @@ namespace NLGUI
 
 		// Update global alphaS from database
 		updateGlobalAlphas();
+		H_AFTER ( RZ_Interface_DrawViews_Setup )
+
+		H_BEFORE ( RZ_Interface_DrawWindows )
 
 		/*  Draw all the windows
 			To minimize texture swapping, we first sort per Window, then we sort per layer, then we render per Global Texture.
@@ -2248,6 +2333,9 @@ namespace NLGUI
 				}
 			}
 		}
+		H_AFTER ( RZ_Interface_DrawWindows )
+
+		H_BEFORE ( RZ_Interface_DrawViews_After )
 
 		CDBManager::getInstance()->flushObserverCalls();
 
@@ -2288,6 +2376,7 @@ namespace NLGUI
 		driver->setMatrixMode2D11();
 
 		CDBManager::getInstance()->flushObserverCalls();
+		H_AFTER ( RZ_Interface_DrawViews_After )
 	}
 
 	bool CWidgetManager::handleEvent( const CEventDescriptor &evnt )
@@ -2351,7 +2440,9 @@ namespace NLGUI
 
 		CEventDescriptorKey &eventDesc = (CEventDescriptorKey&)evnt;
 
-		//_LastEventKeyDesc = eventDesc;
+		// Keep the key event that is about to run action handlers, so they can look at it (modifiers of the
+		// triggering key): it must be stored before the dispatch below, since the captured keyboard paths return
+		lastKeyEvent = eventDesc;
 
 		// Any Key event disable the ContextHelp
 		disableContextHelp();
@@ -2399,9 +2490,10 @@ namespace NLGUI
 		// Manage complex "Enter"
 		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyRETURN && !eventDesc.getKeyCtrl() )
 		{
-			// If the  top window has Enter AH
+			// If the  top window has Enter AH. A window that is not shown stays in the list of its priority (a modal
+			// that was closed, the release notes of the login screen that were never opened): it takes no key.
 			CInterfaceGroup	*tw= getTopWindow();
-			if(tw && !tw->getAHOnEnter().empty())
+			if(tw && tw->getActive() && !tw->getAHOnEnter().empty())
 			{
 				// if the captured keyboard is in this Modal window, then must handle him in priority
 				if( getCaptureKeyboard() && getCaptureKeyboard()->getRootWindow()==tw)
@@ -2474,8 +2566,6 @@ namespace NLGUI
 			CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:quit_dialog");
 			handled = true;
 		}
-
-		lastKeyEvent = eventDesc;
 
 		return handled;
 	}
@@ -3148,7 +3238,7 @@ namespace NLGUI
 		if (i == _MasterGroups.size())
 		{
 			std::string stmp = std::string("not found master group for window: ")+group->getId();
-			nlwarning (stmp.c_str());
+			nlwarning ("%s", stmp.c_str());
 			return;
 		}
 		else
@@ -3183,7 +3273,7 @@ namespace NLGUI
 			if (!noWarning)
 			{
 				std::string stmp = std::string("not found master group for window: ")+group->getId();
-				nlwarning (stmp.c_str());
+				nlwarning ("%s", stmp.c_str());
 			}
 			return;
 		}

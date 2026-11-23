@@ -49,6 +49,7 @@
 #include "../client_sheets/item_sheet.h"
 
 #include "editor.h"
+#include "npc_editor_files.h"
 //
 #include "nel/gui/lua_helper.h"
 #include "nel/gui/group_tree.h"
@@ -67,6 +68,7 @@
 #include "../global.h"
 #include "../connection.h"
 #include "../main_loop.h"
+#include "../misc.h"
 #include "../interface_v3/people_interraction.h"
 #include "../time_client.h"
 #include "../pacs_client.h"
@@ -117,6 +119,7 @@
 #include "../session_browser_impl.h"
 #include "../far_tp.h"
 #include "nel/gui/lua_manager.h"
+#include "../client_ctrl.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -241,7 +244,9 @@ void CDynamicMapClientEventForwarder::nodeInserted(const std::string& instanceId
 		&& getEditor().getMode() != CEditor::AnimationModeLoading /* Loading animation scenario from terminal, ghost nodes created by translator */)
 	{
 		nldebug("Node inserted, but not in edition mode");
-		delete value;
+		// the value is given to the scenario, which holds it by reference: a caller that keeps a reference of
+		// its own (an edit of another editor) keeps it alive, a new value is deleted here
+		CObject::TSmartPtr dropped(value);
 		return;
 	}
 	getEditor().nodeInserted(instanceId, attrName, position, key, value);
@@ -343,6 +348,7 @@ CEditor::CEditor()
 	_TPReceivedFlag = false;
 	_WaitScenarioScreenWanted = false;
 	_WaitScenarioScreenActive = false;
+	m_ModeConfirmed = true;
 	_NewScenario = nullptr;
 	_NewScenarioInitialAct = 0;
 	_EditionModeDisconnectedFlag = true;
@@ -395,6 +401,10 @@ void CEditor::autoConfigInit(bool serverIsRingSession)
 			initialMode = R2::CEditor::EditionMode;
 			initialAccessMode = R2::CEditor::AccessEditor;
 		}
+		// The mode is a guess from the role. The server says next what the session is doing, which sets
+		// the mode again (onEditionModeConnected, onAnimationModeConnected): until then the mode is not
+		// one the editor stays in. A local client has no server to wait for.
+		m_ModeConfirmed = ClientCfg.Local;
 		init(initialMode, initialAccessMode);
 	}
 	else
@@ -420,6 +430,17 @@ void CEditor::autoConfigRelease(bool serverIsRingSession)
 	}
 	else if (serverIsRingSession)
 		R2::getEditor().releaseModules();
+}
+
+// *********************************************************************************************************
+void CEditor::saveConfigWithoutRelease()
+{
+	CHECK_EDITOR
+	// as release(): nothing when the editor is not initialized, or while it is being reset
+	if (_Mode == NotInitialized || !_SerializeUIConfig)
+		return;
+	saveCurrentKeySet();
+	saveUIConfig();
 }
 
 // *********************************************************************************************************
@@ -908,7 +929,7 @@ int CEditor::luaSetEntityCustomSelectBox(CLuaState &ls)
 	{
 		for (TEntityCustomSelectBoxMap::const_iterator watchIt = boxMap.begin(); watchIt != boxMap.end(); ++ watchIt)
 		{
-			nlwarning(watchIt->first.c_str());
+			nlwarning("%s", watchIt->first.c_str());
 		}
 	}
 	*/
@@ -1193,9 +1214,9 @@ int CEditor::luaGenInstanceName(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 2); // this is a method
 #ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 2); // name
-	ucstring baseName;
+	std::string baseName;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 2, baseName));
-	CLuaIHM::push(ls, getEditor().genInstanceName(baseName));
+	CLuaIHM::pushUCString(ls, getEditor().genInstanceName(ucstring::makeFromUtf8(baseName)).toUtf8()); // FIXME: Ring UTF-8
 #else
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 	ls.push(getEditor().genInstanceName(ucstring::makeFromUtf8(ls.toString(2))).toUtf8()); // FIXME: Ring UTF-8
@@ -1212,9 +1233,9 @@ int CEditor::luaIsPostFixedByNumber(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 2); // this is a method
 #ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 2); // name
-	ucstring baseName;
+	std::string baseName;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 2, baseName));
-	ls.push(getEditor().isPostFixedByNumber(baseName));
+	ls.push(getEditor().isPostFixedByNumber(ucstring::makeFromUtf8(baseName))); // FIXME: Ring UTF-8
 #else
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 	ls.push(getEditor().isPostFixedByNumber(ucstring::makeFromUtf8(ls.toString(2)))); // FIXME: Ring UTF-8
@@ -1293,7 +1314,7 @@ int CEditor::luaSetEditorSeason(CLuaState &ls)
 	else if (strcmp(ls.toString(2), "Summer") == 0) getEditor()._Season = Summer;
 	else if (strcmp(ls.toString(2), "Autumn") == 0) getEditor()._Season = Autumn;
 	else if (strcmp(ls.toString(2), "Winter") == 0) getEditor()._Season = Winter;
-	else CLuaIHM::fails(ls, "%s, invalid season name : %s", ls.toString(2));
+	else CLuaIHM::fails(ls, "%s, invalid season name : %s", funcName, ls.toString(2));
 	// If season is changed while scenario is being received, we do not have received the tp command yet,
 	// so signal the weather system that the season should not be changed for now
 	if ((getEditor()._UpdatingScenario && getEditor()._WillTP)
@@ -1353,9 +1374,13 @@ int CEditor::luaSetPlotItemInfos(CLuaState &ls)
 	R2::TMissionItem mi;
 	mi.SheetId = (uint32) ls.toInteger(2);
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::getUCStringOnStack(ls, 3, mi.Name);
-	CLuaIHM::getUCStringOnStack(ls, 4, mi.Description);
-	CLuaIHM::getUCStringOnStack(ls, 5, mi.Comment);
+	std::string text;
+	CLuaIHM::getUCStringOnStack(ls, 3, text);
+	mi.Name.fromUtf8(text);
+	CLuaIHM::getUCStringOnStack(ls, 4, text);
+	mi.Description.fromUtf8(text);
+	CLuaIHM::getUCStringOnStack(ls, 5, text);
+	mi.Comment.fromUtf8(text);
 #else
 	mi.Name = ucstring::makeFromUtf8(ls.toString(3));
 	mi.Description = ucstring::makeFromUtf8(ls.toString(4));
@@ -1417,6 +1442,33 @@ int CEditor::luaIsInIslandRect(CLuaState &ls)
 }
 
 // *********************************************************************************************************
+int CEditor::luaIsValidPos(CLuaState &ls)
+{
+	const char *funcName = "isValidPos";
+	CLuaIHM::checkArgCount(ls, funcName, 3); // method with 2 args
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TNUMBER);
+	// ground of the island the AI can use, as the palette, drawing and move tools test a position: the tops of root
+	// mounds and pillars, cliffs and the rim of the island are not
+	ls.push(CTool::isValid2DPos(CVector2f((float)ls.toNumber(2), (float)ls.toNumber(3))));
+	return 1;
+}
+
+// *********************************************************************************************************
+int CEditor::luaIsValidPoly(CLuaState &ls)
+{
+	const char *funcName = "isValidPoly";
+	CLuaIHM::checkArgCount(ls, funcName, 2); // method with 1 arg
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TTABLE);
+	// a polygon as choosePos takes them (a table of CVector2f): its inside on ground the AI can use, as the palette
+	// tools test the zones of a trigger zone, a bandit camp or a herd (CToolChoosePos)
+	NLMISC::CPolygon2D poly;
+	CLuaIHM::getPoly2DOnStack(ls, 2, poly);
+	ls.push(getEditor().getIslandCollision().isValidPoly(poly));
+	return 1;
+}
+
+// *********************************************************************************************************
 int CEditor::luaGetCurrentIslandName(CLuaState &ls)
 {
 	//H_AUTO(R2_CEditor_luaGetCurrentIslandName)
@@ -1440,7 +1492,10 @@ int CEditor::luaKickCharacter(CLuaState &ls)
 		(uint32)ls.toInteger(2));
 
 	if(!sb.waitOneMessage(sb.getMessageName("on_invokeResult")))
+	{
 		nlwarning("kickCharacter callback return false");
+		getUI().displaySystemInfo(CI18N::get("uiRingRequestNoAnswer"), "BC");
+	}
 
 	return 0;
 }
@@ -1458,7 +1513,10 @@ int CEditor::luaUnkickCharacter(CLuaState &ls)
 		(uint32)ls.toInteger(2));
 
 	if(!sb.waitOneMessage(sb.getMessageName("on_invokeResult")))
+	{
 		nlwarning("unkickCharacter callback return false");
+		getUI().displaySystemInfo(CI18N::get("uiRingRequestNoAnswer"), "BC");
+	}
 
 	return 0;
 }
@@ -1499,6 +1557,31 @@ int CEditor::luaIsScenarioUpdating(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 1); // method with no args
 	ls.push( getEditor()._UpdatingScenario  );
 	return 1;
+}
+
+// *********************************************************************************************************
+int CEditor::luaIsModeSettled(CLuaState &ls)
+{
+	//H_AUTO(R2_CEditor_luaIsModeSettled)
+	const char *funcName = "isModeSettled";
+	CLuaIHM::checkArgCount(ls, funcName, 1); // method with no args
+	ls.push(getEditor().isModeSettled());
+	return 1;
+}
+
+// *********************************************************************************************************
+bool CEditor::isModeSettled() const
+{
+	//H_AUTO(R2_CEditor_isModeSettled)
+	// the server has not said yet what the session is doing: its word sets the mode again
+	if (!m_ModeConfirmed) return false;
+	// the wait screen for a scenario is wanted or shown: it changes the mode when it comes and when it goes
+	if (_WaitScenarioScreenWanted || _WaitScenarioScreenActive) return false;
+	// the start of a test or of an animation is wanted: the next frame asks for it (connect)
+	if (ConnectionWanted) return false;
+	// a teleport: its first frames are drawn and not shown, the loading screen is still on the screen
+	if (FirstFrame || SkipFrame != 0) return false;
+	return true;
 }
 
 
@@ -1617,8 +1700,11 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 	struct CInstanceEnumerator
 	{
-		CSortedInstances *InstMap;
-		TInstanceByName::iterator Current;
+		// The instances of the class when the enumerator was made, in display name order. The Lua code may
+		// change the scenario between two calls, so no iterator into the editor's lists is kept across calls,
+		// and an instance deleted in the meantime is skipped.
+		std::vector<CInstance::TRefPtr> Instances;
+		uint Current;
 		static int next(CLuaState &ls)
 		{
 			const char *funcName = "InstanceEnumerator:next";
@@ -1626,32 +1712,38 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 			CLuaIHM::checkArgType(ls, funcName, 1, LUA_TUSERDATA);
 			CInstanceEnumerator *ie = (CInstanceEnumerator *) ls.toUserData(1);
 			CEditor &ed = getEditor();
-			while(ie->Current != ie->InstMap->end())
+			while (ie->Current < ie->Instances.size())
 			{
-				CInstance *inst = ie->Current->second;
-				if (!inst->getGhost())
+				CInstance *inst = ie->Instances[ie->Current];
+				++ie->Current;
+				if (inst && !inst->getGhost())
 				{
 					// object must be in current act or base act
 					CInstance *parentAct = inst->getParentAct();
 					if (!parentAct || parentAct == ed.getCurrentAct() || parentAct == ed.getBaseAct())
 					{
 						inst->getLuaProjection().push();
-						++ ie->Current;
 						return 1;
 					}
 				}
-				++ ie->Current;
 			}
+			ie->clear(); // nothing left: do not hold the list until the enumerator is collected
 			return 0;
+		}
+		// Frees the instance list and leaves the enumerator empty and valid, so a second call does no harm
+		void clear()
+		{
+			std::vector<CInstance::TRefPtr>().swap(Instances);
+			Current = 0;
 		}
 		//
 		static int gc(CLuaState &ls)
 		{
-			const char *funcName = "InstanceEnumerator:next";
+			const char *funcName = "InstanceEnumerator.__gc";
 			CLuaIHM::checkArgCount(ls, funcName, 1);
 			CLuaIHM::checkArgType(ls, funcName, 1, LUA_TUSERDATA);
 			CInstanceEnumerator *ie = (CInstanceEnumerator *) ls.toUserData(1);
-			ie->~CInstanceEnumerator(); // no real effect for now...
+			ie->clear();
 			return 0;
 		}
 		static int index(CLuaState &ls)
@@ -1673,6 +1765,11 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 	{
 		CLuaIHM::fails(ls, "Trying to iterate over unknown class : %s", ls.toString(2));
 	}
+	if (classIndex >= (sint)getEditor()._InstancesByDispName.size())
+	{
+		// the editor was released, its class table is still there
+		CLuaIHM::fails(ls, "enumInstances : the editor holds no instances of the class %s", ls.toString(2));
+	}
 	ls.newTable();
 	CLuaObject mt;
 	mt.pop(ls);
@@ -1693,10 +1790,15 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 #define new DEBUG_NEW
 #endif
 
-	ie->InstMap = &getEditor()._InstancesByDispName[classIndex];
-	ie->Current = ie->InstMap->begin();
+	ie->Current = 0;
+	// the metatable first: its __gc frees the list when filling it throws
 	mt.push();
 	ls.setMetaTable(-2);
+	CSortedInstances &instMap = getEditor()._InstancesByDispName[classIndex];
+	for (TInstanceByName::iterator it = instMap.begin(); it != instMap.end(); ++it)
+	{
+		ie->Instances.push_back(it->second);
+	}
 	//
 	return 1;
 }
@@ -1864,7 +1966,10 @@ void CEditor::waitScenarioScreen()
 
 
 		// Display
+		ClientCtrl::beforeSwap();
 		Driver->swapBuffers();
+		// (a screen of the interface alone, as the login and character selection screens: paced as they are)
+		limitOutgameFrameRate();
 		//
 		if (NetMngr.getConnectionState() == CNetManager::Disconnect)
 		{
@@ -2132,9 +2237,12 @@ void CEditor::registerLuaFunc()
 	registerEnvMethod("isCurrentSelectionPlayer", luaIsCurrentSelectionPlayer);
 	registerEnvMethod("findEmptyPlace", luaFindEmptyPlace);
 	registerEnvMethod("isInIslandRect", luaIsInIslandRect);
+	registerEnvMethod("isValidPos", luaIsValidPos);
+	registerEnvMethod("isValidPoly", luaIsValidPoly);
 	registerEnvMethod("getCurrentIslandName", luaGetCurrentIslandName);
 	registerEnvMethod("waitScenarioScreen", luaWaitScenarioScreen);
 	registerEnvMethod("isScenarioUpdating", luaIsScenarioUpdating);
+	registerEnvMethod("isModeSettled", luaIsModeSettled);
 	registerEnvMethod("canUndo", luaCanUndo);
 	registerEnvMethod("canRedo", luaCanRedo);
 	registerEnvMethod("getUserEntityName", luaGetUserEntityName);
@@ -2144,6 +2252,10 @@ void CEditor::registerLuaFunc()
 	registerEnvMethod("teleportToCharacter", luaTeleportToCharacter);
 	registerEnvMethod("enumInstances", luaEnumInstances);
 	registerEnvMethod("isClearingContent", luaIsClearingContent);
+	// the files of the NPC editor: its scripts have no other file access
+	registerEnvMethod("loadNpcNames", CNpcEditorFiles::luaLoadNpcNames);
+	registerEnvMethod("loadNpcPresets", CNpcEditorFiles::luaLoadNpcPresets);
+	registerEnvMethod("saveNpcPresets", CNpcEditorFiles::luaSaveNpcPresets);
 }
 
 /*
@@ -3142,7 +3254,7 @@ void CEditor::reset()
 	TAccessMode oldAccessMode = _AccessMode;
 	if (_Mode == EditionMode)
 	{
-		R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
+		R2::getEditor().getLua().executeScriptNoThrow(getScenarioBufferSaveScript());
 	}
 	release();
 	clearDebugWindow();
@@ -3153,12 +3265,22 @@ void CEditor::reset()
 		setForceDesktopReset(true); // next changes of desktop should force a reset, since ui has been reloaded
 		ReloadUIFlag = false;
 	}
+	// the editor comes back in the mode it was in, and stays in it unless a reconnection is asked for below
+	m_ModeConfirmed = true;
 	init(oldMode, oldAccessMode);
 
 	if (oldMode == EditionMode)
 	{
 		CVerboseClock clock("Request reconnection ");
 		getLua().executeScriptNoThrow("r2.requestReconnection()");
+		// The request goes out when the server module is there and the session is known
+		// (CClientEditionModule::requestReconnection). The answer sets the edition mode again
+		// (onEditionModeConnected).
+		const CClientEditionModule &editionModule = getDMC().getEditionModule();
+		if (!ClientCfg.Local && editionModule.isServerEditionModuleUp() && editionModule.getCurrentAdventureId().asInt() != 0)
+		{
+			m_ModeConfirmed = false;
+		}
 	}
 	// try to return to the act with the same title
 	_SerializeUIConfig = true;
@@ -4524,7 +4646,7 @@ bool CEditor::doLuaScript(const char *filename, const char *fileDescText)
 			std::string filename = msg.substr(0, extPos + 4); // extract filename including extension
 			int line;
 			fromString(&*(msg.begin() + extPos + 5), line); // line number follows
-			nlwarning((CLuaIHMRyzom::createGotoFileButtonTag(filename.c_str(), line) + e.what()).c_str());
+			nlwarning("%s", (CLuaIHMRyzom::createGotoFileButtonTag(filename.c_str(), line) + e.what()).c_str());
 		}
 		else
 		{
@@ -4806,10 +4928,11 @@ void CEditor::autoSave()
 
 	uint32 i = maxAutoSave -1;
 
+	// the autosaves of the selected character, named as its buffer is (getScenarioBufferFileName)
 	for ( ; i != 0  ; --i )
 	{
-		std::string current = NLMISC::toString("autosave_%02u.r2", i);
-		std::string next = NLMISC::toString("autosave_%02u.r2", i+1);
+		std::string current = NLMISC::toString("autosave_%s_%02u.r2", PlayerSelectedFileName.c_str(), i);
+		std::string next = NLMISC::toString("autosave_%s_%02u.r2", PlayerSelectedFileName.c_str(), i+1);
 
 		if (CFile::fileExists(current))
 		{
@@ -4821,14 +4944,26 @@ void CEditor::autoSave()
 		}
 	}
 
-	if (CFile::fileExists("save/r2_buffer.dat"))
+	if (CFile::fileExists(getScenarioBufferFileName()))
 	{
-		CFile::copyFile("autosave_01.r2", "save/r2_buffer.dat");
+		CFile::copyFile(NLMISC::toString("autosave_%s_01.r2", PlayerSelectedFileName.c_str()), getScenarioBufferFileName());
 	}
 
-	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
+	R2::getEditor().getLua().executeScriptNoThrow(getScenarioBufferSaveScript());
 
 
+}
+
+// *********************************************************************************************************
+std::string getScenarioBufferFileName()
+{
+	return "save/r2_buffer_" + PlayerSelectedFileName + ".dat";
+}
+
+std::string getScenarioBufferSaveScript()
+{
+	// the character part of the name has letters, digits and '_' only (buildCharacterFileName): no escaping
+	return "r2.Version.save(\"" + getScenarioBufferFileName() + "\")";
 }
 
 // *********************************************************************************************************
@@ -5131,7 +5266,7 @@ void CEditor::onErase(CObject *root, bool &foundInBase, std::string &nameInParen
 		}
 		catch (const ELuaNotATable &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 		}
 
 		// if object is selected or focused, then clear these flags
@@ -5273,6 +5408,9 @@ void CEditor::onEditionModeConnected( uint32 userSlotId, uint32 adventureId, COb
 {
 	//H_AUTO(R2_CEditor_onEditionModeConnected)
 	CHECK_EDITOR
+	// the server has said what the session is doing: the mode set here, or by the wait screen when it goes,
+	// is one the editor stays in (see isModeSettled)
+	m_ModeConfirmed = true;
 	if (!_WaitScenarioScreenActive)
 	{
 		setMode(EditionMode);
@@ -5318,6 +5456,9 @@ void CEditor::onAnimationModeConnected(const CClientMessageAdventureUserConnecti
 	// TMP PATCH
 	// _WillTP = true;
 	CHECK_EDITOR
+	// the server has said what the session is doing (see isModeSettled). The modes that follow the load of
+	// an animation are waits, up to the one the scenario starts in (CClientEditionModule::startScenario).
+	m_ModeConfirmed = true;
 	switch(connected.Mode)
 	{
 		case 0: setMode(AnimationModeLoading); break;
@@ -5351,7 +5492,7 @@ void  CEditor::onEditionModeDisconnected()
 	// Because avec using the button the currentScenario = 0
 	try
 	{
-		R2::getEditor().getLua().executeScript("r2.Version.save(\"save/r2_buffer.dat\")");
+		R2::getEditor().getLua().executeScript(getScenarioBufferSaveScript());
 	}
 	catch (const std::exception& e)
 	{
@@ -5374,6 +5515,14 @@ void  CEditor::onTestModeDisconnected(TSessionId sessionId, uint32 lastAct, TSce
 {
 	//H_AUTO(R2_CEditor_onTestModeDisconnected)
 	CHECK_EDITOR
+	// The test of an edit session is over. The editor that stopped it waits already (GoingToEditionMode);
+	// another editor of the session is still in its test mode. The edition module asks for a reconnection
+	// right after this (CClientEditionModule::onTestModeDisconnected), and the answer sets the edition mode
+	// (onEditionModeConnected): the test mode is not one the editor stays in any more.
+	if (sessionType == st_edit && !ClientCfg.Local)
+	{
+		m_ModeConfirmed = false;
+	}
 	_DMC->CDynamicMapClient::onTestModeDisconnected(sessionId, lastAct, sessionType);
 }
 
@@ -5382,6 +5531,9 @@ void CEditor::nodeInserted(const std::string& instanceId, const std::string& att
 {
 	//H_AUTO(R2_CEditor_nodeInserted)
 	CHECK_EDITOR
+	// the scenario holds the value it inserts by reference, and releases one it refuses: keep it for the
+	// reads below, it is released when this returns if the scenario does not have it
+	CObject::TSmartPtr keep(value);
 	_DMC->CDynamicMapClient::nodeInserted(instanceId, attrName, position, key, value);
 	if (value->isTable())
 	{
@@ -5389,8 +5541,9 @@ void CEditor::nodeInserted(const std::string& instanceId, const std::string& att
  		if (!id.empty())
 		{
 			const CObject *clonedValue = _DMC->find(id);
-			// bad insert
-			if (clonedValue)
+			// the scenario took the value only if its id names it: a refused value is not in the scenario,
+			// and the id may name another node, which has its instance already
+			if (clonedValue == value)
 			{
 				createNewInstanceForObjectTable(clonedValue);
 
@@ -5692,6 +5845,8 @@ void CEditor::nodeSet(const std::string& instanceId, const std::string& attrName
 	CHECK_EDITOR
 	CObject *obj = _DMC->find(instanceId);
 	if (!obj) return;
+	// a value that the scenario refuses changes nothing, and the instances of the old one stay
+	if (!_DMC->getCurrentScenario()->canSetNode(instanceId, attrName, value)) return;
 	// erase previous object
 	nlassert(obj->isTable());
 	//
@@ -5715,7 +5870,14 @@ void CEditor::nodeSet(const std::string& instanceId, const std::string& attrName
 		if (!id.empty())
 		{
 			const CObject *clonedValue = _DMC->find(id);
-			if (clonedValue)
+			// the id names the node that took the value, or a node in it (canSetNode), whose instances were erased above
+			const CObject *target = attrName.empty() ? _DMC->find(instanceId) : _DMC->find(instanceId, attrName);
+			const CObject *within = clonedValue;
+			while (within && within != target)
+			{
+				within = within->getParent();
+			}
+			if (clonedValue && within)
 			{
 				createNewInstanceForObjectTable(clonedValue);	// if the created object is a table, warn him that he has been created
 				onAttrModified(clonedValue);
@@ -7453,23 +7615,36 @@ class CAHR2StopLive : public IActionHandler
 		else
 		{
 			CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
-			sb.closeSession(sb.getCharId(), R2::getEditor().getDMC().getEditionModule().getCurrentAdventureId());
+			CClientEditionModule &editionModule = R2::getEditor().getDMC().getEditionModule();
+			TSessionId editSessionLink = editionModule.getEditSessionLink();
+			if (editSessionLink != 0 && editionModule.isSessionOwner())
+			{
+				// The close makes the DSS send a FAR_TP to the mainland, which is replaced by a Far TP to the
+				// edition session. It is set before the request: a close carried out after the wait has given
+				// up sends the player there as well. Only the owner closes the session (the others are refused).
+				nldebug("Will return to editing session %u", editSessionLink.asInt());
+				FarTP.hookNextFarTPForEditor();
+			}
+			// otherwise, let accomplish the FAR_TP to mainland (returnToPreviousSession)
+			// triggered by the DSS.
+			sb.closeSession(sb.getCharId(), editionModule.getCurrentAdventureId());
 
 			if(sb.waitOneMessage(sb.getMessageName("on_invokeResult")))
 			{
-				if(R2::getEditor().getDMC().getEditionModule().getEditSessionLink()!=0)
+				// refused (1: no such session, 2: not the owner): the session goes on, and no Far TP of its close
+				// follows. 3, the session is no longer open, is the answer to a second stop after a first one
+				// that is carried out late: its Far TP is to come.
+				if (sb._LastInvokeResult == 1 || sb._LastInvokeResult == 2)
 				{
-					// Now we expect to receive an impulsion FAR_TP to mainland, triggered
-					// by the DSS. We'll disobey it by FarTPing to the Edition session instead!
-					nldebug( "Will return to editing session %u", R2::getEditor().getDMC().getEditionModule().getEditSessionLink().asInt() );
-					FarTP.hookNextFarTPForEditor();
+					nlwarning("closeSession refused: %u '%s'", sb._LastInvokeResult, sb._LastInvokeResultMsg.c_str());
+					FarTP.unhookNextFarTPForEditor();
 				}
-				// otherwise, let accomplish the FAR_TP to mainland (returnToPreviousSession)
-				// triggered by the DSS.
 			}
 			else
 			{
+				// without an answer the session may still be live: the player stays in it
 				nlwarning("closeSession callback return false");
+				CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiRingRequestNoAnswer"), "BC");
 			}
 		}
 	}
@@ -7483,7 +7658,6 @@ class CAHInviteCharacter : public IActionHandler
 	{
 		CHECK_EDITOR
 
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler("leave_modal", pCaller, "");
 
 		if(pCaller)
@@ -7505,26 +7679,9 @@ class CAHInviteCharacter : public IActionHandler
 				if (geb && !geb->getInputString().empty())
 				{
 					string charName = geb->getInputString();
-					CSessionBrowserImpl & sessionBrowser = CSessionBrowserImpl::getInstance();
-					sessionBrowser.inviteCharacterByName(sessionBrowser.getCharId(), charName);
-
-					if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
-					{
-						nlwarning("inviteCharacterByName callback return false");
-					}
-
-					if(sessionBrowser._LastInvokeResult == 14)
-					{
-						CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-						if (pVT != nullptr)
-							pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
-
-						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
-					}
-					else if(sessionBrowser._LastInvokeResult == 12)
-					{
-						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_newcomer");
-					}
+					// tells the player the answer, or that there is none, and tells the invited player of an
+					// animation session
+					CSessionBrowserImpl::getInstance().inviteCharacterByNameAndWait(charName, pCaller);
 
 					geb->setInputString(std::string());
 				}
@@ -7643,7 +7800,7 @@ class CAHR2Undo : public IActionHandler
 			const ucstring *actionName = historic.getPreviousActionName();
 			nlassert(actionName);
 #ifdef RYZOM_LUA_UCSTRING
-			CLuaIHM::push(getEditor().getLua(), *actionName);
+			CLuaIHM::pushUCString(getEditor().getLua(), actionName->toUtf8()); // Compatibility
 #else
 			getEditor().getLua().push((*actionName).toUtf8());
 #endif
@@ -7676,7 +7833,7 @@ class CAHR2Redo : public IActionHandler
 			const ucstring *actionName = historic.getNextActionName();
 			nlassert(actionName);
 #ifdef RYZOM_LUA_UCSTRING
-			CLuaIHM::push(getEditor().getLua(), *actionName);
+			CLuaIHM::pushUCString(getEditor().getLua(), actionName->toUtf8()); // Compatibility
 #else
 			getEditor().getLua().push((*actionName).toUtf8());
 #endif

@@ -194,6 +194,9 @@ protected:
 
 	uint					_ResetCounter;
 
+	// see setWindowActivation()
+	bool					_WindowActivation;
+
 public:
 							IDriver();
 	virtual					~IDriver();
@@ -212,6 +215,24 @@ public:
 
 	/// Return true if driver is still active. Return false else. If he user close the window, must return false.
 	virtual bool			isActive() = 0;
+
+	/** Return true while the window of the driver is minimized (iconified) by the window system, whatever size
+	 *  getWindowSize reports then: with some drivers and window systems a minimized window keeps its size, with
+	 *  others it has no area. Return false when there is no window.
+	 *  The calling application may leave time to other applications when it is the case, as nothing of it is shown.
+	 *  The answer is for a window of the driver's own. For a window the application handed to the driver that is
+	 *  a part of another window, it depends on the window system: a child window is not itself minimized where
+	 *  the state belongs to the top-level window (the answer is false while that one is minimized), and where the
+	 *  driver asks the window that holds its view the answer is that window's. Where the state is followed from
+	 *  the events of the window, it is up to date as far as the application pumps the events of the driver.
+	 */
+	virtual bool			isWindowMinimized() const = 0;
+
+	/** Restore the window when it is minimized, and ask the window system to bring it in front, as its task bar
+	 *  does. Nothing happens when the window is not minimized, when there is none, or when it is not the
+	 *  driver's own.
+	 */
+	virtual void			restoreWindow() = 0;
 
 
 
@@ -255,6 +276,12 @@ public:
 	virtual void			setWindowPos(sint32 x, sint32 y) = 0;
 	/// Show or hide the NeL window
 	virtual void			showWindow(bool show) = 0;
+
+	/// Whether the driver activates its window when it shows it, restores it or sets its mode (true by default). False
+	/// for a window on a virtual desktop that is not shown, as activating it switches the screen to that desktop. Such
+	/// a window stays in a window: a full screen mode still changes the display of the monitor.
+	void					setWindowActivation(bool activate) { _WindowActivation = activate; }
+	bool					getWindowActivation() const { return _WindowActivation; }
 
 	/// return the current screen mode (if we are in windowed, return the screen mode behind the window)
 	virtual bool			getCurrentScreenMode(GfxMode &mode) = 0;
@@ -307,6 +334,55 @@ public:
 
 
 
+	/// \name Picture of the minimized window
+	/** A window system may show a picture of a window where the user picks among the windows (the thumbnail of
+	 *  a taskbar, and the full-size preview shown from it). Of a minimized window it has the last picture from
+	 *  before the window was minimized, as nothing of the window is shown, unless pictures of it are supplied.
+	 *  The driver supplies them out of the ordinary frames of the application, when the application asks for
+	 *  it (setMinimizedWindowPictureSupplied): the application goes on drawing its frames while its window is
+	 *  minimized, and has nothing else to do.
+	 *
+	 *  When the window system asks for a picture of the minimized window, the driver enters its picture mode
+	 *  at the end of the frame (swapBuffers), and stays in it for as long as pictures are asked for, and half
+	 *  a second more. In picture mode the frames are drawn so that the driver can read them back: getWindowSize
+	 *  gives the size the window had before it was minimized, also with a driver whose minimized window has
+	 *  no area, and what is drawn into the frame buffer of the window is kept by the driver. Whatever goes by
+	 *  the size of the window (the viewports, the texts, an interface, the render targets of the effects) is
+	 *  drawn as it is for the window when it is shown. At the swap the driver reads the frame back and hands
+	 *  it to the window system, scaled down to what was asked for. isWindowMinimized goes on answering true.
+	 *
+	 *  The driver has the window system ask again a tenth of a second after a picture, and it only asks while
+	 *  it shows the picture: a minimized window nobody looks at is not in picture mode, and its frames are
+	 *  what they are without this (with some drivers nothing is drawn of them). A request the window system
+	 *  makes by itself is answered with the next frame drawn in picture mode, a tenth of a second after the
+	 *  last picture at the earliest.
+	 *
+	 *  No picture is supplied where the window system has none of this, while the driver has no window, and
+	 *  as long as the application has not asked for it. A window the application handed to the driver is
+	 *  supplied like one the driver made, as far as the messages of that window reach the driver
+	 *  (getWindowProc). No picture is supplied either where the driver cannot read the frames back: without
+	 *  frame buffer objects (OpenGL), with a back buffer that cannot be locked, which is the case with
+	 *  multisampling, and of a fullscreen window, whose device is lost while it is minimized (Direct3D). The
+	 *  window then keeps the pictures of the window system; this is said once in the log, except for the
+	 *  fullscreen window, which is never supplied.
+	 */
+	// @{
+	/** The pictures of the minimized window are supplied by the driver, out of the frames the application
+	 *  draws (true), or left to the window system again (false, the state a driver starts in). To call once
+	 *  the display is set. An application that asks for it keeps drawing its frames while its window is
+	 *  minimized: the window system shows no picture of its own meanwhile.
+	 */
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied) = 0;
+
+	/** Return true while the driver is in picture mode: the window is minimized, the window system shows a
+	 *  picture of it, and the frames the application draws are read back for it. The application may go by
+	 *  this for the rate of its frames; it changes at the end of a frame (swapBuffers) only.
+	 */
+	virtual bool			isMinimizedWindowPictureWanted() const = 0;
+	// @}
+
+
+
 	/// \name Framebuffer operations
 	// @{
 	/// Clear the current target surface pixels. The function ignores the viewport settings but uses the scissor.
@@ -333,6 +409,7 @@ public:
 	virtual void			getBuffer(CBitmap &bitmap) = 0;
 
 	/** get the ZBuffer (back buffer).
+	  * NB: the first row is the top one, like in the bitmap of getBuffer().
 	  *
 	  * \param zbuffer the returned array of Z. size of getWindowSize() .
 	  */
@@ -1586,6 +1663,26 @@ protected:
 	void					removeMatDrvInfoPtr(ItMatDrvInfoPtrList shaderIt);
 	void					removeGPUPrgDrvInfoPtr(ItGPUPrgDrvInfoPtrList gpuPrgDrvInfoIt);
 	void					removeUBDrvInfoPtr(ItUBDrvInfoPtrList ubDrvInfoIt);
+
+	/** For the drivers: keeps a window of the application within reach of the mouse.
+	  * A position saved under another monitor layout can be on no monitor at all. When less than a grip of the
+	  * strip along the top edge of the window (where its title bar is) lies on one of the monitors, the position
+	  * becomes the one that centers the window on the first monitor. A window that covers a whole monitor is
+	  * kept where it is, also with its top edge above that monitor.
+	  *
+	  * \param monitors the usable rectangles of the monitors in desktop coordinates, the primary monitor first
+	  * \param x the in/out left of the window with its frame, in desktop coordinates
+	  * \param y the in/out top of the window with its frame, in desktop coordinates
+	  * \param width the width of the window with its frame
+	  * \param height the height of the window with its frame
+	  * \return true if the position was changed
+	  */
+	static bool				keepWindowOnMonitors(const std::vector<NLMISC::CRect> &monitors, sint32 &x, sint32 &y, uint32 width, uint32 height);
+
+#ifdef NL_OS_WINDOWS
+	/// For the drivers: the work areas of the monitors of the desktop, the primary monitor first.
+	static void				getMonitorWorkAreas(std::vector<NLMISC::CRect> &monitors);
+#endif
 
 private:
 	bool					_StaticMemoryToVRAM;

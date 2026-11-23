@@ -106,12 +106,58 @@ CBitmap::~CBitmap()
 \*-------------------------------------------------------------------*/
 uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 {
+	return readImage(f, mipMapSkip, MAX_BITMAP_SIZE);
+}
+
+/*-------------------------------------------------------------------*\
+								loadUntrusted
+\*-------------------------------------------------------------------*/
+bool CBitmap::loadUntrusted(NLMISC::IStream &f, uint32 maxSize, uint mipMapSkip)
+{
+	uint8 depth = 0;
+	try
+	{
+		depth = readImage(f, mipMapSkip, std::min(maxSize, MAX_BITMAP_SIZE));
+		if (depth == 0)
+			nlwarning("The image '%s' could not be read", f.getStreamName().c_str());
+	}
+	catch (const std::exception &e)
+	{
+		// NLMISC::Exception and std::bad_alloc
+		nlwarning("The image '%s' could not be read: %s", f.getStreamName().c_str(), e.what());
+		depth = 0;
+	}
+
+	if (depth != 0 && (_Width == 0 || _Height == 0))
+	{
+		nlwarning("The image '%s' is empty", f.getStreamName().c_str());
+		depth = 0;
+	}
+
+	if (depth == 0)
+	{
+		// a reader may have failed after allocating some levels
+		for (uint i = 0; i < MAX_MIPMAP; ++i)
+			NLMISC::contReset(_Data[i]);
+		reset();
+		return false;
+	}
+
+	return true;
+}
+
+/*-------------------------------------------------------------------*\
+								readImage
+\*-------------------------------------------------------------------*/
+uint8 CBitmap::readImage(NLMISC::IStream &f, uint mipMapSkip, uint32 maxSize)
+{
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
 
 	nlassert(f.isReading());
+	nlassert(maxSize <= MAX_BITMAP_SIZE);
 
 	// testing if DDS
 	uint32 fileType = 0;;
@@ -119,22 +165,22 @@ uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 	if(fileType == DDS_HEADER)
 	{
 #ifdef NEL_ALL_BITMAP_WHITE
-		uint8 result = readDDS(f, mipMapSkip);
+		uint8 result = readDDS(f, mipMapSkip, maxSize);
 		MakeWhite (*this);
 		return result;
 #else // NEL_ALL_BITMAP_WHITE
-		return readDDS(f, mipMapSkip);
+		return readDDS(f, mipMapSkip, maxSize);
 #endif // NEL_ALL_BITMAP_WHITE
 	}
 
 	if (fileType == PNG_HEADER)
 	{
 #ifdef NEL_ALL_BITMAP_WHITE
-		uint8 result = readPNG(f);
+		uint8 result = readPNG(f, maxSize);
 		MakeWhite (*this);
 		return result;
 #else // NEL_ALL_BITMAP_WHITE
-		return readPNG(f);
+		return readPNG(f, maxSize);
 #endif // NEL_ALL_BITMAP_WHITE
 	}
 
@@ -143,11 +189,11 @@ uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 	if (memcmp(&fileType, &JPG_HEADER, 2) == 0)
 	{
 #ifdef NEL_ALL_BITMAP_WHITE
-		uint8 result = readJPG(f);
+		uint8 result = readJPG(f, maxSize);
 		MakeWhite (*this);
 		return result;
 #else // NEL_ALL_BITMAP_WHITE
-		return readJPG(f);
+		return readJPG(f, maxSize);
 #endif // NEL_ALL_BITMAP_WHITE
 	}
 #endif // USE_JPEG
@@ -156,11 +202,11 @@ uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 	if (fileType == GIF_HEADER)
 	{
 #ifdef NEL_ALL_BITMAP_WHITE
-		uint8 result = readGIF(f);
+		uint8 result = readGIF(f, maxSize);
 		MakeWhite (*this);
 		return result;
 #else // NEL_ALL_BITMAP_WHITE
-		return readGIF(f);
+		return readGIF(f, maxSize);
 #endif // NEL_ALL_BITMAP_WHITE
 	}
 #endif // USE_GIF
@@ -207,11 +253,11 @@ uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 		throw ESeekFailed();
 	}
 #ifdef NEL_ALL_BITMAP_WHITE
-	uint8 result = readTGA(f);
+	uint8 result = readTGA(f, maxSize);
 	MakeWhite (*this);
 	return result;
 #else // NEL_ALL_BITMAP_WHITE
-	return readTGA(f);
+	return readTGA(f, maxSize);
 #endif // NEL_ALL_BITMAP_WHITE
 }
 
@@ -524,10 +570,45 @@ bool	CBitmap::isGrayscale() const
 
 
 
+// The DDS header after the "DDS " file type (DDSURFACEDESC2): 31 uint32, the first one being its size in bytes
+static const uint s_DDSHeaderLength = 31;
+
+/** Reads the DDS header after the "DDS " file type. It comes from the file, which may be an image the web browser
+ *  downloaded, so its sizes are checked before anything is read or allocated from them: a width and height of at most
+ *  maxSize (MAX_BITMAP_SIZE keeps the mipmap sizes computed from the header in uint32; the shipped textures are at
+ *  most 4800 pixels a side), and at most MAX_MIPMAP mipmaps.
+ *  \return false if it is not a valid header
+ */
+static bool readDDSHeader(NLMISC::IStream &f, uint32 (&header)[s_DDSHeaderLength], uint32 maxSize)
+{
+	f.serial(header[0]); // size in bytes of the header (without "DDS ")
+	if (header[0] != s_DDSHeaderLength * 4)
+	{
+		nlwarning("Invalid DDS header size %u in '%s', must be %u", header[0], f.getStreamName().c_str(), s_DDSHeaderLength * 4);
+		return false;
+	}
+
+#ifdef NL_LITTLE_ENDIAN
+	f.serialBuffer((uint8 *)(header + 1), (s_DDSHeaderLength - 1) * 4);
+#else
+	for (uint i = 1; i < s_DDSHeaderLength; ++i)
+		f.serial(header[i]);
+#endif
+
+	// height, width and mipmap count
+	if (header[2] == 0 || header[3] == 0 || header[2] > maxSize || header[3] > maxSize || header[6] > MAX_MIPMAP)
+	{
+		nlwarning("Invalid DDS of %ux%u with %u mipmaps in '%s'", header[3], header[2], header[6], f.getStreamName().c_str());
+		return false;
+	}
+
+	return true;
+}
+
 /*-------------------------------------------------------------------*\
 								readDDS
 \*-------------------------------------------------------------------*/
-uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
+uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip, uint32 maxSize)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -538,19 +619,9 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 
 	//-------------- reading entire header
 
-	uint32 size = 0;
-	f.serial(size); // size in Bytes of header(without "DDS")
-	uint32 * _DDSSurfaceDesc = new uint32[size];
-	_DDSSurfaceDesc[0]= size;
-
-#ifdef NL_LITTLE_ENDIAN
-	f.serialBuffer((uint8*)(_DDSSurfaceDesc+1), size-4);
-#else
-	for(uint i= 0; i<size/4 - 1; i++)
-	{
-		f.serial(_DDSSurfaceDesc[i+1]);
-	}
-#endif
+	uint32 _DDSSurfaceDesc[s_DDSHeaderLength];
+	if (!readDDSHeader(f, _DDSSurfaceDesc, maxSize))
+		throw EDDSBadHeader();
 
 	// flags determines which members of the header structure contain valid data
 	uint32 flags = _DDSSurfaceDesc[1];
@@ -559,7 +630,6 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 	if(!(flags & DDSD_LINEARSIZE))
     {
 		nlwarning("A DDS doesn't have the flag DDSD_LINEARSIZE");
-		//delete [] _DDSSurfaceDesc;
 		//throw EDDSBadHeader();
 	}
 
@@ -611,7 +681,6 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 
 	if(PixelFormat!= DXTC1 && PixelFormat!= DXTC1Alpha && PixelFormat!= DXTC3 && PixelFormat!= DXTC5)
 	{
-		delete [] _DDSSurfaceDesc;
 		throw EDDSBadHeader();
 	}
 
@@ -654,7 +723,6 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 		{
 			if(!f.seek(seekSize, IStream::current))
 			{
-				delete [] _DDSSurfaceDesc;
 				throw ESeekFailed();
 			}
 		}
@@ -707,8 +775,6 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 	}
 
 	//------------- End
-
-	delete [] _DDSSurfaceDesc;
 
 	switch(PixelFormat)
 	{
@@ -1279,6 +1345,9 @@ bool CBitmap::convertToType(CBitmap::TType type)
 \*-------------------------------------------------------------------*/
 bool CBitmap::decompressDXT1(bool alpha)
 {
+	// the blocks decode the same with and without an alpha channel
+	nlunreferenced(alpha);
+
 	uint32 i,j,k;
 	NLMISC::CRGBA	c[4];
 	CObjectVector<uint8> dataTmp[MAX_MIPMAP];
@@ -1319,34 +1388,19 @@ bool CBitmap::decompressDXT1(bool alpha)
 			uncompress(color0,c[0]);
 			uncompress(color1,c[1]);
 
-			if (alpha)
-			{
-				c[0].A= 0;
-				c[1].A= 0;
-				c[2].A= 0;
-				c[3].A= 0;
-			}
-			else
-			{
-				c[0].A= 255;
-				c[1].A= 255;
-				c[2].A= 255;
-				c[3].A= 255;
-			}
+			// the two colors of a block and their blends are opaque, with an alpha channel too (they were transparent
+			// then): only the fourth color of a block of three colors is transparent, as in getDXTCColorFromBlock
+			c[0].A = 255;
+			c[1].A = 255;
 
 			if(color0>color1)
 			{
 				c[2].blendFromui(c[0],c[1],85);
-				if(alpha) c[2].A= 255;
-
 				c[3].blendFromui(c[0],c[1],171);
-				if(alpha) c[3].A= 255;
 			}
 			else
 			{
 				c[2].blendFromui(c[0],c[1],128);
-				if(alpha) c[2].A= 255;
-
 				c[3].set(0,0,0,0);
 			}
 
@@ -1853,7 +1907,9 @@ void CBitmap::releaseMipMaps()
 \*-------------------------------------------------------------------*/
 void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 {
-	nlassert(PixelFormat == RGBA || PixelFormat == Luminance || PixelFormat == AlphaLuminance);
+	// Alpha is one 8-bit channel as Luminance (a grayscale image loads as Alpha by default, and the drivers resample it
+	// when they degrade textures)
+	nlassert(PixelFormat == RGBA || PixelFormat == Luminance || PixelFormat == Alpha || PixelFormat == AlphaLuminance);
 	bool needRebuild = false;
 
 	// Deleting mipmaps
@@ -1883,7 +1939,7 @@ void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 		resamplePicture32 ((NLMISC::CRGBA*)&_Data[0][0], pDestRgba, _Width, _Height, nNewWidth, nNewHeight);
 		//logResample("Resample: 60");
 	}
-	else if (PixelFormat == Luminance)
+	else if (PixelFormat == Luminance || PixelFormat == Alpha)
 	{
 		pDestui.resize(nNewWidth*nNewHeight);
 		//logResample("Resample: 40");
@@ -1900,7 +1956,8 @@ void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 		uint16 *pSrc = (uint16*)&_Data[0][0];
 		uint16 *pDest = (uint16*)&pDestui[0];
 
-		size_t srcSize = _Width*_Width;
+		// the source pixel count (it was _Width*_Width: a bitmap wider than tall was read past its end)
+		size_t srcSize = (size_t)_Width * _Height;
 		uint8 *pSrcGray = new uint8[srcSize];
 		uint8 *pSrcAlpha = new uint8[srcSize];
 
@@ -1968,8 +2025,34 @@ void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 /*-------------------------------------------------------------------*\
 							resize
 \*-------------------------------------------------------------------*/
+/** The buffer size of a mipmap of width x height, rounded up to 4 for the DXTC formats (done for every format). It is
+ *  computed in 64 bits: in 32 bits, 2^27 pixels or more wrapped to a buffer far smaller than the pixels the image
+ *  readers then write.
+ *  \throw EAllocationFailure for a negative size, or a size that does not fit in a CObjectVector
+ */
+static uint32 bitmapBufferSize(sint32 width, sint32 height, uint32 bitsPerPixel)
+{
+	if (width < 0 || height < 0)
+	{
+		nlwarning("Cannot resize a bitmap to %dx%d", width, height);
+		throw EAllocationFailure();
+	}
+	uint64 roundedWidth = 4 * (((uint64)width + 3) / 4);
+	uint64 roundedHeight = 4 * (((uint64)height + 3) / 4);
+	uint64 size = (roundedWidth * roundedHeight * bitsPerPixel) / 8;
+	if (size > 0xffffffff)
+	{
+		nlwarning("Cannot resize a bitmap to %dx%d, it does not fit in memory", width, height);
+		throw EAllocationFailure();
+	}
+	return (uint32)size;
+}
+
 void CBitmap::resize (sint32 nNewWidth, sint32 nNewHeight, TType newType, bool resetTo0)
 {
+	// an impossible size throws before the bitmap is changed
+	bitmapBufferSize(nNewWidth, nNewHeight, bitPerPixels[newType != DonTKnow ? newType : PixelFormat]);
+
 	// Deleting mipmaps
 	releaseMipMaps();
 
@@ -1992,17 +2075,14 @@ void CBitmap::resizeMipMap (uint32 numMipMap, sint32 nNewWidth, sint32 nNewHeigh
 {
 	nlassert(numMipMap<MAX_MIPMAP);
 
+	// an impossible size throws before the mipmap is changed
+	uint32 size = bitmapBufferSize(nNewWidth, nNewHeight, bitPerPixels[PixelFormat]);
+
 	// free memory
 	NLMISC::contReset(_Data[numMipMap]);
 
-	// DXTC compressed??
-	//bool	isDXTC= PixelFormat==DXTC1 || PixelFormat==DXTC1Alpha || PixelFormat==DXTC3 || PixelFormat==DXTC5;
-	// if yes, must round up width and height to 4, for allocation
-	nNewWidth= 4*((nNewWidth+3)/4);
-	nNewHeight= 4*((nNewHeight+3)/4);
-
 	// resize the buffer
-	_Data[numMipMap].resize (((uint32)(nNewWidth*nNewHeight)*bitPerPixels[PixelFormat])/8);
+	_Data[numMipMap].resize(size);
 
 	// Fill 0?
 	if( resetTo0 )
@@ -2485,10 +2565,54 @@ void CBitmap::resamplePicture8Fast (const uint8 *pSrc, uint8 *pDest,
 
 
 
+/** The pixel count of an RLE or raw packet of a TGA, which must end with the image at the latest: the last packet of a
+ *  broken file could run on past it, and write past the bitmap. The image is cut at its end, with a warning.
+ */
+static sint32 clampTGAPacket(const NLMISC::IStream &f, uint32 count, uint32 remaining)
+{
+	if (count > remaining)
+	{
+		nlwarning("The TGA image '%s' has an RLE packet of %u pixels where %u remain, it is cut at the end of the image",
+		    f.getStreamName().c_str(), count, remaining);
+		return (sint32)remaining;
+	}
+	return (sint32)count;
+}
+
+/** A TGA pixel of 16 bits to RGBA: an attribute bit, which is not read as alpha, then 5 bits of red, of green and of
+ *  blue.
+ */
+static void tga16ToRGBA(uint16 pixel, uint8 *rgba)
+{
+	uint r = (pixel >> 10) & 0x1f;
+	uint g = (pixel >> 5) & 0x1f;
+	uint b = pixel & 0x1f;
+	rgba[0] = uint8((r << 3) | (r >> 2));
+	rgba[1] = uint8((g << 3) | (g >> 2));
+	rgba[2] = uint8((b << 3) | (b >> 2));
+	rgba[3] = 255;
+}
+
+/// A TGA pixel of 16, 24 or 32 bits, as stored in an RLE image, to RGBA
+static void tgaPixelToRGBA(const uint8 *pixel, uint8 imageDepth, uint8 *rgba)
+{
+	if (imageDepth == 16)
+	{
+		tga16ToRGBA((uint16)(pixel[0] | (pixel[1] << 8)), rgba);
+	}
+	else
+	{
+		rgba[0] = pixel[2];
+		rgba[1] = pixel[1];
+		rgba[2] = pixel[0];
+		rgba[3] = imageDepth == 32 ? pixel[3] : 255;
+	}
+}
+
 /*-------------------------------------------------------------------*\
 							readTGA
 \*-------------------------------------------------------------------*/
-uint8 CBitmap::readTGA( NLMISC::IStream &f)
+uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -2570,6 +2694,22 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 
 	// Reading TGA image data
 
+	if (width > maxSize || height > maxSize)
+	{
+		nlwarning("The TGA image '%s' of %ux%u is larger than %u pixels a side", f.getStreamName().c_str(), (uint)width,
+		    (uint)height, maxSize);
+		return 0;
+	}
+
+	// an RGB(A) image, uncompressed or RLE, is converted from 16, 24 or 32 bits per pixel: with 8, the conversion read
+	// 3 bytes per pixel from scanlines of 1, and an RLE pixel of more than 32 bits did not fit the pixel it was read into
+	if ((imageType == 2 || imageType == 10) && imageDepth != 16 && imageDepth != 24 && imageDepth != 32)
+	{
+		nlwarning("The TGA image '%s' is RGB with %u bits per pixel, which is not supported", f.getStreamName().c_str(),
+		    (uint)imageDepth);
+		return 0;
+	}
+
 	_Width = width;
 	_Height = height;
 
@@ -2582,11 +2722,9 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 			uint8 upSideDown = ((desc & (1 << 5))==0);
 			slsize = _Width * imageDepth / 8;
 
-			scanline = new uint8[slsize];
-			if(!scanline)
-			{
-				throw EAllocationFailure();
-			}
+			// a vector, not new[]: a truncated file throws from serialBuffer, which leaked the scanline
+			std::vector<uint8> scanlineBuffer(std::max(slsize, (sint32)1));
+			scanline = &scanlineBuffer[0];
 
 			for(y=0; y<_Height;y++)
 			{
@@ -2629,13 +2767,7 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 						{
 							uint16 toto = (uint16)scanline[k++];
 							toto |= scanline[k++]<<8;
-							uint _r = toto>>10;
-							uint _g = (toto>>5)&0x1f;
-							uint _b = toto&0x1f;
-							_Data[0][(height-y-1)*width*4 + 4*i] = uint8((_r<<3) | (_r>>2));
-							_Data[0][(height-y-1)*width*4 + 4*i + 1] = uint8((_g<<3) | (_g>>2));
-							_Data[0][(height-y-1)*width*4 + 4*i + 2] = uint8((_b<<3) | (_b>>2));
-							_Data[0][(height-y-1)*width*4 + 4*i + 3] = 255;
+							tga16ToRGBA(toto, &_Data[0][(height - y - 1) * width * 4 + 4 * i]);
 						}
 						else
 						{
@@ -2654,13 +2786,7 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 						{
 							uint16 toto = (uint16)scanline[k++];
 							toto |= scanline[k++]<<8;
-							int _r = toto>>10;
-							int _g = toto&(0x3e0)>>5;
-							int _b = toto&0x1f;
-							_Data[0][y*width*4 + 4*i] = uint8((_r<<3) | (_r>>2));
-							_Data[0][y*width*4 + 4*i + 1] = uint8((_g<<3) | (_g>>2));
-							_Data[0][y*width*4 + 4*i + 2] = uint8((_b<<3) | (_b>>2));
-							_Data[0][y*width*4 + 4*i + 3] = 255;
+							tga16ToRGBA(toto, &_Data[0][y * width * 4 + 4 * i]);
 						}
 						else
 						{
@@ -2677,7 +2803,6 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 			}
 
 			PixelFormat = RGBA;
-			delete []scanline;
 		};
 		break;
 
@@ -2688,11 +2813,8 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 			uint8 upSideDown = ((desc & (1 << 5))==0);
 			slsize = _Width;
 
-			scanline = new uint8[slsize];
-			if(!scanline)
-			{
-				throw EAllocationFailure();
-			}
+			std::vector<uint8> scanlineBuffer(std::max(slsize, (sint32)1));
+			scanline = &scanlineBuffer[0];
 
 			for(y=0; y<_Height;y++)
 			{
@@ -2710,7 +2832,6 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 			}
 
 			PixelFormat = _LoadGrayscaleAsAlpha?Alpha:Luminance;
-			delete []scanline;
 		};
 		break;
 
@@ -2728,35 +2849,32 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 			while(readSize < imageSize)
 			{
 				f.serial(packet);
+				sint32 count = clampTGAPacket(f, (packet & 0x7F) + 1, imageSize - readSize);
 				if((packet & 0x80) > 0) // packet RLE
 				{
 					for(i=0; i<imageDepth/8; i++)
 					{
 						f.serial(pixel[i]);
 					}
-					for (i=0; i < (packet & 0x7F) + 1; i++)
+					for (i = 0; i < count; i++)
 					{
-						_Data[0][dstId++]= pixel[2];
-						_Data[0][dstId++]= pixel[1];
-						_Data[0][dstId++]= pixel[0];
-						_Data[0][dstId++]= pixel[3];
+						tgaPixelToRGBA(pixel, imageDepth, &_Data[0][dstId]);
+						dstId += 4;
 					}
 				}
 				else	// packet Raw
 				{
-					for(i=0; i<((packet & 0x7F) + 1); i++)
+					for (i = 0; i < count; i++)
 					{
 						for(j=0; j<imageDepth/8; j++)
 						{
 							f.serial(pixel[j]);
 						}
-						_Data[0][dstId++]= pixel[2];
-						_Data[0][dstId++]= pixel[1];
-						_Data[0][dstId++]= pixel[0];
-						_Data[0][dstId++]= pixel[3];
+						tgaPixelToRGBA(pixel, imageDepth, &_Data[0][dstId]);
+						dstId += 4;
 					}
   				}
-				readSize += (packet & 0x7F) + 1;
+				readSize += count;
 			}
 			PixelFormat = RGBA;
 
@@ -2777,23 +2895,24 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 			while(readSize < imageSize)
 			{
 				f.serial(packet);
+				sint32 count = clampTGAPacket(f, (packet & 0x7F) + 1, imageSize - readSize);
 				if((packet & 0x80) > 0) // packet RLE
 				{
 					f.serial(pixel[0]);
-					for (i=0; i < (packet & 0x7F) + 1; i++)
+					for (i = 0; i < count; i++)
 					{
 						_Data[0][dstId++]= pixel[0];
 					}
 				}
 				else	// packet Raw
 				{
-					for(i=0; i<((packet & 0x7F) + 1); i++)
+					for (i = 0; i < count; i++)
 					{
 						f.serial(pixel[0]);
 						_Data[0][dstId++]= pixel[0];
 					}
   				}
-				readSize += (packet & 0x7F) + 1;
+				readSize += count;
 			}
 			PixelFormat = _LoadGrayscaleAsAlpha?Alpha:Luminance;
 		};
@@ -3480,6 +3599,117 @@ CRGBAF CBitmap::getColor(float x, float y, bool tileU, bool tileV) const
 
 
 
+/** The bytes of a JPEG file in order, for loadSize. The file is read from the stream a block at a time, so that a file
+ *  of many small steps (fill bytes, empty segments) costs one pass over its blocks and not a seek and a read per step.
+ *  The body of a segment is skipped within the block, or with one seek when it ends beyond the block. Nothing is read
+ *  past the size given.
+ */
+class CJPGSizeReader
+{
+public:
+	CJPGSizeReader(NLMISC::IStream &f, uint32 fileSize, uint32 pos)
+	    : m_Stream(f)
+	    , m_FileSize(fileSize)
+	    , m_BlockPos(pos)
+	    , m_BlockSize(0)
+	    , m_Index(0)
+	    , m_StreamPos(~0u)
+	{
+	}
+
+	/// The position in the file of the next byte
+	uint32 getPos() const { return m_BlockPos + m_Index; }
+
+	/// Reads the next byte. Returns false at the end of the file.
+	bool readByte(uint8 &byte)
+	{
+		if (m_Index >= m_BlockSize && !readBlock())
+			return false;
+		byte = m_Block[m_Index++];
+		return true;
+	}
+
+	/// Skips count bytes. Returns false, and skips nothing, when the file has fewer left.
+	bool skip(uint32 count)
+	{
+		if (count > m_FileSize - getPos())
+			return false;
+		if (count <= m_BlockSize - m_Index)
+		{
+			m_Index += count;
+		}
+		else
+		{
+			// beyond the block: the next block is read from there
+			m_BlockPos = getPos() + count;
+			m_BlockSize = 0;
+			m_Index = 0;
+		}
+		return true;
+	}
+
+private:
+	/// Reads the block at the position of the next byte, which is past the current block
+	bool readBlock()
+	{
+		const uint32 pos = getPos();
+		if (pos >= m_FileSize)
+			return false;
+		const uint32 size = std::min((uint32)sizeof(m_Block), m_FileSize - pos);
+		// the stream is at the end of the last block read, unless a segment was skipped since
+		if (m_StreamPos != pos && !m_Stream.seek((sint32)pos, NLMISC::IStream::begin))
+			return false;
+		m_Stream.serialBuffer(m_Block, size);
+		m_BlockPos = pos;
+		m_BlockSize = size;
+		m_Index = 0;
+		m_StreamPos = pos + size;
+		return true;
+	}
+
+	NLMISC::IStream &m_Stream;
+	uint32 m_FileSize;
+	/// Position in the file, and size, of the block
+	uint32 m_BlockPos;
+	uint32 m_BlockSize;
+	/// The next byte of the block
+	uint32 m_Index;
+	/// Where the stream is, to seek only when the next block is elsewhere
+	uint32 m_StreamPos;
+	uint8 m_Block[4096];
+};
+
+/** Reads up to the next marker of a JPEG file, the way the decoder (next_marker of libjpeg) finds it, so that loadSize
+ *  reads a size from the files that decode: bytes that are not 0xff are passed over, then come any number of 0xff
+ *  fill bytes and the marker code, and 0xff 0x00 is no marker. The bytes passed over are counted in strayBytes.
+ *  Returns false at the end of the file.
+ */
+static bool nextJPGMarker(CJPGSizeReader &reader, uint8 &marker, uint32 &strayBytes)
+{
+	for (;;)
+	{
+		uint8 byte;
+		if (!reader.readByte(byte))
+			return false;
+		if (byte != 0xff)
+		{
+			++strayBytes;
+			continue;
+		}
+		do
+		{
+			if (!reader.readByte(byte))
+				return false;
+		} while (byte == 0xff);
+		if (byte != 0x00)
+		{
+			marker = byte;
+			return true;
+		}
+		strayBytes += 2;
+	}
+}
+
 void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 {
 	retWidth= 0;
@@ -3493,15 +3723,9 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 	if(fileType == DDS_HEADER)
 	{
 		// read entire DDS header.
-		uint32 size = 0;
-		f.serial(size); // size in Bytes of header(without "DDS")
-		uint32 * _DDSSurfaceDesc = new uint32[size];
-		_DDSSurfaceDesc[0]= size;
-
-		for(uint i= 0; i<size/4 - 1; i++)
-		{
-			f.serial(_DDSSurfaceDesc[i+1]);
-		}
+		uint32 _DDSSurfaceDesc[s_DDSHeaderLength];
+		if (!readDDSHeader(f, _DDSSurfaceDesc, MAX_BITMAP_SIZE))
+			return;
 
 		// flags determines which members of the header structure contain valid data
 		uint32 flags = _DDSSurfaceDesc[1];
@@ -3510,15 +3734,12 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 		if(!(flags & DDSD_LINEARSIZE))
 		{
 			nlwarning("A DDS doesn't have the flag DDSD_LINEARSIZE");
-			//delete [] _DDSSurfaceDesc;
 			//throw EDDSBadHeader();
 		}
 
 		//-------------- extracting and testing useful info
 		retHeight  = _DDSSurfaceDesc[2];
 		retWidth = _DDSSurfaceDesc[3];
-
-		delete [] _DDSSurfaceDesc;
 	}
 	else if(fileType == PNG_HEADER)
 	{
@@ -3560,7 +3781,13 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 					break;
 				}
 
-				// skip data of this chunk and CRC32
+				// skip data of this chunk and CRC32, a length that does not fit the signed seek offset would seek backward
+				// and read the same chunks again forever
+				if (chunkLength > 0x7fffffffu - 4)
+				{
+					nlwarning("Invalid PNG chunk length %u in '%s'", chunkLength, f.getStreamName().c_str());
+					break;
+				}
 				f.seek(chunkLength+4, IStream::current);
 			}
 			catch(...)
@@ -3572,83 +3799,85 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 	}
 	else if(memcmp(&fileType, &JPG_HEADER, 2) == 0)
 	{
-		uint8 blockMarker1 = 0;
-		uint8 blockMarker2 = 0;
-		uint16 blockSize = 0;
-		bool eof = false;
-
-		do
+		// The segments are walked by their length from the one after the start of image marker, up to the frame header,
+		// which holds the size. Searching the bytes for a marker found the frame header of a thumbnail (itself a JPEG
+		// image) in an Exif segment, or the end of that thumbnail. Every read is checked against the size of the file
+		// and every step moves forward, so the walk ends whatever the file holds, after one pass over it at most.
+		if (!f.seek(0, IStream::end))
 		{
-			try
+			throw ESeekFailed();
+		}
+		const uint32 fileSize = (uint32)f.getPos();
+		CJPGSizeReader reader(f, fileSize, 2);
+		bool found = false;
+		const char *error = nullptr;
+		uint32 strayBytes = 0;
+
+		while (!found && !error)
+		{
+			uint8 marker;
+			if (!nextJPGMarker(reader, marker, strayBytes))
 			{
-				// marker of a block
-				f.serial(blockMarker1);
-
-				if (blockMarker1 == 0xff)
-				{
-					// marker of a block
-					f.serial(blockMarker2);
-
-					// 0xff00 is only found in image data
-					if (blockMarker2 == 0x00)
-					{
-						// image data 0xff
-					}
-					// 0xffda is image data
-					else if (blockMarker2 == 0xda)
-					{
-						// next data is image data which must end with 0xffd9
-					}
-					// 0xffd9 is the end of an image
-					else if (blockMarker2 == 0xd9)
-					{
-						// real end of file
-						break;
-					}
-					else if (blockMarker2 == 0xdd || blockMarker2 == 0xdc)
-					{
-						f.seek(4, IStream::current);
-					}
-					else if (blockMarker2 == 0xdf)
-					{
-						f.seek(3, IStream::current);
-					}
-					else if (blockMarker2 >= 0xd0 && blockMarker2 <= 0xd8)
-					{
-						// no content
-					}
-					else
-					{
-						// size of a block
-						f.serial(blockSize);
-						NLMISC_BSWAP16(blockSize);
-
-						// frame marker (which contains image width and height)
-						if (blockMarker2 >= 0xc0 && blockMarker2 <= 0xc3)
-						{
-							uint8 imagePrecision = 0; // sample precision
-							uint32 imageSize = 0; // width and height
-							f.serial(imagePrecision);
-							f.serial(imageSize);
-							NLMISC_BSWAP32(imageSize);
-
-							retWidth = imageSize & 0xffff;
-							retHeight = (imageSize & 0xffff0000) >> 16;
-
-							break;
-						}
-
-						// skip the block
-						f.seek(blockSize - 2, IStream::current);
-					}
-				}
+				error = "ends before a frame header";
+				break;
 			}
-			catch(...)
+
+			// the image data, or the end of the image
+			if (marker == 0xda || marker == 0xd9)
 			{
-				eof = true;
+				error = "has no frame header before its image data";
+				break;
+			}
+
+			// the markers without a length: restart, start of image and the temporary one
+			if ((marker >= 0xd0 && marker <= 0xd8) || marker == 0x01)
+			{
+				continue;
+			}
+
+			// the frame headers are 0xc0 to 0xcf, without the Huffman table, the reserved one and the arithmetic
+			// conditioning: their sample precision, height and width follow the length
+			const bool frame = marker >= 0xc0 && marker <= 0xcf && marker != 0xc4 && marker != 0xc8 && marker != 0xcc;
+
+			// the length of the segment, which counts its own 2 bytes
+			uint8 header[7];
+			const uint32 headerSize = frame ? 7 : 2;
+			uint32 headerRead = 0;
+			while (headerRead < headerSize && reader.readByte(header[headerRead]))
+				++headerRead;
+			if (headerRead < headerSize)
+			{
+				error = "ends in a segment";
+				break;
+			}
+			const uint32 length = ((uint32)header[0] << 8) | header[1];
+			if (length < headerSize)
+			{
+				error = "has a segment shorter than its content";
+				break;
+			}
+
+			if (frame)
+			{
+				retHeight = ((uint32)header[3] << 8) | header[4];
+				retWidth = ((uint32)header[5] << 8) | header[6];
+				found = true;
+			}
+			else if (!reader.skip(length - 2))
+			{
+				error = "has a segment longer than the file";
 			}
 		}
-		while(!eof);
+
+		if (error)
+		{
+			nlwarning("The JPG image '%s' %s (at byte %u of %u)", f.getStreamName().c_str(), error, reader.getPos(), fileSize);
+		}
+		if (strayBytes)
+		{
+			// the decoder passes over them with a warning too
+			nlwarning("The JPG image '%s' has %u bytes between its segments that belong to none", f.getStreamName().c_str(), strayBytes);
+		}
 	}
 	else if(fileType == GIF_HEADER)
 	{

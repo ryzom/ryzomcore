@@ -143,7 +143,7 @@ public:
 			if ( getLogSubDirs( domainDir, dirs ) )
 			{
 				for ( vector<string>::const_iterator it=dirs.begin(); it!=dirs.end(); ++it )
-					log.displayNL( (*it).c_str() );
+					log.displayNL("%s", (*it).c_str());
 			}
 			else
 				log.displayNL( "No subdirs found in %s or directory not found", domainDir.c_str() );

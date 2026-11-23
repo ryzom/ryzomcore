@@ -233,21 +233,6 @@ ryzom/server/src/tick_service/tick_service
 # WebTT temp dir
 ryzom/tools/server/www/webtt/app/tmp
 
-# AMS ignore
-web/public_php/ams/is_installed
-web/docs/ams/html
-web/public_php/ams/templates_c
-ryzom/tools/server/ryzom_ams/drupal
-ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/autoload
-ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/configs
-ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/cron
-ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/img
-ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/plugins
-ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/smarty
-ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/translations
-ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/libinclude.php
-ryzom/tools/server/ryzom_ams/old
-
 
 
 # Tools and external directories
@@ -268,7 +253,6 @@ nel/tools/build_gamedata/processes/rbank/build_rbank.cfg
 nel/tools/build_gamedata/processes/zone/debug_zone_dependencies.cfg
 web/public_php/config.php
 web/public_php/is_installed
-web/public_php/ams/files
 web/public_php/db_version_lib
 web/public_php/db_version_shard
 web/public_php/db_version_tool
@@ -301,3 +285,5 @@ ryzom/server/www/login/server_open_status
 imgui.ini
 
 
+# Crash reports downloaded from Zulip
+ryzom/tools/crash_reports/crash_*.md

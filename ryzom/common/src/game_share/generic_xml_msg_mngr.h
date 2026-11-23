@@ -28,6 +28,7 @@
 #include "nel/misc/entity_id.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/string_view.h"
+#include "nel/misc/md5.h"
 
 #include <string>
 #include <vector>
@@ -328,6 +329,100 @@ public:
 	 */
 	bool					nodeUsesCycle(CNodeId &nodeId)				{ return nodeId._Node->UseCycle; }
 
+	// clang-format off
+	/**
+	 * The signature of a msg.xml, which the frontend sends to its clients for them to compare with that of their own
+	 * file: the MD5 of the file without what declares the stream classes (see removeStreamClasses), so that a
+	 * frontend can declare a class, or move a message to one, without the files of its clients having to follow. A
+	 * file that has nothing of the kind has the signature it always had, the MD5 of the whole file.
+	 * removeCarriageReturns: of the file without its carriage returns as well (a client compares with both).
+	 * The hash is all zero if the file cannot be read.
+	 * A file can name the signature of what it says (see findDeployedSignature): that one is given then, for both
+	 * forms, so that the layout of the file can change without its signature.
+	 */
+	static NLMISC::CHashKeyMD5	getSignature(const std::string &filename, bool removeCarriageReturns);
+
+	/**
+	 * The signature of a database.xml, compared at the same place as that of msg.xml: the MD5 of the file, or of
+	 * the file without its carriage returns; or the one the file names for what it says, as for msg.xml. The hash
+	 * is all zero if the file cannot be read.
+	 */
+	static NLMISC::CHashKeyMD5	getDatabaseSignature(const std::string &filename, bool removeCarriageReturns);
+
+	/**
+	 * The hash of what a msg.xml or database.xml says, whatever its layout: the MD5 of its elements in their order,
+	 * each with its name, its attributes in their order with their values, and its text (CDATA too) with every run
+	 * of white space as one space and none at its ends. The comments, the indentation, the line ends, the spaces
+	 * that align attributes and the way a tag is closed do not count; nor do processing instructions, namespace
+	 * prefixes and declarations, and references in a text to entities of a document type, none of which these
+	 * files have. White space inside the value of an attribute does count. skipStreamClasses: the stream_class
+	 * elements and the stream attributes of a msg.xml do not count either, as its signature leaves them out.
+	 * The hash is all zero if the text is not well-formed XML.
+	 */
+	static NLMISC::CHashKeyMD5	getContentHash(const std::vector<uint8> &text, bool skipStreamClasses);
+
+	/**
+	 * The signature a file names for its content as it is deployed. The clients and frontends that are out compare
+	 * the MD5 of the bytes of msg.xml and database.xml, so the same messages in another layout would not match
+	 * them: those of a release once the file is laid out again, or those of a game that keeps the files in a
+	 * layout of its own. A file names the MD5 that what it says has there, in a comment,
+	 *     <!-- deployed_signature content="<content hash>" md5="<MD5 of the deployed file>" ... -->
+	 * both as 32 hexadecimal digits (getContentHash; for a msg.xml without its stream classes, and the MD5 of the
+	 * file without them). deployed is set, and true returned, when such a comment names `content` (the text is
+	 * searched for it as bytes). A file whose content changed since has another content hash, and no signature
+	 * but that of its bytes: with a change of what the file says, take the comment out, or have it written again
+	 * with the MD5 of the new file. Never the new content hash beside the old MD5, which is that of files that say
+	 * something else.
+	 */
+	static bool					findDeployedSignature(const std::vector<uint8> &text, const NLMISC::CHashKeyMD5 &content, NLMISC::CHashKeyMD5 &deployed);
+
+	/**
+	 * Remove from the text of a msg.xml what declares the stream classes: the lines of the `stream_class` elements,
+	 * the comment in front of them (from a line that starts with `<!-- stream_class` to the line that ends it), and
+	 * the `stream` attributes of the nodes, each with the one space in front of it. What is left is the file as it
+	 * was before, byte for byte, provided they were written that way: each element on a line of its own, each
+	 * attribute after one space.
+	 */
+	static void					removeStreamClasses(std::vector<uint8> &text);
+
+	/**
+	 * Check that a msg.xml declares its stream classes the way removeStreamClasses takes them out. Returns what is
+	 * not written that way, one line of text per fault (none if the file cannot be read): a `stream_class` element,
+	 * a `stream` attribute, or a comment that speaks of `stream_class`, that would stay in the signature, which
+	 * clients without it would then not match; a line that would be left out of the signature with something else
+	 * on it. A file that names the signature of what it says (findDeployedSignature) has nothing to report: its
+	 * bytes do not make its signature.
+	 */
+	static std::vector<std::string>	checkStreamClassesText(const std::string &filename);
+
+	/**
+	 * Get the class of the message node, which says on which stream of protocol level ryzomcore/4.2 the frontend
+	 * sends the message: an index in getStreamClasses(), or CLFECOMMON::NoStreamClass for a message that goes by
+	 * impulse. See game_share/stream_record.h.
+	 */
+	uint8					getNodeStreamClass(CNodeId &nodeId)			{ return nodeId._Node->StreamClass; }
+
+	/**
+	 * The classes the file declares (its `stream_class` elements), by name, in the order of their streams
+	 */
+	const std::vector<std::string>	&getStreamClasses() const			{ return _StreamClasses; }
+
+	/**
+	 * For each of those classes, the bytes above which a message of the class is left out instead of sent (its
+	 * `drop_above` attribute), or 0 for a class of which no message can be left out. The messages of such a class do
+	 * not depend on each other (chat lines); in the others a message that is missing leaves the client without
+	 * something for good.
+	 */
+	const std::vector<uint32>	&getStreamClassDropAbove() const			{ return _StreamClassDropAbove; }
+
+	/**
+	 * The file declares a class twice, without a name or with a `drop_above` that is no number, declares more classes
+	 * than a client allows streams, or has a `stream` attribute that names no class (each fault was logged). The
+	 * frontend stops on that.
+	 */
+	bool					hasStreamClassError() const					{ return _StreamClassError; }
+	// clang-format on
+
 	/**
 	 * Set node user data
 	 */
@@ -362,9 +457,14 @@ protected:
 		TMessageFormat		Format;
 		uint				NbBits;
 		TMsgHeaderCallback	Callback;
+		// clang-format off
+		/// The class of the `stream` attribute of the node, or else that of the branch it is in (an index in
+		/// streamClasses, or CLFECOMMON::NoStreamClass)
+		uint8				StreamClass;
 
-		/// Constructor
-		CNode(xmlNodePtr xmlNode, uint32 value);
+		/// Constructor (streamClassError is set if a `stream` attribute in the node or below names no class)
+		CNode(xmlNodePtr xmlNode, uint32 value, uint8 parentStreamClass, const std::vector<std::string> &streamClasses, bool &streamClassError);
+		// clang-format on
 
 		/// Destructor
 		~CNode();
@@ -500,6 +600,11 @@ protected:
 protected:
 	CNode	*_Root;
 
+	// clang-format off
+	std::vector<std::string>	_StreamClasses;
+	std::vector<uint32>	_StreamClassDropAbove;
+	bool	_StreamClassError;
+	// clang-format on
 };
 
 

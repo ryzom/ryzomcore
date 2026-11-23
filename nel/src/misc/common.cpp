@@ -1110,6 +1110,36 @@ bool abortProgram(uint32 pid)
 
 #ifdef NL_OS_WINDOWS
 
+// The environment of a program that this process starts: the one of this process, without the variables that are
+// about this process only. NEL_SE_TRANS says that this process translates structured exceptions already
+// (createDebug), and the child does that for itself, so that nlassert and nlstop show their reason and call stack.
+// NL_REPORT_TOOL keeps the crash report tool of this process off (setReportToolEnabled), and a child decides that
+// for itself too. A block of the Unicode form (CREATE_UNICODE_ENVIRONMENT); false when the environment cannot be read.
+static bool getChildEnvironment(std::vector<wchar_t> &block)
+{
+	static const wchar_t *const s_Excluded[] = { L"NEL_SE_TRANS=", L"NL_REPORT_TOOL=" };
+
+	block.clear();
+	wchar_t *environment = GetEnvironmentStringsW();
+	if (environment == NULL)
+		return false;
+	for (const wchar_t *entry = environment; *entry != L'\0'; entry += wcslen(entry) + 1)
+	{
+		bool excluded = false;
+		for (uint i = 0; i < sizeof(s_Excluded) / sizeof(s_Excluded[0]) && !excluded; ++i)
+			excluded = _wcsnicmp(entry, s_Excluded[i], wcslen(s_Excluded[i])) == 0;
+		if (!excluded)
+			block.insert(block.end(), entry, entry + wcslen(entry) + 1);
+	}
+	FreeEnvironmentStringsW(environment);
+
+	// the block ends with an empty entry, and a block without entries is that one
+	if (block.empty())
+		block.push_back(L'\0');
+	block.push_back(L'\0');
+	return true;
+}
+
 static bool createProcess(const std::string &programName, const std::string &arguments, bool log, PROCESS_INFORMATION &pi)
 {
 	STARTUPINFOW si;
@@ -1118,44 +1148,38 @@ static bool createProcess(const std::string &programName, const std::string &arg
 
 	si.cb = sizeof(si);
 
-	// Enable nlassert/nlstop to display the error reason & callstack
-	const char *SE_TRANSLATOR_IN_MAIN_MODULE = "NEL_SE_TRANS";
-
-	char envBuf[2];
-	if (GetEnvironmentVariableA(SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2) != 0)
+	std::vector<wchar_t> environment;
+	if (!getChildEnvironment(environment))
 	{
-		SetEnvironmentVariableA(SE_TRANSLATOR_IN_MAIN_MODULE, NULL);
+		if (log)
+		{
+			sint lastError = getLastError();
+			nlwarning("LAUNCH: Failed launched '%s' with arg '%s': the environment of this process cannot be read for it, err %d: '%s'", programName.c_str(), arguments.c_str(), lastError, formatErrorMessage(lastError).c_str());
+		}
+		return false;
 	}
 
-	wchar_t *sProgramName = NULL;
-	
-	std::string args;
+	// The first parameter of CreateProcess names one file and is not searched for. It is used for a
+	// program name with a directory, and for a bare name that names a file in the current directory.
+	// With the first parameter NULL, CreateProcess takes the program name from the command line: a bare
+	// name is searched for (application directory, current directory, system directories, PATH, as
+	// execvp searches PATH on Unix) and gets .exe when it has no extension, and a .bat file is run by
+	// the command interpreter.
+	bool useApplicationName = CFile::getExtension(programName) != "bat"
+	    && (!CFile::getPath(programName).empty() || CFile::fileExists(programName));
+	std::wstring wProgramName;
+	if (useApplicationName)
+		wProgramName = utf8ToWide(programName);
 
-	// a .bat file must have first parameter to NULL and use 2nd parameter to pass filename
-	if (CFile::getExtension(programName) == "bat")
-	{
-		args = "\"" + programName + "\" " + arguments;
-	}
-	else
-	{
-		ucstring ucProgramName;
-		ucProgramName.fromUtf8(programName);
+	// the program name is the first argument of the command line, quoted since it may contain spaces
+	std::string args = "\"" + programName + "\" " + arguments;
 
-		sProgramName = new wchar_t[MAX_PATH];
-		wcscpy(sProgramName, (wchar_t*)ucProgramName.c_str());
+	// CreateProcess may modify the command line in place
+	std::wstring wArgs = utf8ToWide(args);
 
-		// important! we need to specify the executable full path as first argument
-		args = toString("\"%s\" ", programName.c_str()) + arguments;
-	}
-
-	// or 0 for a window
-	BOOL res = CreateProcessW(sProgramName, (LPWSTR)nlUtf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL /* current dir */, &si, &pi);
-
-	if (sProgramName)
-	{
-		delete [] sProgramName;
-		sProgramName = NULL;
-	}
+	// or 0 for a window. The child has the default error mode, not the one of this process (SetErrorMode), whose
+	// error boxes this process may have turned off for itself only.
+	BOOL res = CreateProcessW(useApplicationName ? wProgramName.c_str() : NULL, &wArgs[0], NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, &environment[0], NULL /* current dir */, &si, &pi);
 
 	if (!res)
 	{
@@ -1165,8 +1189,7 @@ static bool createProcess(const std::string &programName, const std::string &arg
 			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), lastError, formatErrorMessage(lastError).c_str());
 		}
 
-		CloseHandle( pi.hProcess );
-		CloseHandle( pi.hThread );
+		// no process was created, there are no handles to close
 
 		return false;
 	}
@@ -1421,6 +1444,13 @@ sint launchProgramAndWaitForResult(const std::string &programName, const std::st
 		}
 
 		nlwarning("LAUNCH: Failed launched '%s' with arg '%s' and error: %s", programName.c_str(), arguments.c_str(), error.c_str());
+	}
+
+	// the handles of a process whose wait failed are still open (closed after the error was read above)
+	if (ret != WAIT_OBJECT_0)
+	{
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
 	}
 
 	return -1;
@@ -1701,55 +1731,22 @@ int	nlfseek64( FILE *stream, sint64 offset, int origin )
 {
 #ifdef NL_OS_WINDOWS
 
-	//
-	fpos_t pos64 = 0;
-	switch (origin)
-	{
-	case SEEK_CUR:
-		if (fgetpos(stream, &pos64) != 0)
-			return -1;
-	case SEEK_END:
-		pos64 = _filelengthi64(_fileno(stream));
-		if (pos64 == -1L)
-			return -1;
-	};
-
-	// Seek
-	pos64 += offset;
-
-	// Set the final position
-	return fsetpos (stream, &pos64);
+	// The stream knows its position and its end with what it has buffered: the length of the file on disk
+	// does not include what was written and not flushed yet. _fseeki64 exists since Visual C++ 2005, and
+	// in mingw-w64.
+	return _fseeki64(stream, offset, origin);
 
 #else // NL_OS_WINDOWS
-	// TODO: to fix for Linux and Mac OS X
 
-	// This code doesn't work under windows : fseek() implementation uses a signed 32 bits offset. What ever we do, it can't seek more than 2 Go.
-	// For the moment, i don't know if it works under linux for seek of more than 2 Go.
-
-	nlassert ((offset < SINT64_CONSTANT(2147483647)) && (offset > SINT64_CONSTANT(-2147483648)));
-
-	bool first = true;
-	do
+	// off_t is 64 bits wide on 64-bit systems, and on 32-bit systems when built with _FILE_OFFSET_BITS=64
+	if ((sint64)(off_t)offset != offset)
 	{
-		// Get the size of the next fseek
-		sint nextSeek;
-		if (offset > 0)
-			nextSeek = (sint)std::min ((sint64)SINT64_CONSTANT(2147483647), offset);
-		else
-			nextSeek = (sint)std::max ((sint64)-SINT64_CONSTANT(2147483648), offset);
-
-		// Make a seek
-		int result = fseek ( stream, nextSeek, first?origin:SEEK_CUR );
-		if (result != 0)
-			return result;
-
-		// Remaining
-		offset -= nextSeek;
-		first = false;
+		nlwarning("nlfseek64: offset %" NL_I64 "d does not fit in the %u bit off_t of this build, build with _FILE_OFFSET_BITS=64", offset, (uint)(sizeof(off_t) * 8));
+		errno = EOVERFLOW;
+		return -1;
 	}
-	while (offset);
 
-	return 0;
+	return fseeko(stream, (off_t)offset, origin);
 
 #endif // NL_OS_WINDOWS
 }
@@ -1764,11 +1761,8 @@ sint64 nlftell64(FILE *stream)
 	}
 	else return -1;
 #else
-	nlunreferenced(stream);
-
-	// TODO: implement for Linux and Mac OS X
-	nlerror("Not implemented");
-	return -1;
+	// see nlfseek64 for the width of off_t
+	return (sint64)ftello(stream);
 #endif
 }
 
@@ -1796,6 +1790,11 @@ NLMISC_CATEGORISED_COMMAND(nel, sleep, "Freeze the service for N seconds (for de
 	return true;
 }
 
+// These three commands let anyone with a service command prompt run a program on the host. Every service
+// linked with NeL carried them, so any privilege bug in a command channel (admin tool, EXEC_COMMAND, the
+// client admin commands) turned into a shell. Nothing uses them; a shard that wants a shell escape can
+// register one in its own admin executor service.
+#if 0
 NLMISC_CATEGORISED_COMMAND(nel, system, "Execute the command line using system() function call (wait until the end of the command)", "<commandline>")
 {
 	nlunreferenced(rawCommandString);
@@ -1846,6 +1845,7 @@ NLMISC_CATEGORISED_COMMAND(nel, killProgram, "kill a program given the pid", "<p
 	killProgram(pid);
 	return true;
 }
+#endif
 
 #ifdef NL_OS_WINDOWS
 LONG GetRegKey(HKEY key, LPCWSTR subkey, LPWSTR retdata)
@@ -1915,7 +1915,13 @@ static bool openDocWithExtension (const std::string &document, const std::string
 
 				// create process
 				PROCESS_INFORMATION pi;
-				return createProcess(program, document, false, pi);
+				if (!createProcess(program, document, false, pi))
+					return false;
+
+				// the program runs on its own, its handles are not needed
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				return true;
 			}
 		}
 	}
@@ -1989,6 +1995,12 @@ static bool openDocWithExtension (const std::string &document, const std::string
 
 bool openURL(const std::string &url)
 {
+	// Only web urls: anything else would go to the system's handler for that scheme or file type
+	if (!startsWithCaseInsensitiveAscii(url, "http://") && !startsWithCaseInsensitiveAscii(url, "https://"))
+	{
+		nlwarning("openURL: refused '%s', only http and https urls are opened", url.c_str());
+		return false;
+	}
 	return openDocWithExtension(url, "htm");
 }
 

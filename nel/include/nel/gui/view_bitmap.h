@@ -113,8 +113,9 @@ namespace NLGUI
 
 		void			setColorRGBA(NLMISC::CRGBA col);
 		NLMISC::CRGBA	getColorRGBA() const;
+
 		/// called by CGroupHTML when the pending download is aborted/destroyed, to avoid a dangling pointer
-		void resetHtmlDownload() { _HtmlDownload = NULL; }
+		void resetHtmlDownload() { _HtmlDownload = nullptr; }
 
 		virtual sint32 getAlpha() const NL_OVERRIDE { return _Color.A; }
 		virtual void setAlpha (sint32 a) NL_OVERRIDE { _Color.A = (uint8)a; }

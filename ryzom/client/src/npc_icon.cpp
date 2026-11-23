@@ -481,7 +481,7 @@ void CNPCIconCache::setEnabled(bool b)
 
 NLMISC_COMMAND(dumpNPCIconCache, "Display descriptions of NPCs", "")
 {
-	log.displayNL(CNPCIconCache::getInstance().getDump().c_str());
+	log.displayNL("%s", CNPCIconCache::getInstance().getDump().c_str());
 	return true;
 }
 

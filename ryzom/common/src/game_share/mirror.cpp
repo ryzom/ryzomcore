@@ -2487,10 +2487,26 @@ void	sendMessageViaMirrorToAll( NLNET::CMessage& msgout )
 
 
 /*
+ * For the commands below. They are also registered in a service that links game_share without creating a CMirror
+ * (the mirror service in a shared library build): false, with a message for the user, in such a service.
+ */
+static bool hasMirrorInstance(NLMISC::CLog &log)
+{
+	if (MirrorInstance != nullptr)
+		return true;
+	log.displayNL("This service has no mirror");
+	return false;
+}
+
+
+/*
  * displayMirrorRow command
  */
 NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorRow, "Display the contents of the mirror for an entity (all datasets)", "[<CEntityId> | <dataset> <entityIndex>]" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	CEntityId id;
 	switch( args.size() )
 	{
@@ -2534,6 +2550,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorRow, "Display the contents of th
  */
 NLMISC_CATEGORISED_COMMAND(mirror, setMirrorValue, "Change a value in the mirror", "[<CEntityId>] <propName> <value>" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	CEntityId id;
 	switch( args.size() )
 	{
@@ -2577,6 +2596,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, setMirrorValue, "Change a value in the mirror
  */
 NLMISC_CATEGORISED_COMMAND(mirror, addMirrorWatch, "Watch a value of a property of an entity", "[<CEntityId>] <propName>" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	if ( args.size() < 1 )
 		return false;
 	CEntityId id;
@@ -2616,6 +2638,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, addMirrorWatch, "Watch a value of a property 
  */
 NLMISC_CATEGORISED_COMMAND(mirror, setMirrorWatch, "Set a particular watch of a property value", "watchNb [<CEntityId>] <propName>" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	if ( args.size() < 2 )
 		return false;
 	CEntityId id;
@@ -2667,6 +2692,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, removeMirrorWatch, "Remove a particular watch
  */
 NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorProperties, "Display the properties allocated in the mirror", "" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	MirrorInstance->displayProperties( log );
 	return true;
 }
@@ -2677,6 +2705,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorProperties, "Display the propert
  */
 NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorEntities, "Display all of part of the entities known in a dataset (255=all)", "[<dataset> [<sortByDataSetRow=0> [<onlyEntityType=255> [<onlyCreatorId=255> [<onlyDynamicId=255>]]]]]" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	CMirroredDataSet *dataset = nullptr;
 	bool sortByDataSetRow = false;
 	uint8 onlyEntityType = 0xFF;
@@ -2725,6 +2756,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorEntities, "Display all of part o
  */
 NLMISC_COMMAND( lookForMirrorValue, "Look for values with criteria (Value can be * for any value, or a value in the format displayed in displayMirrorRow)", "<dataset> <propName> <valueString> [<onlyEntityType=255> [<onlyCreatorId=255> [<onlyDynamicId=255>]]]" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	if ( args.size() > 2 )
 	{
 		try
@@ -2771,6 +2805,9 @@ NLMISC_COMMAND( lookForMirrorValue, "Look for values with criteria (Value can be
  */
 NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorTrackers, "Display the trackers for a dataset", "<dataset>" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	if ( args.size() == 1 )
 	{
 		try
@@ -2792,6 +2829,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorTrackers, "Display the trackers 
  */
 NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorDatasets, "Display the datasets loaded and some stats", "" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	TNDataSets::iterator ids;
 	for ( ids=MirrorInstance->dsBegin(); ids!=MirrorInstance->dsEnd(); ++ids )
 	{
@@ -2806,6 +2846,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorDatasets, "Display the datasets 
  */
 NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorEntityTypesOwned, "Display the entity types owned by the service and related info", "" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	MirrorInstance->displayEntityTypesOwned( log );
 	return true;
 }
@@ -2816,6 +2859,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayMirrorEntityTypesOwned, "Display the e
  */
 NLMISC_CATEGORISED_COMMAND(mirror, rescanExistingEntities, "Scan the entities to find if some are missing and add them (debug feature)", "<dataset>" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	if ( args.empty() )
 		return false;
 
@@ -2837,6 +2883,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, rescanExistingEntities, "Scan the entities to
  */
 NLMISC_CATEGORISED_COMMAND(mirror, displayUnknownOnlineEntities, "Scan the entities to find the online entities of which this service is not aware", "<dataset>" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	if ( args.empty() )
 		return false;
 
@@ -2858,6 +2907,9 @@ NLMISC_CATEGORISED_COMMAND(mirror, displayUnknownOnlineEntities, "Scan the entit
  */
 NLMISC_CATEGORISED_COMMAND(mirror, monitorMirrorEntity, "Set/unset an entity for mirror commands when no argument provided", "[<CEntityId> | <dataset> <entityIndex>]" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	switch( args.size() )
 	{
 	case 0: MirrorInstance->MonitoredEntity = CEntityId::Unknown; break;
@@ -2942,6 +2994,9 @@ namespace NLNET
 
 NLMISC_CATEGORISED_COMMAND(mirror, msgoutViaMirror, "Send a message to a specified service, via mirror (ex: msgoutViaMirror 131 REGISTER u32 10 b 1 f 1.5)", "msgout <ServiceName>|<ServiceId> <MessageName> [<ParamType> <Param>]*" )
 {
+	if (!hasMirrorInstance(log))
+		return true;
+
 	if(args.size() < 2) return false;
 
 	if (!MirrorInstance->mirrorIsReady())

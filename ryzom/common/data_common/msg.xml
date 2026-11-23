@@ -1,4 +1,24 @@
 <client_messages_description>
+  <!-- deployed_signature content="58bff78dc823847d7b18d78857870d73" md5="7981f9a9a905e37b74e58748f96325c7" (what this file says, and the MD5 of the file as it is deployed: CGenericXmlMsgHeaderManager::findDeployedSignature) -->
+  <!-- stream_class:
+    The classes of messages that the frontend sends on QUIC streams instead of in the datagrams, to the clients of
+    protocol level ryzomcore/4.2. Each class is one stream, in this order, of which a client allows 16. A branch or a
+    leaf below takes a class with stream="name" (a leaf has that of its branch unless it names another).
+    Only the frontend acts on this, and the signature of this file that the frontend sends to the clients leaves it
+    out: a class can be added, or a message moved, in the frontend's file alone. For that, write it as it is written
+    here: this comment starts with "stream_class", each stream_class element is on a line of its own, and a stream
+    attribute follows one space.
+    The messages of one class keep their order. In one update the client handles the streams in this order, so what
+    the other classes refer to comes first.
+    A class with drop_above="bytes" is one whose messages do not depend on each other: a message of more bytes than
+    that is left out, with a warning of the frontend, and so is one that finds too much waiting for its client. In
+    the other classes a missing message leaves the client without something for good, and the frontend disconnects
+    the client instead.
+  -->
+  <stream_class name="strings" />
+  <stream_class name="chat" drop_above="65536" />
+  <stream_class name="login" />
+  <stream_class name="gateway" />
   <branch name="TARGET">
     <leaf name="PARTY" />
     <leaf name="INVENTORY" />
@@ -34,11 +54,11 @@
   </branch>
   <leaf name="DB_UPD_PLR" />
   <leaf name="DB_UPD_INV" description="EGS sends an inventory update to the client" />
-  <branch name="DB_INIT">
+  <branch name="DB_INIT" stream="login">
     <leaf name="PLR" />
     <leaf name="INV" />
   </branch>
-  <branch name="DB_GROUP">
+  <branch name="DB_GROUP" stream="login">
     <leaf name="UPDATE_BANK" />
     <leaf name="INIT_BANK" />
     <leaf name="RESET_BANK" />
@@ -88,7 +108,7 @@
     <leaf name="FLYING_TEXT_ISE" description="add a flying text to an entity (u32 entity, u32 rgba, u8 effect, s32 param)" />
     <leaf name="FLYING_TEXT" description="add a flying text to an entity (u32 entity, u8 type)" />
   </branch>
-  <branch name="STRING">
+  <branch name="STRING" stream="chat">
     <leaf name="TELL" sendto="IOS" format="s uc" description="the client sends a tell to the character $e : $s" />
     <leaf name="FAR_TELL" description="the client receive a far tell from a player on another shard" />
     <leaf name="CHAT" sendto="IOS" format="uc" description="the client sends the chat message : $s" />
@@ -101,6 +121,8 @@
     <leaf name="DYN_STRING" description="system send a dyn string to the client system chat: $u32" />
     <leaf name="DYN_STRING_GROUP" description="system send a dyn string to the client gived group chat: $u32 $u16" />
     <leaf name="AFK_TXT" sendto="IOS" format="uc" description="the client sets an afk custom text" />
+    <leaf name="CHAT_SHARE" description="the client sends a chat message with structured metadata" />
+    <leaf name="CHAT_SHARE_RESULT" description="the server confirms or rejects a structured chat message" />
   </branch>
   <branch name="STUN">
     <leaf name="STUN" />
@@ -314,7 +336,7 @@
     <leaf name="REMOVE_COMPASS_BOT" description="Same for bots. Params name, bot_dataseetid" />
   </branch>
   <!-- String Manager related message -->
-  <branch name="STRING_MANAGER">
+  <branch name="STRING_MANAGER" stream="strings">
     <leaf name="SET_LANGUAGE" description="The client send the language code to use for this session." />
     <leaf name="PHRASE_SEND" description="The IOS send the prepared phrase to the client." />
     <leaf name="STRING_RQ" description="the client ask the string manager for an unknow string" />
@@ -389,7 +411,7 @@
     <leaf name="EXECUTE_FABER" />
     <!-- FaberPlanSheetId u32/ MemoryTypeId u8/ MemorySlotId u8 / vector<CItemFaberMsg> listOfMpSelectedForFaber -->
     <!-- Impulse ServerToClient -->
-    <leaf name="DOWNLOAD" />
+    <leaf name="DOWNLOAD" stream="login" />
     <!-- the server upload all Known Phrases and All Memorized Phrases to the client: vector<CSPhraseSlot> / vector<CSPhraseMemorySlot> -->
     <!-- BotChat -->
     <leaf name="BUY" sendto="EGS" format="u8 u16" description="the client buy a botChat phrase (indexInBotChat, phraseId)" />
@@ -453,7 +475,7 @@
     <leaf name="POP_FACTION_WAR" format="u8 u8" description="a faction ends" />
     <leaf name="FACTION_WARS" description="a faction ends" />
   </branch>
-  <branch name="ENCYCLOPEDIA">
+  <branch name="ENCYCLOPEDIA" stream="login">
     <leaf name="UPDATE" description="server update the encyclopedia (see msg_encyclopedia.cpp in game_share for the message format)" />
     <leaf name="INIT" description="server sends the whole encyclopedia to the client" />
   </branch>
@@ -469,7 +491,7 @@
     <leaf name="BUILD" sendto="EGS" format="" description="client has built a totem" />
     <leaf name="DUMMY" description="stupid server....." />
   </branch>
-  <branch name="MODULE_GATEWAY">
+  <branch name="MODULE_GATEWAY" stream="gateway">
     <leaf name="FEOPEN" description="The fe gateway route is open" />
     <leaf name="GATEWAY_MSG" description="the fe module gateway transport send a message to the client transport peer" />
     <leaf name="FECLOSE" description="The fe gateway route is closed" />

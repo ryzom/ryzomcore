@@ -216,6 +216,11 @@ bool CXDPFileReader::readUInt(uint32 &val)
 		donebit = c & 0x80;
 		bits = c & 0x7f;
 
+		// A 32-bit value takes at most 5 groups of 7 bits; a longer run is a corrupt patch, not a
+		// reason to write past arr
+		if (i >= 5)
+			return false;
+
 		arr[i++] = bits;
 
 		if (!donebit)
@@ -796,14 +801,14 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const string &sPatchFilename,
 	if (!patch.load(sPatchFilename))
 	{
 		errorMsg = toString("cant load patch %s", sPatchFilename.c_str());
-		nlwarning(errorMsg.c_str());
+		nlwarning("%s", errorMsg.c_str());
 		return ApplyResult_Error;
 	}
 	_CallBack = pCB;
 	TApplyResult ar = patch.apply(sFileToPatchFilename, sOutputFilename, errorMsg);
 	if (ar != ApplyResult_Ok)
 	{
-		nlwarning(errorMsg.c_str());
+		nlwarning("%s", errorMsg.c_str());
 	}
 	return ar;
 }

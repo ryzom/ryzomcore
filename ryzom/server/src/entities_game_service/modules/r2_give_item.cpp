@@ -224,7 +224,7 @@ uint32 CR2GiveItem::_regiserLiteralString( TDataSetRow userRowId, const ucstring
 }
 
 //----------------------------------------------------------------------------
- void CR2GiveItem::giveItemGranted( TDataSetRow creatureRowId, uint32 actionId )
+ void CR2GiveItem::giveItemGranted( TDataSetRow creatureRowId, TDataSetRow characterRowId, uint32 actionId )
 {
 	TPendingRequest::iterator it = _PendingRequest.find( creatureRowId );
 	if( it != _PendingRequest.end() )
@@ -232,13 +232,20 @@ uint32 CR2GiveItem::_regiserLiteralString( TDataSetRow userRowId, const ucstring
 		TCreatureItemRequest &vec = (*it).second;
 		for( uint32 i = 0; i < vec.size(); ++ i)
 		{
+			// the action id comes from the client: the entry must also be the requester's own, since action ids
+			// are a counter shared by every character
+			if( vec[i].ActionId == actionId && vec[i].CharacterRowId != characterRowId )
+			{
+				nlwarning("R2GiveItem: character %u selected action %u of character %u, refused", characterRowId.getIndex(), actionId, vec[i].CharacterRowId.getIndex());
+				return;
+			}
 			if( vec[i].ActionId == actionId )
 			{
 				CCharacter *c = PlayerManager.getChar( vec[i].CharacterRowId );
-				if (c == NULL)
+				if( c == NULL )
 				{
-					nlwarning("R2GiveItem: character of the request %u is no more online", actionId);
-					// drop the request of the offline character, nobody can use it any more
+					// the character that registered this entry is offline, nobody can use it any more
+					nlwarning("R2GiveItem: character %u of the request %u is no more online, request dropped", vec[i].CharacterRowId.getIndex(), actionId);
 					vec[i] = vec.back();
 					vec.pop_back();
 					if( vec.empty() )
@@ -314,6 +321,31 @@ void CR2GiveItem::onUnspawn( TDataSetRow creatureRowId )
 	}
 }
 
+//----------------------------------------------------------------------------
+void CR2GiveItem::onCharacterLogout( TDataSetRow characterRowId )
+{
+	// drop every pending entry the character registered, on any npc
+	TPendingRequest::iterator it = _PendingRequest.begin();
+	while( it != _PendingRequest.end() )
+	{
+		TCreatureItemRequest &vec = (*it).second;
+		for( uint32 i = 0; i < vec.size(); )
+		{
+			if( vec[i].CharacterRowId == characterRowId )
+			{
+				vec[i] = vec.back();
+				vec.pop_back();
+			}
+			else
+				++i;
+		}
+		if( vec.empty() )
+			_PendingRequest.erase( it++ );
+		else
+			++it;
+	}
+}
+
 //============================================================================
 NLMISC_COMMAND(giveItemRequest, "test command for give item R2 feature", "<Character eid><Creature eid><GroupAlias><InstanceId><Item SheetId><Item quantity><Mission text>")
 {
@@ -344,9 +376,9 @@ NLMISC_COMMAND(giveItemRequest, "test command for give item R2 feature", "<Chara
 	return true;
 }
 
-NLMISC_COMMAND(giveItemGranted, "test command for give item R2 features", "<CreatureId><ActionId>")
+NLMISC_COMMAND(giveItemGranted, "test command for give item R2 features", "<CreatureId><ActionId><CharacterId>")
 {
-	if( args.size() != 2 )
+	if( args.size() != 3 )
 		return false;
 
 	CEntityId eid;
@@ -358,7 +390,11 @@ NLMISC_COMMAND(giveItemGranted, "test command for give item R2 features", "<Crea
 	else return false;
 	uint32 actionId;
 	NLMISC::fromString(args[1], actionId);
-	CR2GiveItem::getInstance().giveItemGranted( creatureRowId, actionId );
+	CEntityId charEid;
+	charEid.fromString(args[2].c_str());
+	CCharacter *ch = PlayerManager.getChar(charEid);
+	if(!ch) return false;
+	CR2GiveItem::getInstance().giveItemGranted( creatureRowId, ch->getEntityRowId(), actionId );
 	return true;
 }
 

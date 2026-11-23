@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 		}
 		catch(const EParseException &e)
 		{
-			nlwarning(e.Why.c_str());
+			nlwarning("%s", e.Why.c_str());
 			return -1;
 		}
 		return 0;

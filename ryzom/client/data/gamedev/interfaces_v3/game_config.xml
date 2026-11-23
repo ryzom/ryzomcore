@@ -124,6 +124,19 @@
 	</group>
 </template>
 
+<template name="tgcw_combo_emoji_mode" id="combo_emoji_mode" posparent="parent" posref="TL TL" x="0" y="-18" text="" value="">
+	<!-- wider than other rows for the longest translated entry -->
+	<group id="#id" w="240" h="36" posparent="#posparent" posref="#posref" x="#x" y="#y">
+		<view type="text" id="text" posref="TL TL" x="0" y="0" color="255 255 255 192" fontsize="10" shadow="true" hardtext="#text" />
+		<group type="combo_box" id="combo" posref="BL BL" x="0" y="0" w="240" h="20" value="#value">
+			<instance template="combo_box_def1" />
+			<combo_text name="uiEmojiModeOff" />
+			<combo_text name="uiEmojiModeFont" />
+			<combo_text name="uiEmojiModeImages" />
+		</group>
+	</group>
+</template>
+
 
 <!-- ************** -->
 <!-- Main container -->
@@ -139,13 +152,19 @@
 <variable entry="UI:TEMP:LANGUAGE" type="sint32" value="0" />
 <variable entry="UI:TEMP:SCREEN_RATIO_MODE" type="sint32" value="0" />
 <variable entry="UI:TEMP:SOUND_DRIVER" type="sint32" value="0" />
+<variable entry="UI:TEMP:CONNECTION_PREFERENCE" type="sint32" value="-1" />
+<variable entry="UI:TEMP:CONNECTION_RATE" type="sint32" value="-1" />
+<!-- edited by the dropdown, applied to UI:SAVE:CHAT:EMOJI_MODE -->
+<variable entry="UI:TEMP:CHAT:EMOJI_MODE" type="sint32" value="2" />
 
 <define id="game_config_screen_ratio_eb" value="ui:interface:game_config:content:general:screen_ratio:edit:eb" />
 <define id="game_config_screen_ratio_cb" value="ui:interface:game_config:content:general:screen_ratio:combo" />
+
 <define id="game_config_save_channel_cb" value="ui:interface:game_config:content:chat_colors:save_channel_cb:c" />
 <define id="game_config_auto_channel_cb" value="ui:interface:game_config:content:chat_colors:auto_channel_cb:c" />
 <proc id="game_config_init">
 	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:GAME_CONFIG|value=1" />
+	<action handler="set" params="dblink=UI:TEMP:CHAT:EMOJI_MODE|value=@UI:SAVE:CHAT:EMOJI_MODE" />
 	<action handler="ddx_init" params="ui:interface:game_config:content:all" />
 	<action handler="tree_reset" params="ui:interface:game_config:content:sbtree:tree_list" />
 	<action handler="lua" params="game:configShowOne('explanation')" />
@@ -165,6 +184,7 @@
 </proc>
 
 <proc id="game_config_apply">
+	<action handler="set" params="dblink=UI:SAVE:CHAT:EMOJI_MODE|value=@UI:TEMP:CHAT:EMOJI_MODE" />
 	<action handler="game_config_change_screen_ratio_custom" params="" />
 	<action handler="ddx_update" params="ui:interface:game_config:content:all" />
 	<action handler="game_config_apply" params="" />
@@ -221,6 +241,7 @@
 						<node id="in_scene_chat_messages" name="uigcInSceneChatMessages" handler="lua" params="game:configShowOne('in_scene_chat_messages')" fontsize="10" y_decal="-1" />
 					</node>
 					<node id="landmarkco" name="uigcLandmarkColor" handler="lua" params="game:configShowOne('landmark_colors')" fontsize="10" y_decal="-1" />
+					<node id="mapco" name="uiMapTitle" handler="lua" params="game:configShowOne('map_options')" fontsize="10" y_decal="-1" />
 					<node id="help" name="uimHelp" handler="lua" params="game:configShowOne('help')" fontsize="10" y_decal="-1" />
 				</node>
 
@@ -238,6 +259,13 @@
 				</node>
 
 				<node id="sound" name="uigcSound" handler="lua" params="game:configShowOne('sound')" fontsize="11" y_decal="-1" />
+
+				<!-- Not offered with RYZOM_FORGE: its shards have no QUIC listener, and a connection chosen here that
+					they do not have does not fall back. The page itself stays defined below, the code and
+					game:configHideAll look for it. -->
+				<if flags="!ryzom_forge" />
+				<node id="network" name="uigcNetwork" handler="lua" params="game:configShowOne('network')" fontsize="11" y_decal="-1" />
+				<endif />
 			</group>
 
 			<ctrl style="skin_scroll" id="scroll_bar" align="T" target="tree_list" />
@@ -285,7 +313,6 @@
 			<!-- interface scale -->
 			<instance template="tgcw_checkbox" id="scale_auto" text="uiInterfaceScaleAuto" posref="BL TL" posparent="gam" x="-20" y="-28" />
 			<instance template="tgcw_scrollbarfloat" id="scale" text="uiInterfaceScale" posref="BL TL" posparent="scale_auto" x="20" y="-2" />
-			
 			<!-- window snap -->
 			<view style="sgc_title2" type="text" id="title_win_snap" posref="BL TL" x="-20" y="-28" hardtext="uiWindowSnap" posparent="scale" />
 			<instance template="tgcw_scrollbarint" id="window_snap_distance" text="uiWindowSnapDistance" posref="BL TL" posparent="title_win_snap" x="20" y="-2" />
@@ -304,6 +331,7 @@
 					onclick_l="game_config_change_vid_fullscreen" params_l="" />
 				<view type="text" id="text" posparent="c" posref="MR ML" x="4" y="-2" color="255 255 255 192" fontsize="12" shadow="true" hardtext="uiFullscreen" />
 			</group>
+
 			<group type="combo_box" id="video_modes" w="100" h="20" value="UI:TEMP:VID_MODE" posparent="fullscreen" posref="BL TL" x="0" y="-4">
 				<instance template="combo_box_def1" />
 			</group>
@@ -539,9 +567,20 @@
 			<instance template="tgcw_checkbox" id="show_dyn_channel_name_in_chat_cb" text="uiShowDynChannelNameInChatCB" tooltip="uittShowDynChannelNameInChat" posparent="show_times_in_chat_cb" posref="BL TL" x="0" y="-8" />
 			<instance template="tgcw_checkbox" id="show_online_offline_notifications_cb" text="uiShowOnlineOfflineNotifications" tooltip="uittShowOnlineOfflineNotifications" posparent="show_dyn_channel_name_in_chat_cb" posref="BL TL" x="0" y="-8" />
 			<instance template="tgcw_scrollbarint" id="font_size" text="uiFontSize" posref="BL TL" posparent="show_online_offline_notifications_cb" x="0" y="-8" />
-			<instance template="tgcw_checkbox" id="enter_dontquit_cb" text="uiEnterDontQuitCB" tooltip="uittChatEnter" posparent="font_size" posref="BL TL" x="0" y="-8" />
+
+			<instance template="tgcw_combo_emoji_mode" id="emoji_mode" text="uiEmojiMode" value="UI:TEMP:CHAT:EMOJI_MODE" posref="BL TL" posparent="font_size" x="0" y="-8" />
+			<instance template="tgcw_scrollbarint" id="emoji_size" text="uiEmojiSize" posref="BL TL" posparent="emoji_mode" x="0" y="-8" />
+			<view type="text" id="emoji_size_small" posparent="emoji_size" posref="TR TR" x="0" y="0" color="255 255 255 192" fontsize="10" shadow="true" hardtext="uiEmojiSizeSmall" />
+			<view type="text" id="emoji_size_medium" posparent="emoji_size" posref="TR TR" x="0" y="0" color="255 255 255 192" fontsize="10" shadow="true" hardtext="uiEmojiSizeMedium" />
+			<view type="text" id="emoji_size_large" posparent="emoji_size" posref="TR TR" x="0" y="0" color="255 255 255 192" fontsize="10" shadow="true" hardtext="uiEmojiSizeLarge" />
+			<link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,0)" target="emoji_size_small:active" />
+			<link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,1)" target="emoji_size_medium:active" />
+			<link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,2)" target="emoji_size_large:active" />
+			<link expr="eq(@UI:TEMP:CHAT:EMOJI_MODE,2)" target="emoji_size:active" />
+			<link expr="@UI:TEMP:CHAT:EMOJI_MODE" action="game_config_change_emoji_mode" />
+			<instance template="tgcw_checkbox" id="enter_dontquit_cb" text="uiEnterDontQuitCB" tooltip="uittChatEnter" posparent="emoji_size" posref="BL TL" x="0" y="-8" />
 			<instance template="tgcw_checkbox" id="chat_autocomplete_cb" text="uiChatAutocompleteCB" tooltip="uittDisableChatAutocomplete" posparent="enter_dontquit_cb" posref="BL TL" x="0" y="-8" />
-			<link expr="@UI:SAVE:CHAT_AUTOCOMPLETE" target="chat_autocomplete_cb:c:pushed" />
+			<link expr="@UI:SAVE:CHAT:CHAT_AUTOCOMPLETE" target="chat_autocomplete_cb:c:pushed" />
 
 			<link expr="@UI:SAVE:CHAT:ENTER_DONT_QUIT_CB" target="enter_dontquit_cb:c:pushed" />
 			<link expr="@UI:SAVE:CHAT:SAVE_CHANNEL" target="save_channel_cb:c:pushed" />
@@ -704,18 +743,15 @@
 		<group id="mouse" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
 
 			<view style="sgc_title" id="mouseopt" posref="TM TM" x="0" y="0" hardtext="uiMouseOptions" />
-			<instance template="tgcw_checkbox" id="hard" text="uiMouseHardware" posref="TM TL" x="0" y="-35" />
+			<instance template="tgcw_checkbox" id="hard" text="uiMouseHardware" posref="TL TL" x="0" y="-20" />
 			<instance template="tgcw_checkbox" id="inverted" text="uiMouseInverted" posparent="hard" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_checkbox" id="dbl" text="uiMouseDblClickMode" posparent="inverted" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_checkbox" id="tablet" text="uiFreeViewTablet" posparent="dbl" posref="BL TL" x="0" y="-2" />
-			<view style="sgc_title2" type="text" id="inter" posref="TL TL" x="0" y="-20" hardtext="uiMouseInterface" />
+			<view style="sgc_title2" type="text" id="inter" posparent="tablet" posref="BL TL" x="0" y="-12" hardtext="uiMouseInterface" />
 			<instance template="tgcw_scrollbarint" id="dcspeed" text="uiDoubleClickSpeed" posparent="inter" posref="BL TL" x="20" y="-2" />
-			<instance template="tgcw_scrollbarfloat" id="curspeed" text="uiCursorSpeed" posparent="dcspeed" posref="BL TL" x="0" y="-2" />
-			<instance template="tgcw_scrollbarint" id="curaccel" text="uiCursorAccel" posparent="curspeed" posref="BL TL" x="0" y="-2" />
 
-			<view style="sgc_title2" type="text" id="head" posref="BL TL" hardtext="uiMouseHead" posparent="curaccel" x="-20" y="-12" />
+			<view style="sgc_title2" type="text" id="head" posref="BL TL" hardtext="uiMouseHead" posparent="dcspeed" x="-20" y="-12" />
 			<instance template="tgcw_scrollbarfloat" id="headspeed" text="uiHeadSpeed" posparent="head" posref="BL TL" x="20" y="-2" />
-			<instance template="tgcw_scrollbarint" id="headaccel" text="uiHeadAccel" posparent="headspeed" posref="BL TL" x="0" y="-2" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_mouse" align="T" target="mouse" posparent="crop" posref="TL TR" x="-8" y="0" />
 
@@ -765,6 +801,45 @@
 		</group>
 		<ctrl style="skin_scroll" id="sb_sound" align="T" target="sound" posparent="crop" posref="TL TR" x="-8" y="0" />
 		<!-- *** -->
+		<group id="network" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
+
+			<view style="sgc_title" type="text" id="gen" posref="TM TM" x="0" y="0" hardtext="uigcNetworkTitle" />
+
+			<!-- The connection the player prefers: QuicConnection and QuicStreams of client.cfg, read by game_config_init and
+				written by game_config_apply. The texts are in the order of TConnectionPreference (action_handler_game.cpp);
+				a client built without QUIC only has the first one -->
+			<view style="sgc_title2" type="text" id="preference_title" posref="TL TL" x="0" y="-20" hardtext="uigcConnection" />
+			<group type="combo_box" id="preference" w="200" h="20" value="UI:TEMP:CONNECTION_PREFERENCE" posparent="preference_title" posref="BL TL" x="20" y="-4">
+				<instance template="combo_box_def1" />
+				<combo_text name="uigcConnectionUdp" />
+				<if flags="quic" />
+				<combo_text name="uigcConnectionQuicDatagrams" />
+				<combo_text name="uigcConnectionQuicStreams" />
+				<endif />
+			</group>
+			<link expr="@UI:TEMP:CONNECTION_PREFERENCE" action="game_config_change_connection" />
+
+			<!-- What the connection to the server is at the moment: CNetManager::update() keeps UI:VARIABLES:CONNECTION_TRANSPORT -->
+			<view style="sgc_title2" type="text" id="current_title" posparent="preference" posref="BL TL" x="-20" y="-12" hardtext="uigcConnectionCurrent" />
+			<view type="text" id="current" posparent="current_title" posref="BL TL" x="20" y="-4" color="255 255 255 192" fontsize="12" shadow="true" hardtext="uigcConnectionCurrentNone" />
+			<link expr="switch(@UI:VARIABLES:CONNECTION_TRANSPORT, 'uigcConnectionCurrentNone', 'uigcConnectionCurrentUdp', 'uigcConnectionCurrentQuicDatagrams', 'uigcConnectionCurrentQuicStreams')" target="current:hardtext" />
+
+			<if flags="quic" />
+			<!-- How much the player's connection carries: ConnectionRate of client.cfg, which only the streams of a QUIC
+				connection use. game_config_init adds the choices (s_ConnectionTypes in action_handler_game.cpp) -->
+			<view style="sgc_title2" type="text" id="rate_title" posparent="current" posref="BL TL" x="-20" y="-12" hardtext="uigcConnectionType" />
+			<group type="combo_box" id="rate" w="200" h="20" value="UI:TEMP:CONNECTION_RATE" posparent="rate_title" posref="BL TL" x="20" y="-4">
+				<instance template="combo_box_def1" />
+			</group>
+			<link expr="@UI:TEMP:CONNECTION_RATE" action="game_config_change_connection" />
+			<view type="text" id="rate_note" posparent="rate" posref="BL TL" x="0" y="-4" color="255 255 255 192" fontsize="10" shadow="true" multi_line="true" multi_line_space="0" hardtext="uigcConnectionTypeNote" />
+
+			<!-- Both choices are for the next connection -->
+			<view type="text" id="restart_note" posparent="rate_note" posref="BL TL" x="-20" y="-12" color="255 255 255 192" fontsize="10" shadow="true" multi_line="true" multi_line_space="0" hardtext="uigcConnectionRestartNote" />
+			<endif />
+		</group>
+		<ctrl style="skin_scroll" id="sb_network" align="T" target="network" posparent="crop" posref="TL TR" x="-8" y="0" />
+		<!-- *** -->
 		<group id="landmark_colors" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
 			<!-- Landmark colors -->
 			<view style="sgc_title" id="ccol" posref="TM TM" x="0" y="0" hardtext="uiLandmarkColors" />
@@ -802,6 +877,12 @@
 		</group>
 		<ctrl style="skin_scroll" id="sb_landmark_colors" align="T" target="landmark_colors" posparent="crop" posref="TL TR" x="-8" y="0" />
 		<!-- *** -->
+		<group id="map_options" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
+			<view style="sgc_title" type="text" id="hmap" posref="TM TM" x="0" y="0" hardtext="uiMapTitle" />
+			<instance template="tgcw_checkbox" id="map_auto_zoom" text="uiMapAutoZoom" tooltip="uittMapAutoZoom" posref="TL TL" x="0" y="-20" />
+		</group>
+		<ctrl style="skin_scroll" id="sb_map_options" align="T" target="map_options" posparent="crop" posref="TL TR" x="-8" y="0" />
+		<!-- *** -->
 		<group id="help" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
 
 			<!-- Entities Names -->
@@ -823,6 +904,7 @@
 			<param ui="general:scale_auto:c" type="cfg" realtime="true" widget="boolbut" link="InterfaceScaleAuto" />
 			<param ui="general:scale:c" type="cfg" realtime="false" ui_view="general:scale:c_res" ui_decimal="2" widget="sbfloat" link="InterfaceScale" />
 			<param ui="general:waitvbl:c" type="cfg" realtime="true" widget="boolbut" link="WaitVBL" />
+
 			<param ui="general:occeventbnps:c" type="cfg" realtime="false" widget="boolbut" link="EnableEventsBnp" />
 			<param ui="general:occitems:c" type="cfg" realtime="false" widget="boolbut" link="EnableOccsBnp" />
 			<param ui="general:window_snap_distance:c" type="cfg" realtime="true" ui_view="general:window_snap_distance:c_res" ui_decimal="2" widget="sbint" link="WindowSnapDistance" />
@@ -916,14 +998,15 @@
 		   <param ui="chat_colors:cc_civi:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:CIVILIZATION" realtime="true" />
 		   <param ui="chat_colors:cc_terri:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:TERRITORY" realtime="true" />
 		   -->
-					<param ui="chat_colors:enter_dontquit_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB" realtime="true" />
-					<param ui="chat_colors:chat_autocomplete_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:CHAT_AUTOCOMPLETE" realtime="true" />
+			<param ui="chat_colors:enter_dontquit_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB" realtime="true" />
+			<param ui="chat_colors:chat_autocomplete_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:CHAT_AUTOCOMPLETE" realtime="true" />
 			<param ui="chat_colors:save_channel_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SAVE_CHANNEL" realtime="true" />
 			<param ui="chat_colors:auto_channel_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:AUTO_CHANNEL" realtime="true" />
 			<param ui="chat_colors:show_times_in_chat_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB" realtime="true" />
 			<param ui="chat_colors:show_dyn_channel_name_in_chat_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB" realtime="true" />
 			<param ui="chat_colors:show_online_offline_notifications_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB" realtime="true" />
 			<param ui="chat_colors:font_size:c" type="db" widget="sbint" link="UI:SAVE:CHAT:FONT_SIZE" min="9" max="20" realtime="true" />
+			<param ui="chat_colors:emoji_size:c" type="db" widget="sbint" link="UI:SAVE:CHAT:EMOJI_SIZE" min="0" max="2" realtime="true" />
 
 			<param ui="entity_colors:cc_user:c" type="db" widget="colbut" link="UI:SAVE:ENTITY:COLORS:USER" realtime="true" />
 			<param ui="entity_colors:cc_player:c" type="db" widget="colbut" link="UI:SAVE:ENTITY:COLORS:PLAYER" realtime="true" />
@@ -1012,10 +1095,7 @@
 			<param ui="mouse:dbl:c" type="cfg" widget="boolbut" link="DblClickMode" realtime="true" />
 			<param ui="mouse:tablet:c" type="cfg" widget="boolbut" link="FreeLookTablet" realtime="true" />
 			<param ui="mouse:dcspeed:c" type="db" widget="sbint" link="UI:SAVE:DOUBLE_CLICK_SPEED" min="0" max="100" realtime="true" />
-			<param ui="mouse:curspeed:c" type="cfg" widget="sbfloat" link="CursorSpeed" realtime="true" />
-			<param ui="mouse:curaccel:c" type="cfg" widget="sbint" link="CursorAcceleration" realtime="true" />
 			<param ui="mouse:headspeed:c" type="cfg" widget="sbfloat" link="FreeLookSpeed" realtime="true" />
-			<param ui="mouse:headaccel:c" type="cfg" widget="sbint" link="FreeLookAcceleration" realtime="true" />
 
 			<param ui="keyb:speedmax:c" type="cfg" widget="sbfloat" link="RotKeySpeedMax" realtime="true" />
 			<param ui="keyb:speedmin:c" type="cfg" widget="sbfloat" link="RotKeySpeedMin" realtime="true" />
@@ -1059,6 +1139,7 @@
 			<param ui="landmark_colors:cc_teleporter:c" type="db" widget="colbut" link="UI:SAVE:LANDMARK:COLORS:TELEPORTER" realtime="true" />
 
 			<param ui="help:context_help:c" type="db" widget="boolbut" link="UI:SAVE:ENTITY:CONTEXT_HELP" realtime="true" />
+			<param ui="map_options:map_auto_zoom:c" type="db" widget="boolbut" link="UI:SAVE:MAP:AUTO_ZOOM" realtime="true" />
 		</ddx>
 	</group>
 </group>

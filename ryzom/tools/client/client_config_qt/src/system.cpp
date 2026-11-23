@@ -107,7 +107,7 @@ void CSystem::GatherD3DInfo()
 
 	catch(const NLMISC::Exception &e)
 	{
-		nlwarning( e.what() );
+		nlwarning("%s", e.what());
 	}
 }
 #endif
@@ -151,7 +151,7 @@ void CSystem::GatherOpenGLInfo()
 	}
 	catch(const NLMISC::Exception &e)
 	{
-		nlwarning( e.what() );
+		nlwarning("%s", e.what());
 	}
 }
 

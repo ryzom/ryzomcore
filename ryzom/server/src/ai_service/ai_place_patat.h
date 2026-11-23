@@ -68,8 +68,9 @@ public:
 	virtual bool calcRandomPos(CAIPos& pos) const NL_OVERRIDE;
 	//@}
 	
-	bool setPatat(AITYPES::TVerticalPos verticalPos, std::vector<CAIVector> const& points);
-	
+	/// name, when given, names the place in the shape's warnings where it has no alias of its own (an outpost's)
+	bool setPatat(AITYPES::TVerticalPos verticalPos, std::vector<CAIVector> const& points, std::string const& name = std::string());
+
 private:
 	RYAI_MAP_CRUNCH::CWorldPosition	_WorldValidPos;
 	CAIPos	_MidPos;

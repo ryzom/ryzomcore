@@ -164,7 +164,7 @@ namespace NLGUI
 		destStream.seek(0, NLMISC::IStream::begin);
 	}
 
-	std::string CInterfaceParser::lookup( const std::string &file )
+	std::string CInterfaceParser::lookup(const std::string &file, bool throwException)
 	{
 		std::string filename;
 		
@@ -175,7 +175,7 @@ namespace NLGUI
 				filename = wdpath;
 		}
 		if( filename.empty() )
-			filename = CPath::lookup( file );
+			filename = CPath::lookup(file, throwException);
 
 		return filename;
 	}
@@ -405,6 +405,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 	{
+		H_AUTO(parseXMLDocument)
 
 		CWidgetManager::SMasterGroup *curRoot = nullptr;
 		CInterfaceGroup *rootGroup = nullptr;
@@ -599,7 +600,11 @@ namespace NLGUI
 			{
 				if(!parseLUAScript(root))
 				{
-					nlerror ("could not parse 'lua'");
+					// the editor has no client Lua environment, so scripts can fail there
+					if (editorMode)
+						nlwarning("could not parse 'lua'");
+					else
+						nlerror ("could not parse 'lua'");
 				}
 			}
 			else
@@ -618,6 +623,7 @@ namespace NLGUI
 		// add all modals group to the window list
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 		{
+			H_AUTO(addWindowToMasterGroup)
 
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[i];
 			// insert all modals
@@ -642,6 +648,8 @@ namespace NLGUI
 		// keep template that have the "keep" flag if we are not reloading
 		// if reloading, always keep the template
 		{
+			H_AUTO(keep_template)
+
 			CXMLAutoPtr ptr;
 			for(uint k = 0; k < _Templates.size(); ++k)
 			{
@@ -714,7 +722,7 @@ namespace NLGUI
 							else
 								sTmp = string("cannot parse template node property: ") + ((const char *) ptr + 1) + string(" in instance : NULL");
 							// todo hulud interface syntax error
-							nlinfo(sTmp.c_str());
+							nlinfo("%s", sTmp.c_str());
 
 							return false;
 						}
@@ -745,6 +753,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseInstance(xmlNodePtr cur)
 	{
+		H_AUTO(parseInstance)
 		CXMLAutoPtr ptr;
 
 		//try to find the instance template in our template vector. If the template doesn't exist, return false
@@ -802,6 +811,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseVector(xmlNodePtr cur)
 	{
+		H_AUTO(parseVector)
 		//get the number of elements
 		CXMLAutoPtr cSize((const char*) xmlGetProp( cur, (xmlChar*)"_size" ));
 		if (!cSize)
@@ -937,6 +947,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseLink(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
+		H_AUTO(parseLink)
 		CXMLAutoPtr ptr((const char*) xmlGetProp (cur, (xmlChar*)"expr"));
 		if (!ptr)
 		{
@@ -995,6 +1006,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseVariable (xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	{
+		H_AUTO(parseVariable)
 		//get the args
 		CXMLAutoPtr ptr((const char*) xmlGetProp (cur, (xmlChar*)"entry"));
 		if (!ptr)
@@ -1061,25 +1073,12 @@ namespace NLGUI
 			}
 
 			// access the database
-			CInterfaceProperty prop;
+			readVariable(type, value, entry);
 
-			if (type == "sint64")
-				prop.readSInt64(value.c_str(),entry);
-			else if (type == "sint32")
-				prop.readSInt32(value.c_str(),entry);
-			else if (type == "float" || type == "double")
-				prop.readDouble(value.c_str(),entry);
-			else if (type == "bool")
-				prop.readBool(value.c_str(),entry);
-			else if (type == "rgba")
-				prop.readRGBA(value.c_str(),entry);
-			else if (type == "hotspot")
-				prop.readHotSpot(value.c_str(),entry);
-			else if (type == "text")
-			{
-				/*uint textId = addText(value);
-				prop.readSInt32(toString(textId),entry);*/
-			}
+			// keep the declaration, which is the default resetVariables goes back to
+			VariableData &declaration = m_VariableDefaults[entry];
+			declaration.type = type;
+			declaration.value = value;
 		}
 
 		if( editorMode )
@@ -1107,8 +1106,64 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
+	bool CInterfaceParser::readVariable(const std::string &type, const std::string &value, const std::string &entry)
+	{
+		CInterfaceProperty prop;
+
+		if (type == "sint64")
+			return prop.readSInt64(value.c_str(),entry);
+		else if (type == "sint32")
+			return prop.readSInt32(value.c_str(),entry);
+		else if (type == "float" || type == "double")
+			return prop.readDouble(value.c_str(),entry);
+		else if (type == "bool")
+			return prop.readBool(value.c_str(),entry);
+		else if (type == "rgba")
+			return prop.readRGBA(value.c_str(),entry);
+		else if (type == "hotspot")
+			return prop.readHotSpot(value.c_str(),entry);
+		else if (type == "text")
+		{
+			/*uint textId = addText(value);
+			prop.readSInt32(toString(textId),entry);*/
+		}
+		return false;
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CInterfaceParser::resetVariable( const std::string &entry, const VariableData &declaration )
+	{
+		if( readVariable( declaration.type, declaration.value, entry ) )
+			return true;
+
+		nlwarning( "<CInterfaceParser::resetVariables> '%s' is not reset: its <variable> declaration (type '%s', value '%s') sets no value", entry.c_str(), declaration.type.c_str(), declaration.value.c_str() );
+		return false;
+	}
+
+	// ----------------------------------------------------------------------------
+	uint CInterfaceParser::resetVariables( const std::string &entry )
+	{
+		uint count = 0;
+
+		std::map< std::string, VariableData >::const_iterator itr = m_VariableDefaults.find( entry );
+		if( itr != m_VariableDefaults.end() && resetVariable( itr->first, itr->second ) )
+			++count;
+
+		// every entry below the branch starts with "<entry>:", so they sort together
+		const std::string branch = entry + ":";
+		for( itr = m_VariableDefaults.lower_bound( branch ); itr != m_VariableDefaults.end() && startsWith( itr->first, branch ); ++itr )
+		{
+			if( resetVariable( itr->first, itr->second ) )
+				++count;
+		}
+
+		return count;
+	}
+
+	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseOptions (xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	{
+		H_AUTO(parseOptions)
 		// build the options from type
 		CInterfaceOptions *options = nullptr;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
@@ -1164,6 +1219,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseGroup (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload)
 	{
+		H_AUTO(parseGroup)
 		CInterfaceGroup * group;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 		if (ptr)
@@ -1227,7 +1283,7 @@ namespace NLGUI
 		{
 			string tmp = "cannot parse group "+group->getId();
 			// todo hulud interface syntax error
-			nlinfo (tmp.c_str());
+			nlinfo ("%s", tmp.c_str());
 		}
 		return ok;
 	}
@@ -1270,6 +1326,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseControl (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload)
 	{
+		H_AUTO(parseControl)
 		CCtrlBase* ctrl = nullptr;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 		if (!ptr)
@@ -1311,6 +1368,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseView(xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload)
 	{
+		H_AUTO(parseView)
 		CViewBase * view = nullptr;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 		if (!ptr)
@@ -1406,7 +1464,7 @@ namespace NLGUI
 		{
 			string stmp = string("element not found for tree : ") + string((const char*)ptr);
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 		CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pEltFound);
@@ -1414,7 +1472,7 @@ namespace NLGUI
 		{
 			string stmp = string("not a container : ") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 		parentGroup->attachContainer (pIC);
@@ -1457,7 +1515,7 @@ namespace NLGUI
 		{
 			string stmp = string("element not found for tree : ") + string((const char*)ptr);
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 		CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pEltFound);
@@ -1465,7 +1523,7 @@ namespace NLGUI
 		{
 			string stmp = string("not a container : ") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 		// See if the group should be docked.
@@ -1653,7 +1711,7 @@ namespace NLGUI
 		{
 			string stmp = string("no group found for ") + string((const char*)ptr);
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1663,7 +1721,7 @@ namespace NLGUI
 		{
 			string stmp = string("not a group !") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1672,7 +1730,7 @@ namespace NLGUI
 		{
 			string stmp = string("tree can't have modal group !") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1695,6 +1753,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup)
 	{
+		H_AUTO(parseTree)
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
@@ -1721,7 +1780,7 @@ namespace NLGUI
 		{
 			string stmp = string("no group found for ") + string((const char*)ptr);
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1731,7 +1790,7 @@ namespace NLGUI
 		{
 			string stmp = string("not a group !") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1740,7 +1799,7 @@ namespace NLGUI
 		{
 			string stmp = string("tree can't have modal group !") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1763,6 +1822,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseDefine(xmlNodePtr cur)
 	{
+		H_AUTO(parseDefine)
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"id" ));
 		if (!ptr || *ptr==0)
 		{
@@ -1829,6 +1889,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseProcedure(xmlNodePtr cur, bool reload)
 	{
+		H_AUTO(parseProcedure)
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"id" ));
 		if (!ptr || *ptr==0)
 		{
@@ -1916,6 +1977,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::initCoordsAndLuaScript()
 	{
+		H_AUTO(initCoordsAndLuaScript)
 		// set all position associations
 		for (map<CInterfaceElement*,string>::const_iterator it = _ParentPositionsMap.begin(); it != _ParentPositionsMap.end();it++)
 		{
@@ -2191,6 +2253,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool				CInterfaceParser::solveDefine(xmlNodePtr cur)
 	{
+		H_AUTO(solveDefine)
 		CXMLAutoPtr ptr;
 
 		//get the node properties
@@ -2494,6 +2557,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CInterfaceParser::parseSheetSelection(xmlNodePtr cur)
 	{
+		H_AUTO(parseSheetSelection)
 		CXMLAutoPtr prop;
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"name" );
 		if (!prop)
@@ -2606,6 +2670,7 @@ namespace NLGUI
 	//==================================================================
 	bool CInterfaceParser::parseAnim(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
+		H_AUTO(parseAnim)
 		CInterfaceAnim *pAnim;
 
 		CXMLAutoPtr ptr;
@@ -2878,6 +2943,7 @@ namespace NLGUI
 		NLMISC::contReset (_ParentSizesMaxMap);
 		NLMISC::contReset (_LuaClassAssociation);
 		variableCache.clear();
+		m_VariableDefaults.clear();
 		pointerSettings.clear();
 	}
 
@@ -2942,6 +3008,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CInterfaceParser::parseStyle(xmlNodePtr cur)
 	{
+		H_AUTO(parseStyle)
 		string		styleId;
 		CXMLAutoPtr prop;
 
@@ -2985,6 +3052,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CInterfaceParser::parseLUAScript (xmlNodePtr cur)
 	{
+		H_AUTO(parseLUA)
 		// read fileName
 		CXMLAutoPtr prop;
 		string	fileName;
@@ -3008,6 +3076,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool				CInterfaceParser::solveStyle(xmlNodePtr cur)
 	{
+		H_AUTO(solveStyle)
 		CXMLAutoPtr ptr;
 
 		// if the node is a style, abort (not recrusive because use "style" as param name)
@@ -3118,7 +3187,7 @@ namespace NLGUI
 			needCheck = false;
 		#endif
 
-		string	pathName= CPath::lookup(fileName, false);
+		string pathName = lookup(fileName, false);
 		if(pathName.empty())
 		{
 			nlwarning("LUA Script '%s' not found", fileName.c_str());
@@ -3149,7 +3218,7 @@ namespace NLGUI
 		}
 		catch(const ELuaError &e)
 		{
-			nlwarning(e.luaWhat().c_str());
+			nlwarning("%s", e.luaWhat().c_str());
 			error= e.luaWhat();
 			return false;
 		}
@@ -3166,7 +3235,7 @@ namespace NLGUI
 			// if fail to reload a script, display the error code
 			if( !loadLUA( *it, error ) )
 			{
-				nlwarning( LuaHelperStuff::formatLuaErrorSysInfo( error ).c_str() );
+				CLuaManager::reportScriptError( error );
 			}
 		}
 	}

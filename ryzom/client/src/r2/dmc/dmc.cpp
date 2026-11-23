@@ -406,7 +406,7 @@ CObject::TSmartPtr CDynamicMapClient::translateScenario(CObject* scenario)
 	CObject::TSmartPtr rtdata = _ComLua->translateFeatures(scenario, errorMsg);
 	if( !rtdata )
 	{
-		nlwarning( errorMsg.c_str() );
+		nlwarning("%s", errorMsg.c_str());
 	}
 	return rtdata;
 }
@@ -652,6 +652,34 @@ void CDynamicMapClient::nodeMoved(
 	getCurrentScenario()->moveNode(instanceId, attrName, position,
 			destInstanceId, destAttrName, destPosition);
 
+}
+
+void CDynamicMapClient::otherEditorNodeSet(const std::string &instanceId, const std::string &attrName, CObject *value)
+{
+	flushActions();
+	_ActionHistoric.otherEditorSetNode(instanceId, attrName, value);
+	nodeSet(instanceId, attrName, value);
+}
+
+void CDynamicMapClient::otherEditorNodeInserted(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, CObject *value)
+{
+	flushActions();
+	_ActionHistoric.otherEditorInsertNode(instanceId, attrName, position, key, value);
+	nodeInserted(instanceId, attrName, position, key, value);
+}
+
+void CDynamicMapClient::otherEditorNodeErased(const std::string &instanceId, const std::string &attrName, sint32 position)
+{
+	flushActions();
+	_ActionHistoric.otherEditorEraseNode(instanceId, attrName, position);
+	nodeErased(instanceId, attrName, position);
+}
+
+void CDynamicMapClient::otherEditorNodeMoved(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &destInstanceId, const std::string &destAttrName, sint32 destPosition)
+{
+	flushActions();
+	_ActionHistoric.otherEditorMoveNode(instanceId, attrName, position, destInstanceId, destAttrName, destPosition);
+	nodeMoved(instanceId, attrName, position, destInstanceId, destAttrName, destPosition);
 }
 
 void CDynamicMapClient::scenarioUpdated(CObject* highLevel, bool willTP, uint32 /* startingActIndex */)

@@ -250,7 +250,7 @@ void userFriendlyError( const string& explanation, bool hasDirectionsInExplanati
 			errorStatus = ESRecoverableLater;
 			break;
 		default: // IDOK
-			nlerror( techReason.c_str() );
+			nlerror("%s", techReason.c_str());
 		}
 	}
 	while ( clicked != IDOK );

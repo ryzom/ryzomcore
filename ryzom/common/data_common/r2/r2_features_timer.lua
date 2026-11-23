@@ -18,7 +18,7 @@ feature.Components = {}
 
 feature.Components.Timer =
 	{
-		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor()", "uiR2EdEditEventsButton"),
+		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor", "uiR2EdEditEventsButton"),
 		BaseClass="LogicEntity",			
 		Name="Timer",
 		InEventUI = true,
@@ -162,7 +162,6 @@ function component.getLogicActionActivate(entity, context, action, rtNpcGrp)
 
 	local time = entity.Secondes + entity.Minutes * 60
 	local action1 =  r2.Translator.createAction("timer_set", rtNpcGrp.Id, 0, time)
---	local action1 = r2.Translator.createAction("timer_enable", rtNpcGrp.Id, 0)
 	local action2 = r2.Translator.createAction("generic_event_trigger", rtNpcGrp.Id, 0)
 	local actionIfInactive = r2.Translator.createAction("if_value_equal", rtNpcGrp.Id, "Active", 0, 
 			r2.Translator.createAction("multi_actions", {action1, action2}))
@@ -340,7 +339,7 @@ component.getLogicEvent = function(this, context, event)
 
 	local eventType = tostring(event.Event.Type)
 	
-	local eventHandler, lastCondition = nil, nil
+	local eventHandler, firstCondition, lastCondition = nil, nil, nil
 
 	if eventType == "On Trigger" then 
 		eventHandler, firstCondition, lastCondition = r2.Translator.createEvent("timer_t0_triggered", "",  rtNpcGrp.Id)
@@ -544,8 +543,8 @@ function component.initEventValuesMenu(this, menu, categoryEvent)
 				local subMenu2= subMenu:getSubMenu(lineNb)
 				for s=0,9 do
 					lineStr = tostring(i+s) 
-					local func = "r2.events:setEventValue('','" .. categoryEvent .."','".. lineStr.."')"
-					subMenu2:addLine(ucstring(lineStr), "lua", func, lineStr)
+					local func = r2:uiCall("r2.events:setEventValue", "", categoryEvent, lineStr)
+					subMenu2:addLine(lineStr, "lua", func, lineStr)
 				end
 				lineNb = lineNb+1
 
@@ -575,8 +574,8 @@ function component.initEventValuesMenu(this, menu, categoryEvent)
 					index = index + 1
 					for s=0, 55, 5 do
 						lineStr = tostring( (i+m)*60 + s) 
-						local func = "r2.events:setEventValue('','" .. categoryEvent .."','".. lineStr.."')"
-						subMenu3:addLine(ucstring(tostring(i+m) .. "m ".. s .. "s"), "lua", func, lineStr)				
+						local func = r2:uiCall("r2.events:setEventValue", "", categoryEvent, lineStr)
+						subMenu3:addLine(tostring(i+m) .. "m ".. s .. "s", "lua", func, lineStr)				
 					end										
 				end
 				lineNb = lineNb+1

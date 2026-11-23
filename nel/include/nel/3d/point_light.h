@@ -20,7 +20,8 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/vector.h"
-#include "nel/misc/stl_block_list.h"
+
+#include <list>
 
 
 namespace NL3D
@@ -33,11 +34,6 @@ using NLMISC::CRGBA;
 
 class	CLight;
 class	CTransform;
-
-
-// ***************************************************************************
-// Size of a block for allocation of lighted models nodes.
-#define	NL3D_LIGHTED_MODEL_ALLOC_BLOCKSIZE	1024
 
 
 // ***************************************************************************
@@ -61,7 +57,6 @@ class CPointLight
 {
 public:
 	/// The list of model this light influence.
-	//typedef	NLMISC::CSTLBlockList<CTransform*>	TTransformList;
 	typedef	std::list<CTransform*>	TTransformList;
 	typedef	TTransformList::iterator			ItTransformList;
 
@@ -243,8 +238,6 @@ private:
 	// Index in global light table, -1 when not in table
 	sint16			_TableIndex;
 
-	// The memory for list of LightedModels
-	//static	NLMISC::CBlockMemory<CTransform*, false>		_LightedModelListMemory;
 	// LightedModels. NB: do not contains models that have this light in their FrozenStaticLightSetup
 	TTransformList		_LightedModels;
 

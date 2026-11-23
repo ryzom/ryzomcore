@@ -30,6 +30,7 @@
 #include "game_share/ecosystem.h"
 #include "game_share/brick_families.h"
 #include "game_share/item_origin.h"
+#include "game_share/people_pd.h"
 #include "skill_change_callback.h"
 
 
@@ -179,7 +180,7 @@ private:
 	class CDBModCraftObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(NLMISC::ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 	};
 	CDBModCraftObs			_DBModCraftObs;
 	friend class			CDBModCraftObs;
@@ -242,7 +243,7 @@ private:
 
 	void			resetSelection();
 	void			fillSelection(const std::vector<uint> &mps);
-	void			filterSelectionItemPart(std::vector<uint> &mps, RM_FABER_TYPE::TRMFType itemPartFilter, ITEM_ORIGIN::EItemOrigin originFilter);
+	void			filterSelectionItemPart(std::vector<uint> &mps, RM_FABER_TYPE::TRMFType itemPartFilter, ITEM_ORIGIN::EItemOrigin itemOrigin, EGSPD::CPeople::TPeople planCiv);
 	void			filterSelectionItemSpecific(std::vector<uint> &mps, NLMISC::CSheetId specificItemWanted);
 
 	void			sortSelection(std::vector<uint> &mps) const;

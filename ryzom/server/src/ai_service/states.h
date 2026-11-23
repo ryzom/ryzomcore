@@ -105,10 +105,17 @@ public:
 	
 	typedef	RYAI_MAP_CRUNCH::CWorldPosition	TPosition;
 	
+	// clang-format off
 	// methods for managing geometry
 	bool	setPath(AITYPES::TVerticalPos verticalPos, const std::vector <CAIVector> &points);
 	
 	bool	setPatat(AITYPES::TVerticalPos verticalPos, const std::vector <CAIVector> &points);
+
+	/// The heights in millimetres of the points the next setPath or setPatat gets, one for each point: the shape then
+	/// puts its points and its random positions on the layer nearest to them (the states of a Ring scenario)
+	void	setNextHeights(const std::vector<sint32> &heights) { m_NextHeights = heights; }
+	/// The name of the state or place the shape belongs to, for its warnings
+	void	setOwnerName(const std::string &name) { m_OwnerName = name; }
 	
 	// dumb little geometry type reporting accessors
 	bool	hasPath		()	const	{ return _GeometryType==PATH && hasPoints(); } 
@@ -124,15 +131,33 @@ public:
 	bool	contains	(const	CAIVector	&pos)	const;
 
 	bool	calcRandomPos(CAIPos &pos)	const NL_OVERRIDE;	
+	bool	placePos(RYAI_MAP_CRUNCH::CWorldPosition &wpos, const CAIVector &pos) const NL_OVERRIDE;
 	
 protected:
 private:
 	enum { NONE, PATH, PATAT  }	_GeometryType;
 	std::vector<TPosition>		_Geometry;
 	
+	void	takeHeights(const std::vector<CAIVector> &points);
+	/// warns of each point whose height no layer at its place is near
+	void	warnHeightsOffLayers() const;
+	bool	placePoint(RYAI_MAP_CRUNCH::CWorldPosition &wpos, uint32 index, const CAIVector &pos, float radius, uint32 tries) const;
+	/// the height at pos from those of the points, and the distance in metres to the nearest point
+	sint32	heightAt(const CAIVector &pos, double &distance) const;
+
+	/// the name of the state or place for the warnings
+	const char *ownerName() const { return m_OwnerName.empty() ? "(unnamed)" : m_OwnerName.c_str(); }
+
+	/// the heights for the next geometry, and those of the points of this one (empty without heights)
+	std::vector<sint32>		m_NextHeights;
+	std::vector<sint32>		m_Heights;
+	std::vector<CAIVector>	m_HeightPoints;
+	std::string				m_OwnerName;
+
 	/// bouding box info
 	CAIVector	_VMin, _VMax;
 	bool	_AcceptInvalidPos;
+	// clang-format on
 };
 
 class CAIStatePositional

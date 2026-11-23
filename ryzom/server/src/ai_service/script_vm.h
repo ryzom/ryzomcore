@@ -21,12 +21,32 @@
 #define __SCRIPT_VM__
 
 #include "nel/misc/smart_ptr.h"
+#include "nel/misc/common.h"
 //#include "ai_grp.h"
 
 #include <limits>
+#include <cstring>
 
 namespace AIVM
 {
+
+/// What a script did that it cannot go on from: a value used as a type it is not, a value taken
+/// from an empty stack, a text that grew too long. The run of the script ends there
+/// (CStateInstance::interpretCode), and the service goes on.
+class EScriptStop : public NLMISC::Exception
+{
+public:
+	EScriptStop(const std::string &reason)
+	    : NLMISC::Exception(reason)
+	{
+	}
+};
+
+/// Throws EScriptStop with this reason
+void scriptStop(const char *reason);
+
+/// Largest text a script can make by joining texts, in bytes
+const size_t MaxScriptTextSize = 65536;
 
 /****************************************************************************/
 /* Compiler classes                                                         */
@@ -72,6 +92,18 @@ public:
 	std::vector<size_t> _opcodes;
 	std::string const _sourceName;
 };
+
+/// The byte code word of a float constant: the bits of the float, zero-extended to the word.
+/// This is what the VM reads back: PUSH_ON_STACK takes the float from the first four bytes of
+/// the word, and SWITCH compares the whole word of a case with the zero-extended bits of the
+/// tested value. Reading the float through a size_t pointer instead takes four bytes that are
+/// not part of it into a 64-bit word, and such a case never matches.
+inline size_t floatToOpcode(float value)
+{
+	uint32 bits;
+	memcpy(&bits, &value, sizeof(bits));
+	return (size_t)bits;
+}
 
 class CByteCodeEntry {
 public:
@@ -192,6 +224,12 @@ public:
 	virtual CByteCodeEntry const* getScriptCallBackPtr(NLMISC::TStringId const& eventName) const = 0;
 	virtual void callScriptCallBack(IScriptContext* caller, NLMISC::TStringId const& funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", CScriptStack* stack = NULL) = 0;
 	virtual void callNativeCallBack(IScriptContext* caller, std::string const&       funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", CScriptStack* stack = NULL) = 0;
+
+	/// A line the script of this context causes in the log of the service while it runs: what it
+	/// prints, or what the machine says about a value it gave. True when the context took the line:
+	/// the lines of some contexts are limited in number, and the context writes or counts them
+	/// itself. False when the machine is to write the line as it did.
+	virtual bool logScriptLine(std::string const& line) { return false; }
 };
 
 class CScriptVM
@@ -271,7 +309,28 @@ public:
 		CByteCodeEntry const& codeScriptEntry);
 	static CScriptVM* getInstance();
 	static void destroyInstance();
+
+	/// Gives the scripts that are interpreted from now on this number of operations together
+	/// (CScenarioWorkScope sets it for the work one event of a scenario starts)
+	static void setOpcodeBudget(uint32 opcodes)
+	{
+		_OpcodeBudgetSet = true;
+		_OpcodesLeft = opcodes;
+	}
+	/// The scripts are interpreted without a count again
+	static void clearOpcodeBudget()
+	{
+		_OpcodeBudgetSet = false;
+		_OpcodesLeft = 0;
+	}
+	/// True when a budget was set and is used up: the scripts end at their next operation
+	static bool isOpcodeBudgetSpent() { return _OpcodeBudgetSet && _OpcodesLeft == 0; }
+	/// The operations that are left of the budget that was set, 0 when none is set
+	static uint32 getOpcodesLeft() { return _OpcodesLeft; }
+
 private:
+	static bool _OpcodeBudgetSet;
+	static uint32 _OpcodesLeft;
 	uint32 rand32(uint32 mod)
 	{ 
 		if (mod==0) return 0;
@@ -387,7 +446,7 @@ CScriptStack::CStackEntry& CScriptStack::CStackEntry::operator=(IScriptContext* 
 inline
 bool CScriptStack::CStackEntry::operator==(CStackEntry const& other) const
 {
-	nlassert(_type==other._type);
+	if (_type != other._type) scriptStop("two values of different types are compared");
 	switch (_type)
 	{
 	case EString:
@@ -423,7 +482,7 @@ bool CScriptStack::CStackEntry::operator>=(CStackEntry const& other) const
 inline
 bool CScriptStack::CStackEntry::operator<(CStackEntry const& other) const
 {
-	nlassert(_type==other._type);
+	if (_type != other._type) scriptStop("two values of different types are compared");
 	switch (_type)
 	{
 	case EString:
@@ -441,7 +500,7 @@ bool CScriptStack::CStackEntry::operator<(CStackEntry const& other) const
 inline
 bool CScriptStack::CStackEntry::operator>(CStackEntry const& other) const
 {
-	nlassert(_type==other._type);
+	if (_type != other._type) scriptStop("two values of different types are compared");
 	switch (_type)
 	{
 	case EString:
@@ -486,43 +545,43 @@ CScriptStack::TStackTypes CScriptStack::CStackEntry::type() const
 inline
 std::string& CScriptStack::CStackEntry::getString()
 {
-	nlassert(_type==EString);
+	if (_type != EString) scriptStop("a value that is not a text is used as a text");
 	return *(*((std::string**)&_valp));
 }
 inline
 std::string const& CScriptStack::CStackEntry::getString() const
 {
-	nlassert(_type==EString);
+	if (_type != EString) scriptStop("a value that is not a text is used as a text");
 	return *(*((std::string**)&_valp));
 }
 inline
 IScriptContext* CScriptStack::CStackEntry::getIScriptContext()
 {
-	nlassert(_type==EContext);
+	if (_type != EContext) scriptStop("a value that is not a group is used as a group");
 	return *((IScriptContext**)&_valp);
 }
 inline
 int& CScriptStack::CStackEntry::getInt()
 {
-	nlassert(_type==EOther);
+	if (_type != EOther) scriptStop("a value of the script is used as an address of its code");
 	return _vali;
 }
 inline
 int const& CScriptStack::CStackEntry::getInt() const
 {
-	nlassert(_type==EOther);
+	if (_type != EOther) scriptStop("a value of the script is used as an address of its code");
 	return _vali;
 }
 inline
 float& CScriptStack::CStackEntry::getFloat()
 {
-	nlassert(_type==EFloat);
+	if (_type != EFloat) scriptStop("a value that is not a number is used as a number");
 	return *((float*)&_vali);
 }
 inline
 float const& CScriptStack::CStackEntry::getFloat() const
 {
-	nlassert(_type==EFloat);
+	if (_type != EFloat) scriptStop("a value that is not a number is used as a number");
 	return *((float const*)&_vali);
 }
 
@@ -554,17 +613,20 @@ void CScriptStack::push(int val)
 inline
 CScriptStack::CStackEntry& CScriptStack::top()	//	is this an optimisation of the method below ?
 {
+	if (_Stack.empty()) scriptStop("a value is taken from the stack when it is empty");
 	return _Stack.back();
 }
 inline
 CScriptStack::CStackEntry& CScriptStack::top(int index)
 {
+	if (index < 0 || (size_t)index >= _Stack.size()) scriptStop("a value is taken from the stack when it does not hold that many");
 	return *(_Stack.rbegin()+index);
 }
 
 inline
 void CScriptStack::pop()
 {
+	if (_Stack.empty()) scriptStop("a value is removed from the stack when it is empty");
 	_Stack.pop_back();
 }
 

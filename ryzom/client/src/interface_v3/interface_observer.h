@@ -146,7 +146,7 @@ public:
 				if (NLGUI::CDBManager::getInstance()->getDbProp(data,false) == nullptr)
 				{
 					std::string sTmp = std::string("data (")+std::string(dataTok)+std::string(") in a observer tag do not exist, CREATING!");
-					nlinfo (sTmp.c_str());
+					nlinfo ("%s", sTmp.c_str());
 					data = (const char*)dataTok;
 					NLGUI::CDBManager::getInstance()->getDbProp (data, true);
 				}

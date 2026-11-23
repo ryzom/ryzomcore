@@ -20,6 +20,7 @@
 
 #include "id_impulsions.h"
 #include "uid_impulsions.h"
+#include "game_share/chat_message.h"
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/sphrase_com.h"
 #include "game_share/synchronised_message.h"
@@ -33,6 +34,13 @@ using namespace NLNET;
 
 extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 extern NLNET::TServiceId SelfServiceId;
+
+// DEBUG:CMD forwards a client's text to any service as an EXEC_COMMAND, which that service executes with its
+// own rights and without any privilege check. Only the /cmd command of non-final clients sends it. A live
+// shard must not accept it from a client, so it is refused unless the shard turns this on.
+CVariable<bool> AllowClientServiceCommands("FS", "AllowClientServiceCommands",
+	"Forward the DEBUG:CMD message (the /cmd command of non-final clients) to services as EXEC_COMMAND, executed with the service's rights; keep it off on a live shard",
+	false, 0, true);
 
 void cbImpulsionIdGatewayOpen( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId );
 void cbImpulsionIdGatewayMessage( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId );
@@ -88,6 +96,14 @@ void impulsionCmd( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, 
 		return;
 	}
 	
+	if (!AllowClientServiceCommands.get())
+	{
+		nlwarning("FEHACK: client %s sent DEBUG:CMD '%s %s' for service %s, refused (AllowClientServiceCommands is off)",
+			sender.toString().c_str(), cmd.c_str(), arg.c_str(), dest.c_str());
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( RefusedServiceCommand, (TUid)(sender.getShortId() >> 4) );
+		return;
+	}
+
 	nlinfo("<impulsionCmd> CMD received : %s %s to %s",cmd.c_str(), arg.c_str(), dest.c_str());
 	
 	CMessage msgout("EXEC_COMMAND");
@@ -159,6 +175,39 @@ void impulsionCmd( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, 
 //	CUnifiedNetwork::getInstance()->send("IOS", msgout);
 //
 //}
+
+//-----------------------------------------------
+//	impulsionChatShare
+//-----------------------------------------------
+void impulsionChatShare( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId )
+{
+	if (bms.length() > CHAT_MESSAGE::MaxSerializedSize)
+		return;
+	uint8 chatMode;
+	CEntityId dynamicChannelId;
+	string receiver;
+	CChatMessageRequest request;
+	try
+	{
+		bms.serial( chatMode );
+		bms.serial( dynamicChannelId );
+		bms.serial( receiver );
+		bms.serial( request );
+	}
+	catch(const Exception &e)
+	{
+		nlwarning("<impulsionChatShare> %s", e.what());
+		return;
+	}
+
+	CMessage msgout("CLIENT:STRING:CHAT_SHARE");
+	msgout.serial( sender );
+	msgout.serial( chatMode );
+	msgout.serial( dynamicChannelId );
+	msgout.serial( receiver );
+	msgout.serial( request );
+	CUnifiedNetwork::getInstance()->send("EGS", msgout);
+}
 
 //-----------------------------------------------
 //	impulsionPhraseLearn : learn a phrase
@@ -311,6 +360,16 @@ void routeImpulsionIdFromClient( NLMISC::CBitMemStream& bms, const NLMISC::CEnti
 		if (!msgNodeId.isValid())
 		{
 			nlwarning("Unable to decode message from sender %s", sender.toString().c_str());
+		}
+		else if (msgName.compare(0, 11, "CONNECTION:") == 0
+			&& (msgName == "CONNECTION:DELETE_CHAR" || msgName == "CONNECTION:SELECT_CHAR" || msgName == "CONNECTION:CREATE_CHAR"))
+		{
+			// The character selection screen is reached on a new connection, routed by uid. Once a character is in
+			// game, these would reach their handlers anyway (DELETE_CHAR prefixed with the entity id, which the EGS
+			// reads as an account id), so they are refused.
+			nlwarning("FEHACK: client %s sent %s with a character in game, refused", sender.toString().c_str(), msgName.c_str());
+			CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MisplacedImpulse, (TUid)(sender.getShortId() >> 4) );
+			return;
 		}
 		else
 		{
@@ -521,6 +580,7 @@ void	initImpulsionId()
 	GenericXmlMsgHeaderMngr.setUserData("DEBUG:CMD",					(uint64)impulsionCmd, 0);
 //	GenericXmlMsgHeaderMngr.setUserData("COMMAND:ADMIN",				(uint64)impulsionAdmin, 0);
 //	GenericXmlMsgHeaderMngr.setUserData("STRING_MANAGER:STRING_RQ",		(uint64)impulsionStringRequestId, 0);
+	GenericXmlMsgHeaderMngr.setUserData("STRING:CHAT_SHARE",			(uint64)impulsionChatShare, 0);
 	GenericXmlMsgHeaderMngr.setUserData("PHRASE:LEARN",					(uint64)impulsionPhraseLearn, 0);
 	GenericXmlMsgHeaderMngr.setUserData("PHRASE:MEMORIZE",				(uint64)impulsionPhraseMemorize, 0);	
 	GenericXmlMsgHeaderMngr.setUserData("PHRASE:EXECUTE_FABER",			(uint64)impulsionExecuteFaber, 0);	

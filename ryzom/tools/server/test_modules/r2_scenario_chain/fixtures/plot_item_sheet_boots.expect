@@ -1,0 +1,35 @@
+# Plot items that name the light and the medium boots (iccalb.sitem, iccamb.sitem), whose icon no plot
+# item sheet shows: each gets the first free sheet of the list of the boots, the pants with their boots
+# for the first and the armor tool for the second, and the author is told that no plot item icon looks
+# the same. No plot item of the scenario names pants, so the icon of the pants is free for the boots.
+
+upgrade: ok
+version_update: changed
+version_update_note: uiR2EDVersionNotePlotItemIconNone(Light boots)
+version_update_note: uiR2EDVersionNotePlotItemIconNone(Medium boots)
+no_line: version_update_note: uiR2EDVersionNotePlotItemIcon(
+no_line: version_update_note: uiR2EDVersionNotePlotItemIconTaken
+no_line: version_update_note: uiR2EDVersionNotePlotItemUnknown
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+rt_plot_item_sheets:
+no_line: rt_plot_item_sheets: refused
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Versions.PlotItem = 1
+scenario_at: PlotItems = <size 2>
+scenario_at: PlotItems[0].Name = Light boots
+scenario_at: PlotItems[0].SheetId = 8660526
+scenario_at: PlotItems[1].Name = Medium boots
+scenario_at: PlotItems[1].SheetId = 8649518
+rt_at: PlotItems[0].SheetId = 8660526
+rt_at: PlotItems[1].SheetId = 8649518

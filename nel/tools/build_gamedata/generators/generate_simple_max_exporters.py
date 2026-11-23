@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../configuration")
 if os.path.isfile("generate_simple_max_exporters.log"):
 	os.remove("generate_simple_max_exporters.log")
@@ -51,8 +51,8 @@ def processLine(line, processName, fileExtension, sourceDirectoriesVariable, exp
 	return newline
 
 def generateSimpleMaxExporterFile(sourceFile, destFile, writeMode, processName, fileExtension, sourceDirectoriesVariable, exportDirectoryVariable, clientDirectoryVariable, dateTimeStamp):
-	srcf = open(sourceFile, "r")
-	dstf = open(destFile, writeMode)
+	srcf = open(sourceFile, "r", encoding="utf-8", errors="surrogateescape")
+	dstf = open(destFile, writeMode, encoding="utf-8", errors="surrogateescape")
 	printLog(log, "WRITE " + destFile + " " + writeMode)
 	for line in srcf:
 		dstf.write(processLine(line, processName, fileExtension, sourceDirectoriesVariable, exportDirectoryVariable, clientDirectoryVariable, dateTimeStamp))

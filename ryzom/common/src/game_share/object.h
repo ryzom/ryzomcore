@@ -290,8 +290,10 @@ class CObjectNumber : public CObject
 public:
 	explicit CObjectNumber(double value);
 	explicit CObjectNumber(sint64 value);
-	double getNumberValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
-	sint64 getIntegerValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
+	double getNumberValue() const { return m_IsInteger ? (double)m_Value.Integer : m_Value.Number; }
+	// the conversion is explicit on the double branch only: a mixed ternary would be a double and
+	// round every integer above 2^53
+	sint64 getIntegerValue() const { return m_IsInteger ? m_Value.Integer : (sint64)m_Value.Number; }
 
 #if !defined(CLANG_VERSION) && defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
 	virtual const char *getTypeAsString() const;
@@ -547,11 +549,41 @@ class CClassAttribute: public CObjectTable
 };
 
 // Don't take ownership
+//
+// The binary form of a tree is read from the other side of a connection, by the services and by the client. A
+// stream that is not a tree within the limits below is refused: serial() throws NLMISC::EStream (the module
+// layer catches what a message handler throws, per message), and compressed data, which is only expanded when
+// the tree is asked for, gives no tree (getData() returns NULL). Either way a warning says what was wrong and
+// nothing of the refused tree is kept.
 class CObjectSerializer
 {
 public:
 	// for client : factory to use when reading objects
 	CObjectFactory *Factory;
+
+	/// Largest nesting of tables read. The code that walks a tree recurses once per table. Same value as
+	/// CScenarioTextParser::MaxDepth: what is loaded from a file can be sent.
+	static const uint32 MaxDepth = 256;
+	/// Largest number of table entries read in one tree, same value as CScenarioTextParser::MaxNodes
+	static const uint32 MaxNodes = 1024 * 1024;
+	/// Longest string or key read, which is the longest one NLMISC::IStream accepts to write
+	static const uint32 MaxStringLength = 1000000;
+	/// Largest compressed form of a tree read from a stream. A message between two services, and so anything a
+	/// service sends to a client or to the backup service, is 1 MiB at most by default
+	/// (NLNET::CBufNetBase::DefaultMaxExpectedBlockSize); this leaves room for a shard that raises it, and is
+	/// the limit a user component has (CUserComponent::MaxUserComponentDataLength).
+	static const uint32 MaxCompressedSize = 4 * 1024 * 1024;
+	/// Largest binary form of a tree that is expanded from compressed data: MaxNodes entries of 16 bytes. No
+	/// more than 1032 times the compressed size is expanded either, which is the most deflate can do.
+	static const uint32 MaxUncompressedSize = 16 * 1024 * 1024;
+
+	/** Nesting of tables (0 for a value that is not a table, 1 for a table that holds no table) and number of
+	  * table entries of a tree, counted as they are when a tree is read. Returns false, with the counts
+	  * reached so far, when the tree is above MaxDepth or MaxNodes: the walk stops there, so a tree of any
+	  * depth and size can be given. When part, a value of the tree, is given, the same walk gives the number
+	  * of table entries of part in partNodes (0 when the walk does not come to the end of it).
+	  */
+	static bool measure(const CObject *tree, uint32 &depth, uint32 &nodes, const CObject *part = nullptr, uint32 *partNodes = nullptr);
 
 	// to force static serializer memory cleanup
 	static void releaseInstance();
@@ -584,6 +616,10 @@ private:
 	CObjectSerializer& operator=(const CObjectSerializer& rh);
 	void uncompressImpl();
 
+	// the classes of object.cpp that read and write the values keep the counts of a read below
+	friend class CObjectSerializerImpl;
+	friend class CClassSerializer;
+	friend class CReadDepth;
 
 private:
 	CObject::TSmartPtr	_Data;
@@ -593,6 +629,11 @@ private:
 	uint32		_CompressedLen;
 	uint32		_UncompressedLen;
 	uint32		_Version;
+	// state of the read in progress: tables open, table entries read, and needed properties found without a
+	// value (only the first ones are logged one by one)
+	uint32		m_ReadDepth;
+	uint32		m_ReadNodes;
+	uint32		m_ReadMissing;
 public:
 	uint32		Level;
 	bool		Log;
@@ -612,6 +653,11 @@ public:
 	static void setClientObjectFactory(CObjectFactory *factory)
 	{
 		_ClientObjecFactory = factory;
+	}
+
+	static CObjectFactory *getClientObjectFactory()
+	{
+		return _ClientObjecFactory;
 	}
 };
 

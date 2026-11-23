@@ -24,7 +24,6 @@
 #include <math.h>
 
 #include <list>
-#include <limits>
 
 #include "nel/misc/debug.h"
 #include "nel/misc/config_file.h"
@@ -42,6 +41,7 @@
 #include "ryzom_welcome_service.h"
 
 #include "game_share/welcome_service_itf.h"
+#include "game_share/utils.h"
 #include "game_share/mirror.h"
 
 using namespace std;
@@ -918,7 +918,9 @@ void cbLSChooseShard (CMessage &msgin, const std::string &serviceName, TServiceI
 	}
 
 
-	string ret = lsChooseShard(userName, cookie, userPriv, userExtended, WS::TUserRole::ur_player, 0xffffffff, std::numeric_limits<uint32>::max());
+	// The player chooses the character on the shard: any character slot (0xF, see CClientHost::AuthorizedCharSlot), which
+	// the frontend keeps in 8 bits
+	string ret = lsChooseShard(userName, cookie, userPriv, userExtended, WS::TUserRole::ur_player, 0xffffffff, 0xF);
 
 	if (!ret.empty())
 	{
@@ -993,7 +995,8 @@ std::string lsChooseShard (const std::string &userName,
 	else if (ShardOpen != ClosedForAll)
 	{
 		const std::string&	allowedGroups = OpenGroups;
-		bool				userInOpenGroups = (!userPriv.empty() && !allowedGroups.empty() && allowedGroups.find(userPriv) != std::string::npos);
+		// one of the privileges of the account is, as a whole name, one of the groups
+		bool				userInOpenGroups = hasPrivilegeOfList(userPriv, allowedGroups);
 
 		// open for all or user is privileged
 		authorizeUser = (ShardOpen == OpenForAll || userInOpenGroups);
@@ -1042,7 +1045,7 @@ void cbFailed (CMessage &msgin, const std::string &serviceName, TServiceId  sid)
 	// I can't connect to the Login Service, just nlerror ();
 	string reason;
 	msgin.serial (reason);
-	nlerror (reason.c_str());
+	nlerror ("%s", reason.c_str());
 }
 
 

@@ -153,6 +153,7 @@
 
 #include "stdpch.h"
 #include "script_compiler.h"
+#include "ring_scenario_guard.h"
 #include <list>
 
 using namespace std;
@@ -174,7 +175,42 @@ extern char aiFile[512];
 extern const char *aiInputScript;
 extern uint aiInputScriptLength;
 extern void aiClean ();
+extern void aiResetLexer ();
 extern int aidebug;			/*  nonzero means print parse trace	*/
+
+// The stacks of the parser grow in the heap: a text nested as deep as the parser reads does not
+// fit the stack of the thread
+#define YYSTACK_USE_ALLOCA 0
+
+// True while the scripts of the scenario of a Ring session are compiled. Such a script is made by a
+// client: what its expressions are made of is tested here, where the scripts of the shard are trusted.
+static bool aiScenario ()
+{
+	return CRingScenarioGuard::isLoadingScenario ();
+}
+void aiOutputError (int line, const char *format, ...);
+
+// The errors of the script of a scenario that are kept. Past them the lexer ends the text
+// (aiTooManyErrors): a script is not read on for the errors it has left.
+static const int aiMaxScenarioErrors = 3;
+// The first error of the text that is compiled
+static std::string aiFirstError;
+
+bool aiTooManyErrors ()
+{
+	return aiScenario () && aiErrorCount >= aiMaxScenarioErrors;
+}
+
+// Called by the lexer for a character no token of the script language begins with. The scripts of
+// the shard keep what they had: the character is written out and the text is read on.
+void aiUnknownCharacter (char c)
+{
+	if (aiScenario ())
+		aiOutputError (aiLine, "the character 0x%02x is not of the script language", (uint)(uint8)c);
+	else
+		fwrite (&c, 1, 1, stdout);
+}
+
 #define fprintf myfprintf
 int myfprintf (FILE *file, const char *format, ...)
 {
@@ -185,7 +221,7 @@ int myfprintf (FILE *file, const char *format, ...)
 	{
 		char buffer[1024];
 		result = vsnprintf(buffer, 1024, format, args);
-		nldebug (buffer);
+		nldebug ("%s", buffer);
 	}
 	else
 	{
@@ -208,18 +244,31 @@ bool aiCompile (std::vector<size_t> &dest, const char *script, const char *scrip
 #endif // AI_COMP_DEBUG
 	aiLine = 1;
 	aiErrorCount = 0;
+	aiFirstError.clear ();
+	// A compilation reads its own text only: nothing the lexer read of an earlier text is left for
+	// this one
+	aiResetLexer ();
 	aiInputScript = script;
 	aiInputScriptLength = strlen (script);
-	strcpy (aiFile, scriptName);
+	strncpy (aiFile, scriptName, sizeof (aiFile) - 1);
+	aiFile[sizeof (aiFile) - 1] = 0;
 	aiRoot = NULL;
 	
 	nldebug("script compilation of %s", scriptName);
 	aiErrorMessage = toString ("script compilation of %s\n", scriptName);
 	int err = aiparse();
+	// The parser returns before the end of the text when its stack is full: that is a text that did
+	// not compile (err), and the rest of it is dropped here
+	aiResetLexer ();
+	aiInputScript = "";
+	aiInputScriptLength = 0;
 	bool error = err || aiErrorCount;
 	if (error)
 	{
-		nlwarning ("compilation failed for %s - %d error(s)", scriptName, aiErrorCount);
+		if (aiScenario ())
+			CRingScenarioGuard::refuseScript (scriptName, "does not compile (" + (aiFirstError.empty () ? string ("syntax error") : aiFirstError) + ")");
+		else
+			nlwarning ("compilation failed for %s - %d error(s)", scriptName, aiErrorCount);
 		aiErrorMessage += toString ("compilation failed for %s - %d error(s)\n", scriptName, aiErrorCount);
 	}
 	else
@@ -281,6 +330,16 @@ void aiOutputError(int line, const char *format, ...)
 	char buffer[1024];
 	vsnprintf (buffer, sizeof (buffer), format, args);
 	va_end (args);
+	if (aiScenario ())
+	{
+		// The errors of the script of a scenario make one line, when the compilation ends
+		// (aiCompile): the first error says what the script has
+		if (aiErrorCount == 1)
+			aiFirstError = toString ("line %d: %s", line, buffer);
+		if (aiErrorCount <= aiMaxScenarioErrors)
+			aiErrorMessage += toString ("%s(%d):%s\n", aiFile, line, buffer);
+		return;
+	}
 	nlwarning ("%s(%d):%s", aiFile, line, buffer);
 	aiErrorMessage += toString ("%s(%d):%s\n", aiFile, line, buffer);
 }
@@ -292,6 +351,15 @@ void createNode (CByteCodeYacc &dest)
 	dest.ByteCode = new vector<size_t>;
 	dest.Signature[0] = 0;
 	NodeToClear.push_back (dest.ByteCode);
+}
+
+// The code of 'a' becomes the code of dest, to add to. For the rules that add an element to a list
+// they have built so far ($1): a copy of the list for each element, each kept until the end of the
+// compilation, makes the memory of one statement grow with the square of its length.
+void appendNode (CByteCodeYacc &dest, const CByteCodeYacc &a)
+{
+	dest.ByteCode = a.ByteCode;
+	dest.Signature[0] = 0;
 }
 
 void addNode (CByteCodeYacc &dest, size_t src)
@@ -429,6 +497,8 @@ void nativeFunc (CByteCodeYacc &dest, size_t name, const char *in, const char *o
 #define NODE6(dest,a,b,c,d,e,f) createNode (dest); addNode (dest, a); addNode (dest, b); addNode (dest, c); addNode (dest, d); addNode (dest, e); addNode (dest, f);
 #define NODE7(dest,a,b,c,d,e,f,g) createNode (dest); addNode (dest, a); addNode (dest, b); addNode (dest, c); addNode (dest, d); addNode (dest, e); addNode (dest, f); addNode (dest, g);
 #define NODE8(dest,a,b,c,d,e,f,g,h) createNode (dest); addNode (dest, a); addNode (dest, b); addNode (dest, c); addNode (dest, d); addNode (dest, e); addNode (dest, f); addNode (dest, g); addNode (dest, h);
+#define NODEA2(dest,a,b) appendNode (dest, a); addNode (dest, b);
+#define NODEA3(dest,a,b,c) appendNode (dest, a); addNode (dest, b); addNode (dest, c);
 
 #define TYPEF(dest) dest.Signature[0] = 'f'; dest.Signature[1] = 0;
 #define TYPEL(dest) dest.Signature[0] = 'l'; dest.Signature[1] = 0;
@@ -1610,7 +1680,7 @@ yyreduce:
 
   case 3:
 #line 362 "ai_service/script_parser.yacc"
-    { NODE3 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode, yyvsp[-1].Opcode); TYPEL (yyval.ByteCode); ;}
+    { NODEA3 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode, yyvsp[-1].Opcode); TYPEL (yyval.ByteCode); ;}
     break;
 
   case 4:
@@ -1629,8 +1699,12 @@ yyreduce:
 
   case 6:
 #line 372 "ai_service/script_parser.yacc"
-    { 
-					NODE3 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode, yyvsp[-1].Opcode); TYPEF (yyval.ByteCode); 
+    {
+					// The result is typed as a number whatever is added. In the script of a scenario numbers are added
+					// and nothing else, so that the type is the right one for what uses the result.
+					if (aiScenario () && !yyvsp[-2].ByteCode.isFloat ()) aiOutputError (aiLine, "the left '+' expression must be a float in the script of a scenario but it is a %s", yyvsp[-2].ByteCode.getType ());
+					if (aiScenario () && !yyvsp[0].ByteCode.isFloat ()) aiOutputError (aiLine, "the right '+' expression must be a float in the script of a scenario but it is a %s", yyvsp[0].ByteCode.getType ());
+					NODEA3 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode, yyvsp[-1].Opcode); TYPEF (yyval.ByteCode);
 				;}
     break;
 
@@ -1639,7 +1713,7 @@ yyreduce:
     { 
 					if (!yyvsp[-2].ByteCode.isFloat ()) aiOutputError (aiLine, "the left '-' expression must be a float but it is a %s", yyvsp[-2].ByteCode.getType ());
 					if (!yyvsp[0].ByteCode.isFloat ()) aiOutputError (aiLine, "the right '-' expression must be a float but it is a %s", yyvsp[0].ByteCode.getType ());
-					NODE3 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode, yyvsp[-1].Opcode); TYPEF (yyval.ByteCode); 
+					NODEA3 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode, yyvsp[-1].Opcode); TYPEF (yyval.ByteCode); 
 				;}
     break;
 
@@ -1648,7 +1722,7 @@ yyreduce:
     { 
 					if (!yyvsp[-2].ByteCode.isFloat ()) aiOutputError (aiLine, "the left '%s' expression must be a float but it is a %s", yyvsp[-1].Operator.Operator, yyvsp[-2].ByteCode.getType ());
 					if (!yyvsp[0].ByteCode.isFloat ()) aiOutputError (aiLine, "the right '%s' expression must be a float but it is a %s", yyvsp[-1].Operator.Operator, yyvsp[0].ByteCode.getType ());
-					NODE3 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode, yyvsp[-1].Operator); TYPEF (yyval.ByteCode); 
+					NODEA3 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode, yyvsp[-1].Operator); TYPEF (yyval.ByteCode); 
 				;}
     break;
 
@@ -1778,7 +1852,7 @@ yyreduce:
 
   case 30:
 #line 455 "ai_service/script_parser.yacc"
-    { NODE2 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode); TYPE2 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode); ;}
+    { NODEA2 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode); TYPE2 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode); ;}
     break;
 
   case 31:
@@ -1902,7 +1976,7 @@ yyreduce:
 
   case 50:
 #line 530 "ai_service/script_parser.yacc"
-    { NODE2 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode); TYPE2 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode); ;}
+    { NODEA2 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode); TYPE2 (yyval.ByteCode, yyvsp[-2].ByteCode, yyvsp[0].ByteCode); ;}
     break;
 
   case 51:
@@ -1950,7 +2024,7 @@ yyreduce:
 
   case 59:
 #line 546 "ai_service/script_parser.yacc"
-    { NODE3 (yyval.ByteCode, yyvsp[-2].ByteCode, CScriptVM::PUSH_PRINT_STRING, yyvsp[0].Opcode); ;}
+    { NODEA3 (yyval.ByteCode, yyvsp[-2].ByteCode, CScriptVM::PUSH_PRINT_STRING, yyvsp[0].Opcode); ;}
     break;
 
   case 60:
@@ -1960,7 +2034,7 @@ yyreduce:
 
   case 61:
 #line 548 "ai_service/script_parser.yacc"
-    { NODE3 (yyval.ByteCode, yyvsp[-2].ByteCode, CScriptVM::PUSH_PRINT_VAR, yyvsp[0].Opcode); ;}
+    { NODEA3 (yyval.ByteCode, yyvsp[-2].ByteCode, CScriptVM::PUSH_PRINT_VAR, yyvsp[0].Opcode); ;}
     break;
 
   case 62:
@@ -1970,7 +2044,7 @@ yyreduce:
 
   case 63:
 #line 550 "ai_service/script_parser.yacc"
-    { NODE3 (yyval.ByteCode, yyvsp[-2].ByteCode, CScriptVM::PUSH_PRINT_STR_VAR, yyvsp[0].Opcode); ;}
+    { NODEA3 (yyval.ByteCode, yyvsp[-2].ByteCode, CScriptVM::PUSH_PRINT_STR_VAR, yyvsp[0].Opcode); ;}
     break;
 
   case 64:
@@ -2169,7 +2243,7 @@ yyreduce:
 
   case 99:
 #line 617 "ai_service/script_parser.yacc"
-    { NODE6 (yyval.ByteCode, CScriptVM::PUSH_VAR_VAL, yyvsp[-3].Opcode, yyvsp[-1].ByteCode, yyvsp[-2].Operator, CScriptVM::SET_VAR_VAL, yyvsp[-3].Opcode); ;}
+    { if (aiScenario () && !yyvsp[-1].ByteCode.isFloat ()) aiOutputError (aiLine, "the '%s' expression must be a float in the script of a scenario but it is a %s", yyvsp[-2].Operator.Operator, yyvsp[-1].ByteCode.getType ()); NODE6 (yyval.ByteCode, CScriptVM::PUSH_VAR_VAL, yyvsp[-3].Opcode, yyvsp[-1].ByteCode, yyvsp[-2].Operator, CScriptVM::SET_VAR_VAL, yyvsp[-3].Opcode); ;}
     break;
 
   case 100:
@@ -2184,7 +2258,7 @@ yyreduce:
 
   case 102:
 #line 621 "ai_service/script_parser.yacc"
-    { NODE8 (yyval.ByteCode, yyvsp[-4].ByteCode, CScriptVM::PUSH_CONTEXT_VAR_VAL, yyvsp[-4].ByteCode, yyvsp[-1].ByteCode, yyvsp[-2].Operator, yyvsp[-4].ByteCode, CScriptVM::SET_CONTEXT_VAR_VAL, yyvsp[-3].Opcode); ;}
+    { if (aiScenario () && !yyvsp[-1].ByteCode.isFloat ()) aiOutputError (aiLine, "the '%s' expression must be a float in the script of a scenario but it is a %s", yyvsp[-2].Operator.Operator, yyvsp[-1].ByteCode.getType ()); NODE8 (yyval.ByteCode, yyvsp[-4].ByteCode, CScriptVM::PUSH_CONTEXT_VAR_VAL, yyvsp[-4].ByteCode, yyvsp[-1].ByteCode, yyvsp[-2].Operator, yyvsp[-4].ByteCode, CScriptVM::SET_CONTEXT_VAR_VAL, yyvsp[-3].Opcode); ;}
     break;
 
   case 103:

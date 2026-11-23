@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
 		if(testWildCard(files[i], "*.anim"))
 		{
 			animList.push_back(files[i]);
-			InfoLog->displayRawNL(animList.back().c_str());
+			InfoLog->displayRawNL("%s", animList.back().c_str());
 		}
 
 	}
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
 		if(testWildCard(files[i], "*.animation_set"))
 		{
 			animSetList.push_back(files[i]);
-			InfoLog->displayRawNL(animSetList.back().c_str());
+			InfoLog->displayRawNL("%s", animSetList.back().c_str());
 		}
 	}
 	

@@ -34,6 +34,7 @@
 #include "game_share/action_disconnection.h"
 #include "game_share/action_position.h"
 #include "game_share/action_sync.h"
+#include "game_share/stream_record.h"
 #include "game_share/action_association.h"
 #include "game_share/action_dummy.h"
 #include "game_share/action_login.h"
@@ -82,7 +83,12 @@
 #define SMOOTH_SERVER_TICK_ACCEL		4.0f
 
 
-const char * ConnectionStateCStr [9] = { "NotInitialised", "NotConnected", "Authenticate", "Login", "Synchronize", "Connected", "Probe", "Stalled", "Disconnect" };
+const char *ConnectionStateCStr[10] = { "NotInitialised", "NotConnected", "Authenticate", "Login", "Synchronize", "Connected", "Probe", "Stalled", "Disconnect", "Quit" };
+
+// How long the client waits in state Quit for the frontend to synchronize the connection again (after its limbo mode)
+// before disconnecting, in ms. Longer than the frontend's LimboTimeOut (1 min in the default configuration), so that the
+// frontend removes the session first.
+static const uint32 QuitTimeOut = 90000;
 
 
 // ***************************************************************************
@@ -320,8 +326,10 @@ CNetworkConnection::CNetworkConnection()
 	_DataBase = nullptr;
 
 	reset();
+	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
 
 	_QuitId = 0;
+	m_QuitTime = 0;
 
 	initTicks();
 }
@@ -348,29 +356,6 @@ CNetworkConnection::~CNetworkConnection()
 	else if ( _ReplayIncomingMessagesOn )
 		_RecordedMessagesIn.close();
 #endif
-}
-
-NLMISC::CHashKeyMD5	getTextMD5(const std::string& filename)
-{
-	CIFile	fi;
-	if (!fi.open(CPath::lookup(filename, false)))
-		return NLMISC::CHashKeyMD5();
-
-	std::vector<uint8>	buffer(fi.getFileSize());
-	fi.serialBuffer(&(buffer[0]), (uint)buffer.size());
-
-	std::vector<uint8>::iterator	it = buffer.begin();
-	do
-	{
-		while (it != buffer.end() && *it != '\015')
-			++it;
-
-		if (it != buffer.end())
-			it = buffer.erase(it);
-	}
-	while (it != buffer.end());
-
-	return NLMISC::getMD5((&buffer[0]), (uint32)buffer.size());
 }
 
 /*
@@ -425,12 +410,14 @@ void	CNetworkConnection::init(const string &cookie, const string &addr)
 	_NextClientTickToReplay = 0;
 #endif
 
+	// The signature of msg.xml leaves out what declares the stream classes of a frontend, on both sides: this file
+	// and the frontend's need not agree on those (see CGenericXmlMsgHeaderManager::getSignature)
 	// If the server run on window, those are the one to test
-	_AltMsgXmlMD5 = NLMISC::getMD5("msg.xml");
-	_AltDatabaseXmlMD5 = NLMISC::getMD5("database.xml");
+	_AltMsgXmlMD5 = CGenericXmlMsgHeaderManager::getSignature("msg.xml", false);
+	_AltDatabaseXmlMD5 = CGenericXmlMsgHeaderManager::getDatabaseSignature("database.xml", false);
 	// If the server run on UNIX, those are the one to test
-	_MsgXmlMD5 = getTextMD5("msg.xml");
-	_DatabaseXmlMD5 = getTextMD5("database.xml");
+	_MsgXmlMD5 = CGenericXmlMsgHeaderManager::getSignature("msg.xml", true);
+	_DatabaseXmlMD5 = CGenericXmlMsgHeaderManager::getDatabaseSignature("database.xml", true);
 }
 
 
@@ -571,6 +558,11 @@ bool	CNetworkConnection::connect(string &result)
 		return false;
 	}
 
+	// The transport is chosen when a connection starts: the constructor runs before client.cfg is read
+	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
+	// A fallback to the next frontend address left by an earlier connection would connect again over this one
+	m_LoginNextAddress = false;
+
 	// try to find where common data are located depending to where we'll connect
 	// the goal is to use the same database.txt as the server one
 	try
@@ -642,7 +634,7 @@ bool	CNetworkConnection::connect(string &result)
 				}
 				catch (const Exception &e)
 				{
-					nlwarning (e.what ());
+					nlwarning ("%s", e.what ());
 				}
 			}
 			if (i == shards.size())
@@ -679,6 +671,7 @@ bool	CNetworkConnection::connect(string &result)
 			_FrontendHost.setPort(_FrontendHost.port() - 5000); // Same trick as SBS, just use a port offset
 			nlinfo("Connecting to QUIC at port %d instead", _FrontendHost.port());
 			m_QuicConnection.connect(_FrontendHost);
+			m_DatagramLateness.reset();
 		}
 		else
 		{
@@ -851,6 +844,8 @@ bool	CNetworkConnection::update()
 
 	if (m_LoginNextAddress)
 	{
+		// once: a next update must not connect again (and assert on the socket it connected)
+		m_LoginNextAddress = false;
 		nlassert(!m_Connection.connected());
 
 		std::string tres = "No remaining FS connection addresses";
@@ -983,7 +978,9 @@ bool	CNetworkConnection::update()
 		_ConnectionState = Disconnect;
 	}
 
-	if (!m_UseQuic && !m_Connection.connected())
+	// a receive error while logging in closed the socket to try the next frontend address at the next update: that
+	// update returns at once if the state is Disconnect
+	if (!m_UseQuic && !m_Connection.connected() && !m_LoginNextAddress)
 	{
 		//if(!ClientCfg.Local)
 		//	nlwarning("CNET[%p]: update() attempted whereas socket is not connected !", this);
@@ -1105,6 +1102,19 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 //
 
 
+CNetworkConnection::TTransport CNetworkConnection::transport() const
+{
+	// (while it logs in, the frontend has not answered yet)
+	if (_ConnectionState == NotInitialised || _ConnectionState == NotConnected || _ConnectionState == Authenticate
+	    || _ConnectionState == Login || _ConnectionState == Disconnect)
+		return TransportNone;
+	if (!m_UseQuic)
+		return TransportUdp;
+	if (m_QuicConnection.state() != CQuicConnection::Connected)
+		return TransportNone;
+	return m_QuicConnection.streams() ? TransportQuicStreams : TransportQuicDatagrams;
+}
+
 // sends system login cookie
 void	CNetworkConnection::sendSystemLogin()
 {
@@ -1125,6 +1135,13 @@ void	CNetworkConnection::sendSystemLogin()
 		message.serial(fakeCookie);
 	}
 	message.serial( ClientCfg.LanguageCode );
+
+	// On protocol level ryzomcore/4.2: what the player says the connection carries (0: nothing said)
+	if (m_UseQuic && m_QuicConnection.streams())
+	{
+		uint32 connectionRate = ClientCfg.ConnectionRate;
+		message.serial(connectionRate);
+	}
 
 	// Try to send login, and handle the case when a firewall blocks the sending
 	uint32 length = message.length();
@@ -2211,6 +2228,14 @@ void	CNetworkConnection::sendNormalMessage()
 	message.serial (_LastReceivedNumber);
 	message.serial (_AckBitMask);
 
+	if (m_UseQuic && m_QuicConnection.streams())
+	{
+		// Protocol level ryzomcore/4.2: how late the datagrams of the frontend arrive, which is what its stream data
+		// must not make worse
+		uint8 lateness = CLFECOMMON::encodeDatagramLateness(m_DatagramLateness.report());
+		message.serial (lateness);
+	}
+
 	uint			numPacked = 0;
 
 	// pack each block
@@ -2266,6 +2291,51 @@ void	CNetworkConnection::sendNormalMessage()
 }
 
 bool	CNetworkConnection::stateConnected()
+{
+	bool stateBroke = receiveConnectedDatagrams();
+
+	// The messages on the streams come after those of the datagrams of this update, and only in this state, as the
+	// impulses: in the other states they wait in their stream, which loses nothing
+	if (_ConnectionState == Connected)
+		dispatchStreamRecords();
+
+	return stateBroke;
+}
+
+void CNetworkConnection::dispatchStreamRecords()
+{
+	if (!m_UseQuic || !m_QuicConnection.streams())
+		return;
+
+	// The streams in the order the server opened them: it puts first what the messages of the others refer to (the
+	// strings). The server need not have opened them all.
+	// One message is taken out at a time and nothing of the stream is held while its handler runs: a handler may call
+	// update() again (the progress bar of a teleport does), which then goes on with the next message of the stream.
+	for (uint streamNumber = 0; streamNumber < CLFECOMMON::StreamClassMax; ++streamNumber)
+	{
+		while (_ConnectionState == Connected)
+		{
+			CBitMemStream msgin(true);
+			CQuicConnection::TStreamRecord res = m_QuicConnection.receiveStreamRecord(streamNumber, msgin);
+			if (res == CQuicConnection::NoStreamRecord)
+				break;
+			if (res == CQuicConnection::StreamError)
+			{
+				// Messages are missing for good (the reason is in the log)
+				nlwarning("CNET[%p]: a stream of the QUIC connection cannot be read any further, disconnecting", this);
+				disconnect();
+				return;
+			}
+
+			statsReceive(msgin.length());
+			++_TotalMessages;
+			if (_ImpulseCallback != nullptr)
+				_ImpulseCallback(msgin, _LastReceivedNumber, _ImpulseArg);
+		}
+	}
+}
+
+bool	CNetworkConnection::receiveConnectedDatagrams()
 {
 	// if receives System PROBE
 	//    immediate state Probe
@@ -2476,7 +2546,7 @@ bool	CNetworkConnection::stateProbe()
 					return false; // exit now from loop, don't expect a new state
 					break;
 				default:
-					nlwarning("CNET[%p]: received system %d in state Probe", message);
+					nlwarning("CNET[%p]: received system %d in state Probe", this, message);
 					break;
 				}
 			}
@@ -2567,7 +2637,7 @@ bool	CNetworkConnection::stateStalled()
 					return false; // exit now from loop, don't expect a new state
 					break;
 				default:
-					nlwarning("CNET[%p]: received system %d in state Stalled", message);
+					nlwarning("CNET[%p]: received system %d in state Stalled", this, message);
 					break;
 				}
 			}
@@ -2606,6 +2676,17 @@ bool	CNetworkConnection::decodeHeader(CBitMemStream &msgin, bool checkMessageNum
 
 	msgin.serial (_CurrentReceivedNumber);
 	msgin.serial (_SystemMode);
+
+	if (m_UseQuic && m_QuicConnection.streams())
+	{
+		// Protocol level ryzomcore/4.2: when the frontend sent the datagram, and whether the path changed (see
+		// game_share/stream_record.h). With when it arrived, that tells how late it is.
+		uint16 sendTime = 0;
+		bool pathChanged = false;
+		msgin.serial (sendTime);
+		msgin.serial (pathChanged);
+		m_DatagramLateness.add(sendTime, m_QuicConnection.lastDatagramArrivalTime(), pathChanged);
+	}
 
 	if ((sint)_CurrentReceivedNumber > (sint)_LastReceivedPacketInBothModes && checkMessageNumber)
 	{
@@ -3029,13 +3110,26 @@ bool	CNetworkConnection::stateQuit()
 				switch (message)
 				{
 				case SYSTEM_SYNC_CODE:
+				{
 					// receive sync, decode sync and state synchronize
+					// The session is new: its ticks and lag compensation are those of a new connection (reset() alone
+					// leaves _LCT at 100 ms instead of LCT). The packet numbers go on, so that a datagram of the
+					// previous session that arrives late is older than this session's on both sides: this client
+					// numbers its packets after the QUITs (the frontend takes its ACK_SYNC number as the start), and the
+					// frontend numbers this session after the previous one, starting at this SYNC (a frontend that
+					// starts again at 1 sends a SYNC numbered 1)
+					TPacketNumber sendNumber = _CurrentSendNumber;
 					reset();
+					initTicks();
+					_CurrentSendNumber = sendNumber;
+					_LastReceivedNumber = _CurrentReceivedNumber;
+					_LastReceivedPacketInBothModes = _CurrentReceivedNumber;
+					_LastAckInLongAck = _CurrentReceivedNumber;
 					_ConnectionState = Synchronize;
 					nldebug("CNET[%p]: quit->synchronize", this);
 					receiveSystemSync(msgin);
 					return true;
-					break;
+				}
 /*
 				case SYSTEM_PROBE_CODE:
 					// receive sync, decode sync
@@ -3060,15 +3154,25 @@ bool	CNetworkConnection::stateQuit()
 					receiveSystemAckQuit(msgin);
 					break;
 				default:
-					nlwarning("CNET[%p]: received system %d in state Stalled", message);
+					nlwarning("CNET[%p]: received system %d in state Quit", this, message);
 					break;
 				}
 			}
 			else
 			{
-				nlwarning("CNET[%p]: received normal in state Stalled", this);
+				// sent by the frontend before it received the QUIT
+				nldebug("CNET[%p]: received normal in state Quit", this);
 			}
 		}
+	}
+
+	if (_UpdateTime - m_QuitTime > QuitTimeOut)
+	{
+		// The frontend did not take the session back after its limbo mode: it timed out, the EGS refused the user, or
+		// the session was removed. Over UDP the frontend cannot tell the client, so this is the only way to find out.
+		nlwarning("CNET[%p]: no SYNC from the frontend %u ms after QUIT, disconnecting", this, QuitTimeOut);
+		disconnect();
+		return false;
 	}
 
 	// send quit if not yet received a ack quit
@@ -3086,12 +3190,21 @@ bool	CNetworkConnection::stateQuit()
  */
 void	CNetworkConnection::quit()
 {
+	if (_ConnectionState == NotInitialised || _ConnectionState == NotConnected || _ConnectionState == Authenticate
+	    || _ConnectionState == Disconnect)
+	{
+		// Same states as in disconnect(): there is no connection to send the QUIT on
+		nlwarning("CNET[%p]: cannot quit in state %s, the connection is not open", this, ConnectionStateCStr[_ConnectionState]);
+		return;
+	}
+
 	nlinfo("CNetworkConnection::quit() called, setting to quitting state.");
 
 	++_QuitId;
 	_ConnectionState = Quit;
 	_ReceivedAckQuit = false;
 	_LatestQuitTime = _UpdateTime;
+	m_QuitTime = _UpdateTime;
 
 	sendSystemQuit();
 }
@@ -3132,7 +3245,8 @@ void	CNetworkConnection::reset()
 	_TotalLostPackets = 0;
 	_ConnectionQuality = false;
 
-	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
+	// The send numbers start again at 0
+	_PacketStamps.clear();
 
 	_CurrentSmoothServerTick= 0;
 	_SSTLastLocalTime= 0;
@@ -3148,18 +3262,12 @@ void	CNetworkConnection::initTicks()
 
 void	CNetworkConnection::reinit()
 {
-	// Reset data
-	_ImpulseDecoder.reset();
-	if (_DataBase)
-		_DataBase->resetData(_CurrentServerTick, true);
-	_LongAckBitField.clearAll();
-	_PacketStamps.clear();
-	_Actions.clear();
-	_Changes.clear();
-	_GenericMultiPartTemp.clear();
-	_IdMap.clear();
-	reset();
-	initTicks();
+	resetSession();
+	// a new connection numbers its packets from 0
+	_CurrentSendNumber = 0;
+
+	// The transport is chosen for each new connection, never for one that is kept (see resetSession)
+	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
 
 	// Reuse the udp socket
 	m_Connection.~CUdpSimSock();
@@ -3179,6 +3287,28 @@ void	CNetworkConnection::reinit()
 		m_QuicConnection.release();
 }
 
+void CNetworkConnection::resetSession()
+{
+	// Through limbo mode the connection is kept, still quitting: its packet numbers go on (see stateQuit)
+	TPacketNumber sendNumber = _CurrentSendNumber;
+
+	// and so do its streams, which may still carry messages of the session that ends (a new connection has new ones)
+	m_QuicConnection.endStreamSession();
+
+	// Reset data
+	_ImpulseDecoder.reset();
+	if (_DataBase)
+		_DataBase->resetData(_CurrentServerTick, true);
+	_LongAckBitField.clearAll();
+	_Actions.clear();
+	_Changes.clear();
+	_GenericMultiPartTemp.clear();
+	_IdMap.clear();
+	reset();
+	initTicks();
+	_CurrentSendNumber = sendNumber;
+}
+
 // sends system sync acknowledge
 void	CNetworkConnection::sendSystemQuit()
 {
@@ -3193,14 +3323,27 @@ void	CNetworkConnection::sendSystemQuit()
 
 	uint32	length = message.length();
 	if (m_UseQuic)
+	{
 		m_QuicConnection.sendDatagramSwap(message, length);
+	}
 	else
-		m_Connection.send(message.buffer(), length);
+	{
+		// as sendSystemDisconnection: quit() runs in the login co-task, where an exception would stop it, and the QUIT
+		// is sent again until the frontend answers or QuitTimeOut
+		try
+		{
+			m_Connection.send(message.buffer(), length);
+		}
+		catch (const ESocket &e)
+		{
+			nlwarning("CNET[%p]: QUIT not sent, socket exception: %s", this, e.what());
+		}
+	}
 	//sendUDP (&(_Connection), message.buffer(), length);
 	statsSend(length);
 
 	updateBufferizedPackets ();
-	nlinfo("CNET[%p]: sent QUIT", this);
+	nldebug("CNET[%p]: sent QUIT", this); // every 100 ms until the frontend answers
 }
 
 //

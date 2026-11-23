@@ -126,6 +126,11 @@ IGuildManager &IGuildManager::getInstance()
 	return *(CGuildManager::getInstance());
 }
 
+bool IGuildManager::hasInstance()
+{
+	return CGuildManager::isInitialized();
+}
+
 const std::string &CGuildManager::getCommandHandlerName() const
 {
 	static string name("guildManager");
@@ -183,7 +188,9 @@ void CGuildManager::release()
 		_Instance = NULL;
 	}
 
-	IGuildUnifier::getInstance()->guildManagerReleased();
+	// (a service without the guild unifier module has no one to tell)
+	if (IGuildUnifier::isInitialized())
+		IGuildUnifier::getInstance()->guildManagerReleased();
 }
 
 //----------------------------------------------------------------------------
@@ -769,6 +776,7 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	}
 
 	CGuildCharProxy proxy(character->getCharacter());
+	// the shard unifier rejected the name: tell the player why
 
 	if (result != CHARSYNC::TCharacterNameResult::cnr_ok)
 	{
@@ -922,6 +930,13 @@ void CGuildManager::deleteGuild(uint32 id)
 	}
 
 	_ExistingGuildNames.erase( NLMISC::toLower( guild->getName().toString() ) );
+
+	// The guild's missions are abandoned: deleting the guild does not delete them, and left instanciated they stay in the
+	// mission manager, which fails the first mission whose mono timer is up until it leaves that list: without its guild,
+	// it never does
+	while (!guild->getMissions().empty())
+		guild->removeMission((uint)guild->getMissions().size() - 1, mr_abandon);
+
 	guild->unregisterGuild();
 
 	if (!guild->isProxy())

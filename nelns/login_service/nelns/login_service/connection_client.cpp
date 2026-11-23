@@ -139,6 +139,15 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 		{
 			if (IService::getInstance()->ConfigFile.getVar("AcceptUnknownUsers").asInt() == 1)
 			{
+				// never hand out an account under a name the web login
+				// scripts and the account tool would refuse to create
+				if (!isValidAccountName(login.toUtf8()))
+				{
+					nlwarning("Not creating the unknown user '%s' for the application '%s': an account name is 3 to 64 letters, digits or underscores", login.toUtf8().c_str(), application.c_str());
+					reason = "Invalid account name";
+					break;
+				}
+
 				// we accept new users, add it
 				maybeUser = persistence.createUser(login.toUtf8(), cpassword);
 				reason = maybeUser.second;

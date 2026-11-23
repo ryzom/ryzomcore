@@ -759,7 +759,7 @@ void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent)
 		}
 		catch(const std::exception &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 			
 		}				
 		_FilteredFiles.pop_front();

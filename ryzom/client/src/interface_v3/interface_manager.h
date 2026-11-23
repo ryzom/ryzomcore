@@ -129,6 +129,9 @@ public:
 	/// Singleton method : Get the unique interface loader instance
 	static CInterfaceManager* getInstance();
 
+	/// Whether the instance exists, for code that must not create it
+	static bool hasInstance() { return _Instance != nullptr; }
+
 	/// Destroy singleton
 	static void destroy ();
 
@@ -228,15 +231,11 @@ public:
 	// Save config to default location, if verbose is true, display message in game sysinfo
 	bool saveConfig (bool verbose = false);
 	bool saveConfig (const std::string &filename);
-	// delete the user config (give the player ident fileName)
-	bool deletePlayerConfig (const std::string &playerFileIdent);
 
 	// Save keys to default location, if verbose is true, display message in game sysinfo
 	bool saveKeys (bool verbose = false);
 	// Save the keys config file
 	bool saveKeys (const std::string &filename);
-	// delete the user Keysconfig (give the player ident fileName)
-	bool deletePlayerKeys (const std::string &playerFileIdent);
 
 	// Log system (all chat/tell
 	void setLogState(bool state) { _LogState = state; }
@@ -304,15 +303,17 @@ public:
 
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok button
 	 *	ui:interface:message_box must be defined in xml, with a "text" ViewText son
+	 *	The text is shown as it is written (a translated text has the case its language wants, and a
+	 *	name or a path has its own), unless another case mode is given.
 	 */
-	void	messageBox(const std::string &text, const std::string &masterGroup="ui:interface", TCaseMode caseMode = CaseFirstSentenceLetterUp);
+	void	messageBox(const std::string &text, const std::string &masterGroup="ui:interface", TCaseMode caseMode = CaseNormal);
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok and a HELP button.
 	 *  The help button with open a browser on ryzom.com faq
 	 *	ui:interface:message_box_with_help must be defined in xml, with a "text" ViewText son
 	 */
 	void	messageBoxWithHelp(const std::string &text, const std::string &masterGroup="ui:interface",
 							   const std::string &ahOnOk = std::string(), const std::string &paramsOnOk= std::string(),
-							   TCaseMode caseMode = CaseFirstSentenceLetterUp);
+							   TCaseMode caseMode = CaseNormal);
 
 	/** Open a MessageBox with validation question. this is a simple ModalWindow with a Ok / Cancel button
 	 *	ui:interface:valid_message_box must be defined in xml, with a "text" ViewText son, and a "ok" button
@@ -383,6 +384,8 @@ public:
 	// @{
 	/// For debug: dump in the sysinfo and nlwarning state of lua. detail range from 0 to 2 (clamped).
 	void dumpLuaState(uint detail);
+	// display a string in SysInfo and nlinfo
+	void	dumpLuaString(const std::string &str);
 	// @}
 
 	// Get the list of InGame XML Interface files, with any AddOn ones
@@ -415,7 +418,7 @@ public:
 	bool	isItemCaracRequirementMet(CHARACTERISTICS::TCharacteristics type, sint32 value)
 	{
 		// carac requirement?
-		if( type < (int)CHARACTERISTICS::NUM_CHARACTERISTICS)
+		if( (uint)type < CHARACTERISTICS::NUM_CHARACTERISTICS) // unsigned: the enum may be signed and the value comes from the server
 			return value <= _CurrentPlayerCharac[type];
 		// no carac requirement => ok
 		else
@@ -425,7 +428,7 @@ public:
 	// get Player Carac
 	sint32	getCurrentPlayerCarac(CHARACTERISTICS::TCharacteristics type)
 	{
-		if( type < (int)CHARACTERISTICS::NUM_CHARACTERISTICS)
+		if( (uint)type < CHARACTERISTICS::NUM_CHARACTERISTICS)
 			return _CurrentPlayerCharac[type];
 		else
 			return 0;
@@ -659,8 +662,6 @@ private:
 	// @{
 	// str= printable version of value at stack index
 	void	getLuaValueInfo(std::string &str, sint index);
-	// display a string in SysInfo and nlinfo
-	void	dumpLuaString(const std::string &str);
 	// dump printable version of pair key-index in top of stack. if value is a table, recurs (up to recursTableLevel times)
 	void	dumpLuaKeyValueInfo(uint recursTableLevel, uint tabLevel);
 	// @}

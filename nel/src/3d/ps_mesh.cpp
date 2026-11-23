@@ -418,7 +418,21 @@ void CPSMesh::updatePos()
 
 			mat.scale(*ptCurrSize);
 
-			(*instanceIt)->setMatrix(transfo * tmat * mat);
+			const CMatrix instanceMat = transfo * tmat * mat;
+			(*instanceIt)->setMatrix(instanceMat);
+			/* Give the instance its world matrix now. The system is animated after the Hrc traversal of
+			 * the frame, so the matrix set above only reaches the world matrix at the next one, and the mesh
+			 * would be drawn where it was a frame ago, behind the other particles of its system.
+			 * The date and the dirty state of the matrix are left alone: update() and the Hrc traversal of
+			 * the next frame compute the same world matrix again and do what depends on its date (the
+			 * moving object list, lighting). An instance that was not visible when this frame was clipped
+			 * (a new particle, hidden until now) is still drawn from the next frame on.
+			 */
+			CTransform *instanceFather = (*instanceIt)->hrcGetParent();
+			if (instanceFather)
+				(*instanceIt)->setWorldMatrix(instanceFather->getWorldMatrix() * instanceMat);
+			else
+				(*instanceIt)->setWorldMatrix(instanceMat);
 			if (CParticleSystem::OwnerModel)
 			{
 				// make sure the visibility is the same

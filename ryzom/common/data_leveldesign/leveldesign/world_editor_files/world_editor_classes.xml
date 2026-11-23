@@ -3186,6 +3186,9 @@
 				<CONTEXT_VALUE VALUE="bagne"/>
 			</COMBO_VALUES>
 			<COMBO_VALUES CONTEXT_NAME="default">
+				<CONTEXT_VALUE VALUE="corrupted_moor"/>
+			</COMBO_VALUES>
+			<COMBO_VALUES CONTEXT_NAME="default">
 				<CONTEXT_VALUE VALUE="fyros"/>
 			</COMBO_VALUES>
 			<COMBO_VALUES CONTEXT_NAME="default">
@@ -3198,6 +3201,9 @@
 				<CONTEXT_VALUE VALUE="indoors"/>
 			</COMBO_VALUES>
 			<COMBO_VALUES CONTEXT_NAME="default">
+				<CONTEXT_VALUE VALUE="kitiniere"/>
+			</COMBO_VALUES>
+			<COMBO_VALUES CONTEXT_NAME="default">
 				<CONTEXT_VALUE VALUE="matis"/>
 			</COMBO_VALUES>
 			<COMBO_VALUES CONTEXT_NAME="default">
@@ -3207,7 +3213,25 @@
 				<CONTEXT_VALUE VALUE="matis_newbie"/>
 			</COMBO_VALUES>
 			<COMBO_VALUES CONTEXT_NAME="default">
+				<CONTEXT_VALUE VALUE="newbieland"/>
+			</COMBO_VALUES>
+			<COMBO_VALUES CONTEXT_NAME="default">
 				<CONTEXT_VALUE VALUE="nexus"/>
+			</COMBO_VALUES>
+			<COMBO_VALUES CONTEXT_NAME="default">
+				<CONTEXT_VALUE VALUE="r2_desert"/>
+			</COMBO_VALUES>
+			<COMBO_VALUES CONTEXT_NAME="default">
+				<CONTEXT_VALUE VALUE="r2_forest"/>
+			</COMBO_VALUES>
+			<COMBO_VALUES CONTEXT_NAME="default">
+				<CONTEXT_VALUE VALUE="r2_jungle"/>
+			</COMBO_VALUES>
+			<COMBO_VALUES CONTEXT_NAME="default">
+				<CONTEXT_VALUE VALUE="r2_lakes"/>
+			</COMBO_VALUES>
+			<COMBO_VALUES CONTEXT_NAME="default">
+				<CONTEXT_VALUE VALUE="r2_roots"/>
 			</COMBO_VALUES>
 			<COMBO_VALUES CONTEXT_NAME="default">
 				<CONTEXT_VALUE VALUE="route_gouffre"/>

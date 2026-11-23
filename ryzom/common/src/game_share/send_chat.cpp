@@ -117,9 +117,10 @@ void npcChatToChannelSentence(const TDataSetRow &senderId, CChatGroup::TGroupTyp
  *	Chat group can be constructed from CChatGroup class.
  *	sentenceId is the id of the sentence that must be sent by the DSS
  */
-void forwardToDss(const TDataSetRow &senderId, CChatGroup::TGroupType groupType, std::string& sentenceId,uint32 scenarioId)
+void forwardToDss(const TDataSetRow &senderId, CChatGroup::TGroupType groupType, std::string& sentenceId,uint32 scenarioId, bool logSentence)
 {
-	nlinfo( ("forwarding to DSS : id: "+sentenceId).c_str());
+	if (logSentence)
+		nlinfo("%s", ("forwarding to DSS : id: "+sentenceId).c_str());
 	NLNET::CMessage	msgout("translateAndForward");
 	msgout.serial(const_cast<TDataSetRow&>(senderId));
 	msgout.serialEnum(groupType);
@@ -135,7 +136,7 @@ void forwardToDss(const TDataSetRow &senderId, CChatGroup::TGroupType groupType,
  */
 void forwardToDssArg(const TDataSetRow &senderId, CChatGroup::TGroupType groupType, std::string& sentenceId,uint32 scenarioId,std::vector<float>& argValues)
 {
-	nlinfo( ("forwarding to DSS : id: "+sentenceId).c_str());
+	nlinfo("%s", ("forwarding to DSS : id: "+sentenceId).c_str());
 	NLNET::CMessage	msgout("translateAndForwardArg");
 	msgout.serial(const_cast<TDataSetRow&>(senderId));
 	msgout.serialEnum(groupType);

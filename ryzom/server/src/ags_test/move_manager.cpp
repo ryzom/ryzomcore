@@ -108,7 +108,7 @@ void	CMoveManager::init()
 		}
 		catch (std::exception &e)
 		{
-			nlinfo(e.what());
+			nlinfo("%s", e.what());
 		}
 	}
 */

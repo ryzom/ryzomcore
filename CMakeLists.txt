@@ -11,8 +11,8 @@
 #       * NL_SHARE_PREFIX (default: $CMAKE_INSTALL_PREFIX/share)
 #       * NL_BIN_PREFIX (default: $CMAKE_INSTALL_PREFIX/bin)
 #       * NL_SBIN_PREFIX  (default: $CMAKE_INSTALL_PREFIX/sbin)
-#       * NL_LIB_PREFIX  (default: $CMAKE_INSTALL_PREFIX/lib)
-#       * NL_DRIVER_PREFIX  (default: $CMAKE_INSTALL_PREFIX/lib (windows) or $CMAKE_INSTALL_PREFIX/lib/nel)
+#       * NL_LIB_PREFIX  (default: $CMAKE_INSTALL_PREFIX/$CMAKE_INSTALL_LIBDIR, or lib and lib64 on Windows)
+#       * NL_DRIVER_PREFIX  (default: $CMAKE_INSTALL_PREFIX/lib (windows) or $CMAKE_INSTALL_PREFIX/$CMAKE_INSTALL_LIBDIR/nel)
 #   * Enable building of documentation: add -DBUILD_DOCUMENTATION:BOOL=ON - new make target: DoxygenDoc
 #   * Updating version: update header (above) but also update NL_VERSION below.
 #   * To build binary archive, use the 'package' target.
@@ -115,11 +115,14 @@ RYZOM_SETUP_PREFIX_PATHS()
 
 #-----------------------------------------------------------------------------
 # Default values for URL's
-SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL     "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
-SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL       "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
-SET(RYZOM_CLIENT_FORGET_PASSWORD_URL    "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
+SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL     "https://core.ryzom.dev/account/?page=register" CACHE STRING "Ryzom Client Create Account URL")
+SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL       "https://core.ryzom.dev/account/?page=settings" CACHE STRING "Ryzom Client Edit Account URL")
+SET(RYZOM_CLIENT_FORGET_PASSWORD_URL    "https://core.ryzom.dev/account/" CACHE STRING "Ryzom Client Forget Password URL")
 SET(RYZOM_CLIENT_PATCH_URL              "https://cdn.ryzom.dev/core4/patch/" CACHE STRING "Ryzom Client Patch URL")
 SET(RYZOM_CLIENT_APP_NAME               "core4")
+
+SET(RYZOM_WEBIG_MAIN_URL                "https://open.ryzom.dev/" CACHE STRING "Ryzom Client WebIG Main URL")
+SET(RYZOM_WEBIG_TRUSTED_DOMAIN          "open.ryzom.dev" CACHE STRING "Ryzom Client WebIG Trusted Domain")
 
 SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://core4.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://core4.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
@@ -142,6 +145,13 @@ IF(WITH_RYZOM_LIVE)
   SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/releasenotes_ring/index.php")
 
   SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomforge")
+ENDIF()
+
+#-----------------------------------------------------------------------------
+# code guarded by RYZOM_FORGE
+IF(WITH_RYZOM_FORGE)
+  MESSAGE("Building the code guarded by RYZOM_FORGE")
+  ADD_DEFINITIONS(-DRYZOM_FORGE)
 ENDIF()
 
 #-----------------------------------------------------------------------------
@@ -290,6 +300,68 @@ IF(WITH_STATIC_LIBXML2)
   endif ()
 ENDIF()
 
+# A static libxml2 does not bring the libraries it needs (ICU, lzma, zlib, ...), and CMake's FindLibXml2
+# adds none to its target, unlike the CMake packages of libxml2 and vcpkg. LIBXML2_STATIC_DEPENDENCIES, when
+# given, is that list (names or paths); otherwise it comes from the pkg-config file of libxml2. When
+# cross-compiling, pkg-config is asked only when PKG_CONFIG_LIBDIR or PKG_CONFIG_SYSROOT_DIR is set in the
+# environment (as the toolchain file of the macOS cross build does): otherwise the build host's pkg-config files,
+# which describe its own libraries, would answer.
+IF(NOT HUNTER_ENABLED AND NOT EMSCRIPTEN AND NOT WIN32 AND TARGET LibXml2::LibXml2 AND LIBXML2_LIBRARY MATCHES "\\.a$")
+  GET_TARGET_PROPERTY(LIBXML2_INTERFACE_LINK_LIBRARIES LibXml2::LibXml2 INTERFACE_LINK_LIBRARIES)
+  IF(NOT LIBXML2_INTERFACE_LINK_LIBRARIES)
+    SET(LIBXML2_STATIC_HELP "set LIBXML2_STATIC_DEPENDENCIES to the libraries it needs (names or paths, for example \"icui18n;icuuc;icudata;z;lzma;m\"), or link a shared libxml2")
+    IF(DEFINED LIBXML2_STATIC_DEPENDENCIES)
+      SET(LIBXML2_DEPENDENCIES ${LIBXML2_STATIC_DEPENDENCIES})
+      MESSAGE(STATUS "Static libxml2: linking ${LIBXML2_DEPENDENCIES}, as given by LIBXML2_STATIC_DEPENDENCIES")
+    ELSE()
+      IF(CMAKE_CROSSCOMPILING AND "$ENV{PKG_CONFIG_LIBDIR}" STREQUAL "" AND "$ENV{PKG_CONFIG_SYSROOT_DIR}" STREQUAL "")
+        MESSAGE(FATAL_ERROR "${LIBXML2_LIBRARY} is a static libxml2, and the libraries it needs are not taken from pkg-config when cross-compiling without PKG_CONFIG_LIBDIR or PKG_CONFIG_SYSROOT_DIR in the environment, which point pkg-config to the target's files: set those, or ${LIBXML2_STATIC_HELP}.")
+      ENDIF()
+      FIND_PACKAGE(PkgConfig QUIET)
+      IF(PKG_CONFIG_FOUND)
+        PKG_CHECK_MODULES(LIBXML2_PC QUIET libxml-2.0)
+      ENDIF()
+      IF(NOT LIBXML2_PC_FOUND)
+        MESSAGE(FATAL_ERROR "${LIBXML2_LIBRARY} is a static libxml2, and the pkg-config file libxml-2.0 that lists the libraries it needs was not found: ${LIBXML2_STATIC_HELP}.")
+      ENDIF()
+      # the .pc file found must be the one of that archive
+      GET_FILENAME_COMPONENT(LIBXML2_ARCHIVE_DIR "${LIBXML2_LIBRARY}" REALPATH)
+      GET_FILENAME_COMPONENT(LIBXML2_ARCHIVE_DIR "${LIBXML2_ARCHIVE_DIR}" DIRECTORY)
+      GET_FILENAME_COMPONENT(LIBXML2_PC_REAL_LIBDIR "${LIBXML2_PC_LIBDIR}" REALPATH)
+      IF(NOT LIBXML2_ARCHIVE_DIR STREQUAL LIBXML2_PC_REAL_LIBDIR AND NOT "$ENV{PKG_CONFIG_SYSROOT_DIR}" STREQUAL "")
+        # pkgconf puts the sysroot in front of the libdir of a .pc file, pkg-config does not
+        GET_FILENAME_COMPONENT(LIBXML2_PC_REAL_LIBDIR "$ENV{PKG_CONFIG_SYSROOT_DIR}${LIBXML2_PC_LIBDIR}" REALPATH)
+      ENDIF()
+      IF(NOT LIBXML2_ARCHIVE_DIR STREQUAL LIBXML2_PC_REAL_LIBDIR)
+        MESSAGE(WARNING "The pkg-config file libxml-2.0 found describes the libxml2 of ${LIBXML2_PC_LIBDIR}, not ${LIBXML2_LIBRARY}: its list of libraries may not be the one that archive needs. If the link fails, ${LIBXML2_STATIC_HELP}.")
+      ENDIF()
+      SET(LIBXML2_DEPENDENCIES ${LIBXML2_PC_STATIC_LIBRARIES})
+      LIST(REMOVE_ITEM LIBXML2_DEPENDENCIES xml2)
+      IF(WITH_STATIC_EXTERNAL)
+        # static externals: those libraries are looked up like the other externals, archives first; the C runtime
+        # libraries are left to the linker
+        SET(LIBXML2_STATIC_EXTERNAL_DEPENDENCIES)
+        FOREACH(LIBXML2_DEPENDENCY ${LIBXML2_DEPENDENCIES})
+          IF(LIBXML2_DEPENDENCY MATCHES "^(c|m|dl|rt|pthread)$")
+            LIST(APPEND LIBXML2_STATIC_EXTERNAL_DEPENDENCIES ${LIBXML2_DEPENDENCY})
+          ELSE()
+            FIND_LIBRARY(LIBXML2_DEPENDENCY_${LIBXML2_DEPENDENCY}_LIBRARY ${LIBXML2_DEPENDENCY} HINTS ${LIBXML2_PC_STATIC_LIBRARY_DIRS} ${LIBXML2_PC_LIBDIR})
+            IF(NOT LIBXML2_DEPENDENCY_${LIBXML2_DEPENDENCY}_LIBRARY)
+              MESSAGE(FATAL_ERROR "${LIBXML2_DEPENDENCY}, a library the static libxml2 needs, was not found: ${LIBXML2_STATIC_HELP}.")
+            ENDIF()
+            LIST(APPEND LIBXML2_STATIC_EXTERNAL_DEPENDENCIES ${LIBXML2_DEPENDENCY_${LIBXML2_DEPENDENCY}_LIBRARY})
+          ENDIF()
+        ENDFOREACH()
+        SET(LIBXML2_DEPENDENCIES ${LIBXML2_STATIC_EXTERNAL_DEPENDENCIES})
+      ENDIF()
+      MESSAGE(STATUS "Static libxml2: linking ${LIBXML2_DEPENDENCIES}, as listed by libxml-2.0.pc in ${LIBXML2_PC_LIBDIR}")
+      SET_PROPERTY(TARGET LibXml2::LibXml2 APPEND PROPERTY INTERFACE_LINK_DIRECTORIES ${LIBXML2_PC_STATIC_LIBRARY_DIRS})
+      SET_PROPERTY(TARGET LibXml2::LibXml2 APPEND PROPERTY INTERFACE_LINK_OPTIONS ${LIBXML2_PC_STATIC_LDFLAGS_OTHER})
+    ENDIF()
+    SET_PROPERTY(TARGET LibXml2::LibXml2 APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${LIBXML2_DEPENDENCIES})
+  ENDIF()
+ENDIF()
+
 IF(NOT EMSCRIPTEN)
   FIND_PACKAGE(Iconv QUIET)
 ENDIF()
@@ -313,6 +385,41 @@ IF(WITH_SSE2)
   IF(WITH_SSE3)
     ADD_COMPILE_DEFINITIONS(NL_HAS_SSE3)
   ENDIF()
+ENDIF()
+
+# The definitions of the whole build that the public NeL headers test, besides NL_DEBUG/NL_RELEASE and
+# NL_HAS_SSE2/3, which NeL::misc carries itself: types_nl.h derives NL_CPU_INTEL, NL_CPU_X86_64 and NL_HAS_SSE2
+# from HAVE_X86 and HAVE_X86_64, and FINAL_VERSION changes debug.h, report.h and transport_class.h. NeL::misc
+# gives them to the programs built against an installed NeL, and nel-config and the .pc files print them. A
+# macOS build for several architectures sets the HAVE_ ones per architecture: they are left out then.
+SET(NL_PUBLIC_DEFINITIONS)
+IF(NOT CMAKE_OSX_ARCHITECTURES OR TARGETS_COUNT EQUAL 1)
+  IF(TARGET_X64)
+    LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_X86 HAVE_X64 HAVE_X86_64)
+  ELSEIF(TARGET_X86)
+    LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_X86)
+  ENDIF()
+  IF(TARGET_ARM)
+    IF(TARGET_AARCH64)
+      LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_AARCH64)
+    ENDIF()
+    IF(TARGET_ARMV7S)
+      LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_ARMV7S)
+    ENDIF()
+    IF(TARGET_ARMV7)
+      LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_ARMV7)
+    ENDIF()
+    LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_ARM)
+  ENDIF()
+  IF(TARGET_MIPS)
+    LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_MIPS)
+  ENDIF()
+ENDIF()
+# both values: CMustConsume in debug.h has another layout in a final version
+IF(FINAL_VERSION)
+  LIST(APPEND NL_PUBLIC_DEFINITIONS FINAL_VERSION=1)
+ELSE()
+  LIST(APPEND NL_PUBLIC_DEFINITIONS FINAL_VERSION=0)
 ENDIF()
 
 IF(APPLE)
@@ -439,10 +546,11 @@ IF(WITH_NEL)
 
   # allow find_package to find projects from within the mono repo
   list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/nel/internal")
-ELSE()
-#  FIND_PACKAGE(NeL COMPONENTS 3d misc pacs sound nimp REQUIRED)
-  FIND_PACKAGE(NeL REQUIRED)
 ENDIF()
+
+# Without WITH_NEL, each project below finds the installed NeL with the components it uses. The imported NeL targets
+# and those of the dependencies of the components then share that project's directory, where the link interfaces of
+# the NeL targets are resolved, and a project without the GUI needs no Lua and Luabind.
 
 IF(WITH_RYZOM)
   ADD_SUBDIRECTORY(ryzom)
@@ -456,7 +564,7 @@ IF(WITH_SNOWBALLS)
   ADD_SUBDIRECTORY(snowballs2)
 ENDIF()
 
-IF(WITH_TOOLS)
+IF(WITH_TOOLS OR WITH_RYZOM_TOOLS)
   ADD_SUBDIRECTORY(tool)
 ENDIF()
 
@@ -470,26 +578,28 @@ ENDIF()
 
 # To build the documention, you will have to enable it
 # and then do the equivalent of "make DoxygenDoc".
+OPTION(BUILD_DOCUMENTATION "Build the NeL documentation with Doxygen (target DoxygenDoc)" OFF)
 IF(BUILD_DOCUMENTATION)
-    IF(DOT)
+    FIND_PACKAGE(Doxygen OPTIONAL_COMPONENTS dot)
+    IF(NOT DOXYGEN_FOUND)
+        MESSAGE(FATAL_ERROR "BUILD_DOCUMENTATION needs Doxygen, which was not found: install it or turn BUILD_DOCUMENTATION off")
+    ENDIF()
+    IF(TARGET Doxygen::dot)
         SET(HAVE_DOT YES)
     ELSE()
         SET(HAVE_DOT NO)
     ENDIF()
     # This processes our Doxyfile.in and substitutes paths to generate
     # a final Doxyfile
-    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/doc/Doxyfile.cmake.in ${CMAKE_BINARY_DIR}/doc/Doxyfile)
+    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/nel/doc/Doxyfile.cmake.in ${CMAKE_BINARY_DIR}/doc/Doxyfile)
 
-    ADD_CUSTOM_TARGET(DoxygenDoc ${DOXYGEN} ${CMAKE_BINARY_DIR}/doc/Doxyfile)
+    ADD_CUSTOM_TARGET(DoxygenDoc COMMAND Doxygen::doxygen ${CMAKE_BINARY_DIR}/doc/Doxyfile WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc)
 ENDIF()
 
 IF(WITH_NEL_TESTS)
   ENABLE_TESTING()
   IF(BUILD_DASHBOARD)
     INCLUDE(Dart)
-    SET(SVNCOMMAND svn)
-    SET(SVNSOURCEDIR http://dev.ryzom.com/svn/trunk/nel)
-    SET(GENERATELOGS svn2cl)
   ENDIF()
 ENDIF()
 
@@ -511,9 +621,9 @@ SET(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/nel/resources/nevraxpill.ico)
 SET(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/nel/resources/nevraxpill.ico)
 SET(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/nel/resources\\\\nel.bmp)
 SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} RyzomCore")
-SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\dev.ryzom.com")
-SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\dev.ryzom.com\\\\projects\\\\nel\\\\wiki")
-SET(CPACK_NSIS_CONTACT "matt.raykowski@gmail.com")
+SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\wiki.ryzom.dev")
+SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\wiki.ryzom.dev")
+SET(CPACK_NSIS_CONTACT "https://wiki.ryzom.dev/")
 
 ## Source Packages
 # remove os part of file name

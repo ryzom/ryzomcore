@@ -455,6 +455,17 @@ static CMessage getFileClassImp( CMessage& msgin)
 	CBackupMsgReceiveFileClass outMsg;
 	outMsg.RequestId= inMsg.RequestId;
 
+	// a directory that is not a safe relative path (one could leave SaveShardRoot) is answered with no file; an empty one
+	// is SaveShardRoot itself
+	const std::string directory = CFile::normalizeRelativePath(inMsg.Directory);
+	if (!directory.empty() && !CFile::isSafeFilename(directory, true))
+	{
+		nlwarning("FILE_CLASS: refused directory '%s', not a safe relative path", inMsg.Directory.c_str());
+		CMessage msgout("BS_FILE_CLASS");
+		msgout.serial(outMsg);
+		return msgout;
+	}
+
 	bool	hasWildcard = false;
 
 	{
@@ -500,7 +511,8 @@ static CMessage getFileClassImp( CMessage& msgin)
 				{
 					if (NLMISC::testWildCard(fname, fclass.Patterns[k]))
 					{
-						classes[j].push_back(CClassResult(files[i], fstamp));
+						// the name as the requester gave its directory, which it strips from the result
+						classes[j].push_back(CClassResult(CPath::standardizePath(inMsg.Directory) + fname, fstamp));
 						break;
 					}
 				}
@@ -522,6 +534,11 @@ static CMessage getFileClassImp( CMessage& msgin)
 			for (k=0; k<fclass.Patterns.size(); ++k)
 			{
 				string	file = CPath::standardizePath(inMsg.Directory)+fclass.Patterns[k]; // relative filename
+				if (!CFile::isSafeFilename(CFile::normalizeRelativePath(file), true))
+				{
+					nlwarning("FILE_CLASS: refused file name '%s', not a safe relative path", file.c_str());
+					continue;
+				}
 				string	rfile = getBackupFileName(file); // full filename
 				if (CFile::isExists(rfile))
 					classes[j].push_back(CClassResult(file, CFile::getFileModificationDate(rfile)));
@@ -537,15 +554,11 @@ static CMessage getFileClassImp( CMessage& msgin)
 
 		for (uint j=0; j<classes[i].size(); ++j)
 		{
-			std::string	rfile = classes[i][j].File;
-			// if there's wildcard, the file is already full so we don't need to add again the backup path or we ll have "save_shard/save_shard/..." that is not valid
-			if (!CFile::isExists(rfile))
-				rfile = getBackupFileName(classes[i][j].File);
+			// every name is relative to SaveShardRoot: one that exists as the requester wrote it can be anywhere
+			std::string rfile = getBackupFileName(classes[i][j].File);
 			fdc.addFile(classes[i][j].File, CFile::getFileModificationDate(rfile),CFile::getFileSize(rfile));
 		}
 	}
-	// In case something like getPathContent() has returned full paths, make paths relative to match the requested filenames
-	fdc.stripFilename(SaveShardRootGameShare.get());
 
 	// compose the output message
 	CMessage	msgout("BS_FILE_CLASS");

@@ -13,9 +13,9 @@ SET(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/resources/nevraxpill.ico)
 SET(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/resources/nevraxpill.ico)
 SET(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/resources\\\\nel.bmp)
 SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} NeLNS")
-SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\dev.ryzom.com")
-SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\dev.ryzom.com\\\\projects\\\\nel\\\\wiki")
-SET(CPACK_NSIS_CONTACT "matt.raykowski@gmail.com")
+SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\wiki.ryzom.dev")
+SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\wiki.ryzom.dev\\\\nel")
+SET(CPACK_NSIS_CONTACT "https://wiki.ryzom.dev/")
 SET(CPACK_NSIS_MENU_LINKS 
 	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\sbin\\\\naming_service.exe" "Naming Service"
 	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\sbin\\\\login_service.exe" "Login Service"
@@ -23,7 +23,7 @@ SET(CPACK_NSIS_MENU_LINKS
 	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\sbin\\\\admin_executor_service.exe" "Admin Executor Service"
 	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\sbin\\\\admin_service.exe" "Admin Service"
 	"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\\etc\\\\nel\\\\nelns\\\\naming_service.cfg" "Configs\\\\Naming Service Config"
-	"http://dev.ryzom.com/projects/nel" "NeL Web Site"
+	"https://wiki.ryzom.dev/nel" "NeL Web Site"
 )
 
 ## Source Packages

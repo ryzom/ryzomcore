@@ -4018,44 +4018,6 @@ namespace NLGUI
 		}
 	}
 
-#ifdef RYZOM_LUA_UCSTRING
-	// ***************************************************************************
-	void CGroupContainer::setUCTitleOpened(const ucstring &title)
-	{
-		setTitleOpened(title.toUtf8());
-	}
-
-	// ***************************************************************************
-	void CGroupContainer::setUCTitleClosed(const ucstring &title)
-	{
-		setTitleClosed(title.toUtf8());
-	}
-
-	// ***************************************************************************
-	void CGroupContainer::setUCTitle(const ucstring &title)
-	{
-		setTitle(title.toUtf8());
-	}
-
-	// ***************************************************************************
-	ucstring CGroupContainer::getUCTitle () const
-	{
-		return ucstring::makeFromUtf8(getTitle());
-	}
-
-	// ***************************************************************************
-	ucstring CGroupContainer::getUCTitleOpened () const
-	{
-		return ucstring::makeFromUtf8(getTitleOpened());
-	}
-
-	// ***************************************************************************
-	ucstring CGroupContainer::getUCTitleClosed () const
-	{
-		return ucstring::makeFromUtf8(getTitleClosed());
-	}
-#endif
-
 	// ***************************************************************************
 	void	CGroupContainer::launch ()
 	{

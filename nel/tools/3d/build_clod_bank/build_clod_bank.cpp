@@ -188,7 +188,7 @@ int	main(int argc, char *argv[])
 			}
 			catch(const EUnknownVar &evar)
 			{
-				nlwarning(evar.what());
+				nlwarning("%s", evar.what());
 				// Any other exception will make the program quit.
 			}
 

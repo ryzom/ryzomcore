@@ -132,7 +132,7 @@ private:
 	NLMISC::CRGBA	_LastDiffuse, _LastAmbient;
 	CLightCycleDesc _Desc;
 	float			_LightLevel;
-	float			_WeatherLighting, _LastWeatherLighting;
+	float			_WeatherLighting;
 	float			_UpdateFreq;
 	TLightState     _State;
 	TLightState     _PrevState;

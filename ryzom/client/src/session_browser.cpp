@@ -35,6 +35,18 @@ using namespace RSMGR;
 /// The time the client stay connected to the session browser without requests
 const uint32 KeepConnectedTime = 3;
 
+/// The longest waitOneMessage waits for its message, in seconds. The wait runs in the main loop of the
+/// client, which stands still for as long: this bounds the time a session browser service that is connected
+/// and does not answer (or a session manager behind it that does not) keeps the client frozen. An answer
+/// takes a fraction of a second; a connection that cannot be made is given up by the comm thread when the
+/// system gives up on it, after about 20 seconds, which fits in this.
+const uint32 WaitMessageTimeout = 30;
+
+/// When a wait has given up, its answer can still come, in front of the answer to the next request of the
+/// same kind (see _OwedAnswers). A later wait for that message looks for this long, in milliseconds, whether
+/// another message of the name follows the first one, and takes the last.
+const uint32 OwedAnswerGraceTime = 1000;
+
 // a callback adaptor that queue the sent message for later sending.
 class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 {
@@ -109,7 +121,9 @@ CSessionBrowser::CSessionBrowser()
 		_TerminateComm(false),
 		_SignalConnFail(false),
 		_NBReceivedMessage(0),
-		_WaitingForMessage(false)
+		_NbWaitedMessageReceived(0),
+		_WaitingForMessage(false),
+		_DropConnection(false)
 {
 	// start the comm thread
 	_CommThread = IThread::create(this);
@@ -171,7 +185,9 @@ void CSessionBrowser::run()
 		}
 
 disconnected:
-		// disconnected, waiting for message to send
+		// disconnected: there is no connection that a wait could have given up on
+		_DropConnection = false;
+		// waiting for message to send
 		while (adaptor->_SendQueue.empty())
 		{
 			nlSleep(100);
@@ -214,6 +230,12 @@ retry_connection:
 					goto retry_connection;
 				}
 			}
+			// a wait gave up while this connection was being made: nothing was sent on it
+			if (dropConnectionIfAsked())
+			{
+				adaptor->_PassThrue = false;
+				goto disconnected;
+			}
 			authenticate(_LoginCookie.getUserId(), _LoginCookie);
 			adaptor->_PassThrue = false;
 		}
@@ -230,6 +252,11 @@ sendMessages:
 					clearSendQueue(); // TODO: REMOVE?
 					goto disconnected;
 				}
+
+				// A wait gave up on a request sent on this connection: the next request goes out on a new
+				// one, and what still comes in on this one is not received
+				if (dropConnectionIfAsked())
+					goto disconnected;
 
 				nldebug("SB: Sending next buffer of SendQueue");
 				adaptor->getCallback().send(adaptor->_SendQueue.front());
@@ -259,6 +286,9 @@ sendMessages:
 
 			{
 				CAutoMutex<CUnfairMutex> mutex(adaptor->_Mutex);
+				if (dropConnectionIfAsked())
+					goto disconnected;
+
 				if (!adaptor->_SendQueue.empty())
 					goto sendMessages;
 
@@ -282,10 +312,58 @@ sendMessages:
 	}
 }
 
+// True when a message of the name 'received' is the answer a wait for 'waited' waits for
+static bool answersWait(const std::string &received, const std::string &waited)
+{
+	// hardcoded: JSSRE may replace JSSR in some responses
+	return received == waited || (received == "JSSRE" && waited == "JSSR");
+}
+
+// Called by the comm thread with the mutex of the adaptor held, before it uses the connection
+bool CSessionBrowser::dropConnectionIfAsked()
+{
+	if (!_DropConnection)
+		return false;
+	nldebug("SB: Dropping the connection of a wait that gave up");
+	// (this empties the receive queue as well)
+	getCallbackAdaptor()->getCallback().disconnect();
+	_DropConnection = false;
+	return true;
+}
+
+// A message that is the answer to no wait came in: when a wait that gave up is owed one of its name, this is it
+void CSessionBrowser::settleOwedAnswer(const std::string &name)
+{
+	for (std::map<std::string, uint32>::iterator it = _OwedAnswers.begin(); it != _OwedAnswers.end(); ++it)
+	{
+		if (answersWait(name, it->first))
+		{
+			nlinfo("SB: the '%s' message a wait gave up on came after all, and is not taken for an answer", name.c_str());
+			if (--it->second == 0)
+				_OwedAnswers.erase(it);
+			return;
+		}
+	}
+}
+
+// (called from update, on the main thread, with the mutex of the adaptor held)
 void CSessionBrowser::on_preDispatchMessage(CMessage &msgin, TSockId /* from */, CCallbackNetBase &/* netbase */)
 {
 	++_NBReceivedMessage;
-	_LastReceivedMessageNames.push_back(msgin.getName());
+	const std::string name = msgin.getName();
+	if (_DropConnection)
+	{
+		// it came in on a connection that a wait has given up on, and that the comm thread is about to close
+		settleOwedAnswer(name);
+	}
+	else if (_WaitingForMessage && answersWait(name, _WaitedMessageName))
+	{
+		++_NbWaitedMessageReceived;
+	}
+	else
+	{
+		settleOwedAnswer(name);
+	}
 }
 
 
@@ -306,18 +384,63 @@ void CSessionBrowser::update()
 
 bool CSessionBrowser::waitOneMessage(const std::string &msgName)
 {
-	nldebug("SB: Waiting for message");
+	nldebug("SB: Waiting for message '%s'", msgName.c_str());
+	// the messages of this name are counted from here on (on_preDispatchMessage)
+	_WaitedMessageName = msgName;
+	_NbWaitedMessageReceived = 0;
 	_WaitingForMessage = true;
-	// cleanup the list of received messages
-	_LastReceivedMessageNames.clear();
 
 	CCallbackClientAdaptor	*adaptor = getCallbackAdaptor();
 
-
-	// loop while no message received, still connected or having message to send
-	while (_LastReceivedMessageNames.empty()
-		&& (adaptor->getCallback().connected() || !adaptor->_SendQueue.empty()))
+	// the answers that earlier waits for this message gave up on: they can still come, in front of this one
+	uint32 owed = 0;
 	{
+		std::map<std::string, uint32>::const_iterator it = _OwedAnswers.find(msgName);
+		if (it != _OwedAnswers.end())
+			owed = it->second;
+	}
+
+	// Loop while the message is not received, still connected or having message to send, for
+	// WaitMessageTimeout at most. A message of another name that comes first is no answer to this wait: it is
+	// dispatched as it would be in any frame (the list of the player control window, asked for every few
+	// seconds), and the wait goes on.
+	const TTime start = CTime::getLocalTime();
+	TTime firstReceived = 0;
+	bool hasReceived = false;
+	bool timedOut = false;
+	for (;;)
+	{
+		const TTime now = CTime::getLocalTime();
+		if (_NbWaitedMessageReceived > owed)
+		{
+			// the message of this wait is in, behind every one that was owed
+			break;
+		}
+		if (_NbWaitedMessageReceived != 0)
+		{
+			// As many messages of the name as are owed, or fewer: they are the owed ones, or the last is this
+			// wait's own and owed ones were lost (the service has no one to send an answer to while the client
+			// is not connected). Owed answers come from the same queue of the session manager, right in front
+			// of this wait's own: the last message of the grace time is taken.
+			if (!hasReceived)
+			{
+				hasReceived = true;
+				firstReceived = now;
+			}
+			if (now - firstReceived >= (TTime)OwedAnswerGraceTime)
+				break;
+		}
+		else if (!adaptor->getCallback().connected() && adaptor->_SendQueue.empty())
+		{
+			// the connection was lost, or could not be made
+			break;
+		}
+		if (now - start >= (TTime)WaitMessageTimeout * 1000)
+		{
+			timedOut = _NbWaitedMessageReceived == 0;
+			break;
+		}
+
 		update();
 
 		// give up the time slice
@@ -326,19 +449,38 @@ bool CSessionBrowser::waitOneMessage(const std::string &msgName)
 	}
 
 	_WaitingForMessage = false;
+	_WaitedMessageName.clear();
 
-	if (!_LastReceivedMessageNames.empty())
+	if (timedOut)
 	{
-		// check the first received message match the requested one
-		bool receivedExpected =
-				(_LastReceivedMessageNames.front() == msgName) ||
-				(_LastReceivedMessageNames.front() == "JSSRE" && (msgName == "JSSR")); // harcoded: JSSRE may replace JSSR in some responses
-		STOP_IF(!receivedExpected, "BIG BAD BUG - Expected SBS message '"+msgName+"' but received '"+_LastReceivedMessageNames.front()+"'");
-		return receivedExpected;
+		// The service is connected, or being connected, and silent. What this wait leaves behind must not be
+		// taken for the answer to a later request: the requests that are not sent yet are not sent at all,
+		// and the comm thread closes the connection before it sends anything else, so that nothing more is
+		// received on it (the service sends an answer to the connection its client has at that time, and
+		// drops it when the client has none). An answer can still reach the next connection, when the
+		// session manager gets to it after the client has connected again: it is owed, and counted.
+		bool sent;
+		{
+			CAutoMutex<CUnfairMutex> mutex(adaptor->_Mutex);
+			sent = adaptor->_SendQueue.empty();
+			while (!adaptor->_SendQueue.empty())
+				adaptor->_SendQueue.pop();
+			_DropConnection = true;
+		}
+		if (sent)
+			++_OwedAnswers[msgName];
+		nlwarning("SB: no '%s' message from the session browser in %u seconds: the wait gives up, the connection is dropped (request %s)",
+		    msgName.c_str(), WaitMessageTimeout, sent ? "sent, its answer can still come" : "not sent");
+		return false;
 	}
 
-	// sorry, wait failed
-	return false;
+	// false: the connection was lost, or could not be made, before the message came
+	if (_NbWaitedMessageReceived == 0)
+		return false;
+
+	// what was owed has come in front of this answer, or is taken as lost
+	_OwedAnswers.erase(msgName);
+	return true;
 }
 
 bool CSessionBrowser::connected()

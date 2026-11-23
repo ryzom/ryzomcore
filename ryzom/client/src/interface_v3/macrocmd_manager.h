@@ -110,6 +110,9 @@ public:
 
 	void refreshMacroCombo();
 
+	// Open the macro editor to create a macro from the given one.
+	void editNewMacro(const CMacroCmd &macro);
+
 	sint32 getTexIdBack(uint8 nb) { return (nb>=_OptBackId.size()) ? _OptBackId[_OptBackId.size()-1] : _OptBackId[nb]; }
 	sint32 getTexIdIcon(uint8 nb) { return (nb>=_OptIconId.size()) ? _OptIconId[_OptIconId.size()-1] : _OptIconId[nb]; }
 	sint32 getTexIdOver(uint8 nb) { return (nb>=_OptOverId.size()) ? _OptOverId[_OptOverId.size()-1] : _OptOverId[nb]; }

@@ -213,6 +213,20 @@ public :
 	bool dontReceiveTranslation( const std::string &lang );
 	bool dontSendTranslation( const std::string &lang );
 
+	/// Result of takeChatLine
+	enum TChatLineCheck
+	{
+		ChatLineAccepted,
+		ChatLineRefused,
+		ChatLineFirstRefused // the first line refused since one was accepted
+	};
+
+	/**
+	 * Take one line from the client's chat allowance: lineBurst lines at once (at least 1), and one more each
+	 * lineInterval ms. A refused line is not sent.
+	 */
+	TChatLineCheck takeChatLine(NLMISC::TTime now, uint32 lineBurst, uint32 lineInterval);
+
 private :
 
 	/// CLient datasetrow
@@ -280,6 +294,13 @@ private :
 
 	std::vector<std::string>	_DontReceiveTranslation;
 	std::vector<std::string>	_DontSendTranslation;
+
+	// clang-format off
+	/// When the chat allowance is full again: each line accepted moves it lineInterval later (see takeChatLine)
+	NLMISC::TTime		m_ChatAllowanceTime;
+	/// A line was refused since the last one accepted
+	bool				m_ChatLineRefused;
+	// clang-format on
 
 	/**
 	 * Update the audience of this client

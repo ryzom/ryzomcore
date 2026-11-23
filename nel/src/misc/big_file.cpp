@@ -514,6 +514,18 @@ bool CBigFile::BNP::unpack(const std::string &sDestDir, TUnpackProgressCallback 
 		return false;
 	}
 
+	// The entry names come from the file, which may be a download: each must be a bare file name,
+	// or the write below would leave the destination directory. Nothing is unpacked otherwise.
+	for (uint32 i = 0; i < SFiles.size(); ++i)
+	{
+		if (!CFile::isSafeFilename(SFiles[i].Name, false))
+		{
+			nlwarning("BNP '%s': entry %u has the unsafe name '%s', nothing unpacked", BigFileName.c_str(), i, SFiles[i].Name.c_str());
+			fclose(bnp);
+			return false;
+		}
+	}
+
 	CFile::createDirectory(sDestDir);
 
 	uint32 totalUncompressed = 0, total = 0;

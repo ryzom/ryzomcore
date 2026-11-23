@@ -77,7 +77,8 @@
 	<!-- Continue or Restart Default Outgame Music
 		MUST PLAY IT NOT ASYNCLY, else it don't works well during loading 
 	-->
-	<action handler="play_music_outgame"  params="async=0" />
+	<!-- Play character selection music -->
+	<!-- <action handler="play_music_outgame"  params="async=0" /> -->
 
 </proc>
 
@@ -96,6 +97,9 @@
 	<action handler="set" params="target_property=ui:outgame:charsel:del_but:active|value=0"/>
 	<action handler="set" params="target_property=ui:outgame:charsel:create_new_but:active|value=0"/>
 	<action handler="set" params="target_property=ui:outgame:charsel:resume_session_but:active|value=0"/>
+	<if flags="!ryzom_forge" />
+	<action handler="set" params="target_property=ui:outgame:charsel:close_session_but:active|value=0"/>
+	<endif />
 	
 	<action handler="set" params="target_property=ui:outgame:charsel:quit_but:active|value=0"/>
 </proc>
@@ -115,6 +119,9 @@
 	<action handler="set" params="target_property=ui:outgame:charsel:del_but:active|value=1"/>
 	<action handler="set" params="target_property=ui:outgame:charsel:create_new_but:active|value=1"/>
 	<action handler="set" params="target_property=ui:outgame:charsel:resume_session_but:active|value=1"/>
+	<if flags="!ryzom_forge" />
+	<action handler="set" params="target_property=ui:outgame:charsel:close_session_but:active|value=1"/>
+	<endif />
 	
 	<action handler="set" params="target_property=ui:outgame:charsel:quit_but:active|value=1"/>
 </proc>
@@ -185,7 +192,15 @@
 			value=switch(@UI:TEMP:CHAR3D:PEOPLE, 'outgame_fyros.ig', 'outgame_matis.ig', 'outgame_tryker.ig', 'outgame_zorai.ig')" />
 	<action handler="set" params="target_property=ui:outgame:charsel:char3d:cam:fov |
 			value=switch(@UI:TEMP:CHAR3D:PEOPLE, 60, 60, 60, 60)" />
-			<action handler="set" params="target_property=ui:outgame:charsel:3d_select:y | value=switch(@0, 0, -153, -306, -459, -612)" />
+	<action handler="set" params="target_property=ui:outgame:charsel:3d_select:y |
+								value=switch(@0, 0, -153, -306, -459, -612)" />	
+	
+	<!-- Play character selection music -->
+	<action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,0),not(isCharSelSlotEmpty(@0)))" params="name=character creation fyros.ogg|async=1" />
+	<action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,1),not(isCharSelSlotEmpty(@0)))" params="name=character creation matis.ogg|async=1" />
+	<action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,2),not(isCharSelSlotEmpty(@0)))" params="name=character creation trykers.ogg|async=1" />
+	<action handler="play_music_outgame" cond="and(eq(@UI:TEMP:CHAR3D:PEOPLE,3),not(isCharSelSlotEmpty(@0)))" params="name=character creation zorai.ogg|async=1" />
+	<action handler="play_music_outgame" cond="isCharSelSlotEmpty(@0)" params="async=1" />
 	
 	<action handler="proc" params="proc_charsel_infos2" />
 </proc>
@@ -419,10 +434,52 @@
 </proc>
 
 
+<!-- ******************************************* -->
+<!-- * CLOSE A RING SCENARIO THAT WAS LEFT RUNNING * -->
+<!-- ******************************************* -->
+
+<proc id="proc_charsel_close_session">
+	<action handler="enter_modal" params="group=ui:outgame:charsel_close_session_confirm" />
+</proc>
+
+<proc id="proc_charsel_close_session_confirm_ok">
+	<action handler="play_sound" params="name=charsel_delok_click" />
+	<action handler="leave_modal" params="" />
+	<action handler="close_ring_session" params="slot=@UI:TEMP:CHARSELSLOT" />
+</proc>
+
+<proc id="proc_charsel_close_session_confirm_cancel">
+	<action handler="play_sound" params="name=charsel_delno_click" />
+	<action handler="leave_modal" params="" />
+</proc>
+
+<group type="modal" id="charsel_close_session_confirm" posref="MM MM" w="400" h="260"
+					mouse_pos="false" escapable="false" exit_click_out="false" display="false">
+
+	<instance template="outgame_popup" id="back" posref="TL TL" />
+
+	<view type="text" id="text" posref="TM TM" x="0" y="-60" color="255 255 255 255" global_color="false" line_maxw="384"
+		fontsize="17" shadow="true" hardtext="uiCharSel_CloseSessionConfirm" multi_line="true" multi_line_space="0"/>
+
+	<ctrl style="valid_txt_button" id="submit" posref="BR BR" x="-8" y="8" hardtext="uiCharSel_CloseSession"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_close_session_confirm_ok" />
+
+	<ctrl style="valid_txt_button" id="cancel" posref="TR BR" posparent="submit" x="0" y="4" hardtext="uiCP_Delete_no"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_close_session_confirm_cancel" />
+
+</group>
+
+
 <proc id="charsel_init_buttons">
 	<action handler="add_link" params="id=play_edit_session_del_init|expr=and(not(isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)), not(isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT))))|target=ui:outgame:charsel:play_but:active,ui:outgame:charsel:edit_session_but:active,ui:outgame:charsel:del_but:active" />
 	<action handler="add_link" params="id=create_new_but_init|expr=isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT)|target=ui:outgame:charsel:create_new_but:active" />
+	<if flags="!ryzom_forge" />
+	<action handler="add_link" params="id=resume_session_but_init|expr=isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)|target=ui:outgame:charsel:resume_session_but:active,ui:outgame:charsel:close_session_but:active,ui:outgame:charsel:in_ring_session:active" />
+	<else />
 	<action handler="add_link" params="id=resume_session_but_init|expr=isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)|target=ui:outgame:charsel:resume_session_but:active,ui:outgame:charsel:in_ring_session:active" />
+	<endif />
 	
 	<action handler="remove_link" params="id=play_edit_session_del_init" />
 	<action handler="remove_link" params="id=create_new_but_init" />
@@ -534,7 +591,7 @@
 			onover="play_sound" params_over="name=specie_but_over"
 			onclick_l="proc" params_l="proc_charsel_clickslot|4" />
 
-			<!--
+<!--
 			<group id="bgd_progress" posref="BM BM" w="430" h="75" x="85" y="65" active="true">
 		<instance template="outgame_black_back" id="border"/>		
 		<view type="text" id="text"	active="true" y="-10" posref="TM TM"	hardtext="" fontsize="13" color="255 255 255 255"/>
@@ -602,7 +659,19 @@
 					onclick_l="proc" params_l="proc_charsel_play"/>
 
 	<!-- TEMP: For R2 alpha, don't allow more than one character per user -->
+	<!-- The owner of a scenario that was left running can also close it from here: a scenario that fails to load
+	     cannot be closed from inside -->
+	<!-- Not with RYZOM_FORGE: the Ring is not used there, and its session browser has no answer to the request of
+	     this button (the client would wait for one until its time-out). -->
+	<if flags="!ryzom_forge" />
+	<ctrl style="valid_txt_button" id="close_session_but" posref="BR BM" x="-112" y="36" hardtext="uiCharSel_CloseSession"
+					onover="play_sound" params_over="name=specie_but_over"
+					onclick_l="proc" params_l="proc_charsel_close_session"/>
+
+	<link expr="isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)" target="resume_session_but:active,close_session_but:active,in_ring_session:active" />
+	<else />
 	<link expr="isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)" target="resume_session_but:active,in_ring_session:active" />
+	<endif />
 
 
 	<!--*************-->
@@ -674,7 +743,7 @@
 	 display="false">
 		<instance template="outgame_popup" id="back" posref="TL TL" />
 
-		<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+		<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
 		<ctrl style="valid_txt_button" id="ok" posref="BM BM" x="0" y="8" hardtext="uittOK" 
 						avoid_resize_parent="true" 
 						onover="play_sound" params_over="name=specie_but_over" 
@@ -777,8 +846,8 @@
 
 <group type="menu" id="r2ed_editor_menu" options="menu_back" text_y="0" color="255 255 255 255" fontsize="16" shadow="true" shadow_color="0 0 0 255" shadow_color_over="0 0 0 255" color_over="0 0 0 255" color_grayed="255 255 255 128" shadow_color_grayed="0 0 0 255" highlight_over="255 255 255 128" mouse_pos="false">
 
-	<action id="new_scenario" name="uiR2EDNewScenario" handler="proc" params="proc_charsel_new_scenario_warning" />
-	<action id="new_scenario" name="uiR2EDEditScenario" handler="proc" params="proc_charsel_edit_scenario"/>
+	<action id="new_scenario" name="uiCharSelNewScenario" handler="proc" params="proc_charsel_new_scenario_warning" />
+	<action id="edit_scenario" name="uiR2EDEditScenario" handler="proc" params="proc_charsel_edit_scenario"/>
 
 </group>
 
@@ -880,6 +949,10 @@
 <proc id="proc_message_box_with_help_ok" >
 	<action handler="leave_modal" />	    <!-- must leave modal first if another modal is to be displayed after this one -->
 	<action handler="" params=""/>				
+	<!-- The box runs this when it closes (on_deactive): a user that hid the OK button (the far TP, while
+	     the client returns to the mainland by itself) leaves the box whole for the next one. The second
+	     action is the one CInterfaceManager::messageBoxWithHelp replaces: this one stays the third. -->
+	<action handler="set" params="target_property=ui:outgame:message_box_with_help:ok:active|value=1" />
 </proc>
 
 
@@ -892,7 +965,7 @@
 >
 	<instance template="outgame_popup" id="back" posref="TL TL" />
 
-	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
 	<ctrl style="valid_txt_button" id="ok" posref="BM BL" x="0" y="8" hardtext="uittOK" 
 					avoid_resize_parent="true" 
 					onover="play_sound" params_over="name=specie_but_over" 

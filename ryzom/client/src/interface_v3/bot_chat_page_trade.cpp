@@ -367,8 +367,8 @@ uint32 CBotChatPageTrade::getCurrItemPriceResale() const
 		CGroupEditBox *resaleMarginBox = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:resell_group:can_resell:choose_resell:edit:eb"));
 		if (!resaleMarginBox) return 0;
 
-		// Calculate the resale price from the resale margin
-		uint32 margin = (uint32)resaleMarginBox->getInputStringAsInt();
+		// Calculate the resale price from the resale margin, which the server caps too
+		uint32 margin = std::min((uint32)resaleMarginBox->getInputStringAsInt(), BOTCHATTYPE::MaxResaleMargin);
 		// temp uint64 because we add case where basePrice= 50000, and margin= 99999% => 50000*99999 > 4gig
 		uint64 basePrice = getCurrItemPrice(false);	// base Price without fame margin
 		return uint32(basePrice + basePrice * margin / 100);
@@ -493,6 +493,20 @@ void	CBotChatPageTrade::getCurrItemFactionTypePoints(PVP_CLAN::TPVPClan &pvpClan
 }
 
 // ***************************************************************************
+bool CBotChatPageTrade::isPricedInDappers(CDBCtrlSheet *sheet) const
+{
+	if (_BuyMean == Money)
+		return true;
+	if (_BuyMean != MoneyFactionPoints)
+		return false;
+	// the faction page also lists items priced in dappers
+	PVP_CLAN::TPVPClan fpType;
+	uint32 fpCost;
+	getItemFactionTypePoints(sheet, fpType, fpCost);
+	return fpType == PVP_CLAN::None;
+}
+
+// ***************************************************************************
 uint32 CBotChatPageTrade::getUserFactionPoints(PVP_CLAN::TPVPClan clan) const
 {
 	if ((clan < PVP_CLAN::BeginClans) || (clan > PVP_CLAN::EndClans))
@@ -589,8 +603,11 @@ void CBotChatPageTrade::updateTradeModal()
 			if ((_BuyMean == MoneyGuildXP) || (_BuyMean == GuildMoney) || (_BuyMean == GuildMoneyGuildXP))
 			{
 				uint64 totalPrice = (uint64) priceWithoutFame * (uint64) quantity;
-				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE")->setValue64(totalPrice);
-				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_WITH_FAME")->setValue64(totalPrice);
+				// the modal reads the unit and total prices, each with its fame variant; no fame discount applies here
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE")->setValue64(priceWithoutFame);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:UNIT_PRICE_WITH_FAME")->setValue64(priceWithoutFame);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE")->setValue64(totalPrice);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:TRADE_ITEM:PRICE_WITH_FAME")->setValue64(totalPrice);
 				uint64 totalXP = (uint64) getCurrItemXP() * (uint64) quantity;
 				CGuildManager *pGM = CGuildManager::getInstance();
 
@@ -707,14 +724,15 @@ void CBotChatPageTrade::updateTradeModal()
 					{
 						if ((_BuyMean == Money) || (_BuyMean == MoneyFactionPoints))
 						{
-							if (totalPriceWithoutFame > getInventory().getMoney())
+							// an item costs faction points or dappers, never both: its PRICE holds one or the other
+							if (fpType == PVP_CLAN::None && totalPriceWithoutFame > getInventory().getMoney())
 							{
 								if (confirmTradeGroup) confirmTradeGroup->setActive(false);
 								if (cantTradeGroup) cantTradeGroup->setActive(true);
 								if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiNotEnoughMoney"));
 								if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughMoney"));
 							}
-							else if (_BuyMean == MoneyFactionPoints)
+							else if (fpType != PVP_CLAN::None)
 							{
 								// Check if the player has enough faction point for the object selected
 								if ((confirmTradeGroup != nullptr) && (cantTradeButton != nullptr) && (cantTradeGroup != nullptr))
@@ -837,8 +855,9 @@ void CBotChatPageTrade::setupBuyMeanInModal(CInterfaceGroup *modal)
 	CViewBase *equal = modal->getView("standard_price:total_price:equal");
 	CInterfaceGroup *money = modal->getGroup("standard_price:total_price:item_price");
 	CInterfaceGroup *skillPoints = modal->getGroup("standard_price:total_price:sp");
-	if (equal) equal->setActive(_BuyMean == Money);
-	if (money) money->setActive(_BuyMean == Money);
+	bool dappers = isPricedInDappers(_CurrItemSheet);
+	if (equal) equal->setActive(dappers);
+	if (money) money->setActive(dappers);
 	if (skillPoints) skillPoints->setActive(_BuyMean == SkillPoints);
 }
 
@@ -865,13 +884,13 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 
 	// Set price label
 	CViewText *priceLabel = dynamic_cast<CViewText*>(ig->getView( "standard_price:total_price_header" ));
-	if ( _BuyMean == Money && priceLabel )
+	if (priceLabel)
 	{
-		priceLabel->setText( CI18N::get( "uiPrice" ) );
-		priceLabel->setActive(true);
+		bool dappers = isPricedInDappers(sheet);
+		if (dappers)
+			priceLabel->setText(CI18N::get("uiPrice"));
+		priceLabel->setActive(dappers);
 	}
-	else
-		priceLabel->setActive( false );
 
 	// show quantity dialog if a correct item (only stackable items etc....)
 	uint	defaultQuantity= initQuantityMode(false, sheet);
@@ -1079,6 +1098,16 @@ void CBotChatPageTrade::setFocusOnEditBox(CInterfaceGroup *ebi)
 }
 
 // ***************************************************************************************
+const char *CBotChatPageTrade::getBuildingLossWarning() const
+{
+	// a guild changing hall keeps its inventory, unlike a player's apartment (the server tells them apart the same way)
+	static const CSheetId s_GuildBuilding("guild_main_building.sitem");
+	if (_CurrItemSheet && _CurrItemSheet->getSheetId() == (sint32)s_GuildBuilding.asInt())
+		return "uiQReplaceGuildHall";
+	return "uiQReplaceAppartment";
+}
+
+// ***************************************************************************************
 bool CBotChatPageTrade::isTradeValid( bool enableResale ) const
 {
 	// If the Current Item has been canceled (eg: move out), then not valid!
@@ -1148,8 +1177,10 @@ bool CBotChatPageTrade::isTradeValid( bool enableResale ) const
 			}
 			if (_BuyMean == MoneyFactionPoints)
 			{
-				return ((totalPrice <= getInventory().getMoney()) &&
-						(quantity*fpCost <= getUserFactionPoints(fpType)));
+				// an item costs faction points or dappers, never both: its PRICE holds one or the other
+				if (fpType != PVP_CLAN::None)
+					return (uint64)quantity * fpCost <= getUserFactionPoints(fpType);
+				return totalPrice <= getInventory().getMoney();
 			}
 			else if (_BuyMean == SkillPoints)
 			{
@@ -1570,9 +1601,9 @@ void	CBotChatPageTrade::setupResellGroup(bool sellMode, uint defaultQuantity, CI
 			if (eb)
 			{
 				sint32	resaleMargin= NLGUI::CDBManager::getInstance()->getDbProp( "UI:SAVE:TRADE_ITEM:RESALE_MARGIN" )->getValue32();
-				clamp(resaleMargin, 0, (sint32)MaxResaleMargin);
+				clamp(resaleMargin, 0, (sint32)BOTCHATTYPE::MaxResaleMargin);
 				eb->setInputString( toString( resaleMargin ) );
-				eb->setPositiveIntegerMaxValue(MaxResaleMargin);
+				eb->setPositiveIntegerMaxValue(BOTCHATTYPE::MaxResaleMargin);
 			}
 		}
 	}
@@ -1674,8 +1705,8 @@ void	CBotChatPageTrade::setupFactionPointPrice(bool /* sellMode */, uint default
 		// Setup quantity view in this group
 		setupPriceGroupQuantity(fpGroup, defaultQuantity);
 
-		// setup faction name according to pvp clan
-		string		factionName= PVP_CLAN::toString(fpType);
+		// setup faction name according to pvp clan (the translated name is displayed, the enum name only builds keys)
+		string factionName = CI18N::get("uiFactionPoint_" + PVP_CLAN::toString(fpType));
 		CViewText	*vt= dynamic_cast<CViewText*>(fpGroup->getView("unit_price_header"));
 		if(vt)
 		{
@@ -1693,8 +1724,8 @@ void	CBotChatPageTrade::setupFactionPointPrice(bool /* sellMode */, uint default
 
 		// setup icon according to pvp clan
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		factionName = NLMISC::toLowerAscii(factionName);
-		string	factionIcon= CWidgetManager::getInstance()->getParser()->getDefine(toString("faction_icon_%s", factionName.c_str()));
+		string factionIconName = NLMISC::toLowerAscii(PVP_CLAN::toString(fpType));
+		string factionIcon = CWidgetManager::getInstance()->getParser()->getDefine(toString("faction_icon_%s", factionIconName.c_str()));
 		CViewBitmap		*vBmp= dynamic_cast<CViewBitmap*>(fpGroup->getView("unit_price:item_price:icone"));
 		if(vBmp)	vBmp->setTexture(factionIcon);
 		vBmp= dynamic_cast<CViewBitmap*>(fpGroup->getView("total_price:item_price:icone"));
@@ -2252,7 +2283,8 @@ class CAHConfirmTrade : public IActionHandler
 		case 1:		enableResale = true; break;
 		default: // 2: comes only from Enter of Shift+Enter key from an edit box or in the modal window
 			{
-				enableResale = !Driver->AsyncListener.isKeyPushed(KeySHIFT);
+				const NLGUI::CEventDescriptorKey& keyEvent = CWidgetManager::getInstance()->getLastKeyEvent();
+				enableResale = ! keyEvent.getKeyShift();
 			}
 		}
 
@@ -2277,8 +2309,8 @@ class CAHConfirmTrade : public IActionHandler
 		else
 		{
 			// need to ask user first. Important unexecpected consequence, so use a warning icon
-			pIM->validMessageBox(CInterfaceManager::WarningIconMsg, CI18N::get("uiQReplaceAppartment"),
-				"confirm_trade", toString("resale=%d|noconfirm=1", (uint)enableResale));
+			pIM->validMessageBox(CInterfaceManager::WarningIconMsg, CI18N::get(BotChatPageAll->Trade->getBuildingLossWarning()),
+			    "confirm_trade", toString("resale=%d|noconfirm=1", (uint)enableResale));
 		}
 	}
 };
@@ -2559,7 +2591,7 @@ class CAHBotChatChangeResaleMargin : public IActionHandler
 			sint32 delta;
 			fromString(sParams, delta);
 			sint32 newValue = resaleMarginBox->getInputStringAsInt() + delta;
-			clamp(newValue, 0, (sint32)CBotChatPageTrade::MaxResaleMargin);
+			clamp(newValue, 0, (sint32)BOTCHATTYPE::MaxResaleMargin);
 			resaleMarginBox->setInputStringAsInt( newValue );
 		}
 	}

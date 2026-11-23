@@ -2,7 +2,7 @@
 <!-- *                  WIDGETS               * -->
 <!-- ****************************************** -->
 <interface_config>
-				<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+    <root id="interface" x="0" y="0" w="800" h="600" active="true" />
     <proc id="proc_nothing"></proc>
     <!-- a text with border -->
     <template name="bc_border_text" keep="true" posref="TM TM" posparent="parent" x="0" y="-20" w="-4">
@@ -115,11 +115,11 @@
                     <view type="bitmap" id="pvp_faction_logo2" posref="TR TL" x="-4" posparent="pvp_faction_logo" active="false" texture="blank.tga" global_color="false" />
                     <view type="bitmap" id="rp_logo_1" posref="TL TL" x="2" y="-2" w="24" h="24" scale="true" slot="false" color="255 255 255 255" render_layer="1" texture="" active="false" global_color="false" />
                     <view type="bitmap" id="rp_logo_2" posref="TR TL" w="24" h="24" scale="true" slot="false" posparent="rp_logo_1" color="255 255 255 255" render_layer="1" texture="" active="false" global_color="false" />
-                </group>
+                 </group>
                 <group id="bottom_pvp" posref="BL TL" posparent="top_pvp" child_resize_w="true" child_resize_h="true" child_resize_wmargin="4" child_resize_hmargin="4">
                     <view type="bitmap" id="pvp_outpost_logo" posref="TL TL" x="2" y="-2" active="false" texture="building_state_24x24.tga" global_color="false" />
                     <view type="bitmap" id="pvp_duel_logo" posref="TR TL" posparent="pvp_outpost_logo" active="false"  texture="pvp_duel.tga" global_color="false" />
-                </group>
+                 </group>
             </group>
 
         </group>
@@ -397,6 +397,11 @@
         </action>
         <!--<action id="drop"           name="uimDrop"          handler="proc"  params="drop_item_proc" />-->
         <action id="equip" name="uimEquip" handler="inv_auto_equip" icon="filter_armor.tga"/>
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" icon="brick_default.tga"/>
         <action id="lockunlock" name="uimLockItem" handler="lock_inv_item" icon="r2ed_toolbar_lock_small.tga"/>
         <action id="item_text_edition" name="uimItemTextEdit" handler="item_text_edition" params="ui:interface:edit_custom" icon="r2ed_tool_scenario_window.tga" />
@@ -408,6 +413,14 @@
         <group type="menu" id="item_group_menu" extends="base_menu"></group>
 
     </group>
+    <group type="menu" id="item_menu_in_trade" extends="base_menu">
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
+        <action id="infos" name="uimBoldInfo" handler="open_help_auto" icon="brick_default.tga"/>
+    </group>
     <!-- MAX_INVENTORY_ANIMAL -->
     <link expr="switch(@%pa_beast0:TYPE, 'uimMtPaMount0', 'uimMtPaMount0', 'uimMtPaPacker0', 'uimMtPaDemon0')" target="ui:interface:item_menu_in_bag:move:pa0:hardtext" />
     <link expr="switch(@%pa_beast1:TYPE, 'uimMtPaMount1', 'uimMtPaMount1', 'uimMtPaPacker1', 'uimMtPaDemon1')" target="ui:interface:item_menu_in_bag:move:pa1:hardtext" />
@@ -416,6 +429,11 @@
     <!-- item menu when we are in self -->
     <group type="menu" id="item_menu_in_self" extends="base_menu" on_active="item_menu_base_check">
         <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
         <action id="lockunlock" name="uimLockItem" handler="lock_inv_item" icon="r2ed_toolbar_lock_small.tga"/>
         <separator />
@@ -431,6 +449,11 @@
         <action id="xp_catalyser_use" name="uimXpCatalyserUse" handler="xp_catalyser_use" icon="ico_cataliseur_xp.tga"/>
         <action id="item_text_display" name="uiOpen" handler="item_text_display" params="ui:interface:edit_custom" icon="r2ed_tool_scenario_window.tga"/>
         <separator />
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
         <separator />
         <action id="destroy" name="uimDestroy" handler="proc" params="destroy_item_proc" icon="r2_toolbar_kill_small.tga" />
@@ -440,6 +463,11 @@
         <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
         <action id="move" name="uimMoveTo" icon="curs_can_pan.tga">
             <!--<action id="bag"    name="uimMtBag"         handler="proc" params="move_to_bag" /> -->
+        </action>
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
         </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
         <action id="lockunlock" name="uimLockItem" handler="lock_inv_item" icon="r2ed_toolbar_lock_small.tga"/>
@@ -696,6 +724,8 @@
             <instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true" />
             <group type="list" id="text_list" chat="#chat" fontsize="10" posref="BL BL" posparent="black" x="2" y="2" space="0" sizeref="hw" w="-4" h="-4" maxelements="#maxelements" />
             <ctrl style="skin_scroll" id="scroll_bar" />
+            <ctrl type="button" id="button_newest" button_type="push_button" posparent="black" posref="BR BR" x="-4" y="4" tx_normal="W_arrow_down_1.tga" tx_pushed="W_arrow_down_1.tga" tx_over="W_button_12_over.tga" tooltip="uittChatJumpNewest" active="false" />
+            <ctrl type="button" id="button_unread" button_type="push_button" posparent="black" posref="BR BR" x="-4" y="20" tx_normal="W_arrow_up_1.tga" tx_pushed="W_arrow_up_1.tga" tx_over="W_button_12_over.tga" tooltip="uittChatJumpUnread" active="false" />
         </group>
     </template>
     <template name="chat_box_mainchat" posparent="parent" posref="TL TL" x="0" y="0" w="0" h="0" sizeref="" maxelements="200" keep="true" chat="false">
@@ -708,6 +738,8 @@
             <instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true" />
             <group type="list" id="text_list" chat="#chat" fontsize="10" posref="BL BL" posparent="black" x="2" y="2" space="0" sizeref="hw" w="-4" h="-4" maxelements="#maxelements" />
             <ctrl style="skin_scroll" id="scroll_bar" />
+            <ctrl type="button" id="button_newest" button_type="push_button" posparent="black" posref="BR BR" x="-4" y="4" tx_normal="W_arrow_down_1.tga" tx_pushed="W_arrow_down_1.tga" tx_over="W_button_12_over.tga" tooltip="uittChatJumpNewest" active="false" />
+            <ctrl type="button" id="button_unread" button_type="push_button" posparent="black" posref="BR BR" x="-4" y="20" tx_normal="W_arrow_up_1.tga" tx_pushed="W_arrow_up_1.tga" tx_over="W_button_12_over.tga" tooltip="uittChatJumpUnread" active="false" />
         </group>
     </template>
     <!-- ********************* -->
@@ -720,7 +752,7 @@
             <group type="edit_box" sizeref="w" w="-8" id="ebh" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" clear_on_escape="#clear_on_escape" backup_father_container_pos="#backup_father_container_pos" on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" max_float_prec="#max_float_prec" tooltip="#tooltip" tooltip_parent="#tooltip_parent" negative_filter="#negative_filter" render_layer="#render_layer">
                 <view id="edit_text" type="text" continuous_update="#continuous_text_update" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="255 255 255 100" shadow="#shadow" shadow_x="#shadow_x" shadow_y="#shadow_y" shadow_color="#shadow_color" shadow_outline="#shadow_outline" hardtext="" global_color="false" render_layer="#render_layer" />
             </group>
-                <group type="edit_box" sizeref="w" w="-8" id="eb" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" clear_on_escape="#clear_on_escape" backup_father_container_pos="#backup_father_container_pos" on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" max_float_prec="#max_float_prec" tooltip="#tooltip" tooltip_parent="#tooltip_parent" negative_filter="#negative_filter" render_layer="#render_layer">
+            <group type="edit_box" sizeref="w" w="-8" id="eb" posref="TL TL" x="4" y="-4" child_resize_h="true" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type" reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" clear_on_escape="#clear_on_escape" backup_father_container_pos="#backup_father_container_pos" on_focus_lost="#on_focus_lost" on_focus_lost_params="#on_focus_lost_params" max_float_prec="#max_float_prec" tooltip="#tooltip" tooltip_parent="#tooltip_parent" negative_filter="#negative_filter" render_layer="#render_layer">
                 <view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="#bg_texture" inherit_gc_alpha="true" render_layer="#render_layer" />
                 <view id="edit_text" type="text" continuous_update="#continuous_text_update" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="#shadow" shadow_x="#shadow_x" shadow_y="#shadow_y" shadow_color="#shadow_color" shadow_outline="#shadow_outline" hardtext="" global_color="false" render_layer="#render_layer" />
             </group>
@@ -1175,9 +1207,14 @@
     <!-- **************** -->
     <!-- *  MESSAGE BOX * -->
     <!-- **************** -->
+    <group type="modal" id="chat_link_tell" active="false" exit_click_out="true" posref="MM MR" w="260" child_resize_h="true" child_resize_hmargin="14" options="skin_modal" on_active="set_keyboard_focus" on_active_params="target=ui:interface:chat_link_tell:receiver:eb|select_all=false" on_deactive="chat_link_tell" on_deactive_params="cancel">
+        <view type="text" id="text" posref="TL TL" x="8" y="-8" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" hardtext="uiTellCmdDest" />
+        <instance template="edit_box_widget" id="receiver" posref="TL TL" x="6" y="-24" child_resize_h="true" w="248" onenter="chat_link_tell" onchange="" max_num_chars="255" entry_type="playername" max_historic="0" enter_loose_focus="false" enter_recover_focus="false" />
+        <instance template="button_ok_cancel" posparent="receiver" posref="BR TR" onclick_ok="chat_link_tell" onclick_cancel="leave_modal" />
+    </group>
     <!-- Simple Message Box with just a OK button -->
     <group type="modal" id="message_box" exit_click_out="true" posref="MM MM" w="250" child_resize_h="true" child_resize_hmargin="46" on_enter="leave_modal" options="skin_modal">
-        <view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up" />
+        <view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal" />
         <ctrl style="button_ok" posref="BM BM" x="0" y="8" onclick_l="leave_modal" hardtext="uittOK" avoid_resize_parent="true" />
     </group>
     <!-- Message Box with just a OK/Browse Faq button -->
@@ -1194,7 +1231,7 @@
         <action handler="" params="" />
     </proc>
     <group type="modal" id="message_box_with_help" exit_click_out="false" posref="MM MM" w="250" child_resize_h="true" child_resize_hmargin="46" on_enter="proc" on_enter_params="proc_message_box_with_help_ok" on_deactive="proc" on_deactive_params="proc_message_box_with_help_ok" escapable="true" options="skin_modal">
-        <view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up" />
+        <view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal" />
         <ctrl style="button_ok" id="ok" posref="BM BL" x="2" y="8" onclick_l="proc" params_l="proc_message_box_with_help_ok" hardtext="uittOK" avoid_resize_parent="true" />
         <ctrl style="button_ok" id="browse_faq" posref="BM BR" x="-2" y="8" onclick_l="proc" params_l="proc_browse_faq" hardtext="uittBrowseFaq" avoid_resize_parent="true" />
     </group>
@@ -1215,7 +1252,7 @@
         <group id="icon_group" posref="TL TL" x="4" y="-8" w="24" h="24">
             <view type="bitmap" id="icon" posref="MM MM" texture="" global_color="false" />
         </group>
-        <view type="text" id="text" posref="TL TL" line_maxw="270" x="32" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line_space="0" multi_line="true" case_mode="%case_first_sentence_letter_up" />
+        <view type="text" id="text" posref="TL TL" line_maxw="270" x="32" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line_space="0" multi_line="true" case_mode="%case_normal" />
         <instance template="button_ok_cancel" posref="BM BM" x="0" y="8" onclick_ok="proc" onclick_ok_param="proc_valid_message_box_ok" onclick_cancel="proc" onclick_cancel_param="proc_valid_message_box_cancel" avoid_resize_parent="true" />
     </group>
     <!-- common Style for Message Box For Important Proposal feature (join PVP etc...) -->
@@ -1392,7 +1429,7 @@
 
                             <scene3d id="scene_item_preview" sizeref="wh" w="-2" h="-2" posref="TL TL" x="1" curcam="cam_item_preview" user_interaction="true" ambient="128 96 64" sun_ambient="70 70 70" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" rotz_factor="0.017" roty_factor="0.005" dist_factor="0.2" camz="10" dist_limit_min="20.0" dist_limit_max="80.0">
 
-                                <character3d id="char" dblink="UI:TEMP:CHAR3D" pos="0.0 0.0 -1.8" rot="0.0 0.0 -60.0" anim="1" />
+                                <character3d id="char" dblink="UI:TEMP:ITEM_PREVIEW:#index" pos="0.0 0.0 -1.8" rot="0.0 0.0 -60.0" anim="1" />
                                 <camera id="cam_item_preview" fov="5" pos="0.0 -40.0 0.0" target="0.0 0.0 -0.85" roll="0" />
 
                                 <light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="1.0" far="4.0" />
@@ -1461,7 +1498,6 @@
             <!-- uses identity(x,@branch) to add an observer on branch -->
         </group>
     </template>
-
     <template name="tguildinv_nbslots_bulk_weight" id="" inv_branch_nb="500" inv_branch="" inv_bulk_max="" posparent="parent" posref="TL TL" x="0" y="0" selected_chest="">
         <group id="#id" sizeref="w" h="16" posref="#posref">
             <group id="bulk_weight" child_resize_w="true" child_resize_wmargin="4" h="16" posref="BR BR" posparent="#posparent">
@@ -1543,10 +1579,7 @@
                 tx_normal="w_button_filter_off.tga" tx_pushed="w_button_filter_on.tga" tx_over="" tooltip="uittInventorySearch"
                 onclick_l="inv_search_button" params_l="inv_query_eb" />
             <view type="bitmap" id="bit_inv_search" posref="MM MM" posparent="but_inv_search" texture="w_help_1.tga" global_color="false" color="255 255 255 150" />
-            <instance template="edit_box_widget" id="inv_query_eb" active="false" posref="TR BR" posparent="but_detail" x="0" y="8" w="100" render_layer="9"
-                clear_on_escape="true" enter_recover_focus="false" max_num_chars="20" max_historic="0"
-                onenter="inv_set_search" onchange="inv_set_search"
-                on_focus_lost="inv_search_unfocus" on_focus_lost_params="but_inv_search"/>
+            <instance template="edit_box_widget" id="inv_query_eb" active="false" posref="TR BR" posparent="but_detail" x="0" y="8" w="100" render_layer="9" clear_on_escape="true" enter_recover_focus="false" max_num_chars="20" max_historic="0" onenter="inv_set_search" onchange="inv_set_search" on_focus_lost="inv_search_unfocus" on_focus_lost_params="but_inv_search" />
         </group>
     </template>
     <!-- Link to trig brick action message. don't play when 0 (avoid flying text at startup) -->

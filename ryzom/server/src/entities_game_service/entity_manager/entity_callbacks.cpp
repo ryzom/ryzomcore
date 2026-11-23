@@ -460,7 +460,6 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	{
 		const std::string & privStr = player->getUserPriv();
 		PlayerManager.addSpecialUser( privStr,c->getId() );
-		c->getAdminProperties().init();
 	}
 	if (player->havePriv(NeverAggroPriv))
 	{
@@ -1790,10 +1789,9 @@ void cbHarvestDeposit( NLNET::CMessage& msgin, const std::string &serviceName, N
 	}
 	character->setAfkState(false);
 
-	// DEAD CODE: deposit harvesting is no longer implemented (the official client does not send this message anymore).
-	// Everything below this return is unreachable on purpose: it ends in nlerror(), which aborts the whole service,
-	// so a modified client must never be able to reach it.
-	nlwarning("<cbHarvestDeposit> player Id %s asked a deposit harvest, which is not implemented", charId.toString().c_str() );
+	// deposit harvesting through this message is not implemented: everything below is dead code that
+	// ends in nlerror(), which aborts the service. The client no longer sends the message.
+	nlwarning("<cbHarvestDeposit> %s asked a deposit harvest, which is not implemented", charId.toString().c_str());
 	return;
 
 	// check this harvester can use the given skill

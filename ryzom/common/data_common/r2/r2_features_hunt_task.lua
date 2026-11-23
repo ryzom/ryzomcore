@@ -128,6 +128,8 @@ end
 function component:textAdapter(text)
 
 	assert(self)
+	-- a text that the component does not have (one of an older editor) is an empty text
+	if text == nil then text = "" end
 	assert(type(text) == "string")
 	local str =  text
 	local mission_giver = ""
@@ -139,11 +141,11 @@ function component:textAdapter(text)
 	end
 
 	if tostring(self.TargetNumber) ~= "" then
-		nbTargets = tostring(self.TargetNumber)
+		nbTargets = numberText(self.TargetNumber)
 	end
 	
-	str=string.gsub(str, "<mission_giver>", mission_giver)
-	str=string.gsub(str, "<target_number>", nbTargets)
+	str = replaceTag(str, "<mission_giver>", mission_giver)
+	str = replaceTag(str, "<target_number>", nbTargets)
 	return str
 end
 

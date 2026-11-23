@@ -811,7 +811,7 @@ bool CEntityBase::changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEnti
 	else
 	{
 		if( _PhysScores._PhysicalScores[SCORES::hit_points].Max > 0)
-			setHpBar( (uint32) ( (1023 * _PhysScores._PhysicalScores[SCORES::hit_points].Current) / _PhysScores._PhysicalScores[SCORES::hit_points].Max) );
+			setHpBar((uint32)scoreRatio(_PhysScores._PhysicalScores[SCORES::hit_points].Current, _PhysScores._PhysicalScores[SCORES::hit_points].Max, 1023));
 		else
 			setHpBar(0);
 
@@ -2026,7 +2026,7 @@ bool CEntityBase::removeSabrinaEffect( CSEffect *effect, bool activateSleepingEf
 //-----------------------------------------------
 // CEntityBase::addLink
 //-----------------------------------------------
-void CEntityBase::addLink( CSLinkEffect *effect )
+void CEntityBase::addLink( CSLinkEffect *effect, bool /* newStaticAction */ )
 {
 	if (!effect || !TheDataset.isAccessible(effect->getCreatorRowId()) )
 		return;
@@ -2328,9 +2328,11 @@ bool CEntityBase::canEntityUseAction(CBypassCheckFlags bypassCheckFlags, bool se
 				case EFFECT_FAMILIES::Fear:
 					if (bypassCheckFlags.Flags.Fear)
 						continue;
+					break; // the invulnerability bypass is not a fear bypass
 				case EFFECT_FAMILIES::PowerInvulnerability:
 					if (bypassCheckFlags.Flags.Invulnerability)
 						continue;
+					break;
 				default:;
 				}
 

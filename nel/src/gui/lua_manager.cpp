@@ -35,12 +35,32 @@ namespace NLGUI
 {
 
 	bool CLuaManager::debugLua = false;
+	bool CLuaManager::developmentLibraries = false;
 	bool CLuaManager::editorMode = false;
 	CLuaManager* CLuaManager::instance = nullptr;
+	static CLuaManager::IScriptErrorReporter *s_ScriptErrorReporter = nullptr;
+
+	void CLuaManager::setScriptErrorReporter(IScriptErrorReporter *reporter)
+	{
+		s_ScriptErrorReporter = reporter;
+	}
+
+	CLuaManager::IScriptErrorReporter *CLuaManager::getScriptErrorReporter()
+	{
+		return s_ScriptErrorReporter;
+	}
+
+	void CLuaManager::reportScriptError(const std::string &error, const std::string &luaScript)
+	{
+		if (s_ScriptErrorReporter)
+			s_ScriptErrorReporter->onScriptError(error, luaScript);
+		else
+			nlwarning("%s", error.c_str());
+	}
 
 	CLuaManager::CLuaManager()
 	{
-		luaState = new NLGUI::CLuaState( debugLua );
+		luaState = new NLGUI::CLuaState( debugLua, developmentLibraries );
 	}
 
 	CLuaManager::~CLuaManager()
@@ -63,6 +83,8 @@ namespace NLGUI
 
 	bool CLuaManager::executeLuaScript( const std::string &luaScript, bool smallScript )
 	{
+		H_AUTO ( RZ_Interface_executeLuaScript )
+
 		if( editorMode )
 			return true;
 
@@ -75,18 +97,53 @@ namespace NLGUI
 		}
 		catch( const ELuaError &e )
 		{
-			nlwarning("--- LUA ERROR ---");
-			nlwarning(e.luaWhat().c_str());
-			std::vector<std::string> res;
-			NLMISC::explode(luaScript, std::string("\n"), res);
-			for(uint k = 0; k < res.size(); ++k)
-			{
-					nlwarning("%.05u %s", k, res[k].c_str());
-			}
-			nlwarning("--- ********* ---");
+			reportScriptError( e.luaWhat(), luaScript );
 			return false;
 		}
 
+		return true;
+	}
+
+	bool CLuaManager::callMethod(const char *tableName, const char *functionName, const std::string &argument)
+	{
+		H_AUTO ( RZ_Interface_callMethod )
+
+		if( editorMode )
+			return true;
+
+		CLuaState &ls = *luaState;
+		CLuaStackChecker lsc(&ls);
+		ls.pushGlobalTable();
+		ls.push(tableName);
+		ls.getTable(-2);
+		ls.remove(-2); // the global table
+		if (!ls.isTable(-1))
+		{
+			ls.pop();
+			reportScriptError(NLMISC::toString("%s:%s(): '%s' is not a table", tableName, functionName, tableName));
+			return false;
+		}
+		ls.push(functionName);
+		ls.getTable(-2);
+		bool isFunction = ls.isFunction(-1);
+		ls.pop();
+		if (!isFunction)
+		{
+			ls.pop();
+			reportScriptError(NLMISC::toString("%s:%s(): '%s' is not a function of %s", tableName, functionName, functionName, tableName));
+			return false;
+		}
+		int tableIndex = ls.getTop();
+		ls.pushValue(tableIndex); // self
+		ls.push(argument);
+		if (ls.pcallByName(functionName, 2, 0, tableIndex) != 0)
+		{
+			const char *error = ls.toString(-1);
+			reportScriptError(error ? std::string(error) : NLMISC::toString("%s:%s() failed with an error that is not a string", tableName, functionName));
+			ls.pop(2); // the error and the table
+			return false;
+		}
+		ls.pop(); // the table
 		return true;
 	}
 
@@ -94,14 +151,16 @@ namespace NLGUI
 	{
 		if (luaState) delete luaState;
 
-		luaState = new CLuaState( debugLua );
+		luaState = new CLuaState( debugLua, developmentLibraries );
 	}
 
-	void CLuaManager::forceGarbageCollect()
+	uint CLuaManager::forceGarbageCollect()
 	{
 		nlinfo("Collecting Garbaged LUA variables");
 		luaState->setGCThreshold( 0 );
-		nlinfo( NLMISC::toString( "Memory Used : %d Kb", luaState->getGCCount() ).c_str() );
+		uint memoryUsed = luaState->getGCCount();
+		nlinfo( "Memory Used : %u Kb", memoryUsed );
+		return memoryUsed;
 	}
 }
 

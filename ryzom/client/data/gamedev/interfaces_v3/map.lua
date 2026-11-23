@@ -52,7 +52,7 @@ end
 
 function game:delMapArkPoint(section, name)
 	if game.mapArkPoints[section] ~= nil then
-	game.mapArkPoints[section][name] = nil
+		game.mapArkPoints[section][name] = nil
 	end
 end
 
@@ -82,7 +82,7 @@ function game:openMapArkPointHelp(url, h)
 		if game.mapArkPointsCachedHelp[url] == nil then
 			if whm_html ~= nil then
 				game.mapMapArkPointHelpUrl = url
-			whm_html:renderHtml("<body style:'background-color: #ffffff00'>...</body>")
+				whm_html:renderHtml("<body style:'background-color: #ffffff00'>...</body>")
 				whm_html:browse(url)
 			end
 		else
@@ -108,7 +108,6 @@ function game:updateMapArkPointHelp()
 		end
 	end
 end
-
 function game:onLoadMap(map)
 	if map then
 		game.currentMap = map
@@ -129,6 +128,7 @@ function game:onLoadMap(map)
 	delArkPoints()
 	game.mapMapArkPointHelpUrl = ""
 	for section, points in pairs(game.mapArkPoints) do
+		local currentSection = section
 		real_section = {}
 		map_section = section
 		for k, v in string.gmatch(section, "(%w+)/(%w+)") do
@@ -136,18 +136,18 @@ function game:onLoadMap(map)
 		end
 
 		if real_section[1] then
-			section = real_section[1]
+			currentSection = real_section[1]
 			map_section = real_section[2]
 		end
 
-		if game.mapHideSections[section] == nil then
+		if game.mapHideSections[currentSection] == nil then
 			if game.mapRegionSections[map_section] == nil or game.mapRegionSections[map_section][texture] == true then
-		for name, point in pairs(points) do
-			addLandMark(point[1], point[2], point[3], point[4], "lua", point[5], "", "", "lua", point[6])
+				for name, point in pairs(points) do
+					addLandMark(point[1], point[2], point[3], point[4], "lua", point[5], "", "", "lua", point[6])
+				end
+			end
 		end
 	end
-end
-end
 
 	-- if alt view not enabled
 	if getDbProp("UI:VARIABLES:SHOW_ALT_MAP") == 0 or map:isIsland() then
@@ -158,10 +158,7 @@ end
 		-- debugInfo("-- using ".. self.mapTextures[texture] .." for " .. texture)
 		return self.mapTextures[texture]
 	end
-
 end
-
-
 function game:openFullMap()
 	local ui = getUI("ui:interface:map")
 	if ui.active == false then
@@ -274,9 +271,9 @@ game:addMapArkPoint("Vip/tryker_newbie", 22022, -34295, "vip_tryker_newbie", "Be
 game:addMapArkPoint("Vip/matis_newbie", 1483, -7251, "vip_matis_newbie", "Danibona Cuilli", "teammate_map.tga")
 game:addMapArkPoint("Vip/fyros_newbie", 21645, -26177, "vip_fyros_newbie", "Metis Medos", "teammate_map.tga")
 
-
 -- register map overrride
 -- game:setAltMap("fyros_map.tga", "fyros_map_sp.tga")
-
 -- VERSION --
 FILE_MAP_VERSION = 101
+
+

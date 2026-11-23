@@ -42,7 +42,7 @@ bool CDBViewBar::parse(xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	if (!CViewBitmap::parse(cur,parentGroup))
 	{
 		string tmp = "cannot parse view:"+getId()+", parent:"+parentGroup->getId();
-		nlinfo(tmp.c_str());
+		nlinfo("%s", tmp.c_str());
 		return false;
 	}
 
@@ -56,7 +56,7 @@ bool CDBViewBar::parse(xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	else
 	{
 		string tmp = "cannot getprop:range, view:"+getId()+", parent:"+parentGroup->getId();
-		nlinfo(tmp.c_str());
+		nlinfo("%s", tmp.c_str());
 		return false;
 	}
 
@@ -68,7 +68,7 @@ bool CDBViewBar::parse(xmlNodePtr cur,CInterfaceGroup * parentGroup)
 	else
 	{
 		string tmp = "cannot getprop:rangemax, view:"+getId()+", parent:"+parentGroup->getId();
-		nlinfo(tmp.c_str());
+		nlinfo("%s", tmp.c_str());
 		return false;
 	}
 

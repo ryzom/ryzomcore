@@ -424,6 +424,15 @@ public:
 	 */
 	static bool			exists (const std::string &filename);
 
+	/** Call it when a file that must exist is missing (corrupted or incomplete installation).
+	 * Creates an empty file "needcheck.flag" in getLogDirectory(): the launcher sees it and rescans all
+	 * the files (with their hash) to repair the missing ones. The launcher removes the flag.
+	 * The flag is created only once per run, but each call logs a warning with the missing file.
+	 * Do NOT call it for optional files.
+	 * \param missingFile the name of the missing file, for the log only.
+	 */
+	static void			requestFileCheck (const std::string &missingFile);
+
 
 	/** Clears the map that contains all cached files (Use this function to take into account new files).
 	 */
@@ -593,6 +602,46 @@ struct CFile
 	static std::string getPath (const std::string &filename);
 
 	/**
+	 * Normalize a relative path for use with isSafeFilename():
+	 * - backslashes become forward slashes
+	 * - leading "./" segments and leading slashes are removed (a rooted path is treated as relative)
+	 * - duplicate separators are collapsed
+	 * It does not resolve ".." segments and does not make the path valid or safe by itself;
+	 * call isSafeFilename() on the result.
+	 */
+	static std::string normalizeRelativePath (const std::string &path);
+
+	/**
+	 * Return true when a file name, or with allowSubdirs a relative path, is safe to use below a
+	 * directory of our choosing: no path traversal, no absolute path, no reserved or illegal character.
+	 * The string must be valid UTF-8 (strictly: no overlong sequence, no surrogate, no code point
+	 * above U+10FFFF). Rejected are control characters, the Unicode look-alikes of '/', '\\', ':' and
+	 * '.' that legacy code pages map onto those characters, the Windows-illegal characters
+	 * : * ? " < > |, the replacement character and the byte order mark, any "." or ".." segment,
+	 * a leading separator, and a leading or trailing space or trailing dot in any segment (Windows
+	 * strips those, so the file would get a different name). Longer than 255 bytes is rejected too.
+	 * Windows device names (CON, NUL, COM1, ...) are not checked.
+	 * Call normalizeRelativePath() first when the input may contain backslashes or "./".
+	 */
+	static bool isSafeFilename (const std::string &filename, bool allowSubdirs);
+
+	/**
+	 * Return true when Windows would not open a path as a local file: a network share (\\host\share, //host/share or
+	 * any mix of slashes), a device or long path (\\.\..., \\?\...) or the NT object namespace (\??\...). Opening such
+	 * a path connects to the host and sends the user's credentials, so a path from untrusted input must not be opened.
+	 * DOS device names (CON, NUL, COM1, ...) are not detected. Always false on other systems, where a leading // is
+	 * the root.
+	 */
+	static bool isNetworkOrDevicePath(const std::string &path);
+
+	/**
+	 * The part of a path after the last '/', '\\' or '@', wherever each is. getFilename looks for a backslash only
+	 * when the path has no slash, and for '@' only when it has neither, so its result can still be a path. Use this to
+	 * look a network or device path up by its file name: CPath::lookup returns a name containing '@' as it is.
+	 */
+	static std::string getFilenameAfterAnySeparator(const std::string &path);
+
+	/**
 	 * Just to know if it is a directory.
 	 * _FileName empty and path not !!!
 	 */
@@ -720,6 +769,23 @@ struct CFile
 	  */
 	static bool moveFile(const std::string &dest, const std::string &src);
 
+	/** Move a file over another one, which it replaces
+	 * A destination that exists is replaced in one step and is never deleted first: under its name there is
+	 * the old file or the new one, and when the move fails, the old one. A read-only destination is replaced
+	 * too. A destination that does not exist is no error, the file is then only moved.
+	 * Both paths must be on the same volume: there is no copy when a rename is not possible.
+	 * NB this keeps the attributes of the moved file, those of the replaced file are lost
+	 * On Windows a destination that other processes have open is replaced as long as they share it for
+	 * deletion, as scanners and indexers do (they keep the old file until they close it); where the system
+	 * or the file system does not know the rename that allows this, any open handle refuses the move.
+	 * A move refused because another process holds one of the two files (a scanner reading the file just
+	 * written) is tried again for a short time: with waits that double from 1 ms, for 100 ms in all.
+	 * What waiting cannot cure (access rights, a directory in the place of the destination) fails at once.
+	 * On the other systems a rename that fails is not tried again.
+	 * \return true if the destination is now the moved file. If false, both files are as they were.
+	 */
+	static bool replaceFile(const std::string &dest, const std::string &src);
+
 	/** Create a directory
 	  *	\return true if success
 	  */
@@ -729,6 +795,19 @@ struct CFile
 	  *	\return true if success
 	  */
 	static bool	createDirectoryTree(const std::string &dirname);
+
+	/** Tell if files can be created in a directory.
+	 * The test writes to the directory: it creates an empty file named nl_wtest_<process id>_<n>.tmp
+	 * and removes it at once, which also covers read-only volumes and access rights that the permission
+	 * bits do not show. A file that exists is never opened or replaced. On Windows the file is deleted
+	 * by the system when it is closed, nothing can stay behind. Elsewhere it is unlinked, and a directory
+	 * where that fails is reported as not writable, with a warning that names the file left there.
+	 * The path is used as given: a relative path (".") is not turned into an absolute one first.
+	 * The answer is also false when the path of the directory leaves no room for the name of the test file
+	 * (up to 25 characters) within the path length limit of the system, even if a shorter name still fits.
+	 * \return true if the directory exists and a file can be created in it
+	 */
+	static bool isDirectoryWritable(const std::string &dirname);
 
 	/** Try to set the file access to read/write if not already set.
 	 * On linux/macOS also set +x on directory.
@@ -757,6 +836,12 @@ struct CFile
 	*	Call this method to get a temporary output filename. If you have successfully saved your data, delete the old filename and move the new one.
 	*/
 	static void getTemporaryOutputFilename (const std::string &originalFilename, std::string &tempFilename);
+
+	/** Tell if a name is one getTemporaryOutputFilename() gives: a file name followed by ".tmp" and a number.
+	 * Such a file is being written, or was kept because it could not take the place of its file: code that
+	 * lists a directory of saves leaves it out.
+	 */
+	static bool isTemporaryOutputFilename(const std::string &filename);
 };
 
 } // NLMISC

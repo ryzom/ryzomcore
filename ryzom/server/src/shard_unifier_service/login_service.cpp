@@ -361,7 +361,7 @@ namespace LS
 			/* commented by Ulukyn
 			// Now prevent from logging-in at the same time with a free GM's player account and a GM CS account
 			CNelUserPtr nelUser = CNelUser::load(_NelDb, userId, __FILE__, __LINE__);
-			BOMB_IF(nelUser == NULL, "on_login : invalid nel user %u" << userId, loginResult(from, userId, "", 5, "Invalid user"); return);
+			BOMB_IF(nelUser == NULL, "on_login : invalid nel user " << userId, loginResult(from, userId, "", 5, "Invalid user"); return);
 			if (nelUser->getGMId() != 0)
 			{
 				uint32 otherUserId = nelUser->getGMId();

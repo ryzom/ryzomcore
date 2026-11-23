@@ -1,0 +1,32 @@
+# An activity step, an action and a condition name chat sequences that are not in the scenario: the
+# references are removed, with the handler of the condition, which could never run, and the author is
+# told. The activity step lasted as long as its chat sequence: it has no time limit.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteLostChatSequences(3)
+version_update_note: uiR2EDVersionNoteChatTimeLimits(1)
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimit = No Limit
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimitValue = <empty>
+scenario_lacks: Type = [[begin chat sequence]]
+scenario_lacks: Type = [[is in chat sequence]]
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions = <size 1>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions = <size 1>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[0].Action.Type = Sit Down
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].Chat = <empty>
+scenario_at: Acts[1].Features = <size 1>

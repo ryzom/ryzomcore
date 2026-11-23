@@ -219,6 +219,9 @@ public:
 		else
 		{
 			_Scene->getDriver()->showCursor(false);
+			// the cursor moved freely meanwhile, so the next mouse event only puts it back in the middle
+			_CursorInit = false;
+			_Scene->getDriver()->setMousePos(0.5f, 0.5f);
 		}	
 	}
 		

@@ -109,6 +109,7 @@ public:
 		LastDeleted = -1;
 		InIGZone = in_ig_zone;
 		Primitive = NULL;
+		PrimitiveContainer = nullptr;
 		PrimSize = CVector(1.f, 1.f, 1.f);
 		PrimHeight = 1.f;
 		PrimRelativePos = CVector(0.f, 0.f, 0.f);
@@ -116,6 +117,8 @@ public:
 
 	NL3D::UInstance Instance;
 	NLPACS::UMovePrimitive *Primitive;
+	/// The move container that created Primitive; it may be hibernated while another container is current
+	NLPACS::UMoveContainer *PrimitiveContainer;
 	CVector PrimSize;
 	float PrimHeight;
 	CVector PrimRelativePos;
@@ -248,8 +251,8 @@ public:
 	bool deleteInstance(uint32 idx, bool force = false);
 	bool removeInstances();
 	void removeInstancesInIgZone(uint16 igZone);
-	/// Remove the PACS primitive of every shape instance (IG zone ones included).
-	void removeShapePrimitives();
+	/// Forget the primitives owned by a move container that is about to be deleted (they are deleted with it)
+	void forgetShapePrimitives(NLPACS::UMoveContainer *container);
 	CVector getInstancePos(uint32 idx);
 	bool setInstancePos(uint32 idx, CVector pos);
 	CVector getInstanceRot(uint32 idx);

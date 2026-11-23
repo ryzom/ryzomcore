@@ -115,9 +115,13 @@
 #include "../../common/src/game_share/ryzom_database_banks.h"
 
 #include "chat_text_manager.h"
+#include "emoji_manager.h"
+#include "emoji_picker.h"
 #include "../npc_icon.h"
 
 #include "nel/gui/lua_helper.h"
+#include "../client_ctrl.h"
+#include "nel/misc/json.h"
 using namespace NLGUI;
 #include "nel/gui/lua_ihm.h"
 #include "nel/web/curl_certificates.h"
@@ -142,6 +146,9 @@ using namespace NLGUI;
 #include "../item_group_manager.h"
 
 #include "group_html_webig.h"
+
+// The build options that are interface feature flags (NL_MSQUIC_AVAILABLE). Last, to keep its macros out of the headers
+#include "config.h"
 
 using namespace NLMISC;
 
@@ -285,13 +292,15 @@ class CDrawDraggedSheet : public CWidgetManager::IOnWidgetsDrawnHandler
 public:
 	void process() NL_OVERRIDE
 	{
-		if ( CWidgetManager::getInstance()->getPointer()->show())
+		// the pointer does not exist yet (or anymore) during some screens, eg: login
+		CViewPointerBase *pointer = CWidgetManager::getInstance()->getPointer();
+		if (pointer && pointer->show())
 		{
 			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>( CWidgetManager::getInstance()->getCapturePointerLeft() );
 			if ((pCS != nullptr) && (pCS->isDragged()))
 			{
-				sint	x= CWidgetManager::getInstance()->getPointer()->getX() - pCS->getDeltaDragX();
-				sint	y= CWidgetManager::getInstance()->getPointer()->getY() - pCS->getDeltaDragY();
+				sint x = pointer->getX() - pCS->getDeltaDragX();
+				sint y = pointer->getY() - pCS->getDeltaDragY();
 				pCS->drawSheet (x, y, false, false);
 
 				// if the control support CopyDrag, and if copy key pressed, display a tiny "+"
@@ -477,6 +486,17 @@ CInterfaceManager::CInterfaceManager()
 	for (size_t i = 0; i < ClientCfg.UiFeatureFlags.size(); ++i)
 		parser->addFeatureFlag(ClientCfg.UiFeatureFlags[i]);
 
+	// build options that the interface depends on, so that it only uses what this client has
+#ifdef RYZOM_BG_DOWNLOADER
+	parser->addFeatureFlag("bg_downloader");
+#endif
+#ifdef NL_MSQUIC_AVAILABLE
+	parser->addFeatureFlag("quic");
+#endif
+#ifdef RYZOM_FORGE
+	parser->addFeatureFlag("ryzom_forge");
+#endif
+
 	parser->setSetupOptionsCallback( this );
 	parser->addModule( "scene3d", new CIF3DSceneParser() );
 	parser->addModule( "ddx", new CIFDDXParser() );
@@ -496,10 +516,16 @@ CInterfaceManager::CInterfaceManager()
 	CViewTextFormated::setFormatter( &RyzomTextFormatter );
 
 	CGroupHTML::options.trustedDomains = ClientCfg.WebIgTrustedDomains;
+	CGroupHTML::options.trustedHttpsOnly = ClientCfg.WebIgTrustedHttpsOnly;
 	CGroupHTML::options.languageCode = ClientCfg.getHtmlLanguageCode();
 	CGroupHTML::options.appName = getUserAgentName();
 	CGroupHTML::options.appVersion = getUserAgentVersion();
 	CGroupHTML::options.curlMaxConnections = ClientCfg.CurlMaxConnections;
+	CGroupHTML::options.imageMaxSize = (uint32)ClientCfg.WebIgImageMaxSize;
+	CGroupHTML::options.dataUrlMaxBytes = (uint32)ClientCfg.WebIgDataUrlMaxBytes;
+	CGroupHTML::options.imageMaxBytes = (uint32)ClientCfg.WebIgImageMaxBytes;
+	CGroupHTML::options.pageMaxBytes = (uint32)ClientCfg.WebIgPageMaxBytes;
+	CGroupHTML::options.stylesheetMaxBytes = (uint32)ClientCfg.WebIgStylesheetMaxBytes;
 
 	if (!ClientCfg.CurlCABundle.empty())
 	{
@@ -655,11 +681,65 @@ void CInterfaceManager::destroy ()
 	_Instance = nullptr;
 }
 
+// ------------------------------------------------------------------------------------------------
+// Script errors are shown in the system info window, with a button to open the script at the failing line when
+// ClientCfg.LuaDebugInfoGotoButtonEnabled is set, or with the script lines around the error when the error text
+// does not name a file. The same text goes to the log.
+class CLuaScriptErrorReporterRyzom : public CLuaManager::IScriptErrorReporter
+{
+public:
+	virtual void onScriptError(const std::string &error, const std::string &luaScript) NL_OVERRIDE
+	{
+		std::string msg = error;
+		char filename[MAX_PATH];
+		char exceptionName[MAX_PATH];
+		uint32 line;
+		// Hamster: quick fix on AJM code but sscanf is still awfull
+		if (sscanf(msg.c_str(), "%259s: %259s.lua:%d:", exceptionName, filename, &line) == 3) // NB: test not exact here, but should work in 99,9 % of cases
+		{
+			msg = CLuaIHMRyzom::createGotoFileButtonTag(filename, line) + msg;
+		}
+		else if (!luaScript.empty()) // AJM: handle the other 0.1% of cases
+		{
+			// Yoyo: seems that previous test doesn't work.... btw, must still print the message please...
+			std::vector<string> errorParts;
+			splitString(msg, ":", errorParts);
+			if (errorParts.size() > 3)
+			{
+				std::vector<string> contextList;
+				explode(luaScript, string("\n"), contextList);
+				fromString(errorParts[2], line);
+				if (line >= 3 && contextList.size() >= line)
+					msg = errorParts[0]+": \n>>> "+contextList[line-3]+"\n>>> "+contextList[line-2]+"\n>>> "+contextList[line-1]+"\nError:"+errorParts[2]+": "+errorParts[3];
+				else if (line >= 2 && contextList.size() >= line)
+					msg = errorParts[0]+": \n>>>"+contextList[line-2]+"\n>>>"+contextList[line-1]+"\nError:"+errorParts[2]+": "+errorParts[3];
+				else if (line >= 1 && contextList.size() >= line)
+					msg = errorParts[0]+": \n>>>"+contextList[line-1]+"\nError:"+errorParts[2]+": "+errorParts[3];
+			}
+		}
+		nlwarning("%s", LuaHelperStuff::formatLuaErrorNlWarn(msg).c_str());
+		CInterfaceManager::getInstance()->displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(msg));
+	}
+};
+static CLuaScriptErrorReporterRyzom LuaScriptErrorReporterRyzom;
+
+// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::initLUA()
 {
 	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
 	if( parser->isLuaInitialized() )
 		return;
+
+	// script errors are reported in game, not only in the log
+	CLuaManager::setScriptErrorReporter(&LuaScriptErrorReporterRyzom);
+
+#if !FINAL_VERSION
+	// A development client with AllowDebugLua gets the full Lua standard libraries (io, package, os, debug)
+	// for the R2 editor's file exports and profiler and for MobDebug. A release client never does: the same
+	// Lua state runs scripts served by the trusted web domains.
+	if (ClientCfg.AllowDebugLua)
+		CLuaManager::enableDevelopmentLibraries();
+#endif
 
 	parser->initLUA();
 
@@ -686,8 +766,8 @@ void CInterfaceManager::initLogin()
 
 	if (ClientCfg.XMLLoginInterfaceFiles.empty())
 	{
-		nlinfo("no xml login config files in client.cfg");
-		return;
+		// without the login interface there is no pointer and nothing to display
+		nlerror("XMLLoginInterfaceFiles is empty in the client configuration");
 	}
 
 	nldebug("Textures Login Interface");
@@ -704,7 +784,12 @@ void CInterfaceManager::initLogin()
 		loadTextures(*it + ".tga", *it + ".txt", true);
 	}
 
-	parseInterface (ClientCfg.XMLLoginInterfaceFiles, false);
+	if (!parseInterface(ClientCfg.XMLLoginInterfaceFiles, false))
+	{
+		// parseInterface has logged the file. Without the interface there is no pointer, which the widget manager's
+		// mouse handling needs: the login screen cannot run.
+		nlerror("Cannot load the login interface, its XML data is broken");
+	}
 
 	CWidgetManager::getInstance()->updateAllLocalisedElements();
 
@@ -772,8 +857,8 @@ void CInterfaceManager::initOutGame()
 
 	if (ClientCfg.XMLOutGameInterfaceFiles.empty())
 	{
-		nlinfo("no xml outgame config files in client.cfg");
-		return;
+		// without the outgame interface there is no pointer and nothing to display
+		nlerror("XMLOutGameInterfaceFiles is empty in the client configuration");
 	}
 
 	nldebug("Textures OutGame Interface");
@@ -790,7 +875,12 @@ void CInterfaceManager::initOutGame()
 		loadTextures(*it + ".tga", *it + ".txt", true);
 	}
 
-	parseInterface (ClientCfg.XMLOutGameInterfaceFiles, false);
+	if (!parseInterface(ClientCfg.XMLOutGameInterfaceFiles, false))
+	{
+		// parseInterface has logged the file. Without the interface there is no pointer, which the widget manager's
+		// mouse handling needs: the outgame screens cannot run.
+		nlerror("Cannot load the outgame interface, its XML data is broken");
+	}
 
 	CWidgetManager::getInstance()->updateAllLocalisedElements();
 
@@ -893,6 +983,7 @@ void badXMLParseMessageBox()
 																		NL3D::UDriver::exclamationIcon);
 	if (ret == NL3D::UDriver::yesId)
 	{
+		ClientCtrl::setExitReason("the interface XML did not load, and the user chose to quit");
 		extern void quitCrashReport ();
 		quitCrashReport ();
 		exit (EXIT_FAILURE);
@@ -911,6 +1002,8 @@ void CInterfaceManager::initInGame()
 
 	// Init LUA Scripting
 	initLUA();
+
+	CEmojiManager::getInstance().init();
 
 	// Clear the action manager
 	Actions.clear();
@@ -932,8 +1025,8 @@ void CInterfaceManager::initInGame()
 
 	if (ClientCfg.XMLInterfaceFiles.empty())
 	{
-		nlinfo("no xml config files in client.cfg");
-		return;
+		// without the interface there is nothing to display
+		nlerror("XMLInterfaceFiles is empty in the client configuration");
 	}
 
 	// Textures
@@ -1222,6 +1315,12 @@ void CInterfaceManager::configureQuitDialogBox()
 			}
 		}
 	}
+	else
+	{
+		// The interface XML that declares the dialog is missing or failed to load
+		nlwarning("Interface element '%s' not found, the quit dialog box is not configured", quitDialogStr.c_str());
+		return;
+	}
 
 	// Make all controls have the same size
 	CInterfaceGroup *quitDlgMain = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(quitDialogMainStr));
@@ -1380,6 +1479,12 @@ void CInterfaceManager::uninitInGame1 ()
 		ChatDisplayer = nullptr;
 	}
 
+	// Release interface help before inventory manager
+	CInterfaceHelp::release();
+
+	CEmojiPicker::releaseInstance();
+	CEmojiManager::releaseInstance();
+
 	// Release inventory manager
 	CInventoryManager::releaseInstance();
 	// Same for temp inventory manager
@@ -1454,9 +1559,6 @@ void CInterfaceManager::uninitInGame1 ()
 
 	// Uninit macro manager
 	CMacroCmdManager::getInstance()->uninitInGame();
-
-	// Release interface help
-	CInterfaceHelp::release();
 
 	// Release guild manager
 	CGuildManager::release();
@@ -1895,13 +1997,20 @@ bool CInterfaceManager::loadConfig (const string &filename)
 			{
 				// create placeholder player landmarks file so saveLandmarks will use it
 				// even if shared landmarks file exists
-				COFile f;
-				if (f.open(lmfile, false, false, true))
+				try
 				{
-					std::string xml;
-					xml = "<?xml version=\"1.0\"?>\n<interface_config />";
-					f.serialBuffer((uint8 *)xml.c_str(), xml.size());
-					f.close();
+					COFile f;
+					if (f.open(lmfile, false, false, true))
+					{
+						std::string xml;
+						xml = "<?xml version=\"1.0\"?>\n<interface_config />";
+						f.serialBuffer((uint8 *)xml.c_str(), xml.size());
+						f.close();
+					}
+				}
+				catch (const Exception &e)
+				{
+					nlwarning("Error while writing the file %s : %s.", lmfile.c_str(), e.what());
 				}
 			}
 		}
@@ -2201,9 +2310,9 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 		f.close();
 	}
-	catch(const NLMISC::EStream &)
+	catch (const NLMISC::EStream &e)
 	{
-		nlwarning("Config saving failed.");
+		nlwarning("Config saving failed: %s", e.what());
 		return false;
 	}
 
@@ -2429,6 +2538,10 @@ void CInterfaceManager::processServerIDString()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const string &text, const string &masterGroup, TCaseMode caseMode)
 {
+	// a box that takes the input until it is closed: a control tool learns of it at once
+	if (ClientCtrl::isActive())
+		ClientCtrl::addEvent("message_box", NLMISC::CJsonValue::object().set("group", masterGroup + ":" + msgBoxGroup).set("text", text));
+
 	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup));
 	CViewText		*viewText= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup + ":text"));
 
@@ -2567,6 +2680,8 @@ NLMISC::CRGBA CInterfaceManager::getDebugInfoColor(TSystemInfoMode mode)
 // ***************************************************************************
 void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 {
+	// a control tool reads the system messages, and a command it runs gets those it shows
+	ClientCtrl::showSystemInfo(cat, str);
 	CClientConfig::SSysInfoParam::TMode mode = CClientConfig::SSysInfoParam::Normal;
 	CRGBA color = CRGBA::White;
 
@@ -2805,7 +2920,7 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 			std::string info(currDepth * 4, ' ');
 			info += id;
 			info += toString(", address=0x%p", ig);
-			nlinfo(info.c_str());
+			nlinfo("%s", info.c_str());
 			// dump view & controls for this group
 			for(uint k = 0; k < ig->getViews().size(); ++k)
 			{
@@ -2821,7 +2936,7 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 				{
 					info += "<NULL>";
 				}
-				nlinfo(info.c_str());
+				nlinfo("%s", info.c_str());
 			}
 			//
 			for(uint k = 0; k < ig->getControls().size(); ++k)
@@ -2838,7 +2953,7 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 				{
 					info += "<NULL>";
 				}
-				nlinfo(info.c_str());
+				nlinfo("%s", info.c_str());
 			}
 
 			//
@@ -3017,22 +3132,6 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 		nlwarning ("Error while writing the file %s : %s.", filename.c_str(), e.what ());
 	}
 	return ret;
-}
-
-// ***************************************************************************
-bool CInterfaceManager::deletePlayerConfig (const std::string &playerFileIdent)
-{
-	string fileName= "save/interface_" + playerFileIdent + ".icfg";
-	return CFile::deleteFile(fileName);
-}
-
-
-// ***************************************************************************
-bool CInterfaceManager::deletePlayerKeys (const std::string &playerFileIdent)
-{
-	string fileName = "save/keys_"+playerFileIdent+".xml";
-	string fileNameEditor = "save/keys_r2ed_"+playerFileIdent+".xml";
-	return CFile::deleteFile(fileName) && CFile::deleteFile(fileNameEditor);
 }
 
 // ***************************************************************************
@@ -3671,7 +3770,7 @@ std::vector<std::string>		CInterfaceManager::getInGameXMLInterfaceFiles()
 // ***************************************************************************
 void		CInterfaceManager::dumpLuaString(const std::string &str)
 {
-	nlinfo(str.c_str());
+	nlinfo("%s", str.c_str());
 	displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(str));
 }
 

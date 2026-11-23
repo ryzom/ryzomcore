@@ -33,6 +33,7 @@ extern "C"
 	#	define HAVE_BOOLEAN
 	#endif
 	#include <jpeglib.h>
+	#include <jerror.h>
 }
 #endif
 
@@ -47,9 +48,9 @@ namespace NLMISC
 
 #ifdef USE_JPEG
 
+// the stream and buffer of writeJPG (readJPG has its own, see CJPGSource)
 static NLMISC::IStream *JPGStream = nullptr;
 static const uint32 JPGBufferSize = 4096;
-static uint32 JPGStreamSize = 0;
 static char JPGBuffer[JPGBufferSize];
 
 struct my_error_mgr
@@ -58,48 +59,100 @@ struct my_error_mgr
 	jmp_buf setjmp_buffer;
 };
 
+// libjpeg's messages (the warnings about corrupt data, and the error before my_error_exit) go to the log
+static void jpgOutputMessage(j_common_ptr cinfo)
+{
+	char message[JMSG_LENGTH_MAX];
+	(*cinfo->err->format_message)(cinfo, message);
+	nlwarning("JPEG: %s", message);
+}
+
 void my_error_exit(j_common_ptr cinfo)
 {
 	my_error_mgr *myerr = (my_error_mgr *) cinfo->err;
 
-	nlwarning("error while processing JPEG image");
+	(*cinfo->err->output_message)(cinfo);
 
 	longjmp(myerr->setjmp_buffer, 1);
 }
 
+// A progressive JPEG can repeat empty scans, and each walks every block of the image: 10000 of them, 100 KiB, took 8 s
+// to decode at 4096x4096. TurboJPEG refuses more than 500 scans (TJFLAG_LIMITSCANS), readJPG does too.
+static const int s_JPGMaxScans = 500;
+
+static void jpgProgressMonitor(j_common_ptr cinfo)
+{
+	if (cinfo->is_decompressor && ((j_decompress_ptr)cinfo)->input_scan_number > s_JPGMaxScans)
+	{
+		nlwarning("JPEG: more than %d scans", s_JPGMaxScans);
+		longjmp(((my_error_mgr *)cinfo->err)->setjmp_buffer, 1);
+	}
+}
+
+// The source of one decompression: the stream and the buffer it is read into. They were statics shared by every
+// decompression, which a texture loading thread can run beside the main thread.
+struct CJPGSource
+{
+	jpeg_source_mgr Pub; // first, libjpeg only knows the source as cinfo->src
+	NLMISC::IStream *Stream;
+	uint32 StreamSize;
+	JOCTET Buffer[JPGBufferSize];
+};
+
 static void jpgDecompressInit(j_decompress_ptr cinfo)
 {
+	CJPGSource *src = (CJPGSource *)cinfo->src;
+
 	// get stream size if possible
-	if (JPGStream->seek(0, IStream::end))
-		JPGStreamSize = JPGStream->getPos();
+	if (src->Stream->seek(0, IStream::end))
+		src->StreamSize = src->Stream->getPos();
 	else
 		nlwarning("can't get JPEG stream size");
 
 	// reset current position to the beginning
-	JPGStream->seek(0, IStream::begin);
+	src->Stream->seek(0, IStream::begin);
 
-	cinfo->src->next_input_byte = (unsigned char *)JPGBuffer;
-	cinfo->src->bytes_in_buffer = 0;
+	src->Pub.next_input_byte = src->Buffer;
+	src->Pub.bytes_in_buffer = 0;
 }
 
 static boolean jpgDecompressFill(j_decompress_ptr cinfo)
 {
-	uint length = std::min(JPGBufferSize, JPGStreamSize - JPGStream->getPos());
+	CJPGSource *src = (CJPGSource *)cinfo->src;
 
-	try
+	uint32 pos = (uint32)src->Stream->getPos();
+	uint32 length = pos < src->StreamSize ? std::min(JPGBufferSize, src->StreamSize - pos) : 0;
+	if (length > 0)
 	{
-		JPGStream->serialBuffer((uint8*) JPGBuffer, length);
-	}
-	catch(...)
-	{
-		nlwarning("error while reading JPEG image");
-		cinfo->src->next_input_byte = (unsigned char *)JPGBuffer;
-		cinfo->src->bytes_in_buffer = 0;
-		return FALSE;
+		try
+		{
+			src->Stream->serialBuffer((uint8 *)src->Buffer, length);
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			nlwarning("error while reading JPEG image: %s", e.what());
+			length = 0;
+		}
+		catch (...)
+		{
+			// no exception may unwind through libjpeg
+			nlwarning("error while reading JPEG image");
+			length = 0;
+		}
 	}
 
-	cinfo->src->next_input_byte = (unsigned char *)JPGBuffer;
-	cinfo->src->bytes_in_buffer = length;
+	if (length == 0)
+	{
+		// The end of the data: libjpeg's convention is to warn and insert an end of image marker, which ends the image.
+		// An empty buffer returned as filled made libjpeg read past it.
+		WARNMS(cinfo, JWRN_JPEG_EOF);
+		src->Buffer[0] = (JOCTET)0xff;
+		src->Buffer[1] = (JOCTET)JPEG_EOI;
+		length = 2;
+	}
+
+	src->Pub.next_input_byte = src->Buffer;
+	src->Pub.bytes_in_buffer = length;
 	return TRUE;
 }
 
@@ -107,6 +160,8 @@ static void jpgDecompressSkip(j_decompress_ptr cinfo, long num_bytes)
 {
 	if (num_bytes > 0)
 	{
+		// past the end of the data, each fill brings the 2 bytes of an end of image marker: this ends (it looped forever
+		// when the fill brought nothing)
 		while (num_bytes > (long) cinfo->src->bytes_in_buffer)
 		{
 			num_bytes -= (long) cinfo->src->bytes_in_buffer;
@@ -122,13 +177,10 @@ static void jpgDecompressTerm(j_decompress_ptr /* cinfo */)
 {
 }
 
-static jpeg_source_mgr jpgSourceManager = { nullptr, 0,
-	jpgDecompressInit, jpgDecompressFill, jpgDecompressSkip, jpeg_resync_to_restart, jpgDecompressTerm };
-
 /*-------------------------------------------------------------------*\
 							readJPG
 \*-------------------------------------------------------------------*/
-uint8 CBitmap::readJPG( NLMISC::IStream &f )
+uint8 CBitmap::readJPG(NLMISC::IStream &f, uint32 maxSize)
 {
 	if(!f.isReading()) return false;
 
@@ -138,26 +190,49 @@ uint8 CBitmap::readJPG( NLMISC::IStream &f )
 	struct my_error_mgr jerr;
 	cinfo.err = jpeg_std_error(&jerr.pub);
 	jerr.pub.error_exit = my_error_exit;
+	jerr.pub.output_message = jpgOutputMessage;
+
+	// set the stream to read from
+	CJPGSource source;
+	source.Pub.next_input_byte = nullptr;
+	source.Pub.bytes_in_buffer = 0;
+	source.Pub.init_source = jpgDecompressInit;
+	source.Pub.fill_input_buffer = jpgDecompressFill;
+	source.Pub.skip_input_data = jpgDecompressSkip;
+	source.Pub.resync_to_restart = jpeg_resync_to_restart;
+	source.Pub.term_source = jpgDecompressTerm;
+	source.Stream = &f;
+	source.StreamSize = 0;
 
 	if (setjmp(jerr.setjmp_buffer))
 	{
 		jpeg_destroy_decompress(&cinfo);
-		nlwarning("failed to setjump");
+		nlwarning("Error while reading JPEG '%s'", f.getStreamName().c_str());
 		return 0;
 	}
 
-	// set the stream to read from
-	JPGStream = &f;
-
 	// init decompress
 	jpeg_create_decompress(&cinfo);
-	cinfo.src = &jpgSourceManager;
+	cinfo.src = &source.Pub;
+
+	jpeg_progress_mgr progress;
+	memset(&progress, 0, sizeof(progress));
+	progress.progress_monitor = jpgProgressMonitor;
+	cinfo.progress = &progress;
 
 	// read header of image
 	if (jpeg_read_header(&cinfo, TRUE) != JPEG_HEADER_OK)
 	{
 		jpeg_destroy_decompress(&cinfo);
 		nlwarning("failed to read header");
+		return 0;
+	}
+
+	if (cinfo.image_width > maxSize || cinfo.image_height > maxSize)
+	{
+		nlwarning("The JPEG image '%s' of %ux%u is larger than %u pixels a side", f.getStreamName().c_str(),
+		    (uint)cinfo.image_width, (uint)cinfo.image_height, maxSize);
+		jpeg_destroy_decompress(&cinfo);
 		return 0;
 	}
 
@@ -215,8 +290,6 @@ uint8 CBitmap::readJPG( NLMISC::IStream &f )
 		nlwarning("failed to finish decompressing");
 
 	jpeg_destroy_decompress(&cinfo);
-
-	JPGStream = nullptr;
 
 	return uint8(srcChannels * 8);
 }
@@ -345,7 +418,7 @@ bool CBitmap::writeJPG( NLMISC::IStream &/* f */, uint8 /* quality */)
 	return false;
 }
 
-uint8 CBitmap::readJPG( NLMISC::IStream &/* f */)
+uint8 CBitmap::readJPG(NLMISC::IStream & /* f */, uint32 /* maxSize */)
 {
 	nlwarning ("You must compile NLMISC with USE_JPEG if you want jpeg support");
 	return 0;

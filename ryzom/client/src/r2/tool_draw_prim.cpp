@@ -71,7 +71,7 @@ CToolDrawPrim::CToolDrawPrim(TPrimType primType, CInstance *extending /*= NULL*/
 bool CToolDrawPrim::canTerminate() const
 {
 	//H_AUTO(R2_CToolDrawPrim_canTerminate)
-	return ((_PrimType == Road && _NumPoints >= 1) || _NumPoints >= 3) && _ValidPrim;
+	return _NumPoints >= (uint)(_PrimType == Road ? RoadMinNumPoints : RegionMinNumPoints) && _ValidPrim;
 }
 
 // ***************************************************************
@@ -308,7 +308,7 @@ void CToolDrawPrim::doUpdateBeforeRender()
 	// If there are at least 3 vertices and the primitive is a region, then see whether mouse
 	// is near the first vertex -> in this case, propose to the user to close the primitive
 	// If landscape is intersected too, then the vertex must be nearer then the first vertex
-	if (_PrimType == Region && _NumPoints >= 3)
+	if (_PrimType == Region && _NumPoints >= (uint)RegionMinNumPoints)
 	{
 		bool canClose = false;
 		CGroupMap *gm = isMouseOnWorldMap();

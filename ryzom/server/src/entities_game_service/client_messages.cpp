@@ -28,14 +28,17 @@
 #include "nel/misc/common.h"
 //game_share
 #include "game_share/generic_xml_msg_mngr.h"
+#include "game_share/chat_message.h"
 #include "game_share/sphrase_com.h"
 #include "game_share/security_check.h"
 #include "server_share/log_item_gen.h"
+#include "server_share/used_continent.h"
 //egs
 #include "client_messages.h"
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
 #include "player_manager/character.h"
+#include "world_instances.h"
 #include "entity_manager/entity_callbacks.h"
 #include "phrase_manager/phrase_manager_callbacks.h"
 #include "zone_manager.h"
@@ -59,6 +62,8 @@
 #include "modules/r2_give_item.h"
 #include "game_share/scenario.h"
 #include "server_share/r2_vision.h"
+#include "server_share/client_text.h"
+#include "server_share/client_refusal.h"
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -67,6 +72,270 @@ using namespace std;
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
 CVariable<bool> BuildSpireActive( "egs", "BuildSpireActive", "Activate build spire", true, 0, true );
+
+//----------------------------
+//	buildChatPosition
+//
+//----------------------------
+static bool buildChatPosition(CCharacter *character, CChatMessagePosition &position, const CChatMessagePosition *requested = nullptr)
+{
+	position.X = requested ? requested->X : character->getState().X();
+	position.Y = requested ? requested->Y : character->getState().Y();
+	CMirrorPropValueRO<TYPE_CELL> cell(TheDataset, character->getEntityRowId(), DSPropertyCELL);
+	if ((!requested && cell() <= -2) || IsRingShard)
+		return false;
+
+	float gooDistance;
+	const CPlace *stable = nullptr;
+	const CRegion *region = nullptr;
+	const CContinent *continent = nullptr;
+	std::vector<const CPlace *> places;
+	CZoneManager::getInstance().getPlace(position.X, position.Y, gooDistance, &stable, places, &region, &continent);
+	if (region)
+		position.Region = region->getName();
+	if (continent)
+		position.Continent = continent->getName();
+	if (requested)
+	{
+		// Requests name the continent like the client maps ("fyros"), Continent holds its place name.
+		if (!continent || (!requested->Continent.empty() && toLowerAscii(CUsedContinent::instance().getPhysicalContinentName(requested->Continent)) != toLowerAscii(CUsedContinent::instance().getPhysicalContinentName(toLowerAscii(CONTINENT::toString((CONTINENT::TContinent)continent->getId()))))))
+			return false;
+		const uint32 instanceId = CUsedContinent::instance().getInstanceForContinent((CONTINENT::TContinent)continent->getId());
+		if (instanceId == INVALID_AI_INSTANCE || CWorldInstances::instance().getAISId(instanceId) == TServiceId(0))
+			return false;
+		position.Kind = requested->Kind;
+		position.FlagName = requested->FlagName;
+		position.FlagColor = requested->FlagColor;
+	}
+
+	const CPlace *selected = nullptr;
+	double selectedArea = 0;
+	for (uint i = 0; i < places.size(); ++i)
+	{
+		const CPlace *place = places[i];
+		std::string displayed;
+		if (place->getName().empty() || place->isGooPath() || (place->getPropertyByName("displayed", displayed) && displayed != "true"))
+			continue;
+		double area = 0;
+		for (uint j = 0; j < place->VPoints.size(); ++j)
+		{
+			const CVector &a = place->VPoints[j];
+			const CVector &b = place->VPoints[(j + 1) % place->VPoints.size()];
+			area += double(a.x) * b.y - double(b.x) * a.y;
+		}
+		area = fabs(area);
+		if (!selected || area < selectedArea || (area == selectedArea && place->getName() < selected->getName()))
+		{
+			selected = place;
+			selectedArea = area;
+		}
+	}
+	position.Place = selected ? selected->getName() : position.Region;
+	if (position.Place.empty())
+		position.Place = position.Continent;
+	return !position.Place.empty();
+}
+
+//----------------------------
+//	buildChatPhrase
+//
+//----------------------------
+static bool buildChatPhrase(CCharacter *character, const CChatMessageReference &reference, CChatMessagePhrase &phrase)
+{
+	if (reference.Type == CChatMessageReference::PhraseSheet)
+	{
+		phrase.SheetId = CSheetId(reference.Value);
+		const CAllRolemasterPhrases &phrases = CSheets::getSRolemasterPhrasesMap();
+		CAllRolemasterPhrases::const_iterator it = phrases.find(phrase.SheetId);
+		return it != phrases.end() && it->second.IsRolemasterPhrase && phrase.SheetId.toString().find("saiphrase") == std::string::npos;
+	}
+
+	const std::vector<CKnownPhrase> &knownPhrases = character->getKnownPhrases();
+	if (reference.Value >= knownPhrases.size() || knownPhrases[reference.Value].empty())
+		return false;
+	const CKnownPhrase &knownPhrase = knownPhrases[reference.Value];
+	phrase.SheetId = knownPhrase.PhraseSheetId;
+	if (phrase.SheetId != CSheetId::Unknown)
+		return true;
+
+	// Custom phrases carry their bricks; only share bricks the character knows.
+	const std::set<CSheetId> &knownBricks = character->getKnownBricks();
+	for (std::vector<CSheetId>::const_iterator brick = knownPhrase.PhraseDesc.Bricks.begin();
+		brick != knownPhrase.PhraseDesc.Bricks.end(); ++brick)
+	{
+		if (knownBricks.find(*brick) == knownBricks.end())
+			return false;
+	}
+	if (!CPhraseManager::getInstance().checkPhraseValidity(knownPhrase.PhraseDesc.Bricks))
+		return false;
+	phrase.Phrase = knownPhrase.PhraseDesc;
+	return true;
+}
+
+//----------------------------
+//	buildChatPart
+//
+//----------------------------
+static bool buildChatPart(CCharacter *character, const CChatMessageReference &reference, CChatMessagePart &part)
+{
+	switch (reference.Type)
+	{
+	case CChatMessageReference::Item:
+		part.Type = CChatMessagePart::Item;
+		return character->buildItemInfos(reference.Value, part.ItemValue, false);
+	case CChatMessageReference::KnownPhrase:
+	case CChatMessageReference::PhraseSheet:
+		part.Type = CChatMessagePart::Phrase;
+		return buildChatPhrase(character, reference, part.PhraseValue);
+	case CChatMessageReference::Position:
+		part.Type = CChatMessagePart::Position;
+		return buildChatPosition(character, part.PositionValue);
+	case CChatMessageReference::MapPosition:
+		part.Type = CChatMessagePart::Position;
+		return buildChatPosition(character, part.PositionValue, &reference.PositionValue);
+	case CChatMessageReference::Macro:
+		// Macros are client data; the receiver reviews them before saving.
+		part.Type = CChatMessagePart::Macro;
+		part.MacroValue = reference.MacroValue;
+		return true;
+	case CChatMessageReference::Reaction:
+		// The IOS checks the reacted message against its history.
+		part.Type = CChatMessagePart::Reaction;
+		part.ReactionValue = reference.ReactionValue;
+		return true;
+	default:
+		return false;
+	}
+}
+
+//----------------------------
+//	buildSharedMessage
+//
+//----------------------------
+static bool buildSharedMessage(CCharacter *character, const CChatMessageRequest &request, CChatMessage &message)
+{
+	if (!request.isValid())
+		return false;
+	// Group mentions stay in the text; the other references become parts.
+	std::vector<uint32> partStarts;
+	uint32 textPosition = 0;
+	for (std::vector<CChatMessageReference>::const_iterator it = request.References.begin();
+		it != request.References.end(); ++it)
+	{
+		if (it->Type == CChatMessageReference::Mention)
+			continue;
+		if (it->Start > textPosition)
+		{
+			CChatMessagePart text;
+			text.TextValue = request.Text.substr(textPosition, it->Start - textPosition);
+			message.Parts.push_back(text);
+			partStarts.push_back(textPosition);
+		}
+		CChatMessagePart part;
+		if (!buildChatPart(character, *it, part))
+			return false;
+		message.Parts.push_back(part);
+		partStarts.push_back(it->Start);
+		textPosition = it->Start + it->Length;
+	}
+	if (textPosition < request.Text.size())
+	{
+		CChatMessagePart text;
+		text.TextValue = request.Text.substr(textPosition);
+		message.Parts.push_back(text);
+		partStarts.push_back(textPosition);
+	}
+	for (std::vector<CChatMessageReference>::const_iterator it = request.References.begin();
+		it != request.References.end(); ++it)
+	{
+		if (it->Type != CChatMessageReference::Mention)
+			continue;
+		// @all needs account privileges, like the other privileged chat features.
+		if (it->Value == CChatMessageMention::All)
+		{
+			CPlayer *player = PlayerManager.getPlayer(PlayerManager.getPlayerId(character->getId()));
+			if (!player || player->getUserPriv().empty())
+				continue;
+		}
+		uint part = 0;
+		while (part < message.Parts.size() && (message.Parts[part].Type != CChatMessagePart::Text || it->Start < partStarts[part] || it->Start + it->Length > partStarts[part] + message.Parts[part].TextValue.size()))
+			++part;
+		if (part == message.Parts.size())
+			return false;
+		CChatMessageMention mention;
+		mention.Scope = (CChatMessageMention::TScope)it->Value;
+		mention.Part = (uint8)part;
+		mention.Start = (uint16)(it->Start - partStarts[part]);
+		mention.Length = it->Length;
+		message.Mentions.push_back(mention);
+	}
+	return message.isValid();
+}
+
+//----------------------------
+//	rejectClientChatShare
+//
+//----------------------------
+static void rejectClientChatShare(const CEntityId &sender, const CChatMessageRequest &request)
+{
+	if (request.ClientRequestId != 0)
+		PlayerManager.sendImpulseToClient(sender, "STRING:CHAT_SHARE_RESULT", request.ClientRequestId, false);
+}
+
+//----------------------------
+//	cbClientChatShare
+//
+//----------------------------
+void cbClientChatShare(CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	if (msgin.length() > CHAT_MESSAGE::MaxSerializedSize)
+		return;
+	CEntityId sender;
+	uint8 chatMode;
+	CEntityId dynamicChannelId;
+	std::string receiver;
+	CChatMessageRequest request;
+	try
+	{
+		msgin.serial(sender);
+		msgin.serial(chatMode);
+		msgin.serial(dynamicChannelId);
+		msgin.serial(receiver);
+		msgin.serial(request);
+	}
+	catch (const Exception &e)
+	{
+		nlwarning("<cbClientChatShare> Bad message: %s", e.what());
+		return;
+	}
+
+	CCharacter *character = PlayerManager.getChar(sender);
+	if (!character || !character->getEnterFlag())
+		return;
+	CChatMessage message;
+	if (chatMode >= CChatGroup::nbChatMode || !CHAT_MESSAGE::isValidTarget((CChatGroup::TGroupType)chatMode, dynamicChannelId, receiver) || !buildSharedMessage(character, request, message))
+	{
+		rejectClientChatShare(sender, request);
+		return;
+	}
+	message.Quote.MessageId = request.QuoteMessageId;
+
+	character->setAfkState(false);
+	CMessage msgout("CHAT_SHARE");
+	msgout.serial(sender);
+	msgout.serial(chatMode);
+	msgout.serial(dynamicChannelId);
+	msgout.serial(receiver);
+	msgout.serial(request.ClientRequestId);
+	msgout.serial(message);
+	if (msgout.length() > CHAT_MESSAGE::MaxSerializedSize)
+	{
+		nlwarning("<cbClientChatShare> Shared message is too large");
+		rejectClientChatShare(sender, request);
+		return;
+	}
+	CUnifiedNetwork::getInstance()->send("IOS", msgout);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,6 +480,41 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 		nlwarning("<cbItemDestroy> player Id %s not yet ready", user.toString().c_str() );
 		return;
 	}
+
+	// the client offers no destroy in the guild inventory, whose items only leave through the guild's grade checks
+	if (inventory == INVENTORIES::guild)
+	{
+		nlwarning("<cbItemDestroy> player %s tried to destroy slot %u of the guild inventory, refused", user.toString().c_str(), slot);
+		return;
+	}
+
+	// The client offers destroy in the bag, the room and the pack animals, and names the bag for an item that is held
+	// or worn. The hands and the equipment only refer to items of the bag (destroyItem refuses them), and the client
+	// can name them when the item leaves its slot while the confirmation is open: a warning, no more.
+	if (inventory != INVENTORIES::bag && inventory != INVENTORIES::player_room && (inventory < INVENTORIES::pet_animal || inventory >= INVENTORIES::max_pet_animal))
+	{
+		nlwarning("<cbItemDestroy> player %s tried to destroy slot %u of inventory %u, refused", user.toString().c_str(), slot, (uint)inventory);
+		return;
+	}
+
+	// the client offers no destroy for an item its owner has locked, where it sees the lock: only the bag and the
+	// pack animals send their RESALE_FLAG, and a locked item moved to the apartment shows unlocked there
+	bool lockShown = inventory == INVENTORIES::bag || (inventory >= INVENTORIES::pet_animal1 && inventory < INVENTORIES::max_pet_animal);
+	CInventoryPtr inv = lockShown ? character->getInventory(INVENTORIES::TInventory(inventory)) : NULL;
+	if (inv != NULL && slot < inv->getSlotCount())
+	{
+		CGameItemPtr item = inv->getItem(slot);
+		if (item != NULL && item->getLockedByOwner())
+		{
+			nlwarning("HACK: %s sent ITEM:DESTROY for a locked item (inventory %u, slot %u), refused", user.toString().c_str(), (uint)inventory, (uint)slot);
+			reportRefusedClientMessage(user);
+			return;
+		}
+	}
+
+	// the room and the pack animals must be within reach, as for moving an item, where the client grays the entry
+	if (!character->isInventoryWithinReach(INVENTORIES::TInventory(inventory), "cbItemDestroy"))
+		return;
 
 	character->setAfkState(false);
 	character->destroyItem( INVENTORIES::TInventory(inventory), slot, quantity, true );
@@ -371,9 +675,18 @@ void cbClientItemEnchant( CMessage& msgin, const std::string &serviceName, NLNET
 		nlwarning("<cbClientItemEnchant> player Id %s not yet ready", user.toString().c_str() );
 		return;
 	}
+	// The client offers enchant and recharge in the bag, the room and the pack animals only (item_menu_in_bag, not in
+	// the guild inventory, which would consume a guild crystal)
+	if (inv != INVENTORIES::bag && inv != INVENTORIES::player_room && (inv < INVENTORIES::pet_animal || inv >= INVENTORIES::max_pet_animal))
+	{
+		nlwarning("HACK: <cbClientItemEnchant> player %s tried to use slot %u of inventory %u, refused", user.toString().c_str(), (uint)slot, (uint)inv);
+		reportRefusedClientMessage(user);
+		return;
+	}
 	// if player is dead or stunned don't reload or enchant
 	if (character->isDead() || character->isStunned())
 		return;
+
 	character->enchantOrRechargeItem( (INVENTORIES::TInventory) inv, slot );
 	character->setAfkState(false);
 }
@@ -543,6 +856,29 @@ void cbClientPhraseExecuteFaber( NLNET::CMessage& msgin, const std::string &serv
 		return;
 	}
 
+	// the brick must be a craft plan: only the bricks of the plan families carry what the craft reads (the materials,
+	// the item made). The client names the plan of its craft window.
+	const CStaticBrick *planBrick = CSheets::getSBrickForm( craftPlan );
+	if ( planBrick == NULL || planBrick->Faber == NULL )
+	{
+		nlwarning("HACK: %s sent EXECUTE_FABER with the brick %s, which is not a craft plan, refused", Id.toString().c_str(), craftPlan.toString().c_str());
+		reportRefusedClientMessage(Id);
+		return;
+	}
+
+	// A craft in progress consumes the materials selected for it when it ends, and the phrase manager refuses a
+	// second craft only after the lists below are replaced, so they are left alone. The phrase is still executed:
+	// the phrase manager refuses it and acknowledges the client's execution counter, which the client has already
+	// increased (the craft window stays open during a craft, so this is an ordinary second click).
+	const CEntityPhrases *entityPhrases = CPhraseManager::getInstance().getEntityPhrases( ch->getEntityRowId() );
+	if ( entityPhrases != NULL && entityPhrases->getCurrentActionConst() != NULL && entityPhrases->getCurrentActionConst()->getType() == BRICK_TYPE::FABER )
+	{
+		nldebug("player %s sent EXECUTE_FABER while a craft is in progress, its materials are kept", Id.toString().c_str() );
+		ch->executeMemorizedPhrase( set, slot, false,false );
+		ch->setAfkState(false);
+		return;
+	}
+
 	ch->abortExchange();
 
 	ch->setCraftPlan( craftPlan );
@@ -672,6 +1008,20 @@ void cbClientPhraseLearn( NLNET::CMessage& msgin, const std::string &serviceName
 	{
 		nlwarning("<cbClientPhraseLearn> player Id %s not yet ready", Id.toString().c_str() );
 		return;
+	}
+
+	// The name comes from the client and is saved with the character. The phrase editor allows 20 characters and the
+	// longest localized phrase name is under 100, so a longer one is cut (not refused: the client already has the
+	// phrase in its action book and memorizes it next)
+	static const ucstring::size_type MaxPhraseNameLength = 255;
+	if (phrase.Name.size() > MaxPhraseNameLength)
+	{
+		nlwarning("<cbClientPhraseLearn> player %s sent a name of %u characters for phrase %u, cut to %u",
+			Id.toString().c_str(), (uint)phrase.Name.size(), (uint)phraseId, (uint)MaxPhraseNameLength);
+		ucstring::size_type length = MaxPhraseNameLength;
+		if (phrase.Name[length - 1] >= 0xD800 && phrase.Name[length - 1] <= 0xDBFF)
+			--length; // do not keep half of a surrogate pair
+		phrase.Name.resize(length);
 	}
 
 	ch->learnPhrase( phrase.Bricks, phraseId, phrase.Name, phrase.IconIndex );
@@ -2014,6 +2364,17 @@ void cbClientBotChatEnd( NLNET::CMessage& msgin, const std::string &serviceName,
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+// The behaviour of an emote comes from the client, which sends IDLE or one of the emote animations; the firework
+// animations in that range are played by firework items, not by emotes
+static bool isClientEmoteBehaviour( MBEHAV::EBehaviour behaviour )
+{
+	if ( behaviour == MBEHAV::IDLE )
+		return true;
+	if ( behaviour < MBEHAV::EMOTE_BEGIN || behaviour > MBEHAV::EMOTE_END )
+		return false;
+	return !( behaviour >= (MBEHAV::EMOTE_BEGIN + 80) && behaviour <= (MBEHAV::EMOTE_BEGIN + 109) );
+}
+
 // client send an emote
 void cbClientSendEmote( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -2032,6 +2393,13 @@ void cbClientSendEmote( NLNET::CMessage& msgin, const std::string &serviceName, 
 	catch(const Exception &e)
 	{
 		nlwarning("Bad emote serialisation '%s'", e.what());
+		return;
+	}
+
+	if ( !isClientEmoteBehaviour( behaviour ) )
+	{
+		string name = CEntityIdTranslator::getInstance()->getByEntity(id).toString();
+		nlwarning("HACK: %s %s sent emote behaviour %d, which is no emote animation", id.toString().c_str(), name.c_str(), behaviour);
 		return;
 	}
 
@@ -2080,10 +2448,13 @@ void cbClientSendCustomEmote( NLNET::CMessage& msgin, const std::string &service
 		return;
 	}
 
-	if (behaviour >= (MBEHAV::EMOTE_BEGIN + 80) && behaviour <= (MBEHAV::EMOTE_BEGIN + 109))
+	if (refuseClientTextTooLong(id, "COMMAND:CUSTOM_EMOTE", emoteCustomText, serviceId))
+		return;
+
+	if ( !isClientEmoteBehaviour( behaviour ) )
 	{
 		string name = CEntityIdTranslator::getInstance()->getByEntity(id).toString();
-		nlwarning("HACK: %s %s tries to launch a firework %d", id.toString().c_str(), name.c_str(), behaviour);
+		nlwarning("HACK: %s %s sent custom emote behaviour %d, which is no emote animation", id.toString().c_str(), name.c_str(), behaviour);
 		return;
 	}
 
@@ -2246,6 +2617,9 @@ void cbClientGuildMotd( NLNET::CMessage& msgin, const std::string &serviceName, 
 	string motd;
 	msgin.serial( entityId );
 	msgin.serial( motd );
+
+	if (refuseClientTextTooLong(entityId, "COMMAND:GUILDMOTD", ucstring::makeFromUtf8(motd), serviceId))
+		return;
 
 	CCharacter * user = PlayerManager.getChar( entityId );
 	if (!user)
@@ -2880,7 +3254,12 @@ void cbClientSetCharacterTitle( NLNET::CMessage& msgin, const std::string & serv
 		return;
 	}
 
-	if ( title == uint8(CHARACTER_TITLE::FBT) )
+	if ( (uint)title >= (uint)CHARACTER_TITLE::NB_CHARACTER_TITLE )
+	{
+		nlwarning("<cbClientSetCharacterTitle> user %s sent title %u, there are %u", eId.toString().c_str(), (uint)title, (uint)CHARACTER_TITLE::NB_CHARACTER_TITLE);
+		return;
+	}
+	else if ( title == uint8(CHARACTER_TITLE::FBT) )
 	{
 		if ( !p->isBetaTester() )
 			return;
@@ -2965,6 +3344,12 @@ void cbClientCompassEnableDynamic( NLNET::CMessage& msgin, const std::string & s
 	msgin.serial(userId);
 	msgin.serial(compressedIndex);
 
+	// the index comes from the client and getCurrentDataSetRow() uses it to index the dataset without a check
+	if ( compressedIndex >= (uint32)TheDataset.maxNbRows() )
+	{
+		nlwarning("<cbClientCompassEnableDynamic> user %s sent entity index %u, the dataset has %u rows", userId.toString().c_str(), compressedIndex, (uint32)TheDataset.maxNbRows());
+		return;
+	}
 	TDataSetRow index = TheDataset.getCurrentDataSetRow( compressedIndex );
 	if ( ! TheDataset.isAccessible(index) )
 	{
@@ -3188,7 +3573,7 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 			CGuildMember * gm = guild->getMemberFromEId(charId);
 			if( gm == NULL )
 			{
-				nlwarning("<cbClientPvPSetNeutralAllegianceGuild> Player Character %s is not a member of his guild", charId.toString().c_str());
+				nlwarning("<cbClientPvPSetNeutralAllegianceGuild> %s is not a member of guild %u", charId.toString().c_str(), c->getGuildId());
 				return;
 			}
 			if( gm->getGrade() == EGSPD::CGuildGrade::Leader )
@@ -3202,7 +3587,7 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 		}
 		else
 		{
-			nlwarning("<cbClientPvPSetNeutralAllegianceGuild> Player Character % have no guild", charId.toString().c_str());
+			nlwarning("<cbClientPvPSetNeutralAllegianceGuild> Player Character %s has no guild", charId.toString().c_str());
 		}
 	}
 	else
@@ -3213,6 +3598,15 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+// The secret the shard unifier's ring session manager makes the fast-disconnection codes with, chosen at random when it
+// starts and received from its entity locator (CShardUnifierClient): empty until then, and the bypass is refused.
+std::string FastDisconnectionSecret;
+
+// The login cookies, by user id, that a fast-disconnection code was refused for. The code has 16 bits and the session
+// id comes from the client, so one wrong code ends fast disconnection until the next account login: the cookie the
+// code is made from only changes then, far TPs and reconnections keep it.
+static std::map<uint32, NLNET::CLoginCookie> FastDisconnectionRefusedCookies;
+
 void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId )
 {
 	CEntityId charId;
@@ -3311,6 +3705,7 @@ void cbClientReturnToMainland( NLNET::CMessage& msgin, const std::string & servi
 /// -1: Invalid inventory
 /// -2: Invalid slot
 /// -3: Empty slot
+/// -4: The item is held in an inventory the character's inventory updater does not keep (no info version to raise)
 sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text)
 {
 	if (inventory==INVENTORIES::UNDEFINED)
@@ -3332,9 +3727,20 @@ sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInvento
 	}
 
 	CGameItemPtr item = invent->getItem(slot);
+
+	// The client re-fetches the item info when the info version of the slot that holds the item changes: an equipped
+	// item is held in the bag, and the inventories the character's inventory updater does not keep (the guild's, whose
+	// versions are the guild's) have none to change
+	CInventoryPtr holder = item->getInventory();
+	INVENTORIES::TInventory holderId = holder != NULL ? holder->getInventoryId() : INVENTORIES::UNDEFINED;
+	if (holderId >= INVENTORIES::NUM_ALL_INVENTORY || !character->_InventoryUpdater.isCompatibleWithInventory(holderId))
+	{
+		return -4;
+	}
+
 	item->setCustomText(text);
 	// Following line was commented out by trap, reason unknown
-	character->incSlotVersion(inventory, slot);
+	character->incSlotVersion(holderId, item->getInventorySlot()); // this ensures re-fetch of info window, unusual case
 
 	return 0;
 }
@@ -3354,6 +3760,14 @@ void cbClientEventSetItemCustomText( NLNET::CMessage& msgin, const std::string &
 
 	CCharacter* character = PlayerManager.getChar(eid);
 	if(!character) return;
+
+	// the client offers text edition in the bag only, to the crafter and to privileged players alike
+	if (inventory != INVENTORIES::bag)
+	{
+		string name = CEntityIdTranslator::getInstance()->getByEntity(eid).toString();
+		nlwarning("HACK: %s %s tries to set custom text on slot %u of inventory %u, which is not the bag", eid.toString().c_str(), name.c_str(), (uint)slot, (uint)inventory);
+		return;
+	}
 
 	if (!character->havePriv(":DEV:SGM:GM:EM:"))
 	{
@@ -3547,7 +3961,7 @@ void cbRingMissionSelectAction( NLNET::CMessage& msgin, const std::string & serv
 	CCharacter *ch = PlayerManager.getChar( eid );
 	if( ch )
 	{
-		CR2GiveItem::getInstance().giveItemGranted( ch->getTargetDataSetRow(), actionId );
+		CR2GiveItem::getInstance().giveItemGranted( ch->getTargetDataSetRow(), ch->getEntityRowId(), actionId );
 	}
 }
 
@@ -3578,6 +3992,7 @@ void cbGetNpcIconDesc( NLNET::CMessage& msgin, const std::string & serviceName, 
 //----------------------------
 TUnifiedCallbackItem CbClientArray[]=
 {
+	{ "CLIENT:STRING:CHAT_SHARE",			cbClientChatShare },
 	{ "CLIENT:CONNECTION:CLIENT_QUIT_REQUEST",	cbClientQuitGameRequest },
 	{ "RET_MAINLAND",							cbClientReturnToMainland },
 

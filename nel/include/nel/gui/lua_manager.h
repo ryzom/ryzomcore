@@ -50,6 +50,25 @@ namespace NLGUI
 
 		/// Enables attaching the Lua debugger in the CLuaState instance, only matters on startup.
 		static void enableLuaDebugging(){ debugLua = true;	}
+		/// the next Lua state gets the full standard libraries (io, package, os, debug); development builds only
+		static void enableDevelopmentLibraries(){ developmentLibraries = true; }
+
+		/** Reporter of script errors.
+		  * The library only has the log. The application installs a reporter that can show the error to the UI
+		  * script author (system info window, goto-line button, the script lines around the error); without one
+		  * the error is written to the log with nlwarning.
+		  */
+		class IScriptErrorReporter
+		{
+		public:
+			virtual ~IScriptErrorReporter() {}
+			/// error is the Lua error text; luaScript is the script that failed when known, empty for a file that failed to load
+			virtual void onScriptError(const std::string &error, const std::string &luaScript) = 0;
+		};
+		static void setScriptErrorReporter(IScriptErrorReporter *reporter);
+		static IScriptErrorReporter *getScriptErrorReporter();
+		/// Reports a script error through the installed reporter, or with nlwarning when there is none.
+		static void reportScriptError(const std::string &error, const std::string &luaScript = std::string());
 
 		/// Returns the Lua state.
 		NLGUI::CLuaState* getLuaState() const{ return luaState; }
@@ -61,11 +80,18 @@ namespace NLGUI
 		 */
 		bool executeLuaScript( const std::string &luaScript, bool smallScript = false );
 
+		/**
+		 * Calls the Lua method tableName:functionName(argument) with one string argument. The text is a value on the
+		 * stack, never part of a script, so nothing in it needs escaping. A missing table or function and a Lua error are
+		 * reported through reportScriptError. Returns false when the call did not run or failed.
+		 */
+		bool callMethod(const char *tableName, const char *functionName, const std::string &argument);
+
 		/// Resets the Lua state, that is deallocates it and allocates a new one.
 		void ResetLuaState();
 
-		/// Forces the Garbage Collector to run.
-		void forceGarbageCollect();
+		/// Forces the Garbage Collector to run. Returns the memory in use afterwards, in Kb.
+		uint forceGarbageCollect();
 
 		static void setEditorMode( bool b ){ editorMode = b; }
 
@@ -75,6 +101,7 @@ namespace NLGUI
 
 		static CLuaManager *instance;
 		static bool debugLua;
+		static bool developmentLibraries;
 		static bool editorMode;
 
 		NLGUI::CLuaState *luaState;

@@ -61,8 +61,6 @@ extern CActionsManager			Actions;		// Actions Manager.
 ////////////
 bool							MouseHardware = false;
 bool							MouseFreeLook = false;
-float							MouseCursorSpeed = 1.f;
-uint							MouseCursorAcceleration = 0;
 bool							InitMouseFirstTime = true;
 bool							SetMousePosFirstTime = true;
 
@@ -89,6 +87,7 @@ bool	InitMouseWithCursor (bool hardware)
 	Driver->showCursor(false);
 
 	// Get the new mouse state
+	bool cursorKindChanged = hardware != MouseHardware;
 	MouseHardware = hardware;
 	CViewPointer::setHWMouse( hardware );
 
@@ -111,14 +110,24 @@ bool	InitMouseWithCursor (bool hardware)
 				// First, hide the hardware mouse
 				uint width = Driver->getWindowWidth();
 				uint height = Driver->getWindowHeight();
+				bool cursorMoved = false;
 				if (SetMousePosFirstTime)
 				{
 					SetMousePosFirstTime = false;
 				}
-				else if (width != 0 && height != 0)
+				else if ((cursorKindChanged || !hardware) && width != 0 && height != 0)
 				{
-					nlwarning("Mouse pos %f, %f", x, y);
+					// the cursor of the other kind appears where the pointer of the interface is, and the
+					// hidden system cursor of a software cursor stays under the pointer that is drawn. A
+					// hardware cursor that was one already stays where the player has it: after a loading
+					// screen the pointer is the stale one (it saw no mouse move)
 					Driver->setMousePos(x / width, y / height);
+					cursorMoved = true;
+				}
+				if (!cursorMoved)
+				{
+					// the next mouse move brings the pointer to the cursor, and so does a click before it
+					CInputHandlerManager::getInstance()->recoverMousePos();
 				}
 			}
 		}
@@ -242,17 +251,19 @@ void	SetMouseCursor (bool updatePos)
 }
 
 // *********************************************************************************
-// Use this method to set the cursor speed
-void	SetMouseSpeed (float speed)
+// Use this method to put the mouse in cursor mode whatever mode it is in
+void ResetMouseCursor()
 {
-	MouseCursorSpeed = speed;
-}
-
-// *********************************************************************************
-// Use this method to set the cursor acceleration
-void	SetMouseAcceleration (uint accel)
-{
-	MouseCursorAcceleration = accel;
+	// a hardware cursor stays where the player has it, unless a free look had taken it. The hidden system
+	// cursor of a software cursor goes under the pointer that is drawn
+	bool moveCursor = MouseFreeLook || !MouseHardware;
+	SetMouseFreeLook();
+	SetMouseCursor(moveCursor);
+	if (!moveCursor)
+	{
+		// the next mouse move brings the pointer to the cursor, and so does a click before it
+		CInputHandlerManager::getInstance()->recoverMousePos();
+	}
 }
 
 // *********************************************************************************

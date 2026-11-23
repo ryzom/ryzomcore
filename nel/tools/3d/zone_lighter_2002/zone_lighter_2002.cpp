@@ -1,7 +1,5 @@
 /** \file 3d/zone_lighter.cpp
  * Class to light zones
- *
- * $Id$
  */
 
 /* Copyright, 2000 Nevrax Ltd.
@@ -2707,7 +2705,7 @@ void CZoneLighter2002::lightWater(CWaterShape &ws, const CMatrix &MT, CMultiShap
 	catch(NLMISC::Exception &e)
 	{
 		nlwarning("Water shape lighting failed !");
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 	}
 }
 

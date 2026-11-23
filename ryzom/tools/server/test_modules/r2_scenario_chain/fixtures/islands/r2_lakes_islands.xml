@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!-- Islands for the tests of the scenario chain tool: islands of the editor with the boxes and zones its
+     island files have for them today (six desert islands and a lake island). The entry points are in
+     r2_entry_points.txt. -->
+<islands>
+  <complete_island island="uiR2_Lakes40" continent="r2_lakes" xmin="38074" ymin="-3912" xmax="38632" ymax="-3351">
+    <zone name="22_JE"/>
+    <zone name="22_JF"/>
+    <zone name="22_JG"/>
+    <zone name="23_JE"/>
+    <zone name="23_JF"/>
+    <zone name="23_JG"/>
+    <zone name="23_JH"/>
+    <zone name="24_JE"/>
+    <zone name="24_JF"/>
+    <zone name="24_JG"/>
+    <zone name="24_JH"/>
+    <zone name="25_JF"/>
+    <zone name="25_JG"/>
+    <zone name="25_JH"/>
+  </complete_island>
+</islands>

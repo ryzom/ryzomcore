@@ -20,6 +20,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/log.h"
+#include "nel/misc/time_nl.h"
 #include "nel/misc/variable.h"
 #include "nel/net/module.h"
 #include "nel/net/buf_net_base.h"
@@ -41,6 +42,8 @@ class IFileAccess;
 
 extern NLMISC::CVariable<std::string>	BSFilePrefix;
 
+/// The full path of a file name a requester gave, which is relative to SaveShardRoot. The accesses refuse a name for
+/// which CFile::isSafeFilename(CFile::normalizeRelativePath(name), true) is false, so the path stays below SaveShardRoot.
 std::string	getBackupFileName(const std::string& filename);
 
 
@@ -134,7 +137,8 @@ public:
 	/// Remove a file access
 	void		removeFileAccess(IFileAccess* access);
 
-	/// Flushes file accesses
+	/// Flushes file accesses. An access that asks to be tried again later stays first and ends the update:
+	/// the accesses keep their order, and the loop of the service is not held up.
 	void		update();
 
 	/// Release File manager
@@ -207,7 +211,8 @@ public:
 	{
 		Success,
 		MinorFailure,
-		MajorFailure		// Stall recommended
+		MajorFailure, // Stall recommended
+		RetryLater // Not done yet: the access stays first in the queue and is executed again on a later update
 	};
 
 	/**
@@ -275,6 +280,24 @@ public:
 	/// Execute file writing
 	virtual TReturnCode		execute(CFileAccessManager& manager) NL_OVERRIDE;
 
+private:
+	/// \name A written file that cannot take the place of its file is written again before the access fails
+	// @{
+
+	/// The tries that follow the first one, and the wait before the first of them in milliseconds. The wait
+	/// doubles each time: 100 + 200 + 400 + 800 + 1600 ms, the access fails 3.1 seconds after its first try.
+	static const uint s_ReplaceRetryCount = 5;
+	static const uint s_ReplaceRetryFirstWaitMs = 100;
+
+	/// The number of tries that failed since the access was last given up
+	uint m_ReplaceFailures;
+	/// The local time before which the access is not executed again, 0 when it does not wait
+	NLMISC::TTime m_NextTryTime;
+
+	/// Delete the temporary file kept after a failed replacement, for an access that stays in the queue with its data
+	void deleteKeptTemporaryFile(const std::string &tempFilename);
+
+	// @}
 };
 
 

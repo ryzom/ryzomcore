@@ -99,10 +99,6 @@ namespace NLGUI
 		// Set text (noop if text id)
 		void			setText (const std::string &text);
 		std::string		getText () const;
-#ifdef RYZOM_LUA_UCSTRING
-		void			setTextAsUtf16 (const ucstring &text); // Compatibility
-		ucstring		getTextAsUtf16 () const; // Compatibility
-#endif
 		void			setLocalize (bool localize);
 		bool			isLocalized () const;
 
@@ -148,7 +144,7 @@ namespace NLGUI
 
 		REFLECT_EXPORT_START(CCtrlTextButton, CCtrlBaseButton)
 #ifdef RYZOM_LUA_UCSTRING
-			REFLECT_UCSTRING("uc_hardtext", getTextAsUtf16, setTextAsUtf16); // Compatibility
+			REFLECT_UCSTRING("uc_hardtext", getText, setText); // Compatibility
 #endif
 			REFLECT_BOOL("localize", isLocalized, setLocalize);
 			REFLECT_STRING("hardtext", getHardText, setHardText);

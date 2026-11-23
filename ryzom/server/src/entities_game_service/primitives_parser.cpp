@@ -64,6 +64,47 @@ void CPrimitivesParser::init()
 	// get the primitive files to load
 	CPrimitiveCfg::readPrimitiveCfg();
 
+	// a file that cannot be read at the start of the service is a warning, below
+	vector<string> failedFiles;
+	loadPrimitives(_Primitives, failedFiles);
+} // CPrimitivesParser init
+
+//-----------------------------------------------
+// CPrimitivesParser reloadMissionPrimitives
+//-----------------------------------------------
+bool CPrimitivesParser::reloadMissionPrimitives(std::vector<std::string> &failedFiles)
+{
+	// read into a list of its own: nothing is replaced when a file cannot be read
+	failedFiles.clear();
+	TPrimitivesList primitives;
+	loadPrimitives(primitives, failedFiles);
+	if (!failedFiles.empty())
+	{
+		nlwarning("<CPrimitivesParser reloadMissionPrimitives> %u primitive files could not be read again (%u read), the primitives of the missions are not replaced", (uint)failedFiles.size(), (uint)primitives.size());
+		return false;
+	}
+	if (primitives.empty())
+	{
+		nlwarning("<CPrimitivesParser reloadMissionPrimitives> the used primitive maps (UsedPrimitives) have no primitive file, there is nothing to read again");
+		return false;
+	}
+	m_MissionPrimitives.swap(primitives);
+	return true;
+} // CPrimitivesParser reloadMissionPrimitives
+
+//-----------------------------------------------
+// CPrimitivesParser releaseMissionPrimitives
+//-----------------------------------------------
+void CPrimitivesParser::releaseMissionPrimitives()
+{
+	m_MissionPrimitives.clear();
+} // CPrimitivesParser releaseMissionPrimitives
+
+//-----------------------------------------------
+// CPrimitivesParser loadPrimitives
+//-----------------------------------------------
+void CPrimitivesParser::loadPrimitives(TPrimitivesList &primitives, std::vector<std::string> &failedFiles)
+{
 	vector< string > mapConfigNames;
 
 	// load only active primitive maps...
@@ -103,28 +144,30 @@ void CPrimitivesParser::init()
 				continue;
 			loadedPrimitives.insert(fullName);
 
-			_Primitives.push_back(TLoadedPrimitive());
+			primitives.push_back(TLoadedPrimitive());
 			try
 			{
 				nldebug( "CPrimitivesParser : loading primitive file '%s' %u/%u", first->c_str(), numLoadedPrim+1, primCount);
 				if	(	fullName.empty()
-					||	!loadPrimitive( fullName.c_str(),_Primitives.back().Primitive ))
+					||	!loadPrimitive( fullName.c_str(),primitives.back().Primitive ))
 				{
 					nlwarning("<CPrimitivesParser ctor> error in primitive file %s",fullName.c_str());
+					failedFiles.push_back(*first);
 				}
-				_Primitives.back().FileName = fullName;
+				primitives.back().FileName = fullName;
 //				_PrimitiveFiles.push_back(fullName);
 			}
 			catch(const Exception &e)
 			{
 				nlwarning("<CPrimitivesParser ctor> exception launched : %s",e.what() );
-				_Primitives.pop_back();
+				primitives.pop_back();
+				failedFiles.push_back(*first);
 			}
 
 		}
 
 	}
-}// CPrimitivesParser ctor
+} // CPrimitivesParser loadPrimitives
 
 //-----------------------------------------------
 // CPrimitivesParser loadPrimitive

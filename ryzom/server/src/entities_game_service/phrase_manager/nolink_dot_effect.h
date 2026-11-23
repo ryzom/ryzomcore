@@ -74,6 +74,9 @@ public:
 	/// set the stackable flag
 	inline void stackable(bool flag) { _Stackable = flag; }
 
+	/// the damage type, which a cure tests
+	DMGTYPE::EDamageType getDamageType() const { return _DamageType; }
+
 private:
 	/// cycle lenght in ticks
 	NLMISC::TGameCycle		_CycleLength;

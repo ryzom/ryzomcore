@@ -348,6 +348,7 @@ HRESULT CDriverD3D::SetVertexShaderConstantI(UINT StartRegister, CONST INT* pCon
 CShaderDrvInfosD3D::CShaderDrvInfosD3D(CDriverD3D *drv, ItShaderDrvInfoPtrList it) : IShaderDrvInfos(drv, it)
 {
 	H_AUTO_D3D(CShaderDrvInfosD3D_CShaderDrvInfosD3D)
+	Effect = NULL;
 	Validated = false;
 }
 
@@ -356,7 +357,9 @@ CShaderDrvInfosD3D::CShaderDrvInfosD3D(CDriverD3D *drv, ItShaderDrvInfoPtrList i
 CShaderDrvInfosD3D::~CShaderDrvInfosD3D()
 {
 	H_AUTO_D3D(CShaderDrvInfosD3D_CShaderDrvInfosD3DDtor)
-	Effect->Release();
+	// no effect when it could not be created
+	if (Effect)
+		Effect->Release();
 }
 
 // ***************************************************************************
@@ -365,6 +368,10 @@ bool CDriverD3D::validateShader(CD3DShaderFX *shader)
 {
 	H_AUTO_D3D(CDriverD3D_validateShader)
 	CShaderDrvInfosD3D *shaderInfo = static_cast<CShaderDrvInfosD3D*>((IShaderDrvInfos*)shader->_DrvInfo);
+
+	// a shader whose effect could not be created
+	if (!shaderInfo || !shaderInfo->Effect)
+		return false;
 
 	if (!shaderInfo->Validated)
 	{
@@ -450,10 +457,13 @@ bool CDriverD3D::activeShader(CD3DShaderFX *shd)
 		}
 
 		// Assemble the shader
-		LPD3DXBUFFER pErrorMsgs;
+		LPD3DXBUFFER pErrorMsgs = NULL;
 		HRESULT hr = D3DXCreateEffect(_DeviceInterface, shd->getText(), (UINT)strlen(shd->getText())+1, NULL, NULL, 0, NULL, &(shaderInfo->Effect), &pErrorMsgs);
 		if (hr == D3D_OK)
 		{
+			if (pErrorMsgs)
+				pErrorMsgs->Release();
+
 			// Get the texture handle
 			uint i;
 			for (i=0; i<CShaderDrvInfosD3D::MaxShaderTexture; i++)
@@ -472,7 +482,12 @@ bool CDriverD3D::activeShader(CD3DShaderFX *shd)
 		{
 			nlwarning ("Can't create shader '%s' (0x%x):", shd->getName(), hr);
 			if (pErrorMsgs)
-				nlwarning ((const char*)pErrorMsgs->GetBufferPointer());
+			{
+				nlwarning ("%s", (const char*)pErrorMsgs->GetBufferPointer());
+				pErrorMsgs->Release();
+			}
+			// The shader stays without an effect: it is not created again, and every later activeShader fails
+			shaderInfo->Effect = NULL;
 			shd->_ShaderChanged = false;
 			_CurrentShader = NULL;
 			return false;
@@ -482,6 +497,17 @@ bool CDriverD3D::activeShader(CD3DShaderFX *shd)
 		shd->_ShaderChanged = false;
 	}
 
+	// A shader whose effect could not be created is never the current one
+	if (shd)
+	{
+		CShaderDrvInfosD3D *shaderInfo = static_cast<CShaderDrvInfosD3D*>((IShaderDrvInfos*)shd->_DrvInfo);
+		if (!shaderInfo || !shaderInfo->Effect)
+		{
+			_CurrentShader = NULL;
+			return false;
+		}
+	}
+
 	// Set the shader
 	_CurrentShader = shd;
 
@@ -489,16 +515,17 @@ bool CDriverD3D::activeShader(CD3DShaderFX *shd)
 }
 
 
-static void setFX(CD3DShaderFX &s, const char *name, const char *prog, CDriverD3D *drv)
+static bool setFX(CD3DShaderFX &s, const char *name, const char *prog, CDriverD3D *drv)
 {
 	H_AUTO_D3D(setFX)
 
 	s.setName(name);
 	s.setText(prog);
-	nlverify (drv->activeShader (&s));
+	return drv->activeShader (&s);
 }
 
-#define setFx(a,b,c) { setFX(a, b, c, this); }
+// allOk is the result of the function that sets the effects up
+#define setFx(a,b,c) { if (!setFX(a, b, c, this)) allOk = false; }
 
 static const char *CloudFx =  
 "																	\n\
@@ -3457,9 +3484,11 @@ technique technique_water_calc_no_diffuse_1_1							\n\
 
 
 
-void CDriverD3D::initInternalShaders()
+bool CDriverD3D::initInternalShaders()
 {
 	H_AUTO_D3D(CDriverD3D_initInternalShaders)
+	// every effect is tried, so that the log names each one that fails
+	bool allOk = true;
 	setFx(_ShaderLightmap0,"lightmap0Fx", Lightmap0Fx);
 	setFx(_ShaderLightmap1,"lightmap1Fx", Lightmap1Fx);
 	setFx(_ShaderLightmap2,"lightmap2Fx", Lightmap2Fx);
@@ -3485,6 +3514,7 @@ void CDriverD3D::initInternalShaders()
 	setFx(_ShaderWaterDiffuse, "water_diffuseFx", Water_diffuseFx);
 	setFx(_ShaderWaterCalcNoDiffuse,"water_calc_no_diffuseFx", Water_calc_no_diffuseFx);
 	setFx(_ShaderWaterCalcDiffuse, "water_calc_diffuseFx", Water_calc_diffuseFx);
+	return allOk;
 }
 
 

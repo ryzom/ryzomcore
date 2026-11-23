@@ -85,7 +85,7 @@ void CRewardSharing::userItemSelect(const TDataSetRow & userRow,uint32 itemPos,u
 	if ( state != _Session )
 		return;
 
-	// the user must be one of the candidates
+	// the sender must be one of the candidates (a member who joined the team after the loot is not)
 	bool isCandidate = false;
 	for (uint i = 0; i < _Candidates.size(); i++)
 	{

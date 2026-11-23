@@ -65,6 +65,10 @@ namespace NLQT
 			// TODO: create new Element
 			return 0;
 		}
+
+		// only an atom has a value to edit, the value column of a virtual struct holds the name of its DFN
+		if (!curElm->isAtom())
+			return 0;
 		const NLGEORGES::UType *type = curElm->getType();
 		if(type) 
 		{
@@ -203,7 +207,7 @@ namespace NLQT
 			}
 			else 
 			{
-				nldebug(QString("setModelData from %1 to %2")
+				nldebug("%s", QString("setModelData from %1 to %2")
 					.arg(oldValue).arg(value).toUtf8().constData());
 				model->setData(index, value, Qt::EditRole);
 			}
@@ -224,7 +228,7 @@ namespace NLQT
 					}
 					else 
 					{
-						nldebug(QString("setModelData from %1 to %2")
+						nldebug("%s", QString("setModelData from %1 to %2")
 							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}
@@ -241,7 +245,7 @@ namespace NLQT
 					}
 					else 
 					{
-						nldebug(QString("setModelData from %1 to %2")
+						nldebug("%s", QString("setModelData from %1 to %2")
 							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}
@@ -262,7 +266,7 @@ namespace NLQT
 					}
 					else 
 					{
-						nldebug(QString("setModelData from %1 to %2")
+						nldebug("%s", QString("setModelData from %1 to %2")
 							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}

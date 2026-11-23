@@ -28,7 +28,9 @@
 //-----------------------------------------------------------------------------
 
 class CCharacter;
-
+namespace EGSPD {
+class CMissionPD;
+}
 
 /**
  * CCharacterGameEvent
@@ -54,8 +56,9 @@ public:
 	// set the game event
 	void subscribe();
 
-	// reset the game event (game event is finished)
-	void reset();
+	// reset the game event (game event is finished). running is the mission whose action resets it: it is still being
+	// processed, so it is not removed
+	void reset(const EGSPD::CMissionPD *running = NULL);
 
 	// called at each tick
 	void tickUpdate();

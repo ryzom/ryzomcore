@@ -64,12 +64,10 @@ bool CSLinkEffectHot::update(CTimerEvent * event, bool applyEffect)
 		return true;
 	}
 	
-	applyOnScore( caster, target,SCORES::hit_points, _HealHp );
-	_Report.Hp = _HealHp;
-	applyOnScore( caster, target,SCORES::sap, _HealSap );
-	_Report.Sap = _HealSap;
-	applyOnScore( caster, target,SCORES::stamina, _HealSta );
-	_Report.Sta = _HealSta;
+	// the heal of the effect stays what the spell gave it: a heal clipped by a full score is clipped for this update only
+	_Report.Hp = applyOnScore( caster, target,SCORES::hit_points, _HealHp );
+	_Report.Sap = applyOnScore( caster, target,SCORES::sap, _HealSap );
+	_Report.Sta = applyOnScore( caster, target,SCORES::stamina, _HealSta );
 	PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport( _Report );
 	PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->reportAction(_Report);
 
@@ -77,18 +75,21 @@ bool CSLinkEffectHot::update(CTimerEvent * event, bool applyEffect)
 }
 
 
-void CSLinkEffectHot::applyOnScore( CEntityBase * caster, CEntityBase * target,SCORES::TScores scoreType, sint32& value )
+sint32 CSLinkEffectHot::applyOnScore( CEntityBase * caster, CEntityBase * target,SCORES::TScores scoreType, sint32 value )
 {
+	// a score the spell does not heal: no message, no report
+	if ( value == 0 )
+		return 0;
+
 	SCharacteristicsAndScores & score = target->getScores()._PhysicalScores[ scoreType ];
 	score.Current = score.Current + sint( value );
 	sint32 realHeal=value;
 	
 	if ( score.Current >= score.Max)
 	{
-		sint32 realHeal = value + score.Max - score.Current;
-		value = realHeal;
+		realHeal = value + score.Max - score.Current;
 		if ( realHeal )
-			PHRASE_UTILITIES::sendScoreModifierSpellMessage( caster->getId(), target->getId(), value, value ,scoreType , ACTNATURE::CURATIVE_MAGIC);
+			PHRASE_UTILITIES::sendScoreModifierSpellMessage( caster->getId(), target->getId(), realHeal, realHeal ,scoreType , ACTNATURE::CURATIVE_MAGIC);
 		score.Current = score.Max;
 
 		SM_STATIC_PARAMS_2(params, STRING_MANAGER::entity, STRING_MANAGER::score);
@@ -113,4 +114,6 @@ void CSLinkEffectHot::applyOnScore( CEntityBase * caster, CEntityBase * target,S
 	aiReport.AggroAdd = aggro;
 	aiReport.addDelta(AI_EVENT_REPORT::scoreToStat(scoreType), realHeal);
 	CPhraseManager::getInstance().addAiEventReport(aiReport);
+
+	return realHeal;
 }

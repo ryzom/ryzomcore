@@ -92,6 +92,60 @@ bool readModApp(CStorageContainer *c2500, SEdits &out)
 		fa.Values = ma.Values;
 		out.FaceAttribs.push_back(fa);
 	}
+	out.FaceSmooth.reserve(out.FaceSmooth.size() + md.faceSmooth().size());
+	for (uint i = 0; i < md.faceSmooth().size(); ++i)
+	{
+		const CMeshDelta::SFaceSmooth &ms = md.faceSmooth()[i];
+		SFaceSmoothChange fs;
+		fs.Index = ms.Index;
+		fs.Mask = ms.Mask;
+		fs.Values = ms.Values;
+		out.FaceSmooth.push_back(fs);
+	}
+	for (uint g = 0; g < md.mapDeltas().size(); ++g)
+	{
+		const CMeshDelta::SMapDelta &mm = md.mapDeltas()[g];
+		out.Maps.push_back(SMapEdits());
+		SMapEdits &me = out.Maps.back();
+		me.Channel = (sint32)mm.Channel;
+		me.ChannelKnown = mm.HasChannel;
+		// a missing count never matches a mesh, so the caller reports the channel instead of applying it
+		me.VertCount = mm.HasVertCount ? mm.VertCount : 0xFFFFFFFF;
+		me.FaceCount = mm.HasFaceCount ? mm.FaceCount : 0xFFFFFFFF;
+		for (uint i = 0; i < mm.VertSets.size(); ++i)
+		{
+			const CMeshDelta::SMapVertSet &s = mm.VertSets[i];
+			me.VertSets.push_back(std::make_pair(s.Index, NLMISC::CVector(
+				CMeshDelta::asF(s.P[0]), CMeshDelta::asF(s.P[1]), CMeshDelta::asF(s.P[2]))));
+		}
+		for (uint i = 0; i < mm.CreatedVerts.size(); ++i)
+		{
+			const CMeshDelta::SMapVert &v = mm.CreatedVerts[i];
+			me.CreatedVerts.push_back(NLMISC::CVector(
+				CMeshDelta::asF(v.P[0]), CMeshDelta::asF(v.P[1]), CMeshDelta::asF(v.P[2])));
+		}
+		for (uint i = 0; i < mm.CreatedFaces.size(); ++i)
+		{
+			SMapFaceIdx f;
+			f.T[0] = mm.CreatedFaces[i].T[0];
+			f.T[1] = mm.CreatedFaces[i].T[1];
+			f.T[2] = mm.CreatedFaces[i].T[2];
+			me.CreatedFaces.push_back(f);
+		}
+		for (uint i = 0; i < mm.FaceRemap.size(); ++i)
+		{
+			const CMeshDelta::SFaceVertRemap &mr = mm.FaceRemap[i];
+			SFaceVertRemap r;
+			r.Index = mr.Index;
+			r.ApplyMask = mr.ApplyMask;
+			r.V[0] = mr.V[0]; r.V[1] = mr.V[1]; r.V[2] = mr.V[2];
+			me.FaceRemap.push_back(r);
+		}
+	}
+	out.IrregularIds.insert(out.IrregularIds.end(), md.irregularIds().begin(), md.irregularIds().end());
+	out.HasInputCounts = md.hasInputVertCount() && md.hasInputFaceCount();
+	out.InputVertCount = md.inputVertCount();
+	out.InputFaceCount = md.inputFaceCount();
 	if (md.delVerts().Present) md.delVerts().bits(out.DelVerts);
 	if (md.delFaces().Present) md.delFaces().bits(out.DelFaces);
 	return true;

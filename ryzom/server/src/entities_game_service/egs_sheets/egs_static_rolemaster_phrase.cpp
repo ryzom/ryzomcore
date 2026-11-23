@@ -36,6 +36,8 @@ void CStaticRolemasterPhrase::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UF
 {
 	form->getRootNode().getValueByName( IsRolemasterPhrase, "usable_by_player" );
 	form->getRootNode().getValueByName( IsValidPhrase, "castable" );
+	if ( !form->getRootNode().getValueByName( ShowInAPOnlyIfLearnt, "ShowInAPOnlyIfLearnt" ) )
+		ShowInAPOnlyIfLearnt = false;
 
 	string sbrickSheetName;
 	uint i = 0;

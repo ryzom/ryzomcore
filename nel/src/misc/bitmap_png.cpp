@@ -43,6 +43,9 @@ static void readPNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 {
 	IStream *stream = static_cast<IStream*>(png_get_io_ptr(png_ptr));
 
+	// png_error longjmps, so it is called once the exception is handled: a longjmp out of a catch handler leaks the
+	// exception with GCC and Clang
+	bool failed = false;
 	try
 	{
 		if (stream)
@@ -50,8 +53,10 @@ static void readPNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 	}
 	catch (...)
 	{
-		png_error(png_ptr, "Read error while decoding PNG file");
+		failed = true;
 	}
+	if (failed)
+		png_error(png_ptr, "Read error while decoding PNG file");
 }
 
 static void writePNGData(png_structp png_ptr, png_bytep data, png_size_t length)
@@ -63,7 +68,7 @@ static void writePNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 
 static void setPNGWarning(png_struct * /* png_ptr */, const char* message)
 {
-	nlwarning(message);
+	nlwarning("%s", message);
 }
 
 static void setPNGError(png_struct *png_ptr, const char* message)
@@ -76,7 +81,7 @@ static void setPNGError(png_struct *png_ptr, const char* message)
 /*-------------------------------------------------------------------*\
 							readPNG
 \*-------------------------------------------------------------------*/
-uint8 CBitmap::readPNG( NLMISC::IStream &f )
+uint8 CBitmap::readPNG(NLMISC::IStream &f, uint32 maxSize)
 {
 	if(!f.isReading()) return false;
 
@@ -99,12 +104,19 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 		return 0;
 	}
 
+	// the decoded image, freed by the setjmp handler too when libpng fails while reading it (a truncated file): they
+	// leaked. Volatile, so that they keep their value through the longjmp.
+	png_bytep volatile imageData = nullptr;
+	png_bytepp volatile row_pointers = nullptr;
+
 	if (setjmp(png_jmpbuf(png_ptr)))
 	{
+		png_free(png_ptr, row_pointers);
+		png_free(png_ptr, imageData);
 		// free all of the memory associated with the png_ptr and info_ptr
 		png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
 		// if we get here, we had a problem reading the file
-		nlwarning("Error while reading PNG");
+		nlwarning("Error while reading PNG '%s'", f.getStreamName().c_str());
 		return 0;
 	}
 
@@ -113,6 +125,9 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 
 	// set number of bit already read (in order to step back)
 	png_set_sig_bytes(png_ptr, 4);
+
+	// png_read_info refuses a larger image, before anything is allocated from its size
+	png_set_user_limits(png_ptr, maxSize, maxSize);
 
 	// read header info and use it
 	png_read_info(png_ptr, info_ptr);
@@ -186,10 +201,11 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	uint32 srcChannels = png_get_channels(png_ptr, info_ptr);
 
 	// allocates buffer to copy image data
-	png_bytepp row_pointers = (png_bytepp)png_malloc(png_ptr, height * sizeof(png_bytep));
+	imageData = (png_bytep)png_malloc(png_ptr, (png_alloc_size_t)rowbytes * height);
+	row_pointers = (png_bytepp)png_malloc(png_ptr, height * sizeof(png_bytep));
 
 	for (uint row = 0; row < height; row++)
-		row_pointers[row] = (png_bytep)png_malloc(png_ptr, rowbytes);
+		row_pointers[row] = imageData + (size_t)row * rowbytes;
 
 	// effective read of the image
 	png_read_image(png_ptr, row_pointers);
@@ -240,12 +256,9 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 		}
 	}
 
-	// free allocated memory to copy each rows
-	for (uint row = 0; row < height; row++)
-		png_free(png_ptr, row_pointers[row]);
-
 	// free allocated memory to copy the image
 	png_free(png_ptr, row_pointers);
+	png_free(png_ptr, imageData);
 
 	// clean up after the read, and free any memory allocated
 	png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
@@ -423,6 +436,18 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 					row_pointers[y][dstOffset+1] = _Data[0][srcOffset+3];
 				}
 			}
+			else if (srcChannels == 1 && sig_bit.alpha)
+			{
+				// a source of one channel has no second byte per pixel to take the other channel from (it was read
+				// from the next pixel, and past the bitmap for the last one): luminance is opaque, and alpha is white
+				// as in alphaToRGBA
+				const uint8 gray = PixelFormat == Alpha ? 255 : _Data[0][srcOffset];
+				for (i = 0; i < (sint)dstChannels - 1; ++i)
+				{
+					row_pointers[y][dstOffset + i] = gray;
+				}
+				row_pointers[y][dstOffset + dstChannels - 1] = PixelFormat == Alpha ? _Data[0][srcOffset] : 255;
+			}
 			else if (dstChannels >= 3 && srcChannels <= 2)
 			{
 				// convert gray to colors
@@ -434,8 +459,7 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 				if (sig_bit.alpha)
 				{
 					// copy alpha value
-					row_pointers[y][dstOffset+3] = PixelFormat ==
-						Luminance ? 255:_Data[0][srcOffset+1];
+					row_pointers[y][dstOffset + 3] = _Data[0][srcOffset + 1];
 				}
 			}
 			else

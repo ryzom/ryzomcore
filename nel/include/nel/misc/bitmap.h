@@ -59,6 +59,10 @@ const uint32	GIF_HEADER = NL_MAKEFOURCC('G', 'I', 'F', '8');
 
 const uint8	MAX_MIPMAP = 16;
 
+/// The largest width or height of an image the readers load: 16384, the largest texture Direct3D 11 takes. It keeps
+/// the size of a bitmap and the computations on its pixels in uint32 (an RGBA bitmap of that size takes 1 GiB).
+const uint32 MAX_BITMAP_SIZE = 16384;
+
 
 
 
@@ -99,50 +103,63 @@ private :
 
 
 	/**
+	 * Read an image of any supported format from an IStream, as load() does.
+	 * \param maxSize the largest width or height accepted, at most MAX_BITMAP_SIZE
+	 * \return image depth if succeed, 0 else
+	 */
+	uint8 readImage(NLMISC::IStream &f, uint mipMapSkip, uint32 maxSize);
+
+
+	/**
 	 * Read a DDS from an IStream.
 	 * The bitmap is readen as a set of bytes and stocked compressed.
 	 * Width and Height are multiple of 4.
 	 * \param IStream The stream must be in reading mode.
+	 * \param maxSize the largest width or height accepted
 	 * \return image depth
 	 * \throw EDDSBadHeader : surface is header is not valid.
 	 */
-	uint8 readDDS(NLMISC::IStream &f, uint mipMapSkip);
+	uint8 readDDS(NLMISC::IStream &f, uint mipMapSkip, uint32 maxSize);
 
 
 	/**
 	 * Read a TGA from an IStream.
 	 * TGA pictures can be in 24 or 32 bits, RLE or uncompressed
 	 * \param f IStream (must be a reading stream)
+	 * \param maxSize the largest width or height accepted
 	 * \return image depth if succeed, 0 else
 	 */
-	uint8 readTGA(	NLMISC::IStream &f);
+	uint8 readTGA(NLMISC::IStream &f, uint32 maxSize);
 
 
 	/**
 	 * Read a PNG from an IStream.
 	 * PNG pictures can be in 24 or 32 bits
 	 * \param f IStream (must be a reading stream)
+	 * \param maxSize the largest width or height accepted
 	 * \return image depth if succeed, 0 else
 	 */
-	uint8 readPNG( NLMISC::IStream &f );
+	uint8 readPNG(NLMISC::IStream &f, uint32 maxSize);
 
 
 	/**
 	 * Read a JPG from an IStream.
 	 * JPG pictures can be in 24
 	 * \param f IStream (must be a reading stream)
+	 * \param maxSize the largest width or height accepted
 	 * \return image depth if succeed, 0 else
 	 */
-	uint8 readJPG( NLMISC::IStream &f );
+	uint8 readJPG(NLMISC::IStream &f, uint32 maxSize);
 
 
 	/**
 	 * Read a GIF from an IStream.
 	 * GIF pictures are all converted to 32bit
 	 * \param f IStream (must be a reading stream)
+	 * \param maxSize the largest width or height accepted
 	 * \return image depth if succeed, 0 else
 	 */
-	uint8 readGIF( NLMISC::IStream &f );
+	uint8 readGIF(NLMISC::IStream &f, uint32 maxSize);
 
 
 	/**
@@ -339,6 +356,16 @@ public:
 	 * \throw ESeekFailed : seek has failed
 	 */
 	uint8	load(NLMISC::IStream &f, uint mipMapSkip=0);
+
+
+	/**
+	 * Read a bitmap of any format load() reads from a stream that is not trusted, such as a download of the web
+	 * browser: an image of more than maxSize pixels a side is refused, and so is any error of the readers, exceptions
+	 * included.
+	 * \param maxSize the largest width or height accepted, MAX_BITMAP_SIZE at most
+	 * \return true if the image was loaded; false after a warning naming the stream, with the bitmap left empty
+	 */
+	bool	loadUntrusted(NLMISC::IStream &f, uint32 maxSize, uint mipMapSkip=0);
 
 
 	/**

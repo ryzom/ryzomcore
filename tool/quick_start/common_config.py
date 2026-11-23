@@ -26,6 +26,8 @@ def MergeConfig(file):
 		config["Paths"] = {}
 	if not "WorkingDirs" in config:
 		config["WorkingDirs"] = {}
+	if not "DebuggerArguments" in config:
+		config["DebuggerArguments"] = {}
 	if not "Toolchain" in config:
 		config["Toolchain"] = {}
 	if not "Client" in config["Toolchain"]:
@@ -34,6 +36,8 @@ def MergeConfig(file):
 	config["Paths"] = NeLConfig["Paths"]
 	NeLConfig["WorkingDirs"].update(config["WorkingDirs"])
 	config["WorkingDirs"] = NeLConfig["WorkingDirs"]
+	NeLConfig["DebuggerArguments"].update(config["DebuggerArguments"])
+	config["DebuggerArguments"] = NeLConfig["DebuggerArguments"]
 	NeLConfig["Toolchain"]["Client"].update(config["Toolchain"]["Client"])
 	config["Toolchain"]["Client"] = NeLConfig["Toolchain"]["Client"]
 	NeLConfig["Toolchain"].update(config["Toolchain"])

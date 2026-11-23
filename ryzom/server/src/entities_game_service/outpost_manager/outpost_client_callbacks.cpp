@@ -70,7 +70,14 @@ void cbClientOutpostSideChosen( NLNET::CMessage& msgin, const std::string & serv
 	uint8 side; 
 	msgin.serial( neutral );
 	msgin.serial( side );
-	
+
+	// the side comes from the client and is stored as given when the player's guild takes no part in the fight
+	if ( !neutral && side != OUTPOSTENUMS::OutpostOwner && side != OUTPOSTENUMS::OutpostAttacker )
+	{
+		OUTPOST_WRN("<cbClientOutpostSideChosen> %s chose side %u, refused", eid.toString().c_str(), (uint)side);
+		return;
+	}
+
 	CCharacter * character = PlayerManager.getChar(eid);
 	if( character )
 	{
@@ -173,7 +180,12 @@ void cbClientOutpostWarValidate(NLNET::CMessage & msgin, const std::string & ser
 
 	COutpost::TChallengeOutpostErrors error = COutpost::UnknownError;
 	CCharacter * user = PlayerManager.getChar(eid);
-	if (user != NULL)
+	if (hour >= 24)
+	{
+		// the client sends a GMT hour of the day; the outpost timers count from it
+		OUTPOST_WRN("<cbClientOutpostWarValidate> %s sent attack hour %u, refused", eid.toString().c_str(), (uint)hour);
+	}
+	else if (user != NULL)
 	{
 		CGuildMemberModule * module;
 		if ( user->getModuleParent().getModule( module ) )
@@ -446,9 +458,16 @@ void cbClientOutpostSetDefensePeriod(NLNET::CMessage & msgin, const std::string 
 	uint8 hour;
 	
 	msgin.serial(eId, outpostSheet, hour);
-	
+
+	// the client sends a GMT hour of the day; the outpost timers count from it
+	if (hour >= 24)
+	{
+		OUTPOST_WRN("<cbClientOutpostSetDefensePeriod> %s sent defense hour %u, refused", eId.toString().c_str(), (uint)hour);
+		return;
+	}
+
 	GET_GUILD_MODULE(eId);
-	
+
 	module->outpostSetDefensePeriod(outpostSheet, hour);
 }
 

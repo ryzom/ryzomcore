@@ -154,6 +154,7 @@
 #include "main_loop_debug.h"
 #include "main_loop_temp.h"
 #include "main_loop_utilities.h"
+#include "client_ctrl.h"
 
 
 ///////////
@@ -591,6 +592,8 @@ void clearBuffers()
 void renderScene(bool forceFullDetail, bool bloom)
 {
 	CTextureUser *effectRenderTarget = nullptr;
+	// no effect render target is made for a window without area: the bloom has no picture to work on then
+	bool defaultRenderTarget = false;
 	if (bloom && Driver->supportBloomEffect())
 	{
 		// set bloom parameters before applying bloom effect
@@ -598,7 +601,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
 
 		// init effect render target
-		Driver->beginDefaultRenderTarget();
+		defaultRenderTarget = Driver->beginDefaultRenderTarget();
 	}
 	if (forceFullDetail)
 	{
@@ -611,7 +614,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 	{
 		s_ForceFullDetail.restore();
 	}
-	if (bloom && Driver->supportBloomEffect())
+	if (defaultRenderTarget)
 	{
 		// apply bloom effect
 		CBloomEffect::getInstance().applyBloom();
@@ -680,8 +683,11 @@ void updateWeather()
 	// Update the weather manager
 	updateWeatherManager(MainCam.getMatrix(), ContinentMngr.cur());
 
-	// compute thunder color
-	ThunderColor.modulateFromui(WeatherManager.getCurrWeatherState().ThunderColor, (uint) (256.f * WeatherManager.getThunderLevel()));
+	// compute thunder color: the flash of a lightning, which the light cycle manager adds to the landscape light groups
+	if (ClientCfg.WeatherLightningFlash)
+		ThunderColor.modulateFromui(WeatherManager.getCurrWeatherState().ThunderColor, (uint) (256.f * WeatherManager.getThunderLevel()));
+	else
+		ThunderColor.set(0, 0, 0, 0);
 
 	// Update the lighting
 	LightCycleManager.setHour(DayNightCycleHour, WeatherManager, ThunderColor);
@@ -1002,6 +1008,7 @@ bool mainLoop()
 	paying_account_already_request = false;
 	game_exit_after_paying_account_request = false;
 	FarTP.setMainLoopEntered();
+	ClientCtrl::setPhase("in_game");
 
 	nlinfo ("Starting main loop...", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 
@@ -1032,8 +1039,7 @@ bool mainLoop()
 
 	updateLightDesc();
 
-	SetMouseFreeLook ();
-	SetMouseCursor ();
+	ResetMouseCursor();
 	// Set the cursor.
 	ContextCur.context("STAND BY");
 	UserControls.reset();
@@ -1106,6 +1112,8 @@ bool mainLoop()
 	while( !UserEntity->permanentDeath()
 		&& !game_exit )
 	{
+		// in the game: also after a far TP or a return to the character selection that came back into this loop
+		ClientCtrl::setPhase("in_game");
 		// If an action handler execute. NB: MUST BE DONE BEFORE ANY THING ELSE PROFILE CRASH!!!!!!!!!!!!!!!!!
 		testLaunchProfile();
 
@@ -1760,8 +1768,11 @@ bool mainLoop()
 			bool stereoRenderTarget = StereoDisplay->beginRenderTarget();
 			if (!stereoRenderTarget && haveEffects && !defaultRenderTarget && StereoDisplay->wantClear())
 			{
-				Driver->beginDefaultRenderTarget();
-				defaultRenderTarget = true;
+				// No effect render target is made for a window without area (minimized, or resized down to its
+				// title bar): the frame has no effects then, there is no picture to apply them to
+				defaultRenderTarget = Driver->beginDefaultRenderTarget();
+				if (!defaultRenderTarget)
+					haveEffects = false;
 			}
 
 			if (StereoDisplay->wantClear())
@@ -1993,6 +2004,9 @@ bool mainLoop()
 
 			} /* if (StereoDisplay->wantInterface3D()) */
 
+			// a picture of the scene without the interface, for a control tool (--ctrl-listen)
+			ClientCtrl::sceneRendered();
+
 			if (StereoDisplay->wantInterface2D())
 			{
 				// Render in 2D Mode to display 2D Interfaces and 2D texts.
@@ -2144,6 +2158,13 @@ bool mainLoop()
 
 					// If we have started a Far TP sequence and are waiting for onServerQuitOK()
 					// from the EGS, resume the sequence because the EGS is down and won't reply.
+					FarTP.onServerQuitOk();
+				}
+				else if ((connectionState == CNetworkConnection::Disconnect) && (lastConnectionState != CNetworkConnection::Disconnect) && (LoginSM.getCurrentState() == CLoginStateMachine::st_leave_shard))
+				{
+					// The connection was lost during the quit countdown of a Far TP or a character reselect: SERVER_QUIT_OK
+					// will not come, so the sequence goes on, and reconnects or fails as it does on its own
+					nlinfo("The connection was lost while leaving the shard, the Far TP goes on");
 					FarTP.onServerQuitOk();
 				}
 
@@ -2433,6 +2454,7 @@ bool mainLoop()
 				R2::getEditor().updateBeforeSwapBuffer();
 			}
 
+			ClientCtrl::beforeSwap();
 			Driver->swapBuffers();
 
 			if(Profiling)
@@ -2449,6 +2471,13 @@ bool mainLoop()
 			{
 				nlSleep(50);
 				nldebug("lost device");
+			}
+			// Nothing is shown of a window that is minimized or has no area (resized down to its title bar) either,
+			// and the swap may not wait then: the same time is left to other applications. Network, sound and game
+			// logic then run at the rate this leaves, about 20 frames per second
+			else if (isWindowMinimizedOrWithoutArea())
+			{
+				nlSleep(50);
 			}
 		}
 		else
@@ -2631,8 +2660,7 @@ bool mainLoop()
 				T1		= ryzomGetLocalTime();
 				TSend	= ((T1+DTSend)/DTSend)*DTSend;
 
-				SetMouseFreeLook ();
-				SetMouseCursor ();
+				ResetMouseCursor();
 				// Set the cursor.
 				ContextCur.context("STAND BY");
 				UserControls.reset();
@@ -2693,6 +2721,8 @@ bool mainLoop()
 
 	} // end of main loop
 
+	ClientCtrl::setPhase("leaving_game");
+
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	if (CLuaManager::getInstance().getLuaState())
 	{
@@ -2747,6 +2777,7 @@ bool mainLoop()
 			// Display the background
 			drawLoadingBitmap (0);
 			// Display to screen.
+			ClientCtrl::beforeSwap();
 			Driver->swapBuffers();
 //	} while(ryzomGetLocalTime () < endTime);
 

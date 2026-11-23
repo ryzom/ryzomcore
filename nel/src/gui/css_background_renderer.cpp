@@ -74,16 +74,14 @@ namespace NLGUI
 		// TODO: CSSBackground should keep track of TextureId
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		if (bg.image != m_Background.image && TextureId != -1)
-			rVR.deleteTexture(TextureId);
-
-		m_Background = bg;
-		// TODO: does not accept urls
-		if (TextureId == -1 && !bg.image.empty())
 		{
-			// TODO: make CViewRenderer accept urls
-			if (bg.image.find("://") != std::string::npos)
-				TextureId = rVR.createTexture(bg.image, 0, 0, -1, -1, false);
+			rVR.deleteTexture(TextureId);
+			TextureId = -1;
 		}
+
+		// The owner sets TextureId (CGroupHTML::addTextureDownload): the image is a url or name from a web page, which
+		// CViewRenderer::createTexture would look up as a local path
+		m_Background = bg;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -97,14 +95,8 @@ namespace NLGUI
 			rVR.deleteTexture(TextureId);
 			TextureId = -1;
 		}
+		// the owner sets TextureId, as in setBackground
 		m_Background.image = bgtex;
-
-		if (TextureId == -1 && !bgtex.empty())
-		{
-			// TODO: make CViewRenderer accept urls
-			if (bgtex.find("://") != std::string::npos)
-				TextureId = rVR.createTexture(bgtex, 0, 0, -1, -1, false);
-		}
 	}
 
 	// ----------------------------------------------------------------------------

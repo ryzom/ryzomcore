@@ -20,10 +20,8 @@ function r2.ui.AnimBar:update()
 	self:getButton("r2ed_anim_test_mode").active = testModeAvailable
 	self:getButton("r2ed_anim_dm_mode").active = (r2.Mode == "Test")		
    local actReceived = (isDm and (r2.AnimGlobals.Acts ~= nil or config.Local == 1))
-   debugInfo(tostring(actReceived))
 	self:getButton("r2ed_anim_acts").active = actReceived
    local triggerReceived = (isDm and (r2.AnimGlobals.UserTriggers ~= nil or config.Local == 1))
-   debugInfo(tostring(triggerReceived))
 	self:getButton("r2ed_anim_triggers").active = triggerReceived
 	self:getButton("r2ed_anim_weather").active = (isDm)
 	self:getButton("r2ed_anim_dm_gift").active = r2:isCurrentSelectionPlayer()
@@ -100,7 +98,8 @@ function r2.ui.AnimBar:updateDMControlledEntitiesWindow()
 		button.b.texture="r2_icon_speak_as_small.tga"
 		button.b.texture_pushed="r2_icon_speak_as_small_pushed.tga"
 		button.b.texture_over="r2_icon_speak_as_small_over.tga"
-		button.b.params_l="r2.ui.AnimBar:stopTalk(" .. talkingList[i * 2 + 1] .. ")"
+		-- the ids come from the client as floats: "stopTalk(123)", not "stopTalk(123.0)"
+		button.b.params_l=r2:uiCall("r2.ui.AnimBar:stopTalk", tonumber(numberText(talkingList[i * 2 + 1])))
 		button.b.tooltip = i18n.get("uiR2EDStopDMSpeakAs")
 		setDbProp("UI:VARIABLES:R2_DM_CONTROLLED:" .. index .. ":TEXT_ID", talkingList[i * 2 + 1])
 		index = index + 1
@@ -112,7 +111,7 @@ function r2.ui.AnimBar:updateDMControlledEntitiesWindow()
 		button.b.texture_pushed="r2_icon_possess_small_pushed.tga"
 		button.b.texture_over="r2_icon_possess_small_over.tga"		
 		button.b.tooltip = i18n.get("uiR2EDStopDMControl")
-		button.b.params_l="r2.ui.AnimBar:stopIncarnate(" .. incarnatingList[i * 2 + 1] .. ")"
+		button.b.params_l=r2:uiCall("r2.ui.AnimBar:stopIncarnate", tonumber(numberText(incarnatingList[i * 2 + 1])))
 		setDbProp("UI:VARIABLES:R2_DM_CONTROLLED:" .. index .. ":TEXT_ID", incarnatingList[i * 2 + 1])
 		index = index + 1
 	end

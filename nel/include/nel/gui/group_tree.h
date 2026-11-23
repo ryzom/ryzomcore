@@ -115,10 +115,6 @@ namespace NLGUI
 			bool getOpened() const { return Opened; }
 			void setText(const std::string &text) { Text = text; }
 			const std::string& getText() const { return Text; }
-#ifdef RYZOM_LUA_UCSTRING
-			void setTextAsUtf16(const ucstring &text) { Text = text.toUtf8(); } // Compatibility
-			ucstring getTextAsUtf16() const { return ucstring::makeFromUtf8(Text); } // Compatibility
-#endif
 			sint32 getFontSize() const { return FontSize; }
 			void setFontSize(sint32 value) { FontSize = value; }
 			sint32 getYDecal() const { return YDecal; }
@@ -187,7 +183,7 @@ namespace NLGUI
 				REFLECT_BOOL("Opened", getOpened, setOpened);
 				REFLECT_BOOL("Show", getShow, setShow);
 #ifdef RYZOM_LUA_UCSTRING
-				REFLECT_UCSTRING("Text", getTextAsUtf16, setTextAsUtf16); // Compatibility
+				REFLECT_UCSTRING_REF("Text", getText, setText); // Compatibility
 #else
 				REFLECT_STRING_REF("Text", getText, setText);
 #endif

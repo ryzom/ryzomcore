@@ -104,7 +104,7 @@ bool ShapesExporter::parseConfigFile(const string &filename)
 	catch(const exception &e)
 	{
 		nlwarning("can't parse config file : %s", filename.c_str());
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 		return false;
 	}
 

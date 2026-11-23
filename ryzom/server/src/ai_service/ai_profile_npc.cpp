@@ -30,6 +30,7 @@
 #include "ai_generic_fight.h"
 #include "ai_profile_npc.h"
 #include "group_profile.h"
+#include "ring_scenario_guard.h"
 
 extern bool simulateBug(int bugId);
 
@@ -193,14 +194,19 @@ public:
 	{
 	public:
 		CBotPositionner(RYAI_MAP_CRUNCH::TAStarFlag flags);
-		CBotPositionner(TVerticalPos verticalPos, CAIPos position, RYAI_MAP_CRUNCH::TAStarFlag flag);
+		CBotPositionner(TVerticalPos verticalPos, CAIPos position, const RYAI_MAP_CRUNCH::CWorldPosition &startWorldPos, RYAI_MAP_CRUNCH::TAStarFlag flag);
 		virtual ~CBotPositionner();
 		void setBotAtDest(bool atDest = true);
 		bool isBotAtDest() const;
-
+		void goToStart();
+		
+		// clang-format off
 		CPathCont		_PathCont;
 		CAIPos			_Position;
 		TVerticalPos	_VerticalPos;
+		/// the start position on the layer of its height, not valid for a bot without one (CBotNpc::getStartWorldPos)
+		RYAI_MAP_CRUNCH::CWorldPosition	_StartWorldPos;
+		// clang-format on
 	private:
 		bool			_BotAtDest;
 	};
@@ -318,7 +324,7 @@ void CBotProfileFightNpc::noMoreTarget()
 
 void CBotProfileFightNpc::eventBeginFight()
 {
-	TempSpeaker = _Bot;
+	TempSpeaker = _Bot.ptr();
 	CSpawnBotNpc* spawnable = NLMISC::safe_cast<CSpawnBotNpc*>(_Bot.ptr());
 	CGroupNpc* grpNpc = static_cast<CGroupNpc*>(spawnable->getPersistent().getOwner());
 	grpNpc->processStateEvent(grpNpc->getEventContainer().EventBotBeginFight);
@@ -326,7 +332,7 @@ void CBotProfileFightNpc::eventBeginFight()
 }
 void CBotProfileFightNpc::eventTargetKilled()
 {
-	TempSpeaker = _Bot;
+	TempSpeaker = _Bot.ptr();
 	CSpawnBotNpc* spawnable= NLMISC::safe_cast<CSpawnBotNpc*>(_Bot.ptr());
 	CGroupNpc* grpNpc = static_cast<CGroupNpc*>(spawnable->getPersistent().getOwner());
 	grpNpc->processStateEvent(grpNpc->getEventContainer().EventBotTargetKilled);
@@ -546,8 +552,10 @@ void CGrpProfileFight::updateProfile(uint ticksSinceLastUpdate)
 		}
 		i++;
 	}
-	reorganize(_NpcList.begin(), _NpcList.end());
-
+	// The list is walked by index: the begin of a fight is an event of the group, and a handler
+	// that despawns or spawns bots of the group changes the list (removeBot, addBot).
+	reorganize(_NpcList);
+	
 	// check groups around
 	if (_CheckAround.test())
 	{
@@ -1075,7 +1083,7 @@ void CGrpProfileGuard::updateProfile(uint ticksSinceLastUpdate)
 		for (; first != last; ++first)
 		{
 			const	CAIEntityPhysical *const	ep = (*first)->getSpawnObj();
-			if	(ep->isAlive())
+			if	(ep && ep->isAlive())
 			{
 				switch	(ep->getRyzomType())
 				{
@@ -1257,9 +1265,10 @@ void CGrpProfileTribu::updateProfile(uint ticksSinceLastUpdate)
 			{
 			case BOT_STAND_AT_POS:
 				{
-					CMoveProfile	*moveProf=NLMISC::safe_cast<CMoveProfile*>(_Grp->movingProfile().getAIProfile());
-					moveProf->resumeBot(bot);
-				}
+					CMoveProfile	*moveProf=NLMISC::type_cast<CMoveProfile*>(_Grp->movingProfile().getAIProfile());
+					if (moveProf)
+						moveProf->resumeBot(bot);
+				}							
 				break;
 			case BOT_FIGHT:
 				{
@@ -1789,7 +1798,7 @@ void	CGrpProfileFollowRoute::assignGeometryFromState()
 			nlassertex(_Geometry, ("CGrpProfileFollowRoute : NULL geometry data for group '%s'", persGrp.getFullName().c_str()));
 			if (_Geometry->empty())
 			{
-				nlwarning("CGrpProfileFollowRoute : missing geometry data for group '%s'", persGrp.getFullName().c_str());
+				RYAI_GROUP_WARNING(&persGrp, NLMISC::toString("CGrpProfileFollowRoute : missing geometry data for group '%s'", persGrp.getFullName().c_str()));
 			}
 		}
 		else
@@ -1809,13 +1818,15 @@ void	CGrpProfileFollowRoute::assignGeometryFromState()
 	const	CAIStatePositional	*const	sp = static_cast<const	CAIStatePositional	*const>(state);
 	if	(!sp->shape().hasPoints() && (_GeometryComeFromState))
 	{
-		nlwarning("Error, no position in state '%s'%s",
+		RYAI_GROUP_WARNING(&pgrp, NLMISC::toString("Error, no position in state '%s'%s",
 			sp->getAliasFullName().c_str(),
-			sp->getAliasString().c_str());
+			sp->getAliasString().c_str()));
 	}
 	else
 	{
 		_Geometry = &(sp->shape().getGeometry());
+		// the rule of the new state's shape, for the searches that fall back on it
+		_VerticalPos = sp->shape().getVerticalPos();
 		_GeometryComeFromState = true;
 		_MustCalcRatios = true;
 	}
@@ -1909,7 +1920,7 @@ void	CGrpProfileFollowRoute::setCurrentValidPos	(TVerticalPos verticalPos)
 #if !FINAL_VERSION
 		nlassert(index < _Geometry->size());
 #endif
-		_PathCont.setDestination	(verticalPos, (*_Geometry)[index]);
+		_PathCont.setDestinationKeepingLayer(verticalPos, (*_Geometry)[index]);
 	}
 
 	FOREACH(it, TBotFollowerMap, _NpcList)
@@ -2002,6 +2013,14 @@ void CGrpProfileFollowRoute::updateProfile(uint ticksSinceLastUpdate)
 		if	(botFollower.isBotAtDest())
 		{
 			nbAtDest++;
+			// Once the profile is over an arrived bot stands, like the ones still on their way below: left following
+			// its path it would be pushed by the players and bots against it, with nothing to bring it back.
+			if (_ProfileTerminated)
+			{
+				CSpawnBot *sbot = it->first->getSpawnObj();
+				if (sbot && sbot->isAlive() && sbot->getAIProfileType() == BOT_FOLLOW_POS)
+					sbot->setAIProfile(new CBotProfileStandAtPos(sbot));
+			}
 			continue;
 		}
 
@@ -2153,9 +2172,9 @@ void CGrpProfileStandOnVertices::beginProfile()
 		||	!grpState->isPositional())
 	{
 		if (grpState)
-			nlwarning("CGrpProfileStandOnVertices::beginProfile : grpState without valid points %s for group %s", grpState->getAliasFullName().c_str(), NpcGrp->getPersistent().getFullName().c_str());
+			RYAI_GROUP_WARNING(&NpcGrp->getPersistent(), NLMISC::toString("CGrpProfileStandOnVertices::beginProfile : grpState without valid points %s for group %s", grpState->getAliasFullName().c_str(), NpcGrp->getPersistent().getFullName().c_str()));
 		else
-			nlwarning("CGrpProfileStandOnVertices::beginProfile : invalid no grpState for group %s", NpcGrp->getPersistent().getFullName().c_str());
+			RYAI_GROUP_WARNING(&NpcGrp->getPersistent(), NLMISC::toString("CGrpProfileStandOnVertices::beginProfile : invalid no grpState for group %s", NpcGrp->getPersistent().getFullName().c_str()));
 	}
 	setCurrentValidPos	(grpState);
 	_Finished=false;
@@ -2167,7 +2186,7 @@ void CGrpProfileStandOnVertices::setCurrentValidPos(CAIStatePositional *grpState
 	{
 		CBotPositionner	*botPos=(*it).second;
 		botPos->setBotAtDest(false);
-		botPos->_PathCont.setDestination(grpState->shape().getVerticalPos(), *grpState->shape().point(botPos->_GeomIndex));
+		botPos->_PathCont.setDestinationKeepingLayer(grpState->shape().getVerticalPos(), *grpState->shape().point(botPos->_GeomIndex));
 	}
 }
 
@@ -2216,7 +2235,7 @@ void	CGrpProfileStandOnVertices::addBot	(CBot	*bot)
 
 	if ( grpState->shape().numPoints() < 1 )
 	{
-		nlwarning("CGrpProfileStandOnVertices : group state '%s'%s: no vertice !", grpState->getAliasFullName().c_str(),  grpState->getAliasString().c_str());
+		RYAI_GROUP_WARNING(&grp, NLMISC::toString("CGrpProfileStandOnVertices : group state '%s'%s: no vertice !", grpState->getAliasFullName().c_str(),  grpState->getAliasString().c_str()));
 		return;
 	}
 
@@ -2566,9 +2585,9 @@ void CGrpProfileWander::affectZoneFromStateMachine()
 	if	(!sp->shape().hasPoints())
 	{
 		if (sp->getAliasNode())
-			nlwarning("Error, no position in state %s", sp->getAliasNode()->fullName().c_str());
+			RYAI_GROUP_WARNING(&pgrp, NLMISC::toString("Error, no position in state %s", sp->getAliasNode()->fullName().c_str()));
 		else
-			nlwarning("Error, no position in state %s", sp->getName().c_str());
+			RYAI_GROUP_WARNING(&pgrp, NLMISC::toString("Error, no position in state %s", sp->getName().c_str()));
 	}
 	if (sp->shape().hasPatat())
 		_RandomPos=&(sp->shape());
@@ -2805,7 +2824,7 @@ void CGrpProfileWander::updateProfile(uint ticksSinceLastUpdate)
 				CAIState const* const state = pgrp.getActiveState();
 				if (state != NULL)
 					stateName = state->getAliasFullName();
-				nlwarning("No valid wander position for state '%s'", stateName.c_str());
+				RYAI_GROUP_WARNING(&pgrp, NLMISC::toString("No valid wander position for state '%s'", stateName.c_str()));
 				return;
 			}
 		}
@@ -3155,13 +3174,26 @@ CGrpProfileStandAtStartPoint::CBotPositionner::CBotPositionner(RYAI_MAP_CRUNCH::
 {
 }
 
-CGrpProfileStandAtStartPoint::CBotPositionner::CBotPositionner(TVerticalPos verticalPos, CAIPos position, RYAI_MAP_CRUNCH::TAStarFlag	flag)
+CGrpProfileStandAtStartPoint::CBotPositionner::CBotPositionner(TVerticalPos verticalPos, CAIPos position, const RYAI_MAP_CRUNCH::CWorldPosition &startWorldPos, RYAI_MAP_CRUNCH::TAStarFlag flag)
 : _PathCont(flag)
 , _Position(position)
 , _VerticalPos(verticalPos)
+, _StartWorldPos(startWorldPos)
 , _BotAtDest(false)
 {
-	_PathCont.setDestination(verticalPos, position);
+	goToStart();
+}
+		
+void CGrpProfileStandAtStartPoint::CBotPositionner::goToStart()
+{
+	if (_StartWorldPos.isValid())
+	{
+		// the start position itself, on the layer of its height
+		const CAIVector start(_Position);
+		_PathCont.setDestinationKeepingLayer(_VerticalPos, _StartWorldPos, &start);
+	}
+	else
+		_PathCont.setDestination(_VerticalPos, _Position);
 }
 
 CGrpProfileStandAtStartPoint::CBotPositionner::~CBotPositionner()
@@ -3229,9 +3261,9 @@ void CGrpProfileStandAtStartPoint::addBot(CBot* bot)
 	CGroupNpc& grp = botNpc->grp();
 #ifdef NL_DEBUG
 	nlassert(grp.getSpawnObj());
-#endif
-	CAIStatePositional *grpState=NLMISC::safe_cast<CAIStatePositional *>(grp.getCAIState());
-	_NpcList[bot]=new	CBotPositionner	(botNpc->getStartVerticalPos(), botNpc->getStartPos(), botNpc->getGroup().getAStarFlag());
+#endif		
+	CAIStatePositional *grpState=NLMISC::safe_cast<CAIStatePositional *>(grp.getCAIState());		
+	_NpcList[bot] = new CBotPositionner(botNpc->getStartVerticalPos(), botNpc->getStartPos(), botNpc->getStartWorldPos(), botNpc->getGroup().getAStarFlag());
 
 	CSpawnBot	*const	sbot=bot->getSpawnObj();
 	if	(sbot)
@@ -3257,7 +3289,7 @@ void CGrpProfileStandAtStartPoint::setCurrentValidPos()
 	{
 		CBotPositionner	*botPos=(*it).second;
 		botPos->setBotAtDest(false);
-		botPos->_PathCont.setDestination(botPos->_VerticalPos, botPos->_Position);
+		botPos->goToStart();
 	}
 
 }
@@ -3492,7 +3524,8 @@ void CGrpProfileEscorted::updateProfile(uint ticksSinceLastUpdate)
 			setGroupFighting	(false);
 
 			_Grp->fightProfile().setAIProfile(NULL);
-			(NLMISC::safe_cast<CMoveProfile*>(_Grp->movingProfile().getAIProfile()))->resumeProfile	();
+			if (_Grp->movingProfile().getAIProfile())
+				(NLMISC::safe_cast<CMoveProfile*>(_Grp->movingProfile().getAIProfile()))->resumeProfile	();
 		}
 	}
 	else
@@ -4198,7 +4231,7 @@ void CBotProfileMoveTo::beginProfile()
 {
 	PROFILE_LOG("bot", "move_to", "begin", "");
 	_LastPos = CAIVector(_Bot->pos());
-	_PathCont.setDestination(_VerticalPos, _Dest);
+	_PathCont.setDestinationKeepingLayer(_VerticalPos, _Dest);
 	_Status = CFollowPath::FOLLOWING;
 }
 

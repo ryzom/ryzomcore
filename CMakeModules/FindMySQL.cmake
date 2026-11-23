@@ -12,6 +12,11 @@
 find_package(PkgConfig QUIET)
 pkg_check_modules(PC_MYSQL QUIET libmysql)
 pkg_check_modules(PC_MARIADB QUIET libmariadb)
+IF(APPLE)
+  # MySQL's own module name, which Homebrew's mysql links into its pkg-config path; the Linux
+  # packages, which ship it too, are found by the search below as before
+  pkg_check_modules(PC_MYSQLCLIENT QUIET mysqlclient)
+ENDIF()
 
 if(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARIES)
    SET(MYSQL_FOUND TRUE)
@@ -23,6 +28,10 @@ elseif (PC_MARIADB_FOUND)
   SET(MYSQL_FOUND TRUE)
   set(MYSQL_INCLUDE_DIR ${PC_MARIADB_INCLUDE_DIRS})
   SET(MYSQL_LIBRARIES ${PC_MARIADB_LINK_LIBRARIES})
+elseif (PC_MYSQLCLIENT_FOUND)
+  SET(MYSQL_FOUND TRUE)
+  set(MYSQL_INCLUDE_DIR ${PC_MYSQLCLIENT_INCLUDE_DIRS})
+  SET(MYSQL_LIBRARIES ${PC_MYSQLCLIENT_LINK_LIBRARIES})
 else()
 
   FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
@@ -35,6 +44,9 @@ else()
       /opt/local/include/mysql5/mysql
       /opt/local/include/mysql55/mysql
       /opt/local/include/mysql51/mysql
+      /usr/local/mysql/include
+      /opt/homebrew/opt/mysql-client/include
+      /usr/local/opt/mysql-client/include
       $ENV{ProgramFiles}/MySQL/*/include
       $ENV{SystemDrive}/MySQL/*/include)
 
@@ -59,6 +71,9 @@ else()
       /opt/local/lib/mysql5/mysql
       /opt/local/lib/mysql55/mysql
       /opt/local/lib/mysql51/mysql
+      /usr/local/mysql/lib
+      /opt/homebrew/opt/mysql-client/lib
+      /usr/local/opt/mysql-client/lib
       )
 
     FIND_LIBRARY(MYSQL_LIBRARY_DEBUG NAMES mysqlclientd mariadbclientd
@@ -70,6 +85,9 @@ else()
       /opt/local/lib/mysql5/mysql
       /opt/local/lib/mysql55/mysql
       /opt/local/lib/mysql51/mysql
+      /usr/local/mysql/lib
+      /opt/homebrew/opt/mysql-client/lib
+      /usr/local/opt/mysql-client/lib
       )
   ENDIF()
 

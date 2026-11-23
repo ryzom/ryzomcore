@@ -178,7 +178,7 @@ void CDownloadTask::doTask(const CTaskDesc &newTask)
 
 					for (uint k = 0; k < InfoOnPatch.NonOptCat.size(); ++k)
 					{
-						nlwarning(InfoOnPatch.NonOptCat[k].Name.c_str());
+						nlwarning("%s", InfoOnPatch.NonOptCat[k].Name.c_str());
 					}
 
 					nlwarning("Required categories : ");
@@ -186,7 +186,7 @@ void CDownloadTask::doTask(const CTaskDesc &newTask)
 
 					for (uint k = 0; k < InfoOnPatch.ReqCat.size(); ++k)
 					{
-						nlwarning(InfoOnPatch.ReqCat[k].Name.c_str());
+						nlwarning("%s", InfoOnPatch.ReqCat[k].Name.c_str());
 					}
 
 					nlwarning("Optionnal categories : ");
@@ -194,7 +194,7 @@ void CDownloadTask::doTask(const CTaskDesc &newTask)
 
 					for (uint k = 0; k < InfoOnPatch.OptCat.size(); ++k)
 					{
-						nlwarning(InfoOnPatch.OptCat[k].Name.c_str());
+						nlwarning("%s", InfoOnPatch.OptCat[k].Name.c_str());
 					}
 
 					Parent->_AvailablePatchs = InfoOnPatch.getAvailablePatchsBitfield();					
@@ -980,7 +980,7 @@ void CClient_background_downloaderDlg::handleClientMessage(NLMISC::CMemStream &i
 	}
 	catch (EStream &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 		nlwarning("BG DOWNLOADER PROTOCOL : Stream error");
 		protocolError();
 	}

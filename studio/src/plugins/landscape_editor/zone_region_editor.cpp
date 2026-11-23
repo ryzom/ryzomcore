@@ -35,6 +35,7 @@ namespace LandscapeEditor
 ZoneRegionObject::ZoneRegionObject()
 {
 	m_fileName = "";
+	m_modified = false;
 }
 
 ZoneRegionObject::~ZoneRegionObject()
@@ -89,10 +90,10 @@ bool ZoneRegionObject::save()
 				NLMISC::COXml xmlOut;
 				xmlOut.init(&fileOut);
 				m_zoneRegion.serial(xmlOut);
-				// Done
-				m_modified = false;
 			}
 			fileOut.close();
+			// Done: the file is saved once the close has put it in its place
+			m_modified = false;
 		}
 		else
 		{

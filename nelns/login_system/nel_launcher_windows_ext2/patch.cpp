@@ -98,7 +98,7 @@ string deleteFile (const string &filename, bool throwException=true)
 	if (!NLMISC::CFile::deleteFile(filename))
 	{
 		string str = toString("Can't delete '%s' file : code=%d %s (error code 19)", filename.c_str(), errno, strerror(errno));
-		nlwarning (str.c_str());
+		nlwarning ("%s", str.c_str());
 		if(throwException)
 			throw Exception (str);
 		return str;
@@ -890,7 +890,7 @@ private:
 		char *str;
 		NLMISC_CONVERT_VARGS (str, format, 256);
 		if (info && VerboseLog)
-			nlinfo (str);
+			nlinfo ("%s", str);
 		State = str;
 		if(log)
 		{ 

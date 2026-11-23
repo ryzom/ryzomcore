@@ -551,21 +551,17 @@ namespace NLGUI
 				result.setDouble ((elem->*(pRP->GetMethod.GetFloat))());
 			break;
 			case CReflectedProperty::String:
-				result.setString ((elem->*(pRP->GetMethod.GetString))());
-			break;
 #ifdef RYZOM_LUA_UCSTRING
 			case CReflectedProperty::UCString:
-				result.setString ((elem->*(pRP->GetMethod.GetUCString))().toUtf8());
-			break;
 #endif
-			case CReflectedProperty::StringRef:
-				result.setString ((elem->*(pRP->GetMethod.GetStringRef))());
+				result.setString ((elem->*(pRP->GetMethod.GetString))());
 			break;
+			case CReflectedProperty::StringRef:
 #ifdef RYZOM_LUA_UCSTRING
 			case CReflectedProperty::UCStringRef:
-				result.setString ((elem->*(pRP->GetMethod.GetUCStringRef))().toUtf8());
-			break;
 #endif
+				result.setString ((elem->*(pRP->GetMethod.GetStringRef))());
+			break;
 			case CReflectedProperty::RGBA:
 				result.setRGBA ((elem->*(pRP->GetMethod.GetRGBA))());
 			break;

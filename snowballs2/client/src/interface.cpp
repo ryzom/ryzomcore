@@ -231,7 +231,7 @@ void	releaseInterface()
 void	askString (const string &queryString, const string &defaultString, sint prompt, const CRGBA &color)
 {
   nldebug("called askString");
-nlinfo(queryString.c_str());	
+nlinfo("%s", queryString.c_str());	
 	QueryString = queryString;
 	
 	if (prompt == 2)

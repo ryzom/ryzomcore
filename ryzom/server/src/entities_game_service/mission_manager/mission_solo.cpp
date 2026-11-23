@@ -42,42 +42,53 @@ void CMissionSolo::updateUsersJournalEntry()
 		return;
 	}
 	updateUserJournalEntry( *user, "" );
+
+	// the CSR that monitors the missions of the character has them in its own journal, at the same entries
+	CCharacter * csr = PlayerManager.getChar( user->getMonitoringCSR() );
+	if ( csr )
+		updateUserJournalEntry( *csr, "", true );
 }
 
 void CMissionSolo::clearUsersJournalEntry()
-{	
+{
+	// a mission hidden from the journal has no entry (0xFF)
+	if ( _ClientIndex == 0xFF )
+		return;
+
 	CCharacter * user = PlayerManager.getChar( _Taker );
 	if ( user )
 	{
-		CBankAccessor_PLR::TMISSIONS::TArray &missionItem = CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TYPE",_ClientIndex), 0);
-		missionItem.setTYPE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:ICON",_ClientIndex), 0);
-		missionItem.setICON(user->_PropertyDatabase, CSheetId::Unknown);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TITLE",_ClientIndex), 0);
-		missionItem.setTITLE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:DETAIL_TEXT",_ClientIndex), 0);
-		missionItem.setDETAIL_TEXT(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:END_DATE",_ClientIndex), 0 );
-		missionItem.setEND_DATE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:BEGIN_DATE",_ClientIndex), 0 );
-		missionItem.setBEGIN_DATE(user->_PropertyDatabase, 0);
-		for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
-		{
-			CBankAccessor_PLR::TMISSIONS::TArray::TTARGET &targetItem = CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(i);
+		clearJournalEntry( *user, _ClientIndex );
 
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TARGET%u:TITLE",_ClientIndex,i), 0);
-			targetItem.setTITLE(user->_PropertyDatabase, 0);
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TARGET%u:X",_ClientIndex,i), 0);
-			targetItem.setX(user->_PropertyDatabase, 0);
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TARGET%u:Y",_ClientIndex,i), 0);
-			targetItem.setY(user->_PropertyDatabase, 0);
-		}
-		for (uint i = 0; i < NB_STEP_PER_MISSION; i++)
-		{
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:GOALS:%u:TEXT",_ClientIndex,i), 0);
-			missionItem.getGOALS().getArray(i).setTEXT(user->_PropertyDatabase, 0);
-		}	
+		// the CSR that monitors the missions of the character has them in its own journal, at the same entries
+		CCharacter * csr = PlayerManager.getChar( user->getMonitoringCSR() );
+		if ( csr )
+			clearJournalEntry( *csr, _ClientIndex );
+	}
+}
+
+//----------------------------------------------------------------------------
+void CMissionSolo::clearJournalEntry( CCharacter & user, uint8 clientIndex )
+{
+	CBankAccessor_PLR::TMISSIONS::TArray &missionItem = CBankAccessor_PLR::getMISSIONS().getArray(clientIndex);
+	missionItem.setTYPE(user._PropertyDatabase, 0);
+	missionItem.setICON(user._PropertyDatabase, CSheetId::Unknown);
+	missionItem.setTITLE(user._PropertyDatabase, 0);
+	missionItem.setDETAIL_TEXT(user._PropertyDatabase, 0);
+	missionItem.setEND_DATE(user._PropertyDatabase, 0);
+	missionItem.setBEGIN_DATE(user._PropertyDatabase, 0);
+	// the mission queue sets SLEEP but does not reset it when the mission leaves the queue
+	missionItem.setSLEEP(user._PropertyDatabase, 0);
+	for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
+	{
+		CBankAccessor_PLR::TMISSIONS::TArray::TTARGET &targetItem = missionItem.getTARGET(i);
+		targetItem.setTITLE(user._PropertyDatabase, 0);
+		targetItem.setX(user._PropertyDatabase, 0);
+		targetItem.setY(user._PropertyDatabase, 0);
+	}
+	for (uint i = 0; i < NB_STEP_PER_MISSION; i++)
+	{
+		missionItem.getGOALS().getArray(i).setTEXT(user._PropertyDatabase, 0);
 	}
 }
 
@@ -123,15 +134,21 @@ void CMissionSolo::stopChildren()
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	if (templ == NULL)
 		return;
+	// a child's failure actions can remove this mission (game_event_reset): nothing of it is read in the loop
+	const TDataSetRow taker = _Taker;
 	for ( uint i = 0; i < templ->ChildrenMissions.size(); i++ )
 	{
 		const CMissionTemplate * child = CMissionManager::getInstance()->getTemplate( templ->ChildrenMissions[i] );
 		if ( child )
 		{
-			for ( uint j = 0; j < child->Instances.size(); j++ )
+			// a failed instance leaves Instances (see CMissionTemplate::isInstance)
+			const std::vector<CMission *> instances = child->Instances;
+			for (uint j = 0; j < instances.size(); j++)
 			{
-				CMissionSolo * mission = dynamic_cast<CMissionSolo*>( child->Instances[j] );
-				if ( mission && mission->_Taker == _Taker )
+				if (!child->isInstance(instances[j]))
+					continue;
+				CMissionSolo *mission = dynamic_cast<CMissionSolo *>(instances[j]);
+				if (mission && mission->_Taker == taker)
 					mission->onFailure( true,false );
 			}
 		}
@@ -146,7 +163,11 @@ void CMissionSolo::onFailure(bool ignoreJumps, bool sendMessage)
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	if (templ == NULL)
 		return;
+	// the events of the failure actions can remove this mission
+	NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 	CMission::onFailure(ignoreJumps);
+	if (self == NULL)
+		return;
 
 	if ( getProcessingState() == CMissionBaseBehaviour::Normal  )
 	{
@@ -189,10 +210,18 @@ void CMissionSolo::forceSuccess()
 		user->addSuccessfulMissions( *templ );
 		if ( !templ->Tags.NoList && !templ->Tags.AutoRemove )
 			CCharacter::sendDynamicSystemMessage( user->getId(), isChained()?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
-		CMissionManager::getInstance()->missionDoneOnce(templ);
-		stopChildren();
-		user->processMissionEvent( event );
-		
+		// the failure actions of the other instances or of the children can remove this mission (game_event_reset) or
+		// end it (fail_mission_cat, a nested success): the event is still processed, and nothing of this mission is used
+		NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
+		CMissionManager::getInstance()->missionDoneOnce(templ, this);
+		if (self != nullptr)
+			stopChildren();
+		if (self == nullptr || getFinished())
+		{
+			user->processMissionEvent(event);
+			return;
+		}
+
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || isChained() || templ->Tags.AutoRemove )
 		{
@@ -203,6 +232,10 @@ void CMissionSolo::forceSuccess()
 		{
 			setSuccessFlag();
 		}
+
+		// The mission is done before the event, as when its last step ends: the event can end a parent mission, which
+		// removes its children, this one among them. Nothing of this mission is used from here
+		user->processMissionEvent(event);
 	}
 	else
 		nlwarning("<MISSIONS> alias %s : invalid user", CPrimitivesParser::aliasToString(templ->Alias).c_str());

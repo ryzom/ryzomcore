@@ -30,7 +30,11 @@ IF(WITH_3D)
   ENDIF() #hunter
 
   IF(WITH_NEL_CEGUI)
-    FIND_PACKAGE(CEGUI)
+    FIND_PACKAGE(CEGUI REQUIRED)
+    # FindCEGUI does not stop on its own
+    IF(NOT CEGUI_FOUND)
+      MESSAGE(FATAL_ERROR "WITH_NEL_CEGUI needs CEGUI (the CEGUIBase library and its headers), which was not found: set CEGUI_DIR, or CEGUI_LIBRARY and CEGUI_INCLUDE_DIRS, or turn WITH_NEL_CEGUI off")
+    ENDIF()
   ENDIF()
 ENDIF()
 
@@ -67,6 +71,23 @@ IF(WITH_INSTALL_LIBRARIES)
     SET(enable_3d ${WITH_3D})
     SET(enable_pacs ${WITH_PACS})
     SET(enable_sound ${WITH_SOUND})
+    # the definitions the NeL headers need, which NeL::misc gives to CMake projects, for nel-config and the .pc files
+    # (the build type of a single-configuration build: a multi-configuration generator has none to give here)
+    STRING(TOUPPER "${CMAKE_BUILD_TYPE}" NL_PC_BUILD_TYPE)
+    IF(NL_PC_BUILD_TYPE STREQUAL "DEBUG")
+      SET(NL_PC_CFLAGS "-DNL_DEBUG")
+    ELSE()
+      SET(NL_PC_CFLAGS "-DNL_RELEASE")
+    ENDIF()
+    IF(WITH_SSE2)
+      STRING(APPEND NL_PC_CFLAGS " -DNL_HAS_SSE2")
+      IF(WITH_SSE3)
+        STRING(APPEND NL_PC_CFLAGS " -DNL_HAS_SSE3")
+      ENDIF()
+    ENDIF()
+    FOREACH(NL_PC_DEFINITION ${NL_PUBLIC_DEFINITIONS})
+      STRING(APPEND NL_PC_CFLAGS " -D${NL_PC_DEFINITION}")
+    ENDFOREACH()
     CONFIGURE_FILE(nel-config.in ${CMAKE_CURRENT_BINARY_DIR}/nel-config)
 
     INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/nel-config DESTINATION ${NL_BIN_PREFIX})
@@ -91,11 +112,20 @@ include(CMakePackageConfigHelpers)
 
 set(project_namespace "${PROJECT_NAME}")
 set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
-set(package_components 3d georges gui ligo misc net pacs sevenzip sound snd_lowlevel) # TODO append in components to have actual list of build targets
-set(package_required_dependencies CURL Freetype)
-set(package_georges_dependencies LibXml2)
-set(package_gui_dependencies Lua Luabind)
+# the components are the NeL libraries this build has
+set(package_components)
+foreach(package_component 3d georges gui ligo logic misc net pacs sevenzip snd_lowlevel sound web)
+  if(TARGET NeL::${package_component})
+    list(APPEND package_components ${package_component})
+  endif()
+endforeach()
+set(package_required_dependencies LibXml2) # LibXml2 for misc, which links it PUBLIC
+if(FREETYPE_FOUND)
+  set(package_3d_dependencies Freetype)
+endif()
+set(package_gui_dependencies CURL Lua Luabind)
 set(package_sound_dependencies Vorbis)
+set(package_web_dependencies CURL)
 
 
 set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")

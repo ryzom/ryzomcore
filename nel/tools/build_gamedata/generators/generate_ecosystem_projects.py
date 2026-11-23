@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../configuration")
 if os.path.isfile("generate_ecosystem_projects.log"):
 	os.remove("generate_ecosystem_projects.log")
@@ -110,8 +110,8 @@ def transformLine(line):
 	return newline
 
 def generateFile(sourceFile, destFile):
-	srcf = open(sourceFile, "r")
-	dstf = open(destFile, "w")
+	srcf = open(sourceFile, "r", encoding="utf-8", errors="surrogateescape")
+	dstf = open(destFile, "w", encoding="utf-8", errors="surrogateescape")
 	printLog(log, "WRITE " + destFile)
 	for line in srcf:
 		dstf.write(transformLine(line))

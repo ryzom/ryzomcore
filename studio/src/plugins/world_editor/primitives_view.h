@@ -42,6 +42,7 @@ namespace WorldEditor
 {
 class PrimitivesTreeModel;
 class WorldEditorScene;
+struct WorldFiles;
 
 /**
 @class PrimitivesView
@@ -60,6 +61,9 @@ public:
 	void setZoneBuilder(LandscapeEditor::ZoneBuilderBase *zoneBuilder);
 	void setWorldScene(WorldEditorScene *worldEditorScene);
 	virtual void setModel(PrimitivesTreeModel *model);
+
+	/// What the window shares with the load commands
+	void setWorldFiles(WorldFiles *files);
 
 private Q_SLOTS:
 	void loadLandscape();
@@ -105,6 +109,7 @@ private:
 	WorldEditorScene *m_worldEditorScene;
 	LandscapeEditor::ZoneBuilderBase *m_zoneBuilder;
 	PrimitivesTreeModel *m_primitivesTreeModel;
+	WorldFiles *m_files;
 };
 
 } /* namespace WorldEditor */

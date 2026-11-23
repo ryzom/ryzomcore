@@ -237,8 +237,8 @@ void CDriverD3D::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot
 	{
 		// Update cursor if modified or not already built
 		CCursor &curs = it->second;
-		hotSpotX = (sint) (hotSpotX - curs.HotspotOffsetX);
-		hotSpotY = (sint) ((curs.OrigHeight - hotSpotY) - curs.HotspotOffsetY);
+		hotSpotX = (sint)(hotSpotX - curs.HotspotOffsetX);
+		hotSpotY = (sint)((curs.OrigHeight - hotSpotY) - curs.HotspotOffsetY);
 		if (curs.Cursor == EmptyCursor ||
 			curs.HotspotScale != _CursorScale ||
 			curs.HotSpotX != hotSpotX ||
@@ -283,18 +283,6 @@ nlCursor CDriverD3D::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 ro
 {
 	nlassert(isAlphaBlendedCursorSupported());
 
-	// use size from mouse texture
-	uint mouseW = src.getWidth();
-	uint mouseH = src.getHeight();
-
-	if (_CursorScale != 1.f)
-	{
-		mouseW *= _CursorScale;
-		mouseH *= _CursorScale;
-		hotSpotX *= _CursorScale;
-		hotSpotY *= _CursorScale;
-	}
-
 	CBitmap rotSrc = src;
 	if (rot > 3) rot = 3; // mimic behavior of 'CViewRenderer::drawRotFlipBitmapTiled' (why not rot & 3 ??? ...)
 	switch(rot)
@@ -304,6 +292,23 @@ nlCursor CDriverD3D::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 ro
 		case 2: rotSrc.rot90CW(); rotSrc.rot90CW(); break;
 		case 3: rotSrc.rot90CCW(); break;
 	}
+
+	// use size from mouse texture, as rotated: a cursor bitmap need not be square
+	uint mouseW = rotSrc.getWidth();
+	uint mouseH = rotSrc.getHeight();
+
+	if (_CursorScale != 1.f)
+	{
+		// a cursor keeps at least one pixel, whatever scale it is given
+		mouseW = (uint)std::max(mouseW * _CursorScale, 1.f);
+		mouseH = (uint)std::max(mouseH * _CursorScale, 1.f);
+		hotSpotX = (sint)(hotSpotX * _CursorScale);
+		hotSpotY = (sint)(hotSpotY * _CursorScale);
+	}
+
+	// the hotspot has to be in the cursor (it is not rotated with the bitmap)
+	clamp(hotSpotX, 0, (sint)mouseW - 1);
+	clamp(hotSpotY, 0, (sint)mouseH - 1);
 
 	// create a cursor from bitmap
 	nlCursor result = NULL;
@@ -355,6 +360,10 @@ void CDriverD3D::setMousePos(float x, float y)
 	H_AUTO_D3D(CDriverD3D_setMousePos);
 
 	if (_HWnd == EmptyWindow || !_WindowFocus)
+		return;
+
+	// a window behind another one, on another virtual desktop or not activated leaves the pointer where the user has it
+	if (!mayMoveSystemCursor())
 		return;
 
 	// convert position size from float to pixels
@@ -437,6 +446,13 @@ bool CDriverD3D::isSystemCursorInClientArea()
 	}
 
 	return true;
+}
+
+// ***************************************************************************
+bool CDriverD3D::mayMoveSystemCursor()
+{
+	// the window of a host application (a NeL view in an editor) is in the foreground with its top level window
+	return _WindowActivation && _HWnd != EmptyWindow && GetAncestor(_HWnd, GA_ROOT) == GetForegroundWindow();
 }
 
 // ***************************************************************************

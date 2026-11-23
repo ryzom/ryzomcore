@@ -76,7 +76,7 @@ bool CGroupQuickHelp::submitEvent (const char *event)
 			// Update the text
 			updateParagraph ();
 
-			CLuaManager::getInstance().executeLuaScript(toString("\ngame:processTutorialEvent(\"%s\")\n", event), true);
+			CLuaManager::getInstance().callMethod("game", "processTutorialEvent", event);
 		}
 	}
 	return false;
@@ -254,8 +254,10 @@ void CGroupQuickHelp::beginElement(CHtmlElement &elm)
 			break;
 
 	case HTML_P:
-		// Get the action name
-		if (elm.hasAttribute("quick_help_events"))
+		// Get the action name. Only a page of a trusted domain is a quick help (the help pages of the client
+		// are local files, which are trusted): a step runs its link when it is shown, and the link can name
+		// action handlers.
+		if (_TrustedDomain && elm.hasAttribute("quick_help_events"))
 		{
 			// This page is a quick help
 			_IsQuickHelp = true;
@@ -296,7 +298,8 @@ std::string CGroupQuickHelp::getLanguageUrl(const std::string &href, std::string
 {
 	std::string uri = href;
 
-	if (uri.size() < 5 || uri.substr(0, 5) == "http://" || uri.substr(0, 6) == "https://")
+	// a web page has no language version here
+	if (uri.size() < 5 || startsWithCaseInsensitiveAscii(uri, "http://") || startsWithCaseInsensitiveAscii(uri, "https://") || startsWith(uri, "//"))
 	{
 		return uri;
 	}
@@ -325,7 +328,9 @@ std::string CGroupQuickHelp::getLanguageUrl(const std::string &href, std::string
 		{
 			fname = uri;
 		}
-		if (CPath::lookup(fname, false) == "" && lang != "en")
+		// in the search paths only, as CGroupHTML::lookupLocalFile: the name comes from a link, and is never opened as
+		// a path (Windows opens a network path, sending the user's credentials to its host)
+		if (CPath::lookup(fname, false, true, false) == "" && lang != "en")
 		{
 			uri = getLanguageUrl(href, "en");
 		}

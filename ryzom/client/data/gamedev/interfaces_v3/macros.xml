@@ -239,6 +239,11 @@
 	<action name="uimMacroExec" handler="macros_exec"  icon="r2ed_tool_start.tga"/>
 	<action name="uimMacroEdit" handler="macros_edit" icon="r2ed_edit_dialog_small.tga" />
 	<action name="uimMacroCopy" handler="macros_copy" icon="r2ed_tool_copy.tga" />
+	<action id="macro_chat_link" name="uiChatLinkMenuMacro" icon="ico_range.tga">
+		<action id="main" name="uiMainChat" handler="macros_chat_link" params="destination=main" />
+		<action id="tell" name="uimTell" handler="macros_chat_link" params="destination=tell" />
+		<action id="clipboard" name="uiChatLinkClipboard" handler="macros_chat_link" params="destination=clipboard" />
+	</action>
 	<action name="uimMacroUnassign"	handler="macros_unassign" icon="" />
 	<separator/>
 	<action name="uimMacroDel"	handler="macros_del" icon="patch_off.tga" />
@@ -289,7 +294,9 @@
 
 <!-- MACROS MAIN CONTAINER -->
 <!-- This container holds in its content 'element_macro' instances of the macros -->
-<group type="container" id="macros" w="420" h="512" title="uiMacrosTitle" resizer="false" openable="false" 
+<!-- Resizable in height only: the macro lines are 420 wide -->
+<group type="container" id="macros" w="420" h="340" title="uiMacrosTitle" resizer="true" openable="false"
+	pop_min_w="420" pop_max_w="420" pop_min_h="120" pop_max_h="1600"
 	global_color="false" opened="true" header_color="UI:SAVE:WIN:COLORS:OPT"
 	movable="true" active="false"
 	on_active="proc" on_active_params="proc_macros_open"
@@ -306,15 +313,14 @@
 		 
 		 
 		<ctrl style="new_element_header" id="add_button" posref="MR MR" x="-16" y="0" wmargin="8" hardtext="uittNewMacro"
-				 onclick_l="macros_new_macro" />
-
+				 onclick_l="macros_new_macro" />					
 		<ctrl style="new_element_header" id="save_button" posparent="add_button" posref="ML MR" x="-4" y="0" wmargin="8" hardtext="uiSaveUI"
 				 onclick_l="save_ui" />
 
 	</group>
 
-	<group id="content" x="0" y="0" over="true" child_resize_h="true" child_resize_hmargin="4" posref="TL TL" >
-		<group id="macros" x="10" y="-4" sizeref="w" posref="TL TL" child_resize_h="true" max_h="300" >
+	<group id="content" x="0" y="0" over="true" sizeref="wh" w="0" h="0" posref="TL TL" >
+		<group id="macros" x="10" y="-4" sizeref="w" posref="TL TL" child_resize_h="true" max_sizeparent="parent" max_sizeref="h" max_h="-8" >
 			<group id="list" type="list" x="0" y="0" posref="TL TL" />
 		</group>
 		<ctrl style="skin_scroll" id="sv" posref="TL TL" y="-4" target="macros" />

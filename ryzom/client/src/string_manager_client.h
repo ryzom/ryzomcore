@@ -65,6 +65,9 @@ public:
 	void flushStringCache();
 
 	bool getString(uint32 stringId, std::string &result);
+	/// The text of a string id the shard has sent, as getString gives it, or false when it has not arrived; unlike
+	/// getString it never asks the shard for it
+	bool getReceivedString(uint32 stringId, std::string &result) const;
 	void waitString(uint32 stringId, const IStringWaiterRemover *premover, std::string *result);
 	void waitString(uint32 stringId, IStringWaitCallback *pcallback);
 	bool getDynString(uint32 dynStringId, std::string &result);
@@ -110,7 +113,7 @@ public:
 	static const char *getSPhraseLocalizedDescription(NLMISC::CSheetId id);
 
 	// Get the Localized Title name
-	static const char *getTitleLocalizedName(const std::string &titleId, bool women);
+	static std::string getTitleLocalizedName(const std::string &titleId, bool women);
 	static const char *getLocalizedName(const std::string &text);
 	static std::vector<std::string> getTitleInfos(const std::string &titleId, bool women);
 
@@ -298,7 +301,6 @@ private:
 	static bool _SpecItem_MemoryCompressed;
 
 	static	std::map<std::string, CItem> _SpecItem_TempMap;
-	static std::vector<std::string> _TitleWords;
 	static std::map<std::string, std::string> _DynStrings;
 
 

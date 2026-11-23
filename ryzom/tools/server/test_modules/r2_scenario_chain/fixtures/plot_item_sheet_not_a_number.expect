@@ -1,0 +1,18 @@
+# Plot items whose sheet is not a number, as a file made by hand can have them: the name of a sheet, no
+# sheet at all, and a long text. The update leaves them as they are, and tells the author which plot
+# items they are, with what each has for its sheet (a long text cut to 40 characters). The translation
+# of the scenario fails on such a plot item, as before: the note is what names the plot item.
+
+upgrade: unchanged
+version_update: unchanged
+version_update_note: uiR2EDVersionNotePlotItemUnknown(Named sheet, r2_plot_item_0.sitem)
+version_update_note: uiR2EDVersionNotePlotItemUnknown(No sheet, nil)
+version_update_note: uiR2EDVersionNotePlotItemUnknown(Long text, 0123456789012345678901234567890123456789...)
+no_line: version_update_note: uiR2EDVersionNotePlotItemIcon
+absent: version_update_failure
+
+scenario_vs_file: same
+save: ok
+roundtrip: ok
+translate: fail
+result: 6

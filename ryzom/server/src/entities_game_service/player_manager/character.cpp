@@ -75,6 +75,7 @@
 #include "game_share/r2_share_itf.h"
 
 #include "server_share/r2_vision.h"
+#include "server_share/client_refusal.h"
 
 #include "egs_sheets/egs_sheets.h"
 #include "player_manager/character.h"
@@ -220,7 +221,11 @@ extern vector<CMainlandSummary> Mainlands;
 CVariable<uint32> SpawnedDeadMektoubDelay("egs", "SpawnedDeadMektoubDelay", "nb tick before a dead mektoub despawn)", 2592000, 0, true);
 CVariable<bool> ForceQuarteringRight("egs", "ForceQuarteringRight", "Allow anyone to quarter a dead creature", false, 0, true);
 CVariable<bool> AllowAnimalInventoryAccessFromAnyStable("egs", "AllowAnimalInventoryAccessFromAnyStable", "If true a player can access to his animal inventory (if the animal is inside a stable) from any stable over the world", true, 0, true);
+#ifdef RYZOM_FORGE
 CVariable<uint32> FreeTrialSkillLimit("egs", "FreeTrialSkillLimit", "Level limit for characters belonging to free trial accounts", 125, 0, true);
+#else
+CVariable<uint32> FreeTrialSkillLimit("egs", "FreeTrialSkillLimit", "Level limit for characters belonging to free trial accounts", 21, 0, true);
+#endif
 CVariable<uint32> CraftFailureProbaMpLost("egs", "CraftFailureProbaMpLost", "Probability de destruction de chaque MP en cas d'echec du craft", 50, 0, true);
 
 // Number of login stats kept for a character
@@ -432,6 +437,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_ExchangeId = 0;
 	_ExchangeAccepted = false;
 	_ExchangeMoney = (uint64)0;
+	m_ExchangeStaticAction = false;
 
 	// pvp for player with privilege inactive
 	_PriviledgePvp = false;
@@ -519,6 +525,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_MeleeCombatIsValid = false;
 
 	_CurrentBotChatType = BOTCHATTYPE::UnknownFlag;
+	_RolemasterType = EGSPD::CSPType::Unknown;
 
 /*
 	_HaveMweaTool = false;
@@ -582,6 +589,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_AdversaryParryModifier	= 0;
 
 	_IsInAComa				= false;
+	m_ComaStartDate			= 0;
 	_IntangibleEndDate		= 0;
 	uint64 NOT_TELEPORTING_FLAG= (((uint64)0x12345678)<<32)| (uint64)0x87654321;
 	_WhoSeesMeBeforeTP		= 	NOT_TELEPORTING_FLAG;
@@ -697,7 +705,6 @@ CCharacter::CCharacter():	CEntityBase(false),
 
 	_ChannelAdded = false;
 
-	_DuelOpponent = NULL;
 	_IsTeleportFromRespawn = false;
 	_LastTpTick = 0;
 	_LastRespawnTick = 0;
@@ -1195,6 +1202,11 @@ uint32 CCharacter::tickUpdate()
 	// test again as effects can kill the entity (dots...)
 	if (!isDead())
 	{
+		// a living character has no coma date: one loaded dead can come back to life without dying
+		// again (god mode, or hit points regenerated while a teleport is in progress)
+		if (currentHp() > 0)
+			m_ComaStartDate = 0;
+
 		{
 			H_AUTO(CharacterComputeMaxValue);
 			// Compute max values after apply modifier
@@ -1434,7 +1446,6 @@ uint32 CCharacter::tickUpdate()
 					for ( uint i =  0; i < size; i++ )
 					{
 						nlassert(team->getMissions()[i]);
-						team->getMissions()[i]->updateCompass(*this, string(""));
 						team->getMissions()[i]->updateCompass(*this, string("GROUP:"));
 					}
 				}
@@ -1450,7 +1461,6 @@ uint32 CCharacter::tickUpdate()
 					for ( uint i =  0; i < size; i++ )
 					{
 						nlassert(guild->getMissions()[i]);
-						guild->getMissions()[i]->updateCompass(*this, string(""));
 						guild->getMissions()[i]->updateCompass(*this, string("GROUP:"));
 					}
 				}
@@ -1784,7 +1794,11 @@ void CCharacter::kill(TDataSetRow killerRowId)
 	removeAllSpells();
 	_ForbidPowerDates.clearConsumable();
 
-	_PhysScores._PhysicalScores[SCORES::hit_points].Current = -_PhysScores._PhysicalScores[SCORES::hit_points].Max / 2;
+	// A character saved while dead has kept the date its coma began: the coma goes on from there,
+	// the time spent logged out included, and does not start again at the login
+	if (m_ComaStartDate == 0)
+		m_ComaStartDate = CTime::getSecondsSince1970();
+	_PhysScores._PhysicalScores[SCORES::hit_points].Current = comaHitPoints();
 	setBars();
 
 	_TimeDeath = CTickEventHandler::getGameTime() + 5.0;
@@ -1960,7 +1974,10 @@ void CCharacter::deathOccurs( void )
 			{
 				float currentRegen = - _PhysScores._PhysicalScores[ i ].Max / (CommaDelayBeforeDeath * 0.2f );
 				_PhysScores._PhysicalScores[ i ].CurrentRegenerate = currentRegen;
-				_PhysScores._PhysicalScores[ i ].Current = - _PhysScores._PhysicalScores[ i ].Max / 2;
+				_PhysScores._PhysicalScores[ i ].Current = comaHitPoints();
+				// the value counts all the time up to now, the drain below goes on from this tick
+				_PhysScores._PhysicalScores[ i ].RegenerateTickUpdate = CTickEventHandler::getGameCycle();
+				_PhysScores._PhysicalScores[ i ].KeepRegenerateDecimal = 0;
 			}
 			else
 			{
@@ -2006,6 +2023,28 @@ void CCharacter::deathOccurs( void )
 	setBars();
 }
 
+
+//---------------------------------------------------
+// hit points of a dead character, from the date its coma began
+//
+//---------------------------------------------------
+sint32 CCharacter::comaHitPoints() const
+{
+	const sint32 maxHp = _PhysScores._PhysicalScores[SCORES::hit_points].Max;
+
+	// part of the coma delay that has passed, 0 to 1
+	double elapsedRatio = 0.0;
+	const uint32 now = CTime::getSecondsSince1970();
+	if (m_ComaStartDate != 0 && now > m_ComaStartDate)
+	{
+		const double comaDelay = (double)CommaDelayBeforeDeath.get() * CTickEventHandler::getGameTimeStep();
+		const double elapsed = (double)(now - m_ComaStartDate);
+		elapsedRatio = (comaDelay > 0.0 && elapsed < comaDelay) ? elapsed / comaDelay : 1.0;
+	}
+
+	const sint32 startHp = -maxHp / 2;
+	return startHp + (sint32)((double)(-maxHp - startHp) * elapsedRatio);
+}
 
 //---------------------------------------------------
 // player choose a re-spawn for his death character
@@ -2162,6 +2201,7 @@ void CCharacter::applyRespawnEffects(bool applyDP)
 	msgout.serial(_Id);
 	msgout.serial(_IsDead);
 	sendMessageViaMirror("GPMS", msgout);
+	m_ComaStartDate = 0;
 }
 
 //---------------------------------------------------
@@ -2174,6 +2214,7 @@ void CCharacter::resurrected()
 	_Behaviour = MBEHAV::IDLE;
 	_IsDead = false;
 	_IsInAComa = false;
+	m_ComaStartDate = 0;
 	resetNextDeathPenaltyFactor();
 
 	PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->playerResurrected(this);
@@ -2200,6 +2241,7 @@ void CCharacter::revive()
 	_Behaviour = MBEHAV::IDLE;
 	_IsDead = false;
 	_IsInAComa = false;
+	m_ComaStartDate = 0;
 	_RegionKilledInPvp = 0xffff;
 
 	_PhysScores._PhysicalScores[SCORES::hit_points].Current = _PhysScores._PhysicalScores[SCORES::hit_points].Base;
@@ -2284,6 +2326,26 @@ void CCharacter::mount(TDataSetRow PetRowId, bool fromArk, bool skipDistance)
 		return;
 	}
 
+	// refuse while already mounted: the client never asks for it, but callers that bypass the action system
+	// (web commands) would otherwise take over _EntityMounted and the GPMS control while the first mount
+	// keeps its rider set and stays non-mountable until the player relogs
+	if( TheDataset.isAccessible( _EntityMounted() ) )
+	{
+		nlwarning("<CCharacter::mount> %d Entity %s is already mounted on %s, refusing to mount %s", CTickEventHandler::getGameCycle(), _Id.toString().c_str(), TheDataset.getEntityId( _EntityMounted() ).toString().c_str(), TheDataset.getEntityId( PetRowId ).toString().c_str() );
+
+		CMessage msgout( "IMPULSION_ID" );
+		msgout.serial( _Id );
+		CBitMemStream bms;
+		if ( ! GenericMsgManager.pushNameToStream( "ANIMALS:MOUNT_ABORT", bms) )
+		{
+			nlwarning("<CCharacter::mount> Msg name ANIMALS:MOUNT_ABORT not found");
+			return;
+		}
+		msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
+		CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(_Id.getDynamicId()), msgout );
+		return;
+	}
+
 	CEntityBase * e = CEntityBaseManager::getEntityBasePtr( PetRowId );
 	if( e )
 	{
@@ -2318,10 +2380,10 @@ void CCharacter::mount(TDataSetRow PetRowId, bool fromArk, bool skipDistance)
 							else
 								_RentAMount = PetRowId;
 
-//							_PropertyDatabase.setProp( "USER:MOUNT_WALK_SPEED", (sint64)(sint)(e->getPhysScores().CurrentWalkSpeed() * 1000.0f) );
-							CBankAccessor_PLR::getUSER().setMOUNT_WALK_SPEED(_PropertyDatabase, checkedCast<uint16>(e->getPhysScores().CurrentWalkSpeed() * 1000.0f) );
-//							_PropertyDatabase.setProp( "USER:MOUNT_RUN_SPEED", (sint64)(sint)(e->getPhysScores().CurrentRunSpeed() * 1000.0f) );
-							CBankAccessor_PLR::getUSER().setMOUNT_RUN_SPEED(_PropertyDatabase, checkedCast<uint16>(e->getPhysScores().CurrentRunSpeed() * 1000.0f) );
+							// the mount's base speeds: the rider's speed modifier reaches the client through its SPEED_FACTOR, and
+							// the creature's current speed can still carry the modifier of an earlier ride
+							CBankAccessor_PLR::getUSER().setMOUNT_WALK_SPEED(_PropertyDatabase, checkedCast<uint16>(form->getWalkSpeed() * 1000.0f));
+							CBankAccessor_PLR::getUSER().setMOUNT_RUN_SPEED(_PropertyDatabase, checkedCast<uint16>(form->getRunSpeed() * 1000.0f));
 
 							if( e->getContextualProperty().directAccessForStructMembers().mountable() )
 							{
@@ -2431,6 +2493,8 @@ void CCharacter::unmount( bool changeMountedState, uint petIndex )
 	{
 		e->setMode( MBEHAV::NORMAL, true );
 		e->setRiderEntity( TDataSetRow() );
+		// the rider's speed modifier is copied onto the mount during the ride, it must not stay with the creature
+		e->setSpeedVariationModifier(0);
 		e->getContextualProperty().directAccessForStructMembers().mountable( true );
 		e->getContextualProperty().setChanged();
 	}
@@ -2693,6 +2757,15 @@ void CCharacter::applyRegenAndClipCurrentValue()
 		_PhysScores._PhysicalScores[ i ].RegenerateTickUpdate = CTickEventHandler::getGameCycle();
 	}
 
+	applyCurrentSpeed();
+} // applyRegenAndClipCurrentValue //
+
+//---------------------------------------------------
+// CCharacter::applyCurrentSpeed
+// Compute the current walk/run speed (forced to 0 while sitting, AFK, stunned or rooted)
+//---------------------------------------------------
+void CCharacter::applyCurrentSpeed()
+{
 	// restore value without weight malus
 	_PhysScores.SpeedVariationModifier -= _LastAppliedWeightMalus;
 
@@ -2749,7 +2822,7 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	// Speed
 	// while stunned/root/mezzed etc speed is forced to 0
 	float oldCurrentSpeed;
-	if( _Mode().Mode != MBEHAV::SIT && canEntityMove() && !PlayerManager.isRootedByGM( _Id ) )
+	if( _Mode().Mode != MBEHAV::SIT && !_ContextualProperty.directAccessForStructMembers().afk() && canEntityMove() && !PlayerManager.isRootedByGM( _Id ) )
 	{
 		float pcSpeed = 1.0f + speedVariationModifier / 100.0f;
 		oldCurrentSpeed = _PhysScores.CurrentWalkSpeed;
@@ -2792,7 +2865,7 @@ void CCharacter::applyRegenAndClipCurrentValue()
 		CBankAccessor_PLR::getUSER().setSPEED_FACTOR(_PropertyDatabase, 0 );
 	}
 
-} // applyRegenAndClipCurrentValue //
+} // applyCurrentSpeed //
 
 
 //---------------------------------------------------
@@ -2809,6 +2882,15 @@ void CCharacter::processStaticAction()
 		{
 			cancelStaticEffects();
 		}
+	}
+
+	// A player exchange gives only the accepting player a static action, which compares that player's
+	// position with where the exchange began. Check the distance between the two traders here, for both.
+	if (isExchanging() && _CurrentInterlocutor.getType() == RYZOMID::player)
+	{
+		const CCharacter *trader = PlayerManager.getChar(_CurrentInterlocutor);
+		if (trader != nullptr)
+			abortExchangeIfTooFar(trader);
 	}
 
 	// test if the character has moved since last update (if character is in action mode)
@@ -3034,12 +3116,14 @@ CCharacter::~CCharacter()
 	// remove CSR special properties
 	if ( getEnterFlag() )
 	{
-		CCharacter * user = PlayerManager.getChar( _MonitoringCSR );
+		// the CSR that monitors the missions of this character monitors none anymore
+		CCharacter * csr = PlayerManager.getChar( _MonitoringCSR );
+		if ( csr )
+			CAdminProperties::stopMonitoringMissions( *csr );
+		// the character whose missions this CSR monitors can be monitored again
+		CCharacter * user = PlayerManager.getChar( _AdminProperties->getMissionMonitoredUser() );
 		if ( user )
 			user->setMonitoringCSR( TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW ) );
-		user = PlayerManager.getChar( _AdminProperties->getMissionMonitoredUser() );
-		if ( user )
-			user->getAdminProperties().setMissionMonitoredUser( TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW ) );
 		for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it )
 		{
 			CMissionManager::getInstance()->deInstanciateMission( (*it).second );
@@ -3162,6 +3246,23 @@ void CCharacter::prepareToLoad()
 	initPDStructs();
 }
 
+// A saved heading as the GPMS takes one from a client: 0 for one that is not a number, one outside [-Pi, Pi] brought
+// back into it. Returns true when it was changed.
+static bool repairSavedHeading(float &heading)
+{
+	if (!isValidDouble(heading))
+	{
+		heading = 0.f;
+		return true;
+	}
+	if (heading > (float)NLMISC::Pi || heading < -(float)NLMISC::Pi)
+	{
+		heading = (float)atan2(sin((double)heading), cos((double)heading));
+		return true;
+	}
+	return false;
+}
+
 
 //---------------------------------------------------
 // postLoadTreatment: method called after applying a pdr save record for all generic processing work
@@ -3192,7 +3293,7 @@ void CCharacter::postLoadTreatment()
 
 	if (gid != _GuildId)
 	{
-		nlwarning("Player %s think he is in guild %u, he really is in guild %u, changing",
+		nlwarning("Player %s think he is in guild %u, he really is in guild %s, changing",
 			_Id.toString().c_str(),
 			_GuildId,
 			guildIdToString(gid).c_str());
@@ -3209,6 +3310,27 @@ void CCharacter::postLoadTreatment()
 	}
 
 	_NbSurvivePact = (uint8)_Pact.size();
+
+	// A heading that is not a number goes to the client in USER_CHAR, which then sends it in every POSITION, each refused
+	// as a HACK, and one outside [-Pi, Pi] goes to the AI service, whose fixed-point angle it overflows: a modified client
+	// could have either saved before the GPMS refused them (2a9ed025b, 033d556f8)
+	{
+		float heading = _EntityState.Heading;
+		if (repairSavedHeading(heading))
+		{
+			nlwarning("%s: the saved heading is not a number or outside [-Pi, Pi], set to %g", _Id.toString().c_str(), (double)heading);
+			_EntityState.Heading = heading;
+		}
+		for (uint i = 0; i < PositionStack.size(); ++i)
+		{
+			CFarPosition farPos = PositionStack[i];
+			if (repairSavedHeading(farPos.PosState.Heading))
+			{
+				nlwarning("%s: the heading saved in its position stack at %u is not a number or outside [-Pi, Pi], set to %g", _Id.toString().c_str(), i, (double)farPos.PosState.Heading);
+				PositionStack.substFarPosition(i, farPos);
+			}
+		}
+	}
 
 	{
 	H_AUTO(FixPetTicket);
@@ -4606,8 +4728,14 @@ void CCharacter::fillCharInfo(CHARSYNC::TCharInfo &charInfo) const
 	std::pair<CHARSYNC::TCult, CHARSYNC::TCivilisation> charSyncAll = IShardUnifierEvent::convertAllegiance(allegiance);
 	charInfo.setCult(charSyncAll.first);
 	charInfo.setCivilisation(charSyncAll.second);
-	charInfo.setRespawnPoints(getRespawnPoints().buildRingPoints());
-	charInfo.setNewcomer(isNewbie());
+	// a shard that cannot find every respawn point (a Ring shard) says so, and the shard unifier keeps the ring access it has
+	bool respawnPointsKnown;
+	charInfo.setRespawnPoints(getRespawnPoints().buildRingPoints(respawnPointsKnown));
+	charInfo.setRespawnPointsKnown(respawnPointsKnown);
+	// a shard that cannot tell the newcomer flag says so, and the shard unifier keeps the flag it has
+	bool newcomer = true;
+	charInfo.setNewcomerKnown(findNewbie(newcomer));
+	charInfo.setNewcomer(newcomer);
 }
 
 //---------------------------------------------------
@@ -4700,7 +4828,8 @@ void CCharacter::addKnownBrick( const CSheetId& brickId )
 			nlwarning("brick id %s is invalid (index in family == INVALID_POSITION_ID", brickId.toString().c_str());
 			return;
 		}
-
+		// the field of a family has 64 places and the shift is not guarded: the client that is deployed tests the
+		// bit of a brick past them with the same shift, and finds the one this sets
 		_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
 //		_PropertyDatabase.setProp( _DataIndexReminder->KnownBricksFamilies[brickForm->Family], _BrickFamilyBitField[brickForm->Family]);
 		CBankAccessor_PLR::getBRICK_FAMILY().getArray(brickForm->Family).setBRICKS(_PropertyDatabase, _BrickFamilyBitField[brickForm->Family]);
@@ -4810,31 +4939,13 @@ void CCharacter::removeKnownBrick( const CSheetId& brickId )
 			return;
 		}
 
-		_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
-//		_PropertyDatabase.setProp( _DataIndexReminder->KnownBricksFamilies[brickForm->Family], _BrickFamilyBitField[brickForm->Family]);
+		// a brick past the 64 places of the family's field has no bit (addKnownBrick)
+		if (brickForm->IndexInFamily > 64)
+			return;
+
+		// clear the brick's bit, the client then no longer shows the brick as known
+		_BrickFamilyBitField[brickForm->Family] &= ~(sint64)((uint64)1 << pos);
 		CBankAccessor_PLR::getBRICK_FAMILY().getArray(brickForm->Family).setBRICKS(_PropertyDatabase, _BrickFamilyBitField[brickForm->Family]);
-
-		// unlock the relative interface if it's the first brick of this type
-		INTERFACE_FLAGS::TInterfaceFlag flag = INTERFACE_FLAGS::Unknown;
-		switch( BRICK_FAMILIES::brickType(brickForm->Family))
-		{
-		case BRICK_TYPE::COMBAT:
-			flag = INTERFACE_FLAGS::Combat;
-			break;
-		case BRICK_TYPE::MAGIC:
-			flag = INTERFACE_FLAGS::Magic;
-			break;
-		case BRICK_TYPE::COMMERCE:
-			flag = INTERFACE_FLAGS::Commerce;
-			break;
-		default:
-			flag = INTERFACE_FLAGS::Special;
-			break;
-		};
-
-		_InterfacesFlagsBitField |= SINT64_CONSTANT(1) << uint8(flag);
-//		_PropertyDatabase.setProp( "INTERFACES:FLAGS", _InterfacesFlagsBitField);
-		CBankAccessor_PLR::getINTERFACES().setFLAGS(_PropertyDatabase, _InterfacesFlagsBitField);
 	}
 	else
 	{
@@ -5509,6 +5620,11 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 
 	// take all items from temp inventory
 	sendCloseTempInventoryImpulsion();
+
+	// an exchange with another player and an open lift belong to the place being left
+	if (isExchanging() && _CurrentInterlocutor.getType() == RYZOMID::player)
+		abortExchange();
+	CBuildingManager::getInstance()->removeTriggerRequest(_EntityRowId);
 
 	// manage teleport in pvp
 	CPVPManager2::getInstance()->playerTeleports(this);
@@ -7163,6 +7279,15 @@ void CCharacter::removePetCharacterAfterDeath(uint32 index, bool keepInventory)
 		if (form && form->Type == ITEM_TYPE::MEKTOUB_MOUNT_TICKET)
 			_LastFreeMount = CTickEventHandler::getGameCycle();
 
+		// destroyItem only destroys the unlocked quantity, and the pet is gone: unlock the ticket,
+		// whether an exchange locked it (end the exchange first) or lockTicketInInventory on a Ring shard
+		if (_PlayerPets[index].ItemPtr->getLockCount() != 0)
+		{
+			if (isExchanging() && _ExchangeView->containsItem(_PlayerPets[index].ItemPtr))
+				abortExchange();
+			_PlayerPets[index].ItemPtr->setLockCount(0);
+		}
+
 		uint32 slot = _PlayerPets[index].ItemPtr->getInventorySlot();
 
 		// release our ref before we destroy the item
@@ -7765,6 +7890,16 @@ void CCharacter::addGuildPoints(uint32 points)
 	}
 
 }
+//---------------------------------------------------
+// refillScoresOnLevelUp : a new level refills hit points, stamina, sap and focus
+//---------------------------------------------------
+static void refillScoresOnLevelUp(CPhysicalScores &scores)
+{
+	scores._PhysicalScores[SCORES::hit_points].Current = scores._PhysicalScores[SCORES::hit_points].Max;
+	scores._PhysicalScores[SCORES::stamina].Current = scores._PhysicalScores[SCORES::stamina].Max;
+	scores._PhysicalScores[SCORES::sap].Current = scores._PhysicalScores[SCORES::sap].Max;
+	scores._PhysicalScores[SCORES::focus].Current = scores._PhysicalScores[SCORES::focus].Max;
+}
 
 //---------------------------------------------------
 // addXpToSkillInternal : Add amount of xp gain to a skill
@@ -8218,10 +8353,12 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 			//check if skill have children skill
 			if ( ! SkillsTree->SkillsTree[ skillEnum ].ChildSkills.empty() )
 			{
+				bool childUnlocked = false;
 				for( vector<SKILLS::ESkills>::const_iterator it = SkillsTree->SkillsTree[ skillEnum ].ChildSkills.begin(); it != SkillsTree->SkillsTree[ skillEnum ].ChildSkills.end(); ++it )
 				{
 					if( _Skills._Skills[ *it ].Base == 0 )
 					{
+						childUnlocked = true;
 						_Skills._Skills[ *it ].Base = skill->Base + 1;
 						if(_Skills._Skills[ *it ].MaxLvlReached < (skill->Base + 1))
 							_Skills._Skills[ *it ].MaxLvlReached = skill->Base + 1;
@@ -8271,6 +8408,9 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 						processMissionEvent(event);
 					}
 				}
+				// the unlocked skills start one level above this one: a new level, as on the path above
+				if (childUnlocked)
+					refillScoresOnLevelUp(_PhysScores);
 				skill->Xp = stage->XpForPointSkill;
 			}
 			else
@@ -8494,17 +8634,24 @@ void CCharacter::setHomeMainlandSessionId(TSessionId homeSessionId)
 // check if the character is a newbie by checking the base of the position stack
 bool CCharacter::isNewbie() const
 {
-	// default to newbie in case of position stack error
+	// default to newbie when this shard cannot tell (position stack error, or a continent it does not load)
 	bool newbie = true;
-	if (!PositionStack.empty())
-	{
-		const COfflineEntityState& state = (PositionStack[0].SessionId == sessionId()) ? getState() : PositionStack[0].PosState;
-		CContinent *homeCont= CZoneManager::getInstance().getContinent(state.X, state.Y);
-		if (homeCont != NULL)
-			newbie = (((CONTINENT::TContinent)homeCont->getId()) == CONTINENT::NEWBIELAND) ? 1 : 0;
-	}
-
+	findNewbie(newbie);
 	return newbie;
+}
+
+// the character is a newbie while the base of its position stack is in Newbieland; only a shard that loads the
+// continent of that position can tell, and a Ring shard loads no mainland continent
+bool CCharacter::findNewbie(bool &newbie) const
+{
+	if (PositionStack.empty())
+		return false;
+	const COfflineEntityState& state = (PositionStack[0].SessionId == sessionId()) ? getState() : PositionStack[0].PosState;
+	CContinent *homeCont= CZoneManager::getInstance().getContinent(state.X, state.Y);
+	if (homeCont == NULL)
+		return false;
+	newbie = ((CONTINENT::TContinent)homeCont->getId()) == CONTINENT::NEWBIELAND;
+	return true;
 }
 
 //-----------------------------------------------
@@ -8886,106 +9033,41 @@ bool CCharacter::checkCreateParams( const CCreateCharMsg& createCharMsg, CCreate
 		}
 	}
 
-	// the race comes from the client: refuse it if no race sheet matches (setStartStatistics needs a valid one)
-	if (people_sheet == CSheetId::Unknown)
+	// the people comes from the client: refuse it when no race sheet matches (setStartStatistics needs one)
+	if( people_sheet == CSheetId::Unknown )
 	{
 		createCharErrorMsg.People = false;
 		returnValue = false;
-		egs_chinfo("<CCharacter::checkCreateParams> People %u is refused because no race sheet matches", (uint)createCharMsg.People);
+		egs_chinfo("<CCharacter::checkCreateParams> People %u refused: no race sheet matches", (uint)createCharMsg.People);
 	}
-
-	// visual properties come from the client: refuse values that do not fit the visual property bit fields
-	// (see SPropVisualA/B/C). The ranges follow the bit widths, not the gameplay limits.
+	// the visual values come from the client: refuse what does not fit the visual property bit fields
+	// (SPropVisualA/B/C); the ranges are the field widths, not the gameplay limits
 	{
-		struct CRange
-		{
-			static bool ok(sint8 value, sint8 maxValue) { return value >= 0 && value <= maxValue; }
-		};
-
+		struct CRange { static bool ok(sint8 value, sint8 maxValue) { return value >= 0 && value <= maxValue; } };
 		bool visualOk = true;
-
-		if (!CRange::ok(createCharMsg.HairType, 127))
-		{
-			createCharErrorMsg.HairType = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.HairColor, 7))
-		{
-			createCharErrorMsg.HairColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.GabaritHeight, 15))
-		{
-			createCharErrorMsg.GabaritHeight = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.GabaritTorsoWidth, 15) || !CRange::ok(createCharMsg.GabaritBreastSize, 15))
-		{
-			createCharErrorMsg.GabaritTorsoWidth = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.GabaritArmsWidth, 15))
-		{
-			createCharErrorMsg.GabaritArmsWidth = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.GabaritLegsWidth, 15))
-		{
-			createCharErrorMsg.GabaritLegsWidth = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.JacketColor, 7))
-		{
-			createCharErrorMsg.JacketColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.TrousersColor, 7))
-		{
-			createCharErrorMsg.TrousersColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.HatColor, 7))
-		{
-			createCharErrorMsg.HatColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.ArmsColor, 7))
-		{
-			createCharErrorMsg.ArmsColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.HandsColor, 7))
-		{
-			createCharErrorMsg.HandsColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.FeetColor, 7))
-		{
-			createCharErrorMsg.FeetColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.MorphTarget1, 7) || !CRange::ok(createCharMsg.MorphTarget2, 7) || !CRange::ok(createCharMsg.MorphTarget3, 7) || !CRange::ok(createCharMsg.MorphTarget4, 7) || !CRange::ok(createCharMsg.MorphTarget5, 7) || !CRange::ok(createCharMsg.MorphTarget6, 7) || !CRange::ok(createCharMsg.MorphTarget7, 7) || !CRange::ok(createCharMsg.MorphTarget8, 7) || !CRange::ok(createCharMsg.EyesColor, 7) || !CRange::ok(createCharMsg.Tattoo, 127))
-		{
-			createCharErrorMsg.FacialMorphDetail = false;
-			visualOk = false;
-		}
-
-		if (!visualOk)
+		if( !CRange::ok(createCharMsg.HairType, 127) )				{ createCharErrorMsg.HairType = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.HairColor, 7) )				{ createCharErrorMsg.HairColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.GabaritHeight, 15) )			{ createCharErrorMsg.GabaritHeight = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.GabaritTorsoWidth, 15) || !CRange::ok(createCharMsg.GabaritBreastSize, 15) )
+																	{ createCharErrorMsg.GabaritTorsoWidth = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.GabaritArmsWidth, 15) )		{ createCharErrorMsg.GabaritArmsWidth = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.GabaritLegsWidth, 15) )		{ createCharErrorMsg.GabaritLegsWidth = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.JacketColor, 7) )				{ createCharErrorMsg.JacketColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.TrousersColor, 7) )			{ createCharErrorMsg.TrousersColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.HatColor, 7) )				{ createCharErrorMsg.HatColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.ArmsColor, 7) )				{ createCharErrorMsg.ArmsColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.HandsColor, 7) )				{ createCharErrorMsg.HandsColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.FeetColor, 7) )				{ createCharErrorMsg.FeetColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.MorphTarget1, 7) || !CRange::ok(createCharMsg.MorphTarget2, 7)
+			|| !CRange::ok(createCharMsg.MorphTarget3, 7) || !CRange::ok(createCharMsg.MorphTarget4, 7)
+			|| !CRange::ok(createCharMsg.MorphTarget5, 7) || !CRange::ok(createCharMsg.MorphTarget6, 7)
+			|| !CRange::ok(createCharMsg.MorphTarget7, 7) || !CRange::ok(createCharMsg.MorphTarget8, 7)
+			|| !CRange::ok(createCharMsg.EyesColor, 7) || !CRange::ok(createCharMsg.Tattoo, 127) )
+																	{ createCharErrorMsg.FacialMorphDetail = false; visualOk = false; }
+		if( !visualOk )
 		{
 			returnValue = false;
-			egs_chinfo("<CCharacter::checkCreateParams> Visual properties refused because out of range");
+			egs_chinfo("<CCharacter::checkCreateParams> Visual properties refused: out of range");
 		}
 	}
 
@@ -9366,7 +9448,9 @@ void CCharacter::setStartStatistics( const CCreateCharMsg& createCharMsg )
 	}
 	else
 	{
-		setWelcomeMissionDesc(mission, bot);
+		// a start point may have no welcome mission; an unknown mission name is reported when the start points are read
+		if (mission != CAIAliasTranslator::Invalid)
+			setWelcomeMissionDesc(mission, bot);
 		COfflineEntityState state;
 		zone->getRandomPoint( state.X,state.Y,state.Z,state.Heading );
 		setState( state );
@@ -9740,6 +9824,11 @@ void CCharacter::memorizeStartAction( const std::vector< CStaticRole::TMemorized
 		const CStaticRolemasterPhrase * phrase = CSheets::getSRolemasterPhrase( (*it).sentence );
 		if( phrase == 0 )
 		{
+			// sheet_id.bin keeps names that have no sheet any more, the starting role names one of them; the roles are
+			// applied again at every login (addCreationBricks), so each phrase is reported once
+			static std::set<NLMISC::CSheetId> s_ReportedMissingPhrases;
+			if (s_ReportedMissingPhrases.insert((*it).sentence).second)
+				nlwarning("Character %s: the starting role gives the phrase %s, which has no sheet (reported once)", _Id.toString().c_str(), (*it).sentence.toString().c_str());
 			index = getFirstFreeSlotInKnownPhrase();
 			continue;
 		}
@@ -9904,7 +9993,8 @@ void CCharacter::setDatabase()
 				pos -=1;
 			else if ( INVALID_POSITION_ID == pos)
 				continue;
-
+			// the field of a family has 64 places and the shift is not guarded: the client that is deployed tests the
+			// bit of a brick past them with the same shift, and finds the one this sets
 			_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
 
 			// unlock the relative interface if it's the first brick of this type
@@ -10030,7 +10120,7 @@ CEvalNumExpr::TReturnState CCharacter::evalValue (const char *value, double &res
 }
 
 //-----------------------------------------------------------------------------
-void CCharacter::startTradeItemSession( uint16 session )
+void CCharacter::startTradeItemSession(uint16 session, bool reportRestrictions)
 {
 
 	// Start a new trade sesssion
@@ -10075,7 +10165,7 @@ void CCharacter::startTradeItemSession( uint16 session )
 	}
 
 	_ShoppingList = new CCharacterShoppingList(bot->getMerchantPtr(), *this, fameFactor);
-	_ShoppingList->mountShoppingList(_CurrentContinent);
+	_ShoppingList->mountShoppingList(_CurrentContinent, reportRestrictions);
 	_ShoppingList->initPageToUpdate(NB_SLOT_PER_PAGE);
 	_ShoppingList->fillTradePage(_CurrentTradeSession);
 	// set sell item price
@@ -10135,6 +10225,41 @@ void CCharacter::setFilters(uint32 minQuality, uint32 maxQuality, uint32 minPric
 }
 
 //-----------------------------------------------
+// the rolemaster flags of what a bot sells, sent to the client in TRADING:ROLEMASTER_FLAGS
+//-----------------------------------------------
+static uint8 getRolemasterFlags(const CCreature *bot, EGSPD::CSPType::TSPType *rolemasterType)
+{
+	uint8 flags = 0;
+	if( bot->isSellingCharacteristics() )
+		flags |= (1<<ROLEMASTER_FLAGS::CaracteristicUpgrades);
+	if( bot->isSellingFightAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::FightActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Fight;
+	}
+	if( bot->isSellingMagicAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::MagicActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Magic;
+	}
+	if( bot->isSellingHarvestAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::ForageActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Harvest;
+	}
+	if( bot->isSellingCraftAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::CraftActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Craft;
+	}
+
+	if (flags != 0)
+		flags |= (1<<ROLEMASTER_FLAGS::SpecialPowers);
+
+	return flags;
+}
+
+//-----------------------------------------------
 // start a trade action
 //-----------------------------------------------
 void CCharacter::startTradePhrases(uint16 session)
@@ -10147,6 +10272,10 @@ void CCharacter::startTradePhrases(uint16 session)
 	// Delete any current TradeItem shopping list
 	if( _ShoppingList != 0 ) delete _ShoppingList;
 	_ShoppingList = 0;
+
+	// nor keep the phrase list of a previous trade, which PHRASE:BUY indexes, if this one is refused
+	_CurrentPhrasesTradeList.clear();
+	_CurrentPhrasesTradeBot = CEntityId::Unknown;
 
 	// get the bot creature
 	CCreature * bot = CreatureManager.getCreature( _CurrentInterlocutor );
@@ -10171,33 +10300,14 @@ void CCharacter::startTradePhrases(uint16 session)
 		return;
 	}
 
-	// *** Set right rolemaster flags and race in Database
-	uint8 flags = 0;
-	if( bot->isSellingCharacteristics() )
-		flags |= (1<<ROLEMASTER_FLAGS::CaracteristicUpgrades);
-	if( bot->isSellingFightAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::FightActions);
-		setRolemasterType(EGSPD::CSPType::Fight);
-	}
-	if( bot->isSellingMagicAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::MagicActions);
-		setRolemasterType(EGSPD::CSPType::Magic);
-	}
-	if( bot->isSellingHarvestAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::ForageActions);
-		setRolemasterType(EGSPD::CSPType::Harvest);
-	}
-	if( bot->isSellingCraftAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::CraftActions);
-		setRolemasterType(EGSPD::CSPType::Craft);
-	}
+	// the purchases of this trade are made from this bot only
+	_CurrentPhrasesTradeBot = bot->getId();
 
-	if (flags != 0)
-		flags |= (1<<ROLEMASTER_FLAGS::SpecialPowers);
+	// *** Set right rolemaster flags and race in Database
+	EGSPD::CSPType::TSPType rolemasterType = EGSPD::CSPType::Unknown;
+	uint8 flags = getRolemasterFlags(bot, &rolemasterType);
+	if (rolemasterType != EGSPD::CSPType::Unknown)
+		setRolemasterType(rolemasterType);
 
 //	_PropertyDatabase.setProp( "TRADING:ROLEMASTER_FLAGS", flags );
 	CBankAccessor_PLR::getTRADING().setROLEMASTER_FLAGS(_PropertyDatabase, flags );
@@ -10318,8 +10428,9 @@ void CCharacter::getPhrasesOfferedByBot(const CCreature &bot, vector<CTradePhras
 					}
 				}
 
-				// Exclude the phrase if it contains bricks that require a skill level or a brick that the player doesn't have
-				if ( raceOk && isPlayerAllowedToGetAllBricksFromPhrase( _Id, *phrase, _Skills._Skills, _KnownBricks, 250, bot.getRace(), false ) )
+				// Exclude the phrase if it contains bricks that require a skill level or a brick that the player doesn't have.
+				// The race filters above decide the civilisation of an explicit list, so no civilisation is passed.
+				if (raceOk && isPlayerAllowedToGetAllBricksFromPhrase(_Id, *phrase, _Skills._Skills, _KnownBricks, 250, EGSPD::CPeople::Common, false))
 				{
 					// add the phrase to the one he can sell to the player
 					phrases.push_back(CTradePhrase(phraseSheetId));
@@ -10506,6 +10617,14 @@ void CCharacter::buyItem( uint16 itemNumber, uint16 quantity )
 		nlwarning( "<buyItem> Character %s Receive a BOTCHAT:BUY message but _ShoppingList of character are NULL", _Id.toString().c_str() );
 		return;
 	}
+	// The stock client sends 1 to 999 (isTradeValid, the quantity box of bot_chat_v4.xml), and 0 would reach the
+	// nlassert of setStackSize
+	if (quantity == 0)
+	{
+		nlwarning("HACK: %s sent BOTCHAT:BUY for trade item %u with quantity 0, refused", _Id.toString().c_str(), (uint)itemNumber);
+		reportRefusedClientMessage(_Id);
+		return;
+	}
 	_ShoppingList->buyItem( itemNumber, quantity );
 }
 
@@ -10519,6 +10638,13 @@ void CCharacter::destroySaleItem( uint16 itemNumber, uint16 quantity )
 	if( _ShoppingList == 0 )
 	{
 		nlwarning( "<destroyItem> Character %s Receive a BOTCHAT:DESTROY message but _ShoppingList of character are NULL", _Id.toString().c_str() );
+		return;
+	}
+	// The stock client refuses 0 (CBotChatPageTrade)
+	if (quantity == 0)
+	{
+		nlwarning("HACK: %s sent BOTCHAT:DESTROY_ITEM for trade item %u with quantity 0, refused", _Id.toString().c_str(), (uint)itemNumber);
+		reportRefusedClientMessage(_Id);
 		return;
 	}
 	_ShoppingList->destroyItem( itemNumber, quantity );
@@ -10552,27 +10678,40 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 		}
 	}
 
-	// check price can be paid
-	if ( getSP(_RolemasterType) < spPrice )
+	// the skill points spent are those of the rolemaster's type, set with the phrase list a PHRASE:BUY indexes
+	EGSPD::CSPType::TSPType spType = _RolemasterType;
+
+	// PHRASE:BUY_SHEET is only sent from the phrase trade page of a rolemaster, and a dyn chat can change the
+	// interlocutor without ending that bot chat (PHRASE:BUY is checked by buyPhraseByIndex)
+	if (testRestrictions && (_CurrentBotChatType != BOTCHATTYPE::TradePhraseFlag || _CurrentInterlocutor != _CurrentPhrasesTradeBot))
 	{
-		// return information 'not enough skill points'
-		sendDynamicSystemMessage( _Id, "EGS_NOT_ENOUGHT_SP" );
+		nlwarning("Server refused buy sheet action for player %s, sheet %s, outside a phrase trade with %s (phrase trade bot %s, bot chat type %u)",
+		    _Id.toString().c_str(), phraseId.toString().c_str(), _CurrentInterlocutor.toString().c_str(), _CurrentPhrasesTradeBot.toString().c_str(), (uint)_CurrentBotChatType);
 		return false;
 	}
-	//Bsi.append( StatPath, NLMISC::toString("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice) );
-	//EgsStat.displayNL("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice);
-//	EGSPD::buyAction(_Id, phraseId.toString(), spPrice);
+
+	CCreature *bot = CreatureManager.getCreature(_CurrentInterlocutor);
+	if (bot == NULL)
+	{
+		nlwarning("Invalid bot %s", _CurrentInterlocutor.toString().c_str());
+		return false;
+	}
+
+	// startTradePhrases checks the fame when the trade starts, for both messages, and it can drop while the trade page
+	// stays open
+	if (CFameInterface::getInstance().getFameIndexed(_Id, bot->getForm()->getFaction()) < MinFameToTrade)
+	{
+		nldebug("Server refused buy phrase action for player %s, phrase %s, fame too low to trade with rolemaster %s",
+		    _Id.toString().c_str(), phraseId.toString().c_str(), bot->getId().toString().c_str());
+		SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+		params[0].setEIdAIAlias(_CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor));
+		sendDynamicSystemMessage(_Id, "TRADE_FAME_TOO_LOW", params);
+		return false;
+	}
 
 	// check phrase requirements
 	if (testRestrictions)
 	{
-		CCreature * bot = CreatureManager.getCreature( _CurrentInterlocutor );
-		if ( bot == NULL )
-		{
-			nlwarning( "Invalid bot %s",_CurrentInterlocutor.toString().c_str() );
-			return false;
-		}
-
 		if ( bot->getOriginShopSelector().empty() )
 			return false;
 
@@ -10590,12 +10729,39 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 						_Id.toString().c_str(), phraseId.toString().c_str(), EGSPD::CPeople::toString(people).c_str() );
 			return false;
 		}
+
+		// The sheet comes from the client, whose phrase list for a rolemaster only holds player phrases that the
+		// rolemaster's flags sell and that missions do not give: any other phrase, an AI phrase among them, is
+		// refused (it would also be paid in the skill points of the rolemaster's type, whatever its own).
+		// The skill points are those of this rolemaster's type, as startTradePhrases shows them, not those
+		// of the last phrase trade.
+		const string phraseName = phraseId.toString();
+		spType = EGSPD::CSPType::Unknown;
+		const uint8 rolemasterFlags = getRolemasterFlags(bot, &spType);
+		if ( phraseName.find( "saiphrase" ) != string::npos || !staticPhrase->IsRolemasterPhrase || staticPhrase->ShowInAPOnlyIfLearnt
+			|| spType == EGSPD::CSPType::Unknown || !ROLEMASTER_FLAGS::canSellPhrase( rolemasterFlags, phraseName ) )
+		{
+			nlwarning("Server refused buy sheet action for player %s, sheet %s is not sold by rolemaster %s",
+						_Id.toString().c_str(), phraseName.c_str(), bot->getId().toString().c_str() );
+			return false;
+		}
 	}
+
+	// check price can be paid
+	if ( getSP(spType) < spPrice )
+	{
+		// return information 'not enough skill points'
+		sendDynamicSystemMessage( _Id, "EGS_NOT_ENOUGHT_SP" );
+		return false;
+	}
+	//Bsi.append( StatPath, NLMISC::toString("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice) );
+	//EgsStat.displayNL("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice);
+//	EGSPD::buyAction(_Id, phraseId.toString(), spPrice);
 
 	if ( ! learnPrebuiltPhrase(phraseId, knownPhraseIndex, false, (knownPhraseIndex==0) ) )
 		return false;
 
-	spendSP( (double)spPrice, _RolemasterType );
+	spendSP( (double)spPrice, spType );
 
 	BRICK_TYPE::EBrickType phraseType = BRICK_TYPE::UNKNOWN;
 	if ( !staticPhrase->Bricks.empty() )
@@ -10673,15 +10839,23 @@ void CCharacter::buyPhraseByIndex( uint8 botChatIndex, uint16 knownPhraseIndex )
 	bool ok = true;
 	if (botChatIndex >= uint8(_CurrentPhrasesTradeList.size() ) )
 		ok = false;
+	// the list and _RolemasterType come from the phrase trade of a bot: once another bot chat has started, or a dyn chat
+	// has changed the interlocutor without ending it, the refresh below would set the type from another bot
+	if ( _CurrentBotChatType != BOTCHATTYPE::TradePhraseFlag || _CurrentInterlocutor != _CurrentPhrasesTradeBot )
+	{
+		nlwarning("Server refused buy action for player %s, index %u, outside a phrase trade with %s (phrase trade bot %s, bot chat type %u)",
+					_Id.toString().c_str(), (uint)botChatIndex, _CurrentInterlocutor.toString().c_str(), _CurrentPhrasesTradeBot.toString().c_str(), (uint)_CurrentBotChatType );
+		ok = false;
+	}
 
 	// Old feature if the user is buying a guild rolemaster research option, treat this case separatly
 	if ( _CurrentBotChatType == BOTCHATTYPE::GuildRoleMaster )
 		ok = false;	// todo
 
-	// buy the phrase (botChatIndex comes from the client: only index the list if it is in range)
-	CTradePhrase *pPhrase = ok ? &_CurrentPhrasesTradeList[botChatIndex] : NULL;
+	// buy the phrase (botChatIndex comes from the client: only index the list when it is in range)
+	CTradePhrase *phrase = ok ? &_CurrentPhrasesTradeList[ botChatIndex ] : NULL;
 	if(ok)
-		ok = buyRolemasterPhrase(pPhrase->SheetId, knownPhraseIndex, false);
+		ok = buyRolemasterPhrase(phrase->SheetId, knownPhraseIndex, false);
 
 	// send the result to client if he tries to learn it in the ActionBook
 	if (knownPhraseIndex != 0)
@@ -10706,7 +10880,7 @@ void CCharacter::buyPhraseByIndex( uint8 botChatIndex, uint16 knownPhraseIndex )
 	if (ok)
 	{
 		// mark phrase as deleted (NB: already no more appear in the trade list, since hidden client-side)
-		pPhrase->SheetId = CSheetId::Unknown;
+		phrase->SheetId = CSheetId::Unknown;
 
 		CCreature * bot = CreatureManager.getCreature( _CurrentInterlocutor );
 		if ( bot == NULL )
@@ -10913,9 +11087,12 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 		return;
 	}
 
-	if( inv >= INVENTORIES::NUM_INVENTORY)
+	// The trade window sells from the bag and the pack animals only. The hands and the equipment refer to bag items, and
+	// removing an item from them only unlinks it: the item would be listed for sale while it stays in the bag.
+	if (inv != INVENTORIES::bag && (inv < INVENTORIES::pet_animal1 || inv >= INVENTORIES::max_pet_animal))
 	{
-		nlwarning("<CCharacter:-:sellItem> bad inventory index sended by client");
+		nlwarning("HACK: %s sent BOTCHAT:SELL from inventory %u, refused", _Id.toString().c_str(), (uint)inv);
+		reportRefusedClientMessage(_Id);
 		return;
 	}
 
@@ -10924,7 +11101,7 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 		if( (_PlayerPets[ inv - INVENTORIES::pet_animal1 ].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) == false )
 		{
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
-			params[0].Int = inv - INVENTORIES::pet_animal1;
+			params[0].Int = inv - INVENTORIES::pet_animal1 + 1; // the interface numbers the animals from 1
 			sendDynamicSystemMessage( _Id, "ANIMAL_INVENTORY_INACCESSIBLE", params );
 			return;
 		}
@@ -10956,7 +11133,7 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 	CInventoryPtr child = _Inventory[ inv ];
 	if (child == NULL)
 	{
-		nlwarning("<CCharacter:-:sellItem> inventory %u is NULL", (uint)inv);
+		nlwarning("<CCharacter::sellItem> %s: inventory %u has no instance", _Id.toString().c_str(), (uint)inv);
 		return;
 	}
 
@@ -10972,6 +11149,13 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 			return;
 		if ( item->getLockCount() )
 			return;
+		// the trade window does not list the items their owner has locked
+		if (item->getLockedByOwner())
+		{
+			nlwarning("HACK: %s sent BOTCHAT:SELL for a locked item (inventory %u, slot %u), refused", _Id.toString().c_str(), (uint)inv, slot);
+			reportRefusedClientMessage(_Id);
+			return;
+		}
 		sheet = item->getSheetId();
 		quality = item->quality();
 		quantity = min(quantity, item->getStackSize());
@@ -11026,12 +11210,35 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 		uint32 ufBasePrice;
 		queryItemPrice(item, basePrice);
 		ufBasePrice = basePrice;
+
+		// the client adds the resale margin to the price without fame, and caps the margin; not counted as a hack:
+		// older clients took a pasted margin above the cap, and a live change of the price coefficients leaves the
+		// client with a stale base price
+		const uint64 maxResalePrice = (uint64)basePrice + (uint64)basePrice * BOTCHATTYPE::MaxResaleMargin / 100;
+		if (sellPrice > maxResalePrice)
+		{
+			nlwarning("<CCharacter sellItem> character %s try to sell an item %s at %u, above the resale margin cap (%" NL_I64 "u), refused", _Id.toString().c_str(), sheet.toString().c_str(), sellPrice, maxResalePrice);
+			SM_STATIC_PARAMS_3(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+			params[0].SheetId = sheet;
+			params[1].Int = quantity;
+			params[2].Int = quality;
+			sendDynamicSystemMessage(_Id, "ITEM_CANT_BE_SOLD", params);
+			return;
+		}
+
 		float famePriceFactor = 1.0f - CShopTypeManager::getFamePriceFactor(fame);
 		basePrice = uint32(basePrice * famePriceFactor);
 
 		if( sellPrice < basePrice && sellPrice != 0 )
 		{
 			nlwarning("<CCharacter sellItem> character %s try to sell an item %s below it's base price (base price %d, sell price %d), must not permited by client", _Id.toString().c_str(), sheet.toString().c_str(), basePrice, sellPrice );
+			return;
+		}
+
+		// the resale price is kept in the sint32 of a TPriceInfo; the client sends 0 rather than a price that does not fit
+		if( sellPrice > (uint32)std::numeric_limits<sint32>::max() )
+		{
+			nlwarning("<CCharacter sellItem> character %s try to sell an item %s for %u, more than a resale price can be, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str(), sellPrice );
 			return;
 		}
 
@@ -11142,7 +11349,8 @@ void CCharacter::itemSolded( uint32 identifier, uint32 quantity, uint32 sellPric
 				nlwarning("sell price is smaller than base price, setting sell price = base price !");
 				sellPrice = basePrice;
 			}
-			uint64 winMoney = (sellPrice - basePrice) * quantity;
+			// in 64 bits, as the buyer paid it (CCharacterShoppingList::buyItem): a 32-bit product wraps
+			uint64 winMoney = (uint64)(sellPrice - basePrice) * quantity;
 			giveMoney( winMoney );
 
 			SM_STATIC_PARAMS_6(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::entity, STRING_MANAGER::integer, STRING_MANAGER::integer, STRING_MANAGER::integer);
@@ -11905,6 +12113,12 @@ void CCharacter::acceptExchangeInvitation()
 		sendDynamicSystemMessage( _Id, "OPS_EXCHANGE_IMPOSSIBLE");
 		return;
 	}
+	if (_ExchangeAsker == CEntityId::Unknown)
+	{
+		// the invitation was cancelled (the players moved apart) before the answer came
+		nldebug("CCharacter::acceptExchangeInvitation : %s has no pending invitation", _Id.toString().c_str());
+		return;
+	}
 	CCharacter* c = PlayerManager.getChar(_ExchangeAsker);
 	if ( !c )
 	{
@@ -11966,6 +12180,7 @@ void CCharacter::acceptExchangeInvitation()
 
 	CActionDistanceChecker::getInstance()->removePlayer( getEntityRowId() );
 	staticActionInProgress(true);
+	m_ExchangeStaticAction = true;
 
 	_CurrentInterlocutor = _ExchangeAsker;
 	_ExchangeAsker = CEntityId::Unknown;
@@ -11997,6 +12212,13 @@ void CCharacter::acceptExchangeInvitation()
 //-----------------------------------------------
 void CCharacter::declineExchangeInvitation()
 {
+	if (_ExchangeAsker == CEntityId::Unknown)
+	{
+		// the invitation was cancelled (the players moved apart) before the answer came
+		nldebug("CCharacter::declineExchangeInvitation : %s has no pending invitation", _Id.toString().c_str());
+		return;
+	}
+
 	//the target decline the proposition, reset everything and inform the asker
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 	params[0].setEIdAIAlias( _Id, CAIAliasTranslator::getInstance()->getAIAlias(_Id) );
@@ -12086,6 +12308,7 @@ void CCharacter::resetExchange()
 	_ExchangeAsker = CEntityId::Unknown;
 	_ExchangeAccepted = false;
 	_ExchangeMoney = (uint64) 0;
+	endExchangeStaticAction();
 
 	// if interlocutor is a bot, leave it to endBotChat() method
 	if (_CurrentInterlocutor.getType() == RYZOMID::player)
@@ -12101,7 +12324,40 @@ void CCharacter::resetExchange()
 		c->_CurrentInterlocutor = CEntityId::Unknown;
 		c->_ExchangeAccepted = false;
 		c->_ExchangeMoney = (uint64) 0;
+		c->endExchangeStaticAction();
 	}
+}
+
+//-----------------------------------------------
+// endExchangeStaticAction
+//-----------------------------------------------
+void CCharacter::endExchangeStaticAction()
+{
+	if (!m_ExchangeStaticAction)
+		return;
+	m_ExchangeStaticAction = false;
+
+	// any other static action would have cancelled the exchange when it started
+	if (_StaticActionInProgress && _StaticActionType == STATIC_ACT_TYPES::Neutral)
+		staticActionInProgress(false);
+}
+
+//-----------------------------------------------
+// abortExchangeIfTooFar
+//-----------------------------------------------
+bool CCharacter::abortExchangeIfTooFar(const CCharacter *trader)
+{
+	double sqrDistance = CVector2d(_EntityState.X() - trader->getX(), _EntityState.Y() - trader->getY()).sqrnorm();
+	if (sqrDistance <= MaxTalkingDistSquare * 1000.0 * 1000.0)
+		return false;
+
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
+	params[0].setEIdAIAlias(trader->getId(), CAIAliasTranslator::getInstance()->getAIAlias(trader->getId()));
+	sendDynamicSystemMessage(_EntityRowId, "EXCHANGE_TOO_FAR", params);
+	params[0].setEIdAIAlias(_Id, CAIAliasTranslator::getInstance()->getAIAlias(_Id));
+	sendDynamicSystemMessage(trader->getEntityRowId(), "EXCHANGE_TOO_FAR", params);
+	resetExchange();
+	return true;
 }
 
 //-----------------------------------------------
@@ -12115,6 +12371,7 @@ CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
 	if (!bot)
 	{
 		nlwarning("<CCharacter startBotChat> invalid bot %s", _Target().toString().c_str());
+		refuseBotChat(NULL, NULL);
 		return NULL;
 	}
 	// Special case if it is an outpost building
@@ -12123,6 +12380,7 @@ CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
 		const double distanceSquare = pow(float( bot->getState().X - _EntityState.X )/1000.0f,2) + pow(float( bot->getState().Y - _EntityState.Y )/1000,2);
 		if( distanceSquare > MaxTalkingOutpostBuildingDistSquare )
 		{
+			refuseBotChat(bot, "BOTCHAT_TOO_FAR");
 			return NULL;
 		}
 	}
@@ -12131,9 +12389,27 @@ CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
 		const double distanceSquare = pow(float( bot->getState().X - _EntityState.X )/1000.0f,2) + pow(float( bot->getState().Y - _EntityState.Y )/1000,2);
 		if( distanceSquare > MaxTalkingDistSquare )
 		{
+			refuseBotChat(bot, "BOTCHAT_TOO_FAR");
 			return NULL;
 		}
 	}
+
+	// The client asks for a bot chat with its current target without naming it, after running to the NPC that
+	// offered it, and the target can change on the way: refuse what this NPC does not offer. Cosmetic shops open
+	// as item trade. Continuing a mission (UnknownFlag) is checked by the mission step against the NPC.
+	if (chatType != BOTCHATTYPE::UnknownFlag)
+	{
+		uint32 offered = (uint32)1 << (uint32)chatType;
+		if (chatType == BOTCHATTYPE::TradeItemFlag)
+			offered |= (uint32)1 << (uint32)BOTCHATTYPE::TradeCosmeticFlag;
+		if ((bot->getBotChatProgram() & offered) == 0)
+		{
+			nldebug("<CCharacter startBotChat> %s asked %s for bot chat %u, which it does not offer", _Id.toString().c_str(), bot->getId().toString().c_str(), (uint)chatType);
+			refuseBotChat(bot, "BOTCHAT_NOT_OFFERED");
+			return NULL;
+		}
+	}
+
 	_CurrentBotChatType = (uint8)chatType;
 
 	// set the bot as the new interlocutor
@@ -12142,6 +12418,43 @@ CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
 	CharacterBotChatBeginEnd.BotChatStart.push_back( TheDataset.getDataSetRow(_CurrentInterlocutor) );
 
 	return bot;
+}
+
+//-----------------------------------------------
+// refuseBotChat
+//-----------------------------------------------
+void CCharacter::refuseBotChat(const CCreature *bot, const char *phrase)
+{
+	// startBotChat set the bot chat static action before its checks
+	staticActionInProgress(false);
+
+	if (bot != NULL && phrase != NULL)
+	{
+		SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+		params[0].setEIdAIAlias(bot->getId(), CAIAliasTranslator::getInstance()->getAIAlias(bot->getId()));
+		sendDynamicSystemMessage(_EntityRowId, phrase, params);
+	}
+
+	// the client opens its bot chat window when it sends the request
+	sendBotChatForceEnd();
+}
+
+//-----------------------------------------------
+// sendBotChatForceEnd
+//-----------------------------------------------
+bool CCharacter::sendBotChatForceEnd()
+{
+	CMessage msgout("IMPULSION_ID");
+	CBitMemStream bms;
+	msgout.serial(_Id);
+	if (!GenericMsgManager.pushNameToStream("BOTCHAT:FORCE_END", bms))
+	{
+		nlwarning("<CCharacter sendBotChatForceEnd> Msg name BOTCHAT:FORCE_END not found");
+		return false;
+	}
+	msgout.serialBufferWithSize((uint8 *)bms.buffer(), bms.length());
+	sendMessageViaMirror(NLNET::TServiceId(_Id.getDynamicId()), msgout);
+	return true;
 }
 
 //-----------------------------------------------
@@ -12169,16 +12482,8 @@ void CCharacter::endBotChat(bool newBotChat, bool closeDynChat, bool processMiss
 		if ( !newBotChat)
 		{
 			//force the end of the bot chat on the client side
-			CMessage msgout( "IMPULSION_ID" );
-			CBitMemStream bms;
-			msgout.serial( _Id );
-			if ( ! GenericMsgManager.pushNameToStream( "BOTCHAT:FORCE_END", bms) )
-			{
-				nlwarning("<CCharacter endBotChat> Msg name BOTCHAT:FORCE_END not found");
+			if (!sendBotChatForceEnd())
 				return;
-			}
-			msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
-			sendMessageViaMirror( NLNET::TServiceId(_Id.getDynamicId()), msgout );
 
 			if (closeDynChat)
 				CMissionManager::getInstance()->removeAllUserDynChat(this);
@@ -12204,6 +12509,7 @@ void CCharacter::endBotChat(bool newBotChat, bool closeDynChat, bool processMiss
 		case (uint8)BOTCHATTYPE::TradeBuildingOptions :
 		case (uint8)BOTCHATTYPE::TradeOutpostBuilding :
 			_CurrentPhrasesTradeList.clear();
+			_CurrentPhrasesTradeBot = CEntityId::Unknown;
 			break;
 		case (uint8)BOTCHATTYPE::CreateGuildFlag:
 			{
@@ -12246,44 +12552,39 @@ void CCharacter::checkBotGift()
 		return;
 	}
 
-	CMission * mission = NULL;
-	if (_BotGift->Type == MISSION_DESC::Solo)
+	uint32 giftStep;
+	CBankAccessor_PLR::getEXCHANGE().setACCEPTED(_PropertyDatabase, isBotGiftValid(giftStep));
+}
+
+//-----------------------------------------------
+// isBotGiftValid
+//
+//-----------------------------------------------
+bool CCharacter::isBotGiftValid(uint32 &giftStep)
+{
+	nlassert(_BotGift);
+	CMission *mission = getMissionFromBotGift();
+	if (!mission)
+		return false;
+
+	// outside its time and season bounds the mission ignores the gift event, after the gift was taken
+	if (!mission->checkConstraints(false))
+		return false;
+
+	const CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(mission->getTemplateId());
+	nlassert(templ);
+
+	for (set<uint32>::const_iterator itSet = _BotGift->StepsIndex.begin(); itSet != _BotGift->StepsIndex.end(); ++itSet)
 	{
-		mission = _Missions->getMissions( _BotGift->MissionAlias );
-	}
-	else if (_BotGift->Type == MISSION_DESC::Group)
-	{
-		CTeam * team = TeamManager.getRealTeam( _TeamId );
-		if (!team)
+		// the step ends when a team member completes it while the gift window is open
+		const CActiveStepPD *step = mission->getSteps(*itSet);
+		if (step && templ->Steps[*itSet - 1]->checkPlayerGift(mission, *step, this))
 		{
-			nlwarning("Player %s has no team!", _Id.toString().c_str());
-			return;
+			giftStep = *itSet;
+			return true;
 		}
-		mission = team->getMissionByAlias( _BotGift->MissionAlias );
 	}
-
-	if (mission)
-	{
-		const CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
-		nlassert( templ );
-
-		set<uint32>::iterator itSet;
-		bool giftOk = false;
-		for( itSet=_BotGift->StepsIndex.begin(); itSet!=_BotGift->StepsIndex.end(); ++itSet )
-		{
-			if ( templ->Steps[*itSet-1]->checkPlayerGift(mission,this) )
-			{
-				giftOk = true;
-				break;
-			}
-		}
-//		_PropertyDatabase.setProp("EXCHANGE:ACCEPTED", giftOk);
-		CBankAccessor_PLR::getEXCHANGE().setACCEPTED(_PropertyDatabase, giftOk);
-
-	}
-	else
-//		_PropertyDatabase.setProp("EXCHANGE:ACCEPTED", false);
-CBankAccessor_PLR::getEXCHANGE().setACCEPTED(_PropertyDatabase, false);
+	return false;
 }
 
 //-----------------------------------------------
@@ -12445,6 +12746,30 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 			return;
 		}
 
+		// the exchange ends with the gift, a second validate finds none
+		if (_ExchangeView == NULL)
+		{
+			nldebug("CCharacter::acceptExchange : %s validated a gift with no exchange open", _Id.toString().c_str());
+			return;
+		}
+
+		// check the gift again before taking it: a team member may have paid or ended the step since it was offered,
+		// and a modified client can validate a gift that was refused
+		uint32 giftStep;
+		if (!isBotGiftValid(giftStep))
+		{
+			nldebug("CCharacter::acceptExchange : %s validated a gift its mission step does not accept", _Id.toString().c_str());
+			// the gift window may have opened within the time and season bounds of the mission and been validated after
+			const CMission *giftMission = getMissionFromBotGift();
+			const bool outOfBounds = giftMission != NULL && !giftMission->checkConstraints(false);
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+			params[0].setEIdAIAlias(_CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor));
+			sendDynamicSystemMessage(_EntityRowId, outOfBounds ? "MIS_OPTION_NOT_NOW" : "EXCHANGE_GIFT_NOT_NEEDED", params);
+			// the client closes its gift window when it validates, release what it offered
+			resetExchange();
+			return;
+		}
+
 		MISSION_DESC::TMissionType type = _BotGift->Type;
 		TAIAlias	missionAlias = _BotGift->MissionAlias;
 
@@ -12482,27 +12807,25 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 			return;
 		}
 
+		// same rule as for an exchange with a player, see validateExchange()
+		if (_ExchangeView->removeInaccessibleItems())
+		{
+			invalidateExchange();
+			checkBotGift();
+			return;
+		}
+
 		removeExchangeItems(vect, exchangePlayerPets);
 
 		if (mission)
 		{
-			// check if gift is ok for the step or for one of the "step any" steps
-			uint32					stepIndex;
-			vector<uint32>			quantities;
-			bool					giftDone = false;
-			set<uint32>::iterator	itSet;
-			for( itSet=_BotGift->StepsIndex.begin(); itSet!=_BotGift->StepsIndex.end(); ++itSet )
-			{
-				stepIndex = *itSet;
-				quantities.clear();
-				giftDone = mission->itemGiftDone( this ,vect, stepIndex, quantities );
-				if( giftDone )
-					break;
-			}
+			// the gift goes to the step that accepted it, which in a "step any" need not be the first;
+			// checkPlayerGift accepts either items or money, never both
+			uint32 stepIndex = giftStep;
+			vector<uint32> quantities;
+			bool giftDone = !vect.empty() && mission->itemGiftDone(this, vect, stepIndex, quantities);
 			if( !giftDone )
 			{
-				stepIndex = *_BotGift->StepsIndex.begin();
-
 				std::list< CMissionEvent* > eventList;
 				CMissionEventGiveMoney eventMoney( (uint32) _ExchangeMoney );
 				// no item accepted : this is a give money
@@ -12570,6 +12893,27 @@ bool CCharacter::validateExchange()
 	{
 		nlwarning("CCharacter::validateExchange : unknown character %s",_CurrentInterlocutor.toString().c_str());
 		abortExchange();
+		return false;
+	}
+
+	// the distance is checked on character ticks, which do not run every game cycle
+	if (abortExchangeIfTooFar(interlocutor))
+		return false;
+
+	// pet animals are checked when their ticket goes into the exchange, but can be filled or mounted afterwards
+	if (!_ExchangeView->checkPetTickets() || !interlocutor->_ExchangeView->checkPetTickets())
+	{
+		invalidateExchange();
+		return false;
+	}
+
+	// an item of a pack animal, a room or a guild inventory can only be given while its owner has access to it
+	bool removed = _ExchangeView->removeInaccessibleItems();
+	removed = interlocutor->_ExchangeView->removeInaccessibleItems() || removed;
+
+	if (removed)
+	{
+		invalidateExchange();
 		return false;
 	}
 
@@ -12921,6 +13265,12 @@ void CCharacter::addExchangeItems(CCharacter *trader, vector<CGameItemPtr> &item
 			msgAI.PetMirrorRow = _PlayerPets[ i ].SpawnedPets;
 			CWorldInstances::instance().msgToAIInstance(getInstanceNumber(), msgAI);
 		}
+		else
+		{
+			// validateExchange checks the animal counts, which should leave a slot for every pet received
+			nlwarning("<CCharacter::addExchangeItems> %s has no free pet slot, the pet %s from %s is lost",
+			    _Id.toString().c_str(), playerPetsAdded[p].PetSheetId.toString().c_str(), trader->getId().toString().c_str());
+		}
 	}
 
 	if( updatePetDataBase )
@@ -13158,8 +13508,9 @@ void CCharacter::buildMissionList( CCreature * creature,uint16 sessionId )
 	// check must be done done before
 	nlassert(creature);
 
-	// re-init mission interface page
+	// re-init mission interface page, a list left from a chat that did not end normally is dropped
 	_CurrentBotChatListPage = 0;
+	_CurrentMissionList.clear();
 	// for each mission proposed by the creature, check if the player can take the mission, if yes, add the mission to the proposed mission list
 	string noMissionMsg;
 	for ( uint i =  0; i < creature->getMissionVector().size(); i++ )
@@ -13300,6 +13651,9 @@ void CCharacter::addMission(CMissionSolo * mission)
 {
 	_Missions->setMissions( mission );
 	TMissionHistory &mh = _MissionHistories[mission->getTemplateId()];
+	// The journal of a CSR that monitors the missions of a character has the missions of that character: it has to be
+	// its own again for a mission of its own
+	CAdminProperties::stopMonitoringMissions( *this );
 	// store the date.
 	mission->updateUsersJournalEntry();
 }
@@ -13375,6 +13729,9 @@ void CCharacter::removeMission(TAIAlias alias, /*TMissionResult*/ uint32 result,
 		if (!doNotClearJournal)
 			mission->clearUsersJournalEntry();
 	}
+	// a mission removed without a failure (a success before its queue_end step, a command) leaves its queue too; the
+	// character is given, the missions that failed while it was offline are removed before it is their taker
+	mission->leaveWaitingQueue(_Id);
 
 	CMissionManager::getInstance()->deInstanciateMission(mission);
 	_Missions->deleteFromMissions( alias );
@@ -13397,7 +13754,12 @@ void CCharacter::abandonMission(uint8 indexClient)
 			{
 				templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
 				if (templ == NULL || templ->Tags.NoList) // skip invalid or invisible missions
+				{
+					// and forget them: when no visible mission has the index, the last one skipped was abandoned
+					mission = NULL;
+					templ = NULL;
 					continue;
+				}
 			}
 			break;
 		}
@@ -13407,6 +13769,9 @@ void CCharacter::abandonMission(uint8 indexClient)
 		MISDBG( "user:%s abandonMission : ERROR : invalid mission index %u sent ",_Id.toString().c_str(), indexClient );
 		return;
 	}
+	const TAIAlias alias = mission->getTemplateId();
+	const bool finishedWithSuccess = mission->getFinished() && mission->getMissionSuccess();
+	bool removedItself = false;
 	if ( mission->getFinished() == false )
 	{
 		if ( !templ )
@@ -13422,6 +13787,9 @@ void CCharacter::abandonMission(uint8 indexClient)
 		MISDBG("user:%s abandonMission", getId().toString().c_str());
 		mission->onFailure(true, false);
 		CCharacter::sendDynamicSystemMessage( _EntityRowId, "ABANDON_MISSION" );
+
+		// A no_list, chained or auto_remove mission has removed (deleted) itself
+		removedItself = (_Missions->getMissions(alias) == NULL);
 	}
 	// the template can be missing for a finished mission
 	if (templ != NULL)
@@ -13430,7 +13798,7 @@ void CCharacter::abandonMission(uint8 indexClient)
 	vector<string> params = getCustomMissionParams(toUpper(templ->getMissionName()) + "_CALLBACK");
 	if (params.size() >= 1)
 	{
-		if (mission->getFinished() && mission->getMissionSuccess())
+		if (finishedWithSuccess)
 			validateDynamicMissionStep(params[0] + "&result=FINABD");
 		else
 			validateDynamicMissionStep(params[0] + "&result=ABD");
@@ -13438,7 +13806,9 @@ void CCharacter::abandonMission(uint8 indexClient)
 		}
 	}
 
-	removeMission(mission->getTemplateId(), mr_abandon);
+	if (removedItself)
+		return;
+	removeMission(alias, mr_abandon);
 }
 
 void CCharacter::clearSuccessfullMission()
@@ -13638,9 +14008,17 @@ bool CCharacter::processMissionUserEvent(std::list< CMissionEvent* > & eventList
 		return processMissionStepUserEvent( eventList, alias, 0xFFFFFFFF );
 	else
 	{
+		// Processing an event can remove missions: a failed action (recv_item with fail_if_inventory_full) fails its
+		// mission, which removes an auto_remove, no_list or chained one, and returns Nothing. Go through the aliases, and
+		// skip the missions already removed
+		vector<TAIAlias> aliases;
 		for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it )
+			aliases.push_back((*it).first);
+		for (uint i = 0; i < aliases.size(); ++i)
 		{
-			if ( processMissionStepUserEvent( eventList,(*it).second->getTemplateId() ,0xFFFFFFFF) )
+			if (_Missions->getMissions(aliases[i]) == NULL)
+				continue;
+			if (processMissionStepUserEvent(eventList, aliases[i], 0xFFFFFFFF))
 				return true;
 		}
 	}
@@ -13707,8 +14085,17 @@ bool CCharacter::processMissionStepUserEvent(std::list< CMissionEvent* > & event
 			}
 		}
 
-		CMissionManager::getInstance()->missionDoneOnce(templ);
-		mission->stopChildren();
+		// The failure actions of the other instances or of the children can remove the mission (game_event_reset) or fail
+		// it (fail_mission_cat): its MissionDone event is in the list already. It is Normal meanwhile, as in forceSuccess:
+		// a failure of a Complete mission is taken as its end, which would end it again with a second MissionDone.
+		NLMISC::CRefPtr<CMission> missionRef = mission;
+		mission->setProcessingState(CMission::Normal);
+		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
+		if (missionRef != nullptr)
+			mission->stopChildren();
+		if (missionRef == nullptr || mission->getFinished())
+			return true;
+		mission->setProcessingState(CMission::Complete);
 
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || bChained || templ->Tags.AutoRemove )
@@ -13757,6 +14144,12 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 		{
 			if ( idx == index )
 			{
+				// outside its time and season bounds the mission ignores the option, say so instead
+				if (!(*it).second->checkConstraints(false))
+				{
+					refuseMissionOptionNotNow(bot);
+					return;
+				}
 				if ( !botchats[j].Gift )
 				{
 					// build a talk event
@@ -13784,41 +14177,31 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 
 					const CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _BotGift->MissionAlias );
 					nlassert( templ );
-					// if step Any, add all following steps which are part of this step any
-					if( templ->Steps[botchats[j].StepIndex - 1]->isAny() )
+					// a gift step of a step any takes the gift for all the gift steps of its block at this bot,
+					// whichever of their menu entries was picked
+					IMissionStepTemplate *pickedStep = templ->Steps[botchats[j].StepIndex - 1];
+					if (pickedStep->isAny())
 					{
-						j++;
-						while(j<botchats.size() && botchats[j].Gift && templ->Steps[botchats[j].StepIndex - 1]->isAny())
+						for (uint k = 0; k < botchats.size(); ++k)
 						{
-							_BotGift->StepsIndex.insert( botchats[j].StepIndex );
-							j++;
+							IMissionStepTemplate *step = templ->Steps[botchats[k].StepIndex - 1];
+							if (botchats[k].Gift && step->isAny() && step->getOOOStepIndex() == pickedStep->getOOOStepIndex())
+								_BotGift->StepsIndex.insert(botchats[k].StepIndex);
 						}
 					}
-					else
-						j++;
 
-					// init exchange view
-					_ExchangeView = new CExchangeView;
-					_ExchangeView->setCharacter(this);
-					_ExchangeView->bindToInventory(_Inventory[INVENTORIES::bag]);
-
-					SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
-					params[0].setEIdAIAlias( _CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor) );
-					uint32 txt = STRING_MANAGER::sendStringToClient( _EntityRowId, "EXCHANGE_TITLE_BOT", params );
-//					_PropertyDatabase.setProp( "EXCHANGE:TEXT", txt );
-					CBankAccessor_PLR::getEXCHANGE().setTEXT(_PropertyDatabase, txt );
-
-					// try to auto fill exchange view
-					autoFillExchangeView();
+					openMissionGiftExchange();
 				}
 				return;
 			}
+			// one menu entry per option, as sendContextTexts lists them
 			idx++;
+			j++;
 		}
-		uint j = 0;
 		for ( map<uint32,EGSPD::CMissionTeleportPD>::iterator itTp = (*it).second->getTeleportsBegin(); itTp != (*it).second->getTeleportsEnd(); ++itTp )
 		{
-			if ( (*it).second->getTeleportBot( (*itTp).second.getIndex() ) == bot->getAlias() )
+			// the menu also lists the teleports of a mission at its giver
+			if ((*it).second->getTeleportBot((*itTp).second.getIndex()) == bot->getAlias() || bot->getAlias() == (*it).second->getGiver())
 			{
 				if ( idx == index )
 				{
@@ -13843,6 +14226,12 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 			{
 				if ( idx == index )
 				{
+					// outside its time and season bounds the mission ignores the option, say so instead
+					if (!team->getMissions()[i]->checkConstraints(false))
+					{
+						refuseMissionOptionNotNow(bot);
+						return;
+					}
 					if ( !botchats[j].Gift )
 					{
 						// build a talk event
@@ -13861,6 +14250,8 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 					else
 					{
 						// store infos on the current bot gift
+						if (_BotGift)
+							delete _BotGift;
 						_BotGift = new CBotGift;
 						_BotGift->Type = MISSION_DESC::Group;
 						_BotGift->MissionAlias = team->getMissions()[i]->getTemplateId();
@@ -13868,31 +14259,31 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 
 						const CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _BotGift->MissionAlias );
 						nlassert( templ );
-						// if step Any, add all following steps which are part of this step any
-						if( templ->Steps[botchats[j].StepIndex - 1]->isAny() )
+						// a gift step of a step any takes the gift for all the gift steps of its block at this bot,
+						// whichever of their menu entries was picked
+						IMissionStepTemplate *pickedStep = templ->Steps[botchats[j].StepIndex - 1];
+						if (pickedStep->isAny())
 						{
-							j++;
-							while(j<botchats.size() && botchats[j].Gift && templ->Steps[botchats[j].StepIndex - 1]->isAny())
+							for (uint k = 0; k < botchats.size(); ++k)
 							{
-								_BotGift->StepsIndex.insert( botchats[j].StepIndex );
-								j++;
+								IMissionStepTemplate *step = templ->Steps[botchats[k].StepIndex - 1];
+								if (botchats[k].Gift && step->isAny() && step->getOOOStepIndex() == pickedStep->getOOOStepIndex())
+									_BotGift->StepsIndex.insert(botchats[k].StepIndex);
 							}
 						}
-						else
-							j++;
 
-						// init exchange view
-						_ExchangeView = new CExchangeView;
-						_ExchangeView->setCharacter(this);
-						_ExchangeView->bindToInventory(_Inventory[INVENTORIES::bag]);
+						openMissionGiftExchange();
 					}
 					return;
 				}
+				// one menu entry per option, as sendContextTexts lists them
 				idx++;
+				j++;
 			}
 			for ( map<uint32,EGSPD::CMissionTeleportPD>::iterator it = team->getMissions()[i]->getTeleportsBegin(); it != team->getMissions()[i]->getTeleportsEnd(); ++it )
 			{
-				if ( team->getMissions()[i]->getTeleportBot( (*it).second.getIndex() ) == bot->getAlias() )
+				// the menu also lists the teleports of a mission at its giver
+				if (team->getMissions()[i]->getTeleportBot((*it).second.getIndex()) == bot->getAlias() || bot->getAlias() == team->getMissions()[i]->getGiver())
 				{
 					if ( idx == index )
 					{
@@ -13948,6 +14339,39 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 	}
 	nlwarning("<CCharacter botChatMissionAdvance> invalid index %u", index );
 }// botChatMissionAdvance
+
+//-----------------------------------------------
+// refuseMissionOptionNotNow
+//-----------------------------------------------
+void CCharacter::refuseMissionOptionNotNow(const CCreature *bot)
+{
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+	params[0].setEIdAIAlias(bot->getId(), CAIAliasTranslator::getInstance()->getAIAlias(bot->getId()));
+	sendDynamicSystemMessage(_EntityRowId, "MIS_OPTION_NOT_NOW", params);
+
+	// the client opens its gift window as it sends a gift option, and the AI stopped the bot for the chat
+	endBotChat();
+	staticActionInProgress(false);
+}
+
+//-----------------------------------------------
+// openMissionGiftExchange
+//-----------------------------------------------
+void CCharacter::openMissionGiftExchange()
+{
+	// init exchange view
+	_ExchangeView = new CExchangeView;
+	_ExchangeView->setCharacter(this);
+	_ExchangeView->bindToInventory(_Inventory[INVENTORIES::bag]);
+
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+	params[0].setEIdAIAlias(_CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor));
+	uint32 txt = STRING_MANAGER::sendStringToClient(_EntityRowId, "EXCHANGE_TITLE_BOT", params);
+	CBankAccessor_PLR::getEXCHANGE().setTEXT(_PropertyDatabase, txt);
+
+	// try to auto fill exchange view
+	autoFillExchangeView();
+}
 
 
 
@@ -14056,12 +14480,10 @@ bool CCharacter::autoFillExchangeView()
 			break;
 
 		validateSteps = missionTemplate->Steps[*itSet-1]->getSubSteps();
-
-		// get gift step from mission
+		// the template holds the full quantities; the step state holds what is still owed
 		const CActiveStepPD *botGiftStep = currentMission->getSteps(*itSet);
 		if (botGiftStep)
 		{
-			// fill in remaining quantities
 			for (uint i = 0; i < validateSteps.size(); ++i)
 			{
 				const CActiveStepStatePD *gift = botGiftStep->getStates(i + 1);
@@ -14250,24 +14672,42 @@ void CCharacter::updateSavedMissions()
 	}
 	for ( uint i  = 0; i < failed.size(); i++ )
 		removeMission( failed[i]->getTemplateId() , mr_fail );
-	uint idx = 0;
 
 	bool bLaunchCrashHandler = true;
 	if (_SaveDate > IService::getInstance()->getLaunchingDate())
 		bLaunchCrashHandler = false; // Launch the player_reconnect handler
 
-	for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); )
+	// Every mission has its taker and its journal index before any is put in game: the events of a mission's active
+	// steps can give a new mission, which takes the first index no mission holds
+	uint idx = 0;
+	vector<NLMISC::CRefPtr<CMission>> loaded;
+	for (map<TAIAlias, CMission *>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it)
 	{
-		CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( (*it).second->getTemplateId() );
+		CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate((*it).second->getTemplateId());
 		if (!templ)
 			continue;
+		loaded.push_back((*it).second);
 
-		CMissionSolo* mission = EGS_PD_CAST<CMissionSolo*>( (*it).second );
-		EGS_PD_AST( mission );
+		CMissionSolo *mission = EGS_PD_CAST<CMissionSolo *>((*it).second);
+		EGS_PD_AST(mission);
 		mission->setTaker(_EntityRowId);
+		mission->setClientIndex(templ->Tags.NoList ? 0xFF : idx++);
+	}
+
+	// The events of a mission's active steps, and its crash or reconnect handler, can end and remove missions, this one
+	// or others (its children), and give new ones: go through the missions loaded, and skip those already removed. A
+	// mission given again at a removed one's alias is a new instance, already in game.
+	for (uint i = 0; i < loaded.size(); ++i)
+	{
+		CMission *found = loaded[i];
+		if (found == nullptr)
+			continue;
+
+		CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(found->getTemplateId());
+		CMissionSolo *mission = EGS_PD_CAST<CMissionSolo *>(found);
 		if ( !templ->Tags.NoList )
 		{
-			mission->setClientIndex( idx );
+			NLMISC::CRefPtr<CMission> missionRef = mission;
 			mission->putInGame();
 			mission->updateUsersJournalEntry();
 
@@ -14281,7 +14721,7 @@ void CCharacter::updateSavedMissions()
 				SM_STATIC_PARAMS_1(textParams, STRING_MANAGER::literal);
 				textParams[0].Literal.fromUtf8(msg);
 				uint32 txt = STRING_MANAGER::sendStringToClient(getEntityRowId(), "LITERAL", textParams);
-				(*it).second->addCompassTarget((TAIAlias)txt, true, true);
+				mission->addCompassTarget((TAIAlias)txt, true, true);
 			}
 
 			list<CMissionEvent *> eventList;
@@ -14298,20 +14738,17 @@ void CCharacter::updateSavedMissions()
 				delete *eventList.begin();
 				eventList.pop_front();
 			}
+			// the events can have removed it
+			if (missionRef == NULL)
+				continue;
 			// we reload the missions : there was a crash before
-			map<TAIAlias, CMission*>::iterator itBack = it;
-			++itBack;
 			if (bLaunchCrashHandler)
-				mission->applyCrashHandler(true, std::string());
+				mission->applyCrashHandler(true, std::vector<std::string>());
 			else
 				mission->applyPlayerReconnectHandler();
-			it = itBack;
-			++idx;
 		}
 		else
 		{
-			mission->setClientIndex( 0xFF );
-			mission->setTaker(_EntityRowId);
 			mission->putInGame();
 
 			sint32 x = 0;
@@ -14319,7 +14756,7 @@ void CCharacter::updateSavedMissions()
 			string msg;
 			getPositionCheck(toUpper(templ->getMissionName()), x, y, msg);
 
-			for (map<uint32, EGSPD::CMissionCompassPD>::iterator itCompass = (*it).second->getCompassBegin(); itCompass != (*it).second->getCompassEnd(); ++itCompass)
+			for (map<uint32, EGSPD::CMissionCompassPD>::iterator itCompass = mission->getCompassBegin(); itCompass != mission->getCompassEnd(); ++itCompass)
 			{
 				TVectorParamCheck params(1);
 				x = 0;
@@ -14333,7 +14770,6 @@ void CCharacter::updateSavedMissions()
 					textParams[0].Literal.fromUtf8(msg);
 					uint32 txt = STRING_MANAGER::sendStringToClient(getEntityRowId(), "LITERAL", textParams);
 					PlayerManager.sendImpulseToClient(_Id, "JOURNAL:ADD_COMPASS", x, y, txt);
-					++it;
 					continue;
 				}
 
@@ -14368,7 +14804,6 @@ void CCharacter::updateSavedMissions()
 					}
 				}
 			}
-			++it;
 		}
 	}
 }
@@ -15031,13 +15466,15 @@ void CCharacter::memorize(uint8 memorizationSet, uint8 index, uint16 phraseId, c
 //-----------------------------------------------
 // addLink
 //-----------------------------------------------
-void CCharacter::addLink( CSLinkEffect * effect)
+void CCharacter::addLink( CSLinkEffect * effect, bool newStaticAction)
 {
 	if (!effect)
 		return;
 
-	// set the static action flag
-	staticActionInProgress(true,STATIC_ACT_TYPES::Casting);
+	// set the static action flag. The later links of a phrase join the static action of its first link:
+	// starting another one would cancel it and stop the links it holds.
+	if (newStaticAction)
+		staticActionInProgress(true,STATIC_ACT_TYPES::Casting);
 
 	const uint8 size = (uint8)_SEffectLinks.size();
 
@@ -15090,7 +15527,7 @@ void CCharacter::stopAllLinks(float factorOnSurvivalTime)
 {
 	CEntityBase::stopAllLinks(factorOnSurvivalTime);
 
-	for (uint i = 0; i < 10 ; ++i)
+	for (uint i = 0; i < NB_LINK_SLOT ; ++i)
 	{
 //		ICDBStructNode *node = _PropertyDatabase.getICDBStructNodeFromName( NLMISC::toString( "EXECUTE_PHRASE:LINK:%u", i ) );
 //		if ( node )
@@ -15891,6 +16328,9 @@ void	CCharacter::getMatchingMissionLootRequirements( uint16 itemLevel, const std
 	for ( std::map<TAIAlias, CMission*>::iterator itMission=getMissionsBegin(); itMission!=getMissionsEnd(); ++itMission )
 	{
 		CMission *mission = (*itMission).second;
+		// outside its time and season bounds the mission ignores the loot event, the item would give no credit
+		if (!mission->checkConstraints(false))
+			continue;
 		//uint32 missionTemplateId = mission->getTemplateId();
 		CMissionTemplate *missionTemplate = CMissionManager::getInstance()->getTemplate( (*itMission).first );
 		// Browse active steps
@@ -18240,9 +18680,13 @@ void CCharacter::onDisconnection(bool bCrashed)
 	CBuildingManager::getInstance()->removePlayerFromRoom(this);
 	// TODO : check if it's not an exploit to disconnect the player from PVP now (not waiting the disconnection time)
 	CPVPManager2::getInstance()->playerDisconnects(this);
+	// the team invitations this character sent or waits on
+	TeamManager.playerDisconnects(this);
 
 	// Remove handledAIGroups for all missions of the player
 	despawnAllHandledAIGroup();
+	// drop the pending R2 give/receive item entries the character registered on npcs
+	CR2GiveItem::getInstance().onCharacterLogout( getEntityRowId() );
 
 	updateJewelsModifiers(true);
 
@@ -18258,6 +18702,12 @@ void CCharacter::onDisconnection(bool bCrashed)
 //----------------------------------------------------------------------------
 void CCharacter::setAfkState( bool isAfk )
 {
+	// can't go afk while mounted
+	if (isAfk && _Mode.getValue().isMountMode())
+	{
+		return;
+	}
+
 	if (_ContextualProperty.directAccessForStructMembers().afk() != isAfk)
 	{
 		_ContextualProperty.directAccessForStructMembers().afk(isAfk);
@@ -18274,6 +18724,9 @@ void CCharacter::setAfkState( bool isAfk )
 				setMode(MBEHAV::NORMAL);
 			}
 		}
+
+		// speed is forced to 0 while afk: update it now instead of waiting for the next tickUpdate
+		applyCurrentSpeed();
 	}
 }
 
@@ -18440,7 +18893,7 @@ bool CCharacter::changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEntit
 	else
 	{
 		if( _PhysScores._PhysicalScores[SCORES::hit_points].Max > 0)
-			setHpBar( (uint32) ( (1023 * _PhysScores._PhysicalScores[SCORES::hit_points].Current) / _PhysScores._PhysicalScores[SCORES::hit_points].Max) );
+			setHpBar((uint32)scoreRatio(_PhysScores._PhysicalScores[SCORES::hit_points].Current, _PhysScores._PhysicalScores[SCORES::hit_points].Max, 1023));
 		else
 			setHpBar(0);
 		return false;
@@ -18689,10 +19142,8 @@ void CCharacter::sendCustomEmote( const NLMISC::CEntityId& id, MBEHAV::EBehaviou
 
 	string sEmoteCustomText = emoteCustomText.toUtf8();
 
-	if ((behaviour != MBEHAV::IDLE) || (sEmoteCustomText == "none"))
-	{
-		setAfkState(false);
-	}
+	// an emote is an action of the player, with or without an animation, as in sendEmote
+	setAfkState(false);
 
 	if( sEmoteCustomText == "none" )
 	{
@@ -19286,8 +19737,8 @@ void CCharacter::entersWater() const
 {
 	// tranfert damage for player
 	PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->transferDamageOnFictitiousCreature(_EntityRowId, _TeamId);
-	// clear Xp for player
-	PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->clearAllXpForPlayer(_EntityRowId, _TeamId, true);
+	// clear Xp for player (his share of the team damage was moved by the transfer, the team keeps the rest)
+	PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->clearAllXpForPlayer(_EntityRowId, _TeamId, false);
 	// disengage player if engaged in combat
 	CPhraseManager::getInstance().disengage(_EntityRowId, true);
 }
@@ -19372,6 +19823,33 @@ void CCharacter::consumeItem( INVENTORIES::TInventory inventory, uint32 slot )
 		params[2].Int = secondes;
 		CCharacter::sendDynamicSystemMessage(_Id,"CONSUMABLE_OVERDOSE_TIMER", params);
 
+		return;
+	}
+
+	// the item is destroyed when the consumption ends, before its effect is built: an effect with a part lost at load
+	// (reported then) is refused here, while the item is still there
+	if (form->EffectWhenConsumed != CSheetId::Unknown)
+	{
+		const CStaticRolemasterPhrase *effect = CSheets::getSRolemasterPhrase(form->EffectWhenConsumed);
+		if (!effect)
+		{
+			// no phrase to build: the item would be used up for nothing
+			static std::set<CSheetId> reported;
+			if (reported.insert(form->SheetId).second)
+				nlwarning("<CCharacter::consumeItem> the consumable %s names the effect %s, which is no phrase sheet: it is refused",
+				    form->SheetId.toString().c_str(), form->EffectWhenConsumed.toString().c_str());
+			CCharacter::sendDynamicSystemMessage(_Id, "EGS_ACTION_BROKEN");
+			return;
+		}
+		if (CPhraseManager::getInstance().refusesBrokenBricks(effect->Bricks, _EntityRowId, "the effect", form->SheetId, true))
+			return;
+	}
+	else if (form->ConsumableItem->HasBadProperty)
+	{
+		static std::set<CSheetId> reported;
+		if (reported.insert(form->SheetId).second)
+			nlwarning("<CCharacter::consumeItem> the consumable %s lost a property at load (reported then): it is refused", form->SheetId.toString().c_str());
+		CCharacter::sendDynamicSystemMessage(_Id, "EGS_ACTION_BROKEN");
 		return;
 	}
 
@@ -21569,6 +22047,10 @@ std::vector<SItemSpecialEffect> CCharacter::lookForSpecialItemEffects(ITEM_SPECI
 //-----------------------------------------------------------------------------
 bool CCharacter::canBelongToGuild( uint32 guildId, bool setToNone /*= false*/ )
 {
+	// what setToNone may reset below
+	const PVP_CLAN::TPVPClan oldCult = _DeclaredCult;
+	const PVP_CLAN::TPVPClan oldCiv = _DeclaredCiv;
+
 	// Allow changes to guild 0 (no guild)
 	if (guildId == 0)
 	{
@@ -21583,8 +22065,7 @@ bool CCharacter::canBelongToGuild( uint32 guildId, bool setToNone /*= false*/ )
 		// guildAllegiance is a pair; first element = cult, second element = civilization.
 		std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> guildAllegiance = theGuild->getAllegiance();
 
-		if (guildAllegiance.first != _DeclaredCult
-			&& _DeclaredCult != PVP_CLAN::None && _DeclaredCult != PVP_CLAN::Neutral)
+		if (!CGuild::isAllegianceCompatible(guildAllegiance.first, _DeclaredCult))
 		{
 			// Check parameter.  Used to correct players just logging on if guild changed
 			//   allegiance.  If we change it, we should return true.
@@ -21598,8 +22079,7 @@ bool CCharacter::canBelongToGuild( uint32 guildId, bool setToNone /*= false*/ )
 			}
 		}
 
-		if (guildAllegiance.second != _DeclaredCiv
-		    && _DeclaredCiv != PVP_CLAN::None && _DeclaredCiv != PVP_CLAN::Neutral)
+		if (!CGuild::isAllegianceCompatible(guildAllegiance.second, _DeclaredCiv))
 		{
 			// Check parameter.  Used to correct players just logging on if guild changed
 			//   allegiance.  If we change it, we should return true.
@@ -21611,6 +22091,23 @@ bool CCharacter::canBelongToGuild( uint32 guildId, bool setToNone /*= false*/ )
 			{
 				return false;
 			}
+		}
+
+		if (_DeclaredCult != oldCult || _DeclaredCiv != oldCiv)
+		{
+			// The allegiance was reset. setDeclaredCult and setDeclaredCiv are not used for it, as they check the
+			// guild again; what they tell the client and the shard unifier is done here. A character that has not
+			// entered the game yet gets its database and its fame caps when it does (finalizeClientReady).
+			if (getEnterFlag())
+			{
+				CBankAccessor_PLR::getFAME().setCULT_ALLEGIANCE(_PropertyDatabase, _DeclaredCult);
+				CBankAccessor_PLR::getFAME().setCIV_ALLEGIANCE(_PropertyDatabase, _DeclaredCiv);
+				resetFameDatabase();
+				// the faction channels follow the allegiance in a RYZOM_FORGE build
+				CPVPManager2::getInstance()->updateFactionChannel(this);
+			}
+			if (IShardUnifierEvent::getInstance() != NULL)
+				IShardUnifierEvent::getInstance()->onUpdateCharAllegiance(_Id, _DeclaredCult, _DeclaredCiv);
 		}
 
 		return true;
@@ -22095,7 +22592,8 @@ void CCharacter::resetItemTypeFilter()
 
 void CCharacter::refreshTradeList()
 {
-	startTradeItemSession( _CurrentTradeSession + 1 );
+	// the client asks for a rebuild as soon as the window opens (its filters), the trade start already reported
+	startTradeItemSession(_CurrentTradeSession + 1, false);
 }
 
 
@@ -22505,7 +23003,16 @@ void CCharacter::updateBrickFlagsDBEntry()
 void CCharacter::addWearMalus( float m )
 {
 	_WearEquipmentMalus += m;
-//	_PropertyDatabase.setProp( _DataIndexReminder->Modifiers.TotalMalusEquip, (uint32)(_WearEquipmentMalus * 50) );
+	updateWearMalusDBEntry();
+}
+
+
+//------------------------------------------------------------------------------
+
+void CCharacter::updateWearMalusDBEntry()
+{
+	// The client multiplies this value by 2 to show it and to take it as a percentage for the cast time, range and
+	// costs of its action previews.
 	CBankAccessor_PLR::getMODIFIERS().setTOTAL_MALUS_EQUIP(_PropertyDatabase, checkedCast<uint8>(_WearEquipmentMalus * 50) );
 }
 

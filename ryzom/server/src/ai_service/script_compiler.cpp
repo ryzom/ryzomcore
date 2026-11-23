@@ -18,6 +18,9 @@
 
 #include "script_vm.h"
 #include "script_compiler.h"
+#include "ring_scenario_guard.h"
+
+#include "game_share/rt_scenario_check.h"
 
 // Compiler special keywords (tokens and rules)
 static std::string const s_kw_NUMBER       = "NUMBER";
@@ -327,7 +330,7 @@ void CBracketToken::dump(size_t indent) const
 	string str;
 	str.resize(indent,' ');
 	str+="["+_Body+"]";
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -379,7 +382,7 @@ void CCharToken::dump(size_t indent) const
 	str+="'";
 	str+=_c;
 	str+="'";
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -422,7 +425,7 @@ void CTokenToken::dump(size_t indent) const
 	string str;
 	str.resize(indent,' ');
 	str+="{"+_tokenName+"}";
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -477,10 +480,10 @@ void CParenthesisToken::dump(size_t indent) const
 	string str;
 	str.resize(indent,' ');
 	
-	nldebug((str+"(").c_str());
+	nldebug("%s", (str+"(").c_str());
 	FOREACHC(tokenIt,TTokenList,_tokenList)
 		(*tokenIt)->dump(indent+1);
-	nldebug((str+")").c_str());
+	nldebug("%s", (str+")").c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -530,7 +533,7 @@ void COrToken::dump(size_t indent) const
 	string str;
 	str.resize(indent,' ');
 	str+="|";
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 	secondToken->dump(indent+1);
 }
 
@@ -622,7 +625,7 @@ void CCardToken::dump(size_t indent) const
 	default:
 		break;
 	}
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 	_childToken->dump(indent+1);
 }
 
@@ -676,7 +679,7 @@ void CCodeTokenNode::dump(size_t indent)
 	if (_FirstChildNode)
 		str+=":"+_FirstChildNode->getFullName();
 	
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 	if (_FirstChildNode)
 		_FirstChildNode->dump(indent+1);
 	
@@ -840,7 +843,7 @@ CToken::CToken(const  string 	&tokenName, const string &tokenDesc)
 void CToken::dump() const
 {
 	const string str = "Token:"+_tokenName+" : "+_tokenDesc;
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 	FOREACHC(tokenIt,TTokenContainer,_Tokens)
 		(*tokenIt)->dump(0);
 }
@@ -1026,6 +1029,7 @@ CCompiler::CCompiler()
 	// Natives Funcs ---------------------------------------------------------
 	
 	registerNativeFunc();
+	CRingScenarioGuard::checkFunctionList();
 }
 
 CSmartPtr<CSubRuleTracer> CCompiler::buildCodeTree (const string &code) const
@@ -1052,7 +1056,7 @@ CSmartPtr<CSubRuleTracer> CCompiler::buildCodeTree (const string &code) const
 			string str(">> TOKEN: ");
 			str+=tokenName;
 			str+=" "+toString(tokenIndex);
-			nldebug(str.c_str());
+			nldebug("%s", str.c_str());
 		}
 #endif
 		CSmartPtr<CSubRuleTracer> tracer=new CSubRuleTracer(lastIndex, index-1, tokenName, textValue);
@@ -1077,6 +1081,25 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCode (const std::vector<std::
 	CSubRuleTracer::_PreviousTracers.clear();
 	CSubRuleTracer::_NextTracers.clear();
 	
+	// The script of a scenario of a Ring session is what the scenario service accepts at upload: of
+	// a size, without the loops and script functions the editor never writes, calling the functions
+	// of a scenario. The same test is made here, on the text as it is compiled.
+	if (CRingScenarioGuard::isLoadingScenario())
+	{
+		std::string text;
+		for (size_t i = 0; i < sourceCodeLines.size(); ++i)
+		{
+			text += sourceCodeLines[i];
+			text += '\n';
+		}
+		std::string refusal;
+		if (!R2::checkRtScenarioScript(text, false, refusal))
+		{
+			CRingScenarioGuard::refuseScript(fullName, refusal);
+			return NULL;
+		}
+	}
+
 	typedef const std::vector<std::string> TList; // because there a problem with const in the macro.
 	string code="{ \n";
 	// Concatenates lines, avoid parts after // ..
@@ -1098,6 +1121,12 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCode (const std::vector<std::
 				if ( !inQuote && ('/' == str[i]) )
 				{
 					++i;
+					// a '/' that ends the line: there is no character after it to copy
+					if (str.size() == i)
+					{
+						code += '/';
+						break;
+					}
 					if ('/' == str[i])
 						break;
 
@@ -1203,7 +1232,7 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCodeOld (const string &source
 	catch (const Exception &e)
 	{
 		nlwarning("compilation failed for %s", fullName.c_str());
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 	}
 
 	return NULL;
@@ -1222,8 +1251,8 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCodeYacc (const string &sourc
 
 		return tmp;
 	}
-	else if (debug)
-		nlstop;
+	else if (debug && !CRingScenarioGuard::isLoadingScenario())
+		nlstop; // the debugging stop is for the scripts of the shard: a scenario is made by a client
 
 	return NULL;
 }
@@ -1266,15 +1295,15 @@ static void displayErrorLinesForIndex(const string &text, size_t &index)
 	{
 		string lineoStr("at line ");
 		lineoStr += toString(lineIndex);
-		nlwarning(lineoStr.c_str());
+		nlwarning("%s", lineoStr.c_str());
 	}
 	
-	nlwarning(tmp.c_str());
+	nlwarning("%s", tmp.c_str());
 	{
 		string indexerStr;
 		indexerStr.resize(index-totalIndex,' ');
 		indexerStr += "^";
-		nlwarning(indexerStr.c_str());
+		nlwarning("%s", indexerStr.c_str());
 	}
 }
 
@@ -1345,6 +1374,27 @@ void CCompiler::addDeprecatedNativeFunc(std::string const& signature)
 CScriptNativeFuncParams* CCompiler::getNativeFunc(const std::string &funcName, const std::string &inparams, const std::string &outparams)
 {
 	std::string signature;
+	CScriptNativeFuncParams *funcParam = findNativeFunc(funcName, inparams, outparams, signature);
+
+	// The scripts of the scenario of a Ring session call the functions of a scenario only. For the
+	// compilers a function that is refused is a function that does not exist: the script that
+	// calls it does not compile, and the action that holds it does nothing.
+	if (funcParam && CRingScenarioGuard::isLoadingScenario() && !CRingScenarioGuard::isScenarioFunction(signature))
+	{
+		CRingScenarioGuard::refuseFunction(signature);
+		return NULL;
+	}
+	return funcParam;
+}
+
+CScriptNativeFuncParams *CCompiler::getNativeFuncForCall(const std::string &funcName, const std::string &inparams, const std::string &outparams)
+{
+	std::string signature;
+	return findNativeFunc(funcName, inparams, outparams, signature);
+}
+
+CScriptNativeFuncParams *CCompiler::findNativeFunc(const std::string &funcName, const std::string &inparams, const std::string &outparams, std::string &signature)
+{
 	TStringId strId;
 	TNativeFuncMap::iterator it;
 	// Normal params
@@ -1490,7 +1540,7 @@ CCaseTracer::CCaseTracer(const CSmartPtr<CSubRuleTracer> &tracer, const string &
 			const string &strRef=valChldTracer->_TextValue;
 			float f;
 			NLMISC::fromString(strRef, f);
-			_sortValue=*((size_t*)&f);
+			_sortValue = AIVM::floatToOpcode(f);
 			break;
 		}
 		if (!valChldTracer)
@@ -1806,7 +1856,7 @@ void CSubRuleTracer::dump(size_t indent) const
 	str+=","+toString(_tokenIndex); 		
 	str+="): "+_TextValue;
 	
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 	FOREACHC(itTracer, TSubRuleTracerList, _childTracers)
 		(*itTracer)->dump(indent+1);
 }
@@ -1957,7 +2007,7 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 					string &strRef=_childTracers[index]->_TextValue;
 					float f;
 					NLMISC::fromString(strRef, f);
-					byteCode.push_back(*((size_t*)&f));
+					byteCode.push_back(AIVM::floatToOpcode(f));
 					jumpTable.newCodeBlock();
 					break;
 				}

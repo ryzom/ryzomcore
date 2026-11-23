@@ -1038,7 +1038,7 @@ void cbFailed (CMessage &msgin, const std::string &serviceName, TServiceId  sid)
 	// I can't connect to the Login Service, just nlerror ();
 	string reason;
 	msgin.serial (reason);
-	nlerror (reason.c_str());
+	nlerror ("%s", reason.c_str());
 }
 
 

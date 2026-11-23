@@ -122,8 +122,8 @@ ucstring CInstance::getDisplayName()
 	if (getLuaProjection().callMethodByNameNoThrow("getDisplayName", 0, 1))
 	{
 #ifdef RYZOM_LUA_UCSTRING
-		ucstring result;
-		if (CLuaIHM::pop(ls, result)) return result;
+		std::string result; // a ucstring object or a string
+		if (CLuaIHM::getUCStringOnStack(ls, -1, result)) return ucstring::makeFromUtf8(result);
 #else
 		std::string res = ls.toString();
 		ls.pop();
@@ -882,13 +882,19 @@ class CAHPickerLua : public IActionHandler
 			{}
 
 			NLMISC_DECLARE_CLASS(CToolPickLua);
+			// The three functions are named by their path (r2:testCanPickZoneForNPC). They are called through
+			// r2:callByPath (r2_ui_calls.lua) with the instance id or the position as values: no Lua source is
+			// made of an id, which comes from the scenario
 			void pick(CInstance &instance) NL_OVERRIDE
 			{
 				CTool::TSmartPtr holdThis(this); // prevent 'setCurrentTool' from deleting 'this'
 				getEditor().setCurrentTool(nullptr);
 				if (!LuaPickFunc.empty())
 				{
-					getEditor().getLua().executeScriptNoThrow(LuaPickFunc + "('" + instance.getId() + "')");
+					CLuaState &lua = getEditor().getLua();
+					lua.push(LuaPickFunc);
+					lua.push(instance.getId());
+					getEditor().callEnvMethod("callByPath", 2, 0);
 				}
 			}
 			void pick(const CVector &pos) NL_OVERRIDE
@@ -897,7 +903,12 @@ class CAHPickerLua : public IActionHandler
 				getEditor().setCurrentTool(nullptr);
 				if (!LuaPickPosFunc.empty())
 				{
-					getEditor().getLua().executeScriptNoThrow(NLMISC::toString("%s(%f, %f, %f)", LuaPickPosFunc.c_str(), pos.x, pos.y, pos.z));
+					CLuaState &lua = getEditor().getLua();
+					lua.push(LuaPickPosFunc);
+					lua.push((double)pos.x);
+					lua.push((double)pos.y);
+					lua.push((double)pos.z);
+					getEditor().callEnvMethod("callByPath", 4, 0);
 				}
 			}
 			bool canPick(const CInstance &instance) const NL_OVERRIDE
@@ -905,15 +916,15 @@ class CAHPickerLua : public IActionHandler
 				if (LuaPickFunc.empty()) return true;
 				CLuaState &lua = getEditor().getLua();
 				int initialSize = lua.getTop();
-				std::string script = "return " + LuaTestFunc + "('" + instance.getId() + "')";
-				if (lua.executeScriptNoThrow(script, 1))
+				lua.push(LuaTestFunc);
+				lua.push(instance.getId());
+				bool result = false;
+				if (getEditor().callEnvMethod("callByPath", 2, 1))
 				{
-					bool result = lua.toBoolean(initialSize + 1);
-					lua.setTop(initialSize);
-					return result;
+					result = lua.toBoolean(initialSize + 1);
 				}
 				lua.setTop(initialSize);
-				return false;
+				return result;
 			}
 
 			std::string LuaTestFunc;

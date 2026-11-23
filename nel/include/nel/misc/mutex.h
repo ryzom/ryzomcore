@@ -70,16 +70,19 @@ namespace NLMISC {
 // template<typename T>
 // using CSynchronized = CStdSynchronized<T>;
 #	define CStdMutex CMutex
+#	define CStdRecursiveMutex CRecursiveMutex
 #	define CStdSynchronized CSynchronized
 #	define CUnfairMutex CStdMutex
 #	define CFairMutex CStdMutex
 #elif defined(NL_OS_WINDOWS)
 	// By default on Windows, all mutex/synchronization use the CFair* class to avoid freeze problem.
 #	define CMutex CFairMutex
+#	define CRecursiveMutex CFairMutex
 #	define CSynchronized CFairSynchronized
 #else
 	// On GNU/Linux and Mac, we use CUnfair* everwise it creates some strange deadlock during loading and after
 #	define CMutex CUnfairMutex
+#	define CRecursiveMutex CUnfairMutex
 #	define CSynchronized CUnfairSynchronized
 #endif
 
@@ -229,7 +232,7 @@ test_again:
 #endif
 
 
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 #pragma managed(push, off)
 #endif
 
@@ -512,6 +515,10 @@ private:
 
 #endif
 
+#ifdef NL_COMP_VC
+#pragma managed(pop)
+#endif
+
 /**
  * Windows: uses Mutex, the handle can't be shared among processes, but
  * the mutex still can be be shared by passing a common object name to
@@ -590,6 +597,28 @@ public:
 
 	NL_FORCE_INLINE void enter() { std::mutex::lock(); }
 	NL_FORCE_INLINE void leave() { std::mutex::unlock(); }
+};
+
+/**
+ * A mutex that the thread which holds it may enter again, for code that needs that (CRecursiveMutex). CMutex was
+ * such a mutex before it was CStdMutex: a critical section on Windows, a recursive pthread mutex elsewhere (not
+ * CFairMutex there, a semaphore). Where CMutex is not CStdMutex, CRecursiveMutex is that one; std::mutex throws or
+ * blocks when it is entered again.
+ */
+class CStdRecursiveMutex : std::recursive_mutex
+{
+public:
+	NL_FORCE_INLINE CStdRecursiveMutex(const std::string &name)
+	    : std::recursive_mutex()
+	{
+	}
+	NL_FORCE_INLINE CStdRecursiveMutex()
+	    : std::recursive_mutex()
+	{
+	}
+
+	NL_FORCE_INLINE void enter() { std::recursive_mutex::lock(); }
+	NL_FORCE_INLINE void leave() { std::recursive_mutex::unlock(); }
 };
 #endif
 

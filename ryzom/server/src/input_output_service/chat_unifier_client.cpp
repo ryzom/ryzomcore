@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
+#include "game_share/chat_message.h"
 #include "nel/misc/types_nl.h"
 #include "nel/net/module.h"
 #include "nel/net/module_builder_parts.h"
@@ -120,6 +121,11 @@ public:
 		CChatUnifierClientProxy::broadcast_farGuildChat(_Peers.begin(), _Peers.end(), this, senderName, guildId, text);
 	}
 
+	void sendFarGuildChatShared(const ucstring &senderName, uint32 guildId, const CChatMessage &message) NL_OVERRIDE
+	{
+		CChatUnifierClientProxy::broadcast_farGuildChatShared(_Peers.begin(), _Peers.end(), this, senderName, guildId, message);
+	}
+
 	void sendFarGuildChat2(const ucstring &senderName, uint32 guildId, const std::string &phraseName) NL_OVERRIDE
 	{
 		CChatUnifierClientProxy::broadcast_farGuildChat2(_Peers.begin(), _Peers.end(), this, senderName, guildId, phraseName);
@@ -145,12 +151,29 @@ public:
 		}
 	}
 
+	void sendUniverseChatShared(const ucstring &senderName, uint32 homeSessionId, const CChatMessage &message) NL_OVERRIDE
+	{
+		CChatUnifierClientProxy::broadcast_universeBroadcastShared(_Peers.begin(), _Peers.end(), this, senderName, homeSessionId, message);
+
+		if (ForceFarChat)
+		{
+			CChatManager &cm = IOS->getChatManager();
+			TGroupId grpId(RYZOMID::chatGroup,0);
+			cm.farChatInGroupShared(grpId, homeSessionId, message, senderName);
+		}
+	}
+
 	void sendUnifiedDynChat(const NLMISC::CEntityId &dynCharId, const ucstring &senderName, const ucstring &text) NL_OVERRIDE
 	{
 #ifdef NL_OS_WINDOWS
 #	pragma message (NL_LOC_WRN "Add the message in the interface")
 #endif
 		CChatUnifierClientProxy::broadcast_dynChanBroadcast(_Peers.begin(), _Peers.end(), this, dynCharId, senderName, text);
+	}
+
+	void sendUnifiedDynChatShared(const NLMISC::CEntityId &dynCharId, const ucstring &senderName, const CChatMessage &message) NL_OVERRIDE
+	{
+		CChatUnifierClientProxy::broadcast_dynChanBroadcastShared(_Peers.begin(), _Peers.end(), this, dynCharId, senderName, message);
 	}
 
 
@@ -192,8 +215,8 @@ public:
 		case TFailInfo::fi_dest_char_unknown:
 		case TFailInfo::fi_char_offline:
 			{
-				SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-				vect[0].Literal = destName;
+				// no name parameter: a literal is kept in the string cache for good, and destName comes from the client
+				TVectorParamCheck vect;
 				uint32 phraseId = STRING_MANAGER::sendStringToClient( dsr, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
 				cm.sendChat2Ex( CChatGroup::tell, dsr, phraseId );
 			}
@@ -218,6 +241,13 @@ public:
 		// rebuild a group ID and fake the creator and dynamic id
 		TGroupId grpId(RYZOMID::chatGroup, guildId, 0, 0);
 		cm.farChatInGroup(grpId, 0, text, senderName);
+	}
+
+	void farGuildChatShared(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const CChatMessage &message) NL_OVERRIDE
+	{
+		CChatManager &cm = IOS->getChatManager();
+		TGroupId grpId(RYZOMID::chatGroup, guildId, 0, 0);
+		cm.farChatInGroupShared(grpId, 0, message, senderName);
 	}
 
 	// SU forward a guild chat message to the IOS
@@ -246,6 +276,13 @@ public:
 		cm.farChatInGroup(grpId, senderHomeSession, text, senderName);
 	}
 
+	virtual void universeBroadcastShared(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 senderHomeSession, const CChatMessage &message) NL_OVERRIDE
+	{
+		CChatManager &cm = IOS->getChatManager();
+		TGroupId grpId(RYZOMID::chatGroup,0);
+		cm.farChatInGroupShared(grpId, senderHomeSession, message, senderName);
+	}
+
 	// IOS forward a dyn chat chat message to the IOSs
 	virtual void dynChanBroadcast(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text) NL_OVERRIDE
 	{
@@ -267,6 +304,11 @@ public:
 			cm.sendChat(CChatGroup::dyn_chat, dcc->getClient()->getID(), text, TDataSetRow(), chanId, senderName);
 			dcc = dcc->getNextChannelSession(); // next session in this channel
 		}						
+	}
+
+	virtual void dynChanBroadcastShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &message) NL_OVERRIDE
+	{
+		IOS->getChatManager().farDynChatShared(chanId, senderName, message);
 	}
 
 	// SU send a broadcast message to the IOS

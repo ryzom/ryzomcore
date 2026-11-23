@@ -19,6 +19,7 @@
 
 #include "stdpch.h"
 #include "browse_faq.h"
+#include "window_desktop.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -65,7 +66,7 @@ void browseFAQ(NLMISC::CConfigFile &cf)
 		// not found
 		nlwarning("No FAQ url");
 	}
-	else
+	else if (WindowDesktop::mayOpen("a browser for the FAQ at " + url))
 	{
 		openURL(url);
 	}

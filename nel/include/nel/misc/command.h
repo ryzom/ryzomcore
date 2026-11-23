@@ -130,6 +130,10 @@ public:
 	/// \param quiet true if you don't want to display the "executing the command ..."
 	static bool execute (const std::string &commandWithArgs, NLMISC::CLog &log, bool quiet = false, bool human = true);
 
+	/// Executes one command whose arguments are already split, so nothing is parsed: a remote caller
+	/// (the dashboard) sends them separated and no quote or semicolon in a value changes its meaning.
+	static bool executeArgs(const std::string &commandName, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet = false, bool human = true);
+
 	/** Command name completion.
 	 * Case-sensitive. Displays the list after two calls with the same non-unique completion.
      * Completes commands used with prefixes (such as "help " for example) as well.
@@ -211,6 +215,27 @@ struct TCommandHandlerClassInfo
 	{}
 };
 
+/// What an entry of the command registry is: a global command (or a variable, whose name
+/// starts with an upper case letter), a named command handler instance, or a member command
+/// of an instance, named `instance.command`.
+enum TCommandEntryKind
+{
+	CommandEntryKind,
+	HandlerEntryKind,
+	HandlerCommandEntryKind
+};
+
+/** Told by CCommandRegistry when commands come and go, so a console in another process can
+ * keep a table of them for completion. Called on the thread that registers, usually the main
+ * thread; a listener that works on another thread queues what it is told.
+ */
+class ICommandRegistryListener
+{
+public:
+	virtual ~ICommandRegistryListener() { }
+	virtual void onCommandAdded(const std::string &name, TCommandEntryKind kind, const std::string &args, const std::string &help) = 0;
+	virtual void onCommandRemoved(const std::string &name) = 0;
+};
 
 /** Base class for command handler.
  *	Command handler are a mean to build object that support NeL commands
@@ -587,11 +612,21 @@ class CCommandRegistry
 
 	std::set<std::string>		_CommandsDisablingControlChar;
 
+	/// Who is told of the commands coming and going
+	std::vector<ICommandRegistryListener *> _Listeners;
+
+	void notifyAdded(const std::string &name, TCommandEntryKind kind, const std::string &args, const std::string &help);
+	void notifyRemoved(const std::string &name);
+
 	/// Used by ICommand to register themselves
 	void registerCommand(ICommand *command);
 	/// Used by ICommand to unregister themselves
 	void unregisterCommand(ICommand *command);
 
+	/// One command of a command line, as execute() splits it
+	struct TCommandParams;
+	/// Runs one split command: a global command, or a member command of a named handler instance
+	bool executeParams(const TCommandParams &params, NLMISC::CLog &log, bool quiet, bool human);
 
 public:
 
@@ -600,9 +635,18 @@ public:
 	/// Called by command handlers to unregister themselves.
 	void unregisterNamedCommandHandler(ICommandsHandler *handler, const std::string &className);
 
+	/// Listeners are told of every command, variable, handler instance and member command added or removed from now on.
+	void addListener(ICommandRegistryListener *listener);
+	void removeListener(ICommandRegistryListener *listener);
+	/// Reports every entry of the registry to the listener, as onCommandAdded calls.
+	void listCommands(ICommandRegistryListener &listener);
+
 	/// Executes the command and display output to the log
 	/// \param quiet true if you don't want to display the "executing the command ..."
 	bool execute (const std::string &commandWithArgs, NLMISC::CLog &log, bool quiet = false, bool human = true);
+
+	/// Executes one command with its arguments already split; see ICommand::executeArgs
+	bool executeArgs(const std::string &commandName, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet = false, bool human = true);
 
 	/** Command name completion.
 	 * Case-sensitive. Displays the list after two calls with the same non-unique completion.

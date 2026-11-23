@@ -46,7 +46,7 @@ public:
 	 * \author Stephane Coutelas
 	 * \date 2000
 	 */
-	CTextureFile() { _AllowDegradation=true; _SupportSharing= true; _EnlargeCanvasNonPOW2Tex = false; _MipMapSkipAtLoad=0; }
+	CTextureFile() { _AllowDegradation=true; _SupportSharing= true; _EnlargeCanvasNonPOW2Tex = false; _MipMapSkipAtLoad=0; m_UntrustedMaxSize = 0; m_AsyncShareGroup = false; }
 
 	// copy ctor
 	CTextureFile(const CTextureFile &other);
@@ -71,6 +71,8 @@ public:
 		_SupportSharing= true;
 		_EnlargeCanvasNonPOW2Tex = false;
 		_MipMapSkipAtLoad=0;
+		m_UntrustedMaxSize = 0;
+		m_AsyncShareGroup = false;
 	}
 
 
@@ -113,6 +115,17 @@ public:
 	// User can disable the sharing system. Default is to be enabled. Not serialized
 	void					enableSharing(bool enable);
 
+	/** Put the texture in the share group of the async texture manager (CAsyncTextureManager). It then shares its
+	 *	driver texture only with the textures of the same file that are in this group too, and no longer with a
+	 *	texture file used the normal way. The manager uploads a reduced version of the file and swaps other versions
+	 *	in and out over time: the instances in async texture mode must get that driver texture, and a shape that
+	 *	uses the same file without the manager must not.
+	 *	Default is false. Not serialized. This does not touch() the texture: the driver looks the share name up
+	 *	again at the next change of the file name.
+	 */
+	void					enableAsyncShareGroup(bool enable) { m_AsyncShareGroup = enable; }
+	bool					isInAsyncShareGroup() const { return m_AsyncShareGroup; }
+
 
 	/**
 	 * Generate the texture, looking in CPath if necessary.
@@ -126,8 +139,10 @@ public:
 	NLMISC_DECLARE_CLASS(CTextureFile);
 
 
-	//// Used to fill a bitmap by reading a file, looking in CPath if necessary, and using user_color
-	static void buildBitmapFromFile(NLMISC::CBitmap &dest, const std::string &fileName, bool asyncload, uint8 mipMapSkip=0, bool enlargeCanvasNonPOW2Tex = false);
+	/** Used to fill a bitmap by reading a file, looking in CPath if necessary, and using user_color.
+	 *  \param untrustedMaxSize 0 for a file of the game data; otherwise the file is not trusted, see setUntrustedMaxSize()
+	 */
+	static void buildBitmapFromFile(NLMISC::CBitmap &dest, const std::string &fileName, bool asyncload, uint8 mipMapSkip=0, bool enlargeCanvasNonPOW2Tex = false, uint32 untrustedMaxSize = 0);
 
 
 	/// If the file is a DDS texture with mipmap, skip the first skipLod mipmaps (0 by default) at loading
@@ -141,6 +156,13 @@ public:
 	void			setEnlargeCanvasNonPOW2Tex(bool enlarge) { _EnlargeCanvasNonPOW2Tex =  enlarge; }
 	bool			getEnlargeCanvasNonPOW2Tex() const { return _EnlargeCanvasNonPOW2Tex; }
 
+	/** The file is not trusted (a download of the web browser) when maxSize is not 0: it is read with
+	 *  NLMISC::CBitmap::loadUntrusted, and an image of more than maxSize pixels a side, or that cannot be read, becomes the
+	 *  dummy texture. 0 (the default) is a file of the game data. Not serialized.
+	 */
+	void			setUntrustedMaxSize(uint32 maxSize) { touch(); m_UntrustedMaxSize = maxSize; }
+	uint32			getUntrustedMaxSize() const { return m_UntrustedMaxSize; }
+
 	/** Flag that tell that 3d driver supports non-power of 2 textures
 	 *	Default is false.
 	 */
@@ -153,6 +175,8 @@ private:
 	bool		_SupportSharing;	// Default is true.
 	bool        _EnlargeCanvasNonPOW2Tex;    // Non power of 2 textures are cropped. Default is false
 	uint8		_MipMapSkipAtLoad;	// Default is 0.
+	uint32		m_UntrustedMaxSize;	// Default is 0, a trusted file.
+	bool		m_AsyncShareGroup;	// Default is false.
 private:
 	void		dupInfo(const CTextureFile &other);
 

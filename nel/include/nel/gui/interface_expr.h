@@ -181,6 +181,13 @@ namespace NLGUI
 		  * // NB : this is case sensitive
 		  */
 		static void registerUserFct(const char *name, TUserFct fct);
+
+		/** Call a registered user function with these arguments as values. No expression text is made of them,
+		  * so a string argument can hold anything.
+		  * \return false when no function has this name, or when the function gives no result
+		  */
+		static bool callUserFct(const std::string &name, TArgList &args, CInterfaceExprValue &result);
+
 		// Simple evaluations
 		static bool evalAsInt(const std::string &expr, sint64 &dest);
 		static bool evalAsDouble(const std::string &expr, double &dest);

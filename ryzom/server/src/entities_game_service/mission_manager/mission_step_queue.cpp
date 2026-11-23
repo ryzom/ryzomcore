@@ -78,6 +78,10 @@ uint CMissionStepQueueStart::processEvent( const TDataSetRow & userRow, const CM
 {
 	if( event.Type == CMissionEvent::QueueEntryOk )
 	{
+		// a player can wait in several queues: accepting one queue's critical part does not end the waits in the others
+		const CMissionEventQueueEntryOk &eventSpe = static_cast<const CMissionEventQueueEntryOk &>(event);
+		if (eventSpe.QueueId != CMissionQueueManager::getInstance()->getQueueId(QueueName))
+			return 0;
 		return 1;
 	}
 	return 0;

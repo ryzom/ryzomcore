@@ -35,6 +35,7 @@
 //#include "game_share/ryzom_mirror_properties.h"
 
 #include "server_share/r2_variables.h"
+#include "server_share/client_refusal.h"
 
 #include "world_position_manager.h"
 #include "gpm_service.h"
@@ -67,6 +68,25 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 	sint32				x, y, z;
 	float				heading;
 	msgin.serial(x, y, z, heading);
+
+	// the heading goes to PACS, to the AI service and to every client around: one that is not a number is replaced by
+	// the current one. The client sends the atan2 of its front vector, so one outside [-Pi, Pi] is brought back into
+	// it: the AI service converts it to a fixed-point angle that a large one overflows.
+	if (!isValidDouble(heading))
+	{
+		nlwarning("HACK: <cbClientPosition> %s sent an invalid heading, the current one is kept (0 if it is invalid too)", id.toString().c_str());
+		reportRefusedClientMessage(id);
+		heading = CMirrorPropValueRO<float>( TheDataset, entityIndex, DSPropertyORIENTATION );
+		// the current one came from the client or its save the same way
+		if (!isValidDouble(heading))
+			heading = 0.f;
+	}
+	else if (heading > (float)NLMISC::Pi || heading < -(float)NLMISC::Pi)
+	{
+		nlwarning("HACK: <cbClientPosition> %s sent a heading of %g, outside [-Pi, Pi], brought back into it", id.toString().c_str(), (double)heading);
+		reportRefusedClientMessage(id);
+		heading = (float)atan2(sin((double)heading), cos((double)heading));
+	}
 
 	if (IsRingShard)
 	{

@@ -45,7 +45,7 @@ namespace NLGUI
 		prop = xmlGetProp(cur, (const xmlChar *) "selected");
 		if (!prop)
 		{
-			nlwarning((ownerId + " : Couldn't read 'selected' field").c_str());
+			nlwarning("%s", (ownerId + " : Couldn't read 'selected' field").c_str());
 			return false;
 		}
 		owner->relativeSInt64Read(CurrSelected, "selected", prop, "0");

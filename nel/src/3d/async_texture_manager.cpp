@@ -23,6 +23,7 @@
 #include "nel/3d/async_file_manager_3d.h"
 #include "nel/3d/mesh_base_instance.h"
 #include "nel/3d/driver.h"
+#include "nel/3d/lod_character_manager.h"
 
 
 using	namespace std;
@@ -45,6 +46,7 @@ CAsyncTextureManager::CTextureEntry::CTextureEntry()
 
 	Loaded= false;
 	UpLoaded= false;
+	InDriver= false;
 	CanHaveLOD= false;
 	BuildFromHLSManager= false;
 	HLSManagerTextId= -1;
@@ -66,6 +68,24 @@ void		CAsyncTextureManager::CTextureEntry::createCoarseBitmap()
 	CoarseBitmap.releaseMipMaps();
 	// TODODO: conversion to DXTC1
 	CoarseBitmap.convertToType(CBitmap::DXTC1);
+
+	/* The CLod impostor texturing samples this copy with 8-bit shifts, so it must be at most
+		NL3D_CLOD_TMP_BITMAP_MAX_SIZE on each side. The mip levels skipped at load guarantee that for a
+		DXTC DDS with a full mip chain; a DDS exported without mipmaps, or a PNG/TGA, arrives at full size.
+		That is an asset error, not something to paper over with a resample every client would pay for:
+		refuse the copy (the impostor then uses the material color) and name the file.
+	*/
+	uint	coarseW= CoarseBitmap.getWidth();
+	uint	coarseH= CoarseBitmap.getHeight();
+	if(coarseW==0 || coarseH==0 || coarseW>NL3D_CLOD_TMP_BITMAP_MAX_SIZE || coarseH>NL3D_CLOD_TMP_BITMAP_MAX_SIZE)
+	{
+		nlwarning("ASSET ERROR: character texture '%s' is still %ux%u after the requested skip of %u mip level(s) (%u level(s) loaded):"
+			" a far-LOD coarse copy must be at most %ux%u, so export it as a DXTC DDS with a full mip chain."
+			" Impostors of entities using it get the material color instead.",
+			Texture->getFileName().c_str(), coarseW, coarseH, (uint)Texture->getMipMapSkipAtLoad(), Texture->getMipMapCount(),
+			(uint)NL3D_CLOD_TMP_BITMAP_MAX_SIZE, (uint)NL3D_CLOD_TMP_BITMAP_MAX_SIZE);
+		CoarseBitmap.reset();
+	}
 }
 
 
@@ -183,6 +203,15 @@ uint			CAsyncTextureManager::addTextureRef(const string &textNameNotLwr, CMeshBa
 		text->Texture= new CTextureFile;
 		// Do not allow degradation.
 		text->Texture->setAllowDegradation(false);
+		/* The driver texture is shared through its share name with the texture files of the instances in async
+			texture mode: that is how they get what is uploaded here (see CMeshBaseInstance::isAsyncTextureReady()).
+			It must not be shared with a texture file of the same name used the normal way (a static shape):
+			update() recreates the driver texture with the reduced version, and swaps the HDLod in and out.
+			So all of them are in the share group of this manager.
+			A file that is not DXTC with mipmaps is not uploaded at all (see uploadTexturePart()): the texture files
+			of the instances then stay out of the group, see isTextureInDriver().
+		*/
+		text->Texture->enableAsyncShareGroup(true);
 		// For Profiling
 		text->Texture->setTextureCategory(_TextureCategory);
 
@@ -342,6 +371,15 @@ bool			CAsyncTextureManager::isTextureUpLoaded(uint id) const
 
 
 // ***************************************************************************
+bool			CAsyncTextureManager::isTextureInDriver(uint id) const
+{
+	nlassert(id<_TextureEntries.size());
+	nlassert(_TextureEntries[id]);
+	return _TextureEntries[id]->InDriver;
+}
+
+
+// ***************************************************************************
 const NLMISC::CBitmap	*CAsyncTextureManager::getCoarseBitmap(uint id) const
 {
 	if(id>=_TextureEntries.size())
@@ -382,6 +420,8 @@ void			CAsyncTextureManager::update(IDriver *pDriver)
 				CTextureEntry	*textEntry= static_cast<CTextureEntry*>(_CurrentUploadTexture);
 				// If we are here, the texture is finally entirely uploaded. Compile it!
 				textEntry->UpLoaded= true;
+				// uploadTexturePart() puts in the driver only a DXTC texture with mipmaps (NB: still in memory here)
+				textEntry->InDriver= validDXTCMipMap(pText);
 				// Can Have lod if texture is DXTC and have mipMaps! Also disalbe if system disable it
 				textEntry->CanHaveLOD= validDXTCMipMap(pText) && _BaseLodLevel>_MaxLodLevel;
 				// compute the size it takes in VRAM
@@ -486,7 +526,8 @@ bool			CAsyncTextureManager::uploadTexturePart(ITexture *pText, IDriver *pDriver
 			bool isAllUploaded = false;
 			/* Even if the shared texture is still referenced and so still exist in driver, we MUST recreate with good size
 				the texture. This is important for Texture Memory Load Balancing
-				(this may means that is used elsewhere than in the CAsyncTextureManager)
+				(this may means that it is still used by an instance in async texture mode that referenced a
+				texture entry deleted since; the share group keeps the texture files used the normal way out of it)
 				Hence: bMustRecreateSharedTexture==true
 			*/
 			pDriver->setupTextureEx (*pText, false, isAllUploaded, true);

@@ -62,6 +62,5 @@ function game:bcMissionsUpdate()
 	ui = getUI('ui:interface:bot_chat_accept_mission')
 	ui.title = title;
 end
-
 -- VERSION --
 FILE_BOT_CHAT_V4_VERSION = 31

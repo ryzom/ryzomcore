@@ -146,6 +146,13 @@ extern std::string					RingMainURL;
 extern std::string					NewsAtProgress;
 extern bool							FreeTrial;
 
+// The instance of this client among the clients running from the same folder: empty for the first, "b" to "z" for
+// the others. It names the files of the process (client.lock and client.log, clientb.lock and clientb.log ...).
+// The files of a character carry the character and its home mainland (buildCharacterFileName). client.cfg and the
+// string cache are shared under their locks; the web cache index and the HSTS list are shared without one, the
+// last client to quit writes them.
+extern std::string					ClientInstanceSuffix;
+
 void resetTextContext (const char *font, bool resetInterfaceManager);
 
 #endif // CL_GLOBAL_H

@@ -231,8 +231,8 @@ function r2.acts:initActsEditor()
 						back_color= self.islandButtonColors[ecoSysName],
 						selected_color = self.islandSelectedButtonColors[ecoSysName].." 255",
 						col_over = self.islandOverButtonColors[ecoSysName].." 80",
-						group_params_l="r2.acts:openIslandCardFromButton('"..ecoSysName.."', '" ..islandName.."')",
-						params_l="r2.acts:openIslandCardFromButton('"..ecoSysName.."', '" ..islandName.."')",
+						group_params_l=r2:uiCall("r2.acts:openIslandCardFromButton", ecoSysName, islandName),
+						params_l=r2:uiCall("r2.acts:openIslandCardFromButton", ecoSysName, islandName),
 					}
 					local buttonIsland = createGroupInstance("act_button_template", currentLine.id, tmplParams)
 					
@@ -259,7 +259,7 @@ function r2.acts:initActsEditor()
 	newLocationMode.Env.Name = self.newLocation
 
 	local ringLevel = actsUI:find("ring_level")
-	ringLevel.hardtext = "Ring level :    " .. r2.getCharacterRingAccess()
+	ringLevel.hardtext = tostring(i18n.get("uiR2EDActsRingLevel")) .. "    " .. r2.getCharacterRingAccess()
 end
 
 --------------------------------------------------------------------------------------
@@ -781,9 +781,17 @@ function r2.acts:openIslandCard(islandName)
 	islandBitmap.x = 6
 	islandBitmap.y = -6
 
-	-- entry points
-	local entryNb = 0
+	-- entry points, in the order of their names: the numbered ones first, of which the first is the one
+	-- selected, then those kept from earlier lists of entry points (uiR2EntryPointAlpha01 and so on)
+	local entryNames = {}
 	for location, entry in pairs(islandTable.entrypoints) do
+		table.insert(entryNames, location)
+	end
+	table.sort(entryNames)
+	local entryNb = 0
+	for entryIndex = 1, table.getn(entryNames) do
+		local location = entryNames[entryIndex]
+		local entry = islandTable.entrypoints[location]
 
 		local entryPoinButton = actsUI:find("entrypoint"..entryNb):find("flag")
 		entryPoinButton.active = true

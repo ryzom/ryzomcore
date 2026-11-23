@@ -43,7 +43,7 @@ namespace NLGUI
 		std::string::size_type pos = _Id.find_last_of(':');
 		std::string shortID = pos == std::string::npos ? _Id : _Id.substr(pos);
 		result += NLMISC::toString("id=%s, w=%d, h=%d, x=%d, y=%d, wreal=%d, hreal=%d, xreal=%d, yreal=%d", shortID.c_str(), (int) _W, (int) _H, (int) _X, (int) _Y, (int) _WReal, (int) _HReal, (int) _XReal, (int) _YReal);
-		nlinfo(result.c_str());
+		nlinfo("%s", result.c_str());
 	}
 
 	// ***************************************************************************

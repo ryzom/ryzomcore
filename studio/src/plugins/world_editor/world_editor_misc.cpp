@@ -24,12 +24,18 @@
 #include <nel/misc/debug.h>
 #include <nel/misc/path.h>
 #include <nel/misc/file.h>
+#include <nel/misc/mem_stream.h>
 #include <nel/misc/i_xml.h>
 #include <nel/misc/o_xml.h>
+#include <nel/misc/sha1.h>
 #include <nel/ligo/primitive_utils.h>
 #include <nel/ligo/ligo_config.h>
+#include <nel/ligo/zone_region.h>
 
 #include <libxml/tree.h>
+
+// Qt includes
+#include <QtCore/QDir>
 
 namespace WorldEditor
 {
@@ -53,6 +59,136 @@ uint32 getUniqueId()
 	}
 
 	return (uint32)time2;
+}
+
+std::string worldEditFilePath(const std::string &fileName, const std::string &worldEditFolder)
+{
+	// makePathAbsolute keeps the "." and ".." of a name relative to the folder, which a file dialog does
+	// not give, and ends what it returns with a slash, which only a directory may have; cleanPath
+	// resolves the first and takes off the second
+	std::string path = NLMISC::CPath::makePathAbsolute(fileName, worldEditFolder);
+	if (path.empty())
+		return path;
+	return QDir::cleanPath(QString::fromUtf8(path.c_str())).toUtf8().constData();
+}
+
+bool sameFilePath(const std::string &a, const std::string &b)
+{
+#ifdef NL_OS_WINDOWS
+	return NLMISC::compareCaseInsensitive(a, b) == 0;
+#else
+	return a == b;
+#endif
+}
+
+bool FilePathLess::operator()(const std::string &a, const std::string &b) const
+{
+#ifdef NL_OS_WINDOWS
+	return NLMISC::ltCaseInsensitive(a, b);
+#else
+	return a < b;
+#endif
+}
+
+bool readFile(const std::string &fileName, std::string &content)
+{
+	try
+	{
+		NLMISC::CIFile file;
+		if (!file.open(fileName))
+			return false;
+		content.resize(file.getFileSize());
+		if (!content.empty())
+			file.serialBuffer((uint8 *)&content[0], (uint)content.size());
+	}
+	catch (const NLMISC::Exception &)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool writeFile(const std::string &fileName, const std::string &content, std::string &error)
+{
+	try
+	{
+		// the temporary file replaces the file only when close() is reached
+		NLMISC::COFile file;
+		if (!file.open(fileName, false, false, true))
+		{
+			error = "Cannot open " + fileName + " for writing.";
+			return false;
+		}
+		if (!content.empty())
+			file.serialBuffer((uint8 *)&content[0], (uint)content.size());
+		file.close();
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		error = "Error writing " + fileName + ": " + e.what();
+		return false;
+	}
+	return true;
+}
+
+std::string primitivesFileContent(NLLIGO::CPrimitives &primitives, const std::string &fileName)
+{
+	NLMISC::CMemStream stream;
+	NLMISC::COXml xml;
+	xml.init(&stream);
+	primitives.write(xml.getDocument(), fileName.c_str());
+	xml.flush();
+	return std::string((const char *)stream.buffer(), stream.length());
+}
+
+std::string landFileContent(NLLIGO::CZoneRegion &zoneRegion)
+{
+	NLMISC::CMemStream stream;
+	{
+		NLMISC::COXml xml;
+		xml.init(&stream);
+		zoneRegion.serial(xml);
+	}
+	return std::string((const char *)stream.buffer(), stream.length());
+}
+
+std::string fileContentKey(const std::string &content)
+{
+	return NLMISC::toString((uint64)content.size()) + ":"
+		+ NLMISC::getSHA1((const uint8 *)content.data(), (uint32)content.size()).toString();
+}
+
+const FileBaseline *findFileBaseline(const FileBaselines &baselines, const std::string &fileName)
+{
+	FileBaselines::const_iterator it = baselines.find(fileName);
+	return it == baselines.end() ? NULL : &it->second;
+}
+
+void setFileBaseline(FileBaselines &baselines, const std::string &fileName, const std::string &content)
+{
+	FileBaseline &baseline = baselines[fileName];
+	baseline.EditorKey = fileContentKey(content);
+	baseline.DiskKey = baseline.EditorKey;
+}
+
+FileAction fileAction(const std::string &fileName, const std::string &content, const FileBaseline *baseline)
+{
+	// the content the editor would write is compared with what it had for the file, not with the disk,
+	// so that a file another program changed or wrote in another layout stays as it is
+	if (baseline && fileContentKey(content) == baseline->EditorKey)
+		return FileUnchanged;
+
+	if (!NLMISC::CFile::fileExists(fileName))
+		return (baseline && !baseline->DiskKey.empty()) ? FileConflict : FileToWrite;
+
+	std::string current;
+	if (!readFile(fileName, current))
+		return FileConflict;
+	if (current == content)
+		return FileUpToDate;
+	if (baseline && fileContentKey(current) == baseline->DiskKey)
+		return FileToWrite;
+	return FileConflict;
 }
 
 bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList)
@@ -156,7 +292,7 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 											if ( NLMISC::CIXml::getPropertyString(filenameChild, node, "FILENAME"))
 											{
 
-												filenameChild = NLMISC::CPath::makePathAbsolute( filenameChild, p );
+												filenameChild = worldEditFilePath(filenameChild, p);
 
 												// Is it a landscape ?
 												if (type == "landscape")

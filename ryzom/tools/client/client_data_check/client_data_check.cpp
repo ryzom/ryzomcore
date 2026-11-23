@@ -223,7 +223,7 @@ bool CClient_data_checkApp::processBnpMRM()
 		{
 			std::string	tam= "Don't find any BNP files for MRM Check";
 			_LastDataScanLog+= tam;
-			nlinfo(tam.c_str());
+			nlinfo("%s", tam.c_str());
 		}
 		else
 		{

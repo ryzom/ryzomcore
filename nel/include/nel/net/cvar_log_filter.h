@@ -43,7 +43,7 @@
 		{                                                                                                            \
 			char *out;																								 \
 			NLMISC_CONVERT_VARGS(out, format, 256);                                                                  \
-			nlinfo(out);                                                                                             \
+			nlinfo("%s", out);                                                                                             \
 		}                                                                                                            \
 	}
 #endif

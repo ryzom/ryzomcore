@@ -67,6 +67,7 @@ namespace NLQT
 
 		virtual QPaintEngine* paintEngine() const { return NULL; }
 		virtual void showEvent ( QShowEvent * event );
+		virtual void resizeEvent(QResizeEvent *resizeEvent);
 
 		void setNelContext(NLMISC::INelContext &nelContext);
 

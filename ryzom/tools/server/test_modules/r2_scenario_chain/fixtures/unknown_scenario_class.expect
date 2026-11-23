@@ -1,0 +1,9 @@
+# The scenario itself is of a class the editor does not have: the update fails, the author is told the
+# class, and the scenario is not loaded (the program ends with 4, which is what is expected here).
+result: 4
+upgrade: unknown_class
+version_update: failed
+version_update_failure: the scenario has a component of the class 'MadeUpScenario', which this editor does not have
+absent: save
+absent: translate
+absent: dropped_update

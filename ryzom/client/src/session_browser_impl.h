@@ -26,6 +26,10 @@
 #include "nel/gui/lua_helper.h"
 #include "far_tp.h"
 
+namespace NLGUI {
+class CCtrlBase;
+}
+
 class CSessionBrowserImpl : public CSessionBrowser,
 							public NLMISC::CSingleton<CSessionBrowserImpl>
 {
@@ -53,6 +57,7 @@ public:
 	virtual void on_getShardsResult(NLNET::TSockId from, uint32 userId, const std::string &result) NL_OVERRIDE;
 	virtual void on_CSessionBrowserServerWebClient_Disconnection(NLNET::TSockId from) NL_OVERRIDE;
 	virtual void on_sessionList(NLNET::TSockId from, uint32 charId, const std::vector < RSMGR::TSessionDesc > &sessions) NL_OVERRIDE;
+	virtual void on_editSessionList(NLNET::TSockId from, uint32 charId, const std::vector < RSMGR::TSessionDesc > &sessions) NL_OVERRIDE;
 	virtual void on_charList(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::vector < RSMGR::TCharDesc > &charDescs) NL_OVERRIDE;
 	virtual void on_playerRatings(NLNET::TSockId from, uint32 charId, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection) NL_OVERRIDE;
 	virtual void on_ringRatings(NLNET::TSockId from, uint32 charId, uint32 authorRating, uint32 AMRating, uint32 masterlessRating) NL_OVERRIDE;
@@ -62,6 +67,37 @@ public:
 	virtual void on_scenarioAverageScores(NLNET::TSockId from, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection, uint32 rrpTotal) NL_OVERRIDE;
 
 	static uint32 getCharId();
+
+	/// What the session manager answered to an invitation
+	enum TInviteResult
+	{
+		InviteGranted,
+		InviteRefused,
+		InviteNoAnswer
+	};
+
+	/** Invite a character, by its name, into the session this character is in (the one the session manager has
+	  * as its current session), and wait for what the session manager answers. A refusal is told to the player:
+	  * the message box of the free trial or of the newcomer rule, or a line of system info with the reason. No
+	  * answer (the connection is gone) is told as well. An invitation that is granted is told by
+	  * tellCharacterInvited().
+	  * \param caller the control the request comes from, for the message boxes (may be NULL)
+	  */
+	TInviteResult inviteCharacterByNameAndTellRefusal(const std::string &charName, NLGUI::CCtrlBase *caller);
+
+	/** An invitation that is granted is told: a line of system info for the player, and for the invited character
+	  * a tell that says where the session is found (the list of a Ring terminal, for an animation session and for
+	  * an edit session, each with its text).
+	  */
+	void tellCharacterInvited(const std::string &charName, bool animationSession);
+
+	/** The INVITE of the interface of the session the editor is connected to: inviteCharacterByNameAndTellRefusal(),
+	  * then for an invitation that is granted tellCharacterInvited(), and the list of the characters of the session
+	  * is asked for again.
+	  * \param caller the control the request comes from, for the message boxes (may be NULL)
+	  * \return true when the character is invited
+	  */
+	bool inviteCharacterByNameAndWait(const std::string &charName, NLGUI::CCtrlBase *caller);
 
 	// tmp, for local test
 	void testFill();
@@ -107,6 +143,7 @@ private:
 	static int luaJoinRingSession(NLGUI::CLuaState &ls);
 	static int luaCheckRingAccess(NLGUI::CLuaState &ls);
 	static int luaGetFileHeader(NLGUI::CLuaState &ls);
+	static int luaGetScenarioSavePath(NLGUI::CLuaState &ls);
 	static int luaGetRingStats(NLGUI::CLuaState &ls);
 	static int luaGetScenarioScores(NLGUI::CLuaState &ls);
 	static int luaUpdateScenarioScores(NLGUI::CLuaState &ls);
@@ -118,7 +155,11 @@ private:
 	void callRingPlayerInfoMethod(const char *name, int numArg, int numResult);
 	void callScenarioScoresMethod(const char *name, int numArg, int numResult);
 
-	void fill(const std::vector <RSMGR::TSessionDesc > &sessions);
+	/// Fill the window of the Ring terminal with the animation sessions and the edit sessions the character is invited to (its script sorts them)
+	void fill(const std::vector <RSMGR::TSessionDesc > &sessions, const std::vector <RSMGR::TSessionDesc > &editSessions);
+	/// The two lists as the session browser service last sent them (it answers each with a message of its own)
+	std::vector <RSMGR::TSessionDesc > _LastSessions;
+	std::vector <RSMGR::TSessionDesc > _LastEditSessions;
 	void charsFill(const std::vector <RSMGR::TCharDesc > &chars);
 	void ringStatsFill();
 	void playerRatingFill(bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection);

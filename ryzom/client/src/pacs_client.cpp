@@ -89,11 +89,11 @@ void initPACS(const char* rbank, const char* gr, NLMISC::IProgressCallback &/* p
 		{
 			CAABBox		cbox = GR->getBBox();
 
-			uint gw = (uint)(cbox.getHalfSize().x*2.0 / RYZOM_ENTITY_SIZE_MAX) + 1;
-			uint gh = (uint)(cbox.getHalfSize().y*2.0 / RYZOM_ENTITY_SIZE_MAX) + 1;
+			// The count is rounded down: a cell is not smaller than RYZOM_PACS_PRIMITIVE_SIZE_MAX (unless the world is)
+			uint gw = std::max((uint)(cbox.getHalfSize().x*2.0 / RYZOM_PACS_PRIMITIVE_SIZE_MAX), (uint)1);
+			uint gh = std::max((uint)(cbox.getHalfSize().y*2.0 / RYZOM_PACS_PRIMITIVE_SIZE_MAX), (uint)1);
 
-
-			PACS = UMoveContainer::createMoveContainer(GR, gw, gh, RYZOM_ENTITY_SIZE_MAX, 2);
+			PACS = UMoveContainer::createMoveContainer(GR, gw, gh, RYZOM_PACS_PRIMITIVE_SIZE_MAX, 2);
 		}
 		else
 			nlwarning("Could not create global retriever for %s, %s", rbank, gr);
@@ -101,7 +101,7 @@ void initPACS(const char* rbank, const char* gr, NLMISC::IProgressCallback &/* p
 
 	// Try to create a PACS with another method.
 	if(PACS == nullptr)
-		PACS = UMoveContainer::createMoveContainer(15000.0, -25000.0, 20000.0, -20000.0, 16, 16, RYZOM_ENTITY_SIZE_MAX, 2);
+		PACS = UMoveContainer::createMoveContainer(15000.0, -25000.0, 20000.0, -20000.0, 16, 16, RYZOM_PACS_PRIMITIVE_SIZE_MAX, 2);
 
 	// Set the static world image.
 	if(PACS)
@@ -119,10 +119,8 @@ void releasePACS ()
 	// Move container presents ?
 	if (PACS)
 	{
-		// Every primitive handle held outside the container must be cleared before it is freed
-		EntitiesMngr.removeCollision();
-		EntitiesMngr.removeShapePrimitives();
-
+		// The primitives go with the container, no handle may outlive it
+		EntitiesMngr.forgetShapePrimitives(PACS);
 		UMoveContainer::deleteMoveContainer (PACS);
 		PACS = nullptr;
 	}
@@ -203,7 +201,7 @@ void addPacsPrim(const std::string &fileName)
 	std::string ppName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(fileName));
 	if (PacsPrims.find(ppName) != PacsPrims.end())
 	{
-		nlwarning(("Pacs primitive " + ppName + " already has been inserted").c_str());
+		nlwarning("%s", ("Pacs primitive " + ppName + " already has been inserted").c_str());
 		return;
 	}
 	CUniquePtr<NLPACS::UPrimitiveBlock> pb(NLPACS::UPrimitiveBlock::createPrimitiveBlockFromFile(fileName));

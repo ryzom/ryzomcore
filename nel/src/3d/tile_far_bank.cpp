@@ -116,6 +116,10 @@ void CTileFarBank::serial(NLMISC::IStream &f)
 
 	// Serial tiles
 	f.serialCont (_TileVector);
+
+	// CLandscape::initTileBanks takes a far bank without tiles for one that was not loaded, as in the zone lighters
+	if (f.isReading() && _TileVector.empty())
+		nlwarning("ASSET ERROR: the far bank '%s' has no tiles, it must be rebuilt from its tile bank", f.getStreamName().c_str());
 }
 
 

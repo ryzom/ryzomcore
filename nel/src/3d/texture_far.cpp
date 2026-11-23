@@ -646,6 +646,17 @@ void CTextureFar::rebuildPatch (const CVector2s texturePos, const CPatchIdent &p
 						// Tile exist ?
 						if (pTile->isFill (CTileFarBank::diffuse))
 						{
+							// The far bank is read from a file: the tile must hold every pixel read below for this order (a
+							// 256x256 tile holds four 128x128 ones)
+							uint nbSourcePixels = tileSize * tileSize * (is256x256 ? 4 : 1);
+							if (pTile->getSize(CTileFarBank::diffuse, orderX) < nbSourcePixels
+							    || (pTile->isFill(CTileFarBank::additive) && pTile->getSize(CTileFarBank::additive, orderX) < nbSourcePixels))
+							{
+								nlwarning("ASSET ERROR: far bank tile %d is too small for a %s tile at order %d (needs %u pixels)", tile, is256x256 ? "256x256" : "128x128", (sint)orderX, nbSourcePixels);
+								// Stop, do not read outside of the tile
+								break;
+							}
+
 							// Get rotation of the tile in this layer
 							sint nRot=tileElm.getTileOrient(l);
 

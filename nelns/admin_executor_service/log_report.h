@@ -262,7 +262,7 @@ public:
 	 * \param onlyType Type of log to study. If LOG_UNKNOWN, study all.
 	 * \param countOtherTypes If true and onlyType not LOG_UNKNOWN, count the number of lines of each other type found.
 	 */
-	void	pushLine( const std::string& line, NLMISC::CLog::TLogType onlyType=NLMISC::CLog::LOG_WARNING, bool countOtherTypes=true );
+	void	pushLine( const std::string& line, NLMISC::CLog::TLogType onlyType=NLMISC::CLog::NL_LOG_WARNING, bool countOtherTypes=true );
 
 	/// Set the current progress
 	void	setProgress( uint currentFile, uint totalFiles ) { _CurrentFile = currentFile; _TotalFiles = totalFiles; }

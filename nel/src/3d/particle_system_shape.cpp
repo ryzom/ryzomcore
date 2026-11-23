@@ -285,7 +285,7 @@ CParticleSystem *CParticleSystemShape::instanciatePS(CScene &scene, NLMISC::CCon
 		/*
 		for(uint k = 0; k < _CachedTex.size(); ++k)
 		{
-			nlinfo(_CachedTex[k]->getShareName().c_str());
+			nlinfo("%s", _CachedTex[k]->getShareName().c_str());
 		}
 		*/
 	}

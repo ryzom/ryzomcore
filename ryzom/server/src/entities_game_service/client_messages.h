@@ -34,6 +34,9 @@ public:
 	static void release();
 };
 
+/// The secret the shard unifier makes the fast-disconnection codes with, received from its entity locator (empty until then)
+extern std::string FastDisconnectionSecret;
+
 
 #endif // RY_EGS_CLIENT_MESSAGES_H
 

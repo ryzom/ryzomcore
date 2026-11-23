@@ -57,7 +57,8 @@ public:
 
 	virtual QPaintEngine* paintEngine() const { return NULL; }
 
-	void init(CGraphicsConfig *graphicsConfig);
+	/// false when the driver cannot render into the window of the viewport
+	bool init(CGraphicsConfig *graphicsConfig);
 	void release();
 
 	void updateInput();

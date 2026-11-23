@@ -411,6 +411,9 @@ private:
 	// Temporary for the render
 	bool			_CurrentPassOpaque;
 	bool			_LayersRenderingOrder;
+	// The render target had an area when the first part of the current render was traversed: only then is
+	// the render drawn, all of its parts or none
+	bool			m_RenderTargetHasArea;
 
 
 	/// \name Render Lighting Setup.

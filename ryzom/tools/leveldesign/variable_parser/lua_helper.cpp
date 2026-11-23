@@ -327,7 +327,7 @@ bool CLuaState::executeScriptNoThrow(const std::string &code, int numRet)
 	}
 	catch (ELuaError &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 		return false;
 	}
 	return true;

@@ -179,6 +179,11 @@ struct CClientConfig
 	/// QUIC
 	bool			QuicConnection;
 	bool			QuicCertValidation;
+	/// Offer protocol level ryzomcore/4.2, with which the frontend sends some classes of messages on QUIC streams
+	bool			QuicStreams;
+	/// What the player's connection carries towards the client, in bits per second (0: not said, the frontend finds
+	/// out). Told to the frontend at login on protocol level ryzomcore/4.2, which starts and keeps its streams under it.
+	uint32			ConnectionRate;
 	/// Login.
 	bool			DisplayAccountButtons;
 	string			CreateAccountURL;
@@ -217,10 +222,7 @@ struct CClientConfig
 	/// Use a hardware cursor
 	bool			HardwareCursor;
 	float			HardwareCursorScale; // scale for hardware cursor bitmap, 0 = use gui scale
-	float			CursorSpeed;
-	uint			CursorAcceleration;
 	float			FreeLookSpeed;
-	uint			FreeLookAcceleration;
 	float			FreeLookSmoothingPeriod;
 	bool			FreeLookInverted;
 	bool			FreeLookTablet;
@@ -294,6 +296,14 @@ struct CClientConfig
 	// FXAA
 	bool			FXAA;
 
+	/// The lighting of the weather (darker in bad weather) dims the directional lights: the entities and the canopy
+	bool			WeatherLightingEntities;
+	/// The lighting of the weather scales the light on the ground when the landscape is drawn (the sun and the lamps
+	/// on the ground alike) and dims the landscape light groups. The grass follows WeatherLightingEntities
+	bool			WeatherLightingLandscape;
+	/// A lightning of a thunder storm flashes on what the landscape light groups light
+	bool			WeatherLightningFlash;
+
 	// Is bloom effect activated
 	bool			Bloom;
 	bool			SquareBloom;
@@ -337,10 +347,23 @@ struct CClientConfig
 
 	std::string		WebIgMainDomain;
 	std::vector<string>	WebIgTrustedDomains;
+	/// A trusted domain is only trusted over https; a final build cannot turn this off
+	bool			WebIgTrustedHttpsOnly;
 	uint			WebIgNotifInterval; // value in minutes for notification thread
+	/// Let the shard run client commands through COMMAND:REMOTE_ADMIN; off unless the player opts in
+	bool			AllowRemoteAdmin;
 
 	sint32			CurlMaxConnections;
 	string			CurlCABundle;
+
+	/// Largest width or height of a web image in pixels (0 for the largest, 16384), see CGroupHTML::SWebOptions
+	sint32			WebIgImageMaxSize;
+	/// Largest data: URL in bytes, 0 for no limit
+	sint32			WebIgDataUrlMaxBytes;
+	/// Largest download of an image, a page and a stylesheet in bytes, 0 for no limit
+	sint32			WebIgImageMaxBytes;
+	sint32			WebIgPageMaxBytes;
+	sint32			WebIgStylesheetMaxBytes;
 
 	///////////////
 	// ANIMATION //
@@ -360,6 +383,9 @@ struct CClientConfig
 
 	/// Sound Driver
 	TDriverSound	DriverSound;
+
+	/// Sound output device, by the name the sound driver gives it. Empty: the default device.
+	std::string		SoundDevice;
 
 	/// SoundForceSoftwareBuffer
 	bool			SoundForceSoftwareBuffer;
@@ -898,6 +924,14 @@ public:
 
 	/// End process
 	void release ();
+
+	/// Save ConfigFile (client.cfg) under the lock of the file: the clients of a directory share it, and none reads
+	/// it while another writes it (init() reads and fixes it under the same lock). A lock that another client holds
+	/// for more than five seconds is warned about, and the file is saved without it.
+	void saveConfigFile ();
+
+	/// Put the position of the window into the configuration, which release() saves. To call while the driver has its window.
+	void writeWindowPos ();
 
 	bool readBool (const std::string &varName);
 	void writeBool (const std::string &varName, bool val, bool bForce = false);

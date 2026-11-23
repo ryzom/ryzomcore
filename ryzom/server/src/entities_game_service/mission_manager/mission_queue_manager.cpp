@@ -77,15 +77,16 @@ void CMissionQueueManager::characterLoadedCallback(CCharacter *c)
 	TPlayerQueues::const_iterator itPQ =  _PlayerQueues.find(c->getId());
 	if (itPQ != _PlayerQueues.end())
 	{
-		const CQueueVect &queues = (*itPQ).second;
-		for ( uint i = 0 ; i < queues.QueueIds.size() ; )
+		// a copy: removePlayerFromQueue changes the player's entry, and erases it with its last queue
+		const vector<uint32> queueIds = (*itPQ).second.QueueIds;
+		for (uint i = 0; i < queueIds.size(); ++i)
 		{
 			// check coherency with infos kept in manager
 			const uint size2 = (uint)playerQueues.size();
 			uint j;
 			for ( j = 0 ; j < size2 ; ++j)
 			{
-				if (playerQueues[j] == queues.QueueIds[i])
+				if (playerQueues[j] == queueIds[i])
 				{
 					playerQueues[j] = playerQueues.back();
 					playerQueues.pop_back();
@@ -95,17 +96,14 @@ void CMissionQueueManager::characterLoadedCallback(CCharacter *c)
 
 			if (j == size2)
 			{
-				// queue not found in player queues, remove it and go to next
-				removePlayerFromQueue(c->getId(), queues.QueueIds[i]);
-				continue;
+				// queue not found in player queues, remove it
+				removePlayerFromQueue(c->getId(), queueIds[i]);
 			}
 			else
 			{
-				map<uint32,CMissionQueue>::iterator itMQ = _Queues.find(queues.QueueIds[i]);
+				map<uint32, CMissionQueue>::iterator itMQ = _Queues.find(queueIds[i]);
 				BOMB_IF(itMQ == _Queues.end(),"Failed to find queue from it's id, but referenced in _PlayerQueues queues list, BUG", continue);
 				(*itMQ).second.characterLoadedCallback(c);
-
-				++i;
 			}
 		}
 	}
@@ -245,7 +243,7 @@ void CMissionQueueManager::removePlayerFromQueue(const CEntityId &id, uint32 que
 	TPlayerQueues::iterator itPQ = _PlayerQueues.find(id);
 	if (itPQ == _PlayerQueues.end())
 	{
-		nlwarning("Failed to find entry in _PlayerQueues for player ! BUG", id.toString().c_str());
+		nlwarning("Failed to find entry in _PlayerQueues for player %s ! BUG", id.toString().c_str());
 		return;
 	}
 
@@ -256,6 +254,34 @@ void CMissionQueueManager::removePlayerFromQueue(const CEntityId &id, uint32 que
 	{
 		_PlayerQueues.erase(itPQ);
 	}
+}
+
+// ----------------------------------------------------------------------------
+bool CMissionQueueManager::removeMissionFromQueue(uint32 queueId, const CMission *mission, const std::vector<CEntityId> &candidates)
+{
+	map<uint32, CMissionQueue>::iterator it = _Queues.find(queueId);
+	if (it == _Queues.end())
+	{
+		nlwarning("Trying to remove a mission from queue %u but this queue doesn't exist in manager !", queueId);
+		return true;
+	}
+
+	CEntityId id = (*it).second.getEntityWaitingFor(mission);
+	for (uint i = 0; id == CEntityId::Unknown && i < candidates.size(); ++i)
+	{
+		if ((*it).second.waitsWithoutMission(candidates[i]))
+			id = candidates[i];
+	}
+	if (id == CEntityId::Unknown)
+	{
+		// the entry is already gone (clearOfflinePlayer), or the player who waits is offline and no longer in the group:
+		// that entry is taken out when it comes up for the critical part (CMissionQueue::playerLeavesCriticalArea)
+		nldebug("No entity waits in queue %u for the removed mission", queueId);
+		return false;
+	}
+
+	removePlayerFromQueue(id, queueId);
+	return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -270,12 +296,25 @@ void CMissionQueueManager::disconnectPlayer(const CCharacter *c)
 	TPlayerQueues::const_iterator itPQ =  _PlayerQueues.find(c->getId());
 	if (itPQ != _PlayerQueues.end())
 	{
-		const CQueueVect &queues = (*itPQ).second;
-		for ( uint i = 0 ; i < queues.QueueIds.size() ; ++i)
+		const vector<uint32> queueIds = (*itPQ).second.QueueIds;
+		for (uint i = 0; i < queueIds.size(); ++i)
 		{
-			map<uint32,CMissionQueue>::iterator itMQ = _Queues.find(queues.QueueIds[i]);
+			map<uint32, CMissionQueue>::iterator itMQ = _Queues.find(queueIds[i]);
 			BOMB_IF(itMQ == _Queues.end(),"Failed to find queue from it's id, but referenced in _PlayerQueues queues list, BUG", continue);
 			(*itMQ).second.disconnectPlayer(c->getId());
+		}
+
+		// CPlayerManager::disconnectPlayer saves a character that entered the game right after this, with the rollback of
+		// a critical part a restart ended: the next save of the queues drops its id. The queue file saved above keeps it,
+		// which a crash before the character's save needs.
+		if (c->getEnterFlag())
+		{
+			for (uint i = 0; i < queueIds.size(); ++i)
+			{
+				map<uint32, CMissionQueue>::iterator itMQ = _Queues.find(queueIds[i]);
+				if (itMQ != _Queues.end())
+					(*itMQ).second.forgetRollBack(c->getId());
+			}
 		}
 	}
 }
@@ -324,10 +363,8 @@ void CMissionQueueManager::playerWakesUp(const NLMISC::CEntityId &id, TAIAlias m
 {
 	H_AUTO(CMissionQueueManagerPlayerWakesUp);
 
-#ifdef NL_DEBUG
 	bool found = false;
-#endif
-	
+
 	map<uint32,CMissionQueue>::iterator it;
 
 	for ( it = _Queues.begin() ; it != _Queues.end() ; ++it )
@@ -335,15 +372,26 @@ void CMissionQueueManager::playerWakesUp(const NLMISC::CEntityId &id, TAIAlias m
 		if ((*it).second.getMissionAlias() == missionAlias)
 		{
 			(*it).second.changePlayerAwakeState(id, true);
-#ifdef NL_DEBUG
 			found = true;
-#endif
 		}
 	}
 
-#ifdef NL_DEBUG
-	nlassert(found == true);
-#endif
+	// the client asks with the mission of a journal entry: the mission can have left its queue since the entry showed it
+	// asleep
+	if (!found)
+		nldebug("%s wakes up for mission %u, which has no queue", id.toString().c_str(), missionAlias);
+}
+
+// ----------------------------------------------------------------------------
+void CMissionQueueManager::playerWakesUpInQueue(const NLMISC::CEntityId &id, uint32 queueId)
+{
+	map<uint32, CMissionQueue>::iterator it = _Queues.find(queueId);
+	if (it == _Queues.end())
+	{
+		nlwarning("Cannot wake %s up in queue %u, which does not exist", id.toString().c_str(), queueId);
+		return;
+	}
+	(*it).second.changePlayerAwakeState(id, true);
 }
 
 // ----------------------------------------------------------------------------

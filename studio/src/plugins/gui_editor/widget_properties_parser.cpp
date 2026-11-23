@@ -75,7 +75,7 @@ namespace GUIEditor
 			f.close();
 		}
 		else
-			nlwarning( QString( "File %1 cannot be opened!" ).arg( file ).toUtf8().constData() );
+			nlwarning("%s", QString( "File %1 cannot be opened!" ).arg( file ).toUtf8().constData());
 	}
 
 	void CWidgetPropParser::parseGUIWidgetXML( QFile &file )
@@ -207,7 +207,7 @@ namespace GUIEditor
 							if( key == "default" )
 								prop.propDefault = value.toUtf8().constData();
 							else
-								nlwarning( QString( "Unknown tag %1 within a property" ).arg( key ).toUtf8().constData() );
+								nlwarning("%s", QString( "Unknown tag %1 within a property" ).arg( key ).toUtf8().constData());
 
 						}
 						else

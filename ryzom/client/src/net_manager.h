@@ -118,6 +118,11 @@ public:
 	void reinit();
 
 	/**
+	 * Reset data but keep the connection (going back to the character selection on it, see CFarTP)
+	 */
+	void resetSession();
+
+	/**
 	 * Waits for server to answer
 	 */
 	void waitForServer();
@@ -138,6 +143,7 @@ protected:
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_PacketLostLeaf;
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_ServerStateLeaf;
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_ConnectionQualityLeaf;
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_ConnectionTransportLeaf;
 };
 
 
@@ -259,6 +265,7 @@ public:
 	void				setDataBase(NLMISC::CCDBNodeBranch *database) { ALL_MANAGERS->setDataBase( database ); }
 	bool				connect(std::string &result) { bool res = false; std::vector<CNetManager*>::iterator inm; for( inm=_NetManagers.begin(); inm!=_NetManagers.end(); ++inm ) if ( (*inm)->connect( result ) ) res = true; return res; }
 	CNetworkConnection::TConnectionState	getConnectionState() const { return FIRST_MANAGER->getConnectionState(); }
+	const CQuicConnection&	getQuicConnection() const { return FIRST_MANAGER->getQuicConnection(); }
 
 	float				getMeanPacketLoss() { return FIRST_MANAGER->getMeanPacketLoss(); }
 	uint32				getTotalLostPackets() { return FIRST_MANAGER->getTotalLostPackets(); }

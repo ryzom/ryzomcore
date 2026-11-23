@@ -227,6 +227,7 @@ AISHEETS::CCreature::CCreature()
 , _BoundingRadius(0.5)
 , _BonusAggroHungry(0.0), _BonusAggroVeryHungry(0.0)
 , _AssistDist(10)
+, _Scale(1.f)
 , _MinFightDist(0)
 , _FactionIndex(CStaticFames::INVALID_FACTION_INDEX)
 , _FameForGuardAttack(ICreature::InvalidFameForGuardAttack)
@@ -648,7 +649,7 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 
 uint AISHEETS::CCreature::getVersion()
 { 
-	return 45;
+	return 46;
 }
 
 void AISHEETS::CCreature::serial(NLMISC::IStream &s)

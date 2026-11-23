@@ -399,8 +399,8 @@ bool CEditorWorksheet::compareWorksheetFile(QString filename)
 			ucstring itemC = wk_file.getData(0, i+ colIndex);
 			if(item != itemC)
 			{
-				nlwarning(item.toString().c_str());
-				nlwarning(itemC.toString().c_str());
+				nlwarning("%s", item.toString().c_str());
+				nlwarning("%s", itemC.toString().c_str());
 				return false;
 			}
 		}

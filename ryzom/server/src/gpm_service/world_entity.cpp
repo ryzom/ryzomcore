@@ -180,6 +180,7 @@ void	CWorldEntity::init( const CEntityId& id, const TDataSetRow &index )
 	//WhoSeesMe = 0xffffffff;
 
 	CheckMotion = true;
+	SpeedBudget.reset();
 
 } // CWorldEntity constructor
 

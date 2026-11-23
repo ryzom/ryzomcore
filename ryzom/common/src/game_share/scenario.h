@@ -139,6 +139,11 @@ public:
 
 	bool setNode( const std::string& instanceId, const std::string& attrName, CObject* value);
 
+	/// Whether setNode takes the value, without changing anything; a warning says why when it does not.
+	/// Refused: an unknown object, no value, a value of another kind, a tree beyond the reader's limits, and
+	/// an instance id that names a node outside the part of the tree the value replaces.
+	bool canSetNode(const std::string& instanceId, const std::string& attrName, const CObject* value) const;
+
 	bool insertNode(const std::string&  instanceId, const std::string & attrName, sint32 position,
 		const std::string& key, const CObject::TSmartPtr &value);
 
@@ -236,6 +241,9 @@ class CUserComponent
 public: //public type
 	enum TComponentType {Compressed, Dev} ;
 
+	/// Largest compressed or uncompressed body serial() accepts from a peer; a component is a Lua package
+	static const uint32 MaxUserComponentDataLength = 4 * 1024 * 1024;
+
 public://public functions
 	CUserComponent();
 
@@ -299,7 +307,9 @@ public:
 	typedef std::vector< std::pair<std::string, std::string> >  TValues;
 
 public:
-	static std::string AutoSaveSignature;
+	/// The signature of each buffer of the editor this process saved (save/r2_buffer_<character>.dat), by file name:
+	/// the editor reads its own copy back, and a client may play several characters one after the other
+	static std::map<std::string, std::string> AutoSaveSignatures;
 
 public:
 	TValues _Values;
@@ -310,7 +320,18 @@ public:
 
 	bool applySave(const std::string& signature);
 	void applyLoad(std::string& filename, std::string& body, CScenarioValidator::TValues& values);
+
+	/// The Rules of a header as one of the two words a header carries, "Mastered" or "Masterless", also from the
+	/// translated words older clients wrote and from an empty text (masterless); any other text as it is
+	static std::string normalizeRules(const std::string &rules);
+
+	/// For a file whose header has no Rules (a file of the first editors has no header): the Rules of the scenario
+	/// read last (setScenarioToLoad) from its body, as r2.Version.save writes them, "Mastered" when its AccessRules
+	/// is "strict" and "Masterless" otherwise
+	std::string getRulesOfBody() const;
+
 	std::string getBodyMd5() const { return _BodyMd5; }
+	std::string getFilename() const { return _Filename; }
 
 private:
 	std::string _HeaderBody;

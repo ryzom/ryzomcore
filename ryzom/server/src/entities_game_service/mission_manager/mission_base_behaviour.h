@@ -138,12 +138,18 @@ public:
 	virtual CCharacter* getMainEntity() = 0;
 	/// clear the users journal entry corresponding to this mission
 	virtual void clearUsersJournalEntry() = 0;
+	/// clear one entry of a user's team and guild missions (GROUP:MISSIONS), for a mission or for a user who leaves
+	static void clearGroupJournalEntry(CCharacter &user, uint8 clientIndex);
 	/// update the users journal entry corresponding to this mission
 	virtual void updateUsersJournalEntry() = 0;
 	/// stop all children missions that have the same taker
 	virtual void stopChildren() = 0;
 	/// On failure processing
 	virtual void onFailure(bool ignoreJumps,bool sendMessage = true);
+	/// take the entity that waits for the mission out of the queue the mission is in (between its queue_start and
+	/// queue_end steps), when the mission fails or is removed. owner is the character of a solo mission: while the
+	/// character is loaded, it is not the main entity yet.
+	void leaveWaitingQueue(const NLMISC::CEntityId &owner = NLMISC::CEntityId::Unknown);
 
 	///\name dynamic teleport methods methods
 	//@{
@@ -167,8 +173,9 @@ public:
 	/// update taker compass. return the number of entries
 	uint updateCompass(CCharacter & user, const std::string & dbPrefix );
 
-	/// apply the consequences of a crash to this mission
-	void applyCrashHandler(bool EGSCrash, const std::string & AIInstanceName );
+	/// apply the consequences of a crash to this mission: a restart of this service (EGSCrash), or the crash of the AI
+	/// service that had the AI instances named
+	void applyCrashHandler(bool EGSCrash, const std::vector<std::string> & AIInstanceNames );
 	
 	/// apply the consequences of a player reconnection
 	void applyPlayerReconnectHandler();
@@ -180,9 +187,12 @@ public:
 	void updateEncyclopedia();
 	
 protected:
-	void updateUserJournalEntry( CCharacter & user, const std::string & dbPrefix );
+	/// monitoring: the user is not of the mission, but the CSR that monitors the missions of the character who has it.
+	/// Its entry has no compass, and its texts are made for the CSR as if the mission were its own: a text with the
+	/// name of the player has the name of the CSR.
+	void updateUserJournalEntry( CCharacter & user, const std::string & dbPrefix, bool monitoring = false );
 	template <class DBType>
-	void _updateUserJournalEntry( CCharacter & user, DBType &missionDb);
+	void _updateUserJournalEntry( CCharacter & user, DBType &missionDb, bool monitoring);
 
 	template <class DBType>
 	uint _updateCompass(CCharacter & user, DBType &missionDb);

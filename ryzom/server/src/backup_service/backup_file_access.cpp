@@ -48,7 +48,10 @@ bool	bsstrincmp(const char* s1, const char* s2, int n)
 
 std::string	getBackupFileName(const std::string& filename)
 {
-	return SaveShardRootGameShare.get() + filename;
+	// A leading separator is relative to SaveShardRoot like the rest of the name (the logger service sends "/" + name).
+	// The name no longer brings its own separator, so a SaveShardRoot written without its trailing one gets it here,
+	// as the services' local path does (CPath::standardizePath leaves an empty one empty)
+	return NLMISC::CPath::standardizePath(SaveShardRootGameShare.get()) + NLMISC::CFile::normalizeRelativePath(filename);
 	/* // BSFilePrefix and BSFileSubst are deprecated
 	if (BSFilePrefix.get().empty())
 		return filename;
@@ -85,7 +88,12 @@ void	CFileAccessManager::update()
 		IFileAccess*				access = _Accesses.front();
 		IFileAccess::TReturnCode	rc = access->execute(*this);
 
-		if (rc == IFileAccess::MajorFailure)
+		if (rc == IFileAccess::RetryLater)
+		{
+			// the access is not done and has not failed yet: it stays first, and is executed again by a later update
+			break;
+		}
+		else if (rc == IFileAccess::MajorFailure)
 		{
 			nlwarning("Failed to execute access to file '%s', setting to STALLED mode", access->Filename.c_str());
 			setMode(Stalled, access->FailureReason);
@@ -106,8 +114,14 @@ void	CFileAccessManager::update()
 // Release File manager
 void	CFileAccessManager::release()
 {
-	if (!_Accesses.empty())
+	// An access that waits to be tried again is waited for here: it ends within seconds, done, discarded or as
+	// the failure that stalls the manager
+	while (_Mode == Normal && !_Accesses.empty())
+	{
 		update();
+		if (_Mode == Normal && !_Accesses.empty())
+			NLMISC::nlSleep(50);
+	}
 
 	if (!_Accesses.empty())
 	{
@@ -189,9 +203,15 @@ void	CFileAccessManager::removeFileAccess(IFileAccess* access)
 
 IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 {
-	bool	fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
+	// a name that is not a safe relative path (one could leave SaveShardRoot) is answered as a missing file, so the
+	// requester does not wait, and never stalls
+	const bool confined = NLMISC::CFile::isSafeFilename(NLMISC::CFile::normalizeRelativePath(Filename), true);
+	if (!confined)
+		nlwarning("LOAD: refused file name '%s' from %s, not a safe relative path", Filename.c_str(), Requester.toString().c_str());
 
-	if (!fileExists && checkFailureMode(MajorFailureIfFileNotExists))
+	bool fileExists = confined && NLMISC::CFile::fileExists(getBackupFileName(Filename));
+
+	if (!fileExists && confined && checkFailureMode(MajorFailureIfFileNotExists))
 	{
 		FailureReason = NLMISC::toString("MAJOR_FAILURE:LOAD: file '%s' doesn't not exist", Filename.c_str());
 		return MajorFailure;
@@ -225,7 +245,7 @@ IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 		}
 	}
 
-	if (!fileRead && checkFailureMode(MajorFailureIfFileUnreaddable))
+	if (!fileRead && confined && checkFailureMode(MajorFailureIfFileUnreaddable))
 	{
 		FailureReason = NLMISC::toString("MAJOR_FAILURE:LOAD: can't %s file '%s'", (!fileOpen ? "open" : "read"), Filename.c_str());
 		return MajorFailure;
@@ -261,6 +281,12 @@ IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 		}
 	}
 
+	if (!confined)
+	{
+		FailureReason = NLMISC::toString("MINOR_FAILURE:LOAD: file name '%s' is not a safe relative path", Filename.c_str());
+		return MinorFailure;
+	}
+
 	// If the file read failed for any other reason than file not found then complain
 	if (!fileRead && fileExists)
 	{
@@ -293,10 +319,14 @@ CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester,
 	Append = false;
 	CreateDir = true;
 	FailureMode = MajorFailureMode;
+	m_ReplaceFailures = 0;
+	m_NextTryTime = 0;
 	uint32 startPos = (uint32)data.getPos();
 	uint32 actualLen = data.length()-startPos;
 	Data.resize(actualLen);
-	memcpy(&(Data[0]), data.buffer()+startPos, actualLen);
+	// a message can end after the file name: there is then no first byte to take the address of
+	if (actualLen != 0)
+		memcpy(&(Data[0]), data.buffer() + startPos, actualLen);
 }
 
 CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester, uint32 requestid, uint8* data, uint dataSize)
@@ -306,12 +336,59 @@ CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester,
 	Append = false;
 	CreateDir = true;
 	FailureMode = MajorFailureMode;
+	m_ReplaceFailures = 0;
+	m_NextTryTime = 0;
 	Data.resize(dataSize);
-	memcpy(&(Data[0]), data, dataSize);
+	if (dataSize != 0)
+		memcpy(&(Data[0]), data, dataSize);
+}
+
+void CWriteFile::deleteKeptTemporaryFile(const std::string &tempFilename)
+{
+	if (!NLMISC::CFile::deleteFile(tempFilename))
+		nlwarning("WRITE: can't delete the temporary file '%s' of file '%s'", tempFilename.c_str(), Filename.c_str());
 }
 
 IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 {
+	// an access that waits before it writes its file again does nothing until then. A wait longer than the
+	// longest one asked for means that the clock was set back: the access is then executed at once.
+	if (m_NextTryTime != 0)
+	{
+		const NLMISC::TTime now = NLMISC::CTime::getLocalTime();
+		const NLMISC::TTime longestWait = (NLMISC::TTime)s_ReplaceRetryFirstWaitMs << s_ReplaceRetryCount;
+		if (now < m_NextTryTime && m_NextTryTime - now <= longestWait)
+			return RetryLater;
+		m_NextTryTime = 0;
+	}
+
+	// a name that is not a safe relative path (one could leave SaveShardRoot) is discarded, whatever the failure mode:
+	// it is no disk problem to stall for
+	if (!NLMISC::CFile::isSafeFilename(NLMISC::CFile::normalizeRelativePath(Filename), true))
+	{
+		nlwarning("WRITE: refused file name '%s' from %s, not a safe relative path", Filename.c_str(), Requester.toString().c_str());
+		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: file name '%s' is not a safe relative path", Filename.c_str());
+		return MinorFailure;
+	}
+
+	if (Data.empty())
+	{
+		// An append without data has nothing to add: it is done. The file is not opened for it, which would create
+		// a missing file without content, or with UseTempFile copy the whole file and put the copy in its place.
+		if (Append)
+			return Success;
+
+		// A save without data is refused, and the file that is there is left as it is. No requester of this
+		// service has a save without content to send, so it comes from a faulty or a foreign sender. A file
+		// without content cannot be read back through this service either: a load answers for it as for a file
+		// that is missing. And a save that comes by message keeps no backup copy, so writing it would destroy
+		// the last good content. It is a minor failure whatever the failure mode of the access: this is no disk
+		// problem that an operator can solve, and a stalled shard would stall again each time it is resumed.
+		nlwarning("WRITE: refused to save file '%s' from %s without content, the file is left as it is", Filename.c_str(), Requester.toString().c_str());
+		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: file '%s' is not saved without content", Filename.c_str());
+		return MinorFailure;
+	}
+
 	bool	fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
 
 	if (!fileExists)
@@ -383,6 +460,7 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 
 	try
 	{
+		// Data is not empty here: an access without data ended above
 		f.serialBuffer(&(Data[0]), (uint)Data.size());
 		fileSaved = true;
 
@@ -394,8 +472,8 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 	}
 
 	// if can't write in file, file is unwritable, failure in all cases (and no backup)
-	// file is kept untouched
-	if (!fileSaved && checkFailureMode(MajorFailureIfFileUnwritable))
+	// file is kept untouched: f is not closed, so its temporary file is deleted and never takes the place of the file
+	if (!fileSaved)
 	{
 		if (checkFailureMode(MajorFailureIfFileUnwritable))
 		{
@@ -423,7 +501,71 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 		}
 	}
 
-	f.close();
+	// With UseTempFile the file is only written once it is closed: what is still buffered is written there (a full
+	// disk can first show there), and the temporary file takes the place of the file there. A close that throws is
+	// a write that failed, and the file is as it was: the access is not done. As a major failure it stays in the
+	// queue with its data, and is executed again when the stall is lifted.
+	// Without UseTempFile close() does not throw: it returns that the file, which was written in place, is not
+	// written completely. That is the failure of a write that failed.
+	bool fileClosed = true;
+	try
+	{
+		fileClosed = f.close();
+	}
+	catch (const NLMISC::ERenameError &e)
+	{
+		// The file was written, but could not take the place of the old one: another process holds one of the
+		// two. The temporary file was kept. Where the access stays in the queue, its data is still here and that
+		// file is a copy nobody reads: it is deleted. Where the access is discarded, it is the only copy: it stays.
+
+		// Such a hold usually ends within a second, and a stalled shard needs an operator: the access is
+		// executed again on later updates before it fails. It stays first in the queue, the accesses keep their order.
+		if (m_ReplaceFailures < s_ReplaceRetryCount)
+		{
+			deleteKeptTemporaryFile(e.TempFilename);
+			const uint waitMs = s_ReplaceRetryFirstWaitMs << m_ReplaceFailures;
+			++m_ReplaceFailures;
+			m_NextTryTime = NLMISC::CTime::getLocalTime() + waitMs;
+			FailureReason = NLMISC::toString("RETRY:WRITE: can't replace file '%s', try %u of %u in %u ms: %s", Filename.c_str(), m_ReplaceFailures + 1, s_ReplaceRetryCount + 1, waitMs, e.what());
+			nlwarning("WRITE: can't replace file '%s', it is written again in %u ms (try %u of %u): %s", Filename.c_str(), waitMs, m_ReplaceFailures + 1, s_ReplaceRetryCount + 1, e.what());
+			return RetryLater;
+		}
+
+		// given up: if the access is executed again after a stall, it gets all its tries again
+		m_ReplaceFailures = 0;
+		nlwarning("WRITE: can't replace file '%s' after %u tries: %s", Filename.c_str(), s_ReplaceRetryCount + 1, e.what());
+		if (checkFailureMode(MajorFailureIfFileUnwritable))
+		{
+			deleteKeptTemporaryFile(e.TempFilename);
+			FailureReason = NLMISC::toString("MAJOR_FAILURE:WRITE: can't replace file '%s': %s", Filename.c_str(), e.what());
+			return MajorFailure;
+		}
+		// the text of the exception names the temporary file, which now holds what the access was to write
+		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: can't replace file '%s': %s", Filename.c_str(), e.what());
+		return MinorFailure;
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		nlwarning("WRITE: can't close file '%s': %s", Filename.c_str(), e.what());
+		if (checkFailureMode(MajorFailureIfFileUnwritable))
+		{
+			FailureReason = NLMISC::toString("MAJOR_FAILURE:WRITE: can't close file '%s': %s", Filename.c_str(), e.what());
+			return MajorFailure;
+		}
+		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: can't close file '%s': %s", Filename.c_str(), e.what());
+		return MinorFailure;
+	}
+	if (!fileClosed)
+	{
+		if (checkFailureMode(MajorFailureIfFileUnwritable))
+		{
+			FailureReason = NLMISC::toString("MAJOR_FAILURE:WRITE: can't write file '%s'", Filename.c_str());
+			return MajorFailure;
+		}
+		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: can't write file '%s'", Filename.c_str());
+		return MinorFailure;
+	}
+	m_ReplaceFailures = 0;
 
 	if (!fileBackuped)
 	{
@@ -431,13 +573,27 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 		return MinorFailure;
 	}
 
-	NLMISC::COFile flog;
 	std::string str = getBackupFileName(Filename)+"\n";
 	if(str.find("characters")!=std::string::npos)
 	{
-		flog.open(getBackupFileName("new_save.txt"), true);
-		flog.serialBuffer((uint8*)&(str[0]), str.size());
-		flog.close();
+		// the file is written: failing to add it to this list does not fail the access
+		try
+		{
+			NLMISC::COFile flog;
+			if (flog.open(getBackupFileName("new_save.txt"), true))
+			{
+				flog.serialBuffer((uint8 *)&(str[0]), (uint)str.size());
+				flog.close();
+			}
+			else
+			{
+				nlwarning("WRITE: can't add file '%s' to the list of new saves: the list can't be opened", Filename.c_str());
+			}
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			nlwarning("WRITE: can't add file '%s' to the list of new saves: %s", Filename.c_str(), e.what());
+		}
 	}
 
 	return Success;
@@ -446,6 +602,15 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 
 IFileAccess::TReturnCode	CDeleteFile::execute(CFileAccessManager& manager)
 {
+	// a name that is not a safe relative path (one could leave SaveShardRoot) is discarded, whatever the failure mode:
+	// it is no disk problem to stall for
+	if (!NLMISC::CFile::isSafeFilename(NLMISC::CFile::normalizeRelativePath(Filename), true))
+	{
+		nlwarning("DELETE: refused file name '%s' from %s, not a safe relative path", Filename.c_str(), Requester.toString().c_str());
+		FailureReason = NLMISC::toString("MINOR_FAILURE:DELETE: file name '%s' is not a safe relative path", Filename.c_str());
+		return MinorFailure;
+	}
+
 	bool	fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
 
 	if (!fileExists)

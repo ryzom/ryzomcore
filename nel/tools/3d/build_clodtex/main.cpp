@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 		catch(const Exception &e)
 		{
 			// It is not an error to have a bad config file: files will be copied
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 		}
 
 		// List all files.

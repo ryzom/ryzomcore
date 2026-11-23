@@ -316,7 +316,7 @@ void CGuild::setMOTD( const std::string& motd, const NLMISC::CEntityId& eId)
 		CCharacter * user = PlayerManager.getChar( eId );
 		if ( member == NULL || user == NULL )
 		{
-			nlwarning("<CGuildMemberModule::setMOTD>%s invalid member id %s",eId.toString().c_str());
+			nlwarning("<CGuild::setMOTD> invalid member id %s",eId.toString().c_str());
 			return;
 		}
 
@@ -830,6 +830,9 @@ void CGuild::removeMission( uint idx, TMissionResult result)
 		_Missions[idx]->clearUsersJournalEntry();
 	}
 
+	// an abandoned mission is removed without a failure, which would take the entity waiting for it out of its queue
+	_Missions[idx]->leaveWaitingQueue();
+
 	CMissionManager::getInstance()->deInstanciateMission(_Missions[idx]);
 	delete _Missions[idx];
 	_Missions.erase(_Missions.begin() + idx) ;
@@ -939,8 +942,17 @@ bool CGuild::processGuildMissionStepEvent(std::list< CMissionEvent*> & eventList
 			}
 		}
 
-		CMissionManager::getInstance()->missionDoneOnce(templ);
-		mission->stopChildren();
+		// The failure actions of the other instances or of the children can remove the mission or fail it: its MissionDone
+		// event is in the list already. It is Normal meanwhile, as in forceSuccess: a failure of a Complete mission is
+		// taken as its end, which would end it again with a second MissionDone.
+		NLMISC::CRefPtr<CMission> missionRef = mission;
+		mission->setProcessingState(CMission::Normal);
+		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
+		if (missionRef != nullptr)
+			mission->stopChildren();
+		if (missionRef == nullptr || mission->getFinished())
+			return true;
+		mission->setProcessingState(CMission::Complete);
 
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || mission->isChained() || templ->Tags.AutoRemove )
@@ -1121,6 +1133,42 @@ void CGuild::putItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 
 }
 
 //----------------------------------------------------------------------------
+bool CGuild::canTakeItem( CCharacter * user, uint32 slot )
+{
+	nlassert( user );
+
+	if( canAccessToGuildInventory( user ) == false )
+	{
+		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
+		return false;
+	}
+
+	// check if user is trial
+	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
+	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return false);
+	if ( p->isTrialPlayer() )
+	{
+		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_GUILD_INV_IS_TRIAL_PLAYER" );
+		return false;
+	}
+
+	CGuildMember* member = getMemberFromEId(user->getId());
+	if (!member)
+		return false;
+
+	uint8 chest = floor((float)slot / (float)GuildChestSlots);
+
+
+	if (!haveChestViewGrade(chest, member->getGrade()) || !haveChestGetGrade(chest, member->getGrade()))
+	{
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
+		return false;
+	}
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
 void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32 slot, uint32 quantity, uint16 session )
 {
 	// the session system works that way :
@@ -1129,35 +1177,8 @@ void CGuild::takeItem( CCharacter * user, INVENTORIES::TInventory srcInv, uint32
 	// The item session is incremented and the highest session value is then sent to the clients
 	// sessions are reseted when nobody uses the inventory
 
-	nlassert( user );
-
-	if( canAccessToGuildInventory( user ) == false )
-	{
-		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
+	if ( !canTakeItem( user, slot ) )
 		return;
-	}
-
-	// check if user is trial
-	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
-	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return);
-	if ( p->isTrialPlayer() )
-	{
-		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_GUILD_INV_IS_TRIAL_PLAYER" );
-		return;
-	}
-
-	CGuildMember* member = getMemberFromEId(user->getId());
-	if (!member)
-		return;
-
-	uint8 chest = floor((float)slot / (float)GuildChestSlots);
-
-
-	if (!haveChestViewGrade(chest, member->getGrade()) || !haveChestGetGrade(chest, member->getGrade()))
-	{
-		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
-		return;
-	}
 
 	// get the source item
 	CInventoryPtr srcItems = (CGuildInventory *)_Inventory;
@@ -1201,35 +1222,11 @@ void CGuild::moveItem( CCharacter * user, uint32 slot, uint32 dstSlot, uint32 qu
 	// The item session is incremented and the highest session value is then sent to the clients
 	// sessions are reseted when nobody uses the inventory
 
-	nlassert( user );
-
-	if( canAccessToGuildInventory( user ) == false )
-	{
-		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
+	if ( !canTakeItem( user, slot ) )
 		return;
-	}
-
-	// check if user is trial
-	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( user->getId() ));
-	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return);
-	if ( p->isTrialPlayer() )
-	{
-		user->sendDynamicSystemMessage( user->getId(), "EGS_CANT_USE_GUILD_INV_IS_TRIAL_PLAYER" );
-		return;
-	}
 
 	CGuildMember* member = getMemberFromEId(user->getId());
-	if (!member)
-		return;
-
-	uint8 srcChest = floor((float)slot / (float)GuildChestSlots);
 	uint8 dstChest = floor((float)dstSlot / (float)GuildChestSlots);
-
-	if (!haveChestViewGrade(srcChest, member->getGrade()) || !haveChestGetGrade(srcChest, member->getGrade()))
-	{
-		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
-		return;
-	}
 
 	if (!haveChestViewGrade(dstChest, member->getGrade()) || !haveChestPutGrade(dstChest, member->getGrade()))
 	{
@@ -1361,6 +1358,15 @@ void	CGuild::takeMoney( CCharacter * user, uint64 money, uint16 session )
 	if( canAccessToGuildInventory( user ) == false )
 	{
 		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
+		return;
+	}
+
+	// check if user is trial, as for items
+	CPlayer *p = PlayerManager.getPlayer(PlayerManager.getPlayerId(user->getId()));
+	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return);
+	if (p->isTrialPlayer())
+	{
+		user->sendDynamicSystemMessage(user->getId(), "EGS_CANT_TAKE_GUILD_MONEY_IS_TRIAL_PLAYER");
 		return;
 	}
 
@@ -1919,7 +1925,10 @@ uint8 CGuild::getAndSyncItemInfoVersion( uint32 slot, const NLMISC::CEntityId& c
 	uint8 infoVersion = _GuildInventoryView->getItemInfoVersion( slot );
 	CGuildMember* member = EGS_PD_CAST<CGuildMember*>(getMembers( characterId ));
 	if ( member == NULL )
+	{
+		// a guest in the guild room is not a member: nothing to sync for it
 		return infoVersion;
+	}
 	CGuildMemberModule *onlineMember = NULL;
 	if ( member->getReferencingModule( onlineMember ) ) // contains slow dynamic cast :(
 		onlineMember->setLastSentInfoVersion( slot, infoVersion );

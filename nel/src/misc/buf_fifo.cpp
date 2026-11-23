@@ -617,7 +617,7 @@ void CBufFIFO::display ()
 #else
 	strncat (str, "\r", 1);
 #endif
-	DebugLog->display (str);
+	DebugLog->display ("%s", str);
 }
 
 bool CBufFIFO::canFit (uint32 s)

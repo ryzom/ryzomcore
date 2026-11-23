@@ -27,7 +27,7 @@ createItemInBag				::			audit		// Create an item and put it in the player bag: <
 createItemInInv				::			audit		// Create an item and put it in the given player inventory: <invId> <sheetId>|<sheetName> <quantity> <quality>
 createItemInTmpInv			::			audit		// Create an item and put it in the player temp inventory: <sheetId>|<sheetName> <quantity> <quality>
 createNamedItemInBag		::			audit		// Create a named item and put it in the player bag: <item name> [<quantity>]
-createFullArmorSet			::			audit	// Create and equip player with chosen full armor set: <race (fyros/matis/zorai/tryker)> <type (light/medium/heavy)> <quality>
+createFullArmorSet			::			audit	// Create a full armor set in the player bag: <race (fyros/matis/zorai/tryker)> <type (light/medium/heavy)> <quality> [<variant (1/2/3)>]
 delPosFlag					::			audit		// Delete a position flag: <flag name>
 dismiss						::			audit		// Teleport a player back to its former position (before last call to summonPlayer): <player name>
 displayForageRM				::			audit		// Display forageable raw materials near by or at the exact position of a player: <exactPos=1> <extendedInfo=0>

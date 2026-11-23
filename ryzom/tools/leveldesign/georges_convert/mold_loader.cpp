@@ -96,7 +96,7 @@ CMoldElt* CMoldLoader::LoadMold( const CStringEx _sxfilename )
 	{
 		CMoldElt *pME = it->second;
 		CStringEx sTmp = it->first + " Name:" + pME->GetName() + " formula:" + pME->GetFormula();
-		nlwarning (sTmp.c_str());
+		nlwarning ("%s", sTmp.c_str());
 	}*/
 	// DEBUG
 

@@ -363,7 +363,7 @@ function PlayerTracking:fill(list)
 		self:clearMessage()
 	end
 	local endTime = nltime.getPreciseLocalTime()
-	debugInfo(string.format("time ellapsed =  %d", 1000 * (endTime - startTime)))
+	debugInfo(string.format("time ellapsed =  %d", math.floor(1000 * (endTime - startTime))))
 end
 
 
@@ -614,7 +614,7 @@ function PlayerTracking:onDraw()
 		local waitText = i18n.get("uiRAP_WaitMsg" .. math.fmod(os.time(), 3))
 		if not self.ListReceived then
 			self:setInfoMessage(waitText)
-			waitTextColor.A = 127 + 127 * (0.5 + 0.5 * math.cos(6 * timeInSec))
+			waitTextColor.A = math.floor(127 + 127 * (0.5 + 0.5 * math.cos(6 * timeInSec)))
 			local errorTxt = self:getWindow():find("errorMsg")
 			errorTxt.color_rgba = waitTextColor
 		end

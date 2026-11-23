@@ -47,7 +47,8 @@ public:
 	/// Destructor
 	virtual ~IDisplayer();
 
-	/// Display the string where it does.
+	/// Display the string where it does. A message that doDisplay() logs, and that comes back to this displayer on the
+	/// same thread, is not displayed by it: the other displayers of its log display it.
 	void display( const CLog::TDisplayInfo& args, const char *message );
 
 	/// This is the identifier for a displayer, it is used to find or remove a displayer
@@ -79,6 +80,10 @@ public:
 private:
 
 	CMutex	*_Mutex;
+
+	// the thread in doDisplay() (0 for none), written with _Mutex held: display() comes back on that thread when
+	// doDisplay() logs a message that reaches this displayer again, and the mutex would throw or block there
+	volatile size_t m_DisplayingThread;
 };
 
 

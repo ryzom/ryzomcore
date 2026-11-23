@@ -25,7 +25,9 @@
 // Misc
 #include "nel/misc/sheet_id.h"
 
+#include "game_share/animal_status.h"
 #include "game_share/bot_chat_types.h"
+#include "game_share/chat_message.h"
 #include "game_share/inventories.h"
 #include "game_share/slot_equipment.h"
 #include "game_share/temp_inventory_mode.h"
@@ -191,9 +193,7 @@ void CCharacter::initInventoriesDb()
 	_WearEquipmentMalus += pHand->getWearMalus();
 	CEquipInventory* pEquip = (CEquipInventory*)(CInventoryBase*)_Inventory[INVENTORIES::equipment];
 	_WearEquipmentMalus += pEquip->getWearMalus();
-	//	_PropertyDatabase.setProp( _DataIndexReminder->Modifiers.TotalMalusEquip, (uint32)(_WearEquipmentMalus * 50) );
-	CBankAccessor_PLR::getMODIFIERS().setTOTAL_MALUS_EQUIP(
-		_PropertyDatabase, checkedCast<uint8>(_WearEquipmentMalus * 50));
+	updateWearMalusDBEntry();
 
 	// update parry skill if no item in right hand
 	if (getRightHandItem() == NULL)
@@ -335,10 +335,18 @@ void CCharacter::itemPickup(const NLMISC::CEntityId &entity, bool harvest)
 						return;
 					}
 
-					// check creature and character are not too far away
+					// check creature and character are not too far away, measured from the edge of the creature: the client
+					// walks to the edge of a large one, which can be further than MaxHarvestDistance from its centre. Its
+					// size there includes the scale a GM can give it (eventSetBotScale)
+					CMirrorPropValueRO<TYPE_VPB> visualPropertyB(TheDataset, creature->getEntityRowId(), DSPropertyVPB);
+					const SAltLookProp2 altLook((uint64)visualPropertyB());
+					float scale = form->getScale();
+					if (altLook.PropertySubData.Scale != 0)
+						scale *= (float)altLook.PropertySubData.Scale / 100.0f;
 					const double distance = PHRASE_UTILITIES::getDistance(_Id, entity);
+					const double maxDistance = MaxHarvestDistance + form->getColRadius() * scale;
 
-					if (distance < 0 || distance > MaxHarvestDistance)
+					if (distance < 0 || distance > maxDistance)
 					{
 						sendDynamicSystemMessage(_Id, "EGS_HARVEST_CORPSE_TOO_FAR");
 						sendCloseTempInventoryImpulsion();
@@ -731,6 +739,15 @@ void CCharacter::destroyItem(INVENTORIES::TInventory invId, uint32 slot, uint32 
 		return;
 	}
 
+	// The hands and the equipment only refer to items of the bag: a whole item or stack destroyed through them was
+	// only taken off and stayed in the bag, while its owner was told that it is destroyed. The caller names the
+	// inventory the item is in.
+	if (inv->isRefInventory())
+	{
+		nlwarning("<CCharacter::destroyItem> %s: cannot destroy through inventory %u, which only refers to items", _Id.toString().c_str(), (uint)invId);
+		return;
+	}
+
 	// check if slot is valid
 	if (slot >= inv->getSlotCount())
 	{
@@ -848,6 +865,15 @@ void CCharacter::moveItem(INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVE
 	if (dstInv == NULL)
 	{
 		nlwarning("invalid dst inventory %u", dstInvId);
+		return;
+	}
+
+	// The hands and the equipment only refer to items of the bag: equipCharacter fills them and unequipCharacter
+	// empties them. Removing an item from one only unlinks it, so the destination would be given an item that is
+	// still in the bag, and inserting into one would take the item out of its real inventory.
+	if (srcInv->isRefInventory() || dstInv->isRefInventory())
+	{
+		nlwarning("<CCharacter::moveItem> %s: cannot move from inventory %u to inventory %u, one of them only refers to items", _Id.toString().c_str(), (uint)srcInvId, (uint)dstInvId);
 		return;
 	}
 
@@ -1184,10 +1210,8 @@ void CCharacter::unequipCharacter(INVENTORIES::TInventory invId, uint32 slot, bo
 		// ITEMFAMILY::RANGE_WEAPON )
 		_WearEquipmentMalus -= form->WearEquipmentMalus;
 	}
+	updateWearMalusDBEntry();
 
-	//	_PropertyDatabase.setProp(_DataIndexReminder->Modifiers.TotalMalusEquip, uint32(_WearEquipmentMalus * 50));
-	CBankAccessor_PLR::getMODIFIERS().setTOTAL_MALUS_EQUIP(
-		_PropertyDatabase, checkedCast<uint8>(_WearEquipmentMalus * 50));
 	// remove item modifiers
 	removeItemModifiers(item);
 	// if unequipped item may have a protection type, we must re-compute max protection
@@ -2465,6 +2489,13 @@ void CCharacter::incSlotVersion(INVENTORIES::TInventory invId, uint32 slot)
 // ****************************************************************************
 void CCharacter::sendItemInfos(uint32 slotId)
 {
+	CChatMessageItem item;
+	buildItemInfos(slotId, item, true);
+}
+
+// ****************************************************************************
+bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool sendToClient)
+{
 	TLogNoContext_Item noContext;
 
 	try
@@ -2476,7 +2507,7 @@ void CCharacter::sendItemInfos(uint32 slotId)
 		nlassert(SkillsTree);
 		INVENTORIES::TInventory inventory = INVENTORIES::TInventory(slotId >> CItemInfos::SlotIdIndexBitSize);
 		uint32 slot = (slotId & CItemInfos::SlotIdIndexBitMask);
-		CItemInfos infos;
+		CItemInfos &infos = chatItem.Info;
 		CGameItemPtr item = NULL;
 
 		if (inventory == INVENTORIES::exchange)
@@ -2485,14 +2516,14 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			{
 				nlwarning("<sendItemInfos>for exchange %s tries slot %u count is %u", _Id.toString().c_str(), slot,
 						  CExchangeView::NbExchangeSlots);
-				return;
+				return false;
 			}
 
 			if (_ExchangeView == NULL)
 			{
 				nlwarning("<sendItemInfos>for exchange %s tries to access exchange view, but no exchange pending",
 						  _Id.toString().c_str());
-				return;
+				return false;
 			}
 
 			item = _ExchangeView->getExchangeItem(slot);
@@ -2500,7 +2531,7 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			if (item == NULL)
 			{
 				nlwarning("<sendItemInfos>for exchange %s tries slot %u. Slot is empty", _Id.toString().c_str(), slot);
-				return;
+				return false;
 			}
 
 			//			infos.versionInfo = (uint16) _PropertyDatabase.getProp(
@@ -2512,17 +2543,17 @@ void CCharacter::sendItemInfos(uint32 slotId)
 		{
 			CCharacter* trader = PlayerManager.getChar(_CurrentInterlocutor);
 
-			if (!trader)
+			if (!trader || trader->_ExchangeView == nullptr)
 			{
-				nlwarning("<sendItemInfos>%s tries exchange inventory but has no trader", _Id.toString().c_str());
-				return;
+				nlwarning("<sendItemInfos>%s tries exchange inventory but has no trader exchange view", _Id.toString().c_str());
+				return false;
 			}
 
 			if (slot >= CExchangeView::NbExchangeSlots)
 			{
 				nlwarning("<sendItemInfos>for exchange %s tries slot %u count is %u", _Id.toString().c_str(), slot,
 						  CExchangeView::NbExchangeSlots);
-				return;
+				return false;
 			}
 
 			item = trader->_ExchangeView->getExchangeItem(slot);
@@ -2531,7 +2562,7 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			{
 				nlwarning("<sendItemInfos>for exchange_proposition %s tries slot %u. Slot is empty",
 						  _Id.toString().c_str(), slot);
-				return;
+				return false;
 			}
 
 			//			infos.versionInfo = (uint16) _PropertyDatabase.getProp(
@@ -2565,7 +2596,7 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			if (_GuildId == 0)
 			{
 				nlwarning("<sendItemInfos> user %s not in guild !", _Id.toString().c_str());
-				return;
+				return false;
 			}
 
 			CGuild* guild = CGuildManager::getInstance()->getGuildFromId(_GuildId);
@@ -2574,27 +2605,36 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			{
 				//nlwarning("<sendItemInfos> user %s cellId %d is not a guild room !", _Id.toString().c_str(), cell);
 				nlwarning("<sendItemInfos> user %s guild %d unknown !", _Id.toString().c_str(), toString(_GuildId).c_str());
-				return;
+				return false;
+			}
+			// the slot comes from the client and indexes the info version tables, which have NbGuildSlots entries
+			if ( slot >= INVENTORIES::NbGuildSlots )
+			{
+				nlwarning("<sendItemInfos> user %s: guild inventory slot %u, count is %u", _Id.toString().c_str(), slot, INVENTORIES::NbGuildSlots);
+				return false;
 			}
 
 			item = guild->getItem(slot);
 
 			if (item == NULL)
-				return;
+				return false;
 
-			infos.versionInfo = guild->getAndSyncItemInfoVersion(slot, getId());
+			infos.versionInfo = sendToClient ? guild->getAndSyncItemInfoVersion(slot, getId()) : 0;
 		}
 		else if (inventory == INVENTORIES::player_room)
 		{
 			CInventoryPtr roomInv = _PlayerRoom->getInventory();
 
 			if (roomInv == NULL || slot >= roomInv->getSlotCount())
-				return;
+			{
+				nlwarning("<sendItemInfos> user %s: room inventory %s, slot %u", _Id.toString().c_str(), roomInv == NULL ? "missing" : "too small", slot);
+				return false;
+			}
 
 			item = roomInv->getItem(slot);
 
 			if (item == NULL)
-				return;
+				return false;
 
 			infos.versionInfo = (uint16)_InventoryUpdater.getInfoVersion((INVENTORIES::TInventory)inventory, slot);
 		}
@@ -2621,7 +2661,7 @@ void CCharacter::sendItemInfos(uint32 slotId)
 						{
 							nlwarning("<CCharacter sendItemInfos> invalid trading slot %u for user %s", slot,
 									  _Id.toString().c_str());
-							return;
+							return false;
 						}
 					}
 				}
@@ -2641,7 +2681,7 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			}
 			else
 			{
-				return;
+				return false;
 			}
 		}
 		else if (inventory == INVENTORIES::reward_sharing)
@@ -2651,13 +2691,13 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			if (!team)
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid team for user '%s'", _Id.toString().c_str());
-				return;
+				return false;
 			}
 
 			if (!team->getReward())
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid team reward for user '%s'", _Id.toString().c_str());
-				return;
+				return false;
 			}
 
 			item = team->getReward()->getItem(slot);
@@ -2665,7 +2705,7 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			if (item == NULL)
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid item for user '%s'", _Id.toString().c_str());
-				return;
+				return false;
 			}
 
 			//			infos.versionInfo = (uint16)_PropertyDatabase.getProp(
@@ -2679,26 +2719,26 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid inventory %u : there are %u inventory, for user %s",
 						  inventory, INVENTORIES::NUM_INVENTORY, _Id.toString().c_str());
-				return;
+				return false;
 			}
 
 			if (_Inventory[inventory] == NULL)
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid inventory %u: NULL", inventory);
-				return;
+				return false;
 			}
 
 			if (slot >= _Inventory[inventory]->getSlotCount())
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid slot %u for inventory %u: only %u slots for user %s",
 						  slot, inventory, _Inventory[inventory]->getSlotCount(), _Id.toString().c_str());
-				return;
+				return false;
 			}
 
 			item = _Inventory[inventory]->getItem(slot);
 
 			if (item == NULL)
-				return;
+				return false;
 
 			infos.versionInfo = (uint16)_InventoryUpdater.getInfoVersion((INVENTORIES::TInventory)inventory, slot);
 		}
@@ -2707,7 +2747,7 @@ void CCharacter::sendItemInfos(uint32 slotId)
 		{
 			nlwarning("<CCharacter sendItemInfos> invalid slot %u for inventory %u: NULL, for user %s", slot, inventory,
 					  _Id.toString().c_str());
-			return;
+			return false;
 		}
 
 		infos.Hp = item->durability();
@@ -2717,7 +2757,10 @@ void CCharacter::sendItemInfos(uint32 slotId)
 		if (inventory == INVENTORIES::trading)
 			infos.Hp = infos.HpMax;
 
-		infos.CreatorName = CEntityIdTranslator::getInstance()->getEntityNameStringId(item->getCreator());
+		if (sendToClient)
+			infos.CreatorName = CEntityIdTranslator::getInstance()->getEntityNameStringId(item->getCreator());
+		else
+			chatItem.CreatorName = CEntityIdTranslator::getInstance()->getByEntity(item->getCreator());
 		/*
 		CEntityBase* creator = CEntityBaseManager::getEntityBasePtr(item->getCreator());
 		infos.CreatorName = 0;
@@ -2759,12 +2802,16 @@ void CCharacter::sendItemInfos(uint32 slotId)
 				{
 					infos.R2ItemDescription = itemDesc->Description;
 					infos.R2ItemComment = itemDesc->Comment;
+					if (!sendToClient)
+						chatItem.Name = itemDesc->Name;
 				}
 			}
 		}
 
 		item->damage(skillVal, infos.CurrentDamage, infos.MaxDamage);
-		infos.HitRate = (uint16)(item->hitRate() * 6); // nb hit per minute
+		// nb hit per minute, to one decimal: the latency of an attack follows the float hit rate (CCombatWeapon)
+		infos.HitRate = floorf(item->hitRate() * 60.0f + 0.5f) / 10.0f;
+
 		infos.SapLoadCurrent = item->sapLoad();
 		infos.SapLoadMax = item->maxSapLoad();
 		infos.Range = item->range();
@@ -2830,6 +2877,25 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			infos.PetNumber = item->getPetIndex() + 1;
 		}
 
+		if (!sendToClient)
+		{
+			// Share scroll properties without exposing their private text or commands.
+			if (form->Family == ITEMFAMILY::SCROLL)
+				infos.CustomText.clear();
+			infos.slotId = 0;
+			infos.versionInfo = 0;
+			chatItem.SheetId = item->getSheetId();
+			chatItem.Quality = item->quality();
+			chatItem.Quantity = item->getStackSize();
+			chatItem.Weight = item->weight() / 10;
+			chatItem.UserColor = item->color();
+			chatItem.NamePhraseId = form->Family == ITEMFAMILY::SCROLL_R2 ? std::string() : item->getPhraseId();
+			chatItem.Enchant = item->getClientEnchantValue();
+			chatItem.RMClassType = item->getItemClass();
+			chatItem.RMFaberStatType = item->getCraftParameters() == 0 ? RM_FABER_STAT_TYPE::Unknown : item->getCraftParameters()->getBestItemStat();
+			return true;
+		}
+
 		CMessage msgout("IMPULSION_ID");
 		CBitMemStream bms;
 		msgout.serial(_Id);
@@ -2837,7 +2903,7 @@ void CCharacter::sendItemInfos(uint32 slotId)
 		if (!GenericMsgManager.pushNameToStream("ITEM_INFO:SET", bms))
 		{
 			nlwarning("<CCharacter sendItemInfos> Msg name ITEM_INFO:SET not found");
-			return;
+			return false;
 		}
 
 		bms.serial(infos);
@@ -2853,10 +2919,12 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			nlassert(pInv != NULL);
 			pInv->onItemChanged(slot, INVENTORIES::itc_info_version);
 		}
+		return true;
 	}
 	catch (const NLMISC::Exception &e)
 	{
 		nlwarning("<ITEM_INFOS> exception : '%s'", e.what());
+		return false;
 	}
 }
 
@@ -2972,6 +3040,32 @@ void CCharacter::createRechargeItem(uint32 sapRecharge)
 	sendDynamicSystemMessage(_EntityRowId, "ITEM_IS_RECHARGED", params);
 }
 
+// ****************************************************************************
+bool CCharacter::isInventoryWithinReach(INVENTORIES::TInventory invId, const char *context)
+{
+	// The room and the pack animals must be within reach, as for moving an item (moveItem). The client grays the
+	// entries for an inventory that is not available, but its menu can be older than the state.
+	if (invId == INVENTORIES::player_room && !getRoomInterface().canUseInventory(this, this))
+	{
+		nldebug("<%s> %s uses its room inventory, which it cannot use, refused", context, _Id.toString().c_str());
+		return false; // canUseInventory has told a trial player why
+	}
+	if (invId >= INVENTORIES::pet_animal && invId < INVENTORIES::max_pet_animal)
+	{
+		// the availability the client grays on, which selling and crafting also use
+		const uint32 beastIndex = invId - INVENTORIES::pet_animal;
+		if (beastIndex >= _PlayerPets.size() || (_PlayerPets[beastIndex].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) == 0)
+		{
+			nldebug("<%s> %s uses the inventory of pack animal %u, which is out of reach, refused", context, _Id.toString().c_str(), beastIndex);
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
+			params[0].Int = beastIndex + 1;
+			sendDynamicSystemMessage(_Id, "ANIMAL_INVENTORY_INACCESSIBLE", params);
+			return false;
+		}
+	}
+	return true;
+}
+
 // check if enchant or recharge an item
 // ****************************************************************************
 void CCharacter::enchantOrRechargeItem(INVENTORIES::TInventory invId, uint32 slot)
@@ -2981,6 +3075,9 @@ void CCharacter::enchantOrRechargeItem(INVENTORIES::TInventory invId, uint32 slo
 	static const CSheetId lightRechargeSheetId("light_sap_recharge.sitem");
 
 	if (!EnchantSystemEnabled)
+		return;
+
+	if (!isInventoryWithinReach(invId, "enchantOrRechargeItem"))
 		return;
 
 	CInventoryPtr inv = getInventory(invId);
@@ -3217,6 +3314,11 @@ void CCharacter::procEnchantment()
 	{
 		if (rightHandItem->getEnchantment().size() > 0)
 		{
+			// the player asks for the proc (a phrase with a BEPA root): the player is told, the shard's log names the
+			// brick once
+			if (CPhraseManager::getInstance().refusesBrokenBricks(rightHandItem->getEnchantment(), _EntityRowId, "the enchantment", rightHandItem->getSheetId(), true))
+				return;
+
 			CMagicPhrase phrase;
 
 			if (!phrase.buildProc(_EntityRowId, rightHandItem->getEnchantment()))

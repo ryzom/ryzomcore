@@ -432,12 +432,12 @@ TEST_F(CUTMiscStringCommonTest, fromStringSint64)
 	// min limit -1, unable to compare with minimum value because no lower type
 	ret = NLMISC::fromString("-9223372036854775809", val);
 	// with GCC, it returns min, with VC++ it returns max
-	EXPECT_TRUE(ret && (val == std::numeric_limits<sint64>::max() || std::numeric_limits<sint64>::min()));
+	EXPECT_TRUE(ret && (val == std::numeric_limits<sint64>::max() || val == std::numeric_limits<sint64>::min()));
 
 	// max limit +1, unable to compare with maximum value because no higher type
 	ret = NLMISC::fromString("9223372036854775808", val);
 	// with GCC, it returns max with VC++ it returns min
-	EXPECT_TRUE(ret && (val == std::numeric_limits<sint64>::min() || std::numeric_limits<sint64>::max()));
+	EXPECT_TRUE(ret && (val == std::numeric_limits<sint64>::min() || val == std::numeric_limits<sint64>::max()));
 
 	// with period
 	ret = NLMISC::fromString("1.2", val);
@@ -734,4 +734,50 @@ TEST_F(CUTMiscStringCommonTest, fromStringBool)
 
 	ret = NLMISC::fromString("nope", val);
 	EXPECT_TRUE(!ret && !val);
+}
+
+TEST_F(CUTMiscStringCommonTest, startsWithCaseInsensitiveAscii)
+{
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("https://app.ryzom.com/", "https://"));
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("HTTPS://app.ryzom.com/", "https://"));
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("Https://", "https://"));
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii(std::string("URL(x)"), "url("));
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii(std::string("abc"), std::string("")));
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("", ""));
+	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("http://app.ryzom.com/", "https://"));
+	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("https:/", "https://")); // shorter than the prefix
+	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("", "h"));
+	// only ASCII letters fold: a non-letter byte and a non-ASCII byte must match exactly
+	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("http;//", "http://"));
+	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("\xC3\x89x", "\xC3\xA9x")); // E acute vs e acute in UTF-8
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("\xC3\xA9X", "\xC3\xA9x"));
+}
+
+// The wide text CSystemUtils::copyTextToClipboard stores on Windows (CF_UNICODETEXT) and
+// pasteTextFromClipboard reads back: nothing outside the ANSI code page turns into '?'.
+TEST_F(CUTMiscStringCommonTest, utf8ToWideAndBack)
+{
+	// "a", CYRILLIC ZHE, CYRILLIC DE, two CJK ideographs, U+1F600
+	const std::string utf8 = "a\xD0\x96\xD0\xB4\xE6\x97\xA5\xE6\x9C\xAC\xF0\x9F\x98\x80";
+
+	std::wstring expected;
+	expected += (wchar_t)'a';
+	expected += (wchar_t)0x0416;
+	expected += (wchar_t)0x0434;
+	expected += (wchar_t)0x65E5;
+	expected += (wchar_t)0x672C;
+#ifdef NL_OS_WINDOWS
+	// UTF-16: a surrogate pair
+	expected += (wchar_t)0xD83D;
+	expected += (wchar_t)0xDE00;
+#else
+	expected += (wchar_t)0x1F600;
+#endif
+
+	std::wstring wide = NLMISC::utf8ToWide(utf8);
+	EXPECT_TRUE(expected == wide);
+	EXPECT_EQ(utf8, NLMISC::wideToUtf8(wide));
+
+	EXPECT_TRUE(NLMISC::utf8ToWide(std::string()).empty());
+	EXPECT_TRUE(NLMISC::wideToUtf8(std::wstring()).empty());
 }

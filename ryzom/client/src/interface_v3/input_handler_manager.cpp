@@ -37,6 +37,7 @@
 #include "../release.h"
 
 #include "../r2/editor.h"
+#include "../client_ctrl.h"
 
 
 ///////////
@@ -139,9 +140,39 @@ void CInputHandlerManager::release()
 }
 
 // ***************************************************************************
+// The pointer of the interface shows the buttons a control tool presses, as HandleSystemCursorCapture shows those of
+// the mouse
+static void showInjectedButtons(const NLMISC::CEvent &event)
+{
+	CViewPointer *cursor = static_cast<CViewPointer *>(CWidgetManager::getInstance()->getPointer());
+	if (cursor == nullptr)
+		return;
+	if (event == EventMouseDownId)
+	{
+		const CEventMouseDown &down = static_cast<const CEventMouseDown &>(event);
+		cursor->setPointerDown(down.Button == leftButton);
+		cursor->setPointerMiddleDown(down.Button == middleButton);
+		cursor->setPointerRightDown(down.Button == rightButton);
+	}
+	else if (event == EventMouseUpId)
+	{
+		cursor->setPointerDown(false);
+		cursor->setPointerMiddleDown(false);
+		cursor->setPointerRightDown(false);
+	}
+}
+
+// ***************************************************************************
 void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 {
-	HandleSystemCursorCapture(event);
+	// The events of a control tool reach the interface whether the window has the focus or not, so what a tool lets go
+	// of is released also when the user works in another window; and they never take the mouse capture of the window,
+	// which would take the mouse of the user while a tool drags.
+	const bool injected = !m_Injected.empty() && m_Injected.erase(&event) != 0;
+	if (injected)
+		showInjectedButtons(event);
+	else
+		HandleSystemCursorCapture(event);
 
 	if (event == EventDisplayChangeId)
 	{
@@ -214,8 +245,12 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 			 event == EventCharId ||
 			 event == EventStringId)
 	{
+		const bool handledByInterface = inputHandler.handleKeyboardEvent( event );
+		if (injected)
+			ClientCtrl::inputHandled(event, handledByInterface);
+
 		// if not handled, post to Action Manager
-		if( !inputHandler.handleKeyboardEvent( event ) )
+		if( !handledByInterface )
 		{
 			// See if handled by editor
 			bool handled = false;
@@ -261,7 +296,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		}
 	}
 	// **** Event Mouse
-	else if(CWidgetManager::getInstance()->getPointer() && _Focus /* && CWidgetManager::getInstance()->isMouseHandlingEnabled() */ &&
+	else if(CWidgetManager::getInstance()->getPointer() && (hasFocus() || injected) /* && CWidgetManager::getInstance()->isMouseHandlingEnabled() */ &&
 			( event == EventMouseMoveId ||
 			  event == EventMouseDownId ||
 			  event == EventMouseUpId ||
@@ -337,6 +372,8 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 				handled |= inputHandler.handleMouseWheelEvent( event );
 			}
 		}
+		if (injected)
+			ClientCtrl::inputHandled(event, handled);
 
 		// if Event not handled, post to Action Manager
 		if (!handled)
@@ -416,6 +453,9 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 	// **** Others
 	else
 	{
+		// a mouse event of a tool lands here when the interface has no pointer: it did not take it
+		if (injected)
+			ClientCtrl::inputHandled(event, false);
 		FilteredEventServer.postEvent( event.clone() );
 	}
 }
@@ -455,11 +495,40 @@ bool		CInputHandlerManager::CComboKey::operator<(const CComboKey &c) const
 
 
 // ***************************************************************************
+// Tell if this very combo is the shortcut of an action that can run now
+static bool isComboOfUsableAction(const CActionsManager &actionsManager, const CCombo &combo)
+{
+	const CActionsManager::TComboActionMap &comboActions = actionsManager.getComboActionMap();
+	CActionsManager::TComboActionMap::const_iterator it = comboActions.find(combo);
+	return it != comboActions.end() && actionsManager.isActionPresentInContext(it->second);
+}
+
+// ***************************************************************************
 bool CInputHandlerManager::isComboKeyChat(const NLGUI::CEventDescriptorKey &edk) const
 {
 	CComboKey	ckey;
 	ckey.init(edk);
-	return _ComboKeyChat.find(ckey)!=_ComboKeyChat.end();
+	if (_ComboKeyChat.find(ckey) != _ComboKeyChat.end())
+		return true;
+
+	// AltGr types the third character of a key, and Windows reports AltGr as Ctrl+Alt. So with both pressed, a key
+	// that types without them still types. Left to the actions, the key would make valid the actions bound to it
+	// with fewer modifiers (CActionsManager::updateKeyButton): typing AltGr+S would walk the character backward.
+	// A Ctrl+Alt combo that is itself the shortcut of a usable action stays a shortcut.
+	const uint32 altGrFlags = CComboKey::CtrlKey | CComboKey::AltKey;
+	if ((ckey.CtrlFlags & altGrFlags) == altGrFlags)
+	{
+		CComboKey typedKey = ckey;
+		typedKey.CtrlFlags &= ~altGrFlags;
+		if (_ComboKeyChat.find(typedKey) != _ComboKeyChat.end())
+		{
+			CCombo combo;
+			combo.init(ckey.Key, (TKeyButton)(ctrlKeyButton | altKeyButton | ((ckey.CtrlFlags & CComboKey::ShiftKey) ? shiftKeyButton : noKeyButton)));
+			return !isComboOfUsableAction(EditActions, combo) && !isComboOfUsableAction(Actions, combo);
+		}
+	}
+
+	return false;
 }
 
 
@@ -514,17 +583,41 @@ bool CInputHandlerManager::readInputConfigFile(const std::string & fileName)
 
 
 // ***************************************************************************
+bool CInputHandlerManager::hasFocus() const
+{
+	return _Focus || ClientCtrl::isDriven();
+}
+
+// ***************************************************************************
 void	CInputHandlerManager::pumpEvents()
 {
 	H_AUTO_USE ( RZ_Client_Pump_Events )
 
 	nlassert(_EventServer);
 
+	// the input of a control tool (--ctrl-listen) is posted at a pump the interface handles, in the order it came, and
+	// never in pumpEventsNoIM, so a loading screen does not take it
+	if (ClientCtrl::isActive())
+	{
+		std::vector<NLMISC::CEvent *> injected;
+		ClientCtrl::takeInput(injected);
+		for (uint i = 0; i < injected.size(); ++i)
+		{
+			m_Injected.insert(injected[i]);
+			_EventServer->postEvent(injected[i]);
+		}
+	}
+
 	// pump the src EventServer
 	_EventServer->pump(true);
+	m_Injected.clear();
 
 	// pump the filtered ones
 	FilteredEventServer.pump();
+
+	// the calls of a control tool (--ctrl-listen), after the pump: never from inside a listener,
+	// since the event server asserts on a pump within a pump
+	ClientCtrl::update(true);
 }
 
 
@@ -532,6 +625,11 @@ void	CInputHandlerManager::pumpEvents()
 void	CInputHandlerManager::pumpEventsNoIM()
 {
 	nlassert(_EventServer);
+
+	// the input of a control tool was meant for the interface, which this pump skips: what waits is dropped, apart from
+	// its releases, and its calls fail
+	if (ClientCtrl::isActive())
+		ClientCtrl::dropInputForLoading();
 
 	// Set Mode to skip InterfaceManager Handling
 	_SkipInterfaceManager= true;
@@ -544,6 +642,9 @@ void	CInputHandlerManager::pumpEventsNoIM()
 
 	// reset
 	_SkipInterfaceManager= false;
+
+	// the calls of a control tool (--ctrl-listen); a loading screen has no interface to act on
+	ClientCtrl::update(false);
 }
 
 

@@ -10,17 +10,31 @@ MACRO(FIND_CORRECT_LUA_VERSION)
   IF(LUABIND_LIBRARY_RELEASE MATCHES "\\.so")
     INCLUDE(CheckDepends)
 
-    # check for Lua 5.4
-    SET(LUA54_LIBRARIES liblua5.4 liblua-5.4 liblua.so.5.4)
+    # check for Lua 5.5
+    SET(LUA55_LIBRARIES liblua5.5 liblua-5.5 liblua.so.5.5)
 
-    FOREACH(_LIB ${LUA54_LIBRARIES})
+    FOREACH(_LIB ${LUA55_LIBRARIES})
       CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE _LIB LUALIB_FOUND)
       IF(LUALIB_FOUND)
-        MESSAGE(STATUS "Luabind is using Lua 5.4")
-        FIND_PACKAGE(Lua REQUIRED 5.4)
+        MESSAGE(STATUS "Luabind is using Lua 5.5")
+        FIND_PACKAGE(Lua REQUIRED 5.5)
         BREAK()
       ENDIF()
     ENDFOREACH()
+
+    IF(NOT LUALIB_FOUND)
+      # check for Lua 5.4
+      SET(LUA54_LIBRARIES liblua5.4 liblua-5.4 liblua.so.5.4)
+
+      FOREACH(_LIB ${LUA54_LIBRARIES})
+        CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE _LIB LUALIB_FOUND)
+        IF(LUALIB_FOUND)
+          MESSAGE(STATUS "Luabind is using Lua 5.4")
+          FIND_PACKAGE(Lua REQUIRED 5.4)
+          BREAK()
+        ENDIF()
+      ENDFOREACH()
+    ENDIF()
 
     IF(NOT LUALIB_FOUND)
       # check for Lua 5.3
@@ -87,6 +101,8 @@ MACRO(FIND_CORRECT_LUA_VERSION)
       HUNTER_ADD_PACKAGE(Lua)
       FIND_PACKAGE(Lua CONFIG REQUIRED)
       SET(LUA_LIBRARIES Lua::lua_lib)
+    ELSEIF(WITH_LUA55)
+      FIND_PACKAGE(Lua REQUIRED 5.5)
     ELSEIF(WITH_LUA54)
       FIND_PACKAGE(Lua REQUIRED 5.4)
     ELSEIF(WITH_LUA53)
@@ -108,6 +124,16 @@ ENDIF()
 
 SET(LIBRARY_NAME_RELEASE)
 SET(LIBRARY_NAME_DEBUG)
+
+IF(WITH_LUA55)
+  IF(WITH_STLPORT)
+    LIST(APPEND LIBRARY_NAME_RELEASE luabind_stlport_lua55)
+    LIST(APPEND LIBRARY_NAME_DEBUG luabind_stlport_lua55d)
+  ENDIF()
+
+  LIST(APPEND LIBRARY_NAME_RELEASE luabind_lua55)
+  LIST(APPEND LIBRARY_NAME_DEBUG luabind_lua55d)
+ENDIF()
 
 IF(WITH_LUA54)
   IF(WITH_STLPORT)
@@ -165,8 +191,8 @@ IF(WITH_STLPORT)
 ENDIF()
 
 # generic libraries names
-LIST(APPEND LIBRARY_NAME_RELEASE luabind luabind09 libluabind)
-LIST(APPEND LIBRARY_NAME_DEBUG luabind_d luabindd luabind09-d libluabind_d libluabindd)
+LIST(APPEND LIBRARY_NAME_RELEASE luabind09 luabind libluabind)
+LIST(APPEND LIBRARY_NAME_DEBUG luabind09-d luabind_d luabindd libluabind_d libluabindd)
 
 FIND_PACKAGE_HELPER(Luabind luabind/luabind.hpp RELEASE ${LIBRARY_NAME_RELEASE} DEBUG ${LIBRARY_NAME_DEBUG})
 

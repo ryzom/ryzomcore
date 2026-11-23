@@ -893,7 +893,7 @@ IVertexBufferHardGL *CVertexArrayRangeMapObjectATI::createVBHardGL(uint size, CV
 	// init the allocator, if success
 	if( nglIsObjectBufferATI(vertexObjectId) )
 	{
-		newVbHard->initGL(this, vertexObjectId);
+		newVbHard->initGL(this, vertexObjectId, size);
 		return newVbHard;
 	}
 	else
@@ -932,6 +932,8 @@ CVertexBufferHardGLMapObjectATI::CVertexBufferHardGLMapObjectATI(CDriverGL *drv,
 	H_AUTO_OGL(CVertexBufferHardGLMapObjectATI_CVertexBufferHardGLMapObjectATI)
 	// Flag our type
 	VBType = ATIMapObjectVB;
+	_InLostVBList = false;
+	_Size = 0;
 }
 
 // ***************************************************************************
@@ -945,16 +947,20 @@ CVertexBufferHardGLMapObjectATI::~CVertexBufferHardGLMapObjectATI()
 			_VertexArrayRange->_MappedVBList.erase(_IteratorInMappedVBList);
 		}
 	#endif
-	if (_VertexArrayRange)
+	// The location of the vertex buffer does not tell whether the object is in the list:
+	// the engine makes a vertex buffer not resident before it destroys its driver side
+	leaveLostVBList();
+}
+
+// ***************************************************************************
+void CVertexBufferHardGLMapObjectATI::leaveLostVBList()
+{
+	H_AUTO_OGL(CVertexBufferHardGLMapObjectATI_leaveLostVBList)
+	if (_InLostVBList)
 	{
-		if (_Invalid)
-		{
-			if (VB->getLocation() != CVertexBuffer::NotResident)
-			{
-				// when the vb is put in tthe NotResident state, it is removed from that list
-				_VertexArrayRange->_LostVBList.erase(_IteratorInLostVBList);
-			}
-		}
+		_InLostVBList = false;
+		if (_VertexArrayRange)
+			_VertexArrayRange->_LostVBList.erase(_IteratorInLostVBList);
 	}
 }
 
@@ -970,8 +976,9 @@ void *CVertexBufferHardGLMapObjectATI::lock()
 			nlassert(!_DummyVB.empty());
 			return &_DummyVB[0];
 		}
-		// recreate a vb
-		const uint size = VB->getNumVertices() * VB->getVertexSize();
+		// recreate a vb, of the size it had: the engine writes up to the capacity of the
+		// vertex buffer through this lock
+		const uint size = _Size;
 		nlassert(!_VertexObjectId);
 		switch(_VertexArrayRange->getVBType())
 		{
@@ -997,7 +1004,7 @@ void *CVertexBufferHardGLMapObjectATI::lock()
 		NLMISC::contReset(_DummyVB); // free vector memory for real
 		nlassert(_VertexObjectId);
 		_Invalid = false;
-		_VertexArrayRange->_LostVBList.erase(_IteratorInLostVBList);
+		leaveLostVBList();
 		// continue to standard mapping code below ..
 	}
 	if (!_VertexObjectId) return nullptr;
@@ -1027,10 +1034,12 @@ void CVertexBufferHardGLMapObjectATI::invalidate()
 	// Buffer is deleted at end of frame only
 	_Invalid = true;
 	_Driver->incrementResetCounter();
-	_DummyVB.resize(VB->getNumVertices() * VB->getVertexSize(), 0);
+	// As large as the buffer object: the engine writes up to the capacity of the vertex buffer through a lock
+	_DummyVB.resize(_Size, 0);
 	// insert in lost vb list
 	_VertexArrayRange->_LostVBList.push_front(this);
 	_IteratorInLostVBList = _VertexArrayRange->_LostVBList.begin();
+	_InLostVBList = true;
 }
 
 // ***************************************************************************
@@ -1094,11 +1103,12 @@ void CVertexBufferHardGLMapObjectATI::disable()
 }
 
 // ***************************************************************************
-void CVertexBufferHardGLMapObjectATI::initGL(CVertexArrayRangeMapObjectATI *var, uint vertexObjectID)
+void CVertexBufferHardGLMapObjectATI::initGL(CVertexArrayRangeMapObjectATI *var, uint vertexObjectID, uint size)
 {
 	H_AUTO_OGL(CVertexBufferHardGLMapObjectATI_initGL)
 	_VertexArrayRange = var;
 	_VertexObjectId = vertexObjectID;
+	_Size = size;
 }
 
 // ***************************************************************************
@@ -1127,10 +1137,16 @@ void CVertexArrayRangeMapObjectATI::updateLostBuffers()
 	{
 		for(std::list<CVertexBufferHardGLMapObjectATI *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
 		{
-			nlassert((*it)->_VertexObjectId);
-			nlassert(nglIsObjectBufferATI((*it)->_VertexObjectId));
-			nglFreeObjectBufferATI((*it)->_VertexObjectId);
-			(*it)->_VertexObjectId = 0;
+			// (one whose buffer object could not be made again is in the list without one)
+			if ((*it)->_VertexObjectId)
+			{
+				nlassert(nglIsObjectBufferATI((*it)->_VertexObjectId));
+				nglFreeObjectBufferATI((*it)->_VertexObjectId);
+				(*it)->_VertexObjectId = 0;
+			}
+			// The list is emptied below, and the object is told now: making the vertex
+			// buffer not resident does not destroy it, the next setup of it does
+			(*it)->_InLostVBList = false;
 			(*it)->VB->setLocation(CVertexBuffer::NotResident);
 		}
 		_LostVBList.clear();
@@ -1276,7 +1292,7 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 		return nullptr;
 	}
 	CVertexBufferHardARB *newVbHard= new CVertexBufferHardARB(_Driver, vb);
-	newVbHard->initGL(vertexBufferID, this, usage);
+	newVbHard->initGL(vertexBufferID, this, usage, size);
 	_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
 	return newVbHard;
 }
@@ -1312,13 +1328,19 @@ void CVertexArrayRangeARB::updateLostBuffers()
 	{
 		for(std::list<CVertexBufferHardARB *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
 		{
-			nlassert((*it)->_VertexObjectId);
-			GLuint id = (GLuint) (*it)->_VertexObjectId;
+			// (one whose buffer object could not be made again is in the list without one)
+			if ((*it)->_VertexObjectId)
+			{
+				GLuint id = (GLuint) (*it)->_VertexObjectId;
 
-			nlassert(nglIsBufferARB(id));
-			nglDeleteBuffersARB(1, &id);
+				nlassert(nglIsBufferARB(id));
+				nglDeleteBuffersARB(1, &id);
 
-			(*it)->_VertexObjectId = 0;
+				(*it)->_VertexObjectId = 0;
+			}
+			// The list is emptied below, and the object is told now: making the vertex
+			// buffer not resident does not destroy it, the next setup of it does
+			(*it)->_InLostVBList = false;
 			(*it)->VB->setLocation(CVertexBuffer::NotResident);
 		}
 		_LostVBList.clear();
@@ -1342,6 +1364,8 @@ CVertexBufferHardARB::CVertexBufferHardARB(CDriverGL *drv, CVertexBuffer *vb) : 
 	// Flag our type
 	VBType = ARBVB;
 	_VertexArrayRange = nullptr;
+	_InLostVBList = false;
+	_Size = 0;
 	#ifdef NL_DEBUG
 		_Unmapping = false;
 	#endif
@@ -1370,17 +1394,9 @@ CVertexBufferHardARB::~CVertexBufferHardARB()
 		nlassert(nglIsBufferARB(id));
 		nglDeleteBuffersARB(1, &id);
 	}
-	if (_VertexArrayRange)
-	{
-		if (_Invalid)
-		{
-			if (VB->getLocation() != CVertexBuffer::NotResident)
-			{
-				// when the vb is put in tthe NotResident state, it is removed from that list
-				_VertexArrayRange->_LostVBList.erase(_IteratorInLostVBList);
-			}
-		}
-	}
+	// The location of the vertex buffer does not tell whether the object is in the list:
+	// the engine makes a vertex buffer not resident before it destroys its driver side
+	leaveLostVBList();
 	#ifdef NL_DEBUG
 	if (_VertexPtr)
 	{
@@ -1399,12 +1415,23 @@ CVertexBufferHardARB::~CVertexBufferHardARB()
 }
 
 // ***************************************************************************
+void CVertexBufferHardARB::leaveLostVBList()
+{
+	H_AUTO_OGL(CVertexBufferHardARB_leaveLostVBList)
+	if (_InLostVBList)
+	{
+		_InLostVBList = false;
+		if (_VertexArrayRange)
+			_VertexArrayRange->_LostVBList.erase(_IteratorInLostVBList);
+	}
+}
+
+// ***************************************************************************
 void *CVertexBufferHardARB::lock()
 {
 	H_AUTO_OGL(CVertexBufferHardARB_lock);
 
 	if (_VertexPtr) return _VertexPtr; // already locked
-	const uint size = VB->getNumVertices() * VB->getVertexSize();
 	if (_Invalid)
 	{
 		if (VB->getLocation() != CVertexBuffer::NotResident)
@@ -1412,8 +1439,12 @@ void *CVertexBufferHardARB::lock()
 			nlassert(!_DummyVB.empty());
 			return &_DummyVB[0];
 		}
-		// recreate a vb
+		// recreate a vb, of the size it had: the engine writes up to the capacity of the
+		// vertex buffer through this lock
+		const uint size = _Size;
 		GLuint vertexBufferID;
+		// (an error that is left from before is not one of this creation)
+		glGetError();
 		nglGenBuffersARB(1, &vertexBufferID);
 
 		if (glGetError() != GL_NO_ERROR)
@@ -1448,6 +1479,8 @@ void *CVertexBufferHardARB::lock()
 		{
 			_Driver->incrementResetCounter();
 
+			// GL takes the buffer out of its binding, the state cache follows
+			_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
 			nglDeleteBuffersARB(1, &vertexBufferID);
 
 			return &_DummyVB[0];;
@@ -1456,7 +1489,7 @@ void *CVertexBufferHardARB::lock()
 		NLMISC::contReset(_DummyVB); // free vector memory for real
 		nlassert(_VertexObjectId);
 		_Invalid = false;
-		_VertexArrayRange->_LostVBList.erase(_IteratorInLostVBList);
+		leaveLostVBList();
 		// continue to standard mapping code below ..
 	}
 	TTicks	beforeLock = 0;
@@ -1500,6 +1533,8 @@ void *CVertexBufferHardARB::lock()
 #else
 	if (_MemType == CVertexBuffer::FullStream)
 	{
+		// (the vertices in use: what a vertex buffer of this usage gets written at each lock)
+		const uint size = VB->getNumVertices() * VB->getVertexSize();
 		_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 	}
 	else
@@ -1618,12 +1653,13 @@ void CVertexBufferHardARB::disable()
 }
 
 // ***************************************************************************
-void CVertexBufferHardARB::initGL(uint vertexObjectID, CVertexArrayRangeARB *var, CVertexBuffer::TBufferUsage memType)
+void CVertexBufferHardARB::initGL(uint vertexObjectID, CVertexArrayRangeARB *var, CVertexBuffer::TBufferUsage memType, uint size)
 {
 	H_AUTO_OGL(CVertexBufferHardARB_initGL)
 	_VertexObjectId = vertexObjectID;
 	_MemType = memType;
 	_VertexArrayRange = var;
+	_Size = size;
 }
 
 // ***************************************************************************
@@ -1650,10 +1686,12 @@ void CVertexBufferHardARB::invalidate()
 	// Buffer is deleted at end of frame only
 	_Invalid = true;
 	_Driver->incrementResetCounter();
-	_DummyVB.resize(VB->getNumVertices() * VB->getVertexSize(), 0);
+	// As large as the buffer object: the engine writes up to the capacity of the vertex buffer through a lock
+	_DummyVB.resize(_Size, 0);
 	// insert in lost vb list
 	_VertexArrayRange->_LostVBList.push_front(this);
 	_IteratorInLostVBList = _VertexArrayRange->_LostVBList.begin();
+	_InLostVBList = true;
 }
 
 // ***************************************************************************

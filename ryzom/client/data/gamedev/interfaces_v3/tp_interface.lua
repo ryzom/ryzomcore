@@ -770,15 +770,16 @@ function artefact:startInterface(cult)
             for eco, tp in pairs(self.pacts) do
                 tmp[eco] = {}
                 for sheet, price in pairs(tp) do
-                    sheet = string.gsub(sheet, "_f_", "_"..self.faction.."_")
+                    local currentSheet = sheet
+                    currentSheet = string.gsub(sheet, "_f_", "_"..self.faction.."_")
                     -- faction only
-                    if self:strcmp(sheet, "tp_"..self.faction) then
-                        local sheet_name = string.gsub(sheet, "tp_", "")
+                    if self:strcmp(currentSheet, "tp_"..self.faction) then
+                        local sheet_name = string.gsub(currentSheet, "tp_", "")
                         sheet_name = string.gsub(sheet_name, ".sitem", "")
                         label = self.items_labels[sheet_name]
                         tmp[eco][#tmp[eco]+1] = {
-                            name = sheet,
-                            desc = getSheetLocalizedName(sheet..".sitem"),
+                            name = currentSheet,
+                            desc = getSheetLocalizedName(currentSheet..".sitem"),
                             label = label,
                             cost = tostring(price)
                         }

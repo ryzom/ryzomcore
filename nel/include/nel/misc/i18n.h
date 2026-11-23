@@ -44,7 +44,7 @@ namespace NLMISC {
 	// load the language French
 	CI18N::load ("fr");
 	// display "Salut" that is the "hi" string in the selected language (French).
-	nlinfo (CI18N::get("Hi").c_str ());
+	nlinfo ("%s", CI18N::get("Hi").c_str ());
 	// display "rms est un master", the French version of the string
 	nlinfo ("rms"+CI18N::get("Master").c_str ());
  *\endcode

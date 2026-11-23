@@ -47,9 +47,9 @@ int main (int argc, char **argv)
 	// load the language
 	CI18N::load(langName);
 
-	InfoLog->displayRawNL(CI18N::get("Hi").c_str());
+	InfoLog->displayRawNL("%s", CI18N::get("Hi").c_str());
 	InfoLog->displayRawNL(CI18N::get("PresentI18N").c_str(), "Nevrax");
-	InfoLog->displayRawNL(CI18N::get("ExitStr").c_str());
+	InfoLog->displayRawNL("%s", CI18N::get("ExitStr").c_str());
 	getchar();
 
 	return EXIT_SUCCESS;

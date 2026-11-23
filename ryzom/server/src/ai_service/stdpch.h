@@ -142,7 +142,7 @@ public:
 		nlassert(_Log);
 #endif
 		if (_Log)
-			_Log->displayNL(str.c_str());
+			_Log->displayNL("%s", str.c_str());
 	}
 	NLMISC::CLog *_Log;
 };

@@ -42,6 +42,7 @@
 
 #include "script_vm.h"
 #include "script_compiler.h"
+#include "ring_scenario_guard.h"
 
 extern bool simulateBug(int bugId);
 
@@ -199,7 +200,7 @@ public:
 
 		if (_states.empty())
 		{
-			nlwarning("begin_state failed because state list is empty");
+			RYAI_SCRIPT_WARNING(entity, "begin_state failed because state list is empty");
 			return false;
 		}
 		uint i=CAIS::rand16((uint32)_states.size());
@@ -241,6 +242,17 @@ public:
 	// depending on the whim of the level designers
 	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
+		// a group of the list that was removed (the act of a scenario that ended) makes the names
+		// be looked up again
+		for (uint i = 0; i < _groups.size(); ++i)
+		{
+			if (_groups[i] == NULL)
+			{
+				_groups.clear();
+				break;
+			}
+		}
+
 		if	(	_groups.empty()
 			&&	!_groupsName.empty())
 		{
@@ -258,27 +270,26 @@ public:
 				}
 				if (grps.empty())
 				{
-					nlwarning("Can't find group(s) for the name '%s'", _groupsName[i].c_str());
+					RYAI_SCRIPT_WARNING(entity, "Can't find group(s) for the name '" + _groupsName[i] + "'");
 					continue;
 				}
 				
-				// retreive persistent state instance pointer.
+				// keep the groups: an entry reads as NULL once its group is removed
 				for (uint j=0; j<grps.size(); ++j)
-					_groups.push_back(grps[j]->getPersistentStateInstance());
+					_groups.push_back(grps[j]);
 			}
-			// clear the groupName vector to not redo the job
-			_groupsName.clear();
 		}
 
 		if (_groups.empty())
 		{
-			nlwarning("user_event failed because group list is empty");
+			RYAI_SCRIPT_WARNING(entity, "user_event failed because group list is empty");
 			return false;
 		}
 
 		for (uint i=0;i<_groups.size();++i)
 		{
-			CPersistentStateInstance *grp=_groups[i];
+			CGroup *const group = _groups[i];
+			CPersistentStateInstance *grp = group ? group->getPersistentStateInstance() : NULL;
 			if	(!grp)
 				continue;
 			
@@ -294,7 +305,7 @@ protected:
 	virtual uint32 getIndex()=0;
 
 private:	
-	std::vector<CPersistentStateInstance*>	_groups;
+	std::vector<NLMISC::CRefPtr<CGroup> > _groups;
 	std::vector<std::string>				_groupsName;
 };
 
@@ -462,7 +473,7 @@ public:
 	{
 		if (_subActions.empty())
 		{
-			nlwarning("multi_action failed because sub-action list is empty");
+			RYAI_SCRIPT_WARNING(entity, "multi_action failed because sub-action list is empty");
 			return false;
 		}
 
@@ -473,7 +484,8 @@ public:
 		{
 			if(_subActions[i]==NULL)
 			{
-				nlwarning("multi actions : _subActions[%d] NULL ! ",i);
+				RYAI_SCRIPT_WARNING(entity, NLMISC::toString("multi actions : _subActions[%d] NULL ! ", i));
+				continue;
 			}
 			if (!_subActions[i]->executeAction(entity,event))
 				result=false;
@@ -520,7 +532,7 @@ public:
 	{
 		if (_states.empty())
 		{
-			nlwarning("begin_punctual_state failed because state list is empty");
+			RYAI_SCRIPT_WARNING(entity, "begin_punctual_state failed because state list is empty");
 			return false;
 		}
 		entity->setNextPunctualState(_states[CAIS::rand16((uint32)_states.size())]); 
@@ -560,7 +572,7 @@ public:
 	// depending on the whim of the level designers
 	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
-		if (entity->getDebugHistory()->isRecording())
+		if (entity->getDebugHistory()->isRecording() && entity->getPunctualState())
 		{
 			entity->getDebugHistory()->addHistory("GRP End Punctual State: %s",
 				entity->getPunctualState()->getAliasNode()->fullName().c_str());
@@ -600,10 +612,12 @@ public:
 	{
 		if (_subActions.empty())
 		{
-			nlwarning("random_select failed because sub-action list is empty");
+			RYAI_SCRIPT_WARNING(entity, "random_select failed because sub-action list is empty");
 			return false;
 		}
-		_subActions[CAIS::rand16((uint32)_subActions.size())]->executeAction(entity,event);
+		IAILogicAction *const action = _subActions[CAIS::rand16((uint32)_subActions.size())];
+		if (action)
+			action->executeAction(entity, event);
 
 		return true;
 	}
@@ -751,6 +765,11 @@ public:
 		}
 		std::vector<std::string> strs;
 		NLMISC::explode(args[0], string(" "), strs, true);
+		if (strs.empty())
+		{
+			nlwarning("Invalid arguments for 'set timer'(%s) : %s", args[0].c_str(), eventNode->fullName().c_str());
+			return;
+		}
 
 		if (strs[0] == "day_time" || strs[0] == "daytime")
 		{
@@ -772,6 +791,7 @@ public:
 			if (strs.size() < 2)
 			{
 				nlwarning("Missing weekday argument for set timer '%s' : '%s'", eventNode->fullName().c_str(), args[0].c_str());
+				return;
 			}
 			_Mode = tm_weekday;
 
@@ -785,6 +805,7 @@ public:
 			if (strs.size() < 2)
 			{
 				nlwarning("Missing monthday argument for set timer '%s' : '%s'", eventNode->fullName().c_str(), args[0].c_str());
+				return;
 			}
 			_Mode = tm_monthday;
 
@@ -798,6 +819,7 @@ public:
 			if (strs.size() < 2)
 			{
 				nlwarning("Missing seasonday argument for set timer '%s' : '%s'", eventNode->fullName().c_str(), args[0].c_str());
+				return;
 			}
 			_Mode = tm_seasonday;
 
@@ -811,6 +833,7 @@ public:
 			if (strs.size() < 2)
 			{
 				nlwarning("Missing yearday argument for set timer '%s' : '%s'", eventNode->fullName().c_str(), args[0].c_str());
+				return;
 			}
 			_Mode = tm_yearday;
 
@@ -861,6 +884,21 @@ public:
 		return hour + (minute * 100.f)/(60.f*100.f);
 	}
 
+	// ticks until day _DayNumber of the period at _DayTime, the next time it comes: a day number beyond the length of
+	// the period means a day in a later period, the data uses it for stays longer than one period
+	// (counted in whole ticks: in hours, a timer could fire a tick early, find its day still to come when set again from
+	// its own event, and fire twice)
+	uint32 ticksUntilDayOfPeriod(uint32 dayOfPeriod, uint32 daysInPeriod) const
+	{
+		// both times of day are whole ticks: h:mm is hour*1800 + minute*30, the clock counts ticks of the day
+		const sint64 targetTick = (sint64)floor(_DayTime * RYZOM_HOURS_IN_TICKS + 0.5);
+		const sint64 nowTick = (sint64)floor(CTimeInterface::getRyzomTime().getRyzomTime() * RYZOM_HOURS_IN_TICKS + 0.5);
+		sint64 delta = ((sint64)_DayNumber - (sint64)dayOfPeriod) * RYZOM_DAY_IN_TICKS + targetTick - nowTick;
+		while (delta <= 0)
+			delta += (sint64)daysInPeriod * RYZOM_DAY_IN_TICKS;
+		return (uint32)delta;
+	}
+
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
@@ -885,40 +923,16 @@ public:
 			}
 			break;
 		case tm_weekday:
-			{
-				uint32 dow = (uint32)CTimeInterface::getRyzomTime().getRyzomDayOfWeek();
-				while (dow < _DayNumber)
-					dow += RYZOM_WEEK_IN_DAY;
-
-				_Min = _Max = timeTicks + dow * RYZOM_DAY_IN_TICKS;
-			}
+			_Min = _Max = ticksUntilDayOfPeriod((uint32)CTimeInterface::getRyzomTime().getRyzomDayOfWeek(), RYZOM_WEEK_IN_DAY);
 			break;
 		case tm_monthday:
-			{
-				uint32 dom = CTimeInterface::getRyzomTime().getRyzomDayOfMonth();
-				while (dom < _DayNumber)
-					dom += RYZOM_MONTH_IN_DAY;
-
-				_Min = _Max = timeTicks + dom * RYZOM_DAY_IN_TICKS;
-			}
+			_Min = _Max = ticksUntilDayOfPeriod(CTimeInterface::getRyzomTime().getRyzomDayOfMonth(), RYZOM_MONTH_IN_DAY);
 			break;
 		case tm_seasonday:
-			{
-				uint32 dos = CTimeInterface::getRyzomTime().getRyzomDayOfSeason();
-				while (dos < _DayNumber)
-					dos += RYZOM_SEASON_IN_DAY;
-
-				_Min = _Max = timeTicks + dos * RYZOM_DAY_IN_TICKS;
-			}
+			_Min = _Max = ticksUntilDayOfPeriod(CTimeInterface::getRyzomTime().getRyzomDayOfSeason(), RYZOM_SEASON_IN_DAY);
 			break;
 		case tm_yearday:
-			{
-				uint32 doy = CTimeInterface::getRyzomTime().getRyzomDayOfYear();
-				while (doy < _DayNumber)
-					doy += RYZOM_YEAR_IN_DAY;
-
-				_Min = _Max = timeTicks + doy * RYZOM_DAY_IN_TICKS;
-			}
+			_Min = _Max = ticksUntilDayOfPeriod(CTimeInterface::getRyzomTime().getRyzomDayOfYear(), RYZOM_YEAR_IN_DAY);
 			break;
 		}
 
@@ -1092,8 +1106,10 @@ private:
 };
 
 // a big bad global var !
-CAIEntityPhysical	*TempSpeaker = NULL;
-CBotPlayer			*TempPlayer = NULL;
+// The bot that speaks and the player it speaks to, for the time of one event: they read as NULL
+// once the event removed them
+NLMISC::CRefPtr<CAIEntityPhysical> TempSpeaker;
+NLMISC::CRefPtr<CBotPlayer> TempPlayer;
 
 //-------------------------------------------------------------------------------------------
 class CAILogicActionSay : public IAILogicAction
@@ -1169,14 +1185,14 @@ public:
 
 		{
 			const	CSpawnGroup	*const	grp = entity->getGroup()->getSpawnObj();
-#if !FINAL_VERSION
-			nlassert(grp);
-#endif
+			// a group that is not spawned has no bot to speak
+			if (!grp)
+				return true;
 			CSpawnBot	*bot = NULL;
 
 			if	(	TempSpeaker
 				&&	TempSpeaker->isAlive())
-				bot = NLMISC::safe_cast<CSpawnBot*>(TempSpeaker);
+				bot = NLMISC::safe_cast<CSpawnBot *>((CAIEntityPhysical *)TempSpeaker);
 
 			if	(!bot)
 			{
@@ -1343,7 +1359,7 @@ public:
 		case constant:
 			return var.Value;
 		default:
-			nlwarning("retreiveValue from invalid var type ! returning 0");
+			RYAI_SCRIPT_WARNING(stateInstance, "retreiveValue from invalid var type ! returning 0");
 			return 0;
 		}
 
@@ -1367,7 +1383,7 @@ public:
 		case not_equal:
 			return retreiveValue(stateInstance, var1) != retreiveValue(stateInstance, var2);
 		}
-		nlwarning("evalCondition invalid operator %u", op);
+		RYAI_SCRIPT_WARNING(stateInstance, NLMISC::toString("evalCondition invalid operator %u", (uint)op));
 		return false;
 	}
 
@@ -1552,11 +1568,13 @@ public:
 
 		if ( CAILogicDynamicIfHelper::getConditionSuccess() )
 		{
-			_SubActions[0]->executeAction(entity, event);
+			if (_SubActions[0] != NULL)
+				_SubActions[0]->executeAction(entity, event);
 		}
 		else if (_SubActions.size() == 2)
 		{
-			_SubActions[1]->executeAction(entity, event);
+			if (_SubActions[1] != NULL)
+				_SubActions[1]->executeAction(entity, event);
 		}
 		return true;
 	}
@@ -1572,6 +1590,7 @@ public:
 	CAILogicActionConditionIf (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
 								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
+		_Op = invalid_operator;
 		if (args.empty())
 		{
 			nlwarning("condition_if (%s) need arguments !", eventNode->fullName().c_str());
@@ -1591,6 +1610,9 @@ public:
 		if (strs.size() != 3)
 		{
 			nlwarning("condition_if (%s) invalid condition format '%s'. Need 3 parts, found %u", eventNode->fullName().c_str(), args[0].c_str(), strs.size());
+			// the three parts are read below
+			if (strs.size() < 3)
+				return;
 		}
 
 		if (!parseVar(_Var1, strs[0],container))
@@ -1615,7 +1637,7 @@ public:
 	{
 		if (evalCondition(entity, _Var1, _Op, _Var2))
 		{
-			if (!_subActions.empty())
+			if (!_subActions.empty() && _subActions[0] != NULL)
 				_subActions[0]->executeAction(entity, event);
 		}
 		return true;
@@ -1648,10 +1670,10 @@ public:
 	{
 		if (evalCondition(entity, _Var1, _Op, _Var2))
 		{
-			if (!_subActions.empty())
+			if (!_subActions.empty() && _subActions[0] != NULL)
 				_subActions[0]->executeAction(entity, event);
 		}
-		else if (_subActions.size() > 1)
+		else if (_subActions.size() > 1 && _subActions[1] != NULL)
 		{
 			_subActions[1]->executeAction(entity, event);
 		}
@@ -1776,6 +1798,9 @@ public:
 									CStateMachine *container)
 	{
 		uint32 emot = std::numeric_limits<uint32>::max();
+		// without an emot, the action does nothing
+		_EmotNumber = MBEHAV::NUMBER_OF_BEHAVIOURS;
+		_R2 = false;
 
 		if (!subActions.empty())
 		{
@@ -1799,7 +1824,6 @@ public:
 			// offset to emot behavior
 			_EmotNumber = (MBEHAV::EBehaviour)(emot + MBEHAV::EMOTE_BEGIN);
 		}
-		_R2 = false;
 		// parse the bots filter (if any)
 		for (uint i=1; i<args.size(); ++i)
 		{
@@ -1807,7 +1831,7 @@ public:
 			if	(s.empty())
 				continue;
 
-			if (isdigit(s[0]))
+			if (isdigit((unsigned char)s[0]))
 			{
 				// extract a bot number
 				_BotNumber.push_back(NLMISC::atoui(s.c_str()));
@@ -1843,7 +1867,7 @@ public:
 		if	(	!_BotNames.empty()
 			&&	!_BotNumber.empty())
 		{
-			nlwarning("emot (%) : mixing bot name and bot number is dangerous !", eventNode->fullName().c_str());
+			nlwarning("emot (%s) : mixing bot name and bot number is dangerous !", eventNode->fullName().c_str());
 		}
 
 	}
@@ -1856,9 +1880,9 @@ public:
 
 		vector<CAIEntityPhysical *>	eps;
 
-		if	(	TempSpeaker
-			&&	TempSpeaker->getEntityId().getType()==group->getRyzomType()
-			&&	safe_cast<CSpawnBot*>(TempSpeaker)->getPersistent().getOwner() == group)	// check that the tempSpeaker entitiy is in this group
+		if (TempSpeaker
+		    && TempSpeaker->getEntityId().getType() == group->getRyzomType()
+		    && safe_cast<CSpawnBot *>((CAIEntityPhysical *)TempSpeaker)->getPersistent().getOwner() == group) // check that the tempSpeaker entitiy is in this group
 		{
 			
 			// ok, this is a good 'speaker', it will play the emot
@@ -1867,7 +1891,7 @@ public:
 			// turn it to face the first targeter
 			CAIEntityPhysical *targeter = TempSpeaker->firstTargeter();
 			if (targeter)
-				safe_cast<CSpawnBot*>(TempSpeaker)->setTheta(TempSpeaker->pos().angleTo(targeter->pos()));
+				safe_cast<CSpawnBot *>((CAIEntityPhysical *)TempSpeaker)->setTheta(TempSpeaker->pos().angleTo(targeter->pos()));
 		}
 		else
 		{
@@ -1971,7 +1995,7 @@ public:
 		else
 		{
 			if(group)
-				nlwarning("action emote for GroupAlias %s Group name %s : no bots can play the emot ! ", group->getAliasString().c_str(), group->getFullName().c_str());
+				RYAI_SCRIPT_WARNING(entity, NLMISC::toString("action emote for GroupAlias %s Group name %s : no bots can play the emot ! ", group->getAliasString().c_str(), group->getFullName().c_str()));
 			else
 				nlwarning("action emote: no bots can play the emot !");
 		}
@@ -2247,9 +2271,13 @@ public:
 			}
 			else
 			{
-				_Labels.resize(nbArgs);
+				// a label selects the sub-action of its index: there are as many labels as sub-actions
+				if (nbArgs > subActions.size() + 1)
+					nlwarning("switch_actions (%s) has more labels than sub actions, the last ones are ignored", eventNode->fullName().c_str());
+				const uint32 nbLabels = (uint32)subActions.size();
+				_Labels.resize(nbLabels);
 
-				for(uint32 i=0; i<nbArgs-1; ++i)
+				for (uint32 i = 0; i < nbLabels; ++i)
 				{
 					std::string label = args[i+1];
 					if(label =="default")
@@ -2297,7 +2325,9 @@ public:
 			//not found so use the default value
 			if (!action) { action = _DefaultAction; }
 		}
-		BOMB_IF(!action,"ERROR: Bad action pointer!",return false);
+		// no label has the value and there is no default: nothing is selected
+		if (!action)
+			return false;
 
 		return action->executeAction(entity, event);
 	}
@@ -2550,9 +2580,11 @@ public:
 	void addPropertyZone	(CTmpPropertyZone::TSmartPtr	zone) NL_OVERRIDE
 	{
 		CPropertyZone::TSmartPtr	newZone=new CPropertyZone();
+		// the zone has no name of its own
+		newZone->_Shape.setOwnerName("property zone of a logic action");
 		if (!newZone->_Shape.setPatat(zone->verticalPos, zone->points))
 		{
-			
+			nlwarning("CPropertyZone: error while placing the points of a property zone of a logic action");
 		}
 		newZone->_Properties=zone->properties;
 		newZone->_Target = zone->Target;
@@ -3017,16 +3049,16 @@ public:
 	{
 		if(_Sentence == "")
 		{
-			nlwarning("npc has nothing to say!");
+			RYAI_SCRIPT_WARNING(entity, "npc has nothing to say!");
 			return false;
 		}
 
 		const CAIAliasDescriptionNode	*const aliasDesc=entity->aliasTreeOwner()->getAliasNode();
 
-		if	(	aliasDesc->getType() != AITypeGrp
-			||	!entity->getGroup()	)
+		if ((aliasDesc && aliasDesc->getType() != AITypeGrp)
+		    || !entity->getGroup())
 		{
-			nlwarning("group can't have 'npc_say' action !");
+			RYAI_SCRIPT_WARNING(entity, "group can't have 'npc_say' action !");
 			return	true;
 		}
 
@@ -3041,7 +3073,7 @@ public:
 			CAliasCont<CBot> const& bots = grp->bots();
 			if(bots.size()==0)
 			{
-				nlwarning("group empty! say nothing! ");
+				RYAI_SCRIPT_WARNING(entity, "group empty! say nothing! ");
 				return true;
 			}
 
@@ -3049,13 +3081,16 @@ public:
 			if(!chld)
 			{
 				std::string tmp= "no npc named "+_Npc+"! say nothing!";
-				nlwarning(tmp.c_str());
+				RYAI_SCRIPT_WARNING(entity, tmp);
 				return true;
 			}
 			bot= chld->getSpawnObj();
 		}
 		else
 		{
+			// a group that is not spawned has no leader to speak
+			if (!grp->getSpawnObj())
+				return true;
 			CBot *b = grp->getSpawnObj()->getPersistent().getLeader();
 			if (b && b->isSpawned())
 			{
@@ -3077,7 +3112,9 @@ public:
 		{
 			if(!_Arg)
 			{
-				forwardToDss(bot->dataSetRow(),CChatGroup::say,_Sentence,_ScenarioId);
+				// for the group of a Ring session the line of each sentence is a line of that session
+				if (!CRingScenarioGuard::forwardToDss(entity->getGroup(), bot->dataSetRow(), CChatGroup::say, _Sentence, _ScenarioId))
+					forwardToDss(bot->dataSetRow(),CChatGroup::say,_Sentence,_ScenarioId);
 			}
 			else
 			{
@@ -3184,7 +3221,7 @@ public:
 
 		if (_FacerNames.size()  !=2 ) 
 		{
-			nlwarning("Warning CAILogicActionFacing: need two Npc name !");
+			RYAI_SCRIPT_WARNING(entity, "Warning CAILogicActionFacing: need two Npc name !");
 			return false;
 		}
 
@@ -3197,7 +3234,7 @@ public:
 			CAliasCont<CBot> const& bots = grp->bots();
 			if(bots.size()==0)
 			{
-				nlwarning("Warning CAILogicActionFacing: group empty! unable to face !");
+				RYAI_SCRIPT_WARNING(entity, "Warning CAILogicActionFacing: group empty! unable to face !");
 				return false;
 			}
 
@@ -3207,7 +3244,7 @@ public:
 			chld=bots.getChildByName(_FacerNames[0]);
 			if(!chld)
 			{
-				nlwarning("Warning CAILogicActionFacing: no npc named %s ! unable to face !",_FacerNames[0].c_str());
+				RYAI_SCRIPT_WARNING(entity, NLMISC::toString("Warning CAILogicActionFacing: no npc named %s ! unable to face !", _FacerNames[0].c_str()));
 				return false;
 			}
 			botFaced= chld->getSpawnObj();
@@ -3225,7 +3262,7 @@ public:
 			CAliasCont<CBot> const& bots = grp->bots();
 			if(bots.size()==0)
 			{
-				nlwarning("Warning CAILogicActionFacing: group empty! unable to face !");
+				RYAI_SCRIPT_WARNING(entity, "Warning CAILogicActionFacing: group empty! unable to face !");
 				return false;
 			}
 
@@ -3235,7 +3272,7 @@ public:
 			chld=bots.getChildByName(_FacerNames[1]);
 			if(!chld)
 			{
-				nlwarning("Warning CAILogicActionFacing: no npc named %s ! unable to face !",_FacerNames[1].c_str());
+				RYAI_SCRIPT_WARNING(entity, NLMISC::toString("Warning CAILogicActionFacing: no npc named %s ! unable to face !", _FacerNames[1].c_str()));
 				return false;
 			}
 			botFacer= chld->getSpawnObj();

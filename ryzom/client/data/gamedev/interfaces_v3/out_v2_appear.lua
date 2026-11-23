@@ -71,7 +71,7 @@ function outgame:getTrykerLastName()
 	return trykerLastNames[math.random(nbTrykerLastNames)]
 end
 
--- Zora�
+-- Zoraï
 function outgame:getZoraiFirstName()
 	local nbFirstNamesOne = #zoraiFirstNamesOne
 	local FirstNameOne = zoraiFirstNamesOne[math.random(nbFirstNamesOne)]
@@ -94,6 +94,7 @@ function outgame:procGenerateName()
 	local dbNameRace = getDbProp("UI:TEMP:NAME_RACE")
 	local dbNameSubRaceFirstName = getDbProp("UI:TEMP:NAME_SUB_RACE_FIRST_NAME")
 	local dbNameSubRaceLastName = getDbProp("UI:TEMP:NAME_SUB_RACE_LAST_NAME")
+
 	local application = getClientCfgVar("Application")
 	getUI("ui:outgame:appear:job_options:generator:html"):browse("https://app.ryzom.com/app_arcc/outgame_generate_name.php?application="..tostring(application["0"]).."&dbNameRace="..dbNameRace.."&dbNameSubRaceFirstName="..dbNameSubRaceFirstName.."&dbNameSubRaceLastName="..dbNameSubRaceLastName)
 end
@@ -108,7 +109,7 @@ function outgame:OLDprocGenerateName()
 	local lastName = "test"
 
 	-- Fyros and Matis are using "first name, last name" order
-	-- Trykers and Zora�s are using "last name, first name" order
+	-- Trykers and Zoraïs are using "last name, first name" order
 	if  tonumber(dbNameRace) == 1 then
 	-- Fyros
 		firstName = self:getFyrosFirstName()

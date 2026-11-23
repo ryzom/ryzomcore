@@ -1,0 +1,221 @@
+# servdash_cli
+
+The service dashboard of the quick start package as a terminal tool, for Windows and Linux.
+It reads the same ini files as the Win32 servdash, launches the processes in the same order,
+speaks the same launch control file protocol as the admin executor service (AES), and shows
+the same layout: a column of process buttons with a state light, and the console of the
+selected process next to it.
+
+Like tmux, it is split in a daemon that owns the processes and a client that renders them.
+Detaching, or closing the terminal, leaves the shard running. The same command attaches again,
+and several terminals can attach at once. This replaces both servdash in development and the
+`screen` scripts (`service_launcher.sh`, `ryzom_domain_screen_wrapper.sh`) in production.
+
+```
+servdash_cli start_mainland.ini      start the daemon if needed, then attach
+servdash_cli -d start_mainland.ini   start the daemon without attaching
+servdash_cli -a start_mainland.ini   attach only
+servdash_cli --shutdown start_mainland.ini   stop all services and exit the daemon
+servdash_cli --list                  the running dashboards of this user
+servdash_cli --shutdown-all          stop every running dashboard, with its services
+servdash_cli 2                       attach to the second one in the list
+servdash_cli Mainland                attach by title (or id, id prefix, ini path)
+servdash_cli --mcp [start_mainland.ini]   serve the Model Context Protocol on stdio, see below
+```
+
+A shard is opened once: a lock file next to the ini, `<stem>.servdash.lock`, names the
+dashboard that holds it, servdash_cli or servdash_gui, and a second one is refused while that
+process lives. Each daemon registers itself in a per-user directory (`%LOCALAPPDATA%\servdash\sessions`
+on Windows, `$XDG_RUNTIME_DIR/servdash.sessions` or `/tmp/servdash.sessions.<uid>` on
+Linux), so a running dashboard can be named from any directory without its ini path. The
+directory is shared with servdash_gui, whose dashboards speak the same protocol on their
+endpoint: `--list` names them too, and the terminal client can attach to one.
+
+Keys: F5 start/stop, F6 kill, F7 start all, F8 stop all, F2 compact the NeL log headers (type kept, function cut to `NLN…dcast`),
+F3 wrap long lines with a hanging indent, F4 show the arrival time of each line (compact
+headers and timestamps start on), F10 detach, F12 twice to stop everything and quit, Alt+Up/Down or Ctrl+Up/Down
+to select a process, Alt+1..9 to press a console button, PgUp/PgDn to scroll, Enter to send the input line.
+
+The command line of a NeL service completes its commands: the rest of the first matching name
+shows in grey after the cursor, with the arguments the command takes, and the status line
+gives its help. Tab takes the suggestion (a handler instance such as `moduleManager` completes
+to `moduleManager.` and its commands follow), Shift+Tab moves to the next match. The table
+comes from the service itself, live: every command, variable and module command it registers,
+as it registers them, so a module loaded later completes too.
+The mouse works too: click a process, its start/stop glyph, or a console button.
+
+## In the quick start package
+
+The shard scripts of the quick start (`shard_mainland.bat` and the others) open servdash_gui by
+default. With `"Headless": true` in `.nel/config.json` they run `servdash_cli <shard>.ini` in the
+console instead, for a development box reached over SSH: F10 detaches, the same script attaches
+again. The quick start builds servdash_cli with `build_docker\tools_xplat_build.bat` in its
+`ryzombuild_xplat_tools` Docker image (Rust, cargo-xwin), for Windows into
+`build_docker/tools_xplat/x86_64-pc-windows-msvc/release` and for a generic Linux (static musl)
+into `build_docker/tools_xplat/x86_64-unknown-linux-musl/release`. The shard patch of the build
+pipeline (`c1_shard_patch.py`) puts the Linux one into `admin_install.tgz` as `bin/servdash_cli`,
+so it reaches the servers with the patchman package.
+
+## Production servers
+
+The patchman package (`admin_install.tgz`) carries servdash_cli in `bin/`, and its scripts
+have a servdash mode next to the screen one, chosen by the presence of `/home/nevrax/use_servdash`.
+In that mode `bin/admin start` writes `/home/nevrax/admin.ini` from `patchman_list` and
+`special_patchman_list` (the patchman of the host and its special roles, each with a
+`RestartDelay` instead of a shell loop) and starts a detached dashboard on it; `join` attaches,
+`stop` shuts it down. Each domain gets `<domain>/<domain>.ini` from the patch applier, next to
+its `<domain>.screen.rc`: the aes section from `patchman/servdash.ini.default`, then a section
+per service with the launch control files the AES drives, so the dashboard replaces
+`service_launcher.sh` and the services get their console. `bin/domain_<domain>` and the domain
+wrapper use it for `start`, `stop`, `join` and `state`.
+
+## NeL services and the console channel
+
+A section with `Control=1` is a NeL service. The daemon listens on a local endpoint for it
+and appends `--ctrl=<endpoint>` to its arguments. The service then runs a `CSocketDisplayer`
+instead of its Win32 window and streams its log, labels, command buttons and title bar to the
+dashboard, which executes the commands typed or clicked there. The `--ctrl` argument
+overrides `WindowStyle`, so a service started by hand outside the dashboard still opens its
+own window as its config file says. `ReadyPattern` applies to the title the service reports,
+exactly as it applied to the window title before; the patch terminal keeps generating
+`^[^*].+Service Console`. Whatever the service writes to stdout or stderr besides its log, an
+assert or a crash report for instance, shows in the same pane in grey, as do the daemon's
+notes about the process; the service does not echo its log on stdout while it runs under a
+dashboard.
+
+Commands reach the service in two forms: a command line (`cmd`), which the service parses as if
+typed, and a split command (`exec`), whose name and arguments travel as separate fields and run
+as given, followed by a `done` marker with the id of the request once the command ran and its
+output is in the log. The MCP server uses the second form, so an argument with a space, a quote
+or a semicolon arrives intact and the output of a command can be cut out of the log exactly.
+Services built before the marker (console channel version 1) still take `cmd`.
+
+A control section is stopped with `quit` over the channel, or on stdin while the channel is
+not connected; its `ShutdownCmd` and `ShutdownInput` keys are not used. A service that never
+connects (an older binary that does not know `--ctrl`) counts as captured after 30 seconds, so
+the start order of the shard goes on without it.
+
+A service without `Control=1` is shown through its pipes. Its `ReadyPattern`, if any, is
+matched against the output lines.
+
+## The ini file
+
+The format and keys of the Win32 servdash, which ignores the two new ones:
+
+| Key | Meaning |
+| --- | --- |
+| `Title` | Fixed button text; without it the button follows the process title. In the unnamed first section: the dashboard title. |
+| `WorkingDirectory` | Working directory of the process; a `LaunchCmd` starting with `.` is taken from it. Any other command is looked up on the PATH, not in the working directory. |
+| `LaunchCmd`, `LaunchArgs` | The program and its arguments. On Windows the argument string is passed as it stands; on Linux it is split like a shell does. |
+| `ShutdownCmd`, `ShutdownArgs` | A program run to stop the process. Without any stop method the process is killed. |
+| `ShutdownInput` | New: a line written to the process stdin to stop it. |
+| `RestartDelay` | New: seconds after which a process that exited on its own starts again. For a process without `LaunchCtrl`, such as a patchman: what the relaunch loops of the screen setup do. Stop and Kill keep it down. An exit within the first minute of a run doubles the delay each time, up to five minutes; a longer run resets it. |
+| `ReadyPattern` | Regex for the ready state, see above. |
+| `Priority` | Start order group, lowest first; processes without it start one at a time. |
+| `AutoStart` | `0` keeps the process out of the start sequence. |
+| `LaunchCtrl` | `ctrl,state,LAUNCH,RUNNING,STOP,STOPPED`: the launch control protocol below. |
+| `Control` | New: `1` for a NeL service with the console channel. |
+| `Terminal` | Accepted and ignored; every process is shown through its pipes. |
+
+The daemon runs with the directory of the ini file as working directory, like the Win32 tool.
+On Linux, backslashes in path values are accepted as separators. The processes are tied to
+the daemon: a job object on Windows and the parent death signal on Linux take them down if the
+daemon itself dies, so a restarted daemon never declares a service stopped while it still runs.
+
+## Launch control files
+
+The AES controls a service it registered through files in the service directory: it writes
+`<alias>.launch_ctrl` with LAUNCH or STOP, writes `<alias>.deferred_launch_ctrl` with LAUNCH
+to restart a service it told to quit, polls `<alias>.state` for RUNNING or STOPPED, and reads
+`<alias>.start_count` for its crash chain detection. The web admin shard controls work through
+this. servdash_cli does what `service_launcher.sh` does under screen: it starts and stops on
+the orders, writes the state and the counter, consumes a LAUNCH order when the process exits
+so a crash does not relaunch in a loop, and promotes a deferred order after the exit. The
+start and stop buttons write the order file, as the Win32 tool does, so the AES stays in step.
+
+## MCP server for agents
+
+`servdash_cli --mcp [<ini>...]` serves the [Model Context Protocol](https://modelcontextprotocol.io/)
+on stdin and stdout, for an agent such as Claude Code that watches, drives and debugs the
+shards and the patchman services of the machine. It is a client of the dashboards like the
+terminal is: it attaches to every running dashboard of the user as it appears (servdash_cli
+and servdash_gui alike), mirrors their processes, logs and command tables, and forwards the
+orders; the dashboards keep running when the agent goes. The ini files given are started when
+they do not run yet, so a project can name its shard and have it come up with the agent. In
+Claude Code, a `.mcp.json` next to the project does it:
+
+```json
+{ "mcpServers": { "servdash": { "command": "servdash_cli", "args": ["--mcp", "start_mainland.ini"] } } }
+```
+
+On a production server, `claude mcp add servdash -- /home/nevrax/bin/servdash_cli --mcp` gives
+the agent every dashboard of the `nevrax` user: the patchman services of `admin.ini` and the
+domains. Every tool takes a `dashboard` parameter (title, id, ini path) that can be left out
+while one dashboard runs.
+
+| Tool | What it does |
+| --- | --- |
+| `list_dashboards`, `start_dashboard`, `shutdown_dashboard` | The dashboards running; start the daemon of an ini file; stop everything and exit a daemon. |
+| `list_processes`, `get_process` | State, pid, uptime, launch control value, pending restart, log line range; how often the dashboard started the process (start count), how long it took from start to ready, how its last run ended; the service's status labels and buttons. |
+| `start_process`, `stop_process`, `kill_process`, `restart_process`, `start_all`, `stop_all` | The buttons, each with an optional wait for the resulting state. |
+| `wait_for_state` | Waits until a process, or without `process` every process of the dashboard, is ready, running or stopped; returns early when one of them exits, crashes or is relaunched meanwhile, naming it with the way it ended and its last lines. |
+| `list_commands` | The command table of a service: commands, variables, handler instances and member commands with argument syntax and help, filtered by prefix or word. |
+| `run_command` | A NeL command with its arguments as a list, run over the console channel without parsing; returns what the command logged, cut out between the request and its `done` marker. |
+| `send_input` | A line on the stdin of a plain process, with the output that follows. |
+| `get_log` | Lines of a process, or without `process` of all processes merged by time and tagged with their process: by index range, time range, since the last start or last N, then optionally following for a while up to a line cap; filtered by log type or regex. |
+| `clear_log` | Drops the held lines. |
+
+Every log line carries an index, per process from 1 and never reused, and its arrival time
+in milliseconds, so a window of a log ("the 50 lines before the crash", "everything between
+these two indices", "the next 10 seconds") is named exactly and can be fetched again.
+`get_log` shows `idx time type message` by default, with the NeL prefix (thread, file, line,
+function) left out to keep the answer short; `prefix: compact` adds file, line and function,
+`prefix: full` keeps the line as logged. Plain output of a process shows as type `out`, the
+dashboard's own notes (started, exited, restarting) as `dash`. The daemon holds the last
+10000 lines per process; older indices are reported as no longer held.
+
+To follow a shard coming up, three calls do it. `wait_for_state` with `state: ready` and no
+`process` waits for every process of the dashboard and returns the moment one exits, with
+the manner of its exit (`code 1`, `killed`, `crashed, 0xC0000005` on Windows, `crashed, signal 11`
+elsewhere), what it is doing now (stopped, restart pending, started again) and its last 15
+lines; `stop_on_exit: false` keeps waiting instead. Only an exit during the wait ends it: a
+process that was down before shows in the list of what is not ready, with its last exit.
+`list_processes` then gives the boot of
+each process in a line: `start count 2, ready after 3.4 s, last exit: code 1`. The start
+count is the number of launches since the dashboard opened, the one a launch control section
+writes to `<alias>.start_count`; the last exit stays on the line while the next run goes on.
+`get_log` without `process`, with `levels: ["WRN", "ERR", "AST"]` and `since_start: true`,
+gives the warnings and errors of all processes since each was last started, by time, as
+`idx time [process] type message`; `match` narrows them by a regular expression. A log type
+that does not exist is refused, so a filter that matches nothing means a quiet log.
+
+A dashboard sends its whole state to a client that attaches: the processes, the lines it
+holds of each and the command tables, then a marker that the state is complete. The server
+holds a tool call until the dashboard the call names has got that far, or every dashboard it
+found when the call names none, and until the dashboards of its own command line have
+registered. So the first call to a server that just started answers from the whole state,
+however much log there is to send; a dashboard that has not sent its state 15 seconds after
+the connection is reported as not answering, and nothing is served from the part that came.
+
+## Building
+
+Rust 1.82 or later. `cargo build --release` gives a single binary with no runtime files
+(linked against the system C library on Linux; use a musl target for a fully static one).
+Cross-building the Windows binary from Linux or WSL works with cargo-xwin and needs no
+Visual Studio:
+
+```
+rustup target add x86_64-pc-windows-msvc
+cargo install cargo-xwin
+cargo xwin build --release --target x86_64-pc-windows-msvc
+```
+
+The GitHub Actions workflow `.github/workflows/tools.yml` formats, lints, tests and builds the
+tool for Linux (musl) and Windows on every change, and keeps both binaries as run artifacts.
+
+## Not done yet
+
+- Processes are shown line by line through pipes. A program that needs a terminal (a shell,
+  a curses tool) would need a pseudo terminal pane; none of the shard processes do.
+- The patch terminal still writes the `start_<shard>.bat` files for the Win32 servdash; the
+  quick start batch files have to point at this tool to use it.

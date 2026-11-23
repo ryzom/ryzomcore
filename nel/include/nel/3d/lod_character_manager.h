@@ -50,6 +50,9 @@ class	CLodCharacterTexture;
 
 
 // ***************************************************************************
+/// Max width and height of a bitmap given to CLodCharacterTmpBitmap::build() (it samples with 8-bit shifts)
+#define	NL3D_CLOD_TMP_BITMAP_MAX_SIZE	256
+
 /**
  * This bitmap is builded in the Instance texturing build process of CLodCharacterManager
  */
@@ -61,7 +64,8 @@ public:
 	// free memory. 1*1 pixel with black stored
 	void			reset();
 	/** build from a bitmap (NB: converted internally). Should be not so big (eg:64*64).
-	 *	Width and height must be <=256
+	 *	Width and height must be 1..NL3D_CLOD_TMP_BITMAP_MAX_SIZE; a bitmap outside that range is an asset
+	 *	error: it is reported with nlwarning and the 1*1 black bitmap is kept.
 	 */
 	void			build(const NLMISC::CBitmap &bmp);
 	// build from a single color (for untextured materials)

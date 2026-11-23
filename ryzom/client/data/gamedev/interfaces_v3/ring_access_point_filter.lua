@@ -107,18 +107,17 @@ function game.RingAccessPointFilter:validate()
 	end
    local ucUrl
    if config.Local == 1 then
-            ucUrl = ucstring(NicoMagicURL) -- for test in local mode				
+      ucUrl = ucstring(NicoMagicURL) -- for test in local mode				
    else
          ucUrl = getDynString(game.NpcWebPage.UrlTextId)
    end	
    debugInfo(tostring(ucUrl))
-    local utf8Url = ucUrl:toUtf8()	
+   local utf8Url = ucUrl:toUtf8()	
 	local browser = getUI("ui:interface:npc_web_browser"):find("html")
 	-- when in ring mode, add the parameters ourselves. 60 second is the timout for zope....
 	browseNpcWebPage(getUIId(browser), utf8Url .. self:getURLParameters(), false, 60)
 end
-
-
-
 -- VERSION --
 FILE_RING_ACCESS_POINT_FILTER_VERSION = 31
+
+

@@ -457,10 +457,13 @@ void CAudioMixerUser::initDriver(const std::string &driverName)
 		nlctassert(NumDrivers == UAudioMixer::TDriver(ISoundDriver::NumDrivers));
 		_SoundDriver = ISoundDriver::createDriver(this, driverType);
 		nlassert(_SoundDriver);
+		m_SoundDriverName = _SoundDriver->getDllName();
+		if (m_SoundDriverName.empty())
+			m_SoundDriverName = ISoundDriver::getDriverName(driverType);
 	}
 	catch (const ESoundDriver &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 		delete _SoundDriver; _SoundDriver = nullptr;
 		throw;
 	}
@@ -518,6 +521,32 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 		if (manualRolloff) driverOptions |= ISoundDriver::OptionManualRolloff;
 		if (_AutoLoadSample) driverOptions |= ISoundDriver::OptionLocalBufferCopy;
 
+		// A device asked by name must be one the driver lists. The drivers open the default device for a
+		// name they do not know: that is refused here, the caller asked for another device.
+		if (!deviceName.empty())
+		{
+			std::vector<std::string> devices;
+			_SoundDriver->getDevices(devices);
+			if (std::find(devices.begin(), devices.end(), deviceName) == devices.end())
+			{
+				std::string available;
+				for (uint i = 0; i < devices.size(); ++i)
+				{
+					if (devices[i].empty())
+						continue;
+					if (!available.empty())
+						available += ", ";
+					available += "'" + devices[i] + "'";
+				}
+				std::string reason = "AM: The sound driver '" + m_SoundDriverName + "' has no device named '" + deviceName + "'. ";
+				if (available.empty())
+					reason += "It lists no device by name: it only opens its default device, with an empty device name";
+				else
+					reason += "Its devices are: " + available;
+				throw ESoundDriverDeviceNotFound(reason);
+			}
+		}
+
 		// init the driver with selected device and needed options
 		_SoundDriver->initDevice(deviceName, (ISoundDriver::TSoundOptions)driverOptions);
 
@@ -555,7 +584,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	}
 	catch (const ESoundDriver &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 		delete _SoundDriver; _SoundDriver = nullptr;
 		throw;
 	}
@@ -683,12 +712,21 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	try
 	{
 		std::string mixerConfigFile = NLMISC::CPath::lookup("default.mixer_config", false);
-		if (!mixerConfigFile.empty())
+		if (mixerConfigFile.empty())
+		{
+			nlwarning("AM: No default.mixer_config, the default mixer configuration is used and no sample bank is preloaded");
+		}
+		else
 		{
 			formLoader = NLGEORGES::UFormLoader::createLoader();
 
 			NLMISC::CSmartPtr<NLGEORGES::UForm> form;
 			form = formLoader->loadForm(mixerConfigFile.c_str());
+
+			// loadForm has logged why (a damaged sound data file, a missing dfn): the sample banks it lists cannot be
+			// loaded, so the mixer initialization fails
+			if (!form)
+				throw NLMISC::Exception(NLMISC::toString("AM: Cannot load the mixer config '%s', the sound data is broken", mixerConfigFile.c_str()));
 
 			NLGEORGES::UFormElm &root = form->getRootNode();
 
@@ -779,6 +817,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	catch(...)
 	{
 		NLGEORGES::UFormLoader::releaseLoader(formLoader);
+		throw;
 	}
 
 	// init the user var bindings
@@ -1907,7 +1946,7 @@ void				CAudioMixerUser::update()
 			sprintf(tmp, "[%2u]%8p ", i, _Tracks[i]->getSource());
 			str += tmp;
 		}
-		nldebug((string("Status1: ")+str).c_str());
+		nldebug("%s", (string("Status1: ")+str).c_str());
 		str.clear();
 		for (i=_NbTracks/2; i<_NbTracks; ++i)
 		{
@@ -2963,7 +3002,7 @@ NLMISC_CATEGORISED_COMMAND(nel, displaySoundProfile, "Display information on sou
 	vector<string> pv;
 	explode<string>(performance, "\n", pv, true);
 	vector<string>::iterator it(pv.begin()), end(pv.end());
-	for (; it != end; ++it) log.displayNL((*it).c_str());
+	for (; it != end; ++it) log.displayNL("%s", (*it).c_str());
 	return true;
 }
 

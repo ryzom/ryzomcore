@@ -318,10 +318,21 @@ void	CBitSet::serial(IStream &f)
 	if(f.isReading())
 	{
 		f.serial(sz);
+
+		// NumBits is a sint and resize() rounds it up to whole words through NumBits+NL_BITLEN, which must fit a sint
+		if(sz > (uint32)0x7FFFFFFF - NL_BITLEN)
+			throw EStreamOverflow("bit set of %u bits is too large", sz);
+
+		// sz comes from the stream, so it is checked against the words actually read before the set is sized to
+		// it. Older writers stored sz/32 words, leaving out the last partial one, so that word may be missing and
+		// its bits are then read as false.
+		f.serialCont(array32);
+		if(array32.size() < sz/32)
+			throw EStreamOverflow("bit set of %u bits is longer than its words", sz);
 		resize(sz);
 
-		f.serialCont(array32);
-		for(sint i=0;i<(sint)sz;i++)
+		uint32	nbBits= array32.size() > sz/32 ? sz : (uint32)array32.size()*32;
+		for(uint32 i=0;i<nbBits;i++)
 		{
 			uint32	a=array32[i/32];
 			a&= 1<<(i&31);
@@ -333,7 +344,8 @@ void	CBitSet::serial(IStream &f)
 		sz= size();
 		f.serial(sz);
 
-		array32.resize(sz/32);
+		// the last partial word too: sz/32 words alone put the last bits past the end of the vector
+		array32.resize(sz/32 + ((sz&31) != 0 ? 1 : 0));
 		fill_n(array32.begin(), array32.size(), 0);
 		for(sint i=0;i<(sint)sz;i++)
 		{

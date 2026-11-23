@@ -2,8 +2,6 @@
 * NeL plug-ins for 3DSMAX 3.1 compilation notes
 ************************************************
 
-* $Id: compilation_notes.txt,v 1.6 2001/10/05 14:56:45 corvazier Exp $
-
 ** DISTRIBUTION NOTES **
 
 Given that Max plug-ins are linked to the 3DSMax SDK (which is not Gnu GPL) 

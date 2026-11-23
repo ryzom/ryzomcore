@@ -60,6 +60,7 @@ CFaberPhrase::CFaberPhrase()
 
 	// recommended skill level for using crafted item
 	_Recommended = 0;
+	m_NominalRecommended = 0;
 
 	// Item stats modifier
 	_MBOQuality = 0;
@@ -138,7 +139,7 @@ bool CFaberPhrase::build( const TDataSetRow & actorRowId, const std::vector< con
 						break;
 					case TBrickParam::CR_SAP:
 						INFOLOG("SAP: %i",((CSBrickParamCraftSap *)param)->Sap);
-						_MBOSap = ((CSBrickParamCraftSap *)param)->Sap;
+						_MBOSap += ((CSBrickParamCraftSap *)param)->Sap;
 						break;
 					case TBrickParam::CR_STA:
 						INFOLOG("STA: %i",((CSBrickParamCraftSta *)param)->Stamina);
@@ -162,7 +163,8 @@ bool CFaberPhrase::build( const TDataSetRow & actorRowId, const std::vector< con
 						break;
 					case TBrickParam::CR_HITRATE:
 						INFOLOG("HITRATE: %.2f", ((CSBrickParamCraftHitRate *)param)->HitRate);
-						_MBODmg += ((CSBrickParamCraftHitRate *)param)->HitRate;
+						// the hit rate of a weapon follows its speed stat (CGameItem::hitRate)
+						_MBOSpeed += ((CSBrickParamCraftHitRate *)param)->HitRate;
 						break;
 					case TBrickParam::CR_RANGE:
 						INFOLOG("RANGE: %.2f", ((CSBrickParamCraftRange *)param)->Range);
@@ -174,7 +176,7 @@ bool CFaberPhrase::build( const TDataSetRow & actorRowId, const std::vector< con
 						break;
 					case TBrickParam::CR_SAPLOAD:
 						INFOLOG("SAPLOAD: %.2f", ((CSBrickParamCraftSapload *)param)->Sapload);
-						_MBOProtection += ((CSBrickParamCraftSapload *)param)->Sapload;
+						_MBOSapLoad += ((CSBrickParamCraftSapload *)param)->Sapload;
 						break;
 					case TBrickParam::CR_WEIGHT:
 						INFOLOG("WEIGHT: %.2f", ((CSBrickParamCraftWeight *)param)->Weight);
@@ -345,6 +347,12 @@ void  CFaberPhrase::execute()
 		nlwarning("<CFaberPhrase::execute> Can't found static form of craft plan %s", player->getCraftPlan().toString().c_str() );
 		return;
 	}
+	// only a brick of the plan families has the craft data
+	if( plan->Faber == 0 )
+	{
+		nlwarning("<CFaberPhrase::execute> The brick %s is not a craft plan", player->getCraftPlan().toString().c_str() );
+		return;
+	}
 
 	/// set Faber time if not set (default is 2 sec)
 	if ( !_FaberTime)
@@ -392,12 +400,21 @@ void CFaberPhrase::apply()
 	}
 
 	// apply wearing equipment penalty on Recommended skill
+	m_NominalRecommended = _Recommended;
 	_Recommended -= (uint32)(_Recommended * c->wearMalus() * WearMalusCraftFactor);
 
 	const CStaticBrick * plan = CSheets::getSBrickForm( c->getCraftPlan() );
 	if( plan == 0 )
 	{
 		nlwarning("<CFaberPhrase::apply> Can't found static form of craft plan %s", c->getCraftPlan().toString().c_str() );
+		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "UNKNOWN_CRAFT_PLAN");
+		stop();
+		return;
+	}
+	// only a brick of the plan families has the craft data that is read from here on
+	if( plan->Faber == 0 )
+	{
+		nlwarning("<CFaberPhrase::apply> The brick %s is not a craft plan", c->getCraftPlan().toString().c_str() );
 		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "UNKNOWN_CRAFT_PLAN");
 		stop();
 		return;
@@ -485,6 +502,7 @@ void CFaberPhrase::apply()
 		   {
 			   // for each Mp of one type (we have Quantity by type)
 			   uint32 NumMpParameters = (uint32)usedMps[u_mp]->Mp->MpFaberParameters.size();
+			   uint foundParameter = 0;
 
 			   // for each Faber parameters in Mp
 			   for( uint j = 0; j < NumMpParameters; ++j )
@@ -493,6 +511,7 @@ void CFaberPhrase::apply()
 					if( _RootFaberPlan->Faber->NeededMps[mp].MpType == usedMps[u_mp]->Mp->MpFaberParameters[j].MpFaberType )
 					{
 						found_mp = true;
+						foundParameter = j;
 						usedMp++;
 						break;
 					}
@@ -500,6 +519,9 @@ void CFaberPhrase::apply()
 
 			   if (found_mp)
 			   {
+#ifdef RYZOM_FORGE
+				   // The rule of the RYZOM_FORGE server: the ecosystem of the Mp against the civilisation of the plan
+				   nlunreferenced(foundParameter);
 
 				   // Bypass if : Plan is common
 					if ( civRestriction != EGSPD::CPeople::Common )
@@ -541,6 +563,22 @@ void CFaberPhrase::apply()
 								   break;
 						   }
 					}
+#else
+				   // The item part of the Mp says which origin of item it goes into: every origin (common), or the
+				   // origin of the item built. An item of common origin takes any Mp. This is the rule the craft
+				   // window of the client filters its Mps by (CItemSheet::canBuildItemPart).
+				   nlunreferenced(civRestriction);
+				   const ITEM_ORIGIN::EItemOrigin craftCivSpec = usedMps[u_mp]->Mp->MpFaberParameters[foundParameter].CraftCivSpec;
+				   if ( craftCivSpec != ITEM_ORIGIN::COMMON && _CraftedItemStaticForm->Origin != ITEM_ORIGIN::COMMON
+						&& craftCivSpec != _CraftedItemStaticForm->Origin )
+				   {
+						nlwarning( "<CFaberPhrase build> an mp whose item part is for origin %s cannot go into an item of origin %s, plan brick %s",
+							ITEM_ORIGIN::enumToString(craftCivSpec).c_str(), ITEM_ORIGIN::enumToString(_CraftedItemStaticForm->Origin).c_str(),
+							_RootFaberPlan->SheetId.toString().c_str() );
+						stop();
+						return;
+				   }
+#endif
 				   usedMps.erase(usedMps.begin()+u_mp);
 				   break;
 			   }

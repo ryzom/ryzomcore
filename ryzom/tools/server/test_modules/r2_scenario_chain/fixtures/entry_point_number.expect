@@ -1,0 +1,29 @@
+# The locations have their entry points as numbers, as the editors of the first months of 2006 saved them.
+# Number 0 on an island of the first list of entry points is the one entry point the island had then.
+# uiR2_Deserts23 has it under the name uiR2EntryPointAlpha01: the later lists dropped it, and it stands
+# 91 m from the nearest of their entry points. Another number is the position in the list of the island.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteEntryPoints(1)
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsFar
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUncertain
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUnknown
+scenario_at: Locations[0].EntryPoint = uiR2EntryPointAlpha01
+scenario_at: Locations[1].EntryPoint = uiR2EntryPoint02
+rt_at: Locations[0].EntryPoint = uiR2EntryPointAlpha01

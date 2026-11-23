@@ -1,0 +1,785 @@
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2026  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// (this file and stream_queues.cpp are a library of their own, which the tests link too: no stdpch.h)
+#include "stream_scheduler.h"
+
+#include "nel/misc/debug.h"
+
+#include <algorithm>
+
+CStreamSchedulerConfig::CStreamSchedulerConfig()
+    : TotalOutgoingBandwidth(10000000)
+    , StreamMinBytesPerTick(200)
+    , StreamMaxBytesPerTick(65536)
+    , StreamMinChunk(8192)
+    , QueueDelayTarget(20)
+    , TickSeconds(0.1)
+    , DatagramPacketBytes(560)
+    , ReportDatagrams(3)
+    , IdleSecondsToStartUp(10.0)
+{
+}
+
+uint32 streamWindowRoom(const CStreamSchedulerConfig &config, const CStreamWindowState &state)
+{
+	const sint64 packet = (sint64)config.DatagramPacketBytes;
+	const sint64 rttMs = (state.RttMicroseconds + 999) / 1000;
+	const sint64 tickMs = std::max((sint64)1, (sint64)(config.TickSeconds * 1000.0));
+	const sint64 datagramsInFlight = ((rttMs + tickMs - 1) / tickMs + 1) * packet;
+	sint64 inFlight = datagramsInFlight + state.Outstanding + state.Outstanding / 25;
+	if (state.BytesInFlight >= 0)
+		inFlight = std::max(inFlight, state.BytesInFlight + state.GrantedSinceSnapshot + state.GrantedSinceSnapshot / 25);
+	const sint64 room = state.CongestionWindow - inFlight - packet;
+	return (uint32)std::min(std::max(room, (sint64)0), (sint64)config.StreamMaxBytesPerTick);
+}
+
+CStreamScheduler::CStreamScheduler()
+    : m_Tokens(0)
+    , m_Started(false)
+    , m_BudgetShare(1.0)
+    , m_SharedLateness(false)
+    , m_SharedCyclesSinceCut(1000)
+    , m_SharedCleanCycles(0)
+    , m_SharedLateCycles(0)
+    , m_BudgetCuts(0)
+    , m_EgressRate(0)
+    , m_DatagramRate(0)
+    , m_MinimumRate(0)
+    , m_Round(1)
+    , m_RoundDone(false)
+    , m_Cursor(0)
+    , m_LastPool(0)
+    , m_LastPoolLeft(0)
+    , m_LastGranted(0)
+    , m_LastGrantedMinimum(0)
+    , m_LastWaiting(0)
+    , m_LastServed(0)
+    , m_RoundTicks(0)
+    , m_OvershootDatagrams(0)
+    , m_OvershootMinimums(0)
+{
+}
+
+void CStreamScheduler::reports(const CStreamSchedulerConfig &config, uint32 reporting, uint32 late, uint32 quietReporting, uint32 quietLate)
+{
+	if (m_SharedCyclesSinceCut < 1000)
+		++m_SharedCyclesSinceCut;
+
+	// The clients that get no stream data say it best: their datagrams are late for what they share with the others
+	// and for nothing of their own. Where there are too few of them (a wave of logins: everybody gets stream data, and
+	// everybody's allowance passes what its own path takes at about the same time), half of all the clients late
+	// counts only once it has lasted two seconds, which the start of an allowance does not.
+	// What the link of the frontend does, it does to all of them: half of the quiet ones late counts with a quarter
+	// of all the clients late. (A few clients behind one line at home, at the character selection, are half of the
+	// quiet ones of a small shard.)
+	bool sharedNow;
+	if (quietReporting >= (uint32)SharedMinReporting)
+	{
+		sharedNow = quietLate * 2 >= quietReporting && late * 4 >= reporting;
+		m_SharedLateCycles = sharedNow ? (uint32)SharedLastingCycles : 0;
+	}
+	else
+	{
+		const bool halfLate = reporting >= (uint32)SharedMinReporting && late * 2 >= reporting;
+		if (!halfLate)
+			m_SharedLateCycles = 0;
+		else if (m_SharedLateCycles < (uint32)SharedLastingCycles)
+			++m_SharedLateCycles;
+		// (once the frontend holds itself back, it knows what it looks at: no waiting for it to last again)
+		sharedNow = halfLate && (m_SharedLateCycles >= (uint32)SharedLastingCycles || m_BudgetShare < 1.0);
+	}
+
+	m_SharedLateness = sharedNow;
+	if (m_SharedLateness)
+	{
+		m_SharedCleanCycles = 0;
+		if (m_SharedCyclesSinceCut >= (uint32)SharedCutCycles && config.TotalOutgoingBandwidth != 0 && m_EgressRate > 0.0)
+		{
+			// Under what it sends, which can be well under what it holds itself to when the streams have little to do
+			const double share = std::min(m_BudgetShare, m_EgressRate / (double)config.TotalOutgoingBandwidth);
+			// Not under what its clients are guaranteed, which goes whatever the budget: their datagrams and the
+			// minimums of their streams. A frontend takes as many clients as its link carries of that for sure.
+			const double floor = (m_DatagramRate + m_MinimumRate) / (double)config.TotalOutgoingBandwidth;
+			const double cut = std::min(m_BudgetShare, std::max(share * 0.85, floor));
+			// (at the floor nothing is cut)
+			if (cut < m_BudgetShare)
+				++m_BudgetCuts;
+			m_BudgetShare = cut;
+			m_SharedCyclesSinceCut = 0;
+		}
+	}
+	else
+	{
+		// Back up after a second of cycles in a row without it. (Not "with next to nobody late": the clients that
+		// would have to stay late to hold the budget down are then as many as those that can take it down.)
+		if (m_SharedCleanCycles < 1000)
+			++m_SharedCleanCycles;
+		if (m_SharedCleanCycles >= (uint32)SharedCleanCycles)
+			m_BudgetShare = std::min(1.0, m_BudgetShare + 0.01 * config.TickSeconds);
+	}
+}
+
+void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double elapsedSeconds, uint64 measuredEgress, uint64 datagramBytes, std::vector<CEntry> &entries)
+{
+	const uint32 minBytes = std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick);
+	const uint32 maxBytes = config.StreamMaxBytesPerTick;
+
+	// The budget. What was really sent since the last cycle is taken off, whatever it was (datagrams, stream data,
+	// what was sent again, acknowledgements). The frontend owes what it sent above its budget, up to what one cycle
+	// may send. It saves nothing up: what a cycle did not send cannot be sent in that cycle any more, and sent on top
+	// of a later one it is more than the link takes in that one, where it waits in front of the datagrams that
+	// follow. Then this cycle's share is added, by the time that passed, so that a cycle that comes late has all of
+	// it.
+	// (the budget is what reports() left of TotalOutgoingBandwidth)
+	const double bandwidth = (double)config.TotalOutgoingBandwidth * m_BudgetShare;
+	const sint64 tickBudget = (sint64)(bandwidth * config.TickSeconds);
+	const double elapsed = std::min(std::max(elapsedSeconds, 0.0), 2.0 * config.TickSeconds);
+	if (!m_Started)
+	{
+		m_Started = true;
+		m_Tokens = 0;
+	}
+	m_Tokens = std::min(std::max(m_Tokens - (sint64)measuredEgress, -tickBudget), (sint64)0) + (sint64)(bandwidth * elapsed);
+	m_DatagramRate = (double)datagramBytes / std::max(config.TickSeconds, 0.001);
+	if (elapsedSeconds > 0.0)
+		m_EgressRate += ((double)measuredEgress / std::max(elapsedSeconds, 0.5 * config.TickSeconds) - m_EgressRate) * 0.25;
+
+	// What is left for the streams once this cycle's datagrams are out
+	sint64 pool = m_Tokens - (sint64)datagramBytes;
+	m_LastPool = pool;
+	// (counted against what a whole cycle may send by TotalOutgoingBandwidth: a cycle that comes right behind a late
+	// one has next to no budget of its own, and a budget that is held down is not what the counter is about)
+	if ((sint64)datagramBytes > (sint64)((double)config.TotalOutgoingBandwidth * config.TickSeconds))
+		++m_OvershootDatagrams;
+
+	// A client whose stream data starts now joins the round after the one that runs (when none runs, that is this
+	// cycle's: the round is counted on below)
+	for (size_t i = 0; i < entries.size(); ++i)
+	{
+		CEntry &entry = entries[i];
+		entry.Grant = 0;
+		if (entry.Pending != 0 && !entry.Client->HadPending)
+		{
+			entry.Client->LastRound = m_Round;
+			entry.Client->TurnLeft = 0;
+		}
+	}
+	if (m_RoundDone)
+	{
+		++m_Round;
+		m_RoundDone = false;
+		m_RoundTicks = 0;
+	}
+	++m_RoundTicks;
+
+	// 1. The minimum, for every client with stream data that its own path lets through. It is given even when the
+	// budget has nothing left: a client is never without progress because others are served.
+	uint64 grantedMinimum = 0;
+	for (size_t i = 0; i < entries.size(); ++i)
+	{
+		CEntry &entry = entries[i];
+		if (entry.Pending != 0 && entry.Window != 0)
+		{
+			entry.Grant = std::min(minBytes, std::min(entry.Pending, entry.Window));
+			pool -= entry.Grant;
+			grantedMinimum += entry.Grant;
+		}
+	}
+	const sint64 fullBudget = (sint64)((double)config.TotalOutgoingBandwidth * config.TickSeconds);
+	if ((sint64)datagramBytes <= fullBudget && (sint64)(datagramBytes + grantedMinimum) > fullBudget)
+		++m_OvershootMinimums;
+
+	// 2. The turns of this round: the clients that wait for more and did not have their turn yet
+	uint64 grantedTurns = 0;
+	uint32 served = 0;
+	m_Waiting.clear();
+	for (size_t i = 0; i < entries.size(); ++i)
+	{
+		const CEntry &entry = entries[i];
+		if (entry.Pending > entry.Grant && entry.Window > entry.Grant && (sint32)(m_Round - entry.Client->LastRound) > 0)
+			m_Waiting.push_back((uint32)i);
+	}
+	const size_t nbWaiting = m_Waiting.size();
+	if (nbWaiting == 0)
+	{
+		// Nobody waits for a turn: the round is over, and with it the turns that a client's own path had cut short
+		m_RoundDone = true;
+		for (size_t i = 0; i < entries.size(); ++i)
+			entries[i].Client->TurnLeft = 0;
+	}
+	else if (pool > 0)
+	{
+		// What each of them can take now
+		m_Wants.resize(nbWaiting);
+		for (size_t k = 0; k < nbWaiting; ++k)
+		{
+			const CEntry &entry = entries[m_Waiting[k]];
+			uint32 want = std::min(entry.Pending, std::min(entry.Window, maxBytes));
+			m_Wants[k] = want > entry.Grant ? want - entry.Grant : 0;
+		}
+
+		// The size of a turn: the level up to which all of them can be filled out of the pool (those that can take
+		// less leave their part to the others), but not below StreamMinChunk, and not above the most a client gets
+		uint32 turn = maxBytes;
+		{
+			std::vector<uint32> sorted(m_Wants);
+			std::sort(sorted.begin(), sorted.end());
+			sint64 left = pool;
+			for (size_t k = 0; k < nbWaiting; ++k)
+			{
+				const sint64 others = (sint64)(nbWaiting - k);
+				if ((sint64)sorted[k] * others <= left)
+				{
+					left -= sorted[k];
+				}
+				else
+				{
+					turn = (uint32)std::min(left / others, (sint64)maxBytes);
+					break;
+				}
+			}
+		}
+		turn = std::min(maxBytes, std::max(turn, config.StreamMinChunk));
+
+		// By ascending id, from where the last cycle stopped
+		size_t start = 0;
+		while (start < nbWaiting && entries[m_Waiting[start]].Id < m_Cursor)
+			++start;
+		if (start == nbWaiting)
+			start = 0;
+
+		bool done = true;
+		for (size_t n = 0; n < nbWaiting; ++n)
+		{
+			const size_t k = (start + n) % nbWaiting;
+			CEntry &entry = entries[m_Waiting[k]];
+			CStreamSchedulerClient *client = entry.Client;
+			const uint32 want = m_Wants[k];
+
+			if (client->TurnLeft == 0)
+				client->TurnLeft = turn;
+			const uint32 rest = entry.Pending - entry.Grant;
+			const uint32 given = (uint32)std::min((sint64)std::min(client->TurnLeft, want), pool);
+			entry.Grant += given;
+			pool -= given;
+			client->TurnLeft -= given;
+			grantedTurns += given;
+			if (given != 0)
+				++served;
+
+			if (client->TurnLeft == 0 || given == rest)
+			{
+				// Its turn is over, or it has nothing left to send
+				client->LastRound = m_Round;
+				client->TurnLeft = 0;
+			}
+			else if (given < want)
+			{
+				// The pool ran out inside its turn: it goes on from here in the next cycle
+				done = false;
+				m_Cursor = entry.Id;
+				break;
+			}
+			// Else its own path took no more: its turn stays open for the cycles to come
+
+			if (pool <= 0)
+			{
+				m_Cursor = entry.Id + 1;
+				if (n + 1 < nbWaiting)
+					done = false;
+				break;
+			}
+		}
+
+		if (done)
+		{
+			// Everybody that waited was served in one cycle without the pool running out: the round is over
+			m_RoundDone = true;
+			for (size_t i = 0; i < entries.size(); ++i)
+				entries[i].Client->TurnLeft = 0;
+			for (size_t k = 0; k < nbWaiting; ++k)
+				entries[m_Waiting[k]].Client->LastRound = m_Round;
+		}
+	}
+
+	for (size_t i = 0; i < entries.size(); ++i)
+		entries[i].Client->HadPending = entries[i].Pending > entries[i].Grant;
+
+	m_LastPoolLeft = pool;
+	m_LastGrantedMinimum = grantedMinimum;
+	m_MinimumRate = (double)grantedMinimum / std::max(config.TickSeconds, 0.001);
+	m_LastGranted = grantedMinimum + grantedTurns;
+	m_LastWaiting = (uint32)nbWaiting;
+	m_LastServed = served;
+}
+
+CStreamAllowance::CStreamAllowance()
+    : m_CurrentNumber(0)
+    , m_Declared(0)
+    , m_Allowance(0)
+    , m_StartUp(true)
+    , m_Started(false)
+    , m_LastChangeNumber(0)
+    , m_LastChangeWasCut(false)
+    , m_NoiseNow(0)
+    , m_NoiseBefore(0)
+    , m_NoiseCount(0)
+    , m_NoiseCycles(0)
+    , m_QuietLately(false)
+    , m_CongestionEvents(0)
+    , m_SendBusyDrops(0)
+    , m_CyclesWithoutReport(0)
+    , m_IdleCycles(0)
+    , m_IdleCyclesToStartUp(0)
+    , m_InRecovery(false)
+    , m_RecoveryLateness(0)
+    , m_IgnoreEvents(false)
+    , m_SettleCycles(0)
+    , m_ReportJudged(false)
+    , m_LastReportNumber(0)
+{
+	for (uint i = 0; i < (uint)NbCycles; ++i)
+		m_Cycles[i].Valid = false;
+}
+
+void CStreamAllowance::declare(uint32 bytesPerSecond)
+{
+	m_Declared = bytesPerSecond;
+}
+
+uint32 CStreamAllowance::startAllowance(const CStreamSchedulerConfig &config) const
+{
+	if (m_Declared == 0)
+		return config.StreamMinChunk;
+	const double perCycle = (double)m_Declared * config.TickSeconds;
+	return (uint32)std::min(perCycle / 2.0, (double)config.StreamMinChunk * 4.0);
+}
+
+uint32 CStreamAllowance::ceiling(const CStreamSchedulerConfig &config) const
+{
+	if (m_Declared == 0)
+		return config.StreamMaxBytesPerTick;
+	const double perCycle = (double)m_Declared * config.TickSeconds * 0.9;
+	return (uint32)std::min(perCycle, (double)config.StreamMaxBytesPerTick);
+}
+
+void CStreamAllowance::reset(const CStreamSchedulerConfig &config)
+{
+	m_NoiseNow = 0;
+	m_NoiseBefore = 0;
+	m_NoiseCount = 0;
+	m_NoiseCycles = 0;
+	m_Allowance = startAllowance(config);
+	m_StartUp = true;
+	m_InRecovery = false;
+	m_IdleCycles = 0;
+	// What the connection sees while its new path is validated (datagrams that cannot go yet) is not of the streams:
+	// not until the first report on datagrams of after this, and not in the first seconds
+	m_IgnoreEvents = true;
+	m_SettleCycles = (uint32)std::max(1.0, 3.0 / std::max(config.TickSeconds, 0.001));
+	newSession();
+}
+
+void CStreamAllowance::newSession()
+{
+	m_Started = false;
+	m_LastChangeWasCut = false;
+	m_CyclesWithoutReport = 0;
+	m_InRecovery = false;
+	m_ReportJudged = false;
+	for (uint i = 0; i < (uint)NbCycles; ++i)
+		m_Cycles[i].Valid = false;
+}
+
+bool CStreamAllowance::busyIn(uint32 firstNumber, uint32 lastNumber) const
+{
+	if ((sint32)(lastNumber - firstNumber) >= (sint32)NbCycles)
+		firstNumber = lastNumber - ((uint32)NbCycles - 1);
+	uint64 sum = 0;
+	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
+	{
+		const CCycle &cycle = m_Cycles[number % NbCycles];
+		if (!cycle.Valid || cycle.Number != number)
+			continue;
+		// (stream data that waits and does not go: the window of the connection is full of what went before)
+		if (cycle.Backlog && cycle.Granted == 0)
+			return true;
+		sum += cycle.Granted;
+	}
+	// A string now and then is not what makes datagrams late: an eighth of what one cycle may give, in all of them,
+	// and a line of chat in any case, however low the allowance
+	return sum > std::max(m_Allowance / 8, (uint32)600);
+}
+
+bool CStreamAllowance::usedHalfIn(uint32 firstNumber, uint32 lastNumber) const
+{
+	// (cycles further back than those that are kept cannot be found)
+	if ((sint32)(lastNumber - firstNumber) >= (sint32)NbCycles)
+		firstNumber = lastNumber - ((uint32)NbCycles - 1);
+	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
+	{
+		const CCycle &cycle = m_Cycles[number % NbCycles];
+		if (cycle.Valid && cycle.Number == number && (uint64)cycle.Granted * 2 > m_Allowance)
+			return true;
+	}
+	return false;
+}
+
+bool CStreamAllowance::heldIn(uint32 firstNumber, uint32 lastNumber) const
+{
+	// (more cycles than are kept: some of them are not known to have been held)
+	if ((sint32)(lastNumber - firstNumber) >= (sint32)NbCycles)
+		return false;
+	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
+	{
+		const CCycle &cycle = m_Cycles[number % NbCycles];
+		if (!cycle.Valid || cycle.Number != number || !cycle.Held)
+			return false;
+	}
+	return true;
+}
+
+uint32 CStreamAllowance::firstCutCycle(uint32 number) const
+{
+	const uint32 first = number - (uint32)CutCycles;
+	if (m_LastChangeWasCut && (sint32)(m_LastChangeNumber - first) > 0)
+		return m_LastChangeNumber;
+	return first;
+}
+
+uint32 CStreamAllowance::heldBackGrantIn(uint32 firstNumber, uint32 lastNumber) const
+{
+	if ((sint32)(lastNumber - firstNumber) >= (sint32)NbCycles)
+		firstNumber = lastNumber - ((uint32)NbCycles - 1);
+	uint32 most = 0;
+	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
+	{
+		const CCycle &cycle = m_Cycles[number % NbCycles];
+		if (cycle.Valid && cycle.Number == number && cycle.WindowLimited && cycle.Granted > most)
+			most = cycle.Granted;
+	}
+	return most;
+}
+
+uint32 CStreamAllowance::cutFor(uint32 firstNumber, uint32 lastNumber) const
+{
+	// The client used its allowance: half of it
+	if (usedHalfIn(firstNumber, lastNumber))
+		return std::max(m_Allowance / 2, (uint32)1);
+	// It got less than half of it though it had more to send, because the congestion window of its connection had no
+	// room for more: the allowance is far above what its path takes, and half of it would take nothing away. It
+	// goes to a quarter; lateness that lasts cuts again. (A client that got little because the budget of the
+	// frontend is short is not meant: that is not of its path.)
+	if (heldBackGrantIn(firstNumber, lastNumber) != 0)
+		return std::max(m_Allowance / 4, (uint32)1);
+	// It got nothing in those cycles though stream data waited for it: the congestion window of its connection is
+	// full of what it got before them, which is still on its way and in the way. The cut is for that, as far back as
+	// the cycles are kept, and not further than the last cut, which was for what came before it.
+	if (waitingIn(firstNumber, lastNumber))
+	{
+		uint32 far = lastNumber - ((uint32)NbCycles - 1);
+		if (m_LastChangeWasCut && (sint32)(m_LastChangeNumber - far) > 0)
+			far = m_LastChangeNumber;
+		if ((sint32)(firstNumber - far) > 0)
+		{
+			if (usedHalfIn(far, lastNumber))
+				return std::max(m_Allowance / 2, (uint32)1);
+			if (heldBackGrantIn(far, lastNumber) != 0)
+				return std::max(m_Allowance / 4, (uint32)1);
+		}
+	}
+	// It had no more to send than it got, and that was little: its stream data is not what holds its datagrams up
+	return 0;
+}
+
+bool CStreamAllowance::waitingIn(uint32 firstNumber, uint32 lastNumber) const
+{
+	if ((sint32)(lastNumber - firstNumber) >= (sint32)NbCycles)
+		firstNumber = lastNumber - ((uint32)NbCycles - 1);
+	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
+	{
+		const CCycle &cycle = m_Cycles[number % NbCycles];
+		if (cycle.Valid && cycle.Number == number && cycle.WindowLimited && cycle.Granted == 0)
+			return true;
+	}
+	return false;
+}
+
+void CStreamAllowance::cut(uint32 sendNumber, uint32 allowance)
+{
+	m_Allowance = allowance; // (held above the minimum by the caller)
+	m_StartUp = false;
+	m_LastChangeNumber = sendNumber;
+	m_LastChangeWasCut = true;
+	m_InRecovery = true;
+	m_RecoveryLateness = 0xFFFFFFFF; // (the first report on datagrams of after the cut sets it)
+	m_IgnoreEvents = true;
+}
+
+void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops, bool sharedLateness, bool linkInDoubt)
+{
+	if (!m_Started)
+	{
+		m_Started = true;
+		if (m_Allowance == 0)
+			m_Allowance = startAllowance(config);
+		m_LastChangeNumber = sendNumber;
+		m_CongestionEvents = congestionEvents;
+		m_SendBusyDrops = sendBusyDrops;
+	}
+	m_CurrentNumber = sendNumber;
+
+	// A report on a datagram that was not sent yet is no report: the number is the client's word
+	if (newReport && (sint32)(sendNumber - reportNumber) < 0)
+		newReport = false;
+
+	// (for granted(), which counts the idle cycles)
+	m_IdleCyclesToStartUp = (uint32)std::max(1.0, config.IdleSecondsToStartUp / std::max(config.TickSeconds, 0.001));
+
+	// A client that has not reported for a while (its main thread is busy: a loading screen) says nothing about what
+	// its path takes now: its next report may cut the allowance, not raise it
+	const bool mayRaise = m_CyclesWithoutReport < (uint32)ReportCycles;
+
+	// A client that always has a little stream data never reports without any: what was learned of its path then
+	// does not stay for ever (a bad second would count as its noise from then on), it goes after two minutes at most
+	// While the frontend holds itself back for its link, the noise that is known stays as it is: nothing is learned
+	// (a queue at that link that comes and goes under the target would be learned by everybody, stretch after
+	// stretch), and nothing is forgotten (a link that carries less than the budget for an evening would leave every
+	// path with jitter without its noise, and each report of it a reason for a cut).
+	if (!linkInDoubt && ++m_NoiseCycles >= (uint32)NoiseCycles)
+	{
+		m_NoiseBefore = m_NoiseNow;
+		m_NoiseNow = 0;
+		m_NoiseCount = 0;
+		m_NoiseCycles = 0;
+	}
+	if (newReport)
+		m_CyclesWithoutReport = 0;
+	else if (m_CyclesWithoutReport < 1000)
+		++m_CyclesWithoutReport;
+
+	// (the cycles after a new path in which what the connection sees is not counted)
+	if (m_SettleCycles != 0)
+		--m_SettleCycles;
+
+	// A report is judged once: a client that got no new datagram reports the same again
+	if (newReport && (!m_ReportJudged || reportNumber != m_LastReportNumber))
+	{
+		m_ReportJudged = true;
+		m_LastReportNumber = reportNumber;
+
+		const uint32 reportDatagrams = std::max(config.ReportDatagrams, (uint32)1);
+		const sint32 sinceChange = (sint32)(reportNumber - m_LastChangeNumber);
+		// The report covers only datagrams that were sent after the last change
+		const bool covers = sinceChange >= (sint32)reportDatagrams;
+
+		// What the client reports when it got no stream data for a while is not of the streams: the jitter of its
+		// path, a clock that gains on the frontend's. It is the most of those reports, over the stretch of them that
+		// runs and the one before, and lateness is counted from there: the streams may add QueueDelayTarget to what
+		// the path does by itself. (No stream data means none waiting either: a client that gets nothing because the
+		// congestion window of its connection is full still has its stream data on the way, and in the way. And it
+		// means next to none, not none: a client that plays gets a line of chat or a string every other second.)
+		m_QuietLately = !busyIn(reportNumber - QuietCycles - reportDatagrams, reportNumber - 1);
+		if (!sharedLateness && !linkInDoubt && m_QuietLately)
+		{
+			m_NoiseNow = std::max(m_NoiseNow, std::min(lateness, (uint32)NoiseMax));
+			if (++m_NoiseCount >= (uint32)NoiseReports)
+			{
+				m_NoiseBefore = m_NoiseNow;
+				m_NoiseNow = 0;
+				m_NoiseCount = 0;
+				m_NoiseCycles = 0;
+			}
+		}
+		const uint32 noise = std::max(m_NoiseNow, m_NoiseBefore);
+		const uint32 above = lateness > noise ? lateness - noise : 0;
+		const bool late = above > config.QueueDelayTarget;
+
+		// Congestion and datagrams not sent, since the last report that covered: counted once, with such a report
+		bool events = false;
+		bool eventsIgnored = false;
+		if (covers)
+		{
+			// A datagram that was not sent is held against the stream data. Congestion that the connection saw is
+			// not: its congestion window answers for a loss, which takes the room of the stream data with it (the
+			// window room), and a loss is not always congestion. It only is no time for a raise.
+			events = (sendBusyDrops != m_SendBusyDrops);
+			const bool lossOnly = !events && congestionEvents != m_CongestionEvents;
+			m_CongestionEvents = congestionEvents;
+			m_SendBusyDrops = sendBusyDrops;
+			if (lossOnly)
+				eventsIgnored = true;
+			if (m_IgnoreEvents || m_SettleCycles != 0)
+			{
+				eventsIgnored = eventsIgnored || events;
+				events = false;
+				m_IgnoreEvents = false;
+			}
+		}
+
+		// A cut only helps where it takes something away: where a cycle gave more than half the allowance, which
+		// is what the allowance is after the cut. A client that used less than that is not held up by its stream
+		// data, whatever makes its datagrams late or its connection lose packets, and its allowance stays.
+		uint32 cutTo = 0; // (0: no cut)
+		if (sharedLateness)
+		{
+			// What is late or lost now is of the link all the clients share, where the frontend answers for all of
+			// them: nothing of it is held against this client, and nothing is made of it either
+			events = false;
+			eventsIgnored = true;
+		}
+		else if (late)
+		{
+			if (m_InRecovery)
+			{
+				// After a cut: the queue that stood then drains, and the lateness comes down with it. The reports
+				// on datagrams that were all sent after the cut are compared with each other (the report that
+				// caused the cut was of datagrams from before the queue was at its longest): lateness that does
+				// not come down, with stream data still going out, is more than that queue.
+				if (covers)
+				{
+					if (lateness < m_RecoveryLateness)
+						m_RecoveryLateness = lateness;
+					else
+						cutTo = cutFor(m_LastChangeNumber, reportNumber - 1);
+				}
+			}
+			else
+			{
+				// Stream data went out shortly before the datagrams that are late. This does not wait for a report
+				// on datagrams of after the last raise only: every cycle at an allowance that is too high makes the
+				// queue longer.
+				cutTo = cutFor(firstCutCycle(reportNumber), reportNumber - 1);
+			}
+		}
+		else if (covers)
+		{
+			m_InRecovery = false;
+		}
+
+		// A datagram not sent while stream data was going out
+		if (cutTo == 0 && events)
+			cutTo = cutFor(firstCutCycle(sendNumber), sendNumber - 1);
+
+		if (cutTo != 0)
+		{
+			cut(sendNumber, cutTo);
+		}
+		else if (covers && !late && !events && !eventsIgnored && mayRaise && heldIn(reportNumber - reportDatagrams, reportNumber - 1))
+		{
+			// The datagrams of the report were all sent behind cycles in which the client was held at this allowance,
+			// and none of them is late
+			if (m_StartUp && above * 5 <= config.QueueDelayTarget)
+			{
+				// By a quarter while nothing shows at all. (A quarter of a small allowance is less than the step
+				// of an allowance that grows by packets.)
+				m_Allowance = (uint32)std::min((uint64)m_Allowance + std::max(m_Allowance / 4, config.DatagramPacketBytes), (uint64)config.StreamMaxBytesPerTick);
+			}
+			else
+			{
+				// By a packet, and by an eighth where that is less: a packet per cycle is 45 kbit/s, which is most of
+				// what a slow path takes at all
+				m_StartUp = false;
+				const uint32 step = std::min(config.DatagramPacketBytes, std::max(m_Allowance / 8, (uint32)32));
+				m_Allowance = (uint32)std::min((uint64)m_Allowance + step, (uint64)config.StreamMaxBytesPerTick);
+			}
+			m_LastChangeNumber = sendNumber;
+			m_LastChangeWasCut = false;
+		}
+	}
+
+	if (!sharedLateness && !m_InRecovery)
+		followWindow(config, sendNumber);
+
+	// Between the minimum every client gets and the most one gets, and not 0 (unless the most is 0, which stops the
+	// streams)
+	// (and under what the client says its connection carries, where that is above the minimum)
+	const uint32 floor = std::max(std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick), (uint32)1);
+	m_Allowance = std::min(std::max(std::min(m_Allowance, ceiling(config)), floor), config.StreamMaxBytesPerTick);
+}
+
+void CStreamAllowance::followWindow(const CStreamSchedulerConfig &config, uint32 sendNumber)
+{
+	// Not before the cycles that are looked at are all of after the last change
+	if (m_Started && (sint32)(sendNumber - m_LastChangeNumber) < (sint32)FollowCycles)
+		return;
+
+	// The last cycles: the client had stream data waiting in all of them, and in most of them it was the congestion
+	// window that had less room than the allowance
+	uint64 sum = 0;
+	uint32 limited = 0;
+	uint32 given = 0;
+	for (uint32 number = sendNumber - (uint32)FollowCycles; number != sendNumber; ++number)
+	{
+		const CCycle &cycle = m_Cycles[number % NbCycles];
+		if (!cycle.Valid || cycle.Number != number || !cycle.Backlog)
+			return;
+		sum += cycle.Granted;
+		if (cycle.WindowLimited)
+			++limited;
+		if (cycle.Granted != 0)
+			++given;
+	}
+	// (four in five: a window in slow start on a long path is short of room every other cycle for a while)
+	if (limited * 5 < (uint32)FollowCycles * 4)
+		return;
+	// (A window that lets nothing through, or one block in all that time, is not a measure of the path: the path is
+	// gone or the connection is busy with what it lost. That is for the cuts.)
+	if (given < 2)
+		return;
+	const uint64 perCycle = sum / (uint32)FollowCycles;
+	if (perCycle + perCycle / 2 >= m_Allowance)
+		return;
+	// (what gets through can be nothing for a moment: not under a quarter of the allowance at once, and not under
+	// the minimum, which the caller sees to)
+	m_Allowance = (uint32)std::max(perCycle + perCycle / 4, (uint64)(m_Allowance / 4));
+	m_StartUp = false;
+	m_LastChangeNumber = sendNumber;
+	m_LastChangeWasCut = false;
+}
+
+void CStreamAllowance::granted(uint32 bytes, bool wantedMore, bool windowLimited)
+{
+	// After long enough without stream data, an allowance that was cut grows by quarters again, from where it stands
+	if (bytes == 0 && !wantedMore)
+	{
+		if (m_IdleCycles < m_IdleCyclesToStartUp && ++m_IdleCycles == m_IdleCyclesToStartUp)
+		{
+			m_StartUp = true;
+			m_InRecovery = false;
+		}
+	}
+	else
+	{
+		m_IdleCycles = 0;
+	}
+
+	// What this cycle gave, behind its datagram
+	CCycle &cycle = m_Cycles[m_CurrentNumber % NbCycles];
+	cycle.Number = m_CurrentNumber;
+	cycle.Granted = bytes;
+	// (Four fifths of it count as all of it: MsQuic keeps a congestion window under twice what was in flight, and a
+	// block of stream data is outstanding until all of it is acknowledged, so that every other cycle the window has
+	// room for a little less than the allowance. Were that not "held", the allowance could not grow, what is in
+	// flight could not either, and the window would stay where it is.)
+	cycle.Held = wantedMore && (uint64)bytes * 10 >= (uint64)m_Allowance * 8;
+	cycle.Backlog = wantedMore || bytes != 0;
+	cycle.WindowLimited = windowLimited && wantedMore;
+	cycle.Valid = true;
+}
+
+/* end of file */

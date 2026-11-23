@@ -862,7 +862,7 @@ namespace CHARSYNC
 			}
 
 			// we found it, so remove it
-			WARN_IF(!character->remove(_RingDB), ("Failed to remove char %u from the database", charId));
+			WARN_IF(!character->remove(_RingDB), "Failed to remove char " << charId << " from the database");
 
 			// liberate the name in the name manager
 			_NameManager.liberateName(charId);
@@ -921,7 +921,7 @@ namespace CHARSYNC
 
 			// retrieve the character
 			CCharacterPtr character = lookupChar(ru, charId);
-			DROP_IF(character == NULL, ("CharacterSync::updateCharGuild: Failed to find the character '%s', character will not be updated", charEId.toString().c_str()), return);
+			DROP_IF(character == NULL, "CharacterSync::updateCharGuild: Failed to find the character '" << charEId.toString() << "', character will not be updated", return);
 
 			// update the char and save
 			character->setGuildId(guildId);
@@ -949,7 +949,7 @@ namespace CHARSYNC
 
 			// retrieve the character
 			CCharacterPtr character = lookupChar(ru, charId);
-			DROP_IF(character == NULL, ("CharacterSync::updateCharRespawnPoints: Failed to find the character '%s', character will not be updated", charEId.toString().c_str()), return);
+			DROP_IF(character == NULL, "CharacterSync::updateCharRespawnPoints: Failed to find the character '" << charEId.toString() << "', character will not be updated", return);
 
 
 			string ringAccess = makeRingAccessString(respawnPoints);
@@ -998,7 +998,7 @@ namespace CHARSYNC
 
 				// retrieve the character
 				CCharacterPtr character = lookupChar(ru, charId);
-				DROP_IF(character == NULL, ("CharacterSync::updateCharsBestLevel: Failed to find the character '%s', character will not be updated", cbli.getCharEId().toString().c_str()), continue);
+				DROP_IF(character == NULL, "CharacterSync::updateCharsBestLevel: Failed to find the character '" << cbli.getCharEId().toString() << "', character will not be updated", continue);
 
 				// update the char
 				character->setBestCombatLevel(cbli.getBestCombatLevel());
@@ -1152,11 +1152,15 @@ namespace CHARSYNC
 					// the character already exist, just update the record
 					character->setBestCombatLevel(charInfo.getBestCombatLevel());
 					character->setGuildId(charInfo.getGuildId());
-					character->setRingAccess(makeRingAccessString(charInfo.getRespawnPoints()));
+					// a shard that cannot find every respawn point (a Ring shard) leaves the ring access stored
+					if (charInfo.getRespawnPointsKnown())
+						character->setRingAccess(makeRingAccessString(charInfo.getRespawnPoints()));
 					character->setRace(charInfo.getRace());
 					character->setCivilisation(charInfo.getCivilisation());
 					character->setCult(charInfo.getCult());
-					character->setNewcomer(charInfo.getNewcomer());
+					// a shard that cannot tell the newcomer flag (a Ring shard) leaves the one stored
+					if (charInfo.getNewcomerKnown())
+						character->setNewcomer(charInfo.getNewcomer());
 					
 
 
@@ -1194,6 +1198,8 @@ namespace CHARSYNC
 					character->setBestCombatLevel(charInfo.getBestCombatLevel());
 					character->setGuildId(charInfo.getGuildId());
 					character->setHomeMainlandSessionId(charInfo.getHomeSessionId());
+					// a new record has no ring access to keep: from a shard that could not find the respawn points (a
+					// Ring shard, RespawnPointsKnown false) it is the least one, "A1:", until a mainland shard syncs it
 					character->setRingAccess(makeRingAccessString(charInfo.getRespawnPoints()));
 					character->setRace(charInfo.getRace());
 					character->setCivilisation(charInfo.getCivilisation());

@@ -223,7 +223,7 @@
 			<property type="TAccessLevel"	name="RequiredState"	db_col="RequiredState"	byref="true"	enum="smart"/>
 			<property type="std::string"	name="MOTD"				db_col="MOTD"			byref="true"/>
 
-			<child_class	type="CGuild"					name="Guilds"			relation="one-to-many" cont="map"	on-delete="cacacde"/>
+			<child_class	type="CGuild"					name="Guilds"			relation="one-to-many" cont="map"	on-delete="cascade"/>
 		</class>
 
 <!--		<class name="CShard">

@@ -286,6 +286,10 @@ namespace ENTITYLOC
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
 
+			res = handlers.insert(std::make_pair(std::string("ELC_FDS"), &CEntityLocatorClientSkel::setFastDisconnectionSecret_skel));
+			// if this assert, you have a doubly message name in your interface definition !
+			nlassert(res.second);
+
 			init = true;
 		}
 
@@ -316,6 +320,14 @@ namespace ENTITYLOC
 			nlRead(__message, serialCont, events);
 		connectionEvents(sender, events);
 	}
+
+	void CEntityLocatorClientSkel::setFastDisconnectionSecret_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	{
+		H_AUTO(CEntityLocatorClientSkel_setFastDisconnectionSecret_ELC_FDS);
+		std::string	secret;
+			nlRead(__message, serial, secret);
+		setFastDisconnectionSecret(sender, secret);
+	}
 		// The entity locator send a list of connection event to EGS
 	void CEntityLocatorClientProxy::connectionEvents(NLNET::IModule *sender, const std::vector < TCharConnectionEvent > &events)
 	{
@@ -334,12 +346,41 @@ namespace ENTITYLOC
 			_ModuleProxy->sendModuleMessage(sender, __message);
 		}
 	}
+		// The entity locator answers initState with the secret the ring session manager makes the codes for
+		// fast disconnection with, chosen at random when the SU starts: the EGS checks the code a client presents with it
+	void CEntityLocatorClientProxy::setFastDisconnectionSecret(NLNET::IModule *sender, const std::string &secret)
+	{
+		if (_LocalModuleSkel && _LocalModule->isImmediateDispatchingSupported())
+		{
+			// immediate local synchronous dispatching
+			_LocalModuleSkel->setFastDisconnectionSecret(_ModuleProxy->getModuleGateway()->getPluggedModuleProxy(sender), secret);
+		}
+		else
+		{
+			// send the message for remote dispatching and execution or local queing
+			NLNET::CMessage __message;
+
+			buildMessageFor_setFastDisconnectionSecret(__message, secret);
+
+			_ModuleProxy->sendModuleMessage(sender, __message);
+		}
+	}
 
 	// Message serializer. Return the message received in reference for easier integration
 	const NLNET::CMessage &CEntityLocatorClientProxy::buildMessageFor_connectionEvents(NLNET::CMessage &__message, const std::vector < TCharConnectionEvent > &events)
 	{
 		__message.setType("ELC_CE");
 			nlWrite(__message, serialCont, const_cast < std::vector < TCharConnectionEvent >& > (events));
+
+
+		return __message;
+	}
+
+	// Message serializer. Return the message received in reference for easier integration
+	const NLNET::CMessage &CEntityLocatorClientProxy::buildMessageFor_setFastDisconnectionSecret(NLNET::CMessage &__message, const std::string &secret)
+	{
+		__message.setType("ELC_FDS");
+			nlWrite(__message, serial, const_cast < std::string& > (secret));
 
 
 		return __message;

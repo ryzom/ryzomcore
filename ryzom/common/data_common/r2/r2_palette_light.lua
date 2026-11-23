@@ -123,73 +123,70 @@ r2.loadPalette = function()
 	{
 		helmet = 
 		{
-			["heavy helmet"] = "icfahh.sitem"
+			["uiR2EDequipment_icfahh"] = "icfahh.sitem"
 		},
 
 		chest_plate = 
 		{
-			["refugee vest"] =	"icravr.sitem",
-			["civilian vest"] =	"icfacv_3.sitem",
-			["light vest"] =	"icfalv.sitem",
-			["light vest II"] =	"icfalv_3.sitem",
-			["medium vest"] =	"icfamv.sitem",
-			["medium vest II"] =	"icfamv_3.sitem",
-			["heavy vest"] =	"icfahv.sitem",
-			["heavy vest II"] =	"icfahv_3.sitem"
+			["uiR2EDequipment_icravr"] =	"icravr.sitem",
+			["uiR2EDequipment_icfalv"] =	"icfalv.sitem",
+			["uiR2EDequipment_icfalv_3"] =	"icfalv_3.sitem",
+			["uiR2EDequipment_icfamv"] =	"icfamv.sitem",
+			["uiR2EDequipment_icfamv_3"] =	"icfamv_3.sitem",
+			["uiR2EDequipment_icfahv"] =	"icfahv.sitem",
+			["uiR2EDequipment_icfahv_3"] =	"icfahv_3.sitem"
 		},
 
 		legs = 
 		{
-			["light pants"] = "icfalp.sitem",
-			["medium pants"] = "icfamp.sitem",
-			["heavy pants"] = "icfahp.sitem",
-			["pants 4"] = "icfacp_3.sitem",
-			["pants 5"] = "icfahp_3.sitem",
-			["pants 6"] = "icfamp_3.sitem",
-			["pants 7"] = "icfalp_3.sitem"
+			["uiR2EDequipment_icfalp"] = "icfalp.sitem",
+			["uiR2EDequipment_icfamp"] = "icfamp.sitem",
+			["uiR2EDequipment_icfahp"] = "icfahp.sitem",
+			["uiR2EDequipment_icfacp_3"] = "icfacp_3.sitem",
+			["uiR2EDequipment_icfahp_3"] = "icfahp_3.sitem",
+			["uiR2EDequipment_icfamp_3"] = "icfamp_3.sitem",
+			["uiR2EDequipment_icfalp_3"] = "icfalp_3.sitem"
 		},
 
 		boots = 
 		{
-			["light boots"] = "icfalb.sitem",
-			["medium boots"] = "icfamb.sitem",
-			["heavy boots"] = "icfahb.sitem",
-			["boots 4"] = "icfacb_3.sitem",
-			["boots 5"] = "icfahb_3.sitem",
-			["boots 6"] = "icfamb_3.sitem",
-			["boots 7"] = "icfalb_3.sitem"
+			["uiR2EDequipment_icfalb"] = "icfalb.sitem",
+			["uiR2EDequipment_icfamb"] = "icfamb.sitem",
+			["uiR2EDequipment_icfahb"] = "icfahb.sitem",
+			["uiR2EDequipment_icfahb_3"] = "icfahb_3.sitem",
+			["uiR2EDequipment_icfamb_3"] = "icfamb_3.sitem",
+			["uiR2EDequipment_icfalb_3"] = "icfalb_3.sitem"
 		},
 
 		gloves = 
 		{
-			["light gloves"] = "icfalg.sitem",
-			["medium gloves"] = "icfamg.sitem",
-			["heavy gloves"] = "icfahg.sitem"
+			["uiR2EDequipment_icfalg"] = "icfalg.sitem",
+			["uiR2EDequipment_icfamg"] = "icfamg.sitem",
+			["uiR2EDequipment_icfahg"] = "icfahg.sitem"
 		},
 
 		arms_guard = 
 		{
-			["light sleeves"] = "icfals.sitem",
-			["medium sleeves"] = "icfams.sitem",
-			["heavy sleeves"] = "icfahs.sitem",
-			["sleeves 4"] = "icfacs_3.sitem",
-			["sleeves 5"] = "icfahs_3.sitem",
-			["sleeves 6"] = "icfams_3.sitem",
-			["sleeves 7"] = "icfals_3.sitem"
+			["uiR2EDequipment_icfals"] = "icfals.sitem",
+			["uiR2EDequipment_icfams"] = "icfams.sitem",
+			["uiR2EDequipment_icfahs"] = "icfahs.sitem",
+			["uiR2EDequipment_icfahs_3"] = "icfahs_3.sitem",
+			["uiR2EDequipment_icfams_3"] = "icfams_3.sitem",
+			["uiR2EDequipment_icfals_3"] = "icfals_3.sitem"
 		},
 
 		right_hand = 
 		{
-			["dagger"] = "iccm1pd.sitem",
-			["mace"] = "iccm1bm.sitem",
-			["dagger"] = "iccm1pd.sitem",
-			["axe"] = "iccm1sa.sitem",
-			["sword"] = "iccm1ss.sitem"
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem",
+			["uiR2EDequipment_iccm1bm"] = "iccm1bm.sitem",
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem",
+			["uiR2EDequipment_iccm1sa"] = "iccm1sa.sitem",
+			["uiR2EDequipment_iccm1ss"] = "iccm1ss.sitem"
 		},
 
 		left_hand = 
 		{
-			["dagger"] = "iccm1pd.sitem"
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem"
 		}
 	}
 	r2.addR2PlayerEquipment(entries.fyros_male, entries.fyros_equipment)
@@ -228,27 +225,25 @@ r2.loadPalette = function()
 
 		chest_plate = 
 		{
-			["vest 1"] = "icmacv_3.sitem",
-			["vest 2"] = "icmahv_3.sitem",
-			["vest 3"] = "icmamv_3.sitem",
-			["vest 4"] = "icmalv_3.sitem",
-			["vest 5"] = "icravr.sitem"
+			["uiR2EDequipment_icmahv_3"] = "icmahv_3.sitem",
+			["uiR2EDequipment_icmamv_3"] = "icmamv_3.sitem",
+			["uiR2EDequipment_icmalv_3"] = "icmalv_3.sitem",
+			["uiR2EDequipment_icravr"] = "icravr.sitem"
 		},
 
 		legs = 
 		{
-			["pants 1"] = "icmacp_3.sitem",
-			["pants 2"] = "icmahp_3.sitem",
-			["pants 3"] = "icmamp_3.sitem",
-			["pants 4"] = "icmalp_3.sitem"
+			["uiR2EDequipment_icmacp_3"] = "icmacp_3.sitem",
+			["uiR2EDequipment_icmahp_3"] = "icmahp_3.sitem",
+			["uiR2EDequipment_icmamp_3"] = "icmamp_3.sitem",
+			["uiR2EDequipment_icmalp_3"] = "icmalp_3.sitem"
 		},
 
 		boots = 
 		{
-			["boots 1"] = "icmacb_3.sitem",
-			["boots 2"] = "icmahb_3.sitem",
-			["boots 3"] = "icmamb_3.sitem",
-			["boots 4"] = "icmalb_3.sitem"
+			["uiR2EDequipment_icmahb_3"] = "icmahb_3.sitem",
+			["uiR2EDequipment_icmamb_3"] = "icmamb_3.sitem",
+			["uiR2EDequipment_icmalb_3"] = "icmalb_3.sitem"
 		},
 
 		gloves = 
@@ -258,24 +253,23 @@ r2.loadPalette = function()
 
 		arms_guard = 
 		{
-			["sleeves 1"] = "icmacs_3.sitem",
-			["sleeves 2"] = "icmahs_3.sitem",
-			["sleeves 3"] = "icmams_3.sitem",
-			["sleeves 4"] = "icmals_3.sitem"
+			["uiR2EDequipment_icmahs_3"] = "icmahs_3.sitem",
+			["uiR2EDequipment_icmams_3"] = "icmams_3.sitem",
+			["uiR2EDequipment_icmals_3"] = "icmals_3.sitem"
 		},
 
 		right_hand = 
 		{
-			["dagger"] = "iccm1pd.sitem",
-			["mace"] = "iccm1bm.sitem",
-			["dagger"] = "iccm1pd.sitem",
-			["axe"] = "iccm1sa.sitem",
-			["sword"] = "iccm1ss.sitem"
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem",
+			["uiR2EDequipment_iccm1bm"] = "iccm1bm.sitem",
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem",
+			["uiR2EDequipment_iccm1sa"] = "iccm1sa.sitem",
+			["uiR2EDequipment_iccm1ss"] = "iccm1ss.sitem"
 		},
 
 		left_hand = 
 		{
-			["dagger"] = "iccm1pd.sitem"
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem"
 		}
 	}
 	--r2.addR2PlayerEquipment(entries.matis_male, entries.matis_equipment)
@@ -314,26 +308,24 @@ r2.loadPalette = function()
 
 		chest_plate = 
 		{
-			["vest 1"] = "ictacv_3.sitem",
-			["vest 2"] = "ictahv_3.sitem",
-			["vest 3"] = "ictamv_3.sitem",
-			["vest 4"] = "ictalv_3.sitem",
+			["uiR2EDequipment_ictahv_3"] = "ictahv_3.sitem",
+			["uiR2EDequipment_ictamv_3"] = "ictamv_3.sitem",
+			["uiR2EDequipment_ictalv_3"] = "ictalv_3.sitem",
 		},
 
 		legs = 
 		{
-			["pants 1"] = "ictacp_3.sitem",
-			["pants 2"] = "ictahp_3.sitem",
-			["pants 3"] = "ictamp_3.sitem",
-			["pants 4"] = "ictalp_3.sitem"
+			["uiR2EDequipment_ictacp_3"] = "ictacp_3.sitem",
+			["uiR2EDequipment_ictahp_3"] = "ictahp_3.sitem",
+			["uiR2EDequipment_ictamp_3"] = "ictamp_3.sitem",
+			["uiR2EDequipment_ictalp_3"] = "ictalp_3.sitem"
 		},
 
 		boots = 
 		{
-			["boots 1"] = "ictacb_3.sitem",
-			["boots 2"] = "ictahb_3.sitem",
-			["boots 3"] = "ictamb_3.sitem",
-			["boots 4"] = "ictalb_3.sitem"
+			["uiR2EDequipment_ictahb_3"] = "ictahb_3.sitem",
+			["uiR2EDequipment_ictamb_3"] = "ictamb_3.sitem",
+			["uiR2EDequipment_ictalb_3"] = "ictalb_3.sitem"
 		},
 
 		gloves = 
@@ -343,24 +335,23 @@ r2.loadPalette = function()
 
 		arms_guard = 
 		{
-			["sleeves 1"] = "ictacs_3.sitem",
-			["sleeves 2"] = "ictahs_3.sitem",
-			["sleeves 3"] = "ictams_3.sitem",
-			["sleeves 4"] = "ictals_3.sitem"
+			["uiR2EDequipment_ictahs_3"] = "ictahs_3.sitem",
+			["uiR2EDequipment_ictams_3"] = "ictams_3.sitem",
+			["uiR2EDequipment_ictals_3"] = "ictals_3.sitem"
 		},
 
 		right_hand = 
 		{
-			["dagger"] = "iccm1pd.sitem",
-			["mace"] = "iccm1bm.sitem",
-			["dagger"] = "iccm1pd.sitem",
-			["axe"] = "iccm1sa.sitem",
-			["sword"] = "iccm1ss.sitem"
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem",
+			["uiR2EDequipment_iccm1bm"] = "iccm1bm.sitem",
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem",
+			["uiR2EDequipment_iccm1sa"] = "iccm1sa.sitem",
+			["uiR2EDequipment_iccm1ss"] = "iccm1ss.sitem"
 		},
 
 		left_hand = 
 		{
-			["dagger"] = "iccm1pd.sitem"
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem"
 		}
 	}
 	r2.addR2PlayerEquipment(entries.tryker_male, entries.tryker_equipment)
@@ -397,26 +388,24 @@ r2.loadPalette = function()
 
 		chest_plate = 
 		{
-			["vest 1"] = "icmacv_3.sitem",
-			["vest 2"] = "icmahv_3.sitem",
-			["vest 3"] = "icmamv_3.sitem",
-			["vest 4"] = "icmalv_3.sitem",
+			["uiR2EDequipment_icmahv_3"] = "icmahv_3.sitem",
+			["uiR2EDequipment_icmamv_3"] = "icmamv_3.sitem",
+			["uiR2EDequipment_icmalv_3"] = "icmalv_3.sitem",
 		},
 
 		legs = 
 		{
-			["pants 1"] = "icmacp_3.sitem",
-			["pants 2"] = "icmahp_3.sitem",
-			["pants 3"] = "icmamp_3.sitem",
-			["pants 4"] = "icmalp_3.sitem"
+			["uiR2EDequipment_icmacp_3"] = "icmacp_3.sitem",
+			["uiR2EDequipment_icmahp_3"] = "icmahp_3.sitem",
+			["uiR2EDequipment_icmamp_3"] = "icmamp_3.sitem",
+			["uiR2EDequipment_icmalp_3"] = "icmalp_3.sitem"
 		},
 
 		boots = 
 		{
-			["boots 1"] = "icmacb_3.sitem",
-			["boots 2"] = "icmahb_3.sitem",
-			["boots 3"] = "icmamb_3.sitem",
-			["boots 4"] = "icmalb_3.sitem"
+			["uiR2EDequipment_icmahb_3"] = "icmahb_3.sitem",
+			["uiR2EDequipment_icmamb_3"] = "icmamb_3.sitem",
+			["uiR2EDequipment_icmalb_3"] = "icmalb_3.sitem"
 		},
 
 		gloves = 
@@ -425,24 +414,23 @@ r2.loadPalette = function()
 
 		arms_guard = 
 		{
-			["sleeves 1"] = "icmacs_3.sitem",
-			["sleeves 2"] = "icmahs_3.sitem",
-			["sleeves 3"] = "icmams_3.sitem",
-			["sleeves 4"] = "icmals_3.sitem"
+			["uiR2EDequipment_icmahs_3"] = "icmahs_3.sitem",
+			["uiR2EDequipment_icmams_3"] = "icmams_3.sitem",
+			["uiR2EDequipment_icmals_3"] = "icmals_3.sitem"
 		},
 
 		right_hand = 
 		{
-			["dagger"] = "iccm1pd.sitem",
-			["mace"] = "iccm1bm.sitem",
-			["dagger"] = "iccm1pd.sitem",
-			["axe"] = "iccm1sa.sitem",
-			["sword"] = "iccm1ss.sitem"
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem",
+			["uiR2EDequipment_iccm1bm"] = "iccm1bm.sitem",
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem",
+			["uiR2EDequipment_iccm1sa"] = "iccm1sa.sitem",
+			["uiR2EDequipment_iccm1ss"] = "iccm1ss.sitem"
 		},
 
 		left_hand = 
 		{
-			["dagger"] = "iccm1pd.sitem"
+			["uiR2EDequipment_iccm1pd"] = "iccm1pd.sitem"
 		}
 	}
 	r2.addR2PlayerEquipment(entries.zorai_male, entries.zorai_equipment)

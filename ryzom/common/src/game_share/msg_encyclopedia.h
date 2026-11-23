@@ -81,6 +81,12 @@ public:
 		f.serial(StateNbTask);
 		State = StateNbTask & 0x3;
 		NbTask = StateNbTask >> 2;
+		if (f.isReading() && NbTask > 8)
+		{
+			// the field holds up to 15 but the arrays below hold 8
+			nlwarning("CEncyMsgThema: refused a thema with %u tasks", (uint)NbTask);
+			throw NLMISC::EStream("encyclopedia thema with more than 8 tasks");
+		}
 
 		if (State == 2)
 		{

@@ -761,6 +761,11 @@ namespace NLGUI
 			_H = max(newH,   _MinH);
 			if (_DynamicDisplaySize)
 			{
+				// the real max size came from the previous max in CInterfaceGroup::updateCoords: move it along, or a
+				// parent sized from this list sees the old content for a pass (0 after clearing and refilling it,
+				// which resets the offset of the scroll bar it is under)
+				_MaxWReal += _W - _MaxW;
+				_MaxHReal += _H - _MaxH;
 				_MaxW = _W;
 				_MaxH = _H;
 			}
@@ -785,6 +790,11 @@ namespace NLGUI
 			_W = max(newW,   _MinW);
 			if (_DynamicDisplaySize)
 			{
+				// the real max size came from the previous max in CInterfaceGroup::updateCoords: move it along, or a
+				// parent sized from this list sees the old content for a pass (0 after clearing and refilling it,
+				// which resets the offset of the scroll bar it is under)
+				_MaxWReal += _W - _MaxW;
+				_MaxHReal += _H - _MaxH;
 				_MaxW = _W;
 				_MaxH = _H;
 			}
@@ -1289,10 +1299,10 @@ namespace NLGUI
 		const char *funcName = "addTextChild";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 #ifdef RYZOM_LUA_UCSTRING
-		ucstring text; // Compatibility
-		if(CLuaIHM::pop(ls, text))
+		std::string text; // Compatibility
+		if(CLuaIHM::getUCStringOnStack(ls, 1, text))
 		{
-			addTextChild(text.toUtf8());
+			addTextChild(text);
 		}
 #else
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);

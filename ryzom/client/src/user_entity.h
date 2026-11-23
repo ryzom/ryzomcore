@@ -311,6 +311,8 @@ public:
 	float eyesHeight();
 	/// Set Eyes Height.
 	inline void eyesHeight(float h) {_EyesHeight = h;}
+	/// The eyes height on a mount, where EyesHeight is the one on foot (before the scale of the character).
+	static float mountEyesHeight() {return 2.5f;}
 
 	/// Head Pitch methods
 	void	setHeadPitch(double hp);
@@ -356,6 +358,9 @@ public:
 	//@}
 
 	void updateVisualDisplay();
+
+	/// Body parts that finished loading are shown: apply the visibility of the view again (first person view).
+	virtual void onInstancesLoaded() NL_OVERRIDE;
 
 	/// Return 'true' is an attack animation is currently playing.
 	bool isAttacking() const {return _AnimAttackOn;}
@@ -576,6 +581,8 @@ protected:
 	/// Velocity : Front and Lateral
 	float						_FrontVelocity;
 	float						_LateralVelocity;
+	/// Horizontal speed of the last PACS move, reported as the user speed in internal view
+	double						_FinalPacsSpeed;
 	/// Speed adjustement from gpms
 	float						_SpeedServerAdjust;
 	/// Head Pitch

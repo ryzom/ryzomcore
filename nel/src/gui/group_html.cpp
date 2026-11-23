@@ -87,10 +87,10 @@ namespace NLGUI
 
 	CGroupHTML::SWebOptions CGroupHTML::options;
 
-	// Return URL with https is host is in HSTS list
-	static std::string upgradeInsecureUrl(const std::string &url)
+	// Return URL with https if host is in HSTS list
+	static std::string upgradeHstsUrl(const std::string &url)
 	{
-		if (toLowerAscii(url.substr(0, 7)) != "http://") {
+		if (!startsWithCaseInsensitiveAscii(url, "http://")) {
 			return url;
 		}
 
@@ -186,7 +186,7 @@ namespace NLGUI
 			bool hasHSTSHeader()
 			{
 				// ignore header if not secure connection
-				if (toLowerAscii(Url.substr(0, 8)) != "https://")
+				if (!startsWithCaseInsensitiveAscii(Url, "https://"))
 				{
 					return false;
 				}
@@ -238,7 +238,17 @@ namespace NLGUI
 	{
 		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
 		if (me)
+		{
+			// a page larger than the limit cancels the transfer (curl fails it with a write error)
+			uint32 maxBytes = CGroupHTML::options.pageMaxBytes;
+			if (maxBytes && (uint64)me->Content.size() + size * nmemb > maxBytes)
+			{
+				// without the query: the one of a trusted page carries the user's web authentication key (addHTTPGetParams)
+				nlwarning("The page '%s' is larger than %u bytes, its download is cancelled", me->Url.substr(0, me->Url.find('?')).c_str(), maxBytes);
+				return 0;
+			}
 			me->Content.append(buffer, size * nmemb);
+		}
 
 		return size * nmemb;
 	}
@@ -265,6 +275,20 @@ namespace NLGUI
 	{
 		delete data;
 		data = nullptr;
+	}
+
+	size_t CGroupHTML::CDataDownload::writeData(char *buffer, size_t size, size_t nmemb, void *download)
+	{
+		CDataDownload *me = static_cast<CDataDownload *>(download);
+		size_t length = size * nmemb;
+		if (me->maxBytes && (uint64)me->receivedBytes + length > me->maxBytes)
+		{
+			// curl fails the transfer with a write error, and dataDownloadFinished deletes the partial file
+			nlwarning("The download of '%s' is larger than %u bytes, it is cancelled", me->url.c_str(), me->maxBytes);
+			return 0;
+		}
+		me->receivedBytes += (uint32)length;
+		return fwrite(buffer, 1, length, me->fp);
 	}
 
 	void CGroupHTML::StylesheetDownloadCB::finish()
@@ -302,11 +326,56 @@ namespace NLGUI
 		// clear back-references so CViewBitmap does not keep a dangling pointer to this download once it is deleted
 		for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
 		{
-			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(it->Image);
+			// the reference is NULL when the view was already deleted: removeContent() deletes the views of the page
+			// before clearContext() -> releaseDataDownloads() drops the downloads
+			CViewBase *view = it->Image;
+			if (!view)
+				continue;
+
+			CViewBitmap *bitmap = dynamic_cast<CViewBitmap *>(view);
 			if (bitmap)
 				bitmap->resetHtmlDownload();
 		}
 		Images.clear();
+	}
+
+	/** The check of a downloaded image or texture before it replaces the cached file. An empty or broken one, or one
+	 *  larger than the browser accepts, is refused, and its cache entry, stored for the refused body, is cleared so that
+	 *  the next request downloads it again (with the Etag of an empty answer, the next request gets 304 and keeps the old
+	 *  file).
+	 */
+	static bool checkDownloadedImage(const std::string &tmpdest, const std::string &dest, const std::string &url)
+	{
+		uint32 w = 0, h = 0;
+		if (CFile::getFileSize(tmpdest) == 0)
+		{
+			nlwarning("The image (%s) from url (%s) is empty", tmpdest.c_str(), url.c_str());
+			CHttpCache::getInstance()->store(dest, CHttpCacheObject());
+			return false;
+		}
+
+		try
+		{
+			CBitmap::loadSize(tmpdest, w, h);
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			// exception message has .tmp file name, so keep it for further analysis
+			nlwarning("Invalid image (%s) from url (%s): %s", tmpdest.c_str(), url.c_str(), e.what());
+			w = h = 0;
+		}
+
+		uint32 maxSize = CGroupHTML::options.getImageMaxSize();
+		if (w != 0 && h != 0 && w <= maxSize && h <= maxSize)
+			return true;
+
+		if (w != 0 && h != 0)
+			nlwarning("The image (%s) of %ux%u from url (%s) is larger than %u pixels a side", tmpdest.c_str(), w, h,
+			    url.c_str(), maxSize);
+		else
+			nlwarning("Invalid image (%s) from url (%s)", tmpdest.c_str(), url.c_str());
+		CHttpCache::getInstance()->store(dest, CHttpCacheObject());
+		return false;
 	}
 
 	void CGroupHTML::ImageDownloadCB::finish()
@@ -317,36 +386,34 @@ namespace NLGUI
 		vec.swap(Images);
 
 		// tmpdest file does not exist if download skipped (ie cache was used)
-		if (CFile::fileExists(tmpdest) || CFile::getFileSize(tmpdest) == 0)
+		// verify that image is not corrupted, a corrupted one is not used and does not replace the cached one
+		if (CFile::fileExists(tmpdest))
 		{
-			try {
-				// verify that image is not corrupted
-				uint32 w, h;
-				CBitmap::loadSize(tmpdest, w, h);
-				if (w != 0 && h != 0)
+			if (checkDownloadedImage(tmpdest, dest, url))
+			{
+				if (CFile::fileExists(dest))
+					CFile::deleteFile(dest);
+
+				// to reload image on page, the easiest seems to be changing texture
+				// to temp file temporarily. that forces driver to reload texture from disk
+				// ITexture::touch() seem not to do this.
+				// cache was updated, first set texture as temp file
+				for (std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
 				{
-					if (CFile::fileExists(dest))
-						CFile::deleteFile(dest);
+					SImageInfo &img = *it;
+					// the view was deleted while the download was in flight
+					if (!img.Image)
+						continue;
+					Parent->setImage(img.Image, tmpdest, img.Type);
+					Parent->setImageSize(img.Image, img.Style);
 				}
-			}
-			catch(const NLMISC::Exception &e)
-			{
-				// exception message has .tmp file name, so keep it for further analysis
-				nlwarning("Invalid image (%s) from url (%s): %s", tmpdest.c_str(), url.c_str(), e.what());
-			}
 
-			// to reload image on page, the easiest seems to be changing texture
-			// to temp file temporarily. that forces driver to reload texture from disk
-			// ITexture::touch() seem not to do this.
-			// cache was updated, first set texture as temp file
-			for(std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
-			{
-				SImageInfo &img = *it;
-				Parent->setImage(img.Image, tmpdest, img.Type);
-				Parent->setImageSize(img.Image, img.Style);
+				CFile::moveFile(dest, tmpdest);
 			}
-
-			CFile::moveFile(dest, tmpdest);
+			else
+			{
+				CFile::deleteFile(tmpdest);
+			}
 		}
 
 		if (!CFile::fileExists(dest) || CFile::getFileSize(dest) == 0)
@@ -359,6 +426,9 @@ namespace NLGUI
 		for(std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
 		{
 			SImageInfo &img = *it;
+			// the view was deleted while the download was in flight
+			if (!img.Image)
+				continue;
 			Parent->setImage(img.Image, dest, img.Type);
 			Parent->setImageSize(img.Image, img.Style);
 		}
@@ -367,29 +437,45 @@ namespace NLGUI
 	void CGroupHTML::TextureDownloadCB::finish()
 	{
 		// tmpdest file does not exist if download skipped (ie cache was used)
-		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0)
+		// the same check as for images: an invalid texture does not replace the cached one
+		if (CFile::fileExists(tmpdest))
 		{
-			if (CFile::fileExists(dest))
-				CFile::deleteFile(dest);
+			if (checkDownloadedImage(tmpdest, dest, url))
+			{
+				if (CFile::fileExists(dest))
+					CFile::deleteFile(dest);
 
-			CFile::moveFile(dest, tmpdest);
+				CFile::moveFile(dest, tmpdest);
+			}
+			else
+			{
+				CFile::deleteFile(tmpdest);
+			}
 		}
 
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		for(uint i = 0; i < TextureIds.size(); i++)
 		{
 			rVR.reloadTexture(TextureIds[i].first, dest, false);
-			TextureIds[i].second->invalidateCoords();
+			// the view was deleted while the download was in flight
+			if (TextureIds[i].second)
+				TextureIds[i].second->invalidateCoords();
 		}
 	}
 
+#if RYZOM_WEB_BNP_DOWNLOAD
 	void CGroupHTML::BnpDownloadCB::finish()
 	{
 		bool verified = false;
+		// getMD5 gives lowercase hexadecimal
+		std::string md5 = toLowerAscii(m_md5sum);
 		// no tmpfile if file was already in cache
+		// the file is verified when it has the md5 given, if any (the comparison was inverted, a file with another md5
+		// was installed and the right one deleted)
 		if (CFile::fileExists(tmpdest))
 		{
-			verified = m_md5sum.empty() || (m_md5sum != getMD5(tmpdest).toString());
+			std::string got = getMD5(tmpdest).toString();
+			verified = md5.empty() || (md5 == got);
 			if (verified)
 			{
 				if (CFile::fileExists(dest))
@@ -400,12 +486,14 @@ namespace NLGUI
 			}
 			else
 			{
+				nlwarning("The bnp download of '%s' has the md5 %s instead of %s, it is not installed", url.c_str(), got.c_str(),
+				    md5.c_str());
 				CFile::deleteFile(tmpdest);
 			}
 		}
 		else if (CFile::fileExists(dest))
 		{
-			verified = m_md5sum.empty() || (m_md5sum != getMD5(dest).toString());
+			verified = md5.empty() || (md5 == getMD5(dest).toString());
 		}
 
 		if (!m_lua.empty())
@@ -416,16 +504,51 @@ namespace NLGUI
 			CLuaManager::getInstance().executeLuaScript(script, true );
 		}
 	}
+#endif
 
 	// Check if domain is on TrustedDomain
 	bool CGroupHTML::isTrustedDomain(const string &domain)
 	{
+		// an empty host (an empty or relative url) is never trusted, in particular it must not match an
+		// empty web server domain when the shard has not sent one
+		if (domain.empty())
+			return false;
 		if (domain == options.webServerDomain)
 			return true;
 
 		vector<string>::iterator it;
 		it = find(options.trustedDomains.begin(), options.trustedDomains.end(), domain);
 		return it != options.trustedDomains.end();
+	}
+
+	// A trusted page runs its Lua in the client and gets the player's web auth key, so the trust
+	// check is on the host name and, unless the client turned it off, on the page having come over
+	// https; over plain http anyone on the network path can answer for the trusted host.
+	bool CGroupHTML::isTrustedUrl(const string &scheme, const string &domain)
+	{
+		if (!isTrustedDomain(domain))
+			return false;
+		return !options.trustedHttpsOnly || toLowerAscii(scheme) == "https";
+	}
+
+	// An http url to a host that sent Strict-Transport-Security is upgraded to https. When trusted domains are
+	// only trusted over https, an http url to a trusted domain is upgraded too, so a plain http link or
+	// redirect handed out by the web side keeps the page trusted instead of losing its Lua and auth key.
+	// The web side should not hand out such links, so the upgrade is logged.
+	string CGroupHTML::upgradeInsecureUrl(const string &url)
+	{
+		string result = upgradeHstsUrl(url);
+		if (options.trustedHttpsOnly && startsWithCaseInsensitiveAscii(result, "http://"))
+		{
+			CUrlParser uri(result);
+			if (isTrustedDomain(uri.host))
+			{
+				uri.scheme = "https";
+				result = uri.toString();
+				nlinfo("(%s) WEB: '%s' is a trusted domain, '%s' upgraded to https", _Id.c_str(), uri.host.c_str(), url.c_str());
+			}
+		}
+		return result;
 	}
 
 	// Update view after download has finished
@@ -620,13 +743,36 @@ namespace NLGUI
 		}
 	}
 
+	// the directory of the download cache, whose files come from the web
+	static const char *s_CacheDirectory = "cache/";
+
 	// Get an url and return the local filename with the path where the url image should be
 	string CGroupHTML::localImageName(const string &url)
 	{
-		string dest = "cache/";
+		string dest = s_CacheDirectory;
 		dest += getMD5((uint8 *)url.c_str(), (uint32)url.size()).toString();
 		dest += ".cache";
 		return dest;
+	}
+
+	bool CGroupHTML::isCacheFile(const std::string &path)
+	{
+		return startsWith(path, s_CacheDirectory);
+	}
+
+	/** A cache file that is not downloaded yet is not a texture: addImageDownload has set the placeholder, and the
+	 *  download callback sets the file once it is there. Given to the renderer now, the name only replaces the placeholder
+	 *  by a lookup miss, logged for every such image of the page.
+	 */
+	static void clearPendingCacheTexture(std::string &name)
+	{
+		if (CGroupHTML::isCacheFile(name) && !CFile::fileExists(name))
+			name.clear();
+	}
+
+	uint32 CGroupHTML::SWebOptions::getImageMaxSize() const
+	{
+		return imageMaxSize == 0 ? NLMISC::MAX_BITMAP_SIZE : std::min(imageMaxSize, NLMISC::MAX_BITMAP_SIZE);
 	}
 
 	void CGroupHTML::pumpCurlQueue()
@@ -638,13 +784,17 @@ namespace NLGUI
 			{
 				if ((*it)->data == nullptr)
 				{
-					LOG_DL("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
+					LOG_DL("(%s) starting new download '%s'", _Id.c_str(), (*it)->url.c_str());
 					if (!startCurlDownload(*it))
 					{
-						LOG_DL("(%s) failed to start '%s)'", _Id.c_str(), it->url.c_str());
-						finishCurlDownload(*it);
+						LOG_DL("(%s) failed to start '%s)'", _Id.c_str(), (*it)->url.c_str());
+						// out of the queue before its callback runs, as in checkDownloads; the callback can release the
+						// downloads of the page, so the queue is walked again from the start
+						CDataDownload *download = *it;
+						Curls.erase(it);
+						finishCurlDownload(download);
 
-						it = Curls.erase(it);
+						it = Curls.begin();
 						continue;
 					}
 				}
@@ -707,7 +857,7 @@ namespace NLGUI
 		LOG_DL("curl easy handle %p created for '%s'", curl, download->url.c_str());
 
 		// https://
-		if (toLowerAscii(download->url.substr(0, 8)) == "https://")
+		if (startsWithCaseInsensitiveAscii(download->url, "https://"))
 		{
 			// if supported, use custom SSL context function to load certificates
 			NLWEB::CCurlCertificates::useCertificates(curl);
@@ -715,6 +865,7 @@ namespace NLGUI
 
 		download->data = new CCurlWWWData(curl, download->url);
 		download->fp = fp;
+		download->receivedBytes = 0;
 
 		// initial connection timeout, curl default is 300sec
 		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, download->ConnectionTimeout);
@@ -745,15 +896,21 @@ namespace NLGUI
 
 		CUrlParser uri(download->url);
 		if (!uri.host.empty())
-			sendCookies(curl, uri.host, isTrustedDomain(uri.host));
+			sendCookies(curl, uri.host, isTrustedUrl(uri.scheme, uri.host));
 
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, download);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CDataDownload::writeData);
 
 		CURLMcode ret = curl_multi_add_handle(MultiCurl, curl);
 		if (ret != CURLM_OK)
 		{
 			nlwarning("cURL multi handle %p error %d on '%s'", curl, ret, download->url.c_str());
+			// nothing was downloaded: the callback finds no file, as for the failures above, and the handle is freed
+			fclose(fp);
+			download->fp = nullptr;
+			CFile::deleteFile(download->tmpdest);
+			delete download->data;
+			download->data = nullptr;
 			return false;
 		}
 
@@ -810,7 +967,7 @@ namespace NLGUI
 		{
 			if((*it)->url == finalUrl)
 			{
-				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), img);
+				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), view);
 				TextureDownloadCB *cb = dynamic_cast<TextureDownloadCB*>(*it);
 				if (cb)
 				{
@@ -849,6 +1006,10 @@ namespace NLGUI
 		std::string image = CFile::getPath(url) + CFile::getFilenameWithoutExtension(url) + ".tga";
 		if (lookupLocalFile(finalUrl, image.c_str(), false))
 		{
+			// The name found, unless the page's is a texture the renderer has (an interface icon): the renderer would
+			// look a path whose file name it reads differently up as given
+			if (CViewRenderer::getInstance()->getTextureIdFromName(image) < 0)
+				image = finalUrl;
 			setImage(img, image, type);
 			setImageSize(img, style);
 			return nullptr;
@@ -917,13 +1078,19 @@ namespace NLGUI
 		if ( ! CFile::isExists( pathName ) )
 			CFile::createDirectory( pathName );
 	}
+#if RYZOM_WEB_BNP_DOWNLOAD
 
 
 	// Get an url and return the local filename with the path where the bnp should be
 	string CGroupHTML::localBnpName(const string &url)
 	{
 		size_t lastIndex = url.find_last_of("/");
-		string dest = "user/"+url.substr(lastIndex+1);
+		string name = url.substr(lastIndex + 1);
+		// the name comes from the url, and the file is mounted from user/: it must be a plain file name there (on
+		// Windows, a "..\" in the last segment of the url left user/; a query made a name that cannot be created)
+		if (!CFile::isSafeFilename(name, false))
+			return string();
+		string dest = "user/" + name;
 		return dest;
 	}
 
@@ -943,6 +1110,11 @@ namespace NLGUI
 		}
 
 		string dest = localBnpName(url);
+		if (dest.empty())
+		{
+			nlwarning("The bnp download '%s' does not end with a plain file name, it is refused", url.c_str());
+			return false;
+		}
 		LOG_DL("add to download '%s' dest '%s'", url.c_str(), dest.c_str());
 
 		// create/delete the local file
@@ -979,6 +1151,7 @@ namespace NLGUI
 		if ( ! CFile::isExists( pathName ) )
 			CFile::createDirectory( pathName );
 	}
+#endif
 
 	void CGroupHTML::addStylesheetDownload(const std::vector<CHtmlParser::StyleLink> links)
 	{
@@ -1044,9 +1217,12 @@ namespace NLGUI
 								error = curl_easy_strerror(msg->data.result);
 							}
 							LOG_DL("data download finished with curl code %d (%s)", (sint)msg->msg, error.c_str());
-							dataDownloadFinished(success, error, *it);
 
+							// Out of the queue before its callback runs: the Lua of a bnp download can render the page,
+							// which releases every download in the queue. A redirect puts it back in front.
+							CDataDownload *download = *it;
 							Curls.erase(it);
+							dataDownloadFinished(success, error, download);
 							break;
 						}
 					}
@@ -1639,7 +1815,9 @@ namespace NLGUI
 		_CurlWWW = nullptr;
 
 		initImageDownload();
+#if RYZOM_WEB_BNP_DOWNLOAD
 		initBnpDownload();
+#endif
 
 		// setup default browser style
 		setProperty("browser_css_file", "browser.css");
@@ -2397,8 +2575,11 @@ namespace NLGUI
 		viewText->setModulateGlobalColor(ErrorColorGlobalColor);
 		viewText->setMultiLine (true);
 		getParagraph()->addChild (viewText);
-		if(!_TitlePrefix.empty())
-			setTitle (_TitlePrefix);
+		// The error has taken the place of the page: the window has its prefix alone (setTitle would put
+		// the prefix before the prefix), as after a page that gives no title (endBuild). Without a prefix
+		// that is no title, and not the wait text of the request that failed.
+		_TitleString = _TitlePrefix;
+		setContainerTitle (_TitleString);
 
 		updateRefreshButton();
 		invalidateCoords();
@@ -2706,6 +2887,7 @@ namespace NLGUI
 		// In title ?
 		if (_Object)
 		{
+			// the text inside an object is not shown
 			_ObjectScript += tmpStr;
 		}
 		else if (_SelectOption)
@@ -3026,8 +3208,17 @@ namespace NLGUI
 					over = localImageName(overBitmap);
 					addImageDownload(overBitmap, ctrlButton, style, OverImage);
 				}
+				else
+				{
+					// the name the normal bitmap resolved to: the page's path would be looked up as given by the renderer
+					over = normal;
+				}
 			}
 		}
+
+		clearPendingCacheTexture(normal);
+		clearPendingCacheTexture(pushed);
+		clearPendingCacheTexture(over);
 
 		ctrlButton->setType (type);
 		if (!normal.empty())
@@ -3246,10 +3437,12 @@ namespace NLGUI
 	{
 		result = url;
 		string tmp;
+		bool fileUrl = false;
 
 		if (toLowerAscii(result).find("file:") == 0 && result.size() > 5)
 		{
 			result = result.substr(5, result.size()-5);
+			fileUrl = true;
 		}
 		else if (result.find("://") != string::npos || result.find("//") == 0)
 		{
@@ -3257,12 +3450,17 @@ namespace NLGUI
 			return false;
 		}
 
-		tmp = CPath::lookup (CFile::getFilename(result), false, false, false);
-		if (tmp.empty())
-		{
-			// try to find in local directory
-			tmp = CPath::lookup (result, false, false, true);
-		}
+		// A page names a local file by its file name, and only the files of the search paths are local: the game data,
+		// the patches, the user directory and the bnp files mounted from it. A local page is rendered with trusted
+		// rights, and the directories around the search paths hold files a page can steer: the download cache (such as
+		// a stylesheet a page makes the client download), the chat logs and the log files. A path is never opened as
+		// given: Windows opens a network path (credentials sent to its host) or a device name.
+		// The file name of a path that mixes separators can itself be a network path ("x/\\host\share\a@b.png"), which
+		// CPath::lookup returns as it is because of its '@'
+		string fileName = CFile::getFilename(result);
+		if (CFile::isNetworkOrDevicePath(fileName))
+			fileName = CFile::getFilenameAfterAnySeparator(fileName);
+		tmp = CPath::lookup (fileName, false, false, false);
 
 		if (!tmp.empty())
 		{
@@ -3276,13 +3474,16 @@ namespace NLGUI
 		}
 		else
 		{
-			// Is it a texture in the big texture ?
-			if (CViewRenderer::getInstance()->getTextureIdFromName (result) >= 0)
+			// Is it a texture in the big texture ? (an image only: a page is opened as a file)
+			if (!isUrl && CViewRenderer::getInstance()->getTextureIdFromName (result) >= 0)
 			{
 				return true;
 			}
 			else
 			{
+				if (fileUrl)
+					nlwarning("A page asks for the local file '%s', which is not in the search paths", result.c_str());
+
 				// This is not a file in the CPath, let libwww open this URL
 				result = url;
 				return false;
@@ -3448,10 +3649,14 @@ namespace NLGUI
 				finalUrl = options.webServer + finalUrl;
 			}
 
+			if (!isLocal)
+				finalUrl = upgradeInsecureUrl(finalUrl);
 			_URL = finalUrl;
 
 			CUrlParser uri (_URL);
-			_TrustedDomain = isTrustedDomain(uri.host);
+			_TrustedDomain = isLocal ? isTrustedDomain(uri.host) : isTrustedUrl(uri.scheme, uri.host);
+			if (!_TrustedDomain && !isLocal && isTrustedDomain(uri.host))
+				nlwarning("(%s) WEB: '%s' is a trusted domain but '%s' is not https, the page is not trusted", _Id.c_str(), uri.host.c_str(), _URL.c_str());
 			_DocumentDomain = uri.host;
 
 			// file is probably from bnp (ingame help)
@@ -3497,10 +3702,12 @@ namespace NLGUI
 		CForm &form = _Forms[_PostFormId];
 
 		// button can override form action url (and methor, but we only do POST)
-		_URL = _PostFormAction.empty() ? form.Action : _PostFormAction;
+		_URL = upgradeInsecureUrl(_PostFormAction.empty() ? form.Action : _PostFormAction);
 
 		CUrlParser uri(_URL);
-		_TrustedDomain = isTrustedDomain(uri.host);
+		_TrustedDomain = isTrustedUrl(uri.scheme, uri.host);
+		if (!_TrustedDomain && isTrustedDomain(uri.host))
+			nlwarning("(%s) WEB: '%s' is a trusted domain but the form action '%s' is not https, the page is not trusted", _Id.c_str(), uri.host.c_str(), _URL.c_str());
 		_DocumentDomain = uri.host;
 
 		for (i=0; i<form.Entries.size(); i++)
@@ -3534,14 +3741,13 @@ namespace NLGUI
 			}
 			else if (form.Entries[i].ComboBox)
 			{
+				// a select with no option, or nothing selected, submits no value (as a browser does)
 				CDBGroupComboBox *cb = form.Entries[i].ComboBox;
-				if (cb)
+				sint32 sel = cb->getSelection();
+				if (sel >= 0 && sel < (sint32)form.Entries[i].SelectValues.size())
 				{
-					if (form.Entries[i].SelectValues.size() > 0)
-					{
-				entryData = form.Entries[i].SelectValues[cb->getSelection()];
-				addEntry = true;
-					}
+					entryData = form.Entries[i].SelectValues[sel];
+					addEntry = true;
 				}
 			}
 			else if (form.Entries[i].SelectBox)
@@ -3648,11 +3854,13 @@ namespace NLGUI
 		releaseDownloads();
 		updateRefreshButton();
 
-		// Reset the title
+		// The title bar says that the page is on its way. That text is not the title of a page and is not
+		// kept as one (_TitleString): a page that gives no title would leave it in the title bar for good,
+		// and an answer that is not a page puts the title of the page that stays back.
 		if(_TitlePrefix.empty())
-			setTitle (CI18N::get("uiPleaseWait"));
+			setContainerTitle (CI18N::get("uiPleaseWait"));
 		else
-			setTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
+			setContainerTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
 
 		url = upgradeInsecureUrl(url);
 
@@ -3674,7 +3882,7 @@ namespace NLGUI
 		}
 
 		// https://
-		if (toLowerAscii(url.substr(0, 8)) == "https://")
+		if (startsWithCaseInsensitiveAscii(url, "https://"))
 		{
 			// if supported, use custom SSL context function to load certificates
 			NLWEB::CCurlCertificates::useCertificates(curl);
@@ -3779,20 +3987,17 @@ namespace NLGUI
 	{
 		if (!success)
 		{
-			CUrlParser uri(_CurlWWW->Url);
-
-			// potentially unwanted chars
-			std::string url = _CurlWWW->Url;
-			url = strFindReplaceAll(url, string("<"), string("%3C"));
-			url = strFindReplaceAll(url, string(">"), string("%3E"));
-			url = strFindReplaceAll(url, string("\""), string("%22"));
-			url = strFindReplaceAll(url, string("'"), string("%27"));
+			// The page is rendered with the rights of the url's domain, so everything in it is escaped. It is made from the
+			// page's url, without the parameters that addHTTPGetParams adds to the request, which include the user's web
+			// authentication key: the reload link would put it in the history and in later error pages.
+			CUrlParser uri(_URL);
+			std::string url = CHtmlElement::htmlEscape(_URL);
 
 			std::string err;
 			err = "<html><head><title>cURL error</title></head><body>";
 			err += "<h1>Connection failed with cURL error</h1>";
-			err += error;
-			err += "<hr>(" + uri.scheme + "://" + uri.host + ") <a href=\"" + url + "\">reload</a>";
+			err += CHtmlElement::htmlEscape(error);
+			err += "<hr>(" + CHtmlElement::htmlEscape(uri.scheme + "://" + uri.host) + ") <a href=\"" + url + "\">reload</a>";
 			err += "</body></html>";
 			browseErrorHtml(err);
 			return;
@@ -3845,7 +4050,10 @@ namespace NLGUI
 			// if server did not send any error back
 			if (content.empty())
 			{
-				content = string("<html><head><title>ERROR</title></head><body><h1>Connection failed</h1><p>HTTP code '" + toString((sint32)code) + "'</p><p>URL '" + _CurlWWW->Url + "'</p></body></html>");
+				// The page is rendered with the rights of the url's domain: the url is escaped, or a query of a link to a
+				// trusted domain that answers an error without a body could add a <lua> element. It is the page's url,
+				// without the parameters that addHTTPGetParams adds, which include the user's web authentication key.
+				content = string("<html><head><title>ERROR</title></head><body><h1>Connection failed</h1><p>HTTP code '" + toString((sint32)code) + "'</p><p>URL '" + CHtmlElement::htmlEscape(_URL) + "'</p></body></html>");
 			}
 		}
 
@@ -3876,15 +4084,19 @@ namespace NLGUI
 	void CGroupHTML::dataDownloadFinished(bool success, const std::string &error, CDataDownload *data)
 	{
 		fclose(data->fp);
+		data->fp = nullptr;
 
 		CUrlParser uri(data->url);
 		if (!uri.host.empty())
 		{
-			receiveCookies(data->data->Request, uri.host, isTrustedDomain(uri.host));
+			receiveCookies(data->data->Request, uri.host, isTrustedUrl(uri.scheme, uri.host));
 		}
 
 		long code = -1;
 		curl_easy_getinfo(data->data->Request, CURLINFO_RESPONSE_CODE, &code);
+
+		// the callbacks move a downloaded file over the cached one: only a complete download may get there
+		bool downloaded = false;
 
 		LOG_DL("(%s) transfer '%p' completed with http code %d, url (len %d) '%s'", _Id.c_str(), data->data->Request, code, data->url.size(), data->url.c_str());
 		curl_multi_remove_handle(MultiCurl, data->data->Request);
@@ -3910,6 +4122,7 @@ namespace NLGUI
 				{
 					CFile::deleteFile(data->tmpdest);
 				}
+				downloaded = true;
 			}
 			else if ((code >= 301 && code <= 303) || code == 307 || code == 308)
 			{
@@ -3967,6 +4180,12 @@ namespace NLGUI
 			nlwarning("DATA download failed '%s', error '%s'", data->url.c_str(), error.c_str());
 		}
 
+		// a transfer that failed (the file is partial) or an error page (404, a redirect that was not followed)
+		if (!downloaded && CFile::fileExists(data->tmpdest))
+		{
+			CFile::deleteFile(data->tmpdest);
+		}
+
 		finishCurlDownload(data);
 	}
 
@@ -3988,12 +4207,15 @@ namespace NLGUI
 			}
 			catch(...) { }
 
-			// create html code with image url inside and do the request again
-			renderHtmlString("<html><head><title>"+_URL+"</title></head><body><img src=\"" + _URL + "\"></body></html>");
+			// create html code with image url inside and do the request again. The url is escaped: a query of the url
+			// could close the attribute and add elements, a <lua> one run with the rights of a trusted domain
+			std::string url = CHtmlElement::htmlEscape(_URL);
+			renderHtmlString("<html><head><title>" + url + "</title></head><body><img src=\"" + url + "\"></body></html>");
 		}
 		else if (_TrustedDomain && type.find("text/lua") == 0)
 		{
-			setTitle(_TitleString);
+			// the page stays, and its title comes back in place of the wait text
+			setContainerTitle(_TitleString);
 
 			_LuaScript = "\nlocal __CURRENT_WINDOW__=\""+this->_Id+"\" \n"+content;
 			CLuaManager::getInstance().executeLuaScript(_LuaScript, true);
@@ -4185,6 +4407,9 @@ namespace NLGUI
 	void CGroupHTML::beginBuild ()
 	{
 		_Browsing = true;
+
+		// a new page: it has no title until it gives one (htmlTITLE)
+		_TitleString.clear();
 	}
 
 	void CGroupHTML::endBuild ()
@@ -4193,11 +4418,12 @@ namespace NLGUI
 		_Browsing = false;
 		updateRefreshButton();
 
-		// check that the title is set, or reset it (in the case the page
-		// does not provide a title)
+		// The page gave no title: the window has its prefix alone, in place of the title of the page
+		// before or of the wait text (setTitle would put the prefix before the prefix).
 		if (_TitleString.empty())
 		{
-			setTitle(_TitlePrefix);
+			_TitleString = _TitlePrefix;
+			setContainerTitle(_TitleString);
 		}
 
 		invalidateCoords();
@@ -5351,7 +5577,8 @@ namespace NLGUI
 			string suri = elm.getAttribute("href");
 			if(suri.find("ah:") == 0)
 			{
-				if (_TrustedDomain || suri.find("ah:script:") == 0)
+				// an action handler runs with the client's rights, the script one included: trusted pages only
+				if (_TrustedDomain)
 					_Link.back() = suri;
 			}
 			else
@@ -5888,11 +6115,18 @@ namespace NLGUI
 		// read general property
 		string id = elm.getAttribute("id");
 
-		// Widget template name (old)
-		string templateName = elm.getAttribute("z_btn_tmpl");
-		// Input name is the new
-		if (elm.hasNonEmptyAttribute("z_input_tmpl"))
-			templateName = elm.getAttribute("z_input_tmpl");
+		// The page names the template of the widget, as a div of the class ryzom-ui-grouptemplate does: only a
+		// page of a trusted domain may. A template is interface XML with actions of its own, and the name of
+		// the input goes into it as a parameter. Another page gets the default widget of this browser.
+		string templateName;
+		if (_TrustedDomain)
+		{
+			// Widget template name (old)
+			templateName = elm.getAttribute("z_btn_tmpl");
+			// Input name is the new
+			if (elm.hasNonEmptyAttribute("z_input_tmpl"))
+				templateName = elm.getAttribute("z_input_tmpl");
+		}
 
 		// Widget minimal width
 		uint32 minWidth = 0;
@@ -6015,7 +6249,7 @@ namespace NLGUI
 					bool notfound = true;
 					for (uint i=0; i<form.Entries.size(); i++)
 					{
-						if (form.Entries[i].Name == name && form.Entries[i].Checkbox != NULL && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
+						if (form.Entries[i].Name == name && form.Entries[i].Checkbox != nullptr && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
 						{
 							checkbox->initRBRefFromRadioButton(form.Entries[i].Checkbox);
 							notfound = false;
@@ -6208,45 +6442,48 @@ namespace NLGUI
 	void CGroupHTML::htmlOBJECT(const CHtmlElement &elm)
 	{
 		_ObjectType = elm.getAttribute("type");
+#if RYZOM_WEB_BNP_DOWNLOAD
 		_ObjectData = elm.getAttribute("data");
 		_ObjectMD5Sum = elm.getAttribute("id");
 		_ObjectAction = elm.getAttribute("standby");
+#else
+		if (_ObjectType == "application/ryzom-data")
+			nlwarning("The page '%s' asks for the bnp download '%s' (<object type=\"application/ryzom-data\">), which is no "
+			    "longer supported: this client is built without RYZOM_WEB_BNP_DOWNLOAD", _URL.c_str(), elm.getAttribute("data").c_str());
+#endif
+		_ObjectScript.clear();
 		_Object = true;
 	}
 
 	void CGroupHTML::htmlOBJECTend(const CHtmlElement &elm)
 	{
+		// The text after the object is shown, whatever the page's trust. The end of an object on an untrusted page left
+		// this set until the next page, and the text that followed went into the script of the next trusted page's
+		// object, run with trusted rights.
+		_Object = false;
 
-
-		if (_ObjectType=="application/ryzom-data")
+		if (_ObjectType=="application/ryzom-tutorial" || _ObjectType=="application/ryzom-script")
 		{
-			if (!_TrustedDomain)
-				return;
-
+			// The text is a script for the game's Lua: only a trusted page may run one, and it goes as a string
+			// argument rather than as source text, so nothing in it needs escaping.
+			if (_TrustedDomain)
+				CLuaManager::getInstance().callMethod("game", _ObjectType=="application/ryzom-tutorial" ? "executeTutorial" : "executeRyzomScript", _ObjectScript);
+			else
+				nlwarning("The page '%s' has an <object type=\"%s\">, which only a trusted page may run", _URL.c_str(), _ObjectType.c_str());
+		}
+#if RYZOM_WEB_BNP_DOWNLOAD
+		else if (_TrustedDomain && _ObjectType=="application/ryzom-data")
+		{
 			if (!_ObjectData.empty())
 			{
 				if (addBnpDownload(_ObjectData, _ObjectAction, _ObjectScript, _ObjectMD5Sum))
 				{
 					CLuaManager::getInstance().executeLuaScript("\nlocal __ALLREADYDL__=true\n"+_ObjectScript, true);
 				}
-				_ObjectScript.clear();
 			}
 		}
-		else if (_ObjectType=="application/ryzom-tutorial")
-		{
-			while(strFindReplace(_ObjectScript, "[", "〈"));
-			while(strFindReplace(_ObjectScript, "]", "〉"));
-			CLuaManager::getInstance().executeLuaScript("\ngame:executeTutorial([["+_ObjectScript+"]])\n", true);
-			_ObjectScript.clear();
-		}
-		else if (_ObjectType=="application/ryzom-script")
-		{
-			while(strFindReplace(_ObjectScript, "[", "〈"));
-			while(strFindReplace(_ObjectScript, "]", "〉"));
-			CLuaManager::getInstance().executeLuaScript("\ngame:executeRyzomScript([["+_ObjectScript+"]])\n", true);
-			_ObjectScript.clear();
-		}
-		_Object = false;
+#endif
+		_ObjectScript.clear();
 	}
 
 	// ***************************************************************************
@@ -6735,11 +6972,24 @@ namespace NLGUI
 
 		_Cells.back()->NewLine = getTR();
 
+		// The grid of <table border> is drawn in the border colours of the table (its bordercolor attribute or
+		// the default grey, or its own CSS border colour), side by side. Without that grid a border the cell
+		// sets through CSS takes the text colour unless the CSS gives one.
 		CSSRect<CSSBorder> border;
-		border.Top.set(   table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
-		border.Right.set( table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
-		border.Bottom.set(table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
-		border.Left.set(  table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		if (table->CellBorder)
+		{
+			border.Top.set(1, CSS_LINE_STYLE_INSET, table->Border->getTopColor());
+			border.Right.set(1, CSS_LINE_STYLE_INSET, table->Border->getRightColor());
+			border.Bottom.set(1, CSS_LINE_STYLE_INSET, table->Border->getBottomColor());
+			border.Left.set(1, CSS_LINE_STYLE_INSET, table->Border->getLeftColor());
+		}
+		else
+		{
+			border.Top.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+			border.Right.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+			border.Bottom.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+			border.Left.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		}
 
 		if (_Style.hasStyle("border-top-width"))	border.Top.Width = _Style.Current.Border.Top.Width;
 		if (_Style.hasStyle("border-right-width"))	border.Right.Width = _Style.Current.Border.Right.Width;
@@ -6811,8 +7061,8 @@ namespace NLGUI
 		// read general property
 		string templateName;
 
-		// Widget template name
-		if (elm.hasNonEmptyAttribute("z_input_tmpl"))
+		// Widget template name: only from a page of a trusted domain (see htmlINPUT)
+		if (_TrustedDomain && elm.hasNonEmptyAttribute("z_input_tmpl"))
 			templateName = elm.getAttribute("z_input_tmpl");
 
 		// Get the string name

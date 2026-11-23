@@ -4,11 +4,10 @@ echo WIPE
 echo WIPE
 pause
 
-cd external
-cmd /C "call web_wipe"
-cd ..
+rem the web of this root keeps its configuration, logs and database in pipeline\shard_dev, the web setup
+rem writes its configuration into code\web\public_php
+cmd /C "call web_wipe.bat"
 
-del external\*.*
 del redist\*.bat
 
 rmdir /S /Q .\pipeline\client

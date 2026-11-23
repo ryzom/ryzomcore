@@ -29,6 +29,8 @@
 #include "server_share/memc_wrapper.h"
 
 #include "input_output_service.h"
+#include "server_share/client_refusal.h"
+#include "server_share/client_text.h"
 /*#include "game_share/tick_event_handler.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/mode_and_behaviour.h" //TEMP!!!
@@ -37,6 +39,7 @@
 #include "game_share/brick_types.h"
 #include "game_share/loot_harvest_state.h"*/
 #include "game_share/generic_xml_msg_mngr.h"
+#include "game_share/chat_message.h"
 
 /*#include <nel/misc/command.h>*/
 
@@ -133,6 +136,11 @@ void cbImpulsionChat( CMessage& msgin, const string &serviceName, TServiceId ser
 		return;
 	}
 
+	if (refuseClientTextTooLong(sender, "STRING:CHAT", ucstr, serviceId))
+		return;
+	if (!IOS->getChatManager().acceptChatLine(TheDataset.getDataSetRow(sender)))
+		return;
+
 	// Do a general filtering on client input
 	ucstr = IOS->getChatManager().filterClientInput(ucstr);
 
@@ -174,6 +182,11 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 		return;
 	}
 
+	if (refuseClientTextTooLong(sender, "STRING:CHAT_TEAM", ucstr, serviceId))
+		return;
+	if (!IOS->getChatManager().acceptChatLine(TheDataset.getDataSetRow(sender)))
+		return;
+
 	// Do a general filtering on client input
 	ucstr = IOS->getChatManager().filterClientInput(ucstr);
 
@@ -201,6 +214,122 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 	}
 } // impulsionChatTeam //
 
+//-----------------------------------------------
+//	showTell
+//
+//-----------------------------------------------
+static void showTell(const CEntityId &sender, const string &receiver, const ucstring &str)
+{
+	if( ShowChat )
+	{
+		string senderName;
+		CCharacterInfos *ci = IOS->getCharInfos(sender);
+		if (ci == NULL)
+			senderName = sender.toString();
+		else
+			senderName = IOS->getRocketName(ci->Name);
+
+		nlinfo("<impulsionTell> TELL %s to %s: '%s'", senderName.c_str(), receiver.c_str(), str.toString().c_str());
+	}
+}
+
+//-----------------------------------------------
+//	cbChatShare
+//
+//-----------------------------------------------
+void cbChatShare(CMessage &msgin, const string &serviceName, TServiceId serviceId)
+{
+	if (msgin.length() > CHAT_MESSAGE::MaxSerializedSize)
+		return;
+
+	CEntityId sender;
+	uint8 chatMode;
+	CEntityId dynamicChannelId;
+	string receiver;
+	uint32 requestId;
+	CChatMessage message;
+	try
+	{
+		msgin.serial(sender);
+		msgin.serial(chatMode);
+		msgin.serial(dynamicChannelId);
+		msgin.serial(receiver);
+		msgin.serial(requestId);
+		msgin.serial(message);
+	}
+	catch (const Exception &e)
+	{
+		nlwarning("<cbChatShare> %s", e.what());
+		return;
+	}
+	CChatManager &cm = IOS->getChatManager();
+	if (chatMode >= CChatGroup::nbChatMode || !message.isValid() ||
+		!CHAT_MESSAGE::isValidTarget((CChatGroup::TGroupType)chatMode, dynamicChannelId, receiver))
+	{
+		cm.sendQuoteResult(sender, requestId, false);
+		return;
+	}
+	const CChatGroup::TGroupType group = (CChatGroup::TGroupType)chatMode;
+
+	// a shared message is a chat line like STRING:CHAT and STRING:TELL, held to the same rate (ChatLineBurst)
+	if (!cm.acceptChatLine(TheDataset.getDataSetRow(sender)))
+	{
+		cm.sendQuoteResult(sender, requestId, false);
+		return;
+	}
+
+	for (std::vector<CChatMessagePart>::iterator it = message.Parts.begin(); it != message.Parts.end(); ++it)
+	{
+		if (it->Type == CChatMessagePart::Text)
+			it->TextValue = IOS->getChatManager().filterClientInput(it->TextValue,
+				it == message.Parts.begin(), it + 1 == message.Parts.end());
+	}
+	if (!message.isValid())
+	{
+		cm.sendQuoteResult(sender, requestId, false);
+		return;
+	}
+
+	bool accepted = false;
+	try
+	{
+		TDataSetRow senderRow = TheDataset.getDataSetRow(sender);
+		if (group == CChatGroup::tell)
+		{
+			// A tell of plain text comes this way too and is traced like one sent as STRING:TELL
+			if (message.Parts.size() == 1 && message.Parts[0].Type == CChatMessagePart::Text)
+				showTell(sender, receiver, message.Parts[0].TextValue);
+			accepted = cm.tellShared(senderRow, receiver, message);
+		}
+		else
+		{
+			// Use the requested source channel for this send, then restore the active chat mode.
+			CChatClient &client = cm.getClient(senderRow);
+			const CChatGroup::TGroupType previousMode = client.getChatMode();
+			const TChanID previousChannelId = client.getDynChatChan();
+			try
+			{
+				client.setChatMode(group, dynamicChannelId);
+				client.updateAudience();
+				accepted = cm.chatShared(senderRow, message);
+			}
+			catch (...)
+			{
+				client.setChatMode(previousMode, previousChannelId);
+				client.updateAudience();
+				throw;
+			}
+			client.setChatMode(previousMode, previousChannelId);
+			client.updateAudience();
+		}
+	}
+	catch (const Exception &e)
+	{
+		nlwarning("<cbChatShare> %s", e.what());
+	}
+	cm.sendQuoteResult(sender, requestId, accepted);
+}
+
 
 //-----------------------------------------------
 //	cbImpulsionTell :
@@ -224,20 +353,15 @@ void cbImpulsionTell( CMessage& msgin, const string &serviceName, TServiceId ser
 		return;
 	}
 
+	if (refuseClientTextTooLong(sender, "STRING:TELL", str, serviceId))
+		return;
+	if (!IOS->getChatManager().acceptChatLine(TheDataset.getDataSetRow(sender)))
+		return;
+
 	// Do a general filtering on client input
 	str = IOS->getChatManager().filterClientInput(str);
 
-	if( ShowChat )
-	{
-		string senderName;
-		CCharacterInfos *ci = IOS->getCharInfos(sender);
-		if (ci == NULL)
-			senderName = sender.toString();
-		else
-			senderName = IOS->getRocketName(ci->Name);
-
-		nlinfo("<impulsionTell> TELL %s to %s: '%s'", senderName.c_str(), receiver.c_str(), str.toString().c_str());
-	}
+	showTell(sender, receiver, str);
 	TDataSetRow senderRow = TheDataset.getDataSetRow(sender);
 
 	IOS->getChatManager().tell( senderRow, receiver, str );
@@ -447,8 +571,12 @@ void cbImpulsionAfkTxt( CMessage& msgin, const string &serviceName, TServiceId s
 		return;
 	}
 
-	// Do a general filtering on client input
-	afkTxt = IOS->getChatManager().filterClientInputColorCode(afkTxt);
+	if (refuseClientTextTooLong(sender, "STRING:AFK_TXT", afkTxt, serviceId))
+		return;
+
+	// Do a general filtering on client input, as for chat: the text is sent to whoever tells the player, and a
+	// leading '&' would let it pass for a system message ('&SYS&')
+	afkTxt = IOS->getChatManager().filterClientInput(afkTxt);
 
 	CCharacterInfos * charInfos = IOS->getCharInfos( sender );
 	if( charInfos != NULL )
@@ -1569,15 +1697,46 @@ void cbCustomEmote( CMessage& msgin, const string &serviceName, TServiceId servi
 		msgin.serial(sender);
 		msgin.serial(emoteCustomText);
 
-		// filter emote text
-		emoteCustomText = IOS->getChatManager().filterClientInputColorCode(emoteCustomText);
-
 		// get the player
 		if ( sender == TDataSetRow::createFromRawIndex(INVALID_DATASET_ROW) )
 		{
 			nlwarning("<cbCustomEmote> ignoring emote because PC %x Invalid", sender.getIndex());
 			return;
 		}
+
+		// The stock client sends "&EMT&", its display name (the name without title and home shard), a space and the
+		// text. The receivers show a line that starts with a category as it is, without a sender name, so the category
+		// and the name are made here: a line can pass neither for a system message nor for another character's emote.
+		const CEntityId senderId = TheDataset.getEntityId(sender);
+		static const ucstring s_EmotePrefix("&EMT&");
+		if (emoteCustomText.compare(0, s_EmotePrefix.size(), s_EmotePrefix) != 0)
+		{
+			nlwarning("HACK: %s sent a custom emote that does not start with &EMT&, refused", senderId.toString().c_str());
+			reportRefusedClientMessage(senderId);
+			return;
+		}
+		CCharacterInfos *senderInfos = IOS->getCharInfos(senderId);
+		if (senderInfos == NULL)
+		{
+			nlwarning("<cbCustomEmote> ignoring emote because %s has no character infos", senderId.toString().c_str());
+			return;
+		}
+		ucstring senderName = senderInfos->ShortName;
+		ucstring::size_type shardPos = senderName.find('(');
+		if (shardPos != ucstring::npos)
+			senderName = senderName.substr(0, shardPos);
+		// the client's name is the sender's (a name set by a command can contain spaces), or ends at the first space; a
+		// general filtering on the text, as for chat
+		ucstring::size_type textPos;
+		if (emoteCustomText.compare(s_EmotePrefix.size(), senderName.size() + 1, senderName + ucstring(" ")) == 0)
+			textPos = s_EmotePrefix.size() + senderName.size();
+		else
+			textPos = emoteCustomText.find(' ', s_EmotePrefix.size());
+		ucstring text = (textPos == ucstring::npos) ? ucstring() : emoteCustomText.substr(textPos + 1);
+		text = IOS->getChatManager().filterClientInput(text);
+		emoteCustomText = s_EmotePrefix + senderName + ucstring(" ") + text;
+		if (!cm.acceptChatLine(sender))
+			return;
 		// send the phrase
 		cm.sendEmoteCustomTextToAll(sender, emoteCustomText);
 	}
@@ -1724,6 +1883,11 @@ void cbDynChatAddSessionWithName(CMessage& msgin, const string &serviceName, TSe
 		return;
 	}
 	CCharacterInfos* cInfo = IOS->getCharInfos(clientName);
+	if (cInfo == NULL)
+	{
+		nlwarning("<cbDynChatAddSessionWithName> unknown character '%s', session not changed", clientName.toUtf8().c_str());
+		return;
+	}
 	client = cInfo->DataSetIndex;
 	if(client.isValid())
 	{
@@ -1775,6 +1939,11 @@ void cbDynChatRemoveSessionWithName(CMessage& msgin, const string &serviceName, 
 	msgin.serial(chan);
 	msgin.serial(clientName);
 	CCharacterInfos* cInfo = IOS->getCharInfos(clientName);
+	if (cInfo == NULL)
+	{
+		nlwarning("<cbDynChatRemoveSessionWithName> unknown character '%s', session not changed", clientName.toUtf8().c_str());
+		return;
+	}
 	client = cInfo->DataSetIndex;
 	if(client.isValid())
 	{
@@ -1891,7 +2060,7 @@ void cbDynChatServiceChat(CMessage& msgin, const string &serviceName, TServiceId
 
 	// send the message to all the player in this chat
 	CDynChatSession *dcc = chan->getFirstSession();
-	if(!dcc) nlwarning(("nobody hears on channel "+chanID.toString()).c_str());
+	if(!dcc) nlwarning("%s", ("nobody hears on channel "+chanID.toString()).c_str());
 
 	while (dcc)
 	{
@@ -2103,6 +2272,7 @@ TUnifiedCallbackItem CbIOSArray[]=
 	// Received from clients (via FS)
 //	{ "READY_STRING", cbImpulsionReadyString },
 	{ "CLIENT:STRING:CHAT", cbImpulsionChat },
+	{ "CHAT_SHARE", cbChatShare },
 	{ "CLIENT:STRING:CHAT_TEAM", cbImpulsionChatTeam },
 	{ "CLIENT:STRING:TELL", cbImpulsionTell },
 	{ "CLIENT:STRING:FILTER", cbImpulsionFilter },

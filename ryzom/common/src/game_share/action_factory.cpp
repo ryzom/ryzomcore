@@ -273,7 +273,16 @@ void CActionFactory::unpack (NLMISC::CBitMemStream &message, std::vector <CActio
 		}
 		else
 		{
-			action->unpack (message);
+			try
+			{
+				action->unpack (message);
+			}
+			catch (...)
+			{
+				// a malformed action goes back to the store instead of leaking
+				remove (action);
+				throw;
+			}
 			actions.push_back (action);
 		}
 	}
@@ -313,7 +322,16 @@ CAction *CActionFactory::unpack (NLMISC::CBitMemStream &message, NLMISC::TGameCy
 		}
 		else
 		{
-			action->unpack (message);
+			try
+			{
+				action->unpack (message);
+			}
+			catch (...)
+			{
+				// a malformed action goes back to the store instead of leaking
+				remove (action);
+				throw;
+			}
 		}
 	}
 

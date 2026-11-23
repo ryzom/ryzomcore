@@ -1588,7 +1588,7 @@ static bool	setupATIMeminfo(const char *glext)
 
 // ***************************************************************************
 // Extension Check.
-void	registerGlExtensions(CGlExtensions &ext)
+bool registerGlExtensions(CGlExtensions &ext)
 {
 	H_AUTO_OGL(registerGlExtensions);
 
@@ -1625,6 +1625,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Extensions.
 	const char	*glext= (const char*)glGetString(GL_EXTENSIONS);
+	if (glext == NULL)
+	{
+		nlwarning("3D: glGetString(GL_EXTENSIONS) failed, there is no current OpenGL context");
+		return false;
+	}
+
 	GLint	ntext;
 
 	nldebug("3D: Available OpenGL Extensions:");
@@ -1636,7 +1642,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 		for(uint i = 0; i < exts.size(); i++)
 		{
 			if(i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(string(exts[i]+" ").c_str());
+			DebugLog->displayRaw("%s", string(exts[i]+" ").c_str());
 			if(i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");
@@ -1842,6 +1848,8 @@ void	registerGlExtensions(CGlExtensions &ext)
 	ext.NVXGPUMemoryInfo = setupNVXGPUMemoryInfo(glext);
 	ext.ATIMeminfo = setupATIMeminfo(glext);
 #endif
+
+	return true;
 }
 
 
@@ -1974,7 +1982,7 @@ bool registerEGlExtensions(CGlExtensions &ext, EGLDisplay dpy)
 		for(uint i = 0; i < exts.size(); i++)
 		{
 			if(i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(string(exts[i]+" ").c_str());
+			DebugLog->displayRaw("%s", string(exts[i]+" ").c_str());
 			if(i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");
@@ -2008,7 +2016,7 @@ bool registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 		for(uint i = 0; i < exts.size(); i++)
 		{
 			if(i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(string(exts[i]+" ").c_str());
+			DebugLog->displayRaw("%s", string(exts[i]+" ").c_str());
 			if(i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");
@@ -2084,7 +2092,7 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen)
 		for(uint i = 0; i < exts.size(); i++)
 		{
 			if(i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(string(exts[i]+" ").c_str());
+			DebugLog->displayRaw("%s", string(exts[i]+" ").c_str());
 			if(i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");

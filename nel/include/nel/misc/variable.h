@@ -162,7 +162,7 @@ public:
 		// display the value
 		if (quiet)
 		{
-			log.displayNL(toString(human).c_str());
+			log.displayNL("%s", toString(human).c_str());
 		}
 		else
 		{
@@ -345,7 +345,7 @@ public:
 				std::string::size_type pos = 0;
 				while (pos < stat.size())
 				{
-					log.displayNL(getStat().substr(pos, 80).c_str());
+					log.displayNL("%s", getStat().substr(pos, 80).c_str());
 					pos += 80;
 				}
 				return true;
@@ -380,7 +380,7 @@ public:
 
 		if (quiet)
 		{
-			log.displayNL(val.c_str());
+			log.displayNL("%s", val.c_str());
 		}
 		else
 		{
@@ -474,7 +474,7 @@ public:
 		// display the value
 		if (quiet)
 		{
-			log.displayNL (disp.c_str());
+			log.displayNL ("%s", disp.c_str());
 		}
 		else
 		{

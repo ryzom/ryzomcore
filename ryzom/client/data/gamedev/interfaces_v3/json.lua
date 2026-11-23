@@ -374,6 +374,5 @@ function Json.decode(str)
   end
   return ( parse(str, next_char(str, 1, space_chars, true)) )
 end
-
 -- VERSION --
 FILE_JSON_VERSION = 31

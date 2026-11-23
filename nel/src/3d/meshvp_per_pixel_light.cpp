@@ -436,7 +436,7 @@ CVertexProgramPerPixelLight::CVertexProgramPerPixelLight(uint vp)
 			std::string          parseOutput;
 			if (!vpParser.parse(vpCode.c_str(), result, parseOutput))
 			{
-				nlwarning(parseOutput.c_str());
+				nlwarning("%s", parseOutput.c_str());
 				nlassert(0);
 			}
 		#endif

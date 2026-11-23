@@ -311,6 +311,16 @@ namespace NLGUI
 	private:
 		bool checkFeatureFlags(const char *str, ptrdiff_t len = 0) const;
 
+		/// Sets the DB entry to a <variable> value of the given type; false when it sets nothing
+		/// (a value that names another DB entry, or a type the readers do not handle)
+		static bool readVariable(const std::string &type, const std::string &value, const std::string &entry);
+
+		/// resetVariables for one declaration; warns when the declaration sets no value
+		static bool resetVariable(const std::string &entry, const VariableData &declaration);
+
+		/// The <variable> declarations parsed (type and value), by DB entry with arrays expanded, for resetVariables
+		std::map<std::string, VariableData> m_VariableDefaults;
+
 		/// Enabled feature flags (e.g. "ryzomclassic", "contexticons", etc...)
 	    /// Used by <if ... flags="..." \> blocks
 		std::set<std::string> m_FeatureFlags;
@@ -371,7 +381,7 @@ namespace NLGUI
 		void setWorkDir( const std::string &workdir ) NL_OVERRIDE{ _WorkDir = workdir; }
 
 		/// Looks up a file in either the working directory or using CPath::lookup
-		std::string lookup( const std::string &file );
+		std::string lookup(const std::string &file, bool throwException = true);
 
 		void initLUA() NL_OVERRIDE;
 		void uninitLUA() NL_OVERRIDE;
@@ -398,6 +408,7 @@ namespace NLGUI
 		void setEditorMode( bool b ) NL_OVERRIDE{ editorMode = b; }
 
 		void setVariable( const VariableData &v ) NL_OVERRIDE;
+		uint resetVariables( const std::string &entry ) NL_OVERRIDE;
 		bool serializeVariables( xmlNodePtr parentNode ) const NL_OVERRIDE;
 		bool serializeProcs( xmlNodePtr parentNode ) const NL_OVERRIDE;
 		bool serializePointerSettings( xmlNodePtr parentNode ) const NL_OVERRIDE;

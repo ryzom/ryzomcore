@@ -30,6 +30,7 @@
 
 #include "guild_manager.h"
 #include "primitives_parser.h"
+#include "game_share/chat_group.h"
 
 
 using namespace std;
@@ -388,6 +389,12 @@ NLMISC_COMMAND(guildMOTD,"Set the guild message of the day","<userId><message of
 		string motd;
 		if(args.size() == 2)
 			motd = args[1];
+		// The limit of COMMAND:GUILDMOTD (cbClientGuildMotd): a player can run this command too, and its text is not cut
+		if (ucstring::makeFromUtf8(motd).size() > CChatGroup::MaxClientTextLength)
+		{
+			log.displayNL("The message of the day is longer than %u characters, it is not set", (uint)CChatGroup::MaxClientTextLength);
+			return true;
+		}
 		guild->setMOTD(motd, eId);
 	}
 	return true;

@@ -143,7 +143,7 @@ struct CConsumable
 	NL_INSTANCE_COUNTER_DECL(CConsumable);
 public:
 
-	CConsumable() : Family(0), LoopTimer(0), MaxNbLoops(1), OverdoseTimer(0), Data(0), ConsumptionTime(0) {}
+	CConsumable() : Family(0), LoopTimer(0), MaxNbLoops(1), OverdoseTimer(0), Data(0), ConsumptionTime(0), HasBadProperty(false) {}
 
 	virtual void serial(class NLMISC::IStream &f);
 
@@ -159,6 +159,9 @@ public:
 	std::vector<TBrickParam::IIdPtr> Params;
 	/// params as strings
 	std::vector<std::string>	StringParams;
+	/// a param was left out at load (reported then): the consumable is refused (CCharacter::consumeItem). Rebuilt from
+	/// StringParams with Params, not serialized
+	bool		HasBadProperty;
 
 	//* Break when hit: If a creature hits the player, consumption is immediatly aborted
 	//* Sit: player can consume item sit down
@@ -243,7 +246,7 @@ struct SItemSpecialEffect
 		// build() only sets as many of the EffectArgFloat slots as the
 		// EffectType requires (1 or 2 out of 4), but serial() always writes
 		// all 4: default them so the unused slots don't pack uninitialized
-		// memory into the packed_sheets.
+		// memory into the packed sheets
 		EffectType = ITEM_SPECIAL_EFFECT::UNDEFINED;
 		for (uint i = 0; i < MaxEffectPerItem; ++i)
 			EffectArgFloat[i] = 0.0;
@@ -469,13 +472,9 @@ public:
 		Category = MP_CATEGORY::Undefined;
 		Family	 = RM_FAMILY::Unknown;
 		//IsForMission = false;
-
-		// readGeorges() has a bug: it reads the sheet's "HarvestSkill" value
-		// into CStaticItem::Skill instead of CMP::HarvestSkill, so this field
-		// is never actually set from the sheet. serial() writes it
-		// unconditionally regardless, so default it here to avoid packing
-		// uninitialized memory (not fixing the readGeorges() assignment
-		// itself, since that could change existing gameplay behavior).
+		// serial() writes these unconditionally while readGeorges() only sets
+		// them when the sheet has the value, so default them here rather than
+		// pack uninitialized memory into the packed sheets
 		Ecosystem    = ECOSYSTEM::unknown;
 		HarvestSkill = SKILLS::unknown;
 		StatEnergy   = 0;
@@ -855,7 +854,7 @@ public:
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 
 	// return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 68 + ( SKILLS::NUM_SKILLS << 16 ); }
+	inline static uint getVersion () { return 69 + ( SKILLS::NUM_SKILLS << 16 ); }
 
 	/// called when the sheet is removed
 	void removed() {}

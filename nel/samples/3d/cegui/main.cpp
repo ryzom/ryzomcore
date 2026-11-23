@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 			System::getSingleton().setDefaultMouseCursor("TaharezLook", "MouseArrow");
 
 			// create the font and set it up as the default.
-			FontManager::getSingleton().createFont("Commonwealth-10.font");
+			FontManager::getSingleton().createFont("DejaVuSans-10.font");
 
 			// load an image to use as a background
 			ImagesetManager::getSingleton().createImagesetFromImageFile("BackgroundImage", "GPN-2000-001437.tga");

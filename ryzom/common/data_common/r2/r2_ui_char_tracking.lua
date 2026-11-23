@@ -143,6 +143,34 @@ function CharTracking:isKicked(flags)
 end
 
 --***********************************************************************
+-- An editor of an edit session that does not own it gets the list and the tell: inviting, kicking, unkicking
+-- and teleporting to a character are the owner's (the session manager refuses the first three from anyone else)
+function CharTracking:isListOnly()
+	return r2 ~= nil and r2.AccessMode == "Editor" and not r2.isSessionOwner()
+end
+
+--***********************************************************************
+-- show the buttons of the window that the character may use (the invite button stays where it is, frozen: the
+-- tell button is placed against it)
+function CharTracking:updateAdminButtons()
+	local admin = not self:isListOnly()
+	local win = self:getWindow()
+	win:find("invite").frozen = not admin
+	win:find("teleport").active = admin
+	win:find("kick").active = admin
+	win:find("unkick").active = admin
+	-- the tooltip of the name column names what the character can do with a line: the tell alone for an
+	-- editor that does not own the session (the header has a button for each sort order)
+	local tooltipId = "uiRAP_CharNameTooltip"
+	if not admin then
+		tooltipId = "uiRAP_CharNameTooltipListOnly"
+	end
+	local nameHeader = win:find("header_line"):find("char")
+	nameHeader:find("tup").tooltip = i18n.get(tooltipId)
+	nameHeader:find("tdown").tooltip = i18n.get(tooltipId)
+end
+
+--***********************************************************************
 function CharTracking:getColumn(name)
 	return getUI("ui:interface:ring_chars_tracking:content:main:enclosing:columns:getw:column_group:" .. name .. ":values")
 end
@@ -363,7 +391,16 @@ end
 --***********************************************************************
 function CharTracking:onLineCharacterTooltip()
 
-	if self:isConnected(self.CurrActiveList[self:getSelectList():getElementIndex(getUICaller().parent) + 1].Flags) then
+	local connected = self:isConnected(self.CurrActiveList[self:getSelectList():getElementIndex(getUICaller().parent) + 1].Flags)
+	if self:isListOnly() then
+		-- an editor that does not own the session has the list and the tell: its text names neither the
+		-- kick and teleport buttons, which it does not have, nor an invitation, which was not its own
+		if connected then
+			setContextHelpText(i18n.get("uiRAP_ListedAndConnected"))
+		else
+			setContextHelpText(i18n.get("uiRAP_ListedAndNotConnected"))
+		end
+	elseif connected then
 		setContextHelpText(i18n.get("uiRAP_InvitedAndConnected"))
 	else
 		setContextHelpText(i18n.get("uiRAP_InvitedAndNotConnected"))
@@ -495,6 +532,11 @@ function CharTracking:onLineRightClick()
 	menu:find("kick").uc_hardtext = ucstring(i18n.get("uiRAP_MenuKick"):toUtf8() .. "'" .. self:getCharFromId(self.SelectedCharId).Char.."'")
 	menu:find("unkick").uc_hardtext = ucstring(i18n.get("uiRAP_MenuUnkick"):toUtf8() .. "'" .. self:getCharFromId(self.SelectedCharId).Char.."'")
 
+	local admin = not self:isListOnly()
+	menu:find("teleport").active = admin
+	menu:find("kick").active = admin
+	menu:find("unkick").active = admin
+
 	menu:find("unkick").grayed = not self:isKicked(self:getCharFromId(self.SelectedCharId).Flags)
 	menu:find("kick").grayed = not self:isConnected(self:getCharFromId(self.SelectedCharId).Flags)
 	menu:find("teleport").grayed = not self:isConnected(self:getCharFromId(self.SelectedCharId).Flags) or (r2.Mode=="r2ed_anim_test")
@@ -503,20 +545,34 @@ end
 
 --***********************************************************************
 function CharTracking:onTell()
-	debugInfo("tell to owner of session" .. self.SelectedCharId)
-	char = ucstring()	
-	char:fromUtf8(self:getCharFromId(self.SelectedCharId).Char)
-	tell(char, i18n.get("uiRAP_AskForTall"))
+	-- the chat gets the start of a tell to the character, for the player to write the message (a tell with a
+	-- fixed text was sent here)
+	tell(self:getCharFromId(self.SelectedCharId).Char, "")
 end
 
 --***********************************************************************
 function CharTracking:onKick()
 	r2:kickCharacter(self.SelectedCharId)
+	self:onKickOrUnkickAnswered()
 end
 
 --***********************************************************************
 function CharTracking:onUnkick()
 	r2:unkickCharacter(self.SelectedCharId)
+	self:onKickOrUnkickAnswered()
+end
+
+--***********************************************************************
+-- r2:kickCharacter and r2:unkickCharacter return when the server has answered (or has not, in time). The
+-- list still shows the character as it was: the kick and unkick buttons follow the list, so the one
+-- that undoes what was just done stayed frozen until the next periodic refresh. They are both frozen
+-- until the list comes, and the list is asked for now: refresh keeps the minimum time between two
+-- requests (updatePendingRefresh), which forceRefresh does not, so a series of kicks and unkicks asks
+-- for the list no more often than before.
+function CharTracking:onKickOrUnkickAnswered()
+	self:getWindow():find("kick").frozen = true
+	self:getWindow():find("unkick").frozen = true
+	self:refresh()
 end
 
 --***********************************************************************
@@ -528,7 +584,7 @@ end
 function CharTracking:onLineLeftDblClick()
 	local char = self:getCharFromId(self.SelectedCharId)
 	if self:isConnected(char.Flags) then
-		onTell()		
+		self:onTell()
 	end
 end
 
@@ -571,6 +627,7 @@ function CharTracking:onShow()
 	setOnDraw(self:getWindow(), "CharTracking:onDraw()")		
 	self:clear()
 	self:enableButtons(false)	
+	self:updateAdminButtons()
 	self:refresh()	
 end
 

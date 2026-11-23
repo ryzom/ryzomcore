@@ -43,11 +43,11 @@
 
 namespace UVWMAP {
 
-/// UVW Map OSM — Class_ID(UVWMAPOSM_CLASS_ID, 0) = (0xf72b1, 0), SuperClassId 0x810.
+/// UVW Map modifier (0xf72b1, 0), SuperClassId 0x810.
 extern const NLMISC::CClassId CLASSID_UVW_MAP;
 const PIPELINE::MAX::TSClassId SCLASS_OSMODIFIER = 0x00000810;
 
-// istdplug.h UVWMAP_* ParamBlock indices
+// Indices of the UVW Map's old ParamBlock
 enum
 {
 	UVWMAP_MAPTYPE = 0,
@@ -58,14 +58,15 @@ enum
 	UVWMAP_VFLIP = 5,
 	UVWMAP_WFLIP = 6,
 	UVWMAP_CAP = 7,
-	UVWMAP_CHANNEL = 8,
+	UVWMAP_CHANNEL = 8, // 1: vertex colour (map channel 0), 0: the map channel of UVWMAP_MAP_CHANNEL
 	UVWMAP_LENGTH = 9,
 	UVWMAP_WIDTH = 10,
 	UVWMAP_HEIGHT = 11,
-	UVWMAP_AXIS = 12
+	UVWMAP_AXIS = 12,
+	UVWMAP_MAP_CHANNEL = 13
 };
 
-// object.h mapping types for ApplyUVWMap
+// Mapping types
 enum
 {
 	MAP_PLANAR = 0,
@@ -84,9 +85,12 @@ struct SMeshView
 	std::vector<MAXMATH::Point3M> *Verts;
 	/// Per-face corner indices into Verts (size = 3 * numFaces).
 	std::vector<sint32> *FaceVerts; // [f*3+c] = vertex index
-	/// Optional face normals (one per face) — used by MAP_BOX / capped cylindrical.
-	std::vector<MAXMATH::Point3M> *FaceNormals; // may be NULL → computed on the fly
-	/// Map channels: channel id → (UV verts, face corner indices into those UV verts).
+	/// Per-face flags, edge visibility in bits 0..2 (face mapping); NULL: every edge visible.
+	std::vector<uint32> *FaceFlags;
+	/// The faces to map at face level; NULL maps every face.
+	const std::vector<bool> *FaceSel;
+	/// Map channels: channel id -> (UV verts, face corner indices into those UV verts). In: the incoming
+	/// channels; the mapped one keeps the corners of the faces it does not map.
 	struct SChannel
 	{
 		std::vector<NLMISC::CVector> UVs;
@@ -95,21 +99,13 @@ struct SMeshView
 	std::map<int, SChannel> *Maps;
 };
 
-/// Apply UVW Map to \a mesh. Reads pblock + gizmo from \a mod and 0x2510 from \a modApp.
-/// Returns false if the modifier cannot be decoded (caller should warn and skip).
-/// \a typeMask gates which projection types are applied (bit 1<<type): types outside the mask
-/// return false with \a outType set — the corpus-validated set grows per type (planar is pinned
-/// by the Rectangle01 GT; the rest await their own corpus/GT validation).
+/// Apply UVW Map to \a mesh. Reads the ParamBlock and gizmo from \a mod and 0x2510 from \a modApp.
+/// Returns false if the modifier cannot be decoded or its type is outside \a typeMask (bit 1 << type,
+/// \a outType set); the caller warns and leaves it out. \a outChannel receives the channel written,
+/// \a outUnmapped the count of faces face mapping could not map (not exactly one hidden edge; (0, 0) used).
 bool applyUvwMap(PIPELINE::MAX::CSceneClass *mod, PIPELINE::MAX::CStorageContainer *modApp,
-                 SMeshView &mesh, uint typeMask = 0xFFFFFFFF, int *outType = nullptr);
-
-/// Pure projection (no scene wiring) — for tests and for reuse by parametric-prim UV paths.
-/// \a tm maps object-space points into map space (row-vector: p' = p * tm).
-/// Writes one UV per face corner into \a outUVs (size 3*numFaces) and sets face indices 0..N-1.
-void applyUvwMapProjection(int type, float utile, float vtile, float wtile,
-                           int uflip, int vflip, int wflip, int cap,
-                           const MAXMATH::Matrix3M &tm, int channel,
-                           SMeshView &mesh);
+                 SMeshView &mesh, uint typeMask = 0xFFFFFFFF, int *outType = nullptr, int *outChannel = nullptr,
+                 uint *outUnmapped = nullptr);
 
 } /* namespace UVWMAP */
 

@@ -30,6 +30,9 @@ using namespace CLFECOMMON;
 
 extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
+// whether the FESecurity plug-in is created on this gateway (defined after CFESecurity)
+static bool isFESecurityCreated(IModuleGateway *gateway);
+
 /** the specialized route for frontend server transport */
 class CFEServerRoute : public CGatewayRoute
 {
@@ -117,6 +120,10 @@ public:
 	CGatewayFEServerTransport(const IGatewayTransport::TCtorParam &param) 
 		: IGatewayTransport(param)
 	{
+		// The routes are game clients: they see only the modules that address them, not each other's, and the gateway
+		// limits what they can disclose (see openServer)
+		Firewalled = true;
+		PeerInvisible = true;
 	}
 
 	~CGatewayFEServerTransport() NL_OVERRIDE
@@ -199,11 +206,13 @@ public:
 				return false;
 			}
 
-			openServer();
+			if (!openServer())
+				return false;
 		}
 		else if (commandName == "close")
 		{
-			closeServer();
+			if (!closeServer())
+				return false;
 		}
 		else
 			return false;
@@ -211,38 +220,57 @@ public:
 		return true;
 	}
 
-	/// Open the server by intercepting client gateway message
-	void openServer()
+	/// Open the server by intercepting client gateway message. A refusal is logged and the frontend runs on, with no
+	/// route for the clients' modules: nothing catches an exception thrown from a command, which would end the frontend.
+	bool openServer()
 	{
 		if (OpenTransport() != NULL)
-			throw ETransportError("openServer : a transport is already open !");
+		{
+			nlwarning("Frontend gateway transport not opened: a transport of this type is already open");
+			return false;
+		}
+
+		// a game client would see every module and other clients' modules, and could disclose modules under any name
+		if (!Firewalled || !PeerInvisible)
+		{
+			nlwarning("Frontend gateway transport not opened: it must be Firewalled and PeerInvisible, its routes are game clients (gw.transportOptions fes(PeerInvisible Firewalled))");
+			return false;
+		}
+
+		// the plug-in replaces the security data of the clients' modules with the frontend's client info: without it,
+		// the services would take whatever a client sends for its own modules as the frontend's word
+		if (!isFESecurityCreated(_Gateway))
+		{
+			nlwarning("Frontend gateway transport not opened: the FESecurity plug-in must be created on its gateway first (gw.securityCreate FESecurity)");
+			return false;
+		}
 
 		// set this transport as the open transport
 		OpenTransport() = this;
 
-		THostMap &hostmap = CFrontEndService::instance()->receiveSub()->clientMap();
-		THostMap::iterator first(hostmap.begin()), last(hostmap.end());
-		for (; first != last; ++first)
-		{
-			CClientHost *ch = first->second;
+		// Clients connected now are not told: a FEOPEN without a route has no serial number for the client to read
+		// (it would throw and end the client), and no serial could be right, since the client numbers the messages per
+		// transport while each new route starts at 0. A client opens its route by sending FEOPEN when its own gateway
+		// transport opens (the ring editor modules); a client whose transport was already open keeps no route here
+		// until it opens it again.
+		uint nbClients = (uint)CFrontEndService::instance()->receiveSub()->clientMap().size();
+		if (nbClients != 0)
+			nlwarning("Frontend gateway transport opened with %u clients connected: those whose own gateway transport is open (ring editors) have no route until they open it again", nbClients);
 
-			CMessage message("IMPULTION_ID");
-			CBitMemStream bms;
-			GenericXmlMsgHeaderMngr.pushNameToStream( "MODULE_GATEWAY:FEOPEN", bms );
-			message.serialMemStream( bms );
-
-			message.invert();
- 
-			sendImpulsion( ch->clientId(), message, 1, toString( "from FE to ClientId %u", ch->clientId()).c_str(), false );
-		}
-
+		return true;
 	}
 
+	/// The gateway hosting this transport
+	IModuleGateway *getGateway() const { return _Gateway; }
+
 	/// Close the server, this will close the listing socket and any active connection
-	void closeServer()
+	bool closeServer()
 	{
 		if (OpenTransport() != this)
-			throw ETransportError("closeServer : The server is not open");
+		{
+			nlwarning("Frontend gateway transport not closed: it is not open");
+			return false;
+		}
 
 		// close all client connections
 		while (!_Routes.empty())
@@ -259,6 +287,7 @@ public:
 
 		// this transport is no longer open
 		OpenTransport() = NULL;
+		return true;
 	}
 
 
@@ -322,7 +351,48 @@ public:
 		CMessage msg("", true);
 		uint32 len;
 		bms.serial(len);
+		// the length comes from the client: it must fit in what is left of the message before the buffer is allocated
+		if (len > bms.length() - (uint32)bms.getPos())
+		{
+			CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+			CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+			nlwarning("FEHACK: client %u sent a gateway message of %u bytes in %u, discarded", (uint)clientId, len, bms.length() - (uint32)bms.getPos());
+			frs->rejectReceivedMessage( HackedSizeInBuffer, client != NULL ? client->Uid : 0 );
+			return;
+		}
+		// The header is the client's too. The client writes it in binary: 4 bytes, the format, then the length and the
+		// characters of the name. An empty message would be read from the uninitialised 1000-byte buffer that
+		// bufferToFill(0) leaves in place.
+		const uint32 minHeaderSize = 4 + 1 + 4;
+		if (len < minHeaderSize)
+		{
+			CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+			CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+			nlwarning("FEHACK: client %u sent a gateway message of %u bytes, shorter than a message header, discarded", (uint)clientId, len);
+			frs->rejectReceivedMessage( InsufficientSize, client != NULL ? client->Uid : 0 );
+			return;
+		}
 		bms.serialBuffer(msg.bufferToFill(len), len);
+		// readType throws on a name that is empty (the check here names the client), and ignores a short format, which the L5 transport of
+		// the service the message goes to fails on (nlerror in readTypeAtCurrentPos). The header is read on a stream of
+		// its own: the message has no read length before readType.
+		CMessage::TFormat format;
+		uint32 nameLength;
+		{
+			NLMISC::CMemStream header(true);
+			header.fill(msg.buffer(), minHeaderSize);
+			header.seek(4, NLMISC::IStream::begin);
+			header.serial(format);
+			header.serial(nameLength);
+		}
+		if (format.StringMode || !format.LongFormat || nameLength == 0 || nameLength > len - minHeaderSize)
+		{
+			CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+			CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+			nlwarning("FEHACK: client %u sent a gateway message with a header of format %u and a name of %u bytes in %u, discarded", (uint)clientId, (uint)msg.buffer()[4], nameLength, len - minHeaderSize);
+			frs->rejectReceivedMessage( MalformedAction, client != NULL ? client->Uid : 0 );
+			return;
+		}
 		msg.readType();
 
 		// forward to gateway
@@ -496,6 +566,16 @@ NLMISC_REGISTER_OBJECT(IGatewayTransport, CGatewayFEServerTransport, std::string
 
 #define FE_SECURITY_CLASS_NAME "FESecurity"
 
+// The classes of the modules that a game client creates and plugs in the gateway it connects to the frontend: the
+// ring editor's CClientEditionModule (ryzom/client/src/r2/dmc), the only one. A client route discloses these modules
+// only (CFESecurity::acceptModule): the modules of the services know each other by their class, and some by an entry
+// in the manifest.
+// A client module declares no manifest entry. CModuleBase::getModuleManifest writes the entry of each interceptor of
+// the module followed by a space: with empty entries that leaves spaces only, one less than there are interceptors.
+static const char *const s_ClientModuleClasses[] = {
+	"ClientEditionModule",
+};
+
 class CFESecurity : public CGatewaySecurity
 {
 public:
@@ -511,6 +591,49 @@ public:
 	~CFESecurity() NL_OVERRIDE
 	{
 		Instance = NULL;
+	}
+
+	/** A route discloses a module. From a client route, only a module that the game client creates is accepted: its
+	 *	class is one of s_ClientModuleClasses and its manifest holds no entry. The gateway keeps nothing of a refused
+	 *	one, so no service hears of it. The modules that come through the other routes are those of the services, all
+	 *	accepted.
+	 */
+	bool acceptModule(CGatewayRoute *from, const std::string &moduleFullName, const std::string &moduleClass, const std::string &moduleManifest) NL_OVERRIDE
+	{
+		CFEServerRoute *route = dynamic_cast<CFEServerRoute *>(from);
+		if (route == NULL)
+			return true;
+
+		bool clientClass = false;
+		for (uint i = 0; i < sizeofarray(s_ClientModuleClasses); ++i)
+		{
+			if (moduleClass == s_ClientModuleClasses[i])
+			{
+				clientClass = true;
+				break;
+			}
+		}
+		if (clientClass && moduleManifest.find_first_not_of(' ') == std::string::npos)
+			return true;
+
+		// The stock client never does this: logged, and counted as a rejected message of the client (the module comes
+		// in a gateway message of the datagram being processed, as in onDispatchMessage)
+		CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+		TClientId clientId = route->ClientId;
+		CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+		if (!clientClass)
+		{
+			nlwarning("FEHACK: client %u (uid %u) disclosed module '%s' of class '%s' on its gateway route, a class no client creates, refused",
+			    (uint)clientId, client != NULL ? client->Uid : 0, moduleFullName.c_str(), moduleClass.c_str());
+			frs->rejectReceivedMessage(RefusedModuleClass, client != NULL ? client->Uid : 0);
+		}
+		else
+		{
+			nlwarning("FEHACK: client %u (uid %u) disclosed module '%s' of class '%s' on its gateway route with the manifest '%s', a client module declares no entry, refused",
+			    (uint)clientId, client != NULL ? client->Uid : 0, moduleFullName.c_str(), moduleClass.c_str(), moduleManifest.c_str());
+			frs->rejectReceivedMessage(RefusedModuleManifest, client != NULL ? client->Uid : 0);
+		}
+		return false;
 	}
 
 	/** A new proxy is available, the security plug-in can add security data */
@@ -545,8 +668,9 @@ public:
 				ci->UserId = ch->Uid;
 			}
 
-			/// store the security data in the proxy
-			setSecurityData(proxy, ci);
+			/// store the security data in the proxy, in place of any the client sent: the services trust what a proxy
+			/// carries
+			replaceAllSecurityDatas(proxy, ci);
 		}
 	}
 
@@ -567,8 +691,20 @@ public:
 	}
 
 
+	/// The gateway this plug-in is created on
+	IModuleGateway *getGateway() const { return _Gateway; }
+
 	void onDelete() NL_OVERRIDE
 	{
+		// The clients' modules that connect later would keep the security data they send: the client routes are closed
+		// with the plug-in, as the transport does not open without it
+		CGatewayFEServerTransport *transport = CGatewayFEServerTransport::OpenTransport();
+		if (transport != NULL && transport->getGateway() == _Gateway)
+		{
+			nlwarning("FESecurity plug-in removed: the frontend gateway transport is closed with it, and its client routes");
+			transport->closeServer();
+		}
+
 		// remove any client security info
 		vector<IModuleProxy*> proxies;
 		_Gateway->getModuleProxyList(proxies);
@@ -627,6 +763,11 @@ public:
 NLMISC_REGISTER_OBJECT(CGatewaySecurity, CFESecurity, std::string, string(FE_SECURITY_CLASS_NAME));
 
 CFESecurity		*CFESecurity::Instance = NULL;
+
+static bool isFESecurityCreated(IModuleGateway *gateway)
+{
+	return CFESecurity::Instance != NULL && CFESecurity::Instance->getGateway() == gateway;
+}
 
 
 void cbEntityIdChanged(CClientHost *clienthost)

@@ -40,6 +40,7 @@
 #include "game_share/rolemaster_flags.h"
 #include "game_share/people.h"
 #include "nel/gui/lua_ihm.h"
+#include "nel/gui/lua_manager.h"
 #include "../time_client.h"
 
 
@@ -192,7 +193,8 @@ void			CSPhraseManager::initInGame()
 	// compute and the progression phrase, and update DB
 	computePhraseProgression();
 
-	_EnchantWeaponMainBrick = NLMISC::CSheetId("bsxea10.sbrick");
+	// the enchant weapon effect of the powers (BSXEA index 11, the family's last; bsxea10 was never a sheet)
+	_EnchantWeaponMainBrick = NLMISC::CSheetId("bsxea11.sbrick");
 
 	// build map that gives its description for each built-in phrase
 	// slow test on all sheets here ...
@@ -1132,8 +1134,9 @@ void CSPhraseManager::buildPhraseDesc(string &text, const CSPhraseCom &phrase, u
 		// **** Compute Phrase Elements from phrase
 		// get the current action malus (0-100)
 		uint32	totalActionMalus= 0;
-		CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
-			: &*(_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
+		if (!_TotalMalusEquipLeaf)
+			_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false);
+		CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf;
 
 		// root brick must not be Power or aura, because Action malus don't apply to them
 		// (ie leave 0 ActionMalus for Aura or Powers
@@ -1422,6 +1425,11 @@ sint				CSPhraseManager::getPhraseSuccessRate(const CSPhraseCom &phrase)
 		skillValue= pSM->getSkillValueMaxBranch(rootBrick->getSkill());
 		sTable= STExtract;
 	}
+	// A power, an aura or the activation of an enchantment has no success roll: no rate (the tooltip hides a rate of 0)
+	else if(rootBrick->isSpecialPower() || rootBrick->isProcEnchantment())
+	{
+		return 0;
+	}
 	// Default
 	else
 	{
@@ -1506,6 +1514,94 @@ void				CSPhraseManager::getPhraseHpCost(const CSPhraseCom &phrase, uint32 total
 }
 
 // ***************************************************************************
+// The cast time of a magic phrase depends on the item in the right hand, whose casting speed factors
+// come with its item info: this waiter asks the server for the info when it is not up to date.
+class CCastTimeItemInfoWaiter : public IItemInfoWaiter
+{
+public:
+	virtual void infoReceived() NL_OVERRIDE;
+};
+
+static CCastTimeItemInfoWaiter s_CastTimeItemInfoWaiter;
+
+void CCastTimeItemInfoWaiter::infoReceived()
+{
+	getInventory().removeItemInfoWaiter(this);
+
+	// The tooltip of an action shows the cast time: fill the one that is open again, with the info
+	CDBCtrlSheet *ctrl = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getCurContextHelp());
+	if (ctrl && ctrl->isSPhraseId())
+	{
+		std::string help;
+		ctrl->getContextHelpToolTip(help);
+	}
+}
+
+// ***************************************************************************
+// The casting speed factor the item in the right hand gives to a magic phrase, as the server computes it
+// (CMagicPhrase::computeCastingTime and CMagicFocusItemFactor::getCastingTimeFactor): the mean, over the
+// skills of the bricks, of the factor of the item for the family of the skill. The item gives nothing
+// to a phrase with a brick that costs more than its quality.
+static float getPhraseCastingSpeedFactor(const CSPhraseCom &phrase)
+{
+	CSBrickManager *pBM = CSBrickManager::getInstance();
+	CInventoryManager &inv = getInventory();
+
+	// The item in the right hand, and its slot in the bag
+	CItemImage *handItem = inv.getHandItem(0);
+	if (!handItem || handItem->getSheetID() == 0)
+		return 0.f;
+	uint bagIndex = (uint)(handItem - &inv.getBagItem(0));
+	uint itemSlotId = inv.getItemSlotId(LOCAL_INVENTORY ":BAG", bagIndex);
+	// the slot of the server must hold this item (not so while an item is moved), else its info is not the one of the item
+	if (inv.getItemSheetForSlotId(itemSlotId) != handItem->getSheetID())
+		return 0.f;
+
+	// The factors do not change during the life of an item: the info of the slot is used as it is,
+	// and asked again when the server has a newer one (the open tooltip is filled again when it arrives).
+	if (!inv.isItemInfoUpToDate(itemSlotId))
+	{
+		s_CastTimeItemInfoWaiter.ItemSheet = handItem->getSheetID();
+		s_CastTimeItemInfoWaiter.ItemSlotId = itemSlotId;
+		inv.addItemInfoWaiter(&s_CastTimeItemInfoWaiter);
+	}
+	const CClientItemInfo &itemInfo = inv.getItemInfo(itemSlotId);
+
+	// The server compares the largest cost of a brick with the recommended level of the item, its quality
+	sint brickMaxSabrinaCost = 0;
+	float sumFactor = 0.f;
+	uint numSkill = 0;
+	for (uint i = 0; i < phrase.Bricks.size(); i++)
+	{
+		const CSBrickSheet *brick = pBM->getBrick(phrase.Bricks[i]);
+		if (!brick)
+			continue;
+		brickMaxSabrinaCost = std::max(brickMaxSabrinaCost, (sint)brick->SabrinaCost);
+		for (uint j = 0; j < brick->UsedSkills.size(); j++)
+		{
+			SKILLS::ESkills skill = brick->UsedSkills[j].Skill;
+			if (skill == SKILLS::unknown)
+				continue;
+			numSkill++;
+			// the family of the skill is the start of its name
+			const std::string &skillName = SKILLS::toString(skill);
+			if (skillName.compare(0, 4, "SMOE") == 0)
+				sumFactor += itemInfo.CastingSpeedFactor[CItemInfos::OffensiveElemental];
+			else if (skillName.compare(0, 4, "SMOA") == 0)
+				sumFactor += itemInfo.CastingSpeedFactor[CItemInfos::OffensiveAffliction];
+			else if (skillName.compare(0, 4, "SMDH") == 0)
+				sumFactor += itemInfo.CastingSpeedFactor[CItemInfos::DefensiveHeal];
+			else if (skillName.compare(0, 4, "SMDA") == 0)
+				sumFactor += itemInfo.CastingSpeedFactor[CItemInfos::DefensiveAffliction];
+		}
+	}
+	if (numSkill == 0 || brickMaxSabrinaCost > (sint)handItem->getQuality())
+		return 0.f;
+
+	return std::max(sumFactor / (float)numSkill, 0.f);
+}
+
+// ***************************************************************************
 void				CSPhraseManager::getPhraseCastTime(const CSPhraseCom &phrase, uint32 totalActionMalus, float &castTime, float &castTimeMalus)
 {
 	CSBrickManager	*pBM= CSBrickManager::getInstance();
@@ -1565,8 +1661,14 @@ void				CSPhraseManager::getPhraseCastTime(const CSPhraseCom &phrase, uint32 tot
 	if(maxCastTime < minCastTime)
 		maxCastTime = minCastTime;
 
+	// The item in the right hand shortens the cast time of a magic phrase. As on the server, its casting
+	// speed factor divides the minimum time only, not the time the cast time credit adds.
+	float	itemSpeedFactor= 0.f;
+	if(rootBrick->isMagic())
+		itemSpeedFactor= getPhraseCastingSpeedFactor(phrase);
+
 	// Compute the casting time.
-	castTime= (float)(maxCastTime-minCastTime)*castingTimeFactor+(float)minCastTime;
+	castTime= (float)(maxCastTime-minCastTime)*castingTimeFactor+(float)minCastTime/(1.f+itemSpeedFactor);
 
 	// Compute the malus (positive value)
 	castTimeMalus= (float)(maxCastTime-minCastTime)*castingTimeFactor*totalActionMalus/100;
@@ -4524,8 +4626,9 @@ uint32 CSPhraseManager::getTotalActionMalus(const CSPhraseCom &phrase) const
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CSBrickManager *pBM = CSBrickManager::getInstance();
 	uint32 totalActionMalus = 0;
-	CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
-		: &*(_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
+	if (!_TotalMalusEquipLeaf)
+		_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false);
+	CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf;
 	// root brick must not be Power or aura, because Action malus don't apply to them
 	// (ie leave 0 ActionMalus for Aura or Powers
 	if (!phrase.Bricks.empty())
@@ -4572,6 +4675,34 @@ void CSPhraseManager::setRegenTickRange(uint powerIndex, const CTickRange &tickR
 	}
 }
 
+
+// ***************************************************************************
+string CSPhraseComAdpater::updateTooltip()
+{
+	string help;
+	CLuaState *ls = CLuaManager::getInstance().getLuaState();
+	CLuaStackRestorer lsr(ls, 0);
+	CLuaIHM::pushReflectableOnStack(*ls, this);
+	ls->pushGlobalTable();
+	CLuaObject game(*ls);
+	game = game["game"];
+	game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
+	if (!ls->empty())
+	{
+#ifdef RYZOM_LUA_UCSTRING
+		CLuaIHM::getUCStringOnStack(*ls, -1, help); // Compatibility
+#else
+		help = ls->toString();
+#endif
+		ls->pop();
+	}
+	else
+	{
+		nlwarning("Ucstring result expected when calling 'game:updatePhraseTooltip', possible script error");
+	}
+
+	return help;
+}
 
 // ***************************************************************************
 int CSPhraseComAdpater::luaGetCastTime(CLuaState &ls)
@@ -4688,7 +4819,7 @@ int CSPhraseComAdpater::luaGetStaCost(CLuaState &ls)
 int CSPhraseComAdpater::luaGetName(CLuaState &ls)
 {
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::push(ls, this->Phrase.Name);
+	CLuaIHM::pushUCString(ls, this->Phrase.Name.toUtf8()); // Compatibility
 #else
 	ls.push(this->Phrase.Name.toUtf8());
 #endif
@@ -4708,8 +4839,7 @@ int CSPhraseComAdpater::luaGetDesc(CLuaState &ls)
 		if (*desc)
 		{
 #ifdef RYZOM_LUA_UCSTRING
-			ucstring uc = ucstring::makeFromUtf8(desc); // Compatibility
-			CLuaIHM::push(ls, uc);
+			CLuaIHM::pushUCString(ls, desc); // Compatibility
 #else
 			ls.push(desc);
 #endif

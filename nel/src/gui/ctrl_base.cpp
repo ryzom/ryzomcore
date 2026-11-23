@@ -579,8 +579,9 @@ namespace NLGUI
 	{
 		const char *funcName = "setTooltipUtf8";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
-		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
-		std::string tooltip = ls.toString(1);
+		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
+		std::string tooltip;
+		CLuaIHM::getUCStringOnStack(ls, 1, tooltip);
 
 		setDefaultContextHelp(tooltip);
 

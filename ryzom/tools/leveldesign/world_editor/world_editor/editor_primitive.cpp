@@ -982,12 +982,12 @@ void VerifyPrimitivesStructures()
 			int end = errors.find_first_of ("\n");
 			while (first != string::npos)
 			{
-				nlwarning (errors.substr(first, end-first).c_str());
+				nlwarning ("%s", errors.substr(first, end-first).c_str());
 				first = end;
 				end = errors.find_first_of ("\n", end+1);
 			}
 
-			theApp.errorMessage (errors.c_str());
+			theApp.errorMessage("%s", errors.c_str());
 		}
 	}
 	getMainFrame()->terminateLoadingDialog();

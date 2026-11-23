@@ -87,6 +87,7 @@
 #include "animation_fx_id_array.h"
 #include "cursor_functions.h"
 #include "interface_v3/bar_manager.h"
+#include "sound_manager.h"
 // sheets
 #include "client_sheets/item_fx_sheet.h"
 #include "client_sheets/attack_id_sheet.h"
@@ -1234,10 +1235,8 @@ void CCharacterCL::updateVisualPropertyOrient(const NLMISC::TGameCycle &gameCycl
 	// if no skeleton we set the orientation
 	if(_Skeleton.empty())
 	{
-		// Respect the sheet's 'Turn' property: a skeleton-less entity
-		// (e.g. a static decoration) that cannot turn must not be forced
-		// to face the server-sent orientation on every update.
-		front(CVector((float)cos(_TheoreticalOrientation), (float)sin(_TheoreticalOrientation), 0.f), true, true, _CanTurn);
+		// server forces the entity orientation even if it cannot turn
+		front(CVector((float)cos(_TheoreticalOrientation), (float)sin(_TheoreticalOrientation), 0.f), true, true, true);
 		dir(front(), false, false);
 		if(_Primitive)
 			_Primitive->setOrientation(_TheoreticalOrientation, dynamicWI);
@@ -3702,8 +3701,9 @@ void CCharacterCL::beginCast(const MBEHAV::CBehaviour &behaviour)
 		dirToTarget.z = 0;
 		dirToTarget.normalize();
 		front( dirToTarget );
+		// dir() does not check the sheet's Turn flag as front() does: a placed object must not swing its mesh
 		if(_CanTurn)
-		dir( dirToTarget );
+			dir( dirToTarget );
 	}
 
 	switch(behaviour.Behaviour)
@@ -4876,8 +4876,9 @@ void CCharacterCL::applyBehaviour(const CBehaviourContext &bc)	// virtual
 				frontYawBefore = frontYaw();
 				front( dirToTarget );
 			}
+			// dir() does not check the sheet's Turn flag as front() does: a placed object must not swing its mesh
 			if(_CanTurn)
-			dir( dirToTarget );
+				dir( dirToTarget );
 		}
 
 		// Apply the state animation chosen before
@@ -5873,9 +5874,21 @@ void CCharacterCL::animEventsProcessing(double startTime, double stopTime)
 		return;
 
 	// \todo Vianney : temp le temps de savoir comment on joue les son pour le propre joueur
-	// No sound for the player.
-	if(_Slot != 0 || _Mode != MBEHAV::NORMAL)
+	// The user in the NORMAL mode gets the step sounds from CUserEntity::updateSound while moving. The
+	// animation sounds of these states are steps, and are left out there or the steps would be heard twice:
+	// a state that moves the character (the "move" flag), and a turn (the "rotation" flag, the turn_*_to_walk
+	// and turn_*_to_backward states too) while the user moves. A turn on the spot keeps its own steps.
+	bool	stepsFromUpdateSound= false;
+	if(_Slot == 0 && _Mode == MBEHAV::NORMAL)
 	{
+		stepsFromUpdateSound= _CurrentState->Move
+			|| (_CurrentState->Rotation && UserEntity && !UserEntity->getVelocity().isNull());
+	}
+	if(!stepsFromUpdateSound)
+	{
+		// The sounds of the user are played at the level set for them.
+		if(_Slot == 0 && SoundMngr)
+			_SoundContext.RelativeGain = SoundMngr->getUserEntitySoundLevel();
 		// Retreive the surface material
 		uint32 matId= getGroundType();
 		// Set the material id var
@@ -9177,6 +9190,7 @@ void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 		{
 			if ((*itAttachedFxToStart).MaxNumAnimCount == index)
 				return;
+			++itAttachedFxToStart;
 		}
 		// remove previous aura
 		_AuraFX[index] = nullptr;

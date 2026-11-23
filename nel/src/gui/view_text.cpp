@@ -1429,14 +1429,6 @@ namespace NLGUI
 		}
 	}
 
-#ifdef RYZOM_LUA_UCSTRING
-	// ***************************************************************************
-	void CViewText::setTextAsUtf16(const ucstring &text)
-	{
-		setText(text.toUtf8());
-	}
-#endif
-
 	// ***************************************************************************
 	void CViewText::setTextLocalized(const std::string &text, bool localized)
 	{
@@ -1493,6 +1485,12 @@ namespace NLGUI
 	// ***************************************************************************
     void CViewText::setText(const std::string &text)
     {
+		if (_LetterColors != NULL)
+		{
+			delete _LetterColors;
+			_LetterColors = NULL;
+			invalidateContent();
+		}
 	    // common case: no special format, no case mode => easy cache test
 	    if (_FormatTags.empty() && _CaseMode == CaseNormal)
 	    {
@@ -2458,14 +2456,6 @@ namespace NLGUI
 		endOfPreviousLine = !_Lines[line]->getLF();
 	}
 
-#ifdef RYZOM_LUA_UCSTRING
-	// ***************************************************************************
-	void CViewText::setHardTextAsUtf16(const ucstring &ht)
-	{
-		setHardText(ht.toUtf8());
-	}
-#endif
-
 	// ***************************************************************************
 	void CViewText::setHardText (const std::string &ht)
 	{
@@ -2476,20 +2466,6 @@ namespace NLGUI
 		}
 		setText(ht);
 	}
-
-#ifdef RYZOM_LUA_UCSTRING
-	// ***************************************************************************
-	ucstring CViewText::getTextAsUtf16() const
-	{
-		return CUtfStringView(getText()).toUtf16();
-	}
-
-	// ***************************************************************************
-	ucstring CViewText::getHardTextAsUtf16() const
-	{
-		return CUtfStringView(getHardText()).toUtf16();
-	}
-#endif
 
 	// ***************************************************************************
 	string CViewText::getColorAsString() const
@@ -3301,6 +3277,77 @@ namespace NLGUI
 
 
 	// ***************************************************************************
+	uint	CViewText::getFormatTagLength(const std::string &text, uint index)
+	{
+		uint	textSize= (uint)text.size();
+		if(index>=textSize)
+			return 0;
+
+		// Same order as buildFormatTagText
+		if(isColorTag(text, index, textSize))
+			return 7;	// @{RGBA}
+
+		if(isTabTag(text, index, textSize))
+		{
+			uint	i= index+3;
+			while(i<textSize && text[i]!='}')
+				i++;
+			return i<textSize ? i-index+1 : 0;
+		}
+
+		if(isTooltipTag(text, index, textSize))
+		{
+			uint	i= index+3;
+			while(i<textSize && text[i]!='}')
+				i++;
+			return i<textSize ? i-index+1 : 0;
+		}
+
+		return 0;
+	}
+
+	// ***************************************************************************
+	std::string	CViewText::getFormatTagPrefixAt(const std::string &text, uint pos)
+	{
+		uint	textSize= (uint)text.size();
+		if(pos>textSize)
+			pos= textSize;
+
+		std::string	color, tooltip;
+		bool		anyTag= false;
+
+		// The whole string is scanned: a tagged string renders through setTextFormatTaged.
+		for(uint i=0;i<textSize;)
+		{
+			uint	len= getFormatTagLength(text, i);
+			if(len==0)
+			{
+				i++;
+				continue;
+			}
+			anyTag= true;
+			if(i<pos)
+			{
+				if(isColorTag(text, i, textSize))
+					color.assign(text, i, len);
+				else if(isTooltipTag(text, i, textSize))
+					tooltip.assign(text, i, len);
+				// tab tags are positions, not state
+			}
+			i+= len;
+		}
+
+		if(!anyTag)
+			return std::string();
+
+		// Keep the piece on the tagged path, which starts from white.
+		if(color.empty())
+			color= "@{FFFF}";
+
+		return color + tooltip;
+	}
+
+	// ***************************************************************************
 	void		CViewText::buildFormatTagText(const std::string &text, std::string &textBuild, std::vector<CViewText::CFormatTag> &formatTags, std::vector<std::string> &tooltips)
 	{
 		formatTags.clear();
@@ -3373,14 +3420,6 @@ namespace NLGUI
 				precTag= formatTags.back();
 		}
 	}
-
-#ifdef RYZOM_LUA_UCSTRING
-	// ***************************************************************************
-	void	CViewText::setTextFormatTagedAsUtf16(const ucstring &text)
-	{
-		setTextFormatTaged(text.toUtf8());
-	}
-#endif
 
 	// ***************************************************************************
 	void	CViewText::setTextFormatTaged(const std::string &text)
@@ -3471,15 +3510,8 @@ namespace NLGUI
 
 		// color format is available only if multilined
 		if (!_MultiLine)
-			nlwarning("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.c_str());
+			CLuaIHM::debugInfo(NLMISC::toString("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.c_str()));
 	}
-
-#ifdef RYZOM_LUA_UCSTRING
-	void CViewText::setSingleLineTextFormatTagedAsUtf16(const ucstring &text)
-	{
-		setSingleLineTextFormatTaged(text.toUtf8());
-	}
-#endif
 
 	void CViewText::setSingleLineTextFormatTaged(const std::string &text)
 	{
@@ -3539,7 +3571,7 @@ namespace NLGUI
 
 		// this color format is available only if not multilined
 		if (_MultiLine)
-			nlwarning("ViewText is multilined : uc_hardtext_single_line_format will not act as wanted !\n%s", text.c_str());
+			CLuaIHM::debugInfo(NLMISC::toString("ViewText is multilined : uc_hardtext_single_line_format will not act as wanted !\n%s", text.c_str()));
 	}
 
 

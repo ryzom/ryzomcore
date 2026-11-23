@@ -366,7 +366,7 @@ void CClient::updateFullStat ()
 			CallbackServer->send (msgout, From);
 		}
 
-		nlinfo (line.c_str());
+		nlinfo ("%s", line.c_str());
 	}
 
 
@@ -463,7 +463,7 @@ void CClient::updateStat ()
 		fclose (fp);
 	}
 
-	nlinfo (line.c_str());
+	nlinfo ("%s", line.c_str());
 
 	CMessage msgout("INFO");
 	msgout.serial(line);

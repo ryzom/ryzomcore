@@ -36,6 +36,7 @@
 #include "building_manager/building_physical.h"
 #include "guild_manager/fame_manager.h"
 #include "zone_manager.h"
+#include "mission_manager/mission_base_behaviour.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -167,7 +168,8 @@ void CGuildMemberModule::setGrade( uint16 index,uint8 session, EGSPD::CGuildGrad
 		return;
 	}
 	EGSPD::CGuildGrade::TGuildGrade oldGrade = member->getGrade();
-	if ( !canAffectGrade( oldGrade ) )
+	// both the member's grade and the one given must be below the caller's own, as the client's menu offers
+	if ( !canAffectGrade( oldGrade ) || !canAffectGrade( grade ) )
 	{
 		proxy.sendSystemMessage("GUILD_INSUFFICIENT_GRADE");
 		return;
@@ -349,7 +351,8 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 	if (invitedChar == NULL) return;
 	invitedAllegiance = invitedChar->getAllegiance();
 
-	if (invitedAllegiance.first != guildAllegiance.first && invitedAllegiance.first != PVP_CLAN::Neutral)
+	// the test the character passes again when it joins (CCharacter::canBelongToGuild)
+	if (!CGuild::isAllegianceCompatible(guildAllegiance.first, invitedAllegiance.first))
 	{
 		SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
 		params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
@@ -358,7 +361,7 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 		return;
 	}
 
-	if (invitedAllegiance.second != guildAllegiance.second && invitedAllegiance.second != PVP_CLAN::Neutral)
+	if (!CGuild::isAllegianceCompatible(guildAllegiance.second, invitedAllegiance.second))
 	{
 		SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
 		params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
@@ -537,8 +540,22 @@ void CGuildMemberModule::clearOnlineGuildProperties()
 {
 	CGuildCharProxy targetProxy;
 	getProxy(targetProxy);
+
+	// an exchange may hold items of the guild inventory, release them while the character still has access to it
+	CCharacter *c = PlayerManager.getChar(targetProxy.getId());
+	if (c)
+		c->abortExchange();
+
 	targetProxy.setGuildId(0);
 	targetProxy.updateTargetingChars();
+
+	// the guild missions, which the next guild's missions would otherwise inherit (see CTeam::clearPlayerTeamDB)
+	CCharacter *user = PlayerManager.getChar(targetProxy.getId());
+	if (user)
+	{
+		for (uint8 i = MaxGroupMissionCount; i < MaxGroupMissionCount + MaxGuildMissionCount; ++i)
+			CMissionBaseBehaviour::clearGroupJournalEntry(*user, i);
+	}
 
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, targetProxy.getEntityRowId(), DSPropertyCELL );
 	sint32 cell = mirrorCell;

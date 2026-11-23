@@ -236,7 +236,14 @@ struct CUCStringHashMapTraits
 	CUCStringHashMapTraits() { }
 	size_t operator()(const ucstring &id) const
 	{
-		return id.size();
+		// The 32-bit FNV-1a offset basis and prime, applied per 16-bit code unit (not per byte); 32-bit result
+		uint32 hash = 2166136261u;
+		for (ucstring::size_type i = 0; i < id.size(); ++i)
+		{
+			hash ^= (uint32)id[i];
+			hash *= 16777619u;
+		}
+		return (size_t)hash;
 	}
 	bool operator()(const ucstring &id1, const ucstring &id2) const
 	{
@@ -261,6 +268,10 @@ ucchar toLower(ucchar c);
 ucstring toUpper(const ucstring &str);
 void toUpper(ucchar *str);
 ucchar toUpper(ucchar c);
+
+/** Return at most the first maxLength UTF-16 units of a string, without cutting a surrogate pair in half
+ */
+ucstring truncateUtf16(const ucstring &str, size_t maxLength);
 
 };
 

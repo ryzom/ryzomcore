@@ -88,6 +88,12 @@ NLMISC_COMMAND (shards, "displays the list of all registered shards", "")
 	return true;
 }
 
+// A field of a result row for display: a SQL NULL is a null pointer
+static const char *sqlDisplayField(const char *field)
+{
+	return field ? field : "NULL";
+}
+
 NLMISC_COMMAND (shardDatabase, "displays the list of all shards in the database", "")
 {
 	if(args.size() != 0) return false;
@@ -96,15 +102,17 @@ NLMISC_COMMAND (shardDatabase, "displays the list of all shards in the database"
 	MYSQL_ROW row;
 	sint32 nbrow;
 
-	string reason = sqlQuery("select ShardId, WsAddr, NbPlayers, Name, Online, ClientApplication, Version, DynPatchURL from shard", nbrow, row, result);
-	if(!reason.empty()) { log.displayNL("Display registered users failed; '%s'", reason.c_str()); return true; }
+	// the domain is joined so that a shard whose domain_id names no domain is listed too, with a NULL domain name
+	string reason = sqlQuery("select s.ShardId, s.domain_id, d.domain_name, s.WsAddr, s.NbPlayers, s.Name, s.Online, s.Version, s.State from shard s left join domain d on d.domain_id = s.domain_id", nbrow, row, result);
+	if(!reason.empty()) { log.displayNL("Display shards in database failed; '%s'", reason.c_str()); return true; }
 
 	log.displayNL("Display the %d shards in the database :", nbrow);
-	log.displayNL(" > ShardId, WsAddr, NbPlayers, Name, Online, ClientApplication, Version, DynPatchURL");
+	log.displayNL(" > ShardId, DomainId, DomainName, WsAddr, NbPlayers, Name, Online, Version, State");
 
 	if (nbrow != 0) while(row != 0)
 	{
-		log.displayNL(" > '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'", row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
+		log.displayNL(" > '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'", sqlDisplayField(row[0]), sqlDisplayField(row[1]), sqlDisplayField(row[2]),
+			sqlDisplayField(row[3]), sqlDisplayField(row[4]), sqlDisplayField(row[5]), sqlDisplayField(row[6]), sqlDisplayField(row[7]), sqlDisplayField(row[8]));
 		row = mysql_fetch_row(result);
 	}
 

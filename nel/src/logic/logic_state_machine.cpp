@@ -55,7 +55,7 @@ void xmlCheckNodeName (xmlNodePtr &node, const char *nodeName)
 		smprintf (tmp, 512, "LogicStateMachine STATE_MACHINE XML Syntax error in block line %d, node %s should be %s",
 			node ? (int)node->line:-1, node ? (const char *)node->name : "NULL", nodeName);
 
-		nlinfo (tmp);
+		nlinfo ("%s", tmp);
 		nlstop;
 		throw EXmlParsingError (tmp);
 	}

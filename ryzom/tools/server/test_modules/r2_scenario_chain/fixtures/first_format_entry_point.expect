@@ -1,0 +1,30 @@
+# A scenario of the first format on the island that has number 17 in the first list of islands,
+# uiR2_Deserts23. A scenario of that time starts at the one entry point its island had. The later lists
+# of entry points do not have that one; the island has it under the name uiR2EntryPointAlpha01, and the
+# location the scenario gets names it. The islands and entry points of this test are in fixtures/islands.
+upgrade: ok
+version_update: changed
+version_update_note: uiR2EDVersionNoteEmptyGroups(1)
+version_update_note: uiR2EDVersionNoteFirstAct()
+version_update_note: uiR2EDVersionNoteEntryPoints(1)
+no_line: version_update_note: uiR2EDVersionNoteIsland
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsFar
+absent: version_update_failure
+absent: dropped_update
+absent: late_update
+save: ok
+roundtrip: ok
+reload_version_update: current
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Description.LocationId = 22
+scenario_at: Locations = <size 1>
+scenario_at: Locations[0].IslandName = uiR2_Deserts23
+scenario_at: Locations[0].EntryPoint = uiR2EntryPointAlpha01
+rt_at: Locations[0].Island = uiR2_Deserts23
+rt_at: Locations[0].EntryPoint = uiR2EntryPointAlpha01

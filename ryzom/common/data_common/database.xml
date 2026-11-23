@@ -1,4 +1,5 @@
 <database_description>
+  <!-- deployed_signature content="2525197443c3cbd40cbed08a71fec2e9" md5="2001780293949abdff161d600efd332e" (what this file says, and the MD5 of the file as it is deployed: CGenericXmlMsgHeaderManager::findDeployedSignature) -->
   <!-- Define bank superclass -->
   <bank_superclass>
     <bank name="PLR" class="CCDBSynchronised" />

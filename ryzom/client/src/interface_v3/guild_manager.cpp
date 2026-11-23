@@ -352,7 +352,6 @@ void CGuildManager::update()
 	// *** Need to update Names?
 	if (_NeedUpdate)
 	{
-		_NeedUpdate = false;
 		bool bAllValid = true;
 		// Update wait until all the name of members, name of the guild and description are valid
 
@@ -363,6 +362,8 @@ void CGuildManager::update()
 			if (!pSMC->getString (_GuildMembers[i].NameID, _GuildMembers[i].Name)) bAllValid = false;
 			else _GuildMembers[i].Name = CEntityCL::removeTitleAndShardFromName(_GuildMembers[i].Name);
 		}
+		// Our own name arrives through the string manager as well, and the grade below is looked up by name
+		if ((UserEntity != nullptr) && (!_GuildMembers.empty()) && UserEntity->getEntityName().empty()) bAllValid = false;
 
 		// If all is valid no more need update and if guild is opened update the interface
 		if (bAllValid)
@@ -421,9 +422,6 @@ void CGuildManager::update()
 				uint i;
 				_Grade = EGSPD::CGuildGrade::Member;
 				string sUserName = toLower(UserEntity->getEntityName());
-				if (sUserName.empty())
-					_NeedUpdate = true;
-
 				for (i = 0; i < _GuildMembers.size(); ++i)
 				{
 					if (toLower(_GuildMembers[i].Name) == sUserName)
@@ -457,6 +455,7 @@ void CGuildManager::update()
 			}
 
 			// guild updated
+			_NeedUpdate = false;
 			_NeedUpdateMembers= false;
 		}
 	}

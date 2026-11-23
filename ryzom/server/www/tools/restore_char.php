@@ -130,7 +130,10 @@ xml_copy("/xml/EntityBase/_Gender/@value");
 xml_copy("/xml/EntityBase/_Size/@value");
 
 $v = $src->EntityBase->_Name['value'];
-$v = strstr($v, '(', true);
+$p = strstr($v, '(', true);
+if ($p !== false) {
+	$v = $p;
+}
 $dst->EntityBase->_Name['value'] = $v.'(Atys)';
 
 $dst->_Missions->CharId['value'] = eid();
@@ -141,9 +144,10 @@ if($templates[$templ][0] == 'account_11076_3_pdr.bin' || $templates[$templ][0] =
 
 $result = $dst->xpath('//_ItemId/@value');
 
-while(list( , $node) = each($result)) {
+foreach ($result as &$node) {
 	$node[0] = itemid();
 }
+unset($node);
 
 xml_copy("/xml/_FirstConnectedTime/@value");
 xml_copy("/xml/_LastConnectedTime/@value");
@@ -242,8 +246,8 @@ global $src, $dst;
 	else $d = $dst_path;
 	xml_remove($xml_path);
 	$result = $src->xpath($xml_path);
-	while(list( , $node) = each($result)) {
-			xml_merge($d, $node);
+	foreach ($result as $node) {
+		xml_merge($d, $node);
 	}
 }
 

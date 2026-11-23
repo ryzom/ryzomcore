@@ -1,0 +1,20 @@
+# Plot items whose sheet is a number that can be no sheet number: one with a fraction, and one far too
+# large. The update leaves them as they are, and the note shows each number as it is, in a few characters
+# (the fraction is not rounded away, the large number is not written out in hundreds of digits). The
+# check of an upload refuses the scenario, as before.
+
+upgrade: unchanged
+version_update: unchanged
+version_update_note: uiR2EDVersionNotePlotItemUnknown(Half, 8460334.5)
+version_update_note: uiR2EDVersionNotePlotItemUnknown(Huge, 1e+300)
+no_line: version_update_note: uiR2EDVersionNotePlotItemIcon
+absent: version_update_failure
+
+scenario_vs_file: same
+save: ok
+roundtrip: ok
+translate: ok
+rt_check: invalid: PlotItems[0].SheetId is the number
+rt_plot_item_sheets:
+no_line: rt_plot_item_sheets: ok
+result: 8

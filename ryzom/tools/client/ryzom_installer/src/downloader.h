@@ -74,6 +74,7 @@ protected:
 	void downloadFile();
 
 	bool checkDownloadedFile();
+	bool refusesToReplacePart();
 
 	QNetworkAccessManager *m_manager;
 	QTimer *m_timer;
@@ -85,6 +86,22 @@ protected:
 	qint64 m_offset;
 	qint64 m_size;
 	QDateTime m_lastModified;
+
+	// m_size is the size of the whole file, from a parsed Content-Range or the Content-Length of a 200
+	bool m_sizeKnown;
+
+	// Content type of the latest answer, and of the first answer for each file in this run
+	QString m_contentType;
+	QMap<QString, QString> m_firstContentTypes;
+
+	// Status of the running GET, read at its first data, 0 before
+	int m_getStatus;
+
+	// Failure found while the GET runs, reported when it has finished
+	QString m_getFailure;
+
+	// Parts deleted because their size or date disagreed with the server, per file, for this run
+	QMap<QString, int> m_partDeletions;
 
 	bool m_supportsAcceptRanges;
 	bool m_supportsContentRange;

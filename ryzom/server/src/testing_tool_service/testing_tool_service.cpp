@@ -334,7 +334,7 @@ void CTestingTool::startTest()
 	}
 	string s = string("\n*********** Starting test iteration ") + toString( _CurrentIteration ) + string("\n");
 	fputs( s.c_str(), _TestSessionReport );
-	nlinfo( s.c_str() );
+	nlinfo("%s", s.c_str());
 
 	_EngageFightInTick = 50;
 	_TimeTestStart = CTickEventHandler::getGameCycle() + 50;

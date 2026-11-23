@@ -227,6 +227,24 @@ void makeInstanceTransparent(NL3D::UInstance	&inst, uint8 opacity, bool disableZ
 // change the video mode, possibly centering the software mouse cursor if going to fullscreen
 void setVideoMode(const NL3D::UDriver::CMode &mode);
 
+// The size (of the client area) of the window of a client that leaves fullscreen: the size the window had when
+// the client went to fullscreen in this run, else the default window size. The size of the fullscreen mode is the
+// size of a screen: a window of that size does not fit on it
+void getWindowSizeLeavingFullscreen(uint16 &width, uint16 &height);
+
+// The frame limiter of the login and character selection loops, called once per frame after the swap. These
+// screens (an interface, and the characters of the selection) need no more frames than a display shows: without
+// the sleep of the configuration (Sleep >= 0) and without vertical sync, a frame waits here for the rest of a
+// 60th of a second, and for longer while the window is minimized, has no area or has not the focus. (The game
+// itself is not slowed for a window without the focus: several clients are played side by side. These screens
+// are not the game.)
+void limitOutgameFrameRate();
+
+// Nothing of the window is shown: it is minimized (with some drivers and window systems a minimized window keeps
+// its size), or it has no area (resized down to its title bar). The frame loops leave time to other applications
+// then
+bool isWindowMinimizedOrWithoutArea();
+
 // Get the current color depth (8, 16, or 32). In windowed mode, this will be the desktop color depth, in fullscreen mode, the color depth of the framebuffer.
 uint getCurrentColorDepth();
 

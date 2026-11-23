@@ -373,7 +373,7 @@ void displayZones()
 	catch(const Exception &)
 	{
 		string tmp = string("Cant load bankfile ")+ViewerCfg.BanksPath + "/" + ViewerCfg.Bank;
-		nlerror (tmp.c_str());
+		nlerror ("%s", tmp.c_str());
 	}
 
 	if (!ViewerCfg.TilesPath.empty())
@@ -403,7 +403,7 @@ void displayZones()
 	catch(const Exception &)
 	{
 		string tmp = string("Cant load bankfile ")+ViewerCfg.BanksPath + "/" + farBank;
-		nlerror (tmp.c_str());
+		nlerror ("%s", tmp.c_str());
 	}
 	
 	if ( ! Landscape->Landscape.initTileBanks() )

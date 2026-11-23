@@ -193,6 +193,8 @@ CLandscape::CLandscape() :
 
 	// Init far lighting with White/black
 	setupStaticLight (CRGBA(255,255,255), CRGBA(0,0,0), 1.f);
+	// Default: the light on the ground is not scaled at render
+	m_LightScale = 1.f;
 	// Default material for pointLights
 	_PointLightDiffuseMaterial= CRGBA::White;
 
@@ -860,6 +862,10 @@ void			CLandscape::updateGlobalsAndLockBuffers (const CVector &refineCenter)
 	// PZBModelPosition
 	CLandscapeGlobals::PZBModelPosition= _PZBModelPosition;
 
+	// The light scale, as a diffuse color
+	uint8 lightScale = (uint8)(m_LightScale * 255.f + 0.5f);
+	CLandscapeGlobals::LightScaleColor.set(lightScale, lightScale, lightScale, 255);
+
 	// VB Allocators.
 	CLandscapeGlobals::CurrentFar0VBAllocator= &_Far0VB;
 	CLandscapeGlobals::CurrentFar1VBAllocator= &_Far1VB;
@@ -1231,6 +1237,15 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 	unlockBuffers(true);
 
 
+	// The light scale (see setLightScale()) is the diffuse color of the vertices, which the tile and
+	// far materials modulate their texture with when the light is scaled. With a VertexProgram the diffuse color
+	// is a constant of the program. Without, it is the color of the materials, and the color of the vertices in
+	// the Far1 VB (see CPatch::computeGeomorphAlphaFar1VertexListVB()).
+	bool scaleLight = m_LightScale < 1.f;
+	TileMaterial.setColor(CLandscapeGlobals::LightScaleColor);
+	FarMaterial.setColor(CLandscapeGlobals::LightScaleColor);
+
+
 	// If VertexShader enabled, setup VertexProgram Constants.
 	if (_VertexShaderOk)
 	{
@@ -1267,6 +1282,8 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 					driver->setUniform3f(IDriver::VertexProgram, program->idx().RefineCenter, refineCenter);
 					// c[6] take info for Geomorph trnasition to TileNear.
 					driver->setUniform2f(IDriver::VertexProgram, program->idx().TileDist, CLandscapeGlobals::TileDistFarSqr, CLandscapeGlobals::OOTileDistDeltaSqr);
+					// c[7] take the light scale, the diffuse color of the vertices
+					driver->setUniform4f(IDriver::VertexProgram, program->idx().LightScale, m_LightScale, m_LightScale, m_LightScale, 1);
 					// c[10] take the fog vector.
 					driver->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::Fog));
 					// c[12] take the current landscape Center / delta Pos to apply
@@ -1358,10 +1375,20 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 		TileMaterial.texEnvOpAlpha(0, CMaterial::Replace);
 		TileMaterial.texEnvArg0Alpha(0, CMaterial::Texture, CMaterial::SrcAlpha);
 		// NB: important to set Replace and not modulate, because in case of VerexProgram enabled,
-		// Diffuse o[COL0] is undefined.
+		// Diffuse o[COL0] is undefined in the lightmap pass, and is the light scale in the others.
 
 		// Copy from stage 0 to stage 1.
 		TileMaterial.setTexEnvMode(1, TileMaterial.getTexEnvMode(0));
+
+		// If the light is scaled, the RGB passes modulate the tile with the diffuse color, which is the
+		// scale. Hence the lightmap pass, which modulates the result, lights a darker tile. The additive pass
+		// is not scaled.
+		if (scaleLight && (passOrder == NL3D_TILE_PASS_RGB0 || passOrder == NL3D_TILE_PASS_RGB1 || passOrder == NL3D_TILE_PASS_RGB2))
+		{
+			// NB: the previous of stage 0 is the diffuse color
+			TileMaterial.texEnvOpRGB(0, CMaterial::Modulate);
+			TileMaterial.texEnvArg1RGB(0, CMaterial::Previous, CMaterial::SrcColor);
+		}
 
 		// setup multitex / blending.
 		if(passOrder==NL3D_TILE_PASS_RGB0)
@@ -1628,6 +1655,18 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 	FarMaterial.setBlend(false);
 	// set the DLM texture.
 	FarMaterial.setTexture(1, _TextureDLM);
+	// If the light is scaled, modulate the far texture with the diffuse color, which is the scale. The
+	// dynamic lightmap is added after it. Else replace, as a landscape without scale (for Far0 and Far1).
+	if (scaleLight)
+	{
+		// NB: the previous of stage 0 is the diffuse color
+		FarMaterial.texEnvOpRGB(0, CMaterial::Modulate);
+		FarMaterial.texEnvArg1RGB(0, CMaterial::Previous, CMaterial::SrcColor);
+	}
+	else
+	{
+		FarMaterial.texEnvOpRGB(0, CMaterial::Replace);
+	}
 
 	// Render All material RdrPass0.
 	itFar=_TextureFars.begin();
@@ -2789,6 +2828,10 @@ bool			CLandscape::eraseTileFarIfNotGood (uint tileNumber, uint sizeOrder0, uint
 			(TileFarBank.getTile (tileNumber)->getSize (CTileFarBank::diffuse, CTileFarBank::order2) != sizeOrder2)
 			)
 		{
+			const CTileFarBank::CTileFar *tile = TileFarBank.getTile(tileNumber);
+			nlwarning("ASSET ERROR: far bank tile %u has %u/%u/%u diffuse pixels, the tile bank needs %u/%u/%u, it is not drawn far away", tileNumber,
+			    tile->getSize(CTileFarBank::diffuse, CTileFarBank::order0), tile->getSize(CTileFarBank::diffuse, CTileFarBank::order1),
+			    tile->getSize(CTileFarBank::diffuse, CTileFarBank::order2), sizeOrder0, sizeOrder1, sizeOrder2);
 			TileFarBank.getTile (tileNumber)->erasePixels (CTileFarBank::diffuse);
 			bSame=false;
 		}
@@ -2804,6 +2847,10 @@ bool			CLandscape::eraseTileFarIfNotGood (uint tileNumber, uint sizeOrder0, uint
 			(TileFarBank.getTile (tileNumber)->getSize (CTileFarBank::additive, CTileFarBank::order2) != sizeOrder2)
 			)
 		{
+			const CTileFarBank::CTileFar *tile = TileFarBank.getTile(tileNumber);
+			nlwarning("ASSET ERROR: far bank tile %u has %u/%u/%u additive pixels, the tile bank needs %u/%u/%u, it is not drawn far away", tileNumber,
+			    tile->getSize(CTileFarBank::additive, CTileFarBank::order0), tile->getSize(CTileFarBank::additive, CTileFarBank::order1),
+			    tile->getSize(CTileFarBank::additive, CTileFarBank::order2), sizeOrder0, sizeOrder1, sizeOrder2);
 			TileFarBank.getTile (tileNumber)->erasePixels (CTileFarBank::additive);
 			bSame=false;
 		}
@@ -2863,6 +2910,19 @@ bool			CLandscape::initTileBanks ()
 		// Far actived!
 		_FarInitialized=true;
 	}
+	else if (TileFarBank.getNumTile() == 0)
+	{
+		// No far bank was loaded: the zone lighters and the world editor's land export only load the tile bank.
+		// CTileFarBank::serial reports a far bank file without tiles.
+		nldebug("No far bank, the far tiles are not checked against the tile bank");
+	}
+	else
+	{
+		// The far bank was not built from this tile bank. Its tiles are not checked against it, CTextureFar and
+		// CPatchDLMContext check each far tile they read.
+		nlwarning("ASSET ERROR: the far bank has %d tiles and the tile bank %d, the far bank must be rebuilt from this tile bank", TileFarBank.getNumTile(), TileBank.getTileCount());
+		bCompatibility = false;
+	}
 
 	// Register / Load the vegetables.
 	TileBank.initTileVegetableDescs(_VegetableManager);
@@ -2903,6 +2963,13 @@ void			CLandscape::setupStaticLight (const CRGBA &diffuse, const CRGBA &ambiant,
 		_LightValue[i].B=uint8(b);
 		_LightValue[i].A=255;
 	}
+}
+
+// ***************************************************************************
+void CLandscape::setLightScale(float scale)
+{
+	clamp(scale, 0.f, 1.f);
+	m_LightScale = scale;
 }
 
 // ***************************************************************************

@@ -29,6 +29,7 @@
 #include "editable_mesh.h"
 
 // STL includes
+#include <cstring>
 #include <iomanip>
 
 // NeL includes
@@ -182,6 +183,22 @@ void CEditableMesh::toStringLocal(std::ostream &ostream, const std::string &pad,
 	}
 
 	CTriObject::toStringLocal(ostream, pad, PMB_TRI_OBJECT_PARSE_FILTER);
+}
+
+bool CEditableMesh::softSelection() const
+{
+	for (TStorageObjectContainer::const_iterator it = m_EditableMeshUnknown.begin(), end = m_EditableMeshUnknown.end(); it != end; ++it)
+	{
+		if (it->first != 0x4020)
+			continue;
+		const CStorageRaw *raw = dynamic_cast<const CStorageRaw *>(it->second);
+		if (!raw || raw->Value.size() < 4)
+			return false;
+		uint32 on;
+		memcpy(&on, &raw->Value[0], 4);
+		return on != 0;
+	}
+	return false;
 }
 
 IStorageObject *CEditableMesh::createChunkById(uint16 id, bool container)

@@ -55,7 +55,7 @@ function ob_callback_r2login($buffer)
 
 ///////////////////////////////////////////////////////
 // Callback called on error
-function err_callback($errno, $errmsg, $filename, $linenum, $vars)
+function err_callback($errno, $errmsg, $filename, $linenum, $vars = null)
 {
 	// don't log "PHP ERROR/2048 Only variables should be passed by reference"
 	if($errno == 2048) return;

@@ -87,7 +87,7 @@ struct TTradeItemCmp
 };
 
 //-----------------------------------------------------------------------------
-void CCharacterShoppingList::mountShoppingList( CONTINENT::TContinent continent )
+void CCharacterShoppingList::mountShoppingList(CONTINENT::TContinent continent, bool reportRestrictions)
 {
 	set< TItemTradePtr > setOfPlayerItem;
 	set< TItemTradePtr, TTradeItemCmp> setOfNpcItem;
@@ -173,7 +173,7 @@ void CCharacterShoppingList::mountShoppingList( CONTINENT::TContinent continent 
 				}
 			}
 		}
-		if( altarRestrictionReport)
+		if (altarRestrictionReport && reportRestrictions)
 			CCharacter::sendDynamicSystemMessage(_Character->getEntityRowId(), "ALTAR_RESTRICTION");
 	}
 
@@ -272,17 +272,18 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 			}
 		}
 
-		if( form->Family != ITEMFAMILY::PET_ANIMAL_TICKET &&
-			form->Family != ITEMFAMILY::HARVEST_TOOL &&
-			form->Family != ITEMFAMILY::FOOD &&
-			form->Family != ITEMFAMILY::HARVEST_TOOL &&
-			form->Family != ITEMFAMILY::CRAFTING_TOOL &&
-			form->Family != ITEMFAMILY::COSMETIC &&
-			form->Family != ITEMFAMILY::TELEPORT &&
-			form->Family != ITEMFAMILY::SERVICE && 
-			form->Family != ITEMFAMILY::GENERIC_ITEM &&
-			form->Family != ITEMFAMILY::CONSUMABLE
-			)
+		// the families that have no energy class (no craft stats) pass the class filter
+		const bool classFiltered = form->Family != ITEMFAMILY::PET_ANIMAL_TICKET
+		    && form->Family != ITEMFAMILY::FOOD
+		    && form->Family != ITEMFAMILY::HARVEST_TOOL
+		    && form->Family != ITEMFAMILY::CRAFTING_TOOL
+		    && form->Family != ITEMFAMILY::COSMETIC
+		    && form->Family != ITEMFAMILY::TELEPORT
+		    && form->Family != ITEMFAMILY::SERVICE
+		    && form->Family != ITEMFAMILY::GENERIC_ITEM
+		    && form->Family != ITEMFAMILY::CONSUMABLE;
+
+		if (classFiltered)
 		{
 			if( _Character->getMinClassItemFilter() != RM_CLASS_TYPE::Unknown && itemEnergy != ~0u )
 			{
@@ -333,7 +334,13 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 					break;
 				}
 			}
-	
+		}
+
+		// The level filter applies to the families with a class and to the tools, which a merchant lists once
+		// per level. The other families keep passing it (haircuts, tattoos, mount tickets, food and stable
+		// services are listed at a single level).
+		if (classFiltered || form->Family == ITEMFAMILY::HARVEST_TOOL || form->Family == ITEMFAMILY::CRAFTING_TOOL)
+		{
 			if( _Character->getMinQualityFilter() > itemTrade->getLevel() )
 				return false;
 			if( _Character->getMaxQualityFilter() < itemTrade->getLevel() )
@@ -382,6 +389,10 @@ bool CCharacterShoppingList::checkAltarRestriction()
 //-----------------------------------------------------------------------------
 uint32 CCharacterShoppingList::getSellPrice( const TItemTradePtr itemTrade, bool dynnamicShop )
 {
+	// the price a player resells an item for is kept to the dapper: through a float, one above 2^24 was rounded
+	if( dynnamicShop )
+		return (uint32)itemTrade->getPriceInfo().getAmount();
+
 	float priceFactor = 1.0f;
 	if( _CurrentMerchant != 0 && dynnamicShop == false )
 	{
@@ -741,8 +752,8 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 				dapperPrice = getSellPrice( shop->ItemTrade, shop->ShopUnit->getShopUnitType() == IShopUnit::DynamicShop );
 			}
 
-			// check if character have enough money
-			if( ( dapperPrice * quantity ) > _Character->getMoney() )
+			// check if character have enough money (in 64 bits: the quantity comes from the client and a 32-bit product wraps)
+			if( (uint64)dapperPrice * quantity > _Character->getMoney() )
 			{
 				// return player information 'not enough money'
 				_Character->sendDynamicSystemMessage( _Character->getId(), "OPS_NOT_ENOUGHT_SEED" );
@@ -758,11 +769,11 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 			{
 				if( shop->ShopUnit == 0 )
 				{
-					nlwarning("<CCharacterShoppingList::buyItem> ShopUnit ptr is NULL for a faction points item");
+					nlwarning("<CCharacterShoppingList::buyItem> %s: no shop unit for faction item %u", _Character->getId().toString().c_str(), itemNumber);
 					return;
 				}
 				factionPrice = getSellPrice( shop->ItemTrade, shop->ShopUnit->getShopUnitType() == IShopUnit::DynamicShop );
-				if (_Character->getFactionPoint(clan) < (factionPrice*quantity))
+				if ((uint64)_Character->getFactionPoint(clan) < (uint64)factionPrice * quantity)
 				{
 					// return player information 'not enough faction point'
 					_Character->sendDynamicSystemMessage( _Character->getId(), "OPS_NOT_ENOUGHT_FACTION_POINTS" );
@@ -885,7 +896,7 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 	{
 	case RYMSG::TTradeCurrency::tc_dappers:
 		// Spend dappers
-		_Character->spendMoney( dapperPrice * stackSize );
+		_Character->spendMoney( (uint64)dapperPrice * stackSize );
 
 		break;
 	case RYMSG::TTradeCurrency::tc_faction_points:

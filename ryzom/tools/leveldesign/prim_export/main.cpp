@@ -241,7 +241,7 @@ sint getYFromZoneName (const string &ZoneName)
 void outString (const string &sText)
 {
 	createDebug ();
-	InfoLog->displayRaw(sText.c_str());
+	InfoLog->displayRaw("%s", sText.c_str());
 }
 
 // ***************************************************************************
@@ -893,7 +893,7 @@ int main (int argc, char**argv)
 				if (NLMISC::toLowerAscii(CFile::getExtension (files[i])) == "primitive")
 				{
 					// Progress bar
-					nlinfo (files[i].c_str());
+					nlinfo ("%s", files[i].c_str());
 					callback.DisplayString = "Add primitives from "+CFile::getFilename(files[i]);
 					callback.progress ((float)i/(float)fileCount);
 					callback.pushCropedValues ((float)i/(float)fileCount, (float)(i+1)/(float)fileCount);

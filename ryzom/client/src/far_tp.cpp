@@ -19,11 +19,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
+#include "nel/misc/block_memory.h"
 #include "nel/3d/u_driver.h"
 #include "far_tp.h"
 #include "net_manager.h"
 #include "connection.h"
 #include "interface_v3/interface_manager.h"
+#include "nel/gui/group_modal.h"
 #include "login_patch.h"
 #include "init_main_loop.h"
 #include "weather.h"
@@ -50,6 +52,7 @@
 #include "interface_v3/action_handler_base.h"
 #include "item_group_manager.h"
 #include "nel/misc/cmd_args.h"
+#include "client_ctrl.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -236,7 +239,19 @@ void CLoginStateMachine::pushEvent(TEvent eventId)
 	// set the next event
 	_NextEvents.push_back(eventId);
 
-	if (CCoTask::getCurrentTask() != this)
+	if (CCoTask::getCurrentTask() != this && !_HoldEvents)
+	{
+		/// resume the state machine to advance state
+		resume();
+	}
+}
+
+void CLoginStateMachine::holdEvents(bool hold)
+{
+	nlassert(CCoTask::getCurrentTask() != this);
+
+	_HoldEvents = hold;
+	if (!hold && !_NextEvents.empty())
 	{
 		/// resume the state machine to advance state
 		resume();
@@ -338,7 +353,7 @@ void CLoginStateMachine::run()
 				// r2 mode
 				SM_BEGIN_EVENT_TABLE
 					SM_EVENT(ev_login_ok, st_check_patch);
-					SM_EVENT(ev_bad_login, st_display_error);
+					SM_EVENT(ev_bad_login, st_login);
 					SM_EVENT(ev_quit, st_end);
 				SM_END_EVENT_TABLE
 			}
@@ -500,10 +515,6 @@ void CLoginStateMachine::run()
 			SM_END_EVENT_TABLE
 
 			break;
-		case st_display_error:
-			_CurrentState = st_login;
-
-			break;
 		case st_patch:
 			/// run the patch process and display progress
 			initPatch();
@@ -537,7 +548,7 @@ void CLoginStateMachine::run()
 			{
 				SM_BEGIN_EVENT_TABLE
 					SM_EVENT(ev_enter_game, st_ingame);
-					SM_EVENT(ev_conn_failed, st_display_error);
+					SM_EVENT(ev_conn_failed, st_login);
 				SM_END_EVENT_TABLE
 			}
 			else
@@ -626,8 +637,15 @@ void CLoginStateMachine::run()
 			SM_END_EVENT_TABLE
 			break;
 		case st_disconnect:
-			// Far TP part 2: disconnect from the FS and unload shard-specific data (called from farTPmainLoop())
-			// FarTP.disconnectFromPreviousShard();
+			// Server Hop part 2: disconnect from the FS and unload shard-specific data. Out of game (character selection)
+			//   this state comes straight from st_leave_shard and nothing but this co-task makes the call; it draws
+			//   nothing and releases no driver object there.
+			// Far TP part 2: in game the call draws the loading screen and releases scene and driver objects, the work
+			//   of the main thread (where the co-task is a thread of its own, no OpenGL context is current in it). So
+			//   this state only waits, and farTPmainLoop(), which sent ev_far_tp_main_loop_entered, makes the call.
+			//   In both cases disconnectFromPreviousShard() ends with ev_connect.
+			if (!FarTP.isIngame())
+				FarTP.disconnectFromPreviousShard();
 
 			SM_BEGIN_EVENT_TABLE
 				SM_EVENT(ev_connect, st_reconnect_fs);
@@ -729,6 +747,58 @@ namespace R2
 }
 
 
+/// A request of requestFarTPToSession() that the session browser did not answer, or did not grant. The reason is
+/// logged, with the code of the refusal. The player is told the translated text of TextId, in which %code is the
+/// code.
+struct EFarTPRequestFailed : public NLMISC::Exception
+{
+	EFarTPRequestFailed(const char *reason, const char *textId, uint32 code = 0)
+	    : NLMISC::Exception(std::string(reason))
+	    , TextId(textId)
+	    , Code(code)
+	{
+	}
+
+	std::string TextId;
+	uint32 Code;
+};
+
+/// The text for the player of a request to the session browser that failed: it got no answer in time ('answered'
+/// is false), or the server refused it with a code that has no text of its own.
+static const char *failedRequestTextId(bool answered)
+{
+	return answered ? "uiFarTPRefused" : "uiFarTPNoAnswer";
+}
+
+/// The text for the player of a join that the session manager refused (the results of joinSession, joinEditSession
+/// and joinMainland in ring_session_manager.cpp). The results that say nothing a player can act on (a character,
+/// a user or a database record that is not found, a welcome service that fails) share the text with the code.
+const char *CFarTP::joinRefusalTextId(uint32 result)
+{
+	switch (result)
+	{
+	case 2: // the session is not found
+	case 4: // no server hosts the session
+	case 15: // the session is not open
+		return "uiFarTPSessionClosed";
+	case 3: // the character has no invitation to the session
+		return "uiFarTPNotInvited";
+	case 5: // the shard is closed, or has no welcome service
+	case 14: // the shard is down, or restricted
+		return "uiSessionUnreachable";
+	case 16:
+		return "uiFarTPBanned";
+	case 17: // a newcomer and a session that is not for newcomers, or the reverse
+		return "uiFarTPNewcomer";
+	case 20: // a free trial account and a scenario that does not allow them
+		return "uiFarTPFreeTrial";
+	case 21:
+		return "uiFarTPKicked";
+	default:
+		return "uiFarTPRefused";
+	}
+}
+
 /*
  * requestFarTPToSession
  */
@@ -768,24 +838,24 @@ retryJoinEdit:
 				bool ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_joinSessionResult"));
 
 				if (!ret)
-					throw "Protocol error";
+					throw EFarTPRequestFailed("Protocol error", failedRequestTextId(false));
 				if (sb._LastJoinSessionResult == 2)
 				{
 					// the edit session did not exist, create a new one
 					sb.scheduleSession(charId, TSessionType::st_edit, "", "", TSessionLevel::sl_a, /*TAccessType::at_private, */TRuleType::rt_strict, TEstimatedDuration::et_long, 0, TAnimMode(), TRaceFilter(), TReligionFilter(), TGuildFilter(), TShardFilter(), TLevelFilter(), std::string(), TSessionOrientation(), true, true);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_scheduleSessionResult"));
-					if (!ret || sb._LastScheduleSessionResult!= 0)	throw "schedule error";
+					if (!ret || sb._LastScheduleSessionResult!= 0)	throw EFarTPRequestFailed("schedule error", failedRequestTextId(ret), sb._LastScheduleSessionResult);
 					sessionId = sb._LastScheduleSessionId;
 
 					// invite the char in the session
 					sb.inviteCharacter(charId, sessionId, charId, TSessionPartStatus::sps_edit_invited);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
-					if (!ret || sb._LastInvokeResult != 0)	throw "Invitation Error";
+					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("Invitation Error", failedRequestTextId(ret), sb._LastInvokeResult);
 
 					// now, start the edit session
 					sb.startSession(charId, sessionId);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
-					if (!ret || sb._LastInvokeResult != 0)	throw "start session error";
+					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("start session error", failedRequestTextId(ret), sb._LastInvokeResult);
 
 					// retry to join
 					goto retryJoinEdit;
@@ -796,14 +866,14 @@ retryJoinEdit:
 					// the session was closed, the SU has put it in planned state, start it
 					sb.startSession(charId, sessionId);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
-					if (!ret || sb._LastInvokeResult != 0)	throw "start session error (2), no DSS available";
+					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("start session error (2), no DSS available", failedRequestTextId(ret), sb._LastInvokeResult);
 					// retry to join
 					goto retryJoinEdit;
 				}
 				else if (sb._LastJoinSessionResult != 0)
 				{
 					// any other error are not recoverable from here
-					throw "join session error";
+					throw EFarTPRequestFailed("join session error", joinRefusalTextId(sb._LastJoinSessionResult), sb._LastJoinSessionResult);
 				}
 
 				// ok, the join is accepted !, the other far TP work is done in the callback
@@ -816,15 +886,14 @@ retryJoinEdit:
 				bool ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_joinSessionResult"));
 
 				if (!ret)
-					throw "Protocol error";
+					throw EFarTPRequestFailed("Protocol error", failedRequestTextId(false));
 				if (sb._LastJoinSessionResult == 16)
 				{
-//	#pragma message (NL_LOC_WRN "inform the player that he is banned from the ring")
-					throw "User ban from the ring";
+					throw EFarTPRequestFailed("User ban from the ring", joinRefusalTextId(sb._LastJoinSessionResult), sb._LastJoinSessionResult);
 				}
 				if (sb._LastJoinSessionResult != 0)
 				{
-					throw "Join session error";
+					throw EFarTPRequestFailed("Join session error", joinRefusalTextId(sb._LastJoinSessionResult), sb._LastJoinSessionResult);
 				}
 				// ok, the join is accepted !, the other far TP work is done in the callback
 			}
@@ -838,11 +907,11 @@ retryJoinEdit:
 				bool ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_joinSessionResult"));
 
 				if (!ret)
-					throw "Protocol error";
+					throw EFarTPRequestFailed("Protocol error", failedRequestTextId(false));
 				if (sb._LastJoinSessionResult != 0)
 				{
 					// some error during the join
-					throw "Error joining session";
+					throw EFarTPRequestFailed("Error joining session", joinRefusalTextId(sb._LastJoinSessionResult), sb._LastJoinSessionResult);
 				}
 				// ok, the join is accepted !, the other far TP work is done in the callback
 			}
@@ -892,8 +961,9 @@ retryJoinEdit:
 //		pIM->executeLuaScript(res, true);
 //		return true;
 //	}
-	catch ( char *errorMsg )
+	catch (const EFarTPRequestFailed &e)
 	{
+		const char *errorMsg = e.what();
 //		// Get more details on the error
 //		string httpErrorStr;
 //		if (errorNum < 4) // we didn't receive an answer
@@ -928,10 +998,6 @@ retryJoinEdit:
 //			CAHManager::getInstance()->runActionHandler( "proc", NULL, "charsel_disable_buttons" );
 //			CAHManager::getInstance()->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:quit_but:active|value=1" );
 
-			CInterfaceElement *btnOk = CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:message_box:ok");
-			if (btnOk)
-				btnOk->setActive( ! requestRetToMainland );
-
 			// Hide the black screen i.e. force showing the interface
 			CInterfaceElement *charSelBlackScreen = CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:black_screen");
 			if (charSelBlackScreen)
@@ -941,13 +1007,46 @@ retryJoinEdit:
 					charSelBlackScreenBitmap->setAlpha(0);
 			}
 		}
-		pIM->messageBoxWithHelp(
-			CI18N::get(requestRetToMainland ? "uiSessionVanishedFarTP" : "uiSessionUnreachable") + errorMsg,
-			letReturnToCharSelect ? "ui:outgame:charsel" : "ui:interface");
+		// What the player is told: what happened, in his language (the reason of the exception is English, for
+		// the log), and that the client goes back to the mainland when it does so by itself.
+		string message = CI18N::get(e.TextId);
+		strFindReplace(message, "%code", toString(e.Code));
+		if (requestRetToMainland)
+		{
+			message += " " + CI18N::get("uiFarTPBackToMainland");
+			// The return follows at once, and the box goes with the interface it is in: at the character
+			// selection it is gone when the game is entered, a moment later. The player reads the message on
+			// arrival (showReturnMessage).
+			m_ReturnMessage = message;
+			// The box shown now, for a session that is closed, has the text it always had, which says both
+			// and that the teleport is under way: on arrival that would read as if it were still to come.
+			if (e.TextId == "uiFarTPSessionClosed")
+				message = CI18N::get("uiSessionVanishedFarTP");
+		}
+		pIM->messageBoxWithHelp(message, letReturnToCharSelect ? "ui:outgame" : "ui:interface");
+		if (!requestRetToMainland)
+		{
+			// The client stays where it is: at the character selection, or in the game. No return is under way
+			// any more, also when this request was the return itself (the join of the mainland that follows
+			// CONNECTION:RET_MAINLAND): a message kept for the arrival would be shown to whichever character
+			// enters the game next.
+			m_ReturnMessage.clear();
+		}
+		if ( letReturnToCharSelect && requestRetToMainland )
+		{
+			// The client goes back to the mainland by itself: the box that was just shown has no use for its
+			// OK button. It is the box with the help button, a group of the outgame interface itself (the
+			// 'charsel' group has the plain message box, and no box of this name). The button is hidden once
+			// the box is up, and the procedure the box runs when it closes shows it again
+			// (proc_message_box_with_help_ok of out_v2_select.xml): the other users of the box find it whole.
+			CInterfaceElement *btnOk = CWidgetManager::getInstance()->getElementFromId("ui:outgame:message_box_with_help:ok");
+			if (btnOk)
+				btnOk->setActive(false);
+		}
 
 		// Info in the log
-		string outErrorMsg = toString("Could not join %ssession %u: '%s' error\n", joinMode==CFarTP::LaunchEditor ? "editing " : "", sessionId.asInt(), errorMsg );
-		nlwarning( outErrorMsg.c_str() );
+		string outErrorMsg = toString("Could not join %ssession %u: '%s' error (code %u)\n", joinMode==CFarTP::LaunchEditor ? "editing " : "", sessionId.asInt(), errorMsg, e.Code );
+		nlwarning("%s", outErrorMsg.c_str());
 //		if ( httpErrorStr.empty() )
 //		{
 //			string delimiter = "Content-Type: text/html";
@@ -1015,6 +1114,14 @@ void CFarTP::hookNextFarTPForEditor()
 }
 
 /*
+ * unhookNextFarTPForEditor
+ */
+void CFarTP::unhookNextFarTPForEditor()
+{
+	_HookedForEditor = false;
+}
+
+/*
  * requestReturnToPreviousSession
  */
 void CFarTP::requestReturnToPreviousSession(TSessionId rejectedSessionId)
@@ -1033,11 +1140,38 @@ void CFarTP::requestReturnToPreviousSession(TSessionId rejectedSessionId)
  */
 void CFarTP::requestReconnection()
 {
+	// the player goes back to the character selection: a message kept for the arrival of this character is not
+	// for the one that is chosen there
+	m_ReturnMessage.clear();
 	_ReselectingChar = true;
 	if (!requestFarTPToSession(TSessionId(std::numeric_limits<uint16>::max()), std::numeric_limits<uint8>::max(), CFarTP::JoinMainland, false))
 		_ReselectingChar = false;
 }
 
+/*
+ * requestReselectThroughLimbo
+ */
+void CFarTP::requestReselectThroughLimbo()
+{
+	if (LoginSM.getCurrentState() != CLoginStateMachine::st_ingame)
+	{
+		nlwarning("Cannot go back to the character selection in login state %s", CLoginStateMachine::toString(LoginSM.getCurrentState()).c_str());
+		return;
+	}
+	if (NetMngr.getConnectionState() != CNetworkConnection::Connected)
+	{
+		nlwarning("Cannot go back to the character selection in connection state %s", NetMngr.getConnectionStateCStr());
+		return;
+	}
+
+	// The same sequence as requestReconnection() once the shard unifier has answered, but for the same shard and
+	// connection: no fast disconnection, the quit countdown applies (see disconnectFromPreviousShard)
+	m_ReturnMessage.clear(); // as in requestReconnection
+	_ReselectingChar = true;
+	m_ReselectThroughLimbo = true;
+	_SessionIdToJoinFast = 0;
+	LoginSM.pushEvent(CLoginStateMachine::ev_connect);
+}
 
 const char * CFarTP::_URLTable[CFarTP::NbJoinModes] =
 {
@@ -1115,6 +1249,7 @@ void CFarTP::onServerQuitAbort()
 	if (LoginSM.getCurrentState() == CLoginStateMachine::st_leave_shard)
 		LoginSM.pushEvent(CLoginStateMachine::ev_enter_game);
 	_ReselectingChar = false;
+	m_ReselectThroughLimbo = false;
 }
 
 void CFarTP::disconnectFromPreviousShard()
@@ -1152,8 +1287,18 @@ void CFarTP::disconnectFromPreviousShard()
 		}
 	}
 
-	// Disconnect from the FS
-	NetMngr.disconnect();
+	if (m_ReselectThroughLimbo)
+	{
+		// Leave the game but keep the connection: on SYSTEM_QUIT the frontend tells the EGS that the user left (the quit
+		// countdown is over, so the character is gone) and came back, and keeps the session until the EGS sends the
+		// characters, then synchronizes it again (see stateQuit())
+		NetMngr.quit();
+	}
+	else
+	{
+		// Disconnect from the FS
+		NetMngr.disconnect();
+	}
 
 	if (isIngame())
 	{
@@ -1193,7 +1338,10 @@ void CFarTP::disconnectFromPreviousShard()
 		(done in resetShardSpecificData() above)
 		If we do the resetShardSpecificData() after, scenari could arise where Local database could not be reseted
 	*/
-	NetMngr.reinit();
+	if (m_ReselectThroughLimbo)
+		NetMngr.resetSession();
+	else
+		NetMngr.reinit();
 
 	// Reset weather state so the new shard's weather starts clean
 	ClientCfg.ManualWeatherSetup = false;
@@ -1211,21 +1359,30 @@ void CFarTP::connectToNewShard()
 {
 	// TODO: start commands?
 
-	// Connect to the next FS
-	NetMngr.initCookie(Cookie, FSAddr);
-
-	// connect the session browser to the new shard
-	NLNET::CInetHost sbsAddress(CSessionBrowserImpl::getInstance().getFrontEndAddress());
-	sbsAddress.setPort(sbsAddress.port()+SBSPortOffset);
-	CSessionBrowserImpl::getInstance().connectItf(sbsAddress);
-
-	string result;
-	NetMngr.connect(result);
-	if (!result.empty())
+	// Through limbo, the connection is kept (still quitting until the frontend synchronizes it again)
+	if (!m_ReselectThroughLimbo)
 	{
-		_Reason = new string(result);
-		LoginSM.pushEvent(CLoginStateMachine::ev_conn_failed);
-		return;
+		// The id of the shard that is left is not the one of the shard that is joined, which sends its own, and
+		// its web server with it, when the client is ready (impulseShardId). Until then there is none: the
+		// scripts that wait for the id before they ask the web server for a page (getShardId) wait again.
+		ShardId = 0;
+
+		// Connect to the next FS
+		NetMngr.initCookie(Cookie, FSAddr);
+
+		// connect the session browser to the new shard
+		NLNET::CInetHost sbsAddress(CSessionBrowserImpl::getInstance().getFrontEndAddress());
+		sbsAddress.setPort(sbsAddress.port() + SBSPortOffset);
+		CSessionBrowserImpl::getInstance().connectItf(sbsAddress);
+
+		string result;
+		NetMngr.connect(result);
+		if (!result.empty())
+		{
+			_Reason = new string(result);
+			LoginSM.pushEvent(CLoginStateMachine::ev_conn_failed);
+			return;
+		}
 	}
 
 	// Reinit the string manager cache.
@@ -1351,6 +1508,7 @@ void CFarTP::sendReady()
 			NetMngr.update();
 			IngameDbMngr.flushObserverCalls();
 			NLGUI::CDBManager::getInstance()->flushObserverCalls();
+			exitIfFailedOrDisconnected(); // the tick does not advance on a closed connection
 			// Be nice to the system
 			nlSleep(100);
 		}
@@ -1383,6 +1541,10 @@ void CFarTP::sendReady()
 
 	LoginSM.pushEvent(CLoginStateMachine::ev_enter_game);
 
+	// the end of a far TP in game (after a character reselect the main loop is entered anew, and shows it)
+	if (!isReselectingChar())
+		showReturnMessage();
+
 	if (_DSSDown)
 	{
 		_DSSDown = false;
@@ -1404,11 +1566,45 @@ void CFarTP::onFailure()
 	{
 		reason += ": no characters found!";
 	}
-	Driver->systemMessageBox(("Unable to join shard"+reason).c_str(), "Error", UDriver::okType, UDriver::exclamationIcon);
 
 	// TODO: recover from error
+	// The previous shard is left, and the loop waiting for the reconnection shows the message and exits the client, on
+	// the main thread (this runs in the login co-task)
+	m_FailureMessage = "Unable to join shard" + reason;
+	nlwarning("%s", m_FailureMessage.c_str());
 
 	LoginSM.pushEvent(CLoginStateMachine::ev_quit);
+}
+
+void CFarTP::exitIfFailed()
+{
+	if (m_FailureMessage.empty())
+		return;
+
+	Driver->systemMessageBox(m_FailureMessage.c_str(), "Error", UDriver::okType, UDriver::exclamationIcon);
+
+	// as ExitClientError does, after its own message box
+	extern void quitCrashReport();
+	quitCrashReport();
+	NLMISC::NL3D_BlockMemoryAssertOnPurge = false;
+	ClientCtrl::setExitReason("a far teleport failed: " + m_FailureMessage);
+	exit(EXIT_FAILURE);
+}
+
+void CFarTP::exitIfFailedOrDisconnected()
+{
+	if (m_FailureMessage.empty() && isJoiningShard() && (NetMngr.getConnectionState() == CNetworkConnection::Disconnect))
+	{
+		// The connection closed while joining the shard (connectToNewShard has started it, or kept it for limbo mode):
+		// the frontend or the EGS refused the user, the backend went down (SERVER_DOWN), the session timed out in limbo
+		// mode (the frontend closes a QUIC connection, a UDP client gives up after QuitTimeOut), or the transport was
+		// lost, possibly already during the quit countdown. Only ACTION_DISCONNECTION sends ev_conn_dropped, so nothing
+		// else would end the reconnection.
+		bool beforeCharacters = (LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_fs);
+		_Reason = new string((m_ReselectThroughLimbo && beforeCharacters) ? "the connection was closed while going back to the character selection" : "the connection to the shard was closed");
+		LoginSM.pushEvent(CLoginStateMachine::ev_conn_dropped);
+	}
+	exitIfFailed();
 }
 
 void CFarTP::onDssDown(bool forceReturn)
@@ -1428,7 +1624,44 @@ void CFarTP::onDssDown(bool forceReturn)
 
 	CInterfaceManager *pIM= CInterfaceManager::getInstance();
 	pIM->messageBoxWithHelp(CI18N::get("uiDisconnected"));
+	// the interface of the Ring goes with the return: the message is shown again on arrival
+	m_ReturnMessage = CI18N::get("uiDisconnected");
 	requestReturnToPreviousSession();
+}
+
+void CFarTP::showReturnMessage()
+{
+	if (m_ReturnMessage.empty())
+		return;
+
+	CInterfaceManager::getInstance()->messageBoxWithHelp(m_ReturnMessage);
+	m_ReturnMessage.clear();
+	CGroupModal *box = dynamic_cast<CGroupModal *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:message_box_with_help"));
+	if (!box)
+		return;
+
+	// A box without an action on OK closes at a click beside it (CInterfaceManager::messageBoxWithHelp), and
+	// this one comes up while the game is still loading: it stays until its OK button is used. The widget
+	// manager takes that setting when the modal is enabled, so the box is enabled again with it.
+	box->ExitClickOut = false;
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, box);
+
+	// A modal of the game opens on the mouse pointer: CGroupModal spawns there unless its mouse_pos is off,
+	// with its parent hotspot at the bottom left, whatever posref its definition has. That suits a box that
+	// answers a click. Nobody clicked for this one, and when the main loop is entered the pointer has no
+	// position yet (CViewPointerBase starts it at InvalidCoord): the box was clipped into the bottom left
+	// corner of the screen. It gets the centre of the interface as its spawn point, for this showing: the next
+	// box takes the pointer again (CWidgetManager::pushModalWindow).
+	CInterfaceGroup *parent = box->getParent();
+	if (parent)
+	{
+		box->SpawnMouseX = parent->getWReal() / 2;
+		box->SpawnMouseY = parent->getHReal() / 2;
+	}
+	// (twice, as CInterfaceManager::messageBoxInternal does for a box it has just given a text)
+	box->invalidateCoords();
+	box->updateCoords();
+	box->updateCoords();
 }
 
 extern bool loginFinished;
@@ -1478,7 +1711,18 @@ void CFarTP::farTPmainLoop()
 	ConnectionReadySent = false;
 	LoginSM.pushEvent(CLoginStateMachine::ev_far_tp_main_loop_entered);
 
-	disconnectFromPreviousShard();
+	// Far TP part 2: the state machine now waits in st_disconnect (see there) for the main thread to leave the shard.
+	// The events of the call (it updates the network, and ends with ev_connect) are held until it is over, as when
+	// the co-task made the call: the co-task then connects to the new shard (st_reconnect_fs) before holdEvents()
+	// returns here.
+	if (LoginSM.getCurrentState() == CLoginStateMachine::st_disconnect)
+	{
+		LoginSM.holdEvents(true);
+		disconnectFromPreviousShard();
+		LoginSM.holdEvents(false);
+	}
+	else
+		nlwarning("FarTP: the login state machine is in state %s instead of st_disconnect, the previous shard is not left from the main loop", CLoginStateMachine::toString(LoginSM.getCurrentState()).c_str());
 
 	uint nbRecoSelectCharReceived = 0;
 
@@ -1494,6 +1738,7 @@ void CFarTP::farTPmainLoop()
 		NetMngr.update();
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
+		exitIfFailedOrDisconnected();
 
 		// TODO: resend in case the last datagram sent was lost?
 //		// check if we can send another dated block

@@ -116,7 +116,7 @@ void testLaunchProfileVBLock()
 		nlinfo("**************");
 		for(uint i=0;i<strs.size();i++)
 		{
-			nlinfo(strs[i].c_str());
+			nlinfo("%s", strs[i].c_str());
 		}
 		ProfilingVBLock= false;
 
@@ -126,7 +126,7 @@ void testLaunchProfileVBLock()
 		Driver->profileVBHardAllocation(strs);
 		for(uint i=0;i<strs.size();i++)
 		{
-			nlinfo(strs[i].c_str());
+			nlinfo("%s", strs[i].c_str());
 		}
 		strs.clear();
 		Driver->endProfileIBLock(strs);
@@ -134,7 +134,7 @@ void testLaunchProfileVBLock()
 		nlinfo("**************");
 		for(uint i=0;i<strs.size();i++)
 		{
-			nlinfo(strs[i].c_str());
+			nlinfo("%s", strs[i].c_str());
 		}
 		ProfilingVBLock= false;
 
@@ -145,7 +145,7 @@ void testLaunchProfileVBLock()
 		Driver->profileIBAllocation(strs);
 		for(uint i=0;i<strs.size();i++)
 		{
-			nlinfo(strs[i].c_str());
+			nlinfo("%s", strs[i].c_str());
 		}
 		*/
 	}

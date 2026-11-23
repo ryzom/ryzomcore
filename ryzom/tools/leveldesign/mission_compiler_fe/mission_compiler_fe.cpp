@@ -133,7 +133,7 @@ BOOL CMissionCompilerFeApp::InitInstance()
 				msg += "In '"+NLLIGO::buildPrimPath(e.Primitive)+"'\r\n";
 			}
 			msg += "Error while compiling '"+fileName+"' :\r\n"+e.Why+"\r\n";
-			nlwarning(msg.c_str());
+			nlwarning("%s", msg.c_str());
 			exit(-1);
 		}
 		nlinfo("Compiled and installed %u missions", nbMission);

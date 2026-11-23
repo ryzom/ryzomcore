@@ -6,7 +6,6 @@ includedir=@includedir@
 Name: nel-net
 Version: @NL_VERSION@
 Description: NeL @NL_VERSION@
-Requires:
-Libs: -L${libdir}
-Libs.private: @LIBS@ -lc -lpthread -lrt -ldl
-Cflags: -I${includedir} -lc -lpthread -lrt -ldl
+Requires: nel-misc
+Libs: -L${libdir} -lnelnet
+Cflags: -I${includedir}

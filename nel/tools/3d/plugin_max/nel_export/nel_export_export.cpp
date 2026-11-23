@@ -282,6 +282,9 @@ bool CNelExport::exportAnim (const std::string &sPath, std::vector<INode*>& vect
 			_ExportNel->addAnimation (animFile, *vectNode[n], nodeName.c_str(), root);
 		}
 
+		// One message for the animated controllers that gave no track
+		_ExportNel->outputUnexportedAnimations();
+
 		if (vectNode.size())
 		{
 			// Open a file
@@ -392,7 +395,7 @@ bool CNelExport::exportSkeleton	(const std::string &sPath, INode* pNode, TimeVal
 		}
 		catch (const Exception &e)
 		{
-			nlwarning (e.what());
+			nlwarning ("%s", e.what());
 		}
 	}
 

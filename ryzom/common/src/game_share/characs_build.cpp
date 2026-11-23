@@ -30,7 +30,7 @@ void loadCharacteristicsFromSheet(const NLGEORGES::UFormElm &rootNode, std::stri
 		std::string characPath = prefix + characName;
 		if(!rootNode.getValueByName(dest[k], characPath.c_str()))
 		{
-			nlwarning(("Key " + characName + "not found.").c_str());
+			nlwarning("%s", ("Key " + characName + "not found.").c_str());
 		}
 	}
 }

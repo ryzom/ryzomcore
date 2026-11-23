@@ -132,6 +132,15 @@ bool CServerAdminModule::getPosition(TSessionId sessionId, double&x, double&y, d
 
 void CServerAdminModule::onModuleUp(NLNET::IModuleProxy *moduleProxy)
 {
+	// The modules of the services are known by the class name they declare. A module of a game client declares the
+	// class it wants: it is never taken as one of the service modules below.
+	if (moduleProxy->getModuleClassName() != "ClientEditionModule" && isClientModule(moduleProxy))
+	{
+		nlwarning("R2Admin: the client module '%s' declares the class '%s', it is not taken as a module of a service",
+			moduleProxy->getModuleName().c_str(), moduleProxy->getModuleClassName().c_str());
+		return;
+	}
+
 	if (moduleProxy->getModuleClassName() == "ServerAnimationModule")
 	{
 		_ServerAnimationProxy = moduleProxy;
@@ -145,11 +154,13 @@ void CServerAdminModule::onModuleUp(NLNET::IModuleProxy *moduleProxy)
 
 void CServerAdminModule::onModuleDown(NLNET::IModuleProxy *moduleProxy)
 {
-	if (moduleProxy->getModuleClassName() == "ServerAnimationModule")
+	// A service module is only forgotten when the module that goes down is the one that was stored: any module can
+	// declare its class name.
+	if (_ServerAnimationProxy == moduleProxy)
 	{
 		_ServerAnimationProxy = nullptr;
 	}
-	else if (moduleProxy->getModuleClassName() == "ServerEditionModule")
+	else if (_ServerEditionProxy == moduleProxy)
 	{
 		_ServerEditionProxy = nullptr;
 	}

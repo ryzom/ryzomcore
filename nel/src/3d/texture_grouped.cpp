@@ -378,7 +378,7 @@ void CTextureGrouped::displayIncompatibleTextureWarning(CSmartPtr<ITexture> *tex
 	{
 		if (textureTab[k])
 		{
-			nlwarning((textureTab[k]->getShareName()).c_str());
+			nlwarning("%s", (textureTab[k]->getShareName()).c_str());
 		}
 		else
 		{

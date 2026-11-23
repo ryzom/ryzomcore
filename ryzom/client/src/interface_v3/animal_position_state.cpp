@@ -285,14 +285,14 @@ void CNamedEntityPositionState::build(CCDBNodeLeaf *name, CCDBNodeLeaf *x, CCDBN
 // ***************************************************************************
 CEntityCL	*CDialogEntityPositionState::getEntity()
 {
-	if ( CCompassDialogsManager::getInstance().getEntries().size() >= _DialogIndex )
+	if ( _DialogIndex >= CCompassDialogsManager::getInstance().getEntries().size() )
 		return nullptr;
 	return EntitiesMngr.getEntityByName(CCompassDialogsManager::getInstance().getEntries()[_DialogIndex].Text);
 }
 
 bool		 CDialogEntityPositionState::getDbPos(sint32 &px, sint32 &py)
 {
-	if ( CCompassDialogsManager::getInstance().getEntries().size() < _DialogIndex )
+	if ( _DialogIndex >= CCompassDialogsManager::getInstance().getEntries().size() )
 		return false;
 	px = CCompassDialogsManager::getInstance().getEntries()[_DialogIndex].X;
 	py = CCompassDialogsManager::getInstance().getEntries()[_DialogIndex].Y;

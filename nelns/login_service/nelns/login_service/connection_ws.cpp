@@ -52,7 +52,7 @@ void refuseShard (TServiceId sid, const char *format, ...)
 {
 	string reason;
 	NLMISC_CONVERT_VARGS (reason, format, NLMISC::MaxCStringSize);
-	nlwarning(reason.c_str ());
+	nlwarning("%s", reason.c_str ());
 	CMessage msgout("FAILED");
 	msgout.serial (reason);
 	CUnifiedNetwork::getInstance ()->send (sid, msgout);

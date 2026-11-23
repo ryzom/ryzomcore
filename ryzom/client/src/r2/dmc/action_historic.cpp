@@ -41,6 +41,7 @@ namespace R2
 CActionHistoric::CActionHistoric() : _Scenario(nullptr, st_edit)
 {
 	_NewActionIsPending = false;
+	m_NewActionDropped = false;
 	_CurrActionIndex = -1;
 	setMaxNumActions(50);
 	_SubActionCount = 0;
@@ -73,10 +74,19 @@ void CActionHistoric::cancelAction()
 	//H_AUTO(R2_CActionHistoric_cancelAction)
 	if (_NewAction && _NewActionIsPending)
 	{
-		_NewAction->rollback(_DMC, _Scenario);
+		if (m_NewActionDropped)
+		{
+			// its edits name nodes by positions from before the edit of another editor
+			nlwarning("R2Ed: another editor changed the scenario tree during the action '%s', its edits are kept", _NewAction->getName().toUtf8().c_str());
+		}
+		else
+		{
+			_NewAction->rollback(_DMC, _Scenario);
+		}
 	}
 	_NewAction = nullptr;
 	_NewActionIsPending = false;
+	m_NewActionDropped = false;
 	_SubActionCount = 1;
 	_NewActionName.clear();
 	getEditor().callEnvMethod("onCancelActionInHistoric", 0, 0);
@@ -152,7 +162,11 @@ void CActionHistoric::endAction()
 		_Actions.pop();
 	}
 	_CurrActionIndex = -1;
-	_Actions.push(_NewAction);
+	// a pending action during which another editor changed the tree can not be undone (dropActions)
+	if (!m_NewActionDropped)
+	{
+		_Actions.push(_NewAction);
+	}
 	if (!_NewActionIsPending)
 	{
 		_NewAction->flush(_DMC, _Scenario); // redo may trigger other observers that complete the action
@@ -161,6 +175,7 @@ void CActionHistoric::endAction()
 	_CurrActionIndex = -1;
 	_NewAction = nullptr;
 	_NewActionIsPending = false;
+	m_NewActionDropped = false;
 	// warn lua that a new action has been added
 	if (isUndoSupported())
 	{
@@ -200,6 +215,7 @@ void CActionHistoric::clear(CObject *newScenario)
 	_CurrActionIndex = -1;
 	_NewAction = nullptr;
 	_NewActionIsPending = false;
+	m_NewActionDropped = false;
 	_Scenario.setHighLevel(newScenario ? CRequestBase::cloneObject(newScenario) : nullptr);
 	// warn lua that all actions have been cleared
 	getEditor().callEnvMethod("onClearActionHistoric", 0, 0);
@@ -221,6 +237,87 @@ sint CActionHistoric::getNextActionIndex() const
 	if (_Actions.empty()) return -1;
 	sint index = (sint) _Actions.getSize() + (_CurrActionIndex + 1);
 	return index >= 0 && index < (sint) _Actions.getSize() ? index : -1;
+}
+
+//====================================================================================
+// true for a table that holds a table
+static bool holdsTable(const CObject *obj)
+{
+	if (!obj->isTable()) return false;
+	for (uint32 k = 0; k < obj->getSize(); ++k)
+	{
+		const CObject *entry = obj->getValueAtPos(k).getPtr();
+		if (entry && entry->isTable()) return true;
+	}
+	return false;
+}
+
+//====================================================================================
+// true for two tables with the same named entries and as many unnamed ones, so that the entries keep their positions
+static bool sameEntries(const CObject *a, const CObject *b)
+{
+	if (a->getSize() != b->getSize()) return false;
+	for (uint32 k = 0; k < b->getSize(); ++k)
+	{
+		std::string key = b->getKey(k);
+		if (key.empty() ? !a->getKey(k).empty() : a->getAttr(key).getPtr() == nullptr) return false;
+	}
+	return true;
+}
+
+//====================================================================================
+void CActionHistoric::dropActions()
+{
+	// a pending action sent its first edits already, by positions in the tree from before
+	if (_NewAction && _NewActionIsPending) m_NewActionDropped = true;
+	if (_Actions.empty()) return;
+	nldebug("R2Ed: another editor changed the scenario tree, the %u actions of the undo history are dropped", _Actions.getSize());
+	_Actions.clear();
+	_CurrActionIndex = -1;
+	// warn lua that all actions have been cleared
+	getEditor().callEnvMethod("onClearActionHistoric", 0, 0);
+}
+
+//====================================================================================
+void CActionHistoric::otherEditorSetNode(const std::string &instanceId, const std::string &attrName, const CObject *value)
+{
+	if (!_Scenario.getHighLevel()) return; // no undo, so no anticipated scenario
+	// A value in place of another one of the same kind leaves the shape of the tree as it is: a text or a
+	// number, or a table of them with the same entries, like the Position a move sets. An attribute that the
+	// object did not have, a table that holds tables, or one with other entries changes it.
+	CObject *object = _Scenario.find(instanceId);
+	const CObject *old = object ? (attrName.empty() ? object : object->getAttr(attrName).getPtr()) : nullptr;
+	bool sameShape = old && old->isTable() == value->isTable()
+		&& (!old->isTable() || (!holdsTable(old) && !holdsTable(value) && sameEntries(old, value)));
+	CObject::TSmartPtr copy = CRequestBase::cloneObject(value);
+	if (!_Scenario.setNode(instanceId, attrName, copy) || !sameShape)
+	{
+		dropActions();
+	}
+}
+
+//====================================================================================
+void CActionHistoric::otherEditorInsertNode(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const CObject *value)
+{
+	if (!_Scenario.getHighLevel()) return;
+	_Scenario.insertNode(instanceId, attrName, position, key, CRequestBase::cloneObject(value));
+	dropActions();
+}
+
+//====================================================================================
+void CActionHistoric::otherEditorEraseNode(const std::string &instanceId, const std::string &attrName, sint32 position)
+{
+	if (!_Scenario.getHighLevel()) return;
+	_Scenario.eraseNode(instanceId, attrName, position);
+	dropActions();
+}
+
+//====================================================================================
+void CActionHistoric::otherEditorMoveNode(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &destInstanceId, const std::string &destAttrName, sint32 destPosition)
+{
+	if (!_Scenario.getHighLevel()) return;
+	_Scenario.moveNode(instanceId, attrName, position, destInstanceId, destAttrName, destPosition);
+	dropActions();
 }
 
 //====================================================================================
@@ -550,8 +647,8 @@ void CActionHistoric::CRequestEraseNode::redo(IDynamicMapClient *dmc, CScenario 
 		CObject *old = scenario.find(_InstanceId, _AttrName, _Position);
 		if (!old)
 		{
-			nlwarning("Can't redo erase request!!");
-			nlassert(0); // TMP TMP
+			// another editor may have erased it first: the position would name another node, nothing is sent
+			nlwarning("R2Ed: can't erase '%s' of '%s' at %d, the node is not in the scenario", _AttrName.c_str(), _InstanceId.c_str(), (int)_Position);
 			return;
 		}
 		if (!old->getNameInParent(_ParentInstanceId, _AttrNameInParent, _PositionInParent))
@@ -589,7 +686,7 @@ void CActionHistoric::CRequestEraseNode::undo(IDynamicMapClient *dmc, CScenario 
 	_OldValue = nullptr;
 
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::push(getEditor().getLua(), ucstring::makeFromUtf8(_InstanceId));
+	CLuaIHM::pushUCString(getEditor().getLua(), _InstanceId); // Compatibility
 #else
 	getEditor().getLua().push(_InstanceId);
 #endif
@@ -623,7 +720,7 @@ void CActionHistoric::CRequestInsertNode::redo(IDynamicMapClient *dmc, CScenario
 
 	CObject* nodeId = _Value->findAttr("InstanceId");
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::push(getEditor().getLua(), ucstring::makeFromUtf8(nodeId->toString()));
+	CLuaIHM::pushUCString(getEditor().getLua(), nodeId->toString()); // Compatibility
 #else
 	getEditor().getLua().push(nodeId->toString());
 #endif
@@ -635,6 +732,28 @@ void CActionHistoric::CRequestInsertNode::undo(IDynamicMapClient *dmc, CScenario
 	//H_AUTO(R2_CRequestInsertNode_undo)
 	nlassert(scenario.getHighLevel()); // if this assert fires, then 'clear' was called with a NULL pointer ! The action historic need a start scenario to have undo capability
 	nlassert(dmc);
+	// A node that has an instance id is erased by it. Its position may name another node by now: an insert at the
+	// end erases the last entry of the table, which is the node of another editor when one was added after it.
+	if (_Value->isTable() && _Value->isString("InstanceId"))
+	{
+		std::string id = _Value->toString("InstanceId");
+		if (!scenario.find(id))
+		{
+			nlwarning("R2Ed: can't undo the insert of '%s', the node is not in the scenario", id.c_str());
+			return;
+		}
+		// modify local version
+		scenario.eraseNode(id, "", -1);
+		// send to network
+		dmc->doRequestEraseNode(id, "", -1);
+#ifdef RYZOM_LUA_UCSTRING
+		CLuaIHM::pushUCString(getEditor().getLua(), id); // Compatibility
+#else
+		getEditor().getLua().push(id);
+#endif
+		getEditor().callEnvMethod("setUndoRedoInstances", 1, 0);
+		return;
+	}
 	// if there's a key here, not good for us :(
 	// so try to find another shorter name for this object...
 	if (!_Key.empty())
@@ -652,7 +771,7 @@ void CActionHistoric::CRequestInsertNode::undo(IDynamicMapClient *dmc, CScenario
 			dmc->doRequestEraseNode(instanceId, attrName, position);
 
 #ifdef RYZOM_LUA_UCSTRING
-			CLuaIHM::push(getEditor().getLua(), ucstring::makeFromUtf8(instanceId));
+			CLuaIHM::pushUCString(getEditor().getLua(), instanceId); // Compatibility
 #else
 			getEditor().getLua().push(instanceId);
 #endif

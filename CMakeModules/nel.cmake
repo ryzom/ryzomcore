@@ -135,9 +135,10 @@ MACRO(NL_DEFAULT_PROPS name label)
       SET(_SUBSYSTEM "CONSOLE")
     ENDIF()
 
+    # The image version comes from /VERSION, not from the VERSION property: on a Linux host (the Docker
+    # builds under Wine) CMake names an executable with VERSION <name>.exe-<version> and adds a symlink
+    # <name>.exe, which Windows cannot open
     SET_TARGET_PROPERTIES(${name} PROPERTIES
-      VERSION ${NL_VERSION}
-      SOVERSION ${NL_VERSION_MAJOR}
       COMPILE_FLAGS "/GA"
       LINK_FLAGS "/VERSION:${NL_VERSION_MAJOR}.${NL_VERSION_MINOR} /SUBSYSTEM:${_SUBSYSTEM},${_SUBSYSTEM_VERSION}")
 
@@ -207,7 +208,26 @@ MACRO(NL_ADD_RUNTIME_FLAGS name)
 #      LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}")
   ENDIF()
   IF(WITH_STLPORT)
-    TARGET_LINK_LIBRARIES(${name} PRIVATE ${STLPORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+    # Appended to the property rather than through TARGET_LINK_LIBRARIES: the targets use both the plain
+    # and the keyword signature of TARGET_LINK_LIBRARIES, which CMake does not allow mixing. The property
+    # takes no optimized and debug keywords, so those become generator expressions.
+    SET(_NL_RUNTIME_LIBS)
+    SET(_NL_RUNTIME_CONFIG)
+    FOREACH(_NL_LIB ${STLPORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+      IF(_NL_LIB STREQUAL "optimized")
+        SET(_NL_RUNTIME_CONFIG "$<NOT:$<CONFIG:Debug>>")
+      ELSEIF(_NL_LIB STREQUAL "debug")
+        SET(_NL_RUNTIME_CONFIG "$<CONFIG:Debug>")
+      ELSEIF(_NL_LIB STREQUAL "general")
+        SET(_NL_RUNTIME_CONFIG)
+      ELSEIF(_NL_RUNTIME_CONFIG)
+        LIST(APPEND _NL_RUNTIME_LIBS "$<${_NL_RUNTIME_CONFIG}:${_NL_LIB}>")
+        SET(_NL_RUNTIME_CONFIG)
+      ELSE()
+        LIST(APPEND _NL_RUNTIME_LIBS "${_NL_LIB}")
+      ENDIF()
+    ENDFOREACH()
+    SET_PROPERTY(TARGET ${name} APPEND PROPERTY LINK_LIBRARIES ${_NL_RUNTIME_LIBS})
   ENDIF()
 ENDMACRO(NL_ADD_RUNTIME_FLAGS)
 
@@ -377,7 +397,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
   # Features
   ###
-  OPTION(WITH_LOGGING             "With Logging"                                  ON )
+  OPTION(WITH_LOGGING             "With the standard output, memory and log.log displayers (asserts and errors still report without them)" ON )
   OPTION(WITH_COVERAGE            "With Code Coverage Support"                    OFF)
   OPTION(WITH_PCH                 "With Precompiled Headers"                      ON )
   OPTION(WITH_LOW_MEMORY          "With low memory (use the least of RAM)"        OFF)
@@ -450,6 +470,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_TOOLS               "Build Tools"                                   OFF)
 
   OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            ON)
+  OPTION(WITH_RYZOM_FORGE         "Build the code guarded by RYZOM_FORGE (not maintained)" ON)
 
   OPTION(WITH_MONGODB             "Compile server with MongoDB support"           ON)
   OPTION(WITH_MEMCACHED           "Compile server with memcached support"         OFF)
@@ -481,8 +502,12 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_DRIVER_DIRECT3D     "Build Direct3D Driver (3D)"                    OFF)
   OPTION(WITH_DRIVER_OPENAL       "Build OpenAL Driver (Sound)"                   ON )
   OPTION(WITH_DRIVER_FMOD         "Build FMOD Driver (Sound)"                     OFF)
-  OPTION(WITH_DRIVER_DSOUND       "Build DirectSound Driver (Sound)"              OFF)
-  OPTION(WITH_DRIVER_XAUDIO2      "Build XAudio2 Driver (Sound)"                  OFF)
+  IF(WIN32)
+    OPTION(WITH_DRIVER_DSOUND     "Build DirectSound Driver (Sound)"              OFF)
+    OPTION(WITH_DRIVER_XAUDIO2    "Build XAudio2 Driver (Sound)"                  OFF)
+  ELSEIF(WITH_DRIVER_DSOUND OR WITH_DRIVER_XAUDIO2)
+    MESSAGE(FATAL_ERROR "WITH_DRIVER_DSOUND and WITH_DRIVER_XAUDIO2 build Windows-only sound drivers: turn them off on this platform")
+  ENDIF()
 
   ###
   # Optional support
@@ -496,7 +521,6 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
-  OPTION(WITH_PERFHUD             "With NVIDIA PerfHUD support"                   OFF)
 
   IF(NOT EMSCRIPTEN)
     OPTION(WITH_SSE2                "With SSE2"                                     ON )
@@ -536,7 +560,13 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   OPTION(WITH_LUA52               "Build Ryzom Core using Lua 5.2"                OFF)
   OPTION(WITH_LUA53               "Build Ryzom Core using Lua 5.3"                OFF)
   OPTION(WITH_LUA54               "Build Ryzom Core using Lua 5.4"                OFF)
+  OPTION(WITH_LUA55               "Build Ryzom Core using Lua 5.5"                OFF)
+  IF(WITH_LUA50)
+    # luabind uses the Lua 5.1 API, and the client and Ring editor scripts use the length operator
+    MESSAGE(FATAL_ERROR "Lua 5.0 is not supported, Ryzom Core needs Lua 5.1 or later")
+  ENDIF()
   OPTION(WITH_RYZOM_CLIENT_UAC    "Ask to run as Administrator"                   OFF)
+  OPTION(WITH_RYZOM_CLIENT_CTRL   "Control endpoint in a final client (--ctrl-listen)" OFF)
   OPTION(WITH_RYZOM_PATCH         "Enable Ryzom in-game patch support"            OFF)
   OPTION(WITH_RYZOM_CUSTOM_PATCH_SERVER "Only use patch server from CFG file"     OFF)
   OPTION(WITH_RYZOM_STEAM         "Enable Steam features"                         OFF)
@@ -615,6 +645,13 @@ MACRO(NL_SETUP_BUILD)
       set(CMAKE_C_STANDARD_REQUIRED ON)
       set(NL_CPP_STANDARD_SET ON)
     endif()
+  elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7) OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 11))
+    # clang-cl takes the MSVC branch above
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_C_STANDARD 11)
+    set(CMAKE_C_STANDARD_REQUIRED ON)
+    set(NL_CPP_STANDARD_SET ON)
   endif()
 
   IF(CMAKE_CXX_LIBRARY_ARCHITECTURE)
@@ -791,10 +828,6 @@ MACRO(NL_SETUP_BUILD)
     SET(CMAKE_LIBRARY_PATH /opt/local/lib ${CMAKE_LIBRARY_PATH})
   ENDIF()
 
-  IF(WITH_LOGGING)
-    ADD_PLATFORM_FLAGS("-DENABLE_LOGS")
-  ENDIF()
-
   SET(CUSTOM_FLAGS "" CACHE STRING "Custom compile flags (useful for /MPn)")
   IF(NOT ${CUSTOM_FLAGS} STREQUAL "")
     ADD_PLATFORM_FLAGS(${CUSTOM_FLAGS})
@@ -852,6 +885,13 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     ADD_PLATFORM_FLAGS("/D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_WIN32 /DWIN32 /D_WINDOWS /wd4250")
+
+    # The sources are UTF-8: read them as UTF-8 whatever the code page of the build machine,
+    # and keep narrow string literals in UTF-8 (/utf-8 exists from VC++ 2015 Update 2 on; clang-cl
+    # does both by default, and its version is not the one of cl)
+    IF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.0.23918)
+      ADD_PLATFORM_FLAGS("/utf-8")
+    ENDIF()
 
     # huge PCH
     ADD_PLATFORM_FLAGS("/Zm1000")
@@ -1117,7 +1157,7 @@ MACRO(NL_SETUP_BUILD)
           ENDIF()
         ENDIF()
         
-        IF(NOT NL_CPP_STANDARD_SET)
+        IF(CLANG)
           # use libc++ under OX X to be able to use new C++ features (and else it'll use GCC 4.2.1 STL)
           # minimum target is now OS X 10.7
           SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -stdlib=libc++")
@@ -1147,6 +1187,11 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     ADD_PLATFORM_FLAGS("-D_REENTRANT")
+
+    # 64-bit off_t on 32-bit systems, for fseeko and ftello (nlfseek64 and nlftell64)
+    IF(NOT WIN32)
+      ADD_PLATFORM_FLAGS("-D_FILE_OFFSET_BITS=64")
+    ENDIF()
 
     # hardening
     IF(NOT EMSCRIPTEN)
@@ -1318,7 +1363,15 @@ ENDMACRO(NL_MAKE_ABSOLUTE_PREFIX)
 MACRO(NL_SETUP_PREFIX_PATHS)
   IF(TARGET_X64 AND WIN32)
     SET(LIB_SUFFIX "64")
+  ELSEIF(WIN32)
+    SET(LIB_SUFFIX "")
   ELSE()
+    # libraries go to the library directory of the platform (lib, lib64, lib/<multiarch>), as the NeL
+    # package configuration does; a packager's -DLIB_SUFFIX=64 names it when CMAKE_INSTALL_LIBDIR is not given
+    IF(LIB_SUFFIX AND NOT DEFINED CMAKE_INSTALL_LIBDIR)
+      SET(CMAKE_INSTALL_LIBDIR "lib${LIB_SUFFIX}" CACHE PATH "Object code libraries (LIBDIR)")
+    ENDIF()
+    INCLUDE(GNUInstallDirs)
     SET(LIB_SUFFIX "")
   ENDIF()
 
@@ -1366,8 +1419,10 @@ MACRO(NL_SETUP_PREFIX_PATHS)
   IF(NOT NL_LIB_PREFIX)
     IF(LIBRARY_ARCHITECTURE)
       SET(NL_LIB_PREFIX "lib/${LIBRARY_ARCHITECTURE}" CACHE PATH "Installation path for libraries.")
-    ELSE()
+    ELSEIF(WIN32)
       SET(NL_LIB_PREFIX "lib${LIB_SUFFIX}" CACHE PATH "Installation path for libraries.")
+    ELSE()
+      SET(NL_LIB_PREFIX "${CMAKE_INSTALL_LIBDIR}" CACHE PATH "Installation path for libraries.")
     ENDIF()
   ENDIF()
   NL_MAKE_ABSOLUTE_PREFIX(NL_LIB_PREFIX NL_LIB_ABSOLUTE_PREFIX)
@@ -1381,7 +1436,7 @@ MACRO(NL_SETUP_PREFIX_PATHS)
         IF(WIN32)
           SET(NL_DRIVER_PREFIX "bin${LIB_SUFFIX}" CACHE PATH "Installation path for drivers.")
         ELSE()
-          SET(NL_DRIVER_PREFIX "lib${LIB_SUFFIX}/nel" CACHE PATH "Installation path for drivers.")
+          SET(NL_DRIVER_PREFIX "${CMAKE_INSTALL_LIBDIR}/nel" CACHE PATH "Installation path for drivers.")
         ENDIF()
       ENDIF()
     ELSE()
@@ -1436,8 +1491,10 @@ MACRO(RYZOM_SETUP_PREFIX_PATHS)
   IF(NOT RYZOM_LIB_PREFIX)
     IF(LIBRARY_ARCHITECTURE)
       SET(RYZOM_LIB_PREFIX "lib/${LIBRARY_ARCHITECTURE}" CACHE PATH "Installation path for libraries.")
-    ELSE()
+    ELSEIF(WIN32)
       SET(RYZOM_LIB_PREFIX "lib${LIB_SUFFIX}" CACHE PATH "Installation path for libraries.")
+    ELSE()
+      SET(RYZOM_LIB_PREFIX "${CMAKE_INSTALL_LIBDIR}" CACHE PATH "Installation path for libraries.")
     ENDIF()
   ENDIF()
   NL_MAKE_ABSOLUTE_PREFIX(RYZOM_LIB_PREFIX RYZOM_LIB_ABSOLUTE_PREFIX)

@@ -1,0 +1,22 @@
+# A handler with the action "Desactivate" on a creature, the name earlier versions gave "Deactivate".
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+absent: version_update_note
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[0].Action.Type = Deactivate
+scenario_lacks: Type = [[Desactivate]]

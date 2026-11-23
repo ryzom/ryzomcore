@@ -70,6 +70,12 @@ function featureTree.createParentNode(parentCategory)
 end
 
 
+-- The action of the node of a feature in the tree: creates the component 'componentName' of the feature
+-- 'featureName'
+function featureTree.createFeatureComponent(featureName, componentName)
+	r2.Features[featureName].Components[componentName]:createProtected()
+end
+
 function featureTree.addNodeWithId(featureName, category)
 	local tree = getUI(r2.FeatureTree.Path)
 	if not tree then return end
@@ -116,7 +122,7 @@ function featureTree.addNodeWithId(featureName, category)
 	end
 	featureNode.Text = i18n.get("uiR2Ed"..featureName.. "Node")
 	featureNode.AHName = "lua"
-	featureNode.AHParams = "r2.Features['".. featureName.."'].Components." ..componentName.. ":createProtected()"
+	featureNode.AHParams = r2:uiCall("r2.FeatureTree.createFeatureComponent", featureName, componentName)
 
 	categoryNode:addChild(featureNode)
 end
@@ -152,7 +158,7 @@ function featureTree.addUserComponentNode(userComponentName)
 	featureNode.Id = userComponentName
 	featureNode.Text = userComponentName
 	featureNode.AHName = "lua"
-	featureNode.AHParams = "r2.Translator.CreateUserComponent('"..userComponentName.."')"
+	featureNode.AHParams = r2:uiCall("r2.Translator.CreateUserComponent", userComponentName)
 
 	categoryNode:addChild(featureNode)
 	tree:forceRebuild()

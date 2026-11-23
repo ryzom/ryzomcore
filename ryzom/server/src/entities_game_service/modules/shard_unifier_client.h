@@ -47,6 +47,11 @@ public:
 	virtual void validateCharacterNameBeforeCreate	(uint32 userId, uint8 charIndex, const ucstring &name, uint32 homeSessionId) =0;
 	virtual bool validateCharacterCreation			(uint32 userId, uint8 charIndex, const CCreateCharMsg &createCharMsg) =0;
 	virtual void renameCharacter					(const NLMISC::CEntityId &eid) =0;
+	/// Refuses the name validations and the character creations that wait for the unifier, as when it goes down.
+	/// The service calls it before it releases its managers (CPlayerService::release): the modules go after them,
+	/// and a refusal made when the unifier is taken down then reads what is already released (the answer of a
+	/// refused creation is the list of the player's characters, with their regions).
+	virtual void refusePendingNameRequests			() =0;
 
 	// interface for name unifier (guild part)
 	virtual void validateGuildName				(uint32 guildId, const ucstring &guildName) =0;

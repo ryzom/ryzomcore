@@ -19,6 +19,7 @@
 #include "primitives_model.h"
 #include "world_editor_actions.h"
 #include "world_editor_constants.h"
+#include "world_editor_misc.h"
 
 #include "../core/core_constants.h"
 #include "../landscape_editor/landscape_editor_constants.h"
@@ -45,7 +46,8 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	  m_undoStack(0),
 	  m_worldEditorScene(0),
 	  m_zoneBuilder(0),
-	  m_primitivesTreeModel(0)
+	  m_primitivesTreeModel(0),
+	  m_files(0)
 {
 	setContextMenuPolicy(Qt::DefaultContextMenu);
 
@@ -119,6 +121,11 @@ void PrimitivesView::setModel(PrimitivesTreeModel *model)
 	m_primitivesTreeModel = model;
 }
 
+void PrimitivesView::setWorldFiles(WorldFiles *files)
+{
+	m_files = files;
+}
+
 void PrimitivesView::loadRootPrimitive()
 {
 	nlassert(m_undoStack);
@@ -137,7 +144,10 @@ void PrimitivesView::loadRootPrimitive()
 		Q_FOREACH(QString fileName, fileNames)
 		{
 			m_lastDir = QFileInfo(fileName).absolutePath();
-			m_undoStack->push(new LoadRootPrimitiveCommand(fileName, m_worldEditorScene, m_primitivesTreeModel, this));
+			LoadRootPrimitiveCommand *command = new LoadRootPrimitiveCommand(fileName, m_worldEditorScene, m_primitivesTreeModel, this, m_files);
+			m_undoStack->push(command);
+			if (!command->isLoaded())
+				QMessageBox::warning(this, tr("Error opening primitive file"), tr("%1 is not loaded: it cannot be read, the log says why.").arg(fileName));
 		}
 
 		if (fileNames.count() > 1)
@@ -165,7 +175,10 @@ void PrimitivesView::loadLandscape()
 		Q_FOREACH(QString fileName, fileNames)
 		{
 			m_lastDir = QFileInfo(fileName).absolutePath();
-			m_undoStack->push(new LoadLandscapeCommand(fileName, m_primitivesTreeModel, m_zoneBuilder));
+			LoadLandscapeCommand *command = new LoadLandscapeCommand(fileName, m_primitivesTreeModel, m_zoneBuilder, m_files);
+			m_undoStack->push(command);
+			if (!command->isLoaded())
+				QMessageBox::warning(this, tr("Error opening land file"), tr("%1 is not loaded: %2.").arg(fileName, command->error()));
 		}
 
 		if (fileNames.count() > 1)
@@ -205,10 +218,42 @@ void PrimitivesView::save()
 
 	if (node->data(Constants::PRIMITIVE_FILE_IS_CREATED).toBool())
 	{
-		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), node->fileName().toUtf8().constData()))
-			QMessageBox::warning(this, "World Editor Qt", tr("Error writing output file: %1").arg(node->fileName()));
-		else
+		const std::string fileName = node->fileName().toUtf8().constData();
+		std::string content;
+		try
+		{
+			content = Utils::primitivesFileContent(*node->primitives(), fileName);
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			QMessageBox::warning(this, "World Editor Qt", tr("Error writing output file %1: %2").arg(node->fileName(), QString::fromUtf8(e.what())));
+			return;
+		}
+
+		// as the world Save does: a file the editor did not change keeps what is on disk, and one that
+		// changed on disk too is replaced only when the user says so
+		const Utils::FileBaseline *baseline = m_files ? Utils::findFileBaseline(m_files->Baselines, fileName) : NULL;
+		Utils::FileAction action = Utils::fileAction(fileName, content, baseline);
+		if (action == Utils::FileUnchanged)
+		{
 			node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
+			return;
+		}
+		if (action == Utils::FileConflict
+			&& QMessageBox::question(this, "World Editor Qt",
+				tr("%1 changed on disk since it was loaded or saved, and is also changed in the editor. Replace it with the editor version?").arg(node->fileName()),
+				QMessageBox::Save | QMessageBox::Cancel, QMessageBox::Cancel) != QMessageBox::Save)
+			return;
+
+		std::string error;
+		if (action != Utils::FileUpToDate && !Utils::writeFile(fileName, content, error))
+		{
+			QMessageBox::warning(this, "World Editor Qt", QString::fromUtf8(error.c_str()));
+			return;
+		}
+		if (m_files)
+			Utils::setFileBaseline(m_files->Baselines, fileName, content);
+		node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
 	}
 	else
 		saveAs();
@@ -230,13 +275,27 @@ void PrimitivesView::saveAs()
 
 		RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
 
-		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), fileName.toUtf8().constData()))
-			QMessageBox::warning(this, "World Editor Qt", tr("Error writing output file: %1").arg(fileName));
+		// the file dialog asked before a file is replaced
+		const std::string name = fileName.toUtf8().constData();
+		std::string content;
+		std::string error;
+		try
+		{
+			content = Utils::primitivesFileContent(*node->primitives(), name);
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			error = "Error writing " + name + ": " + e.what();
+		}
+		if (!error.empty() || !Utils::writeFile(name, content, error))
+			QMessageBox::warning(this, "World Editor Qt", QString::fromUtf8(error.c_str()));
 		else
 		{
 			node->setFileName(fileName);
 			node->setData(Constants::PRIMITIVE_FILE_IS_CREATED, true);
 			node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
+			if (m_files)
+				Utils::setFileBaseline(m_files->Baselines, name, content);
 		}
 	}
 	setCursor(Qt::ArrowCursor);
