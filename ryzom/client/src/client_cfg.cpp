@@ -1675,6 +1675,8 @@ void CClientConfig::setValues()
 	if (!ClientCfg.ForceLanguage)
 	{
 		READ_STRING_FV(LanguageCode)
+		if (!ClientCfg.LanguageWithoutTexts.empty() && ClientCfg.LanguageCode == ClientCfg.LanguageWithoutTexts)
+			ClientCfg.LanguageCode = "en";
 	}
 	// DebugStringManager
 	READ_BOOL_DEV(DebugStringManager)

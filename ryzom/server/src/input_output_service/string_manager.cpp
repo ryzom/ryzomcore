@@ -72,6 +72,7 @@ std::string CStringManager::_LanguageCode[NB_LANGUAGES] =
 	"fr",
 	"ru",
 	"es",
+	"ja",
 
 /* ace: currently, we only want english, i remove other language to remove warning during IOS launch
 	"fr",		// french

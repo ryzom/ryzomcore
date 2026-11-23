@@ -446,7 +446,8 @@
 				<combo_text name="uigcEnglish" />
 				<combo_text name="uigcFrancais" />
 				<combo_text name="uigcDeutch" />
-				<!--
+				<combo_text name="uigcJapanese" />
+				<!-- the indexes 4 and 5 of convertLanguageIntToLanguageCode and game:configInit
 				<combo_text name="uigcRussian" />
 				<combo_text name="uigcSpanish" />
 				-->

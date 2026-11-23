@@ -730,6 +730,9 @@ struct CClientConfig
 
 	bool			ForceLanguage;
 	std::string		LanguageCode;
+	// The language of client.cfg that the data has no texts in (set by init.cpp, empty if none): setValues() gives
+	// English for it, so that the client stays in English until the data has the texts.
+	std::string		LanguageWithoutTexts;
 	bool			DebugStringManager;
 	bool			PreCacheShapes;
 	bool			ResetShapeBankOnRetCharSelect;

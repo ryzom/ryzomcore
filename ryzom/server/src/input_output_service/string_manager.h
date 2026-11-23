@@ -63,6 +63,7 @@ public:
 		french,
 		russian,
 		spanish,
+		japanese,
 		NB_LANGUAGES
 	};
 

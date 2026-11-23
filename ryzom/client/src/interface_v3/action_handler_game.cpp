@@ -119,6 +119,7 @@ extern CClientChatManager ChatMngr;
 void beastOrder (const std::string &orderStr, const std::string &beastIndexStr, bool confirmFree = true);
 
 
+// The order of the language combo box of game_config.xml and of game:configInit
 string convertLanguageIntToLanguageCode(sint val)
 {
 	switch(val)
@@ -127,8 +128,9 @@ string convertLanguageIntToLanguageCode(sint val)
 	case 0: return "en"; break;
 	case 1: return "fr"; break;
 	case 2: return "de"; break;
-	case 3: return "ru"; break;
-	case 4: return "es"; break;
+	case 3: return "ja"; break;
+	case 4: return "ru"; break;
+	case 5: return "es"; break;
 	}
 }
 
@@ -3606,7 +3608,8 @@ class CHandlerGameConfigLanguage : public IActionHandler
 			// Set the new language
 			//string newVal = (newOne==2)?"de":(newOne==1)?"fr":"en";
 			string newVal = convertLanguageIntToLanguageCode(newOne);
-			if (ClientCfg.LanguageCode != newVal)
+			// the language of client.cfg and not the one in use: see LanguageWithoutTexts
+			if (ClientCfg.readString("LanguageCode") != newVal)
 			{
 				CDDXManager *pDM = CDDXManager::getInstance();
 				CInterfaceDDX *pDDX = pDM->get(GAME_CONFIG_DDX);
@@ -4001,7 +4004,8 @@ class CHandlerGameConfigApply : public IActionHandler
 			sint newOne = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_LANGUAGE )->getValue32();
 			//string newVal = (newOne==2)?"de":(newOne==1)?"fr":"en";
 			string newVal = convertLanguageIntToLanguageCode(newOne);
-			if (ClientCfg.LanguageCode != newVal)
+			// the language of client.cfg and not the one in use: see LanguageWithoutTexts
+			if (ClientCfg.readString("LanguageCode") != newVal)
 			{
 				ClientCfg.LanguageCode = newVal;
 				ClientCfg.writeString("LanguageCode", ClientCfg.LanguageCode);

@@ -1123,6 +1123,18 @@ void prelogInit()
 			ProgressBar.newMessage ( nmsg );
 
 			FPU_CHECKER_ONCE
+			// The language of a new configuration file is the one of the system (client_cfg.cpp), which the data may
+			// not have texts in (the classic data has no Japanese): the client is then in English, as it was before
+			// the language was known, and says so. The language of client.cfg stays (it is used again when the data
+			// has the texts).
+			if (ClientCfg.LanguageCode != "en" && CPath::lookup(ClientCfg.LanguageCode + ".uxt", false, false).empty())
+			{
+				nlwarning("The data has no texts in the language '%s' (%s.uxt is missing), the client is in English",
+				    ClientCfg.LanguageCode.c_str(), ClientCfg.LanguageCode.c_str());
+				ClientCfg.LanguageWithoutTexts = ClientCfg.LanguageCode;
+				ClientCfg.LanguageCode = "en";
+			}
+
 			STRING_MANAGER::CLoadProxy loadProxy;
 			CI18N::setLoadProxy(&loadProxy);
 			CI18N::load(ClientCfg.LanguageCode);

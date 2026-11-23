@@ -3477,7 +3477,7 @@ class CAHLoadScenario : public IActionHandler
 
 		// ---- fix for old scenarii
 		// They name the language (the former ScenarioLanguages were French, Deutsch, English and Other). A scenario
-		// of today has one of the codes of ScenarioLanguages (fr, de, en, es, ru, other_lang), which is sent as it
+		// of today has one of the codes of ScenarioLanguages (fr, de, en, es, ru, ja, other_lang), which is sent as it
 		// is, and a header without a language has the default of the Scenario class, en.
 		if (lang == "French")
 			lang = "fr";

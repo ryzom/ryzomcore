@@ -147,14 +147,17 @@ function game:configInit()
 	local lang = getClientCfg('LanguageCode');
 	local langNb = 0;
 
+	-- the order of the combo box of game_config.xml and of convertLanguageIntToLanguageCode
 	if (lang == 'de') then
 		langNb = 2;
 	elseif (lang == 'fr') then
 		langNb = 1;
-	elseif (lang == 'ru') then
+	elseif (lang == 'ja') then
 		langNb = 3;
-	elseif (lang == 'es') then
+	elseif (lang == 'ru') then
 		langNb = 4;
+	elseif (lang == 'es') then
+		langNb = 5;
 	end
 
 	-- force observers call

@@ -68,12 +68,14 @@ void CI18N::initLanguages()
 		_LanguageCodes.push_back("de");
 		_LanguageCodes.push_back("ru");
 		_LanguageCodes.push_back("es");
+		_LanguageCodes.push_back("ja");
 
 		_LanguageNames.push_back("English");
 		_LanguageNames.push_back("French");
 		_LanguageNames.push_back("German");
 		_LanguageNames.push_back("Russian");
 		_LanguageNames.push_back("Spanish");
+		_LanguageNames.push_back("Japanese");
 
 		_LanguagesNamesLoaded = true;
 	}
