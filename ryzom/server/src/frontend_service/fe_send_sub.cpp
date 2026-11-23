@@ -180,7 +180,11 @@ void CFeSendSub::init( NLNET::CUdpSock *datasock, THostMap *clientmap, CHistory 
 
 	// (without what declares the stream classes: the clients need not have those to have the same file)
 	_MsgXmlMD5 = CGenericXmlMsgHeaderManager::getSignature("msg.xml", false);
-	_DatabaseXmlMD5 = NLMISC::getMD5("database.xml");
+	// (a frontend without the file does not start, as before: every client would be told its files are not the
+	// server's)
+	if (NLMISC::CPath::lookup("database.xml", false).empty())
+		nlerror("database.xml is not in the search paths of the frontend, which sends its signature to the clients");
+	_DatabaseXmlMD5 = CGenericXmlMsgHeaderManager::getDatabaseSignature("database.xml", false);
 
 	/*_TotalBandwidth = totalbandwith; // initialized by setTotalBandwidth() and setClientBandwitdth()
 	_ClientBandwidth = clientbandwith; */

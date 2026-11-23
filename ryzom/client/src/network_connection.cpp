@@ -358,29 +358,6 @@ CNetworkConnection::~CNetworkConnection()
 #endif
 }
 
-NLMISC::CHashKeyMD5	getTextMD5(const std::string& filename)
-{
-	CIFile	fi;
-	if (!fi.open(CPath::lookup(filename, false)))
-		return NLMISC::CHashKeyMD5();
-
-	std::vector<uint8>	buffer(fi.getFileSize());
-	fi.serialBuffer(&(buffer[0]), (uint)buffer.size());
-
-	std::vector<uint8>::iterator	it = buffer.begin();
-	do
-	{
-		while (it != buffer.end() && *it != '\015')
-			++it;
-
-		if (it != buffer.end())
-			it = buffer.erase(it);
-	}
-	while (it != buffer.end());
-
-	return NLMISC::getMD5((&buffer[0]), (uint32)buffer.size());
-}
-
 /*
  * Init
  */
@@ -437,10 +414,10 @@ void	CNetworkConnection::init(const string &cookie, const string &addr)
 	// and the frontend's need not agree on those (see CGenericXmlMsgHeaderManager::getSignature)
 	// If the server run on window, those are the one to test
 	_AltMsgXmlMD5 = CGenericXmlMsgHeaderManager::getSignature("msg.xml", false);
-	_AltDatabaseXmlMD5 = NLMISC::getMD5("database.xml");
+	_AltDatabaseXmlMD5 = CGenericXmlMsgHeaderManager::getDatabaseSignature("database.xml", false);
 	// If the server run on UNIX, those are the one to test
 	_MsgXmlMD5 = CGenericXmlMsgHeaderManager::getSignature("msg.xml", true);
-	_DatabaseXmlMD5 = getTextMD5("database.xml");
+	_DatabaseXmlMD5 = CGenericXmlMsgHeaderManager::getDatabaseSignature("database.xml", true);
 }
 
 
