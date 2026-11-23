@@ -498,7 +498,7 @@ void			CSBrickManager::compileBrickProperties()
 								break;
 						}
 						// find the key end.
-						while(k<textSize && (isalpha((char)text[k]) || text[k]=='_'))
+						while(k<textSize && (((uint8)text[k] < (uint8)'\x80' && isalpha((uint8)text[k])) || text[k]=='_'))
 						{
 							key+= (char)text[k];
 							k++;

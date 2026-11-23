@@ -324,7 +324,8 @@ class CAHEditGotoLineEnd : public CAHEdit
 			}
 			else
 			{
-				_GroupEdit->setCursorPos((sint32)_GroupEdit->getPromptRef().length() + (sint32)_GroupEdit->getInputString().length());
+				// the cursor counts the characters of the input string, without the prompt
+				_GroupEdit->setCursorPos((sint32)_GroupEdit->getInputStringRef().length());
 			}
 		}
 	}
