@@ -28,6 +28,7 @@
 #include "nel/misc/entity_id.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/string_view.h"
+#include "nel/misc/md5.h"
 
 #include <string>
 #include <vector>
@@ -328,6 +329,63 @@ public:
 	 */
 	bool					nodeUsesCycle(CNodeId &nodeId)				{ return nodeId._Node->UseCycle; }
 
+	// clang-format off
+	/**
+	 * The signature of a msg.xml, which the frontend sends to its clients for them to compare with that of their own
+	 * file: the MD5 of the file without what declares the stream classes (see removeStreamClasses), so that a
+	 * frontend can declare a class, or move a message to one, without the files of its clients having to follow. A
+	 * file that has nothing of the kind has the signature it always had, the MD5 of the whole file.
+	 * removeCarriageReturns: of the file without its carriage returns as well (a client compares with both).
+	 * The hash is all zero if the file cannot be read.
+	 */
+	static NLMISC::CHashKeyMD5	getSignature(const std::string &filename, bool removeCarriageReturns);
+
+	/**
+	 * Remove from the text of a msg.xml what declares the stream classes: the lines of the `stream_class` elements,
+	 * the comment in front of them (from a line that starts with `<!-- stream_class` to the line that ends it), and
+	 * the `stream` attributes of the nodes, each with the one space in front of it. What is left is the file as it
+	 * was before, byte for byte, provided they were written that way: each element on a line of its own, each
+	 * attribute after one space.
+	 */
+	static void					removeStreamClasses(std::vector<uint8> &text);
+
+	/**
+	 * Check that a msg.xml declares its stream classes the way removeStreamClasses takes them out. Returns what is
+	 * not written that way, one line of text per fault (none if the file cannot be read): a `stream_class` element,
+	 * a `stream` attribute, or a comment that speaks of `stream_class`, that would stay in the signature, which
+	 * clients without it would then not match; a line that would be left out of the signature with something else
+	 * on it.
+	 */
+	static std::vector<std::string>	checkStreamClassesText(const std::string &filename);
+
+	/**
+	 * Get the class of the message node, which says on which stream of protocol level ryzomcore/4.2 the frontend
+	 * sends the message: an index in getStreamClasses(), or CLFECOMMON::NoStreamClass for a message that goes by
+	 * impulse. See game_share/stream_record.h.
+	 */
+	uint8					getNodeStreamClass(CNodeId &nodeId)			{ return nodeId._Node->StreamClass; }
+
+	/**
+	 * The classes the file declares (its `stream_class` elements), by name, in the order of their streams
+	 */
+	const std::vector<std::string>	&getStreamClasses() const			{ return _StreamClasses; }
+
+	/**
+	 * For each of those classes, the bytes above which a message of the class is left out instead of sent (its
+	 * `drop_above` attribute), or 0 for a class of which no message can be left out. The messages of such a class do
+	 * not depend on each other (chat lines); in the others a message that is missing leaves the client without
+	 * something for good.
+	 */
+	const std::vector<uint32>	&getStreamClassDropAbove() const			{ return _StreamClassDropAbove; }
+
+	/**
+	 * The file declares a class twice, without a name or with a `drop_above` that is no number, declares more classes
+	 * than a client allows streams, or has a `stream` attribute that names no class (each fault was logged). The
+	 * frontend stops on that.
+	 */
+	bool					hasStreamClassError() const					{ return _StreamClassError; }
+	// clang-format on
+
 	/**
 	 * Set node user data
 	 */
@@ -362,9 +420,14 @@ protected:
 		TMessageFormat		Format;
 		uint				NbBits;
 		TMsgHeaderCallback	Callback;
+		// clang-format off
+		/// The class of the `stream` attribute of the node, or else that of the branch it is in (an index in
+		/// streamClasses, or CLFECOMMON::NoStreamClass)
+		uint8				StreamClass;
 
-		/// Constructor
-		CNode(xmlNodePtr xmlNode, uint32 value);
+		/// Constructor (streamClassError is set if a `stream` attribute in the node or below names no class)
+		CNode(xmlNodePtr xmlNode, uint32 value, uint8 parentStreamClass, const std::vector<std::string> &streamClasses, bool &streamClassError);
+		// clang-format on
 
 		/// Destructor
 		~CNode();
@@ -500,6 +563,11 @@ protected:
 protected:
 	CNode	*_Root;
 
+	// clang-format off
+	std::vector<std::string>	_StreamClasses;
+	std::vector<uint32>	_StreamClassDropAbove;
+	bool	_StreamClassError;
+	// clang-format on
 };
 
 

@@ -43,6 +43,7 @@
 #include <utility>
 
 #include <nel/misc/file.h>
+#include <nel/misc/path.h>
 #include <nel/misc/vector.h>
 
 #include "../pipeline_max/storage_ole.h"
@@ -180,7 +181,7 @@ int main(int argc, char **argv)
 		ctr.serial(instream);
 		// PID-suffixed temp path so concurrent invocations don't clobber each other
 		// (same pattern as pipeline_max_corpus_test), removed after the reserial check.
-		std::string tempPath = "/tmp/pipeline_max_dump." + NLMISC::toString((sint32)PMD_GETPID()) + ".tmp";
+		std::string tempPath = NLMISC::CPath::getTemporaryDirectory() + "pipeline_max_dump." + NLMISC::toString((sint32)PMD_GETPID()) + ".tmp";
 		{
 			NLMISC::COFile of(tempPath);
 			ctr.serial(of); // out

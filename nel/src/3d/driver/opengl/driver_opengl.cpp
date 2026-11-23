@@ -200,12 +200,18 @@ CDriverGL::CDriverGL()
 
 	_ctx                = nil;
 	_glView             = nil;
+	m_WindowDelegate    = nil;
 	_backBufferHeight   = 0;
 	_backBufferWidth    = 0;
+	m_FullscreenWindow  = false;
+	m_WindowedStyleMask = 0;
+	m_WindowedFrame     = NSZeroRect;
+	m_WindowedPresentationOptions = 0;
 
 #elif defined (NL_OS_UNIX)
 
 	_dpy = nullptr;
+	_WindowMinimized = false;
 	_visual_info = nullptr;
 
 #	ifdef XF86VIDMODE
@@ -214,6 +220,17 @@ CDriverGL::CDriverGL()
 #	endif //XF86VIDMODE
 
 #endif // NL_OS_UNIX
+
+#ifdef NL_OS_WINDOWS
+	m_MinimizedPictureMode = false;
+	m_MinimizedPictureWidth = 0;
+	m_MinimizedPictureHeight = 0;
+	m_MinimizedPictureColorBuffer = 0;
+	m_MinimizedPictureDepthStencilBuffer = 0;
+	m_MinimizedPictureUnsupportedReported = false;
+#endif // NL_OS_WINDOWS
+
+	m_WindowFrameBuffer = 0;
 
 	_ColorDepth = ColorDepth32;
 
@@ -364,6 +381,7 @@ CDriverGL::CDriverGL()
 
 	_TextureTargetCubeFace = 0;
 	_TextureTargetUpload = false;
+	m_ZeroAreaRenderTargetReported = false;
 }
 
 // ***************************************************************************
@@ -381,7 +399,9 @@ bool CDriverGL::setupDisplay()
 	// Driver caps.
 	//=============
 	// Retrieve the extensions for the current context.
-	registerGlExtensions (_Extensions);
+	if (!registerGlExtensions(_Extensions))
+		return false;
+
 	vector<string> lines;
 	explode(_Extensions.toString(), string("\n"), lines);
 	for(uint i = 0; i < lines.size(); i++)
@@ -715,7 +735,8 @@ bool CDriverGL::activeFrameBufferObject(ITexture * tex)
 		}
 		else
 		{
-			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			// the frame buffer of the window, or what stands for it (see getWindowFrameBuffer)
+			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_WindowFrameBuffer);
 			return true;
 		}
 	}
@@ -926,6 +947,13 @@ bool CDriverGL::swapBuffers()
 		if (_VRAMVertexArrayRange) _VRAMVertexArrayRange->updateLostBuffers();
 	}
 
+#ifdef NL_OS_WINDOWS
+	// In the picture mode of a minimized window the frame that ends was drawn into the frame buffer object
+	// that stands for the window: it is the picture of the window, when the desktop compositor waits for one
+	if (m_MinimizedPictureMode)
+		endMinimizedPictureFrame();
+#endif // NL_OS_WINDOWS
+
 #ifdef USE_OPENGLES
 
 	eglSwapBuffers (_EglDisplay, _EglSurface);
@@ -942,6 +970,12 @@ bool CDriverGL::swapBuffers()
 
 	glXSwapBuffers(_dpy, _win);
 
+#endif // NL_OS_WINDOWS
+
+#ifdef NL_OS_WINDOWS
+	// Between two frames: picture mode is entered or left, for the frame to come
+	if (m_MinimizedPictureMode || m_MinimizedPicture.isSupplied())
+		updateMinimizedPictureMode();
 #endif // NL_OS_WINDOWS
 
 #ifndef USE_OPENGLES
@@ -1003,7 +1037,19 @@ bool CDriverGL::release()
 	H_AUTO_OGL(CDriverGL_release)
 
 	// release only if the driver was initialized
-	if (!_Initialized) return true;
+	if (!_Initialized)
+	{
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(USE_OPENGLES)
+		// a display that was refused, or never set up, still has the X connection and the error
+		// handler of init(), and what setDisplay did before it stopped
+		if (_dpy)
+		{
+			destroyWindow();
+			unInit();
+		}
+#endif
+		return true;
+	}
 
 	// hide window
 	showWindow(false);
@@ -1357,6 +1403,16 @@ void CDriverGL::getZBuffer (std::vector<float>  &zbuffer)
 	CRect	rect(0,0);
 	getWindowSize(rect.Width, rect.Height);
 	getZBufferPart(zbuffer, rect);
+
+	// OpenGL reads the rows from the bottom of the window: the first row is the top one, as in getBuffer
+	if (zbuffer.size() == (size_t)rect.Width * rect.Height)
+	{
+		for (uint32 y = 0; y < rect.Height / 2; ++y)
+		{
+			std::swap_ranges(zbuffer.begin() + (size_t)y * rect.Width, zbuffer.begin() + (size_t)(y + 1) * rect.Width,
+			    zbuffer.begin() + (size_t)(rect.Height - 1 - y) * rect.Width);
+		}
+	}
 }
 
 void CDriverGL::getBuffer (CBitmap &bitmap)

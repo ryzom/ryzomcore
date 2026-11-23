@@ -270,6 +270,10 @@ void CMessage::readType ()
 
 	std::string name;
 	serial (name);
+	// A message that is written has a name (setType asserts it). One that is read without a name is refused
+	// as any other stream that is not a message: its sender is not this program.
+	if (name.empty())
+		throw NLMISC::EInvalidDataStream(*this);
 	setType (name, TMessageType(format.MessageType));
 	_HeaderSize = getPos();
 }

@@ -32,6 +32,7 @@
 #include "phrase_manager/phrase_manager.h"
 #include "phrase_manager/toxic_cloud.h"
 #include "mission_manager/mission_manager.h"
+#include "mission_manager/mission_log.h"
 #include "primitives_parser.h"
 #include "team_manager/team.h"
 #include "team_manager/team_manager.h"
@@ -137,10 +138,33 @@ NLMISC_COMMAND(simMissionEvent,"simulate a mission event","<player> <event type>
 //-----------------------------------------------
 // reload missions
 //-----------------------------------------------
-NLMISC_COMMAND(reloadMissions,"reload the mission primitives. Picked missions are erased","[bool telling if we have tio reset aliases (default : false)]")
+NLMISC_COMMAND(reloadMissions, "read the primitive files again and rebuild the missions. Picked missions are erased, and the service is blocked meanwhile", "[<1 to read the mission, bot and group names again too, which a mission that uses a new name needs; the AI service must be restarted after it> (default: 0)]")
 {
 	if (args.size() > 1)
 		return true;
+
+	// Read the primitive files again, before anything is touched: the missions are built from what is read here,
+	// not from the primitives of the start of the service. This runs on the main loop of the service.
+	const TTime startTime = CTime::getLocalTime();
+	vector<string> failedFiles;
+	if (!CPrimitivesParser::getInstance().reloadMissionPrimitives(failedFiles))
+	{
+		const uint blockedMs = (uint)(CTime::getLocalTime() - startTime);
+		if (failedFiles.empty())
+		{
+			log.displayNL("missions not reloaded, nothing was changed: the used primitive maps (UsedPrimitives) have no primitive file");
+		}
+		else
+		{
+			log.displayNL("missions not reloaded, nothing was changed: %u primitive files could not be read again (the service log says why):", (uint)failedFiles.size());
+			for (uint i = 0; i < failedFiles.size(); ++i)
+				log.displayNL("  %s", failedFiles[i].c_str());
+		}
+		log.displayNL("the service was blocked for %u ms", blockedMs);
+		return true;
+	}
+	const TTime readTime = CTime::getLocalTime();
+
 	CPlayerManager::TMapPlayers::const_iterator itPlayer = PlayerManager.getPlayers().begin();
 
 	for (; itPlayer != PlayerManager.getPlayers().end(); ++itPlayer)
@@ -179,7 +203,24 @@ NLMISC_COMMAND(reloadMissions,"reload the mission primitives. Picked missions ar
 	if (reloadAliases)
 		CAIAliasTranslator::init();
 	CMissionManager::init();
-	log.displayNL("missions reloaded");
+
+	// The mission manager and the alias translator keep nothing of the primitives they were built from
+	CPrimitivesParser::getInstance().releaseMissionPrimitives();
+
+	CMissionManager *missionManager = CMissionManager::getInstance();
+	const uint nbRefused = missionManager->getNbRefusedMissions();
+	log.displayNL("missions reloaded: %u missions and %u reference missions loaded, %u refused", (uint)missionManager->getMissionTemplates().size(), missionManager->getNbRefMissions(), nbRefused);
+	if (nbRefused != 0)
+	{
+		if (MissionLog.getLogFile().empty())
+			log.displayNL("the service log says why each mission was refused");
+		else
+			log.displayNL("the mission log '%s' says why each mission was refused", MissionLog.getLogFile().c_str());
+	}
+	if (!reloadAliases)
+		log.displayNL("the mission, bot and group names were not read again: a mission that uses a name added since the start of the service is refused. 'reloadMissions 1' reads them again, and the AI service must be restarted after it");
+	const TTime endTime = CTime::getLocalTime();
+	log.displayNL("the service was blocked for %u ms, %u ms of them to read the primitive files again", (uint)(endTime - startTime), (uint)(readTime - startTime));
 	return true;
 } // reloadMissions
 
@@ -541,13 +582,24 @@ NLMISC_COMMAND(addMission,"Add mission to character", "<character_id> <Mission g
 	c->setAfkState(false);
 
 	std::list< CMissionEvent* > eventList;
-	CMissionManager::getInstance()->instanciateMission(c, missionAlias,	giverAlias, eventList);
-	c->processMissionEventList(eventList,true, CAIAliasTranslator::Invalid);
+	bool added = CMissionManager::getInstance()->instanciateMission(c, missionAlias, giverAlias, eventList) == 0;
+	c->processMissionEventList( eventList,true, CAIAliasTranslator::Invalid );
 
-	log.displayNL("Mission '%s' \t(alias %10u)  added to character %s",
-		CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(missionAlias).c_str(),
-		missionAlias,
-		args[0].c_str());
+	// the mission is not given when the character does not meet its prerequisites, or has a full journal
+	if (added)
+	{
+		log.displayNL("Mission '%s' \t(alias %10u)  added to character %s",
+		    CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(missionAlias).c_str(),
+		    missionAlias,
+		    args[0].c_str());
+	}
+	else
+	{
+		log.displayNL("Mission '%s' \t(alias %10u)  NOT added to character %s: the mission is unknown, or the character cannot take it (the mission log says why with VerboseMissions)",
+		    CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(missionAlias).c_str(),
+		    missionAlias,
+		    args[0].c_str());
+	}
 
 	return true;
 }
@@ -2834,7 +2886,8 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot 
 		targetEntityId = CEntityId(args[12]);
 
 	CMessage msgout("EVENT_CREATE_NPC_GROUP");
-	uint32 messageVersion = 2;
+	// 3: with heightKnown after the entity the group takes the place of
+	uint32 messageVersion = 3;
 	msgout.serial(messageVersion);
 	msgout.serial(instanceNumber);
 	msgout.serial(playerId);
@@ -2850,6 +2903,9 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot 
 	msgout.serial(look);
 	msgout.serial(cell);
 	msgout.serial(targetEntityId);
+	// the place is given with the command, not measured: the layer is the one the vertical pos rule takes
+	bool heightKnown = false;
+	msgout.serial(heightKnown);
 	CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
 
 	return true;

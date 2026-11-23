@@ -26,7 +26,14 @@ extern "C"
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 #include <libavutil/opt.h>
+#include <libavutil/version.h>
 }
+
+// av_register_all() is deprecated since FFmpeg 4.0 (avformat 58.9.100) and removed in 5.0
+#define NL_FFMPEG_HAS_REGISTER_ALL (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
+// AVChannelLayout and swr_alloc_set_opts2() exist since FFmpeg 5.1 (avutil 57.24.100);
+// AVCodecContext::channels and swr_alloc_set_opts() are removed in FFmpeg 7.0
+#define NL_FFMPEG_HAS_CHANNEL_LAYOUT (LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 24, 100))
 
 using namespace std;
 using namespace NLMISC;
@@ -102,7 +109,9 @@ public:
 		av_log_set_level(AV_LOG_DEBUG);
 		av_log_set_callback(nel_logger);
 
+#if NL_FFMPEG_HAS_REGISTER_ALL
 		av_register_all();
+#endif
 
 		//avformat_network_init();
 	}
@@ -123,7 +132,7 @@ int avio_read_packet(void *opaque, uint8 *buf, int buf_size)
 	nlassert(stream->isReading());
 
 	uint32 available = decoder->getStreamSize() - stream->getPos();
-	if (available == 0) return 0;
+	if (available == 0) return AVERROR_EOF;
 
 	buf_size = FFMIN(buf_size, available);
 	stream->serialBuffer((uint8 *)buf, buf_size);
@@ -165,7 +174,6 @@ namespace NLSOUND {
 // swresample will convert audio to this format
 #define FFMPEG_SAMPLE_RATE 44100
 #define FFMPEG_CHANNELS 2
-#define FFMPEG_CHANNEL_LAYOUT AV_CH_LAYOUT_STEREO
 #define FFMPEG_BITS_PER_SAMPLE 16
 #define FFMPEG_SAMPLE_FORMAT  AV_SAMPLE_FMT_S16
 
@@ -174,7 +182,7 @@ CAudioDecoderFfmpeg::CAudioDecoderFfmpeg(NLMISC::IStream *stream, bool loop)
 	_Stream(stream), _Loop(loop), _IsMusicEnded(false), _StreamSize(0), _IsSupported(false),
 	_AvioContext(NULL), _FormatContext(NULL),
 	_AudioContext(NULL), _AudioStreamIndex(0),
-	_SwrContext(NULL)
+	_SwrContext(NULL), _Frame(NULL), _Packet(NULL)
 {
 	_StreamOffset = stream->getPos();
 	stream->seek(0, NLMISC::IStream::end);
@@ -195,12 +203,20 @@ CAudioDecoderFfmpeg::CAudioDecoderFfmpeg(NLMISC::IStream *stream, bool loop)
 
 		_AvioContext = avio_alloc_context(avio_ctx_buffer, avio_ctx_buffer_size, 0, this, &avio_read_packet, NULL, &avio_seek);
 		if (!_AvioContext)
+		{
+			av_free(avio_ctx_buffer);
 			throw Exception("Can't allocate avio context");
+		}
 
 		_FormatContext->pb = _AvioContext;
 		sint ret = avformat_open_input(&_FormatContext, NULL, NULL, NULL);
 		if (ret < 0)
 			throw Exception("avformat_open_input: %d", ret);
+
+		_Frame = av_frame_alloc();
+		_Packet = av_packet_alloc();
+		if (!_Frame || !_Packet)
+			throw Exception("Can't allocate frame and packet");
 
 		// find stream and then audio codec to see if ffmpeg supports this
 		_IsSupported = false;
@@ -209,13 +225,18 @@ CAudioDecoderFfmpeg::CAudioDecoderFfmpeg(NLMISC::IStream *stream, bool loop)
 			_AudioStreamIndex = av_find_best_stream(_FormatContext, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
 			if (_AudioStreamIndex >= 0)
 			{
-				_AudioContext = _FormatContext->streams[_AudioStreamIndex]->codec;
-				av_opt_set_int(_AudioContext, "refcounted_frames", 1, 0);
-
-				AVCodec *codec = avcodec_find_decoder(_AudioContext->codec_id);
-				if (codec != NULL && avcodec_open2(_AudioContext, codec, NULL) >= 0)
+				// the codec context is owned by the decoder since the stream's own context was removed in FFmpeg 5
+				AVCodecParameters *codecpar = _FormatContext->streams[_AudioStreamIndex]->codecpar;
+				const AVCodec *codec = avcodec_find_decoder(codecpar->codec_id);
+				if (codec != NULL)
 				{
-					_IsSupported = true;
+					_AudioContext = avcodec_alloc_context3(codec);
+					if (_AudioContext != NULL
+						&& avcodec_parameters_to_context(_AudioContext, codecpar) >= 0
+						&& avcodec_open2(_AudioContext, codec, NULL) >= 0)
+					{
+						_IsSupported = true;
+					}
 				}
 			}
 		}
@@ -244,7 +265,13 @@ void CAudioDecoderFfmpeg::release()
 		swr_free(&_SwrContext);
 
 	if (_AudioContext)
-		avcodec_close(_AudioContext);
+		avcodec_free_context(&_AudioContext);
+
+	if (_Frame)
+		av_frame_free(&_Frame);
+
+	if (_Packet)
+		av_packet_free(&_Packet);
 
 	if (_FormatContext)
 		avformat_close_input(&_FormatContext);
@@ -253,7 +280,7 @@ void CAudioDecoderFfmpeg::release()
 		av_freep(&_AvioContext->buffer);
 
 	if (_AvioContext)
-		av_freep(&_AvioContext);
+		avio_context_free(&_AvioContext);
 }
 
 bool CAudioDecoderFfmpeg::isFormatSupported() const
@@ -297,6 +324,77 @@ uint32 CAudioDecoderFfmpeg::getRequiredBytes()
 	return 0; // no minimum requirement of bytes to buffer out
 }
 
+bool CAudioDecoderFfmpeg::createResampler()
+{
+#if NL_FFMPEG_HAS_CHANNEL_LAYOUT
+	// AV_CHANNEL_LAYOUT_STEREO is a C designated initializer, not usable from C++17
+	AVChannelLayout out_layout;
+	av_channel_layout_default(&out_layout, FFMPEG_CHANNELS);
+	AVChannelLayout in_layout;
+	if (_AudioContext->ch_layout.order == AV_CHANNEL_ORDER_UNSPEC)
+		av_channel_layout_default(&in_layout, _AudioContext->ch_layout.nb_channels);
+	else
+		av_channel_layout_copy(&in_layout, &_AudioContext->ch_layout);
+	sint ret = swr_alloc_set_opts2(&_SwrContext,
+			// output
+			&out_layout, FFMPEG_SAMPLE_FORMAT, FFMPEG_SAMPLE_RATE,
+			// input
+			&in_layout, _AudioContext->sample_fmt, _AudioContext->sample_rate,
+			0, NULL);
+	av_channel_layout_uninit(&in_layout);
+	av_channel_layout_uninit(&out_layout);
+	if (ret < 0)
+	{
+		nlwarning("FFMPEG: error creating resampler: %s", av_err2string(ret).c_str());
+		return false;
+	}
+#else
+	sint64 in_channel_layout = _AudioContext->channel_layout
+		? _AudioContext->channel_layout
+		: av_get_default_channel_layout(_AudioContext->channels);
+	_SwrContext = swr_alloc_set_opts(NULL,
+			// output
+			AV_CH_LAYOUT_STEREO, FFMPEG_SAMPLE_FORMAT, FFMPEG_SAMPLE_RATE,
+			// input
+			in_channel_layout, _AudioContext->sample_fmt, _AudioContext->sample_rate,
+			0, NULL);
+	if (!_SwrContext)
+	{
+		nlwarning("FFMPEG: error creating resampler");
+		return false;
+	}
+#endif
+	sint ret2 = swr_init(_SwrContext);
+	if (ret2 < 0)
+	{
+		nlwarning("FFMPEG: error initializing resampler: %s", av_err2string(ret2).c_str());
+		swr_free(&_SwrContext);
+		return false;
+	}
+	return true;
+}
+
+uint32 CAudioDecoderFfmpeg::convertFrame(uint8 *buffer, uint32 maximum)
+{
+	uint32 out_bps = av_get_bytes_per_sample(FFMPEG_SAMPLE_FORMAT) * FFMPEG_CHANNELS;
+	uint32 max_samples = maximum / out_bps;
+
+	uint32 out_samples = av_rescale_rnd(swr_get_delay(_SwrContext, _AudioContext->sample_rate) + _Frame->nb_samples,
+			FFMPEG_SAMPLE_RATE, _AudioContext->sample_rate, AV_ROUND_UP);
+
+	if (max_samples > out_samples)
+		max_samples = out_samples;
+
+	// samples that do not fit stay buffered in the resampler and come out with the next frame
+	sint converted = swr_convert(_SwrContext, &buffer, max_samples, (const uint8 **)_Frame->extended_data, _Frame->nb_samples);
+	if (converted < 0)
+	{
+		nlwarning("FFMPEG: error converting audio frame: %s", av_err2string(converted).c_str());
+		return 0;
+	}
+	return out_bps * (uint32)converted;
+}
+
 uint32 CAudioDecoderFfmpeg::getNextBytes(uint8 *buffer, uint32 minimum, uint32 maximum)
 {
 	if (_IsMusicEnded) return 0;
@@ -310,78 +408,60 @@ uint32 CAudioDecoderFfmpeg::getNextBytes(uint8 *buffer, uint32 minimum, uint32 m
 		return 1;
 	}
 
-	uint32 bytes_read = 0;
-
-	AVFrame frame = {0};
-	AVPacket packet = {0};
-
-	if (!_SwrContext)
+	if (!_SwrContext && !createResampler())
 	{
-		sint64 in_channel_layout = av_get_default_channel_layout(_AudioContext->channels);
-		_SwrContext = swr_alloc_set_opts(NULL,
-				// output
-				FFMPEG_CHANNEL_LAYOUT, FFMPEG_SAMPLE_FORMAT, FFMPEG_SAMPLE_RATE,
-				// input
-				in_channel_layout, _AudioContext->sample_fmt, _AudioContext->sample_rate,
-				0, NULL);
-		swr_init(_SwrContext);
+		_IsSupported = false;
+		_IsMusicEnded = true;
+		return 1;
 	}
+
+	uint32 bytes_read = 0;
 
 	sint ret;
 	while(bytes_read < minimum)
 	{
-		// read packet from stream
-		if ((ret = av_read_frame(_FormatContext, &packet)) < 0)
+		// read packet from stream; at the end of the stream the decoder is drained with an empty packet
+		bool draining = false;
+		if ((ret = av_read_frame(_FormatContext, _Packet)) < 0)
+		{
+			if (ret != AVERROR_EOF)
+				nlwarning("FFMPEG: error reading packet: %s", av_err2string(ret).c_str());
+			draining = true;
+		}
+
+		if (draining || _Packet->stream_index == _AudioStreamIndex)
+		{
+			ret = avcodec_send_packet(_AudioContext, draining ? NULL : _Packet);
+			if (ret < 0 && ret != AVERROR_EOF)
+			{
+				nlwarning("FFMPEG: error sending packet to decoder: %s", av_err2string(ret).c_str());
+			}
+			else
+			{
+				// a packet can contain multiple frames
+				while ((ret = avcodec_receive_frame(_AudioContext, _Frame)) >= 0)
+				{
+					uint32 size = convertFrame(buffer, maximum - bytes_read);
+					bytes_read += size;
+					buffer += size;
+
+					av_frame_unref(_Frame);
+				}
+				if (ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
+				{
+					nlwarning("FFMPEG: error decoding audio frame: %s", av_err2string(ret).c_str());
+				}
+			}
+		}
+
+		if (draining)
 		{
 			_IsMusicEnded = true;
 			// TODO: looping
 			break;
 		}
 
-		if (packet.stream_index == _AudioStreamIndex)
-		{
-			// packet can contain multiple frames
-			AVPacket first = packet;
-			int got_frame = 0;
-			do {
-				got_frame = 0;
-				ret = avcodec_decode_audio4(_AudioContext, &frame, &got_frame, &packet);
-				if (ret < 0)
-				{
-					nlwarning("FFMPEG: error decoding audio frame: %s", av_err2string(ret).c_str());
-					break;
-				}
-				packet.size -= ret;
-				packet.data += ret;
-
-				if (got_frame)
-				{
-					uint32 out_bps = av_get_bytes_per_sample(FFMPEG_SAMPLE_FORMAT) * FFMPEG_CHANNELS;
-					uint32 max_samples = (maximum - bytes_read) / out_bps;
-
-					uint32 out_samples = av_rescale_rnd(swr_get_delay(_SwrContext, _AudioContext->sample_rate) + frame.nb_samples,
-							FFMPEG_SAMPLE_RATE, _AudioContext->sample_rate, AV_ROUND_UP);
-
-					if (max_samples > out_samples)
-						max_samples = out_samples;
-
-					uint32 converted = swr_convert(_SwrContext, &buffer, max_samples, (const uint8 **)frame.extended_data, frame.nb_samples);
-					uint32 size = out_bps * converted;
-
-					bytes_read += size;
-					buffer += size;
-
-					av_frame_unref(&frame);
-				}
-			} while (got_frame && packet.size > 0);
-
-			av_packet_unref(&first);
-		}
-		else
-		{
-			ret = 0;
-			av_packet_unref(&packet);
-		}
+		av_packet_unref(_Packet);
 	}
 
 	return bytes_read;

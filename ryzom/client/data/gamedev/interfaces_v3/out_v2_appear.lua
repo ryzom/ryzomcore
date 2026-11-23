@@ -71,7 +71,7 @@ function outgame:getTrykerLastName()
 	return trykerLastNames[math.random(nbTrykerLastNames)]
 end
 
--- Zora�
+-- Zoraï
 function outgame:getZoraiFirstName()
 	local nbFirstNamesOne = #zoraiFirstNamesOne
 	local FirstNameOne = zoraiFirstNamesOne[math.random(nbFirstNamesOne)]
@@ -109,7 +109,7 @@ function outgame:OLDprocGenerateName()
 	local lastName = "test"
 
 	-- Fyros and Matis are using "first name, last name" order
-	-- Trykers and Zora�s are using "last name, first name" order
+	-- Trykers and Zoraïs are using "last name, first name" order
 	if  tonumber(dbNameRace) == 1 then
 	-- Fyros
 		firstName = self:getFyrosFirstName()

@@ -164,7 +164,7 @@ namespace NLGUI
 		destStream.seek(0, NLMISC::IStream::begin);
 	}
 
-	std::string CInterfaceParser::lookup( const std::string &file )
+	std::string CInterfaceParser::lookup(const std::string &file, bool throwException)
 	{
 		std::string filename;
 		
@@ -175,7 +175,7 @@ namespace NLGUI
 				filename = wdpath;
 		}
 		if( filename.empty() )
-			filename = CPath::lookup( file );
+			filename = CPath::lookup(file, throwException);
 
 		return filename;
 	}
@@ -600,7 +600,11 @@ namespace NLGUI
 			{
 				if(!parseLUAScript(root))
 				{
-					nlerror ("could not parse 'lua'");
+					// the editor has no client Lua environment, so scripts can fail there
+					if (editorMode)
+						nlwarning("could not parse 'lua'");
+					else
+						nlerror ("could not parse 'lua'");
 				}
 			}
 			else
@@ -1069,25 +1073,12 @@ namespace NLGUI
 			}
 
 			// access the database
-			CInterfaceProperty prop;
+			readVariable(type, value, entry);
 
-			if (type == "sint64")
-				prop.readSInt64(value.c_str(),entry);
-			else if (type == "sint32")
-				prop.readSInt32(value.c_str(),entry);
-			else if (type == "float" || type == "double")
-				prop.readDouble(value.c_str(),entry);
-			else if (type == "bool")
-				prop.readBool(value.c_str(),entry);
-			else if (type == "rgba")
-				prop.readRGBA(value.c_str(),entry);
-			else if (type == "hotspot")
-				prop.readHotSpot(value.c_str(),entry);
-			else if (type == "text")
-			{
-				/*uint textId = addText(value);
-				prop.readSInt32(toString(textId),entry);*/
-			}
+			// keep the declaration, which is the default resetVariables goes back to
+			VariableData &declaration = m_VariableDefaults[entry];
+			declaration.type = type;
+			declaration.value = value;
 		}
 
 		if( editorMode )
@@ -1112,6 +1103,61 @@ namespace NLGUI
 		}
 
 		return true;
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CInterfaceParser::readVariable(const std::string &type, const std::string &value, const std::string &entry)
+	{
+		CInterfaceProperty prop;
+
+		if (type == "sint64")
+			return prop.readSInt64(value.c_str(),entry);
+		else if (type == "sint32")
+			return prop.readSInt32(value.c_str(),entry);
+		else if (type == "float" || type == "double")
+			return prop.readDouble(value.c_str(),entry);
+		else if (type == "bool")
+			return prop.readBool(value.c_str(),entry);
+		else if (type == "rgba")
+			return prop.readRGBA(value.c_str(),entry);
+		else if (type == "hotspot")
+			return prop.readHotSpot(value.c_str(),entry);
+		else if (type == "text")
+		{
+			/*uint textId = addText(value);
+			prop.readSInt32(toString(textId),entry);*/
+		}
+		return false;
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CInterfaceParser::resetVariable( const std::string &entry, const VariableData &declaration )
+	{
+		if( readVariable( declaration.type, declaration.value, entry ) )
+			return true;
+
+		nlwarning( "<CInterfaceParser::resetVariables> '%s' is not reset: its <variable> declaration (type '%s', value '%s') sets no value", entry.c_str(), declaration.type.c_str(), declaration.value.c_str() );
+		return false;
+	}
+
+	// ----------------------------------------------------------------------------
+	uint CInterfaceParser::resetVariables( const std::string &entry )
+	{
+		uint count = 0;
+
+		std::map< std::string, VariableData >::const_iterator itr = m_VariableDefaults.find( entry );
+		if( itr != m_VariableDefaults.end() && resetVariable( itr->first, itr->second ) )
+			++count;
+
+		// every entry below the branch starts with "<entry>:", so they sort together
+		const std::string branch = entry + ":";
+		for( itr = m_VariableDefaults.lower_bound( branch ); itr != m_VariableDefaults.end() && startsWith( itr->first, branch ); ++itr )
+		{
+			if( resetVariable( itr->first, itr->second ) )
+				++count;
+		}
+
+		return count;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -2897,6 +2943,7 @@ namespace NLGUI
 		NLMISC::contReset (_ParentSizesMaxMap);
 		NLMISC::contReset (_LuaClassAssociation);
 		variableCache.clear();
+		m_VariableDefaults.clear();
 		pointerSettings.clear();
 	}
 
@@ -3140,7 +3187,7 @@ namespace NLGUI
 			needCheck = false;
 		#endif
 
-		string	pathName= CPath::lookup(fileName, false);
+		string pathName = lookup(fileName, false);
 		if(pathName.empty())
 		{
 			nlwarning("LUA Script '%s' not found", fileName.c_str());

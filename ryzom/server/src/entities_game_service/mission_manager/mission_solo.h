@@ -38,6 +38,9 @@ public:
 	void updateUsersJournalEntry() NL_OVERRIDE;
 	/// override
 	void clearUsersJournalEntry() NL_OVERRIDE;
+	/// clear one entry of the solo missions of a journal (MISSIONS): of the user of a mission, or of the CSR that
+	/// monitors the missions of that user
+	static void clearJournalEntry( CCharacter & user, uint8 clientIndex );
 	/// override
 	void setupEscort(const std::vector<TAIAlias> & aliases) NL_OVERRIDE;
 	/// override

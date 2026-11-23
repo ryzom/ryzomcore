@@ -1333,6 +1333,8 @@ class CAHReturnToMainland : public IActionHandler
 public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
+		// a stop of the live session that got no answer has set the Far TP to the editor: the player chose the mainland
+		FarTP.unhookNextFarTPForEditor();
 		FarTP.requestReturnToPreviousSession();
 	}
 };
@@ -1347,6 +1349,8 @@ class CAHReselectCharacter : public IActionHandler
 public:
 	void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
+		// the Far TP of the reconnection goes to the character selection, not to the editor (see return_to_mainland)
+		FarTP.unhookNextFarTPForEditor();
 		if (getParam(sParams, "limbo") == "1")
 		{
 			if (!IsInRingSession)
@@ -3061,8 +3065,45 @@ static vector<UDriver::CMode> VideoModes;
 #define GAME_CONFIG_SOUND_DRIVER_COMBO	"ui:interface:game_config:content:sound:driver_gr:driver"
 #define GAME_CONFIG_SOUND_DRIVER_DB		"UI:TEMP:SOUND_DRIVER"
 
+// Network connection
+#define GAME_CONFIG_CONNECTION_PREFERENCE_COMBO "ui:interface:game_config:content:network:preference"
+#define GAME_CONFIG_CONNECTION_PREFERENCE_DB "UI:TEMP:CONNECTION_PREFERENCE"
+#define GAME_CONFIG_CONNECTION_RATE_COMBO "ui:interface:game_config:content:network:rate"
+#define GAME_CONFIG_CONNECTION_RATE_DB "UI:TEMP:CONNECTION_RATE"
+
 // The 3 possible modes editable (NB: do not allow client.cfg HDEntityTexture==1 and DivideTextureSizeBy2=2
 enum	TTextureMode	{LowTextureMode= 0, NormalTextureMode= 1, HighTextureMode= 2};
+
+// The connections a player can prefer, in the order of the combo box (game_config.xml). They are QuicConnection and
+// QuicStreams in client.cfg. A client built without QUIC only has the first one in its combo box.
+enum TConnectionPreference
+{
+	UdpConnectionPreference = 0, // QuicConnection off
+	QuicDatagramsConnectionPreference = 1, // QuicConnection on, QuicStreams off
+	QuicStreamsConnectionPreference = 2 // both on
+};
+
+// The connection types a player can choose from: what ConnectionRate becomes in client.cfg (bits per second that
+// the connection carries downstream, 0 lets the server find out) and the text of the choice. This is the one list
+// of them, the combo box is filled from it.
+struct CConnectionType
+{
+	uint32 Rate;
+	const char *Text;
+};
+static const CConnectionType s_ConnectionTypes[] = {
+	{ 0, "uigcConnectionTypeAuto" },
+	{ 56000, "uigcConnectionType56K" },
+	{ 128000, "uigcConnectionTypeIsdn" },
+	{ 512000, "uigcConnectionType512K" },
+	{ 1000000, "uigcConnectionType1M" },
+	{ 2000000, "uigcConnectionType2M" },
+	{ 6000000, "uigcConnectionType6M" },
+	{ 16000000, "uigcConnectionType16M" },
+	{ 50000000, "uigcConnectionType50M" },
+	{ 100000000, "uigcConnectionType100M" },
+};
+static const sint s_NumConnectionTypes = (sint)(sizeof(s_ConnectionTypes) / sizeof(s_ConnectionTypes[0]));
 
 void cacheStereoDisplayDevices(); // from init.cpp
 
@@ -3180,6 +3221,120 @@ void updateSoundDriverComboUI()
 }
 
 // ***************************************************************************
+// The choice of the connection combo box that client.cfg has. The combo box has the choices of this client: one
+// built without QUIC has UDP only, which is what it connects over whatever client.cfg prefers.
+static sint getConnectionPreferenceChoice(const CDBGroupComboBox *pCB)
+{
+	sint choice = UdpConnectionPreference;
+	if (ClientCfg.QuicConnection)
+		choice = ClientCfg.QuicStreams ? QuicStreamsConnectionPreference : QuicDatagramsConnectionPreference;
+	return std::min(choice, (sint)pCB->getNumTexts() - 1);
+}
+
+// ***************************************************************************
+// The choice of the connection type combo box that client.cfg has. A rate that is none of the list (set by hand in
+// client.cfg) is the choice after them, which updateConnectionConfigUI adds for it.
+static sint getConnectionTypeChoice()
+{
+	for (sint i = 0; i < s_NumConnectionTypes; ++i)
+	{
+		if (s_ConnectionTypes[i].Rate == ClientCfg.ConnectionRate)
+			return i;
+	}
+	return s_NumConnectionTypes;
+}
+
+// ***************************************************************************
+// Set the combo boxes of the network page to what client.cfg has
+static void updateConnectionConfigUI()
+{
+	CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox *>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_CONNECTION_PREFERENCE_COMBO));
+	if (!pCB)
+	{
+		nlwarning("Connection UI element '%s' not found", GAME_CONFIG_CONNECTION_PREFERENCE_COMBO);
+		return;
+	}
+
+	// -1 is important to indicate we set this value in edit mode
+	NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_CONNECTION_PREFERENCE_DB)->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_CONNECTION_PREFERENCE_DB)->setValue32(getConnectionPreferenceChoice(pCB));
+
+	// The connection type comes with the QUIC choices: the interface of a client built without QUIC has neither
+	bool quicChoices = pCB->getNumTexts() > 1;
+	pCB = dynamic_cast<CDBGroupComboBox *>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_CONNECTION_RATE_COMBO));
+	if (!pCB)
+	{
+		if (quicChoices)
+			nlwarning("Connection UI element '%s' not found", GAME_CONFIG_CONNECTION_RATE_COMBO);
+		return;
+	}
+
+	pCB->resetTexts();
+	for (sint i = 0; i < s_NumConnectionTypes; ++i)
+		pCB->addText(CI18N::get(s_ConnectionTypes[i].Text));
+
+	sint choice = getConnectionTypeChoice();
+	if (choice == s_NumConnectionTypes)
+	{
+		// a rate set by hand is shown as it is, and stays for as long as this choice does
+		string text = CI18N::get("uigcConnectionTypeCustom");
+		strFindReplace(text, "%rate", toString(ClientCfg.ConnectionRate));
+		pCB->addText(text);
+	}
+
+	NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_CONNECTION_RATE_DB)->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_CONNECTION_RATE_DB)->setValue32(choice);
+}
+
+// ***************************************************************************
+// Write the connection choices of the player to client.cfg. Returns true when client.cfg changed: the new values
+// are for the next connection.
+static bool applyConnectionConfig()
+{
+	bool changed = false;
+
+	// Only a choice that is not what client.cfg has is written: a client built without QUIC shows UDP whatever
+	// client.cfg prefers, and leaves that preference to the clients that have QUIC
+	CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox *>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_CONNECTION_PREFERENCE_COMBO));
+	sint preference = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_CONNECTION_PREFERENCE_DB)->getValue32();
+	if (pCB && preference >= 0 && preference < (sint)pCB->getNumTexts() && preference != getConnectionPreferenceChoice(pCB))
+	{
+		bool quicConnection = preference != UdpConnectionPreference;
+		if (ClientCfg.QuicConnection != quicConnection)
+		{
+			ClientCfg.QuicConnection = quicConnection;
+			ClientCfg.writeBool("QuicConnection", quicConnection);
+		}
+
+		// with UDP preferred, QuicStreams stays as it is: UDP has no streams
+		bool quicStreams = preference == QuicStreamsConnectionPreference;
+		if (quicConnection && ClientCfg.QuicStreams != quicStreams)
+		{
+			ClientCfg.QuicStreams = quicStreams;
+			ClientCfg.writeBool("QuicStreams", quicStreams);
+		}
+
+		changed = true;
+	}
+
+	// The choice after the list is a rate set by hand in client.cfg, which stays (see updateConnectionConfigUI)
+	pCB = dynamic_cast<CDBGroupComboBox *>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_CONNECTION_RATE_COMBO));
+	sint choice = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_CONNECTION_RATE_DB)->getValue32();
+	if (pCB && choice >= 0 && choice < s_NumConnectionTypes && ClientCfg.ConnectionRate != s_ConnectionTypes[choice].Rate)
+	{
+		ClientCfg.ConnectionRate = s_ConnectionTypes[choice].Rate;
+		ClientCfg.writeInt("ConnectionRate", (sint32)ClientCfg.ConnectionRate);
+		changed = true;
+	}
+
+	// the choice of a rate set by hand goes with that rate
+	if (changed)
+		updateConnectionConfigUI();
+
+	return changed;
+}
+
+// ***************************************************************************
 class CHandlerGameConfigInit : public IActionHandler
 {
 public:
@@ -3232,6 +3387,8 @@ public:
 		CAHManager::getInstance()->runActionHandler("game_config_change_vid_fullscreen", nullptr);
 
 		updateSoundDriverComboUI();
+
+		updateConnectionConfigUI();
 
 		// **** Init Texture Size Modes
 		// init the combo box, according to Texture Installed or not
@@ -3628,6 +3785,36 @@ class CHandlerGameConfigSoundDriver : public IActionHandler
 REGISTER_ACTION_HANDLER (CHandlerGameConfigSoundDriver, "game_config_change_sound_driver");
 
 // ***************************************************************************
+// A choice of a combo box of the network page changed
+class CHandlerGameConfigChangeConnection : public IActionHandler
+{
+	static bool choiceChanged(const char *dbEntry)
+	{
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbEntry);
+		sint oldChoice = node->getOldValue32();
+		sint newChoice = node->getValue32();
+		// not at init, which sets -1 first
+		return oldChoice != newChoice && oldChoice != -1 && newChoice != -1;
+	}
+
+	virtual void execute(CCtrlBase * /* pCaller */, const string & /* Params */) NL_OVERRIDE
+	{
+		// the values of an earlier change would count as one
+		if (CInterfaceLink::isUpdatingAllLinks()) return;
+
+		// dirt the apply button of the DDX
+		if (choiceChanged(GAME_CONFIG_CONNECTION_PREFERENCE_DB) || choiceChanged(GAME_CONFIG_CONNECTION_RATE_DB))
+		{
+			CDDXManager *pDM = CDDXManager::getInstance();
+			CInterfaceDDX *pDDX = pDM->get(GAME_CONFIG_DDX);
+			if (pDDX)
+				pDDX->validateApplyButton();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerGameConfigChangeConnection, "game_config_change_connection");
+
+// ***************************************************************************
 class CHandlerGameConfigApply : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
@@ -3635,19 +3822,30 @@ class CHandlerGameConfigApply : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// **** Apply the video mode
+		// Get Fullscreen
+		bool bFullscreen = false;
+		{
+			CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
+			if (pBut != nullptr)
+				bFullscreen = pBut->getPushed();
+		}
+
+		// A window needs no mode of the list. Without a mode picked in the list (none of them is the configured
+		// or the current one), a fullscreen mode stays as it is
 		sint nVideModeNb = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getValue32();
-		if (nVideModeNb != -1)
+		if (nVideModeNb != -1 || !bFullscreen)
 		{
 			sint nVideoFreqNb = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->getValue32();
-			if (nVideoFreqNb != -1)
+			if (nVideoFreqNb != -1 || !bFullscreen)
 			{
 				// Get W, H
 				sint w = 1024, h = 768;
-				string name;
+				string name = ClientCfg.MonitorName;
 				{
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
-					if( pCB != nullptr)
+					if (pCB != nullptr && nVideModeNb != -1)
 					{
+						name.clear();
 						string vidModeStr = pCB->getText(nVideModeNb);
 						string tmp = vidModeStr.substr(0,vidModeStr.find('x')-1);
 						fromString(tmp, w);
@@ -3665,19 +3863,11 @@ class CHandlerGameConfigApply : public IActionHandler
 				sint freq = 60;
 				{
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
-					if( pCB != nullptr)
+					if (pCB != nullptr && nVideoFreqNb != -1)
 					{
 						string vidFreqStr = pCB->getText(nVideoFreqNb);
 						fromString(vidFreqStr, freq);
 					}
-				}
-
-				// Get Fullscreen
-				bool bFullscreen = false;
-				{
-					CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
-					if (pBut != nullptr)
-						bFullscreen = pBut->getPushed();
 				}
 
 				ClientCfg.Windowed = !bFullscreen;
@@ -3690,10 +3880,19 @@ class CHandlerGameConfigApply : public IActionHandler
 					ClientCfg.Depth = screenMode.Depth;
 					ClientCfg.Frequency = freq;
 				}
-				else
+				else if (screenMode.Windowed)
 				{
+					// the window stays as the player has it (it may span several screens)
 					uint32 width, height;
 					Driver->getWindowSize(width, height);
+					w = width;
+					h = height;
+				}
+				else
+				{
+					// leaving fullscreen: the size of the screen is no size for a window
+					uint16 width, height;
+					getWindowSizeLeavingFullscreen(width, height);
 					w = width;
 					h = height;
 				}
@@ -3797,6 +3996,10 @@ class CHandlerGameConfigApply : public IActionHandler
 			}
 		}
 
+		// **** Apply the connection preference and the connection type
+		if (applyConnectionConfig())
+			requestReboot = true;
+
 		// *** Apply the Screen AR
 		// since already set in the config file, need only to bkup the current version
 		CHandlerGameConfigInit::BkupScreenAspectRatio= ClientCfg.ScreenAspectRatio;
@@ -3825,7 +4028,7 @@ class CHandlerGameConfigApply : public IActionHandler
 
 		// **** Save the config
 		if (ClientCfg.SaveConfig)
-			ClientCfg.ConfigFile.save ();
+			ClientCfg.saveConfigFile ();
 		ClientCfg.IsInvalidated = true;
 	}
 };
@@ -4024,11 +4227,12 @@ REGISTER_ACTION_HANDLER (CHandlerSetInterfaceScale, "set_ui_scale");
 // ***************************************************************************
 class CHandlerSetMouseScale : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute(CCtrlBase *pCaller, const string &Params)
 	{
 		std::string s;
 		s = getParam(Params, "scale");
-		if (!s.empty()) {
+		if (!s.empty())
+		{
 			bool valid = false;
 			if (nlstricmp(s, "auto") == 0 || s == "0")
 			{
@@ -4061,24 +4265,73 @@ class CHandlerSetMouseScale : public IActionHandler
 		CInterfaceManager::getInstance()->displaySystemInfo(help);
 	}
 };
-REGISTER_ACTION_HANDLER (CHandlerSetMouseScale, "set_mouse_scale");
+REGISTER_ACTION_HANDLER(CHandlerSetMouseScale, "set_mouse_scale");
 
+// ***************************************************************************
+// The Abandon button of the journal. An unfinished mission is abandoned only after a confirmation; on a finished one
+// the same button (then labelled "Finished") takes the mission off the journal, which loses nothing.
+// Params is the index of the mission in dbMissions; ahConfirmed gets "mission=<index>|title=<title text id>".
+static void askMissionAbandon(const string &Params, const string &dbMissions, const string &ahConfirmed)
+{
+	uint8 nMissionNb;
+	fromString(Params, nMissionNb);
+
+	string dbMission = dbMissions + ":" + toString((uint)nMissionNb);
+	CCDBNodeLeaf *pFinished = NLGUI::CDBManager::getInstance()->getDbProp(dbMission + ":FINISHED", false);
+	CCDBNodeLeaf *pTitle = NLGUI::CDBManager::getInstance()->getDbProp(dbMission + ":TITLE", false);
+	if (pFinished == NULL || pTitle == NULL)
+	{
+		nlwarning("%s: no mission '%s' in the database (params '%s')", ahConfirmed.c_str(), dbMission.c_str(), Params.c_str());
+		return;
+	}
+
+	string confirmedParams = "mission=" + toString((uint)nMissionNb) + "|title=" + toString(pTitle->getValue32());
+	if (pFinished->getValue32() != 0)
+		CAHManager::getInstance()->runActionHandler(ahConfirmed, NULL, confirmedParams);
+	else
+		CInterfaceManager::getInstance()->validMessageBox(CInterfaceManager::QuestionIconMsg, CI18N::get("uiQConfirmMissionAbandon"), ahConfirmed, confirmedParams);
+}
+
+// The request itself. The mission that was asked about must still be the one in the slot: a mission that ended while
+// the question was open may have left its place to another one.
+static void sendMissionAbandon(const string &Params, const string &dbMissions, const char *msgName)
+{
+	uint8 nMissionNb;
+	fromString(IActionHandler::getParam(Params, "mission"), nMissionNb);
+	sint32 title;
+	fromString(IActionHandler::getParam(Params, "title"), title);
+
+	CCDBNodeLeaf *pTitle = NLGUI::CDBManager::getInstance()->getDbProp(dbMissions + ":" + toString((uint)nMissionNb) + ":TITLE", false);
+	if (pTitle == NULL || pTitle->getValue32() != title)
+	{
+		nlinfo("%s: the mission of slot %u changed since the question, nothing is abandoned", msgName, (uint)nMissionNb);
+		return;
+	}
+
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON", false);
+	if (pNL != NULL) pNL->setValue64(0);
+
+	sendMsgToServer(msgName, nMissionNb);
+}
 
 // ***************************************************************************
 class CHandlerGameMissionAbandon : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
-		uint8 nMissionNb;
-		fromString(Params, nMissionNb);
-
-		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
-		if (pNL != nullptr) pNL->setValue64(0);
-
-		sendMsgToServer("JOURNAL:MISSION_ABANDON", nMissionNb);
+		askMissionAbandon(Params, "SERVER:MISSIONS", "mission_abandon_confirmed");
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGameMissionAbandon, "mission_abandon");
+
+class CHandlerGameMissionAbandonConfirmed : public IActionHandler
+{
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	{
+		sendMissionAbandon(Params, "SERVER:MISSIONS", "JOURNAL:MISSION_ABANDON");
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerGameMissionAbandonConfirmed, "mission_abandon_confirmed");
 
 
 // ***************************************************************************
@@ -4086,16 +4339,19 @@ class CHandlerGameGroupMissionAbandon : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
-		uint8 nMissionNb;
-		fromString(Params, nMissionNb);
-
-		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
-		if (pNL != nullptr) pNL->setValue64(0);
-
-		sendMsgToServer("JOURNAL:GROUP_MISSION_ABANDON", nMissionNb);
+		askMissionAbandon(Params, "SERVER:GROUP:MISSIONS", "group_mission_abandon_confirmed");
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGameGroupMissionAbandon, "group_mission_abandon");
+
+class CHandlerGameGroupMissionAbandonConfirmed : public IActionHandler
+{
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	{
+		sendMissionAbandon(Params, "SERVER:GROUP:MISSIONS", "JOURNAL:GROUP_MISSION_ABANDON");
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerGameGroupMissionAbandonConfirmed, "group_mission_abandon_confirmed");
 
 
 // ***************************************************************************

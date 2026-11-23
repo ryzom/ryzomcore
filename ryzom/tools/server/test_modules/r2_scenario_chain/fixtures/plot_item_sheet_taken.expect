@@ -1,0 +1,46 @@
+# Plot items that name items of the game with the same icon. A plot item sheet is the sheet of one plot
+# item of a scenario: the first plot item that asks for an icon gets it (the medium vest, the medium
+# sleeves). One whose icon another plot item has gets the first free sheet of its list of the same kind,
+# whether that other plot item got the icon in this update (the light vest after the medium vest: the
+# clothes) or had it before (the caster pants after the trousers: the stuffing). The author is told which
+# plot item has the icon. Every plot item has a plot item sheet in the end, and each another one.
+
+upgrade: ok
+version_update: changed
+version_update_note: uiR2EDVersionNotePlotItemIcon(Medium vest)
+version_update_note: uiR2EDVersionNotePlotItemIconTaken(Light vest, Medium vest)
+version_update_note: uiR2EDVersionNotePlotItemIconTaken(Caster pants, Trousers)
+version_update_note: uiR2EDVersionNotePlotItemIcon(Medium sleeves)
+no_line: version_update_note: uiR2EDVersionNotePlotItemIcon(Light vest)
+no_line: version_update_note: uiR2EDVersionNotePlotItemIcon(Caster pants)
+no_line: version_update_note: uiR2EDVersionNotePlotItemIconNone
+no_line: version_update_note: uiR2EDVersionNotePlotItemUnknown
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+rt_plot_item_sheets:
+no_line: rt_plot_item_sheets: refused
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Versions.PlotItem = 1
+scenario_at: PlotItems = <size 5>
+scenario_at: PlotItems[0].SheetId = 8630318
+scenario_at: PlotItems[1].Name = Light vest
+scenario_at: PlotItems[1].SheetId = 8630574
+scenario_at: PlotItems[2].SheetId = 8660526
+scenario_at: PlotItems[3].Name = Caster pants
+scenario_at: PlotItems[3].SheetId = 8662062
+scenario_at: PlotItems[4].SheetId = 8630062
+rt_at: PlotItems[0].SheetId = 8630318
+rt_at: PlotItems[1].SheetId = 8630574
+rt_at: PlotItems[2].SheetId = 8660526
+rt_at: PlotItems[3].SheetId = 8662062
+rt_at: PlotItems[4].SheetId = 8630062

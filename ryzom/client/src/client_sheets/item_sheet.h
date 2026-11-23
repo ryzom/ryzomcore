@@ -44,6 +44,7 @@
 #include "game_share/ecosystem.h"
 #include "game_share/mp_category.h"
 #include "game_share/item_origin.h"
+#include "game_share/people_pd.h"
 #include "game_share/shield_types.h"
 #include "game_share/crafting_tool_type.h"
 #include "game_share/rm_family.h"
@@ -448,8 +449,11 @@ public:
 	// MP only. true if durability ok
 	bool	canBuildItemPart(RM_FABER_TYPE::TRMFType e) const;
 
-	// MP only. true if durability ok, and if origin ok
-	bool	canBuildItemPart(RM_FABER_TYPE::TRMFType e, ITEM_ORIGIN::EItemOrigin origin) const;
+	// MP only. true if durability ok, and if the craft takes this MP for that item part, as the server checks it
+	// (CFaberPhrase::apply): the origin filter of the item part is common or the origin of the item built, or the
+	// item built is of common origin. With RYZOM_FORGE the rule is another, as on that server: a common plan takes
+	// any MP and a plan of a civilisation no MP of another civilisation's ecosystem.
+	bool	canBuildItemPart(RM_FABER_TYPE::TRMFType e, ITEM_ORIGIN::EItemOrigin origin, EGSPD::CPeople::TPeople planCiv) const;
 
 	// MP only. get a ref on the item part. assert if cannot build for any race
 	const CMpItemPart	&getItemPart(RM_FABER_TYPE::TRMFType e) const;

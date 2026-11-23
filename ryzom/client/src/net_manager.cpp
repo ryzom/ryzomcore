@@ -89,6 +89,8 @@
 #include "game_share/r2_types.h"
 #include "npc_icon.h"
 #include "interface_v3/action_handler_base.h"
+#include "client_ctrl.h"
+#include "nel/misc/json.h"
 
 // Std.
 #include <vector>
@@ -361,7 +363,7 @@ void copyKeySet(const std::string &srcPath, const std::string &destPath)
 	srcStr.resize(CFile::getFileSize(srcPath));
 	if (srcStr.empty())
 	{
-		nlwarning("Can't copy keys from %s : file not found or empty");
+		nlwarning("Can't copy keys from %s : file not found or empty", srcPath.c_str());
 		return;
 	}
 	try
@@ -420,14 +422,21 @@ void impulseUserChars(NLMISC::CBitMemStream &impulse)
 
 	if (!NewKeysCharNameValidated.empty())
 	{
-		// if there's a new char for which a key set was wanted, create it now
+		// if there's a new char for which a key set was wanted, create it now: the character of that name on the
+		// mainland it was created for (the names are compared without the mainland in parentheses they may carry)
+		std::string newCharFileName = buildPlayerNameForSaveFile(NewKeysCharNameValidated);
 		for (uint k = 0; k < CharacterSummaries.size(); ++k)
 		{
-			if (toLower(CharacterSummaries[k].Name.toUtf8()) == toLower(NewKeysCharNameValidated))
+			// (on this branch the file name carries no mainland, and the mainland of the summary is not compared)
+			if (buildPlayerNameForSaveFile(CharacterSummaries[k].Name.toUtf8()) == newCharFileName)
 			{
-				// first, stripes server name
-				copyKeySet(lookupSrcKeyFile(GameKeySet), "save/keys_" + buildPlayerNameForSaveFile(NewKeysCharNameValidated) + ".xml");
-				copyKeySet(lookupSrcKeyFile(RingEditorKeySet), "save/keys_r2ed_" + buildPlayerNameForSaveFile(NewKeysCharNameValidated) + ".xml");
+				// the file of the new character carries its home mainland (buildCharacterFileName)
+				std::string charFileName = buildCharacterFileName(NewKeysCharNameValidated, CharacterSummaries[k].Mainland);
+				copyKeySet(lookupSrcKeyFile(GameKeySet), "save/keys_" + charFileName + ".xml");
+				copyKeySet(lookupSrcKeyFile(RingEditorKeySet), "save/keys_r2ed_" + charFileName + ".xml");
+				// once: the list of characters comes again after a far TP or a return to the selection, and the
+				// keys of the character are its own by then
+				NewKeysCharNameValidated.clear();
 				break;
 			}
 		}
@@ -556,6 +565,16 @@ void impulseServerQuitOk(NLMISC::CBitMemStream &impulse)
 			game_exit= true;
 			ryzom_exit= true;
 		}
+		else
+		{
+			// Nobody asked to quit and no Far TP is leaving the shard: the EGS removed the active character on its
+			// own (the disconnectPlayer command, the three failures of cbClientReady, an exception late in
+			// cbSelectChar), and it does not ask the frontend to close the connection. Nothing more comes for
+			// this character, so end the connection here, as for ACTION_DISCONNECTION_CODE: the main loop shows
+			// the disconnection (uiDisconnected) and lets the player exit.
+			nlwarning("The server ended the game session without a quit request (CONNECTION:SERVER_QUIT_OK), disconnecting");
+			NetMngr.disconnect();
+		}
 	}
 }
 
@@ -620,7 +639,7 @@ class CInterfaceChatDisplayer : public CClientChatManager::IChatDisplayer
 {
 public:
 	virtual void displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer=0) NL_OVERRIDE;
-	virtual void displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName) NL_OVERRIDE;
+	virtual void displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName, const std::string &rawMessage) NL_OVERRIDE;
 	virtual void clearChannel(CChatGroup::TGroupType mode, uint32 dynChatDbIndex) NL_OVERRIDE;
 
 private:
@@ -656,6 +675,18 @@ void CInterfaceChatDisplayer::colorizeSender(string &text, const string &senderN
 // display a chat from network to interface
 void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer)
 {
+	// the line for a control tool (--ctrl-listen), as it arrived
+	if (ClientCtrl::isActive())
+	{
+		NLMISC::CJsonValue e = NLMISC::CJsonValue::object();
+		e.set("channel", mode == CChatGroup::dyn_chat ? std::string("dyn") : CChatGroup::groupTypeToString(mode));
+		if (mode == CChatGroup::dyn_chat)
+			e.set("dyn_id", dynChatId.toString());
+		e.set("sender", senderName);
+		e.set("text", rawMessage);
+		ClientCtrl::addEvent("chat", e);
+	}
+
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	string finalString;
 	string stringCategory = getStringCategory(ucstr, finalString);
@@ -935,8 +966,12 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 
 
 // display a tell from network to interface
-void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName)
+void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName, const std::string &rawMessage)
 {
+	// as for the other channels, the text the sender wrote, not the sentence built around it
+	if (ClientCtrl::isActive())
+		ClientCtrl::addEvent("chat", NLMISC::CJsonValue::object().set("channel", "tell").set("sender", senderName).set("text", rawMessage));
+
 
 	string finalString = ucstr;
 
@@ -1518,6 +1553,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 	if (SoundMngr)
 	{
 		LoadingMusic.clear();
+		bool keepEventMusic = false;
 		switch (LoadingBackground)
 		{
 		case TeleportKamiBackground:
@@ -1529,6 +1565,9 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 		case ResurectKamiBackground:
 		case ResurectKaravanBackground:
 			// TODO: Resurrect music
+			// Until there is one, the death music keeps playing through the loading screen (an empty
+			// event music would stop it): CUserEntity::updatePreCollision stops it once the player is alive.
+			keepEventMusic = true;
 			break;
 		default:
 			LoadingMusic = ClientCfg.TeleportLoadingMusic;
@@ -1536,7 +1575,8 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 		}
 
 		// start to play
-		SoundMngr->playEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade, true);
+		if (!keepEventMusic)
+			SoundMngr->playEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade, true);
 	}
 
 	// Create the loading texture.
@@ -1763,6 +1803,19 @@ void impulseTeamInvitation(NLMISC::CBitMemStream &impulse)
 
 	CLuaManager::getInstance().executeLuaScript("game:onTeamInvation("+toString(textID)+")", 0);
 }// impulseTeamInvitation //
+
+//-----------------------------------------------
+// impulseTeamCancelInvitation :
+// The invitation ended on the server (no answer in time, or the invitor left): close its window
+//-----------------------------------------------
+void impulseTeamCancelInvitation(NLMISC::CBitMemStream &impulse)
+{
+	if (PermanentlyBanned) return;
+
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_team_proposal"));
+	if (pGC == nullptr) return;
+	pGC->setActive(false);
+}// impulseTeamCancelInvitation //
 
 //-----------------------------------------------
 // impulseTeamShareOpen
@@ -3722,6 +3775,7 @@ void initializeNetwork()
 
 	GenericMsgHeaderMngr.setCallback("CASTING:BEGIN",			impulseBeginCast);
 	GenericMsgHeaderMngr.setCallback("TEAM:INVITATION",			impulseTeamInvitation);
+	GenericMsgHeaderMngr.setCallback("TEAM:CANCEL_INVITATION",	impulseTeamCancelInvitation);
 	GenericMsgHeaderMngr.setCallback("TEAM:SHARE_OPEN",			impulseTeamShareOpen);
 	GenericMsgHeaderMngr.setCallback("TEAM:SHARE_INVALID",		impulseTeamShareInvalid);
 	GenericMsgHeaderMngr.setCallback("TEAM:SHARE_CLOSE",		impulseTeamShareClose);
@@ -3837,6 +3891,8 @@ void initializeNetwork()
 //-----------------------------------------------
 void impulseCallBack(NLMISC::CBitMemStream &impulse, sint32 packet, void *arg)
 {
+	// the record of a control tool (--ctrl-listen): every impulse received passes here
+	ClientCtrl::netImpulse(false, impulse);
 	GenericMsgHeaderMngr.execute(impulse);
 }
 
@@ -4047,6 +4103,30 @@ bool CNetManager::update()
 				if (node)
 					node->setValue32((sint32)getConnectionQuality());
 			}
+
+			if (!m_ConnectionTransportLeaf)
+				m_ConnectionTransportLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CONNECTION_TRANSPORT", false);
+
+			if (m_ConnectionTransportLeaf)
+			{
+				// the values the interface has for them (config.xml, and the texts of the network page in game_config.xml)
+				sint32 connectionTransport = 0; // not connected
+				switch (transport())
+				{
+				case TransportUdp:
+					connectionTransport = 1;
+					break;
+				case TransportQuicDatagrams:
+					connectionTransport = 2;
+					break;
+				case TransportQuicStreams:
+					connectionTransport = 3;
+					break;
+				default:
+					break;
+				}
+				m_ConnectionTransportLeaf->setValue32(connectionTransport);
+			}
 		}
 	}
 
@@ -4080,6 +4160,8 @@ void CNetManager::push(NLMISC::CBitMemStream &msg)
 
 	if (PermanentlyBanned) return;
 
+	// the record of a control tool (--ctrl-listen): every impulse sent passes here
+	ClientCtrl::netImpulse(true, msg);
 	CNetworkConnection::push(msg);
 }
 
@@ -4335,7 +4417,7 @@ NLMISC_COMMAND(localTell, "Temp : simulate a tell in local mode", "<people_name>
 		}
 	}
 //	TDataSetIndex dsi = INVALID_DATASET_ROW;
-	InterfaceChatDisplayer.displayTell(/*dsi, */msg, player);
+	InterfaceChatDisplayer.displayTell(/*dsi, */msg, player, msg);
 	return true;
 }
 

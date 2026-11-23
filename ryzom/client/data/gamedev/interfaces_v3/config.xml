@@ -1702,6 +1702,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:SHOW_RETICLE" type="bool" value="true" />
 <variable entry="UI:SAVE:SHOW_ICON_BUFFS" type="bool" value="true" />
 <link expr="@UI:SAVE:SHOW_ICON_BUFFS" action="trigger_show_icon_buffs" />
+<variable entry="UI:SAVE:RADAR:USE_CAMERA" type="bool" value="false" />
 <variable entry="UI:VARIABLES:MISSION_SELECTED_PREV_SESSION" type="sint32" value="-1" />
 
 <!-- set to true if the current header that called a menu was a popup container -->
@@ -2114,6 +2115,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable type="float" entry="UI:VARIABLES:SERVERSTATE" />
 
 <variable type="bool" entry="UI:VARIABLES:CONNECTION_QUALITY" />
+
+<!-- What the connection to the server goes over: 0 not connected, 1 UDP, 2 QUIC datagrams, 3 QUIC datagrams and streams (CNetManager::update) -->
+<variable type="sint32" entry="UI:VARIABLES:CONNECTION_TRANSPORT" value="0" />
 
 <!-- ***************************** -->
 <!-- *  COMMON DEFINE COLORS     * -->

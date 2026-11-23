@@ -20,7 +20,7 @@ NL_DEFAULT_PROPS(snowballs_position_service "Snowballs, Services: Position Servi
 NL_ADD_RUNTIME_FLAGS(snowballs_position_service)
 
 INSTALL(TARGETS snowballs_position_service RUNTIME DESTINATION sbin COMPONENT services)
-INSTALL(FILES position_service.cfg DESTINATION etc/snowballs COMPONENT services)
+INSTALL(FILES position_service.cfg DESTINATION ${SNOWBALLS_CONFIG_FILE} COMPONENT services)
 
 IF (WITH_NEL_TESTS OR WITH_TESTING)
     ADD_SUBDIRECTORY(tests)

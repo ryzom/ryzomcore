@@ -247,8 +247,7 @@ function r2.dialogs:initDialogsMenu()
 	local uc_dialog = ucstring()
 
 	for k, dialog in pairs(allDialogs) do
-		uc_dialog:fromUtf8(dialog.Name)
-		dialogMenu:addLine(uc_dialog, "lua", "r2:setSelectedInstanceId('" .. dialog.InstanceId .."')", dialog.InstanceId)
+		dialogMenu:addLine(dialog.Name, "lua", r2:uiCall("r2:setSelectedInstanceId", dialog.InstanceId), dialog.InstanceId)
 	end
 
 	dialogMenu:setMaxVisibleLine(self.maxVisibleLine)
@@ -672,11 +671,11 @@ function r2.dialogs:initTimeMenu(timeFunction, isHours)
 	timeMenu:reset()
 
 	for i=0,9 do
-		timeMenu:addLine(ucstring(tostring(i)), "lua", timeFunction .. "(" .. tostring(i) .. ")", tostring(i))
+		timeMenu:addLine(tostring(i), "lua", r2:uiCall(timeFunction, i), tostring(i))
 	end
 
 	if isHours then
-		timeMenu:addLine(ucstring(tostring(10)), "lua", timeFunction .. "(" .. tostring(10) .. ")", tostring(10))
+		timeMenu:addLine(tostring(10), "lua", r2:uiCall(timeFunction, 10), tostring(10))
 	else
 
 		local lineNb = 9
@@ -690,7 +689,7 @@ function r2.dialogs:initTimeMenu(timeFunction, isHours)
 
 			for s=0,9 do
 				lineStr = tostring(i+s) 
-				subMenu:addLine(ucstring(lineStr), "lua", timeFunction .. "(" .. tostring(i+s) .. ")", lineStr)
+				subMenu:addLine(lineStr, "lua", r2:uiCall(timeFunction, i+s), lineStr)
 			end
 
 			timeMenu:setMaxVisibleLine(self.maxVisibleLine)
@@ -766,10 +765,10 @@ function r2.dialogs:initWhoMenu(whoFunction, towho)
 	local npcTable = r2.Scenario:getAllInstancesByType("Npc")
 
 	if towho == true then
-		whoMenu:addLine(i18n.get("uiR2EdNobody"), "lua", whoFunction.."('" ..i18n.get("uiR2EdNobody"):toUtf8().. "')", "Nobody")
+		whoMenu:addLine(i18n.get("uiR2EdNobody"), "lua", r2:uiCall(whoFunction, i18n.get("uiR2EdNobody")), "Nobody")
 	else
-		whoMenu:addLine(i18n.get("uiR2EdSystem"), "lua", whoFunction.."('_System')", "System")
-		whoMenu:addLine(i18n.get("uiR2EdDonjonMaster"), "lua", whoFunction.."('_DM')", "DonjonMaster")	
+		whoMenu:addLine(i18n.get("uiR2EdSystem"), "lua", r2:uiCall(whoFunction, "_System"), "System")
+		whoMenu:addLine(i18n.get("uiR2EdDonjonMaster"), "lua", r2:uiCall(whoFunction, "_DM"), "DonjonMaster")	
 	end
 	local uc_who = ucstring()
 	
@@ -787,8 +786,7 @@ function r2.dialogs:initWhoMenu(whoFunction, towho)
 				end
 			end
 			if addLine then
-				uc_who:fromUtf8(npc.Name)
-				whoMenu:addLine(uc_who, "lua", whoFunction.."('" ..npc.InstanceId.. "')", npc.InstanceId)	
+				whoMenu:addLine(npc.Name, "lua", r2:uiCall(whoFunction, npc.InstanceId), npc.InstanceId)	
 			end
 		end
 	end

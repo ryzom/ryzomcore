@@ -157,7 +157,8 @@ namespace NLGUI
 		static TLinkList             _LinkList;
 		TLinkList::iterator			 _ListEntry;
 		bool						 _On;
-		static TLinkVect             _LinksWithNoTarget; // there should be an owner for links with no targets
+		// there should be an owner for links with no targets. Never destroyed, emptied by removeAllLinks()
+		static TLinkVect            &linksWithNoTarget();
 		static bool					 _UpdateAllLinks;
 		///\ name triggered link mgt
 		//@{

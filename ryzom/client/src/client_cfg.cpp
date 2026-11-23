@@ -330,6 +330,8 @@ CClientConfig::CClientConfig()
 	FSHost				= "";						// Default Host.
 	QuicConnection		= true;
 	QuicCertValidation	= true;
+	QuicStreams			= false; // client_default.cfg turns it on
+	ConnectionRate		= 0;
 
 	TexturesInterface.push_back("texture_interfaces_v3_2x");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc_2x");
@@ -339,9 +341,9 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= RYZOM_CLIENT_CREATE_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
-	EditAccountURL		= RYZOM_CLIENT_EDIT_ACCOUNT_URL;	// "https://open.ryzom.dev/ams/";
-	ForgetPwdURL		= RYZOM_CLIENT_FORGET_PASSWORD_URL;	// "https://open.ryzom.dev/ams/";
+	CreateAccountURL	= RYZOM_CLIENT_CREATE_ACCOUNT_URL;	// "https://core.ryzom.dev/account/?page=register";
+	EditAccountURL		= RYZOM_CLIENT_EDIT_ACCOUNT_URL;	// "https://core.ryzom.dev/account/?page=settings";
+	ForgetPwdURL		= RYZOM_CLIENT_FORGET_PASSWORD_URL;	// "https://core.ryzom.dev/account/";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -359,10 +361,7 @@ CClientConfig::CClientConfig()
 
 	HardwareCursor			= true;					// Default HardwareCursor
 	HardwareCursorScale     = 1.f;
-	CursorSpeed				= 1.f;					// Default CursorSpeed
-	CursorAcceleration		= 0;					// Default CursorAcceleration
 	FreeLookSpeed			= 0.001f;				// Default FreeLookSpeed
-	FreeLookAcceleration    = 0;					// Default FreeLookAcceleration
 	FreeLookSmoothingPeriod = 0.f;                  // when in absolute mode, free look factor is used instead of speed, the mouse gives the absolute angle
 	FreeLookInverted		= false;
 	FreeLookTablet			= false;                // Mouse reports absolute coordinates, so avoid mouse recentering
@@ -400,6 +399,10 @@ CClientConfig::CClientConfig()
 	VideoMemory			= 0;
 
 	FXAA				= true;
+
+	WeatherLightingEntities		= true;
+	WeatherLightingLandscape	= true;
+	WeatherLightningFlash		= true;
 
 	Bloom				= true;
 	SquareBloom			= true;
@@ -471,6 +474,7 @@ CClientConfig::CClientConfig()
 	// SOUND //
 	SoundOn				= true;						// Default is with sound.
 	DriverSound			= SoundDrvAuto;
+	SoundDevice			= "";						// Default device of the sound driver
 	SoundForceSoftwareBuffer = true;
 	StartMusic = "main theme air.ogg"; // Use at game startup (originally no music)
 	EmptySlotMusic = "loading music loop.ogg"; // Use in character selection for empty slots
@@ -917,10 +921,7 @@ void CClientConfig::setValues()
 	// INPUTS //
 	READ_BOOL_FV(HardwareCursor)
 	READ_FLOAT_FV(HardwareCursorScale)
-	READ_FLOAT_FV(CursorSpeed)
-	READ_INT_FV(CursorAcceleration)
 	READ_FLOAT_FV(FreeLookSpeed)
-	READ_INT_FV(FreeLookAcceleration)
 	READ_FLOAT_FV(FreeLookSmoothingPeriod)
 	READ_BOOL_FV(FreeLookInverted)
 	READ_BOOL_FV(FreeLookTablet)
@@ -939,6 +940,8 @@ void CClientConfig::setValues()
 	// QUIC
 	READ_BOOL_FV(QuicConnection)
 	READ_BOOL_FV(QuicCertValidation)
+	READ_BOOL_FV(QuicStreams)
+	READ_INT_FV(ConnectionRate)
 
 	READ_BOOL_DEV(DisplayAccountButtons)
 	
@@ -1110,6 +1113,11 @@ void CClientConfig::setValues()
 
 	// FXAA
 	READ_BOOL_FV(FXAA)
+
+	// Weather lighting
+	READ_BOOL_FV(WeatherLightingEntities)
+	READ_BOOL_FV(WeatherLightingLandscape)
+	READ_BOOL_FV(WeatherLightningFlash)
 
 	// ScreenAspectRatio.
 	READ_FLOAT_FV(ScreenAspectRatio)
@@ -1368,6 +1376,8 @@ void CClientConfig::setValues()
 	}
 	else
 		cfgWarning ("Default value used for 'DriverSound' !!!");
+	// SoundDevice
+	READ_STRING_FV(SoundDevice)
 	// SoundForceSoftwareBuffer
 	READ_BOOL_FV(SoundForceSoftwareBuffer);
 	// SoundOutGameMusic
@@ -1963,6 +1973,8 @@ void CClientConfig::setValues()
 
 	READ_BOOL_DEV(DamageShieldEnabled)
 
+	// The Lua commands, and in a client that is not a final version the ah command and the development libraries
+	// of Lua. Read by a final version too: it is off by default, a published client has it only if its player sets it.
 	READ_BOOL_FV(AllowDebugLua)
 	READ_BOOL_FV(DisplayLuaDebugInfo)
 
@@ -2129,6 +2141,15 @@ void CClientConfig::serial(NLMISC::IStream &f)
 //-----------------------------------------------
 void CClientConfig::init(const string &configFileName)
 {
+	// The clients of a directory share client.cfg: it is created, read and fixed here under its lock, held until
+	// the end of this function (the saves here don't take it again), and every other save takes it (saveConfigFile).
+	// Without the lock the file is read as it was before there was one: another client may be writing it.
+	std::string lockFileName = configFileName + ".lock";
+	CFileLock configLock;
+	if (configLock.lock(lockFileName, 10000) != CFileLock::Locked)
+		nlwarning("CFG::init: %s is read without its lock %s in '%s' (%s): another client of the directory may be writing it",
+		    configFileName.c_str(), lockFileName.c_str(), CPath::getCurrentPath().c_str(), configLock.getError().c_str());
+
 	// if the users client config does not exist
 	if(!CFile::fileExists(configFileName))
 	{
@@ -2136,7 +2157,8 @@ void CClientConfig::init(const string &configFileName)
 		FILE *fp = nlfopen(configFileName, "w");
 
 		if (fp == nullptr)
-			nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());
+			nlerror("CFG::init: Can't create config file '%s' in directory '%s'. The client keeps its files (client.cfg, logs, saves) in the directory it is started from when that directory holds client_default.cfg: make that directory writable, or start the client with the option --profile to keep them in the per-user directory",
+			    configFileName.c_str(), CPath::getCurrentPath().c_str());
 		else
 			nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
 
@@ -2230,7 +2252,35 @@ void CClientConfig::init(const string &configFileName)
 
 
 //-----------------------------------------------
-// init :
+// writeWindowPos :
+//-----------------------------------------------
+void CClientConfig::writeWindowPos ()
+{
+#ifndef RZ_NO_CLIENT
+	// Driver still alive ?
+	if (ClientCfg.SaveConfig && Driver && Driver->isActive ())
+	{
+		sint32 x, y;
+		uint32 width, height;
+
+		Driver->getWindowPos(x, y);
+		Driver->getWindowSize(width, height);
+
+		// Are we in window mode ? Windows moves a minimized window off the screen. With some drivers it has an
+		// empty size then; where it keeps its size, or has it back while the desktop shows a picture of it (see
+		// UDriver::setMinimizedWindowPictureSupplied), the driver tells that it is minimized.
+		if (ClientCfg.Windowed && width != 0 && height != 0 && !Driver->isWindowMinimized() /* && !isWindowMaximized() */)
+		{
+			// Save windows position. width/height are saved when leaving ingame.
+			writeInt("PositionX", x);
+			writeInt("PositionY", y);
+		}
+	}
+#endif
+}
+
+//-----------------------------------------------
+// release :
 //-----------------------------------------------
 void CClientConfig::release ()
 {
@@ -2243,23 +2293,8 @@ void CClientConfig::release ()
 		{
 			CConfigFile::CVar *varPtr = nullptr;
 
-			// Driver still alive ?
-			if (Driver && Driver->isActive ())
-			{
-				sint32 x, y;
-				uint32 width, height;
-
-				Driver->getWindowPos(x, y);
-				Driver->getWindowSize(width, height);
-
-				// Are we in window mode ? A minimized window has an empty size, and Windows moves it off the screen.
-				if (ClientCfg.Windowed && width != 0 && height != 0 /* && !isWindowMaximized() */)
-				{
-					// Save windows position. width/height are saved when leaving ingame.
-					writeInt("PositionX", x);
-					writeInt("PositionY", y);
-				}
-			}
+			// The driver is gone already when the client quits from the character selection: releaseOutGame() did this
+			writeWindowPos();
 
 			// Save if in FPV or TPV.
 			writeBool("FPV", ClientCfg.FPV);
@@ -2273,9 +2308,22 @@ void CClientConfig::release ()
 		}
 
 		// Save it
-		ClientCfg.ConfigFile.save ();
+		ClientCfg.saveConfigFile ();
 	}
 #endif
+}
+
+//-----------------------------------------------
+// saveConfigFile :
+//-----------------------------------------------
+void CClientConfig::saveConfigFile ()
+{
+	// without the lock the file is saved as it was before there was one: another client may be reading it
+	std::string lockFileName = ConfigFile.getFilename() + ".lock";
+	CFileLock configLock;
+	if (configLock.lock(lockFileName, 5000) != CFileLock::Locked)
+		nlwarning("CFG: %s is saved without its lock %s (%s): another client of the directory may be reading it", ConfigFile.getFilename().c_str(), lockFileName.c_str(), configLock.getError().c_str());
+	ConfigFile.save();
 }
 
 bool CClientConfig::readBool (const std::string &varName)

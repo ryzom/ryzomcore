@@ -25,6 +25,8 @@
 
 #include <string>
 #include <list>
+#include <utility>
+#include <vector>
 
 
 namespace NLMISC
@@ -46,7 +48,25 @@ class IDisplayer;
 class CLog {
 public:
 
-	typedef enum { LOG_NO=0, LOG_ERROR, LOG_WARNING, LOG_INFO, LOG_DEBUG, LOG_STAT, LOG_ASSERT, LOG_UNKNOWN } TLogType;
+	/** Log types. <syslog.h> defines LOG_WARNING, LOG_INFO and LOG_DEBUG as macros, so the NL_LOG_ names are the ones
+	 * that work whatever the include order. The former LOG_ names stay as aliases; those three are left out when the
+	 * syslog macros are already defined.
+	 * NeL's own code uses the NL_LOG_ names for those three.
+	 */
+	typedef enum
+	{
+		NL_LOG_NO = 0, NL_LOG_ERROR, NL_LOG_WARNING, NL_LOG_INFO, NL_LOG_DEBUG, NL_LOG_STAT, NL_LOG_ASSERT, NL_LOG_UNKNOWN,
+#ifndef LOG_WARNING
+		LOG_WARNING = NL_LOG_WARNING,
+#endif
+#ifndef LOG_INFO
+		LOG_INFO = NL_LOG_INFO,
+#endif
+#ifndef LOG_DEBUG
+		LOG_DEBUG = NL_LOG_DEBUG,
+#endif
+		LOG_NO = NL_LOG_NO, LOG_ERROR = NL_LOG_ERROR, LOG_STAT = NL_LOG_STAT, LOG_ASSERT = NL_LOG_ASSERT, LOG_UNKNOWN = NL_LOG_UNKNOWN
+	} TLogType;
 
 	// Debug information
 	struct TDisplayInfo
@@ -193,11 +213,19 @@ public:
 private:
 	friend class CSetLogPosition;
 	
-	/// If !noDisplayer(), sets line and file parameters, and enters the mutex. If !noDisplayer(), don't forget to call display...() after, to release the mutex.
-	void setPosition (sint line, const char *fileName, const char *funcName = nullptr);
+	/// The position of a message: CSetLogPosition keeps the one the log had before its message.
+	struct CPosition
+	{
+		const char *FileName;
+		sint Line;
+		const char *FuncName;
+	};
 
-	/// Symetric to setPosition(). Automatically called CSetLogPosition
-	void unsetPosition();
+	/// If !noDisplayer(), enters the mutex, keeps the position the log had in previous, sets line and file parameters and returns true; otherwise returns false.
+	bool setPosition(sint line, const char *fileName, const char *funcName, CPosition &previous);
+
+	/// Symetric to setPosition(): gives the log the position it had back and releases the mutex. Call it once for each setPosition() that returned true, and only then (CSetLogPosition does).
+	void unsetPosition(const CPosition &previous);
 
 protected:
 	/// Returns true if the string must be logged, according to the current filter
@@ -216,7 +244,9 @@ protected:
 
 	CDisplayers							 _BypassFilterDisplayers;	// these displayers always log info (by pass filter system)
 
-	CMutex								 _Mutex;
+	// recursive: the arguments of a message are evaluated while the mutex is held (from setPosition() on), and one
+	// that logs on this log too (a getter that warns) enters it again from the same thread
+	mutable CRecursiveMutex				 _Mutex;
 
 	uint32								 _PosSet;
 
@@ -234,6 +264,17 @@ protected:
 
 	std::string							 TempString;
 	TDisplayInfo						 TempArgs;
+
+	// the lines begun (display() without a new line, as nlassertex does) by the messages that a message logged
+	// while their arguments are evaluated interrupted, the innermost last
+	std::vector<std::pair<std::string, TDisplayInfo> > m_Interrupted;
+
+	// the lines that messages logged in the middle of another one began and did not end: each ends with its
+	// message, and goes to the displayers before the next line of this log, as unsetPosition() calls no displayer
+	std::vector<std::pair<std::string, TDisplayInfo> > m_Unfinished;
+
+	/// Displays the lines of m_Unfinished, each with a new line
+	void displayUnfinished();
 
 };
 

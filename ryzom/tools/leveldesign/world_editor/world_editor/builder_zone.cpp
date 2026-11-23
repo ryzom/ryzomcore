@@ -1616,7 +1616,7 @@ bool CBuilderZone::initZoneBank (const string &sPathName)
 		{
 			string error;
 			if (!_ZoneBank.addElement(NLMISC::tStrToUtf8(findData.cFileName), error))
-				theApp.errorMessage(error.c_str());
+				theApp.errorMessage("%s", error.c_str());
 		}
 		if (FindNextFile(hFind, &findData) == 0)
 			break;

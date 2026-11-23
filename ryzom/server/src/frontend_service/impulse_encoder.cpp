@@ -63,6 +63,35 @@ void cbImpulsionByteSize2Changed( IVariable& var )
 }
 
 
+// A client whose connection has QUIC streams gets its large messages on them (the module gateway of the Ring, the
+// database of a login, chat), and its datagrams need no more room for impulsions on a shard where the others get
+// more (BandwidthRatio in the configuration of the shard types). Its channels have sizes of their own.
+uint MaxStreamImpulseBitSizes [3];
+
+void cbStreamImpulsionByteSize0Changed( IVariable& var );
+void cbStreamImpulsionByteSize1Changed( IVariable& var );
+void cbStreamImpulsionByteSize2Changed( IVariable& var );
+
+CVariable<uint> StreamImpulsionByteSize0( "fe", "StreamImpulsionByteSize0", "Size of impulsion channel 0 of a client whose connection has QUIC streams", 20, 0, true, cbStreamImpulsionByteSize0Changed, true );
+CVariable<uint> StreamImpulsionByteSize1( "fe", "StreamImpulsionByteSize1", "Size of impulsion channel 1 of a client whose connection has QUIC streams", 200, 0, true, cbStreamImpulsionByteSize1Changed, true );
+CVariable<uint> StreamImpulsionByteSize2( "fe", "StreamImpulsionByteSize2", "Size of impulsion channel 2 of a client whose connection has QUIC streams", 200, 0, true, cbStreamImpulsionByteSize2Changed, true );
+
+void cbStreamImpulsionByteSize0Changed( IVariable& var )
+{
+	MaxStreamImpulseBitSizes[0] = (StreamImpulsionByteSize0.get())*8;
+}
+
+void cbStreamImpulsionByteSize1Changed( IVariable& var )
+{
+	MaxStreamImpulseBitSizes[1] = (StreamImpulsionByteSize1.get())*8;
+}
+
+void cbStreamImpulsionByteSize2Changed( IVariable& var )
+{
+	MaxStreamImpulseBitSizes[2] = (StreamImpulsionByteSize2.get())*8;
+}
+
+
 bool verboseImpulsions = false;
 
 //
@@ -191,9 +220,23 @@ uint64	CImpulseQueue::totalSentData()
 
 
 /*
+ * The sizes of the channels, by what the connection of the client is
+ */
+void CImpulseEncoder::setStreams( bool streams )
+{
+	_MaxBitSizes = streams ? MaxStreamImpulseBitSizes : MaxImpulseBitSizes;
+	uint	i;
+	for (i=0; i<1; ++i)		_Level0[i].setup(maxBitSize(0), 0, i);
+	for (i=0; i<2; ++i)		_Level1[i].setup(maxBitSize(1), 1, i);
+	for (i=0; i<4; ++i)		_Level2[i].setup(maxBitSize(2), 2, i);
+}
+
+
+/*
  * Constructor
  */
 CImpulseEncoder::CImpulseEncoder()
+    : _MaxBitSizes(MaxImpulseBitSizes)
 {
 	uint	i;
 

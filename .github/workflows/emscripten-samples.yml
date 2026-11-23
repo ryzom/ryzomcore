@@ -14,7 +14,9 @@ on:
   workflow_dispatch:
 
 env:
-  EM_VERSION: 3.1.61
+  # at least 3.1.65: the wasm-ld of 3.1.61 could take a static function in an archive member for a definition of the
+  # global of the same name (fixed by LLVM #104876); FreeType's static adler32 left libpng's and zlib's calls unresolved
+  EM_VERSION: 3.1.65
   BUILD_TYPE: Release
 
 permissions:

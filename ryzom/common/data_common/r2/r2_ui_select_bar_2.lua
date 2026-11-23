@@ -511,13 +511,11 @@ function r2.SelectBar:popMenu(index)
 	-- special case for act
 	if index==2 then
 		for k, v in pairs(self.InstancesTypes) do
-			local ucname = ucstring()
-			ucname:fromUtf8(v.type)
-			r2:addMenuLine(rm, ucname, "lua", "r2.SelectBar:openInstancesOfType('".. v.type .."','" .. v.icon .."')", v.type, v.icon, 14)
+			r2:addMenuLine(rm, v.type, "lua", r2:uiCall("r2.SelectBar:openInstancesOfType", v.type, v.icon), v.type, v.icon, 14)
 		end
 	else
 		for k, v in pairs(sons) do
-			r2:addMenuLine(rm, v:getDisplayName(), "lua", "r2:setSelectedInstanceId('" .. v.InstanceId .."')", tostring(k), v:getSelectBarIcon(), 14)
+			r2:addMenuLine(rm, v:getDisplayName(), "lua", r2:uiCall("r2:setSelectedInstanceId", v.InstanceId), tostring(k), v:getSelectBarIcon(), 14)
 		end
 	end
 
@@ -562,9 +560,7 @@ function r2.SelectBar:browseSequences()
 	r2:clearMenu(rm)
 	for s = 0, activitySequences.Size - 1 do
 		local sequence = activitySequences[s]
-		local uc_sequ = ucstring()
-		uc_sequ:fromUtf8(sequence:getName())
-		rm:addLine(uc_sequ, "lua", "r2.activities:triggerSelectSequence('".. sequence.InstanceId .. "')", sequence.InstanceId)
+		rm:addLine(sequence:getName(), "lua", r2:uiCall("r2.activities:triggerSelectSequence", sequence.InstanceId), sequence.InstanceId)
 	end
 	rm:addSeparator()
 	r2:addMenuLine(rm, i18n.get("uiR2EDNewSequence"), "lua", "r2.activities:newSequenceInst()", "new_sequence", "r2_icon_create.tga", 14)	

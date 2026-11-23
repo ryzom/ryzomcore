@@ -129,8 +129,11 @@ public:
 		NLMISC::fromString(lp->ParamValue, port);
 		BOMB_IF(port == 0, "Invalid listen port '"<<lp->ParamValue<<"'", return false);
 
-		// open the server
-		openItf(port);
+		// open the server on all network interfaces: the clients connect to this port (the port of their frontend plus
+		// SBSPortOffset), the BindAddress setting of the service only applies to the service ports
+		CInetAddress anyAddress; // the dual stack any address
+		anyAddress.setPort(port);
+		openItf(anyAddress);
 
 		// init ring db
 		const TParsedCommandLine *initRingDb = initInfo.getParam("ring_db");
@@ -299,13 +302,26 @@ public:
 	}
 
 	// Close the current edit session of the character
-	// Return 'invokeResult' : 0 : ok, session closed (or about to close)
-	//                         1 : char not found
-	//                         2 : failed to close the session, internal error
+	// Return 'invokeResult' : 0 : ok, session closed (or about to close), or the removal of its saved file asked for
+	//                         2 : the edit session could not be looked up, database error
+	//                         3 : no session server to remove the saved file of a session that does not run
+	//                         4 : the character has no edit session
+	//                         5 : the edit session could not be loaded
 	virtual void on_closeEditSession(NLNET::TSockId from, uint32 charId)
 	{
 		CHECK_AUTH_WITH_CHARID(from, charId);
 		CRingSessionManagerWebClientItf::closeEditSession(charId);
+	}
+
+	// Close the animation sessions that the character owns and that are open, and nothing else
+	// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+	//                         1 : char not found
+	//                         2 : failed to close the sessions, internal error
+	//                         3 : the character owns no open animation session
+	virtual void on_closeAnimSessions(NLNET::TSockId from, uint32 charId)
+	{
+		CHECK_AUTH_WITH_CHARID(from, charId);
+		CRingSessionManagerWebClientItf::closeAnimSessions(charId);
 	}
 
 	// Hibernat an edit session (if open)
@@ -431,8 +447,8 @@ public:
 	//                1 : char not found
 	//                2 : session not found
 	//                3 : character already subscribed to or invited in the session
-	//                4 : session not public
-	//                5 : character banned
+	//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
+	//                5 : character banned, or a character of its account is kicked from the session
 	//                6 : no place left, session is full
 	//                7 : session owner not found
 	//                8 : internal error
@@ -506,6 +522,7 @@ public:
 	//                3 : kicked character has no participation in the session
 	//                4 : internal error
 	//                5 : owner char don't own the session
+	//                6 : the owner of the session can't be kicked
 	virtual void on_kickCharacter(NLNET::TSockId from, uint32 ownerCharId, TSessionId sessionId, uint32 kickedCharId)
 	{
 		CHECK_AUTH_WITH_CHARID(from, ownerCharId);
@@ -725,9 +742,14 @@ public:
 
 		{
 
+			// The participations of the character say where it is invited. A kick holds for the account, as at the
+			// join of the session manager: the kicks are those of every character of the account of the requester
+			// (the sixteen ids that follow its user id shifted by four bits). The answer goes to the requester
+			// alone.
+			uint32 firstCharIdOfAccount = (charId >> 4) << 4;
 			CSString query;
-			query << "SELECT session_id, kicked";
-			query << " FROM session_participant WHERE char_id = "<< charId;
+			query << "SELECT session_id, kicked, char_id";
+			query << " FROM session_participant WHERE char_id >= " << firstCharIdOfAccount << " AND char_id <= " << (firstCharIdOfAccount + 15);
 			BOMB_IF(!_RingDB.query(query), "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
 			CUniquePtr<CStoreResult> result(_RingDB.storeResult());	
 			uint32 row = result->getNumRows();
@@ -739,11 +761,14 @@ public:
 				uint32 kicked;
 				
 				result->fetchRow();
+				uint32 partCharId;
 				result->getField(0, session_id);
 				result->getField(1, kicked);
+				result->getField(2, partCharId);
 				if (kicked == 0)
 				{
-					allowedSessions.insert(session_id);
+					if (partCharId == charId)
+						allowedSessions.insert(session_id);
 				}
 				else
 				{
@@ -912,7 +937,10 @@ public:
 			sd.setLaunchDate(startDate);
 			
 			sd.setRequesterCharInvited(allowedSessions.find(sessionNum) != allowedSessions.end() || accessType == TAccessType::at_public || autoInvite);
-			sd.setRequesterCharKicked(kickedSessions.find(sessionNum) != kickedSessions.end());
+			// (the owner of a session is not held back by a kick of another character of its account)
+			uint32 ownerCharId;
+			result2->getField(4, ownerCharId);
+			sd.setRequesterCharKicked(ownerCharId != charId && kickedSessions.find(sessionNum) != kickedSessions.end());
 			
 			// Calculate number of connected players
 			// TODO : do this a bit faster
@@ -921,7 +949,7 @@ public:
 			query << " AND current_session="<< sd.getSessionId();
 			BOMB_IF(!_RingDB.query(query), "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
 			CUniquePtr<CStoreResult> result3(_RingDB.storeResult());
-			BOMB_IF(result2->getNumRows()<1,"Expected 1 result from SQL nbPlayers request but retrieved none",return);
+			BOMB_IF(result3->getNumRows()<1,"Expected 1 result from SQL nbPlayers request but retrieved none",return);
 			uint32 nbPlayers;
 			result3->fetchRow();
 			result3->getField(0, nbPlayers);
@@ -938,11 +966,146 @@ public:
 		sessionList(from, charId, sessionDescs);
 	}
 
+	// Ask for the list of the edit sessions of other characters
+	// that the requesting character is invited to as an editor.
+	virtual void on_getEditSessionList(NLNET::TSockId from, uint32 charId)
+	{
+		nldebug("on_getEditSessionList : getting the edit sessions char %u is invited to", charId);
+		CHECK_AUTH_WITH_CHARID(from, charId);
+
+		// The edit session of another character is listed for the editors its owner invited: the session is open,
+		// the character has an editor's participation in it and no character of its account is kicked from it,
+		// which is what the session manager asks of the join (_joinSessionCommon). The edit session of the
+		// character itself is not listed: its owner enters it with the editor button, which also opens it again
+		// when it is closed. The filters of an animation session (newcomer, race, religion, guild, shard, level)
+		// are not for an edit session: the invitation is the access.
+		CSString query;
+		//                      0                1                   2                  3
+		query << "SELECT sessions.session_id, sessions.title, sessions.description, start_date,";
+		//                 4             5                   6                  7                   8
+		query << " sessions.lang, sessions.anim_mode, sessions.level, sessions.orientation, char_name,";
+		//                    9
+		query << " home_mainland_session_id";
+		query << " FROM sessions LEFT JOIN characters ON sessions.owner = char_id";
+		query << " WHERE session_type = 'st_edit'";
+		query << " AND state = 'ss_open'";
+		query << " AND sessions.owner <> " << charId;
+		query << " AND EXISTS (SELECT * FROM session_participant WHERE session_participant.session_id = sessions.session_id";
+		query << " AND session_participant.char_id = " << charId << " AND session_participant.kicked = 0";
+		query << " AND session_participant.status IN ('sps_edit_invited', 'sps_editing'))";
+		query << " AND NOT EXISTS (SELECT * FROM session_participant WHERE session_participant.session_id = sessions.session_id";
+		query << " AND session_participant.char_id >= " << ((charId >> 4) << 4) << " AND session_participant.char_id <= " << (((charId >> 4) << 4) + 15);
+		query << " AND session_participant.kicked <> 0)";
+
+		BOMB_IF(!_RingDB.query(query), "getEditSessionList : error executing request in database", editSessionList(from, charId, vector<TSessionDesc>()); return);
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
+
+		vector<TSessionDesc> sessionDescs;
+		sessionDescs.resize(result->getNumRows());
+		for (uint i = 0; i < result->getNumRows(); ++i)
+		{
+			result->fetchRow();
+			TSessionDesc &sd = sessionDescs[i];
+			uint32 sessionNum;
+			uint32 homeSessionId;
+			uint32 startDate;
+			string s;
+
+			result->getField(0, sessionNum);
+			sd.setSessionId(TSessionId(sessionNum));
+			result->getField(9, homeSessionId);
+			result->getField(8, s);
+			sd.setOwnerName(CShardNames::getInstance().makeFullName(s, homeSessionId));
+			result->getField(1, s);
+			sd.setTitle(s);
+			result->getField(2, s);
+			sd.setDescription(s);
+			result->getDateField(3, startDate);
+			sd.setLaunchDate(startDate);
+			result->getField(4, s);
+			sd.setLanguage(s);
+			// (what the session was scheduled with: an edit session has no use for these three)
+			result->getField(5, s);
+			sd.setAnimMode(TAnimMode(s));
+			result->getField(6, s);
+			sd.setSessionLevel(TSessionLevel(s));
+			result->getField(7, s);
+			sd.setOrientation(TSessionOrientation(s));
+
+			sd.setRequesterCharInvited(true);
+			sd.setRequesterCharKicked(false);
+			// the session manager holds a free trial account back from an animation session only
+			sd.setAllowFreeTrial(true);
+			sd.setNbRating(0);
+			sd.setRateFun(0);
+			sd.setRateDifficulty(0);
+			sd.setRateAccessibility(0);
+			sd.setRateOriginality(0);
+			sd.setRateDirection(0);
+			sd.setScenarioRRPTotal(0);
+			sd.setNbConnectedPlayer(0);
+		}
+
+		// the number of characters in each session (a request of its own, as for the animation sessions: the
+		// result of the list is read to its end first)
+		for (uint i = 0; i < sessionDescs.size(); ++i)
+		{
+			CSString countQuery;
+			countQuery << "SELECT COUNT(*) FROM ring_users";
+			countQuery << " WHERE current_status='cs_online'";
+			countQuery << " AND current_session=" << sessionDescs[i].getSessionId();
+			BOMB_IF(!_RingDB.query(countQuery), "getEditSessionList : error executing the count request in database", editSessionList(from, charId, vector<TSessionDesc>()); return);
+			CUniquePtr<CStoreResult> countResult(_RingDB.storeResult());
+			BOMB_IF(countResult->getNumRows() < 1, "getEditSessionList : the count request has no result", editSessionList(from, charId, vector<TSessionDesc>()); return);
+			uint32 nbPlayers;
+			countResult->fetchRow();
+			countResult->getField(0, nbPlayers);
+			sessionDescs[i].setNbConnectedPlayer(nbPlayers);
+		}
+
+		editSessionList(from, charId, sessionDescs);
+	}
+
 	// Ask for the list of players that are available
 	// for the requesting session.
 	virtual void on_getCharList(NLNET::TSockId from, uint32 charId, TSessionId sessionId)
 	{
 		CHECK_AUTH_WITH_CHARID(from, charId);
+
+		// The list is for the characters of the session: its owner, a character that has a participation in it and
+		// is not kicked from it, and a character that is in it (an account that enters by its privilege has no
+		// participation). The session id is the one the client names, so it is checked against the character.
+		// A participation counts as it does for the join of the session manager, when its role is one of the type
+		// of the session: an editor's in an edit session, an animator's or a player's in an animation session.
+		CSString check;
+		check << "SELECT COUNT(*) FROM sessions WHERE sessions.session_id = " << sessionId.asInt();
+		check << " AND (sessions.owner = " << charId;
+		check << " OR EXISTS (SELECT * FROM session_participant WHERE session_participant.session_id = sessions.session_id";
+		check << " AND session_participant.char_id = " << charId << " AND session_participant.kicked = 0";
+		check << " AND ((sessions.session_type = 'st_edit' AND session_participant.status IN ('sps_edit_invited', 'sps_editing'))";
+		check << " OR (sessions.session_type = 'st_anim' AND session_participant.status NOT IN ('sps_edit_invited', 'sps_editing'))";
+		check << " OR sessions.session_type NOT IN ('st_edit', 'st_anim'))";
+		// (a kick holds for the account, as at the join: no character of the account of the requester is kicked)
+		check << " AND NOT EXISTS (SELECT * FROM session_participant AS account_kick WHERE account_kick.session_id = sessions.session_id";
+		check << " AND account_kick.char_id >= " << ((charId >> 4) << 4) << " AND account_kick.char_id <= " << (((charId >> 4) << 4) + 15);
+		check << " AND account_kick.kicked <> 0))";
+		check << " OR EXISTS (SELECT * FROM characters WHERE characters.char_id = " << charId;
+		check << " AND characters.current_session = sessions.session_id))";
+		BOMB_IF(!_RingDB.query(check), "getCharList : error executing the access request in database", charList(from, charId, sessionId, vector<TCharDesc>()); return);
+		CUniquePtr<CStoreResult> checkResult(_RingDB.storeResult());
+		uint32 nbAllowed = 0;
+		if (checkResult->getNumRows() == 1)
+		{
+			checkResult->fetchRow();
+			checkResult->getField(0, nbAllowed);
+		}
+		if (nbAllowed == 0)
+		{
+			nlwarning("SBS : getCharList : char %u asks for the characters of session %u and is not one of them, an empty list is sent",
+			    charId, sessionId.asInt());
+			charList(from, charId, sessionId, vector<TCharDesc>());
+			return;
+		}
 
 		// do the 'request of the death' !
 		CSString query;
@@ -956,7 +1119,9 @@ public:
 		query << " characters.cult, session_participant.status, characters.home_mainland_session_id, ";
 		//                    11
 		query << " session_participant.kicked";
-		query << " FROM sessions, session_participant, characters, ring_users LEFT JOIN guilds ON characters.guild_id = guilds.guild_id";
+		// the comma joined tables go in parentheses: an outer join binds tighter than a comma, so its ON clause
+		// could only name ring_users and guilds, and the database refuses the request
+		query << " FROM (sessions, session_participant, characters, ring_users) LEFT JOIN guilds ON characters.guild_id = guilds.guild_id";
 		query << " WHERE sessions.session_id = "<<sessionId;
 		query << " AND sessions.session_id = session_participant.session_id";
 		query << " AND characters.char_id = session_participant.char_id";
@@ -1074,8 +1239,24 @@ public:
 		uint32 invitedCharId;
 		result->getField(0, invitedCharId);
 
-		// do the real invitation with the SU
-		CRingSessionManagerWebClientItf::inviteCharacter(charId, sessionId, invitedCharId, TSessionPartStatus::sps_play_invited);
+		// The requester names no role: an edit session takes editors (the session manager only lets its owner
+		// invite them), any other session takes players
+		TSessionPartStatus role(TSessionPartStatus::sps_play_invited);
+		query = "";
+		query << "SELECT session_type FROM sessions WHERE session_id = " << sessionId.asInt();
+		BOMB_IF(!_RingDB.query(query), "invitedCharacterByName : failed request 3 in database", invokeResult(from, charId >> 4, 103, "Database request failed"); return);
+		result = CUniquePtr<CStoreResult>(_RingDB.storeResult());
+		if (result->getNumRows() != 0)
+		{
+			string sessionType;
+			result->fetchRow();
+			result->getField(0, sessionType);
+			if (TSessionType(sessionType) == TSessionType::st_edit)
+				role = TSessionPartStatus::sps_edit_invited;
+		}
+
+		// do the real invitation with the SU (which answers "session not found" when the requester is in none)
+		CRingSessionManagerWebClientItf::inviteCharacter(charId, sessionId, invitedCharId, role);
 
 		// the return is done with SU return
 	}
@@ -1257,11 +1438,44 @@ public:
 
 
 
+	// Read the character that a part of a multi-part message for the DSS is for (its first field).
+	// Returns false if the message is not such a part.
+	static bool readMultiPartCharId(const NLNET::CMessage &msg, uint32 &msgCharId)
+	{
+		std::string name = msg.getName();
+		if (name != "DSS_HEAD" && name != "DSS_MSG" && name != "DSS_FOOT")
+			return false;
+
+		NLNET::CMessage body(msg);
+		if (!body.isReading())
+			body.invert();
+		try
+		{
+			body.serial(msgCharId);
+		}
+		catch (const NLMISC::EStream &)
+		{
+			return false;
+		}
+		return true;
+	}
+
 	// Send the Footer message of a multi-part message that will be forwarded to DSS via sbs
 	void on_forwardToDss(NLNET::TSockId from, uint32 charId, const NLNET::CMessage& msg)
 	{		
 		CHECK_AUTH_WITH_CHARID(from, charId);
 		BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);	
+
+		// The edition module takes the character of a multi-part message from the message itself, and gives the
+		// complete message to its handlers as sent by that character. Only the parts of a multi-part message are
+		// forwarded, and only for the character this connection is authenticated for.
+		uint32 msgCharId = 0;
+		if (!readMultiPartCharId(msg, msgCharId) || msgCharId != charId)
+		{
+			nlwarning("forwardToDss: %s (char %u) sent the message '%s' for char %u, only the parts of its own multi-part messages are forwarded, message refused",
+				from->getTcpSock()->remoteAddr().asString().c_str(), charId, msg.getName().c_str(), msgCharId);
+			return;
+		}
 
 		NLNET::CMessage message(msg);		
 		/*

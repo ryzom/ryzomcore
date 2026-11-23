@@ -67,15 +67,22 @@ namespace STORAGE {
  *   Point3 — srcTag == -1 fresh/absolute, else CLONE of input vert srcTag with Pos = offset
  *   from the source's PRE-move position), 0x0208 created base-topology faces (24 B: srcTag +
  *   v[3] + smGroup + flagsMatId), 0x0210 face-vertex remap (20 B: faceIdx + applyMask + v[3]),
- *   0x0220 per-face attribute changes (12 B: faceIdx + applyMask + values); plus the 4-byte
- *   leaves 0x0100 input vert count / 0x0110 input face count (every instance) / 0x0300
- *   subobject level, the delete bitmaps 0x0170 (verts) / 0x0270 (faces) — containers holding
+ *   0x0220 per-face attribute changes (12 B: faceIdx + applyMask + values), 0x0230 per-face
+ *   smoothing-group changes (12 B: faceIdx + mask + values); plus the 4-byte leaves 0x0100
+ *   input vert count / 0x0110 input face count (every instance) / 0x0300 map channel count,
+ *   the delete bitmaps 0x0170 (verts) / 0x0270 (faces), containers holding
  *   EXACTLY ONE 0x2700 bit-array leaf (uint32 bitCount + LSB-first packed bits, dword-padded
  *   with zero pad bits on every corpus instance) — the selection containers
- *   0x0400/0x0410/0x0420/0x0430 (same one-0x2700 shape; state, not geometry; kept raw), and
- *   a recognized-but-untyped map-channel/UI family kept raw (0x0320/0x0324/0x0328 4-byte
- *   triple, record tables 0x0230/0x0330/0x0334/0x0338/0x033b, container 0x0340, rare
- *   0x0120/0x0200/0x0360 — see mesh_delta.cpp for the corpus-inventoried shapes).
+ *   0x0400/0x0410/0x0420/0x0430 (same one-0x2700 shape; state, not geometry; kept raw).
+ * - Map channel deltas, one group per channel the delta carries, each opened by a 0x0320 leaf
+ *   (the channel number, signed) and followed by 0x0324 input map vert count / 0x0328 input map
+ *   face count and the channel's record tables: 0x0330 map vert sets (16 B: index + float[3]
+ *   value), 0x0334 created map verts (12 B: float[3]), 0x0338 created map faces (12 B: t[3], one
+ *   per 0x0208 created face, indices in the input + created map vert space), 0x033b map face
+ *   remap (20 B: the 0x0210 shape, the same uninitialized uncovered corners). Channels of the
+ *   mesh without a group are not carried by the delta.
+ * - Kept raw: the 0x0340 container (one 8-byte 0x2700 bit array) and the rare
+ *   0x0120/0x0200/0x0360 (see mesh_delta.cpp for the corpus-inventoried shapes).
  *
  * CRITICAL FORMAT FACT: the 0x0210 records carry UNINITIALIZED WRITER BYTES in the v[i] words
  * of corners not covered by applyMask (corpus-witnessed). Every record field is therefore
@@ -154,6 +161,49 @@ public:
 		inline bool hidden() const { return (Values & 0x08) != 0; }
 	};
 
+	//! One 0x0230 smoothing-group change record: on input face \a Index, the groups set in
+	//! \a Mask take their state from \a Values.
+	struct SFaceSmooth
+	{
+		uint32 Index;
+		uint32 Mask;
+		uint32 Values;
+	};
+
+	//! One 0x0330 map vert set record: map vert \a Index takes the value in \a P (raw float bits).
+	struct SMapVertSet
+	{
+		uint32 Index;
+		uint32 P[3];
+	};
+
+	//! One 0x0334 created map vert (raw float bits).
+	struct SMapVert
+	{
+		uint32 P[3];
+	};
+
+	//! One 0x0338 created map face.
+	struct SMapFace
+	{
+		uint32 T[3];
+	};
+
+	//! The records of one map channel group (0x0320 and what follows it).
+	struct SMapDelta
+	{
+		uint32 Channel; //!< signed channel number as stored
+		bool HasChannel; //!< false when the 0x0320 leaf was not readable (the group still collects its records)
+		bool HasVertCount, HasFaceCount;
+		uint32 VertCount, FaceCount; //!< the channel's input map vert and face counts
+		std::vector<SMapVertSet> VertSets;
+		std::vector<SMapVert> CreatedVerts;
+		std::vector<SMapFace> CreatedFaces;
+		std::vector<SFaceVertRemap> FaceRemap;
+
+		SMapDelta() : Channel(0), HasChannel(false), HasVertCount(false), HasFaceCount(false), VertCount(0), FaceCount(0) { }
+	};
+
 	//! A decoded 0x2700 bit array (delete bitmap): uint32 bit count + the packed payload bytes
 	//! AFTER the count dword, verbatim (LSB-first bits; any padding bytes retained as stored).
 	struct SBitArray
@@ -192,14 +242,16 @@ public:
 	inline const std::vector<SCreatedFace> &createdFaces() const { return m_CreatedFaces; }
 	inline const std::vector<SFaceVertRemap> &faceRemap() const { return m_FaceRemap; }
 	inline const std::vector<SFaceAttrib> &faceAttribs() const { return m_FaceAttribs; }
+	inline const std::vector<SFaceSmooth> &faceSmooth() const { return m_FaceSmooth; }
+	inline const std::vector<SMapDelta> &mapDeltas() const { return m_MapDeltas; }
 	inline const SBitArray &delVerts() const { return m_DelVerts; }
 	inline const SBitArray &delFaces() const { return m_DelFaces; }
 	inline bool hasInputVertCount() const { return m_HasInputVertCount; }
 	inline uint32 inputVertCount() const { return m_InputVertCount; }
 	inline bool hasInputFaceCount() const { return m_HasInputFaceCount; }
 	inline uint32 inputFaceCount() const { return m_InputFaceCount; }
-	inline bool hasSubObjLevel() const { return m_HasSubObjLevel; }
-	inline uint32 subObjLevel() const { return m_SubObjLevel; }
+	inline bool hasMapCount() const { return m_HasMapCount; }
+	inline uint32 mapCount() const { return m_MapCount; }
 	//@}
 
 	//! Raw float bits to float (bit-exact; no FPU pass).
@@ -239,11 +291,13 @@ private:
 	{
 		uint16 Id;
 		uint kind; // 0 moves, 1 createdVerts, 2 createdFaces, 3 faceRemap, 4 faceAttribs,
-		           // 5 count leaf, 6 bit array
-		const CStorageRaw *Raw; // the record table leaf (kinds 0..5) or the 0x2700 leaf (kind 6)
-		size_t Row0, Rows;      // kinds 0..4: row range in the typed table
+		           // 5 count leaf, 6 bit array, 7 faceSmooth, and in map delta MapIdx: 8 vert
+		           // sets, 9 created verts, 10 created faces, 11 face remap
+		const CStorageRaw *Raw; // the record table leaf (kinds 0..5, 7..11) or the 0x2700 leaf (kind 6)
+		size_t Row0, Rows;      // kinds 0..4, 7..11: row range in the typed table
 		uint32 Value;           // kind 5: the count value
 		const SBitArray *Bits;  // kind 6
+		size_t MapIdx;          // kinds 8..11
 	};
 
 	std::vector<SMove> m_Moves;
@@ -251,10 +305,12 @@ private:
 	std::vector<SCreatedFace> m_CreatedFaces;
 	std::vector<SFaceVertRemap> m_FaceRemap;
 	std::vector<SFaceAttrib> m_FaceAttribs;
+	std::vector<SFaceSmooth> m_FaceSmooth;
+	std::vector<SMapDelta> m_MapDeltas;
 	SBitArray m_DelVerts;
 	SBitArray m_DelFaces;
-	bool m_HasInputVertCount, m_HasInputFaceCount, m_HasSubObjLevel;
-	uint32 m_InputVertCount, m_InputFaceCount, m_SubObjLevel;
+	bool m_HasInputVertCount, m_HasInputFaceCount, m_HasMapCount;
+	uint32 m_InputVertCount, m_InputFaceCount, m_MapCount;
 
 	std::vector<SChunkNote> m_LocalDataChildren;
 	std::vector<SChunkNote> m_DeltaChildren;

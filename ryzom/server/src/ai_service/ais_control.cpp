@@ -46,12 +46,12 @@ public:
 	{
 		if (module->getModuleClassName() == "ServerAnimationModule")
 		{
-			WARN_IF(_ServerAnimationProxy != NULL, ("CAisControl::onModuleUp : receiving module for class AisSynchronisation as '%s', but already have one as '%s', replacing", module->getModuleName().c_str(), _ServerAnimationProxy->getModuleName().c_str()));
+			WARN_IF(_ServerAnimationProxy != NULL, "CAisControl::onModuleUp : receiving module for class AisSynchronisation as '" << module->getModuleName() << "', but already have one as '" << _ServerAnimationProxy->getModuleName() << "', replacing");
 			_ServerAnimationProxy = module;
 		}
 		else if (module->getModuleClassName() == "CharacterControl")
 		{
-			WARN_IF(_CharacterControlProxy != NULL, ("CAisControl::onModuleUp : receiving module for class AisSynchronisation as '%s', but already have one as '%s', replacing", module->getModuleName().c_str(), _CharacterControlProxy->getModuleName().c_str()));
+			WARN_IF(_CharacterControlProxy != NULL, "CAisControl::onModuleUp : receiving module for class AisSynchronisation as '" << module->getModuleName() << "', but already have one as '" << _CharacterControlProxy->getModuleName() << "', replacing");
 			_CharacterControlProxy = module;
 		}
 		

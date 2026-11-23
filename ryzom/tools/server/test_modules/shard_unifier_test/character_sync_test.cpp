@@ -316,6 +316,15 @@ public:
 		charInfo.setCharEId(CEntityId(0, newCharId));
 		charInfo.setBestCombatLevel(10);
 		charInfo.setCharName("0th character");
+		// the constructor leaves the other fields unset: a mainland shard that knows the flags
+		charInfo.setHomeSessionId(0);
+		charInfo.setGuildId(0);
+		charInfo.setRace(CHARSYNC::TRace::r_fyros);
+		charInfo.setCivilisation(CHARSYNC::TCivilisation::c_neutral);
+		charInfo.setCult(CHARSYNC::TCult::c_neutral);
+		charInfo.setNewcomer(false);
+		charInfo.setNewcomerKnown(true);
+		charInfo.setRespawnPointsKnown(true);
 		IShardUnifierEvent::getInstance()->onNewChar(charInfo);
 
 		// message dispatch will be done immediately, so the result should be cool right now

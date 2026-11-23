@@ -2,7 +2,7 @@
  * \file water_build.h
  * \brief CWaterShape construction from a Max node whose material carries the bWater flag —
  * the headless counterpart of CExportNel::buildWaterShape (plugin_max/nel_mesh_lib/
- * export_mesh.cpp:1675). Water shapes are the biggest remaining not-produced class after M2
+ * export_mesh.cpp, buildWaterShape). Water shapes are the biggest remaining not-produced class after M2
  * (221 corpus files, ~10% of the reference shape output).
  * \author Jan Boon (Kaetemi)
  * \author Claude Opus 4.7 (1M context)
@@ -44,7 +44,7 @@ using namespace SCENELIB;
 /// hasWaterMaterial(node) before calling. Ownership of the returned shape passes to the caller
 /// (delete after serialization).
 ///
-/// Replicates CExportNel::buildWaterShape (plugin_max/nel_mesh_lib/export_mesh.cpp:1675):
+/// Replicates CExportNel::buildWaterShape (plugin_max/nel_mesh_lib/export_mesh.cpp, buildWaterShape):
 ///  - Evaluates the node's mesh (existing MESHEVAL::evalNodeMesh, respecting the modifier stack).
 ///  - Projects the mesh's node-local verts onto Z=0 and takes the convex hull → CPolygon2D
 ///    (setShape). Only convex shapes supported, matching the reference.

@@ -121,6 +121,7 @@
 #include "../connection.h"
 #include "../login_patch.h"
 #include "../r2/tool.h"
+#include "../r2/editor.h"
 #include "../entities.h"
 #include "../misc.h"
 #include "../gabarit.h"
@@ -494,6 +495,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getMainPageURL", getMainPageURL);
 	ls.registerFunc("setNewsAtProgress", setNewsAtProgress);
 	ls.registerFunc("getCharSlot", getCharSlot);
+	ls.registerFunc("getShardId", getShardId);
 	ls.registerFunc("getServerSeason", getServerSeason);
 	ls.registerFunc("computeCurrSeason", computeCurrSeason);
 	ls.registerFunc("getAutoSeason", getAutoSeason);
@@ -605,13 +607,20 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		luabind::def("messageBox", (void(*)(const CLuaUCString &, const std::string &)) &messageBox),
 		luabind::def("messageBox", (void(*)(const CLuaUCString &, const std::string &, int caseMode)) &messageBox),
 #endif
+		// (text), (text, master group) and (text, master group, case mode: the case_* defines of the interface).
+		// The last two were registered for CLuaUCString only, which no build has: a script that named the
+		// master group or the case mode got "No matching overload found".
 		luabind::def("messageBox", (void(*)(const std::string &)) &messageBox),
+		luabind::def("messageBox", (void(*)(const std::string &, const std::string &)) &messageBox),
+		luabind::def("messageBox", (void(*)(const std::string &, const std::string &, int caseMode)) &messageBox),
 #ifdef RYZOM_LUA_UCSTRING
 		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &)) &messageBoxWithHelp), // TODO: Lua UTF-8
 		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &, const std::string &)) &messageBoxWithHelp), // TODO: Lua UTF-8
 		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &, const std::string &, int caseMode)) &messageBoxWithHelp), // TODO: Lua UTF-8
 #endif
 		luabind::def("messageBoxWithHelp", (void(*)(const std::string &)) &messageBoxWithHelp),
+		luabind::def("messageBoxWithHelp", (void(*)(const std::string &, const std::string &)) &messageBoxWithHelp),
+		luabind::def("messageBoxWithHelp", (void(*)(const std::string &, const std::string &, int caseMode)) &messageBoxWithHelp),
 		LUABIND_FUNC(replacePvpEffectParam),
 		LUABIND_FUNC(secondsSince1970ToHour),
 #ifdef RYZOM_BG_DOWNLOADER
@@ -1042,6 +1051,10 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 	const std::string &emoteMenu = ls.toString(1);
 	const std::string &luaParams = ls.toString(2);
 
+	// luaParams is the path of a function of the Ring editor's Lua (see where the lines are created)
+	if (!luaParams.empty() && !R2::getEditor().isInitialized())
+		nlwarning("initEmotesMenu: the lines get no action, '%s' is called through the Ring editor, which is not started", luaParams.c_str());
+
 	ls.newTable();
 	CLuaObject result(ls);
 	std::map<std::string, std::string> emoteList;
@@ -1150,9 +1163,23 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 					}
 					else
 					{
-						// Create a line
-						pMenu->addLine(CI18N::get(sTmp), "lua",
-							luaParams + "('" + sEmoteId + "', '" + toString(CI18N::get(sTmp)) + "')", sTmp);
+						// Create a line. Its action is the function named by luaParams, called with the id of
+						// the emote and its name. The callers are the menus of the Ring editor: the call is made
+						// with r2:uiCall (r2_ui_calls.lua), which keeps the two as values, where a name with a
+						// quote in it ended the text of a call. Without a function the line has no action.
+						std::string lineParams;
+						if (!luaParams.empty() && R2::getEditor().isInitialized())
+						{
+							CLuaState &lua = R2::getEditor().getLua();
+							int initialSize = lua.getTop();
+							lua.push(luaParams);
+							lua.push(sEmoteId);
+							lua.push(toString(CI18N::get(sTmp)));
+							if (R2::getEditor().callEnvMethod("uiCall", 3, 1))
+								lua.toString(initialSize + 1, lineParams);
+							lua.setTop(initialSize);
+						}
+						pMenu->addLine(CI18N::get(sTmp), "lua", lineParams, sTmp);
 						emoteList[sEmoteId] = (toLower(CI18N::get(sTmp)));
 					}
 				}
@@ -1322,6 +1349,20 @@ int	CLuaIHMRyzom::getCharSlot(CLuaState &ls)
 	const char *funcName = "getCharSlot";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 	ls.push(PlayerSelectedSlot);
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getShardId(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_getShardId)
+	const char *funcName = "getShardId";
+	CLuaIHM::checkArgCount(ls, funcName, 0);
+	// 0 until the first shard this client connects to has sent its id, and with it its web server
+	// (impulseShardId): the web pages of the shard are trusted, and get the login cookie, from then on.
+	// It is not set back to 0 for a later connection: it is the id of the shard before until the next
+	// shard sends its own.
+	ls.push(ShardId);
 	return 1;
 }
 

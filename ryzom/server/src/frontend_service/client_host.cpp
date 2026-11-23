@@ -90,6 +90,7 @@ void CClientHost::setupOutBox( TOutBox& outbox )
 	// b. System bit
 	bool	systemMode = false;
 	outbox.serialBitAndLog( systemMode );
+	setupLatenessHeader( outbox );
 
 	// b. Add the latest receive number belonging to the destination client
 	outbox.serialAndLog1( _ReceiveNumber );
@@ -116,9 +117,36 @@ void	CClientHost::setupSystemHeader( TOutBox& outbox, uint8 code)
 	// b. System bit
 	bool	systemMode = true;
 	outbox.serialBitAndLog( systemMode );
+	setupLatenessHeader( outbox );
 
 	// c. System message code
 	outbox.serialAndLog1( code );
+}
+
+
+/*
+ * On a connection of protocol level ryzomcore/4.2, add the fields of the level to a header
+ */
+void	CClientHost::setupLatenessHeader( TOutBox& outbox )
+{
+	CQuicUserContext *user = QuicUser.get();
+	if ( user == NULL || !user->Streams )
+		return;
+
+	// When the datagram is sent, for the client to tell how late it arrives. Room is left here, and the time is
+	// written where the datagram is sent, right before it goes (CFeSendSub::CSendBuffer::sendOutBox): the flush runs
+	// later than this, and not always as much later.
+	nlassert( (uint)outbox.getPosInBit() == CLFECOMMON::DatagramSendTimeBitPos );
+	outbox.reserveBits( CLFECOMMON::DatagramSendTimeBits );
+
+	// The path to the client changed
+	bool pathChanged = false;
+	if ( user->PathChangedDatagrams.load( NLMISC::TMemoryOrderRelaxed ) > 0 )
+	{
+		user->PathChangedDatagrams.fetchAdd( -1 );
+		pathChanged = true;
+	}
+	outbox.serialBit( pathChanged );
 }
 
 
@@ -136,7 +164,17 @@ void CClientHost::setReceiveTimeNow()
  */
 void CClientHost::initClientBandwidth()
 {
-	setClientBandwidth( CFrontEndService::instance()->sendSub()->clientBandwidth() );
+	// A client with streams gets its large messages on them. Its datagrams and their impulsion channels are of the
+	// sizes for such clients, which a shard that gives the others more (BandwidthRatio) has no reason to raise.
+	const bool streams = hasStreams();
+	ImpulseEncoder.setStreams( streams );
+	CFeSendSub *sendSub = CFrontEndService::instance()->sendSub();
+	setClientBandwidth( streams ? sendSub->streamClientBandwidth() : sendSub->clientBandwidth() );
+}
+
+bool CClientHost::hasStreams() const
+{
+	return QuicUser.get() != NULL && QuicUser->Streams;
 }
 
 
@@ -256,8 +294,8 @@ void CClientHost::displayClientProperties( bool full, bool allProps, bool sortBy
 	if ( _EntityIndex.isValid())
 	{
 		CMirrorPropValueRO<uint16> availableImpulseBitsize( TheDataset, _EntityIndex, DSFirstPropertyAvailableImpulseBitSize );
-		log->displayNL( "Bit bandwidth usage feeding client at %d Hz: %d bps (max 13312), current throttle %d; including impulsion %d, database throttle %d",
-			freq, _BitBandwidthUsageAvg*freq, getCurrentThrottle()*freq, _BitImpulsionUsageAvg*freq, availableImpulseBitsize*freq );
+		log->displayNL( "Bit bandwidth usage feeding client at %d Hz: %d bps (nominal %d), current throttle %d; including impulsion %d, database throttle %d",
+			freq, _BitBandwidthUsageAvg*freq, _MaxOutboxSizeInBit*freq, getCurrentThrottle()*freq, _BitImpulsionUsageAvg*freq, availableImpulseBitsize*freq );
 
 		// Impulsion stats
 		log->displayNL( "Nb messages in impulse queues: %u %u %u", ImpulseEncoder.queueSize(0), ImpulseEncoder.queueSize(1), ImpulseEncoder.queueSize(2) );

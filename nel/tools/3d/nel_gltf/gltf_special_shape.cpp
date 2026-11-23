@@ -256,6 +256,7 @@ static bool waterToExtras(CWaterShape *ws, CJsonValue &e, std::string *err)
 	e.setBool("nel_water_splash", ws->isSplashEnabled());
 	e.setBool("nel_water_scene_env_above", ws->getUseSceneWaterEnvMap(0));
 	e.setBool("nel_water_scene_env_under", ws->getUseSceneWaterEnvMap(1));
+	e.setDouble("nel_water_dist_max", ws->getDistMax());
 
 	putVector(e, "nel_water_def_pos", ws->getDefaultPos()->getDefaultValue());
 	putVector(e, "nel_water_def_scale", ws->getDefaultScale()->getDefaultValue());
@@ -335,6 +336,7 @@ static IShape *waterFromExtras(const CJsonValue &e, std::string *err)
 	ws->enableSplash(e.getBool("nel_water_splash", true));
 	ws->setUseSceneWaterEnvMap(0, e.getBool("nel_water_scene_env_above", false));
 	ws->setUseSceneWaterEnvMap(1, e.getBool("nel_water_scene_env_under", false));
+	ws->setDistMax((float)e.getDouble("nel_water_dist_max", -1.0));
 
 	CVector pos, scale;
 	CQuat rot;

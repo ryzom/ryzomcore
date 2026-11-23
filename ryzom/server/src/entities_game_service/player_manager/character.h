@@ -107,6 +107,9 @@ typedef EGSPD::CMissionPD CMission;
 // Max number of pact character can be have
 #define NB_MAX_PACT 5
 
+// number of links that the database of a character shows (EXECUTE_PHRASE:LINK in database.xml)
+#define NB_LINK_SLOT			10
+
 static const uint8 MaxSoloMissionCount = 15;
 static const uint8 MaxGroupMissionCount = 4;
 static const uint8 MaxGuildMissionCount = 4;
@@ -1196,6 +1199,9 @@ public:
 	/// return the current bot chat type
 	uint8 getBotChatType() const;
 
+	/// true while a mission gift is open, it has no bot chat type of its own
+	bool hasBotGift() const { return _BotGift != NULL; }
+
 	///\return the current bot chat page
 	uint8 getCurrentBotChatListPage();
 
@@ -1262,6 +1268,9 @@ public:
 
 	// check if the character is a newbie by checking the base of the position stack
 	virtual bool isNewbie() const NL_OVERRIDE;
+	// set newbie and return true when this shard loads the continent of the base of the position stack; false when
+	// it cannot tell (a Ring shard does not load the mainland continents)
+	bool findNewbie(bool &newbie) const;
 
 	// See in character_interface.h
 	void applyTopOfPositionStack() NL_OVERRIDE;
@@ -1517,9 +1526,9 @@ public:
 	void spawnAllHandledAIGroup();
 	/// for all handles in all missions send despawn-msg to ais
 	void despawnAllHandledAIGroup();
-
-	/// build the item trade list
-	void startTradeItemSession(uint16 session);
+	
+	/// build the item trade list, reportRestrictions when the trade opens: a rebuild must not repeat the messages
+	void startTradeItemSession(uint16 session, bool reportRestrictions = true);
 
 	std::vector<CTradePhrase> &currentPhrasesTradeList();
 
@@ -1915,6 +1924,10 @@ public:
 	// player accept resurrection by other character
 	void resurrected();
 
+	/// Hit points of a dead character: they go from -Max/2 to -Max over the coma delay, counted from the
+	/// date the coma began, and the character can be healed back to life as long as they are above -Max
+	sint32 comaHitPoints() const;
+
 	// player revives at full health at his location without death penalty
 	void revive();
 
@@ -1972,8 +1985,8 @@ public:
 	/// update brick flags DB value
 	void updateBrickFlagsDBEntry();
 
-	// add a link cast by this player
-	virtual void addLink( CSLinkEffect * effect) NL_OVERRIDE;
+	// add a link cast by this player. A new static action cancels the one in progress, with the links it holds.
+	virtual void addLink( CSLinkEffect * effect, bool newStaticAction = true) NL_OVERRIDE;
 
 	// remove a link cast by this player
 	virtual void removeLink( CSLinkEffect * effect, float factorOnSurvivalTime) NL_OVERRIDE;
@@ -2012,6 +2025,9 @@ public:
 	void addWearMalus(float m);
 
 	float wearMalus();
+
+	/// write the equipment wear malus in the database of the client, as a percentage rounded to the nearest
+	void updateWearMalusDBEntry();
 
 	/// modify current dodge modifier
 	void incDodgeModifier(sint32 inc);
@@ -2811,6 +2827,10 @@ public:
 	/// destroy an item (or several items in a stack)
 	void destroyItem(INVENTORIES::TInventory invId, uint32 slot, uint32 quantity, bool sendChatMessage = false);
 
+	/// false, with a message to the player where there is one, if invId is the room or a pack animal that the
+	/// character cannot reach now; true for any other inventory. context names the caller in the log.
+	bool isInventoryWithinReach(INVENTORIES::TInventory invId, const char *context);
+
 	/// used for selectItems / destroyItems
 	class CItemSlotId
 	{
@@ -3237,6 +3257,27 @@ private:
 	/// reset exchange: clear and reset exchange views, clear exchange related members and client database
 	void resetExchange();
 
+	/// end the exchange with trader and tell both when they are too far apart, return true if it ended
+	bool abortExchangeIfTooFar(const CCharacter *trader);
+
+	/// stop the static action that accepting a player exchange started, if it is still the current one
+	void endExchangeStaticAction();
+
+	/// close the bot chat window the client opened for a refused bot chat, telling why with phrase (bot b) if not NULL
+	void refuseBotChat(const CCreature *bot, const char *phrase);
+
+	/// tell the client to close its bot chat window, return false if the message is not known
+	bool sendBotChatForceEnd();
+
+	/// check the bot gift exchange against the steps it is given to, clamping its money to what a step still needs; giftStep gets the step index that accepts it
+	bool isBotGiftValid(uint32 &giftStep);
+
+	/// open the exchange of the mission gift just stored in _BotGift, with its title and the items it needs
+	void openMissionGiftExchange();
+
+	/// end the bot chat of a mission option picked outside the time and season bounds of its mission, telling why
+	void refuseMissionOptionNotNow(const CCreature *bot);
+
 	/// add an entity that must be saved with me when i am saved
 	void addEntityToSaveWithMe(const NLMISC::CEntityId &entityId);
 	void clearEntitiesToSaveWithMe();
@@ -3542,7 +3583,12 @@ private:
 	bool _ExchangeAccepted;
 
 	// money in exchange
-	uint64 _ExchangeMoney;
+	uint64								_ExchangeMoney;
+
+	// clang-format off
+	// accepting a player exchange started the current static action
+	bool								m_ExchangeStaticAction;
+	// clang-format on
 
 	/// current bot gift of the player
 	CBotGift* _BotGift;
@@ -3776,6 +3822,9 @@ private:
 
 	// is character in a coma ("dead" but can still be healed and resurrected)
 	bool _IsInAComa;
+
+	// date the coma began, in seconds since 1970, 0 when the character is not dead; saved with the character
+	uint32						m_ComaStartDate;
 
 	// Aggroable override (-1=computed, 0=not aggroable, 1=aggroable)
 	sint8 _AggroableOverride;

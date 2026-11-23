@@ -139,6 +139,8 @@
 <variable entry="UI:TEMP:LANGUAGE" type="sint32" value="0" />
 <variable entry="UI:TEMP:SCREEN_RATIO_MODE" type="sint32" value="0" />
 <variable entry="UI:TEMP:SOUND_DRIVER" type="sint32" value="0" />
+<variable entry="UI:TEMP:CONNECTION_PREFERENCE" type="sint32" value="-1" />
+<variable entry="UI:TEMP:CONNECTION_RATE" type="sint32" value="-1" />
 
 <define id="game_config_screen_ratio_eb" value="ui:interface:game_config:content:general:screen_ratio:edit:eb" />
 <define id="game_config_screen_ratio_cb" value="ui:interface:game_config:content:general:screen_ratio:combo" />
@@ -239,6 +241,8 @@
 				</node>
 
 				<node id="sound" name="uigcSound" handler="lua" params="game:configShowOne('sound')" fontsize="11" y_decal="-1" />
+
+				<node id="network" name="uigcNetwork" handler="lua" params="game:configShowOne('network')" fontsize="11" y_decal="-1" />
 			</group>
 
 			<ctrl style="skin_scroll" id="scroll_bar" align="T" target="tree_list" />
@@ -706,18 +710,15 @@
 		<group id="mouse" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
 
 			<view style="sgc_title" id="mouseopt" posref="TM TM" x="0" y="0" hardtext="uiMouseOptions" />
-			<instance template="tgcw_checkbox" id="hard" text="uiMouseHardware" posref="TM TL" x="0" y="-35" />
+			<instance template="tgcw_checkbox" id="hard" text="uiMouseHardware" posref="TL TL" x="0" y="-20" />
 			<instance template="tgcw_checkbox" id="inverted" text="uiMouseInverted" posparent="hard" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_checkbox" id="dbl" text="uiMouseDblClickMode" posparent="inverted" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_checkbox" id="tablet" text="uiFreeViewTablet" posparent="dbl" posref="BL TL" x="0" y="-2" />
-			<view style="sgc_title2" type="text" id="inter" posref="TL TL" x="0" y="-20" hardtext="uiMouseInterface" />
+			<view style="sgc_title2" type="text" id="inter" posparent="tablet" posref="BL TL" x="0" y="-12" hardtext="uiMouseInterface" />
 			<instance template="tgcw_scrollbarint" id="dcspeed" text="uiDoubleClickSpeed" posparent="inter" posref="BL TL" x="20" y="-2" />
-			<instance template="tgcw_scrollbarfloat" id="curspeed" text="uiCursorSpeed" posparent="dcspeed" posref="BL TL" x="0" y="-2" />
-			<instance template="tgcw_scrollbarint" id="curaccel" text="uiCursorAccel" posparent="curspeed" posref="BL TL" x="0" y="-2" />
 
-			<view style="sgc_title2" type="text" id="head" posref="BL TL" hardtext="uiMouseHead" posparent="curaccel" x="-20" y="-12" />
+			<view style="sgc_title2" type="text" id="head" posref="BL TL" hardtext="uiMouseHead" posparent="dcspeed" x="-20" y="-12" />
 			<instance template="tgcw_scrollbarfloat" id="headspeed" text="uiHeadSpeed" posparent="head" posref="BL TL" x="20" y="-2" />
-			<instance template="tgcw_scrollbarint" id="headaccel" text="uiHeadAccel" posparent="headspeed" posref="BL TL" x="0" y="-2" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_mouse" align="T" target="mouse" posparent="crop" posref="TL TR" x="-8" y="0" />
 
@@ -766,6 +767,45 @@
 			<instance template="tgcw_scrollbarint" id="mp3_volume" text="uimwMP3Player" posparent="music_volume" posref="BL TL" x="0" y="-2" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_sound" align="T" target="sound" posparent="crop" posref="TL TR" x="-8" y="0" />
+		<!-- *** -->
+		<group id="network" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
+
+			<view style="sgc_title" type="text" id="gen" posref="TM TM" x="0" y="0" hardtext="uigcNetworkTitle" />
+
+			<!-- The connection the player prefers: QuicConnection and QuicStreams of client.cfg, read by game_config_init and
+				written by game_config_apply. The texts are in the order of TConnectionPreference (action_handler_game.cpp);
+				a client built without QUIC only has the first one -->
+			<view style="sgc_title2" type="text" id="preference_title" posref="TL TL" x="0" y="-20" hardtext="uigcConnection" />
+			<group type="combo_box" id="preference" w="200" h="20" value="UI:TEMP:CONNECTION_PREFERENCE" posparent="preference_title" posref="BL TL" x="20" y="-4">
+				<instance template="combo_box_def1" />
+				<combo_text name="uigcConnectionUdp" />
+				<if flags="quic" />
+				<combo_text name="uigcConnectionQuicDatagrams" />
+				<combo_text name="uigcConnectionQuicStreams" />
+				<endif />
+			</group>
+			<link expr="@UI:TEMP:CONNECTION_PREFERENCE" action="game_config_change_connection" />
+
+			<!-- What the connection to the server is at the moment: CNetManager::update() keeps UI:VARIABLES:CONNECTION_TRANSPORT -->
+			<view style="sgc_title2" type="text" id="current_title" posparent="preference" posref="BL TL" x="-20" y="-12" hardtext="uigcConnectionCurrent" />
+			<view type="text" id="current" posparent="current_title" posref="BL TL" x="20" y="-4" color="255 255 255 192" fontsize="12" shadow="true" hardtext="uigcConnectionCurrentNone" />
+			<link expr="switch(@UI:VARIABLES:CONNECTION_TRANSPORT, 'uigcConnectionCurrentNone', 'uigcConnectionCurrentUdp', 'uigcConnectionCurrentQuicDatagrams', 'uigcConnectionCurrentQuicStreams')" target="current:hardtext" />
+
+			<if flags="quic" />
+			<!-- How much the player's connection carries: ConnectionRate of client.cfg, which only the streams of a QUIC
+				connection use. game_config_init adds the choices (s_ConnectionTypes in action_handler_game.cpp) -->
+			<view style="sgc_title2" type="text" id="rate_title" posparent="current" posref="BL TL" x="-20" y="-12" hardtext="uigcConnectionType" />
+			<group type="combo_box" id="rate" w="200" h="20" value="UI:TEMP:CONNECTION_RATE" posparent="rate_title" posref="BL TL" x="20" y="-4">
+				<instance template="combo_box_def1" />
+			</group>
+			<link expr="@UI:TEMP:CONNECTION_RATE" action="game_config_change_connection" />
+			<view type="text" id="rate_note" posparent="rate" posref="BL TL" x="0" y="-4" color="255 255 255 192" fontsize="10" shadow="true" multi_line="true" multi_line_space="0" hardtext="uigcConnectionTypeNote" />
+
+			<!-- Both choices are for the next connection -->
+			<view type="text" id="restart_note" posparent="rate_note" posref="BL TL" x="-20" y="-12" color="255 255 255 192" fontsize="10" shadow="true" multi_line="true" multi_line_space="0" hardtext="uigcConnectionRestartNote" />
+			<endif />
+		</group>
+		<ctrl style="skin_scroll" id="sb_network" align="T" target="network" posparent="crop" posref="TL TR" x="-8" y="0" />
 		<!-- *** -->
 		<group id="landmark_colors" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
 			<!-- Landmark colors -->
@@ -1015,10 +1055,7 @@
 			<param ui="mouse:dbl:c" type="cfg" widget="boolbut" link="DblClickMode" realtime="true" />
 			<param ui="mouse:tablet:c" type="cfg" widget="boolbut" link="FreeLookTablet" realtime="true" />
 			<param ui="mouse:dcspeed:c" type="db" widget="sbint" link="UI:SAVE:DOUBLE_CLICK_SPEED" min="0" max="100" realtime="true" />
-			<param ui="mouse:curspeed:c" type="cfg" widget="sbfloat" link="CursorSpeed" realtime="true" />
-			<param ui="mouse:curaccel:c" type="cfg" widget="sbint" link="CursorAcceleration" realtime="true" />
 			<param ui="mouse:headspeed:c" type="cfg" widget="sbfloat" link="FreeLookSpeed" realtime="true" />
-			<param ui="mouse:headaccel:c" type="cfg" widget="sbint" link="FreeLookAcceleration" realtime="true" />
 
 			<param ui="keyb:speedmax:c" type="cfg" widget="sbfloat" link="RotKeySpeedMax" realtime="true" />
 			<param ui="keyb:speedmin:c" type="cfg" widget="sbfloat" link="RotKeySpeedMin" realtime="true" />

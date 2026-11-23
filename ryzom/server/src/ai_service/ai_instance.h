@@ -28,8 +28,11 @@
 #include "continent.h"
 #include "ai_grp.h"
 #include "service_dependencies.h"
+#include "ring_scenario_guard.h"
 
 #include "sheets.h"
+
+#include "game_share/r2_basic_types.h"
 
 class CBot;
 class CGroup;
@@ -73,7 +76,9 @@ public:
 	CNpcZone* getZone(NLMISC::TStringId zoneName);
 	// Trig Event if player in zone
 	void updateZoneTrigger(CBotPlayer* player);
-
+	/// The player leaves every trigger zone it is counted in (it logs out or changes instance)
+	void removePlayerFromZoneTriggers(CBotPlayer *player);
+	
  	// overloads for IManagerParent virtuals
 	CAIInstance* getAIInstance() const NL_OVERRIDE { return const_cast<CAIInstance*>(this); }
 	CCellZone* getCellZone() NL_OVERRIDE { return NULL; }
@@ -181,6 +186,14 @@ public:
 	std::string& getContinentName() { return _ContinentName; }
 
 	void initInstance(std::string const& continentName, uint32 instanceNumber);
+	
+	/// The Ring session whose scenario is loaded in this instance, 0 for none. It is set when
+	/// the scenario service sends the scenario, and is what CRingScenarioGuard tests.
+	TSessionId getRingSession() const { return _RingSession; }
+	void setRingSession(TSessionId sessionId);
+	/// The operations of the script machine the scenario of the Ring session ran since the update
+	/// of this instance began (CScenarioWorkScope counts them, update() begins the count again)
+	CRingUpdateBudget &ringUpdateBudget() { return _RingUpdateBudget; }
 
 	/// Main squad family accessor
 	COutpostSquadFamily *getSquadFamily() { return _SquadFamily; }
@@ -208,8 +221,10 @@ public:
 			return NULL;
 	}
 
-	CGroupNpc* eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &grpName, const std::string &look, sint32 cell=0, const std::string &botsName = "", const std::string &vpx = "");
-	bool eventCreateNpcBot(CGroupNpc* grp, uint nbBots, bool spawnBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, const std::string &name, double orientation, double dispersionRadius, const std::string &look, const std::string &botsName = "", const std::string &vpx = "");
+	/// heightKnown: height is the height in millimetres of the ground at pos (the player it spawns at, or a z given with
+	/// the command), and the bots that stand at pos are on the layer nearest to it rather than on the upper one
+	CGroupNpc* eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &grpName, const std::string &look, sint32 cell=0, const std::string &botsName = "", const std::string &vpx = "", bool heightKnown = false, sint32 height = 0);
+	bool eventCreateNpcBot(CGroupNpc* grp, uint nbBots, bool spawnBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, const std::string &name, double orientation, double dispersionRadius, const std::string &look, const std::string &botsName = "", const std::string &vpx = "", bool heightKnown = false, sint32 height = 0);
 
 	/// create a new easter egg
 	CBotEasterEgg* createEasterEgg(uint32 easterEggId, NLMISC::CSheetId const& sheetId, std::string const& botName, double x, double y, double z, double heading, const std::string& look);
@@ -221,6 +236,12 @@ public:
 private:
 	void sendInstanceInfoToEGS();
 
+	/// The npc managers that hold the trigger zones of the instance (their name ends with ".zone_trigger")
+	void getZoneTriggerManagers(std::list<CMgrNpc *> &zoneTriggerManager);
+	/// Count the player out of the given trigger zones (group aliases) and send their leave event,
+	/// the one place where a zone loses a player
+	void processZoneTriggerLeave(const std::list<CMgrNpc *> &zoneTriggerManager, const CBotPlayer *player, const std::vector<uint32> &leaveZone);
+	
 private:
 	/// @name AI service hierarchy
 	//@{
@@ -236,7 +257,11 @@ private:
 	std::string _ContinentName;
 	/// The ai instance number (multi ai system)
 	uint32 _InstanceNumber;
-
+	/// The Ring session whose scenario is loaded in this instance, 0 for none
+	TSessionId _RingSession;
+	/// What the scripts of that scenario ran since the update of this instance began
+	CRingUpdateBudget _RingUpdateBudget;
+	
 	CAIEntity* tryToGetEntity(char const* str);
 
 	//	we must share pets and players .. later :)

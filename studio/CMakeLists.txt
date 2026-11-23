@@ -8,7 +8,12 @@ cmake_minimum_required(VERSION 3.28)
 
 project(Studio VERSION ${RyzomCore_VERSION} LANGUAGES CXX)
 
-find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS 3d georges gui ligo misc sound)
+# gui for the GUI editor plug-in (WITH_GUI); without sound the object viewer plug-in is left out
+set(STUDIO_NEL_COMPONENTS 3d georges ligo misc)
+if(WITH_GUI)
+  list(APPEND STUDIO_NEL_COMPONENTS gui)
+endif()
+find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS ${STUDIO_NEL_COMPONENTS} OPTIONAL_COMPONENTS sound)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

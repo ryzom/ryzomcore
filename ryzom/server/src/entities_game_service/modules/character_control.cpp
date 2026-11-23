@@ -71,7 +71,7 @@ public:
 	{
 		if (module->getModuleClassName() == "ServerAnimationModule")
 		{
-			WARN_IF(_ServerAnimationProxy != NULL, ("CCharacterControl::onModuleUp : receiving module for class CharacterSynchronisation as '%s', but already have one as '%s', replacing", module->getModuleName().c_str(), _ServerAnimationProxy->getModuleName().c_str()));
+			WARN_IF(_ServerAnimationProxy != NULL, "CCharacterControl::onModuleUp : receiving module for class CharacterSynchronisation as '" << module->getModuleName() << "', but already have one as '" << _ServerAnimationProxy->getModuleName() << "', replacing");
 			_ServerAnimationProxy = module;
 		}
 	}
@@ -312,7 +312,10 @@ public:
 					CCharacter *c = (*it).second.Player->getActiveCharacter();
 					if (c != 0)
 					{
-						if( c->getInstanceNumber() == sessionId.asInt()  || c->getInstanceNumber() == scenarioId.asInt() )
+						// The characters of the scenario are those whose current session is the session of the
+						// scenario, or an animation session linked to it. (The number of the AI instance of a
+						// character is not the id of a session.)
+						if( getSessionId(c->currentSessionId()) == scenarioId )
 						{
 							if( c->isDead() )
 							{

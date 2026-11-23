@@ -247,10 +247,8 @@ local registerFeature = function ()
 						local subMenu = menu:getSubMenu(ev)
 						local func = ""
 						for i=0, 9 do
-							local uc_name = ucstring()
-							uc_name:fromUtf8( tostring(i) )
-							func = "r2.events:setEventValue('','" .. categoryEvent .."','".. tostring(i).."')"
-							subMenu:addLine(uc_name, "lua", func, tostring(i))
+							func = r2:uiCall("r2.events:setEventValue", "", categoryEvent, tostring(i))
+							subMenu:addLine(tostring(i), "lua", func, tostring(i))
 						end
 
 					elseif r2.events.eventTypeWithValue[eventType]~=nil then
@@ -261,7 +259,7 @@ local registerFeature = function ()
 							local sequence = this:getBehavior().Activities[s]
 							local func = ""
 							if r2.events.eventTypeWithValue[eventType]=="ActivitySequence" then
-								func = "r2.events:setEventValue('".. sequence.InstanceId .."','" .. categoryEvent .."')"
+								func = r2:uiCall("r2.events:setEventValue", sequence.InstanceId, categoryEvent)
 							end
 
 							local uc_name = ucstring()
@@ -285,10 +283,8 @@ local registerFeature = function ()
 								
 								for a=0, sequence.Components.Size-1 do
 									local activity = sequence.Components[a]
-									local uc_name = ucstring()
-									uc_name:fromUtf8(activity:getShortName())
-									activitiesMenu:addLine(uc_name, "lua", 
-										"r2.events:setEventValue('".. activity.InstanceId .."','" .. categoryEvent .."')", activity.InstanceId)
+									activitiesMenu:addLine(activity:getShortName(), "lua", 
+										r2:uiCall("r2.events:setEventValue", activity.InstanceId, categoryEvent), activity.InstanceId)
 								end
 
 								-- no activity in the sequence
@@ -1031,7 +1027,17 @@ local registerFeature = function ()
 						-- add delta to have primitive center in world over player pos
 						src.Position.x = src.Position.x + px - mx + 4 * (math.random() - 0.5)
 						src.Position.y = src.Position.y + py - my + 4 * (math.random() - 0.5)
-						src.Position.z = src.Position.z + pz - mz + 4 * (math.random() - 0.5)
+						-- at the height of the player, and every vertex on the ground under its new place in the world,
+						-- relative to the primitive: the AI service puts a point on the layer nearest to its height. A vertex
+						-- off the ground the AI can use, where the editor may find no height, keeps its height relative to
+						-- the primitive, as before.
+						src.Position.z = src.Position.z + pz - mz
+						for k, v in pairs(src.Points) do
+							local wx, wy = src.Position.x + v.Position.x, src.Position.y + v.Position.y
+							if r2:isValidPos(wx, wy) then
+								v.Position.z = r2:snapZToGround(wx, wy) - src.Position.z
+							end
+						end
 					--end
 				end						
 				r2.requestInsertNode(r2.Scenario:getBaseAct():getDefaultFeature().InstanceId, "Components", -1, "", src)
@@ -1422,14 +1428,11 @@ local registerFeature = function ()
 --				{Name="Reactions", Type="Table"}
 
 		},
-		updateVersion = function(this, scenarioValue, currentValue)
+		updateVersion = function(this, scenarioValue, currentValue, update)
 			local patchValue = scenarioValue
 			if patchValue < 1 then
 				-- Patch only for old save (not the 0.0.3)
-				if this.Reactions  ~= nil then
-					-- TODO use identifier instead				
-					r2.requestEraseNode(this.InstanceId, "Reactions", -1)
-				end	
+				update:erase(this, "Reactions")
 				patchValue = 1
 			end
 
@@ -1692,9 +1695,7 @@ local registerFeature = function ()
 				addLine = not (entity:isKindOf("NpcCreature") or entity:isBotObject() or entity:isPlant() or entity:isGrouped()) --TEMP
 			end  --TEMP
 			if addLine then
-				local uc_name = ucstring()
-				uc_name:fromUtf8(entity.Name)
-				subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+				subMenu:addLine(entity.Name, "lua", r2:uiCall(calledFunction, entity.InstanceId), entity.InstanceId)
 				empty = false
 			end
 		end
@@ -1923,9 +1924,7 @@ local registerFeature = function ()
 				addLine = not (entity:isKindOf("NpcPlant") or entity:isGrouped())	
 			end																		
 			if addLine then
-				local uc_name = ucstring()
-				uc_name:fromUtf8(entity.Name)
-				subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+				subMenu:addLine(entity.Name, "lua", r2:uiCall(calledFunction, entity.InstanceId), entity.InstanceId)
 				empty = false
 			end
 		end

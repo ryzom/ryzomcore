@@ -411,6 +411,9 @@ void CBloomEffect::applyBloom()
 	else _BlurWidth = raiseToNextPowerOf2(width) / 2;
 	if (height >= 256) _BlurHeight = 256;
 	else _BlurHeight = raiseToNextPowerOf2(height) / 2;
+	// half the size of a render target of one pixel is no pixel: the blur textures keep an area
+	if (_BlurWidth == 0) _BlurWidth = 1;
+	if (_BlurHeight == 0) _BlurHeight = 1;
 
 	nlassert(!_BlurFinalTex);
 	_BlurFinalTex = _Driver->getRenderTargetManager().getRenderTarget(_BlurWidth, _BlurHeight, false);

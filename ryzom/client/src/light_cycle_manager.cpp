@@ -106,11 +106,12 @@ CLightCycleManager::CLightCycleManager() :
                                         _ValidDesc(false),
 					_LightLevel(0),
 					_WeatherLighting(0),
-					_LastWeatherLighting(0),
 					_UpdateFreq(0),
 					_State(StateUnknown),
 					_PrevState(StateUnknown)
 {
+	_LastDiffuse.set(0, 0, 0, 0);
+	_LastAmbient.set(0, 0, 0, 0);
 	H_AUTO_USE(RZ_LightCycleManager)
 }
 
@@ -157,27 +158,27 @@ bool CLightCycleManager::setLightDesc(const CLightCycleDesc &desc)
 	H_AUTO_USE(RZ_LightCycleManager)
 	if (desc.NightTransitionStartHour > desc.NumHours)
 	{
-		nlwarning ("NightTransitionStartHour (%d) > NumHours (%d)", desc.NightTransitionStartHour, desc.NumHours);
+		nlwarning("NightTransitionStartHour (%f) > NumHours (%f)", desc.NightTransitionStartHour, desc.NumHours);
 		_State = StateUnknown;
 		return false;
 	}
 
 	if (desc.NightTransitionEndHour > desc.NumHours)
 	{
-		nlwarning ("NightTransitionEndHour (%d) > NumHours (%d)", desc.NightTransitionEndHour, desc.NumHours);
+		nlwarning("NightTransitionEndHour (%f) > NumHours (%f)", desc.NightTransitionEndHour, desc.NumHours);
 		_State = StateUnknown;
 		return false;
 	}
 	//
 	if (desc.DawnTransitionStartHour > desc.NumHours)
 	{
-		nlwarning ("DawnTransitionStartHour (%d) > NumHours (%d)", desc.DawnTransitionStartHour, desc.NumHours);
+		nlwarning("DawnTransitionStartHour (%f) > NumHours (%f)", desc.DawnTransitionStartHour, desc.NumHours);
 		_State = StateUnknown;
 		return false;
 	}
 	if (desc.DawnTransitionEndHour > desc.NumHours)
 	{
-		nlwarning ("DawnTransitionEndHour (%d) > NumHours (%d)", desc.DawnTransitionEndHour, desc.NumHours);
+		nlwarning("DawnTransitionEndHour (%f) > NumHours (%f)", desc.DawnTransitionEndHour, desc.NumHours);
 		_State = StateUnknown;
 		return false;
 	}
@@ -188,7 +189,7 @@ bool CLightCycleManager::setLightDesc(const CLightCycleDesc &desc)
 		 )
 	   )
 	{
-		nlwarning("!(DawnTransitionStartHour (%d) >= NightTransitionEndHour (%d) || DawnTransitionEndHour (%d) <= NightTransitionStartHour (%d))",
+		nlwarning("!(DawnTransitionStartHour (%f) >= NightTransitionEndHour (%f) || DawnTransitionEndHour (%f) <= NightTransitionStartHour (%f))",
 		          desc.DawnTransitionStartHour, desc.NightTransitionEndHour, desc.DawnTransitionEndHour, desc.NightTransitionStartHour);
 		_State = StateUnknown;
 		return false;
@@ -289,7 +290,9 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 		hour -= ::floorf(hour / _Desc.NumHours) * _Desc.NumHours;
 	}
 	float updateDuration = getUpdateDuration();
-	if (fabs(_Hour - hour) >= (4.f * updateDuration))
+	// a jump of the hour relights the whole landscape. Without an update frequency (a continent whose landscape
+	// light is the same by day and by night) there is no step to tell a jump by: every frame would be one
+	if (updateDuration != 0.f && fabs(_Hour - hour) >= (4.f * updateDuration))
 	{
 		touch();
 	}
@@ -314,15 +317,31 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 
 	// directionnal lights
 	// (override the global light by the light in the weather manager : during bad weather, the scene can be darker)
-	setupCanopyLight(_WeatherLighting);
-	setupMainLight(_WeatherLighting);
+	float entitiesWeatherLighting = ClientCfg.WeatherLightingEntities ? _WeatherLighting : 1.f;
+	setupCanopyLight(entitiesWeatherLighting);
+	setupMainLight(entitiesWeatherLighting);
 
 	// landscape lighting
 	CRGBA diffuse, ambiant;
 	getLandscapeLightColor(diffuse, ambiant);
 
+	// bad weather darkens the landscape, and the instance groups lit through its light groups (below), like the
+	// directional lights above. The weather lighting can move fast (a weather the server sets blends in 8 seconds,
+	// a manual weather jumps), and the light of the landscape is baked patch by patch: a change of the static
+	// light would show the boundaries of the patches until every one of them was updated. So the weather stays
+	// out of the static light, which follows the hour only: the landscape is drawn darker instead, which
+	// applies to all the patches at once
+	float landscapeWeatherLighting = ClientCfg.WeatherLightingLandscape ? _WeatherLighting : 1.f;
+	clamp(landscapeWeatherLighting, 0.f, 1.f);
+	if (Landscape)
+	{
+		Landscape->setLightScale(landscapeWeatherLighting);
+	}
+
+	// a touched setup is a landscape that has not seen the light yet (a new landscape, another continent):
+	// it gets the light whether the colors changed or not
 	bool colorTouched = diffuse != _LastDiffuse || ambiant != _LastAmbient;
-	if (colorTouched)
+	if (colorTouched || _Touched)
 	{
 		_LastDiffuse = diffuse;
 		_LastAmbient = ambiant;
@@ -335,8 +354,9 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 			else
 				Landscape->setupStaticLight(diffuse, ambiant, 1.f);
 			_UpdateFreq = getLandscapePatchUpdateFreq();
-			if (_Touched)
+			if (_Touched || _UpdateFreq == 0.f)
 			{
+				// without an update frequency a change of the colors has no other way to the patches
 				Landscape->updateLightingAll();
 				Landscape->setUpdateLightingFrequency(0);
 			}
@@ -356,10 +376,17 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 	}
 	else
 	{
+		// the light groups of the landscape take the weather lighting as the landscape does (the alpha is no
+		// light level)
+		uint weatherLevel = (uint)(256.f * landscapeWeatherLighting);
+		CRGBA groupDiffuse = _LastDiffuse;
+		CRGBA groupAmbient = _LastAmbient;
+		groupDiffuse.modulateFromuiRGBOnly(groupDiffuse, weatherLevel);
+		groupAmbient.modulateFromuiRGBOnly(groupAmbient, weatherLevel);
 		CRGBA color;
-		color.add(_LastDiffuse, lightningColor);
+		color.add(groupDiffuse, lightningColor);
 		Scene->setLightGroupColor(LightGroupLandscapeDiffuse, color);
-		color.add(_LastAmbient, lightningColor);
+		color.add(groupAmbient, lightningColor);
 		Scene->setLightGroupColor(LightGroupLandscapeAmbient, color);
 		float nightLevel = _LightLevel*255.f;
 		clamp (nightLevel, 0, 255);

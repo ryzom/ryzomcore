@@ -325,7 +325,7 @@ function r2.activities:newSequenceUI(activitySequence)
 								downUpColor="220 140 100 255",
 								overDownUpColor="255 180 170 255",
 								colPushed = "220 140 100 255",
-								paramsL= "r2.activities:selectSequence('"..activitySequence.InstanceId.."')"
+								paramsL= r2:uiCall("r2.activities:selectSequence", activitySequence.InstanceId)
 						   }
 
 	local ui = getUI(self.uiId)
@@ -1060,7 +1060,7 @@ function r2.activities:initActivityMenu()
 		
 		local zone = self.activityTypeTranslation[actType].zone
 		if zone == "" then
-			activityMenu:addLine(uc_activity, "lua", "r2.activities:setActivityType('"..actType.."')", actType)
+			activityMenu:addLine(translation, "lua", r2:uiCall("r2.activities:setActivityType", actType), actType)
 		else
 			activityMenu:addLine(uc_activity, "", "", actType)
 
@@ -1077,8 +1077,7 @@ function r2.activities:initActivityMenu()
 			local zonesMenu = activityMenu:getSubMenu(activitiesNb)
 			local zonesTable = r2.Scenario:getAllInstancesByType(zone)
 			for key, z in pairs(zonesTable) do
-				uc_activity:fromUtf8(z.Name)
-				zonesMenu:addLine(uc_activity, "lua", "r2.activities:setActivityType('"..actType.."', '".. z.InstanceId .."')", z.InstanceId)
+				zonesMenu:addLine(z.Name, "lua", r2:uiCall("r2.activities:setActivityType", actType, z.InstanceId), z.InstanceId)
 			end
 			if table.getn(zonesTable) == 0 then
 				zonesMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2.activities:setActivityType()", "")
@@ -1169,11 +1168,11 @@ function r2.activities:initTimeMenu(timeFunction, isHours)
 	timeMenu:reset()
 
 	for i=0,9 do
-		timeMenu:addLine(ucstring(tostring(i)), "lua", timeFunction .. "(" .. tostring(i) .. ")", tostring(i))
+		timeMenu:addLine(tostring(i), "lua", r2:uiCall(timeFunction, i), tostring(i))
 	end
 
 	if isHours == true then
-		timeMenu:addLine(ucstring(tostring(10)), "lua", timeFunction .. "(" .. tostring(10) .. ")", tostring(10))
+		timeMenu:addLine(tostring(10), "lua", r2:uiCall(timeFunction, 10), tostring(10))
 	else
 
 		local lineNb = 9
@@ -1187,7 +1186,7 @@ function r2.activities:initTimeMenu(timeFunction, isHours)
 
 			for s=0,9 do
 				lineStr = tostring(i+s) 
-				subMenu:addLine(ucstring(lineStr), "lua", timeFunction .. "(" .. tostring(i+s) .. ")", lineStr)
+				subMenu:addLine(lineStr, "lua", r2:uiCall(timeFunction, i+s), lineStr)
 			end
 		end
 	end

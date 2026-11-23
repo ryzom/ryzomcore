@@ -1,0 +1,15 @@
+# The death of a creature tells a bandit not to fight with npcs ("Dont fight with Npcs"). The script
+# of the action runs in the group of the creature, the one that fired the event, so each line names
+# the group of the bandit it is about: the faction is set on the bandit, not on the dead creature.
+
+upgrade: unchanged
+save: ok
+roundtrip: ok
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+
+rt_has: ()r2_0001_RtNpcGrp_4.setFactionProp("faction", "civil");
+rt_has: ()r2_0001_RtNpcGrp_4.setFactionProp("ennemyFaction", "Player");
+rt_lacks: ()setFactionProp("faction", "civil");
+rt: acts=2 texts=0

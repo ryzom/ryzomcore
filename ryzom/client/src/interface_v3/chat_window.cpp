@@ -41,6 +41,7 @@
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "../client_chat_manager.h"
+#include "../client_ctrl.h"
 //
 #include "../session_browser_impl.h"
 
@@ -771,13 +772,54 @@ const string CChatGroupWindow::getValidUiStringId(const string &stringId)
 }
 
 //=================================================================================
-CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, const string &winColor)
+// The title of the window of a free teller, from the name of the entity
+static string getFreeTellerTitle(const string &winNameIn)
 {
 	// must parse the entity name, and eventually make it Full with shard name (eg: 'ani.yoyo' becomes 'yoyo(Aniro)')
 	string winNameFull= CShardNames::getInstance().makeFullNameFromRelative(PlayerSelectedMainland, winNameIn);
 
 	// remove shard name if necessary
-	string winName= CEntityCL::removeShardFromName(winNameFull);
+	return CEntityCL::removeShardFromName(winNameFull);
+}
+
+//=================================================================================
+uint CChatGroupWindow::getFreeTellerIndex(const string &winNameIn) const
+{
+	uint i;
+	string sWinName = toLower(getFreeTellerTitle(winNameIn));
+	for (i = 0; i < _FreeTellers.size(); ++i)
+	{
+		CGroupContainer *pGC = _FreeTellers[i];
+		if (toLower(pGC->getTitle()) == sWinName)
+			break;
+	}
+	return i;
+}
+
+//=================================================================================
+CGroupContainer *CChatGroupWindow::findFreeTeller(const string &winName) const
+{
+	uint i = getFreeTellerIndex(winName);
+	return i < _FreeTellers.size() ? _FreeTellers[i] : NULL;
+}
+
+//=================================================================================
+// True when the user owns the animation session of the Ring he is in, from the load of its scenario on: a
+// tell window has its INVITE button then.
+static bool userCanInviteToRingSession()
+{
+	R2::CEditor::TMode mode = R2::getEditor().getMode();
+	if (mode == R2::CEditor::NotInitialized)
+		return false;
+	return R2::getEditor().getDMC().getEditionModule().isSessionOwner()
+		&& uint32(R2::CEditor::AnimationModeLoading) <= uint32(mode)
+		&& uint32(mode) <= uint32(R2::CEditor::AnimationModeGoingToPlay);
+}
+
+//=================================================================================
+CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, const string &winColor)
+{
+	string winName = getFreeTellerTitle(winNameIn);
 
 	// get the color
 	string sWinColor = winColor;
@@ -785,15 +827,8 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, con
 		sWinColor = "UI:SAVE:WIN:COLORS:COM";
 
 	// Look if the free teller do not already exists
-	uint32 i;
-	string sWinName = winName;
-	sWinName = toLower(sWinName);
-	for (i = 0; i < _FreeTellers.size(); ++i)
-	{
-		CGroupContainer *pGC = _FreeTellers[i];
-		if (toLower(pGC->getTitle()) == sWinName)
-			break;
-	}
+	string sWinName = toLower(winName);
+	uint i = getFreeTellerIndex(winNameIn);
 	// Create container if not present
 	if (i == _FreeTellers.size())
 	{
@@ -831,23 +866,14 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, con
 		pGC->center();
 		_FreeTellers.push_back(pGC);
 
-		CInterfaceElement *result = pRoot->findFromShortId(string("invite"));
-		if(result)
-		{
-			CCtrlBaseButton * inviteButton = dynamic_cast<CCtrlBaseButton*>(result);
-			if(inviteButton)
-			{
-				bool isDM = false;
-				R2::CEditor::TMode mode = R2::getEditor().getMode();
-				if (mode != R2::CEditor::NotInitialized )
-				{
-					isDM =  R2::getEditor().getDMC().getEditionModule().isSessionOwner()
-						&& uint32(R2::CEditor::AnimationModeLoading) <= uint32(mode)
-						&& uint32(mode) <= uint32(R2::CEditor::AnimationModeGoingToPlay);
-				}
-				inviteButton->setActive(isDM);
-			}
-		}
+		// The INVITE button of this window. (It was looked up from the root of the interface, by its short
+		// id: that finds the first control named 'invite' of all the windows, and the Invite button of the
+		// Ring's list of characters comes before any tell window. The button of this window stayed hidden
+		// until a contact list changed.)
+		// The FRIEND and IGNORE buttons are set with it: they were set only when a contact list changed, so the
+		// tell window of a friend had a FRIEND button to press until then (in an animation, where the lists
+		// rarely change, for as long as the window was there).
+		updateFreeTellerHeader(*pGC);
 
 		// the group is only active on the current desktop
 		pGC->setActive(true);
@@ -891,14 +917,7 @@ void CChatGroupWindow::updateFreeTellerHeader(CGroupContainer &ft)
 
 	if (inviteBut)
 	{
-		bool isDM = false;
-		R2::CEditor::TMode mode = R2::getEditor().getMode();
-		if (mode != R2::CEditor::NotInitialized )
-		{
-			isDM =  R2::getEditor().getDMC().getEditionModule().isSessionOwner()
-				&& uint32(R2::CEditor::AnimationModeLoading) <= uint32(mode)
-				&& uint32(mode) <= uint32(R2::CEditor::AnimationModeGoingToPlay);
-		}
+		bool isDM = userCanInviteToRingSession();
 
 		inviteBut->setActive(isDM);
 		if (isDM)
@@ -1354,7 +1373,13 @@ public:
 				}
 			}
 
-			if ( NLMISC::ICommand::exists( cmd ) )
+			// a control tool that drives a client whose content is not trusted may type what it read there: the command
+			// would do what the privileged methods of the endpoint are refused for
+			if (ClientCtrl::refuseTypedCommand(cmdWithArgs))
+			{
+				// the warning and the system message say why
+			}
+			else if ( NLMISC::ICommand::exists( cmd ) )
 			{
 				NLMISC::ICommand::execute( cmdWithArgs, g_log );
 			}
@@ -1468,17 +1493,26 @@ public:
 		string playerName = ::getFreeTellerName(pCaller);
 		if (!playerName.empty())
 		{
-			// ask the SBS to invite the character in the session
-			CSessionBrowserImpl::getInstance().inviteCharacterByName(CSessionBrowserImpl::getInstance().getCharId(), playerName);
-			// additionaly, send a tell to signal the player he has been invited to a ring session
-			ChatMngr.tell(playerName, CI18N::get("uiRingInviteNotification"));
-			//
-			CInterfaceManager *im = CInterfaceManager::getInstance();
-			im->displaySystemInfo("@{6F6F}" +  playerName +" @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
-			// force a refresh of the ui
-			CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
+			// ask the SBS to invite the character in the session, and wait for the answer: the session manager
+			// can refuse (the character is already invited, a newcomer or free trial rule, a scenario that is
+			// not started). The player is told a refusal, and the other player is told nothing. An invitation
+			// that is granted is told to both, and the list of the characters of the session is asked for again.
+			CSessionBrowserImpl::getInstance().inviteCharacterByNameAndWait(playerName, pCaller);
 		}
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerInviteToRingSession, "invite_to_ring_session");
+
+// ***************************************************************************************
+// The buttons in the header of the tell windows are set again: the INVITE button depends on the mode of the
+// Ring editor, whose scripts run this at each change of mode (r2:onModeChanged).
+class CHandlerUpdateFreeTellerHeaders : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
+	{
+		PeopleInterraction.updateAllFreeTellerHeaders();
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerUpdateFreeTellerHeaders, "update_free_teller_headers");
 

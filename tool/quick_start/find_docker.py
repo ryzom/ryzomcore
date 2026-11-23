@@ -1,4 +1,3 @@
-
 # Run the command `docker images` to check if docker is running, and list the images
 # Docker must be in the system path
 # Returns None if Docker is not found, otherwise a table of available images
@@ -6,6 +5,7 @@
 
 import subprocess
 import os
+import json
 
 def FindDocker():
 	try:
@@ -62,3 +62,31 @@ def NeedConfigureDocker():
 	if not FoundDocker == None:
 		return True
 	return False
+
+# The kind of toolchain an image holds, from its dev.ryzom.quickstart.toolchain label: None for a plain
+# GCC image, "none" for an image without a C++ toolchain, "wine" for a Windows toolchain under Wine
+_ImageToolchainLabels = {}
+def DockerImageToolchain(image):
+	if image in _ImageToolchainLabels:
+		return _ImageToolchainLabels[image]
+	res = None
+	try:
+		output = subprocess.check_output(['docker', 'image', 'inspect', image], stderr=subprocess.DEVNULL, text=True)
+		inspect = json.loads(output)
+		labels = inspect[0]["Config"]["Labels"] or {}
+		res = labels.get("dev.ryzom.quickstart.toolchain")
+	except (subprocess.CalledProcessError, FileNotFoundError, KeyError, IndexError, ValueError):
+		pass
+	_ImageToolchainLabels[image] = res
+	return res
+
+# The built Wine toolchain images of the quick start (pass a fresh FindDocker() after building images)
+def WineDockerImages(found=None):
+	if found is None:
+		found = FoundDocker
+	res = []
+	if found:
+		for image in found:
+			if image in FoundDockerImages and DockerImageToolchain(image) == "wine":
+				res += [ image ]
+	return res

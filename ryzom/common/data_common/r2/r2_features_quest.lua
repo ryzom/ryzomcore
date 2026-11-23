@@ -114,10 +114,12 @@ end
 
 function component:textAdapter(text)
 	assert(self)
+	-- a text that the component does not have (one of an older editor) is an empty text
+	if text == nil then text = "" end
 	assert(type(text) == "string")
 	local str =  text
 	
-	str=string.gsub(str, "<quest_name>", self.Name)
+	str = replaceTag(str, "<quest_name>", self.Name)
 	return str
 end
 

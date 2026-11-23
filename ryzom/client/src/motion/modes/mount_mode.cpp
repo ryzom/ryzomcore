@@ -68,7 +68,7 @@ void CUserControls::mountModeStart()
 	}
 
 	// Adjust eyes height to the mount.
-	UserEntity->eyesHeight(2.5f);
+	UserEntity->eyesHeight(CUserEntity::mountEyesHeight());
 	// No more Velocity.
 	UserEntity->frontVelocity(0);
 	UserEntity->lateralVelocity(0);

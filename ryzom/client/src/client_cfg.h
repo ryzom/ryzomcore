@@ -179,6 +179,11 @@ struct CClientConfig
 	/// QUIC
 	bool			QuicConnection;
 	bool			QuicCertValidation;
+	/// Offer protocol level ryzomcore/4.2, with which the frontend sends some classes of messages on QUIC streams
+	bool			QuicStreams;
+	/// What the player's connection carries towards the client, in bits per second (0: not said, the frontend finds
+	/// out). Told to the frontend at login on protocol level ryzomcore/4.2, which starts and keeps its streams under it.
+	uint32			ConnectionRate;
 	/// Login.
 	bool			DisplayAccountButtons;
 	string			CreateAccountURL;
@@ -217,10 +222,7 @@ struct CClientConfig
 	/// Use a hardware cursor
 	bool			HardwareCursor;
 	float			HardwareCursorScale; // scale for hardware cursor bitmap, 0 = use gui scale
-	float			CursorSpeed;
-	uint			CursorAcceleration;
 	float			FreeLookSpeed;
-	uint			FreeLookAcceleration;
 	float			FreeLookSmoothingPeriod;
 	bool			FreeLookInverted;
 	bool			FreeLookTablet;
@@ -293,6 +295,14 @@ struct CClientConfig
 
 	// FXAA
 	bool			FXAA;
+
+	/// The lighting of the weather (darker in bad weather) dims the directional lights: the entities and the canopy
+	bool			WeatherLightingEntities;
+	/// The lighting of the weather scales the light on the ground when the landscape is drawn (the sun and the lamps
+	/// on the ground alike) and dims the landscape light groups. The grass follows WeatherLightingEntities
+	bool			WeatherLightingLandscape;
+	/// A lightning of a thunder storm flashes on what the landscape light groups light
+	bool			WeatherLightningFlash;
 
 	// Is bloom effect activated
 	bool			Bloom;
@@ -373,6 +383,9 @@ struct CClientConfig
 
 	/// Sound Driver
 	TDriverSound	DriverSound;
+
+	/// Sound output device, by the name the sound driver gives it. Empty: the default device.
+	std::string		SoundDevice;
 
 	/// SoundForceSoftwareBuffer
 	bool			SoundForceSoftwareBuffer;
@@ -911,6 +924,14 @@ public:
 
 	/// End process
 	void release ();
+
+	/// Save ConfigFile (client.cfg) under the lock of the file: the clients of a directory share it, and none reads
+	/// it while another writes it (init() reads and fixes it under the same lock). A lock that another client holds
+	/// for more than five seconds is warned about, and the file is saved without it.
+	void saveConfigFile ();
+
+	/// Put the position of the window into the configuration, which release() saves. To call while the driver has its window.
+	void writeWindowPos ();
 
 	bool readBool (const std::string &varName);
 	void writeBool (const std::string &varName, bool val, bool bForce = false);

@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, argparse
+import time, sys, os, shutil, subprocess, argparse
 sys.path.append("../configuration")
 
 parser = argparse.ArgumentParser()
@@ -55,15 +55,15 @@ for processName in ProcessToComplete:
 		os.chdir(processName)
 		try:
 			subprocess.call([ "python", "1_export.py" ])
-		except Exception, e:
+		except Exception as e:
 			printLog(log, "<" + processName + "> " + str(e))
 		os.chdir("..")
 		try:
-			processLog = open(processName + "/log.log", "r")
+			processLog = open(processName + "/log.log", "r", errors="replace")
 			processLogData = processLog.read()
 			processLog.close()
 			log.write(processLogData)
-		except Exception, e:
+		except Exception as e:
 			printLog(log, "<" + processName + "> " + str(e))
 		# subprocess.call("idle.bat")
 	else:

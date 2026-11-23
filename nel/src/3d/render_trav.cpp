@@ -74,6 +74,7 @@ CRenderTrav::CRenderTrav()
 	setupTransparencySorting();
 	Driver = nullptr;
 	_CurrentPassOpaque = true;
+	m_RenderTargetHasArea = true;
 
 	_CacheLightContribution = nullptr;
 
@@ -118,6 +119,18 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 	#endif
 	H_AUTO( NL3D_TravRender );
 	if (getDriver()->isLost()) return; // device is lost so no need to render anything
+	// A render target without area (the window while it is minimized, or resized to nothing) takes no drawing:
+	// the viewport the driver makes of it is empty. As for a lost device, the traversals before this one have
+	// run and only the drawing is left out. (A driver that reports no size leaves the values as they are.)
+	// The first part of a render decides for all of its parts: the ordering tables the later parts draw from
+	// are only filled when the first part is drawn.
+	if (newRender)
+	{
+		uint32 targetWidth = 1, targetHeight = 1;
+		getDriver()->getRenderTargetSize(targetWidth, targetHeight);
+		m_RenderTargetHasArea = targetWidth != 0 && targetHeight != 0;
+	}
+	if (!m_RenderTargetHasArea) return;
 	CTravCameraScene::update();
 	// Bind to Driver.
 	setupDriverCamera();

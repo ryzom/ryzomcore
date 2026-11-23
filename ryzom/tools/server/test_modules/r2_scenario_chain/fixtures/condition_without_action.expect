@@ -1,0 +1,23 @@
+# An event handler with a condition and no action: it translates to nothing. The act has the two events
+# and the two actions of its own start and of its two npcs, as without the handler.
+
+upgrade: unchanged
+version_update: unchanged
+absent: version_update_note
+scenario_vs_file: same
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+rt_act: index=1 npcs=2 groups=3 states=3 events=2 actions=2 actions_all=2 user_triggers=0 fauna_groups=0

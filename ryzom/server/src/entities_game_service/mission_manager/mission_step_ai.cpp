@@ -185,7 +185,7 @@ uint CMissionStepAIMsg::processEvent( const TDataSetRow & userRow, const CMissio
 	if( event.Type == CMissionEvent::AIMsg )
 	{
 		CMissionEventAIMsg & eventSpe = (CMissionEventAIMsg &) event;
-		nlwarning("CMissionStepAIMsg : Message from event = '%s', message of mission = '%s'",  eventSpe.Msg.c_str(), _Msg.c_str());
+		MISDBG("CMissionStepAIMsg : Message from event = '%s', message of mission = '%s'",  eventSpe.Msg.c_str(), _Msg.c_str());
 		if ( eventSpe.Msg == _Msg )
 		{
 			LOGMISSIONSTEPSUCCESS("wait_msg");

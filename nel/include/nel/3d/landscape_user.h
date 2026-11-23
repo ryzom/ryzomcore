@@ -99,6 +99,9 @@ public:
 	  */
 	virtual	void	setupStaticLight (const CRGBA &diffuse, const CRGBA &ambiant, float multiply) NL_OVERRIDE;
 
+	virtual void setLightScale(float scale) NL_OVERRIDE;
+	virtual float getLightScale() const NL_OVERRIDE;
+
 	virtual	void	setPointLightDiffuseMaterial(CRGBA diffuse) NL_OVERRIDE;
 	virtual	CRGBA	getPointLightDiffuseMaterial () const NL_OVERRIDE;
 

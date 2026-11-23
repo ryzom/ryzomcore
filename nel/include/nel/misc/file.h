@@ -69,9 +69,20 @@ struct EDiskFullError : public EWriteError
 	EDiskFullError( const std::string& filename ) : EWriteError(filename) {}
 };
 
+/** A file written through a temporary file could not take the place of its target: the target (Filename) is
+ * left as it was, and the temporary file (TempFilename) is kept, it holds what was written.
+ */
 struct ERenameError : public EFile
 {
-	ERenameError( const std::string& dest, const std::string& src ) : EFile( dest, "Rename Error from the file '" +src+"' to the file '" +dest+"'", true ) {}
+	ERenameError(const std::string &dest, const std::string &src)
+	    : EFile(dest, "Rename Error from the file '" + src + "' to the file '" + dest + "': '" + dest + "' is left as it was, what was written is kept in '" + src + "'", true)
+	    , TempFilename(src)
+	{
+	}
+
+	virtual ~ERenameError() NL_OVERRIDE { }
+
+	std::string TempFilename;
 };
 
 
@@ -212,15 +223,20 @@ private:
 class COFile : public IStream
 {
 public:		// Basic Usage.
-	/// Object. NB: destructor close() the stream.
+	/** Object. NB: destructor close() the stream.
+	 *	The destructor does not throw. With the flag useTempFile it gives the writing up: the temporary file
+	 *	is deleted and the file is left as it was.
+	 */
 	COFile();
 	COFile(const std::string &path, bool append=false, bool text=false, bool useTempFile=false);
 	~COFile() NL_OVERRIDE;
 
 	/** Open a file for writing. false if failed. close() if a file was opened.
-	*	If you open the file with the flag useTempFile, you MUST close explicitly the file
-	*	with close() if the writing as been successed.
-	*/
+	 *	If you open the file with the flag useTempFile, you MUST close explicitly the file
+	 *	with close() if the writing as been successed.
+	 *	With useTempFile the writing goes to a temporary file beside the file, which takes the place of the
+	 *	file in close() in one step: the file is the old one or the new one, never a part of the new one.
+	 */
 	bool	open(const std::string &path, bool append=false, bool text=false, bool useTempFile=false);
 
 	bool	isOpen	()	const
@@ -229,9 +245,23 @@ public:		// Basic Usage.
 	}
 
 public:		// Advanced Usage.
-	/// Explicit close.
-	void	close();
-	/// flush the file.
+	/** Explicit close.
+	 *	What is still buffered is written here, so this is where a small file meets a full disk. The file is
+	 *	not written completely when this write or the close fails, or when a write, a flush or a seek failed
+	 *	before.
+	 *	A file opened without useTempFile: close() does not throw. A file that is not written completely is
+	 *	logged as a warning that names it, by close() and by the destructor alike.
+	 *	A file opened with useTempFile: close() throws, and only then:
+	 *	\throw EDiskFullError, EWriteError the file could not be written completely. The temporary file is
+	 *	deleted and the file it was for is left as it was.
+	 *	\throw ERenameError the temporary file could not take the place of the file. The file is left as it
+	 *	was, and the temporary file is kept: the exception names it.
+	 *	After any of these the stream is closed, and neither a second close() nor the destructor does more.
+	 *	\return false if a file opened without useTempFile was not written completely, true otherwise: also
+	 *	when no file was open.
+	 */
+	bool close();
+	/// flush the file. A flush that fails is not reported here: close() reports it, as described there.
 	void	flush();
 	/// Seek the file
 	bool	seek (sint32 offset, IStream::TSeekOrigin origin) const NL_OVERRIDE;
@@ -245,14 +275,71 @@ public:		// Advanced Usage.
 	virtual void		serialBuffer(uint8 *buf, uint len) NL_OVERRIDE;
 
 protected:
-	/// Internal close.
-	void	internalClose(bool success);
+	/// Internal close. Returns what close() returns.
+	bool internalClose(bool success);
 	virtual void		serialBit(bool &bit) NL_OVERRIDE;
 
 private:
+	/// Remember that a write, a flush or the flush of a seek failed, with the error of the first one.
+	void rememberWriteError(int error) const;
+
 	FILE	*_F;
 	std::string _FileName;
 	std::string _TempFileName;
+	// A write that failed, for close(): the close after a failed flush succeeds. seek() is const.
+	mutable bool m_WriteFailed;
+	mutable int m_WriteErrno;
+};
+
+
+// ======================================================================================================
+/**
+ * An exclusive lock between processes, held on a file of its own: processes that use the same file (several
+ * clients run from one folder) take the lock around their reads and writes of that file. The lock file is created
+ * when it is missing, and its content is not used. The system releases the lock when the process ends, also when
+ * the process stops without releasing it.
+ * The lock is on a file other than the one it protects: a lock on a file that is replaced through a temporary file
+ * would stay on the replaced file, and on Unix an fcntl lock ends when the process closes any handle of the file.
+ */
+class CFileLock
+{
+public:
+	enum TResult
+	{
+		/// the lock is taken
+		Locked,
+		/// another process holds it
+		Held,
+		/// the file can't be created, opened or locked: getError() says why
+		Failed
+	};
+
+	CFileLock();
+	/// Releases the lock
+	~CFileLock();
+
+	/// Takes the lock of the file once no other process holds it, waiting at most timeoutMs milliseconds (0 waits
+	/// without end). Held when the time ran out.
+	TResult lock(const std::string &path, uint32 timeoutMs);
+	/// Takes the lock of the file when no other process holds it
+	TResult tryLock(const std::string &path);
+	/// Releases the lock, when one is held
+	void unlock();
+	bool isLocked() const;
+	/// Why the last lock() or tryLock() failed, with the message of the system
+	const std::string &getError() const { return m_Error; }
+
+private:
+	CFileLock(const CFileLock &);
+	CFileLock &operator=(const CFileLock &);
+	TResult lockImpl(const std::string &path, bool wait);
+
+#ifdef NL_OS_WINDOWS
+	void *m_Handle;
+#else
+	int m_Fd;
+#endif
+	std::string m_Error;
 };
 
 

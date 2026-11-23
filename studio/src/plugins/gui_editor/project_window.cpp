@@ -109,13 +109,20 @@ namespace GUIEditor
 
 	void ProjectWindow::clear()
 	{
-		fileTree->clear();
+		// the two top-level items are the file categories of the form, only their files go
+		for( int i = 0; i < fileTree->topLevelItemCount(); i++ )
+			qDeleteAll( fileTree->topLevelItem( i )->takeChildren() );
 	}
 
 	void ProjectWindow::onAddButtonClicked()
 	{
 		if( fileTree->currentItem() == NULL )
+		{
+			QMessageBox::information( this,
+									tr( "Adding file to project" ),
+									tr( "Select the category of the file to add first." ) );
 			return;
+		}
 
 		QTreeWidgetItem *item = fileTree->currentItem();
 		QTreeWidgetItem *parent = item->parent();
@@ -161,7 +168,8 @@ namespace GUIEditor
 		
 		if( reply == QMessageBox::Yes )
 		{
-			fileTree->currentItem()->parent()->removeChild( fileTree->currentItem() );
+			// deleting the item takes it out of its category
+			delete fileTree->currentItem();
 			filesChanged = true;
 		}
 

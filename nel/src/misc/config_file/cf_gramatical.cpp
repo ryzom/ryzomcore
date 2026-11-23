@@ -45,6 +45,7 @@
 
 #include <cstdio>
 #include <vector>
+#include <deque>
 #include <string>
 
 using namespace std;
@@ -81,7 +82,7 @@ struct cf_value
 	NLMISC::CConfigFile::CVar::TVarType	Type;
 	int						Int;
 	double					Real;
-	char					String[1024];
+	const char				*String;	// in cf_Strings, see cf_newString()
 };
 
 /* Externals */
@@ -101,11 +102,18 @@ char	*cf_CurrentFile;
 
 bool	cf_OverwriteExistingVariable;	// setup in the config_file.cpp reparse()
 
+// the strings of the values of the file being parsed, a cf_value points into them
+deque<string>	cf_Strings;
+
 
 
 /* Prototypes */
 
 int yylex (void);
+
+const char *cf_newString (const string &str);
+
+void cf_clearStrings ();
 
 cf_value cf_op (cf_value a, cf_value b, cf_operation op);
 
@@ -1057,7 +1065,7 @@ case 27:
 					{
 					case NLMISC::CConfigFile::CVar::T_INT: Var.Int = (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].IntValues[0]; break;
 					case NLMISC::CConfigFile::CVar::T_REAL: Var.Real = (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].RealValues[0]; break;
-					case NLMISC::CConfigFile::CVar::T_STRING: strcpy (Var.String, (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].StrValues[0].c_str()); break;
+					case NLMISC::CConfigFile::CVar::T_STRING: Var.String = cf_newString ((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].StrValues[0]); break;
 					default: DEBUG_PRINT("*** CAN T DO THAT!!!\n"); break;
 					}
 					yyval.Val = Var;
@@ -1294,6 +1302,22 @@ yyerrhandle:
 #line 307 "cf_gramatical.yxx"
 
 
+/* keep a string for a value, the pointer is valid until cf_clearStrings() */
+const char *cf_newString (const string &str)
+{
+	cf_Strings.push_back (str);
+	return cf_Strings.back ().c_str ();
+}
+
+/* free the strings of the values, called by CConfigFile::reparse() around cfparse() */
+void cf_clearStrings ()
+{
+	cf_Strings.clear ();
+	// the last value of the lexer points into the freed strings
+	yylval.Val.Type = NLMISC::CConfigFile::CVar::T_UNKNOWN;
+	yylval.Val.String = "";
+}
+
 /* compute the good operation with a, b and op */
 cf_value cf_op (cf_value a, cf_value b, cf_operation op)
 {
@@ -1395,9 +1419,9 @@ cf_value cf_op (cf_value a, cf_value b, cf_operation op)
 		case NLMISC::CConfigFile::CVar::T_STRING:
 			switch (b.Type)
 			{
-			case NLMISC::CConfigFile::CVar::T_INT:	{ char str2[60]; NLMISC::smprintf(str2, 60, "%d", b.Int); strcat(a.String, str2); break; }
-			case NLMISC::CConfigFile::CVar::T_REAL:	{ char str2[60]; NLMISC::smprintf(str2, 60, "%f", b.Real); strcat(a.String, str2); break; }
-			case NLMISC::CConfigFile::CVar::T_STRING:	strcat (a.String, b.String); break;
+			case NLMISC::CConfigFile::CVar::T_INT:	{ char str2[60]; NLMISC::smprintf(str2, 60, "%d", b.Int); a.String = cf_newString (string (a.String) + str2); break; }
+			case NLMISC::CConfigFile::CVar::T_REAL:	{ char str2[60]; NLMISC::smprintf(str2, 60, "%f", b.Real); a.String = cf_newString (string (a.String) + str2); break; }
+			case NLMISC::CConfigFile::CVar::T_STRING:	a.String = cf_newString (string (a.String) + b.String); break;
 			default: break;
 			}
 			break;

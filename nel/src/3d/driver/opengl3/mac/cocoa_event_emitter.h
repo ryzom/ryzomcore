@@ -20,6 +20,9 @@
 #ifndef NL_COCOA_EVENT_EMITTER_H
 #define NL_COCOA_EVENT_EMITTER_H
 
+#include <map>
+#include <string>
+#include <vector>
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/event_server.h"
 #include "nel/misc/events.h"
@@ -43,6 +46,15 @@ class CCocoaEventEmitter : public IEventEmitter
 
 	// TODO like internal server in unix event emitter... review!
 	CEventServer*    _server;
+
+	// the key of each virtual key code in the keyboard layout m_LayoutId, empty until the first key
+	std::vector<TKey> m_LayoutKeys;
+	std::string      m_LayoutId;
+	// the key reported for each key that is down
+	std::map<unsigned short, TKey> m_PressedKeycodes;
+
+	void         readKeyboardLayout();
+	TKey         layoutKeycodeToNelKey(unsigned short keycode);
 
 public:
 	CCocoaEventEmitter() : 

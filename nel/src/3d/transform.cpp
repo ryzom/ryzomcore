@@ -201,10 +201,26 @@ CTransform::~CTransform()
 	hrcUnlink();
 	clipUnlinkFromAll();
 
-	// remove mys sons.
+	/* remove mys sons: they go to the root of the scene, as a son detached from a skeleton does
+		(see CSkeletonModel::detachSkeletonSon()). A son left outside of the Hrc graph is no more updated: it keeps
+		its _AncestorSkeletonModel and its link in the SonsOfAncestorSkeletonModelGroup, and the clip traversal
+		reads that skeleton after it is deleted.
+		NB: a son whose Hrc freeze is requested can't be linked (see hrcLinkSon()): it stays unlinked, and forgets its
+		ancestor skeleton here. The roots are the last models of a scene to be deleted.
+	*/
+	CTransform	*root= getOwnerScene() ? getOwnerScene()->getRoot() : nullptr;
 	while(hrcGetNumChildren())
 	{
-		hrcGetChild(0)->hrcUnlink();
+		CTransform	*son= hrcGetChild(0);
+		son->hrcUnlink();
+		if(root && root!=this)
+			root->hrcLinkSon(son);
+		if(son->_HrcParent==NULL && son->_AncestorSkeletonModel)
+		{
+			son->_AncestorSkeletonModel= nullptr;
+			if(getOwnerScene())
+				son->updateClipTravForAncestorSkeleton();
+		}
 	}
 	while(clipGetNumChildren())
 	{

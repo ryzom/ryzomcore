@@ -97,7 +97,6 @@ FILE(GLOB NLMISC_GENERIC
 	../../include/nel/misc/singleton.h
 	speaker_listener.cpp ../../include/nel/misc/speaker_listener.h
 	../../include/nel/misc/static_map.h
-	../../include/nel/misc/stl_block_list.h
 )
 
 FILE(GLOB NLMISC_UTILITY
@@ -192,6 +191,10 @@ IF(WITH_SSE2)
 	ENDIF()
 ENDIF()
 
+# the definitions of the whole build the public headers test, for the programs built against an installed NeL
+# (this build has them in its global flags)
+target_compile_definitions(nelmisc INTERFACE "$<INSTALL_INTERFACE:${NL_PUBLIC_DEFINITIONS}>")
+
 IF(WITH_GTK)
   IF(GTK2_FOUND)
     TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE ${GTK2_INCLUDE_DIRS})
@@ -275,6 +278,14 @@ ENDIF()
 
 target_compile_definitions(nelmisc PUBLIC $<$<CONFIG:Debug>:NL_DEBUG> $<$<CONFIG:Release>:NL_RELEASE>)
 
+# without the default displayers, createDebug() attaches no standard output, memory or log.log displayer to the
+# logs, and the program adds its own; failed asserts and fatal errors still go to the standard error output and to
+# the message box displayer, which writes their report file (nel_report_<time>.log), may copy them to the clipboard
+# and may start the report tool, and acts on the report as with the default displayers
+IF(NOT WITH_LOGGING)
+  TARGET_COMPILE_DEFINITIONS(nelmisc PRIVATE NEL_DEFAULT_DISPLAYER=0 NEL_LOG_IN_FILE=0)
+ENDIF()
+
 NL_DEFAULT_PROPS(nelmisc "NeL, Library: NeL Misc")
 NL_ADD_RUNTIME_FLAGS(nelmisc)
 
@@ -304,6 +315,34 @@ IF(WITH_BREAKPAD)
   TARGET_COMPILE_DEFINITIONS(nelmisc PRIVATE NL_HAVE_BREAKPAD)
 ENDIF()
 
+# what a static nelmisc needs, for nel-misc.pc; nel_sevenzip, a library of its own, goes to Libs when it is shared:
+# the linker looks for the libraries a shared library needs in its own directories only, not in the -L ones
+SET(PC_REQUIRES_PRIVATE "zlib")
+IF(WITH_STATIC)
+  SET(PC_LIBS "")
+  SET(PC_LIBS_PRIVATE "-lnel_sevenzip")
+ELSE()
+  SET(PC_LIBS "-lnel_sevenzip")
+  SET(PC_LIBS_PRIVATE "")
+ENDIF()
+IF(TARGET LibXml2::LibXml2 OR LIBXML2_FOUND)
+  STRING(APPEND PC_REQUIRES_PRIVATE " libxml-2.0")
+ENDIF()
+IF(TARGET PNG::PNG)
+  STRING(APPEND PC_REQUIRES_PRIVATE " libpng")
+ENDIF()
+IF(JPEG_FOUND)
+  STRING(APPEND PC_REQUIRES_PRIVATE " libjpeg")
+ENDIF()
+IF(GIF_FOUND)
+  STRING(APPEND PC_LIBS_PRIVATE " -lgif")
+ENDIF()
+IF(APPLE)
+  STRING(APPEND PC_LIBS_PRIVATE " -framework Carbon")
+ELSE()
+  STRING(APPEND PC_LIBS_PRIVATE " -lrt")
+ENDIF()
+STRING(APPEND PC_LIBS_PRIVATE " -ldl ${CMAKE_THREAD_LIBS_INIT}")
 NL_GEN_PC(nel-misc.pc)
 
 IF(WITH_INSTALL_LIBRARIES OR NOT WITH_STATIC)

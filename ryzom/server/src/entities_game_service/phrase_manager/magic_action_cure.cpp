@@ -20,9 +20,11 @@
 #include "magic_action.h"
 #include "phrase_manager/magic_phrase.h"
 #include "player_manager/character.h"
+#include "entity_manager/entity_manager.h"
 #include "game_share/effect_families.h"
 #include "game_share/magic_fx.h"
 #include "s_link_effect_dot.h"
+#include "nolink_dot_effect.h"
 #include "phrase_manager/phrase_utilities_functions.h"
 
 
@@ -194,14 +196,21 @@ protected:
 					bool removed = false;
 					if ( effect->getPower() <= _Power )
 					{
-						if ( effect->getFamily() == EFFECT_FAMILIES::Dot )
+						if (effect->getFamily() == EFFECT_FAMILIES::Dot || effect->getFamily() == EFFECT_FAMILIES::DoTStackable)
 						{
-							CSLinkEffectDot * dot = (CSLinkEffectDot *)effect;
-							for ( uint j = 0; j < _AffectedDots.size(); j++ )
+							// the damage over time links of players and the timed damage of creatures; the heal over
+							// time of creatures carries the Dot family too (CMagicAiActionHoT), it is no damage and stays
+							DMGTYPE::EDamageType dmgType = DMGTYPE::UNDEFINED;
+							if (CSLinkEffectDot *linkDot = dynamic_cast<CSLinkEffectDot *>(effect))
+								dmgType = linkDot->getDamageType();
+							else if (const CNoLinkDOTEffect *timedDot = dynamic_cast<const CNoLinkDOTEffect *>(effect))
+								dmgType = timedDot->getDamageType();
+
+							for (uint j = 0; dmgType != DMGTYPE::UNDEFINED && j < _AffectedDots.size(); j++)
 							{
-								if ( _AffectedDots[j] == dot->getDamageType() )
+								if (_AffectedDots[j] == dmgType)
 								{
-									target->removeSabrinaEffect( dot );
+									target->removeSabrinaEffect(effect);
 									removed = true;
 									break;
 								}
@@ -224,7 +233,10 @@ protected:
 						i++;
 				}
 				else
-					nlwarning("<CEntityBase dispellEffects> NULL effect #%u found in an entity. Debug needed",i);
+				{
+					nlwarning("<CMagicActionCure apply> NULL effect #%u found in an entity. Debug needed", i);
+					i++;
+				}
 			}
 		}
 	}

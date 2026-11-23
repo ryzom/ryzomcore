@@ -27,7 +27,12 @@
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 #include <X11/Xutil.h>
+#include <X11/XKBlib.h>
+#include <clocale>
+#include <cstdlib>
+#include <cstring>
 #include "nel/misc/debug.h"
+#include "nel/misc/system_utils.h"
 #include "nel/misc/utf_string_view.h"
 
 
@@ -47,6 +52,10 @@ CUnixEventEmitter::CUnixEventEmitter ():_dpy(nullptr)
 	_im = nullptr;
 	_ic = nullptr;
 	_SelectionOwned=false;
+	m_LostIM = false;
+	m_Focus = false;
+	m_FilteredKeycode = 0;
+	m_FilteredTime = 0;
 }
 
 CUnixEventEmitter::~CUnixEventEmitter()
@@ -54,13 +63,14 @@ CUnixEventEmitter::~CUnixEventEmitter()
 	closeIM();
 }
 
-void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
+void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver, bool ownWindow)
 {
 	_dpy = dpy;
 	_win = win;
 	_driver = driver;
 
-	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|StructureNotifyMask|ExposureMask|EnterWindowMask|LeaveWindowMask|FocusChangeMask);
+	// the property changes are for the driver: the window manager states a minimized window in a property
+	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|StructureNotifyMask|ExposureMask|EnterWindowMask|LeaveWindowMask|FocusChangeMask|PropertyChangeMask);
 
 	// define Atoms used by clipboard
 	XA_CLIPBOARD = XInternAtom(dpy, "CLIPBOARD", False);
@@ -70,45 +80,126 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 
 	// define Atom used by delete window
 	XA_WM_DELETE_WINDOW = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-	XSetWMProtocols(dpy, win, &XA_WM_DELETE_WINDOW, 1);
+
+	// The property is replaced as a whole: on a window of the application this took away the protocols its
+	// toolkit had set (WM_TAKE_FOCUS, _NET_WM_PING), and its owner gets the close request anyway.
+	if (ownWindow)
+		XSetWMProtocols(dpy, win, &XA_WM_DELETE_WINDOW, 1);
 
 /*
 	TODO: implements all useful events processing
 	ButtonMotionMask|Button1MotionMask|Button2MotionMask|
 	Button3MotionMask|Button4MotionMask|Button5MotionMask|KeymapStateMask|
-	SubstructureNotifyMask|VisibilityChangeMask|PropertyChangeMask|
+	SubstructureNotifyMask|VisibilityChangeMask|
 	ColormapChangeMask|OwnerGrabButtonMask
 */
 
 	createIM();
 }
 
+#ifdef X_HAVE_UTF8_STRING
+// Xlib calls this when the input method stops, for example when its server is restarted
+static void inputMethodDestroyed(XIM /* im */, XPointer clientData, XPointer /* callData */)
+{
+	((CUnixEventEmitter *)clientData)->lostIM();
+}
+#endif
+
 void CUnixEventEmitter::createIM()
 {
 #ifdef X_HAVE_UTF8_STRING
 
-	XModifierKeymap *g_mod_map = XGetModifierMapping(_dpy);
+	m_LostIM = false;
 
-	char *modifiers = XSetLocaleModifiers(getenv("XMODIFIERS"));
+	if (_ic != nullptr)
+		return;
 
-	_im = XOpenIM(_dpy, nullptr, nullptr, nullptr);
-
-	if (_im)
+	// Xlib chooses the input method, and the encoding of what it gives, by the locale LC_CTYPE has while the
+	// input method and its context are made. When LC_CTYPE is the C locale, this function takes the locale of
+	// the environment from here to where the input context exists, and then sets LC_CTYPE back to what it
+	// found, so that opening the input method changes the locale of nothing else: with the LC_CTYPE of the
+	// user, tolower() and the comparisons that ignore case follow the language of the user (in a Turkish
+	// locale "QUIT" and "quit" are not the same word). What LC_CTYPE is for the rest of the process is not
+	// decided here. The input method keeps the locale it was opened with. The string setlocale returns does
+	// not survive the next call.
+	const char *ctype = setlocale(LC_CTYPE, nullptr);
+	const std::string savedCtype = ctype ? ctype : "";
+	if (savedCtype.empty() || savedCtype == "C" || savedCtype == "POSIX")
 	{
+		if (setlocale(LC_CTYPE, "") == nullptr)
+			nlwarning("3D: The locale of the environment (LC_ALL, LC_CTYPE or LANG) is not installed, text input uses the C locale");
+	}
+
+	if (!XSupportsLocale())
+	{
+		ctype = setlocale(LC_CTYPE, nullptr);
+		nlwarning("3D: Xlib does not support the locale '%s', text input uses the C locale", ctype ? ctype : "");
+		setlocale(LC_CTYPE, "C");
+	}
+
+	// The input methods to try. "" is the one of the environment: the server named by XMODIFIERS (such as
+	// "@im=ibus"), or without XMODIFIERS the dead keys and compose sequences of the locale, handled by Xlib.
+	// The others are for a server that does not answer or cannot give the input style asked for below: a
+	// modifier given here goes before the one of XMODIFIERS, so they are Xlib's own handling whatever the
+	// environment says.
+	static const char *const s_Modifiers[] = { "", "@im=local", "@im=" };
+	uint firstModifiers = 0;
+
+	// In the C locale the text an input method server commits is lost: the letter of a dead key never
+	// arrives, which is how dead keys broke with ibus when its server was asked for whatever the locale.
+	// Xlib's own handling gives them there.
+	ctype = setlocale(LC_CTYPE, nullptr);
+	if (ctype == nullptr || strcmp(ctype, "C") == 0 || strcmp(ctype, "POSIX") == 0)
+	{
+		firstModifiers = 1;
+
+		const char *xmodifiers = getenv("XMODIFIERS");
+		if (xmodifiers != nullptr && xmodifiers[0] != '\0')
+			nlwarning("3D: LC_CTYPE is the C locale, the input method of XMODIFIERS (%s) is not used: its text would be lost. Set LANG or LC_CTYPE to a UTF-8 locale to use it", xmodifiers);
+	}
+
+	for (uint i = firstModifiers; i < sizeof(s_Modifiers) / sizeof(s_Modifiers[0]) && _ic == nullptr; ++i)
+	{
+		if (XSetLocaleModifiers(s_Modifiers[i]) == nullptr)
+			continue;
+
+		_im = XOpenIM(_dpy, nullptr, nullptr, nullptr);
+		if (_im == nullptr)
+			continue;
+
 		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
-//		XSetICFocus(_ic);
-	}
-	else
-	{
-		_ic = nullptr;
-		nlwarning("XCreateIM failed");
-	}
-
-	if (!_ic)
-	{
-		nlwarning("XCreateIC failed");
+		if (_ic == nullptr)
+		{
+			XCloseIM(_im);
+			_im = nullptr;
+		}
 	}
 
+	// the modifiers the input method was opened with are those of the locale it was opened in
+	const char *modifiers = XSetLocaleModifiers(nullptr);
+	const std::string imModifiers = modifiers ? modifiers : "";
+
+	// LC_CTYPE as the process had it
+	if (!savedCtype.empty())
+		setlocale(LC_CTYPE, savedCtype.c_str());
+
+	if (_ic == nullptr)
+	{
+		nlwarning("3D: No X input method could be opened (XOpenIM or XCreateIC failed), dead keys and compose sequences do not work");
+		return;
+	}
+
+	// when the input method stops, Xlib frees it and its context: lostIM() forgets them
+	XIMCallback destroyCallback;
+	destroyCallback.client_data = (XPointer)this;
+	destroyCallback.callback = inputMethodDestroyed;
+	XSetIMValues(_im, XNDestroyCallback, &destroyCallback, NULL);
+
+	if (m_Focus)
+		XSetICFocus(_ic);
+
+	const char *imLocale = XLocaleOfIM(_im);
+	nlinfo("3D: X input method opened with the locale '%s' and the modifiers '%s'", imLocale ? imLocale : "", imModifiers.c_str());
 #endif
 }
 
@@ -126,16 +217,43 @@ void CUnixEventEmitter::closeIM()
 		XCloseIM(_im);
 		_im = nullptr;
 	}
+
+	m_LostIM = false;
 #endif
+}
+
+void CUnixEventEmitter::lostIM()
+{
+	// Xlib has freed them, or is about to: they must not be used, closed or destroyed any more
+	_im = nullptr;
+	_ic = nullptr;
+	m_LostIM = true;
 }
 
 void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 {
+	// A signal that ends the session (the system shuts down, the user logs off) is told to the application here,
+	// where a window system that sends a message for it would deliver it
+	NLMISC::CSystemUtils::pollEndSession();
+
 	while (XPending(_dpy))
 	{
 		XEvent	Event;
 		XNextEvent(_dpy, &Event);
-		if (allWindows || Event.xany.window == _win)
+
+		// An input method takes its events first, whatever their window: the connection to an input method
+		// server has a window of its own. Key presses are filtered in processMessage, which posts the key
+		// before the input method takes it, and key releases are never filtered, so that every key that went
+		// down for the application also goes up.
+		if (Event.type != KeyPress && Event.type != KeyRelease && XFilterEvent(&Event, None))
+			continue;
+
+		// the input method stopped: open the next one that answers
+		if (m_LostIM)
+			createIM();
+
+		// a keyboard mapping change is for every window, its event has none
+		if (allWindows || Event.xany.window == _win || Event.type == MappingNotify)
 		{
 			// nlinfo("event: %d", Event.type);
 			if (_driver)
@@ -245,6 +363,9 @@ TKey getKeyFromKeycode (uint keycode)
 	case 0x31: return KeyAPOSTROPHE;
 	case 0x33: return KeyBACKSLASH;
 	case 0x5e: return KeyOEM_102;
+	case 0x5b: return KeyDECIMAL; // KPDL, on the layouts where it gives a period or a comma
+	case 0x61: return KeyOEM_102; // AB11, the ro key of Japanese keyboards, as on Windows (it shares the name with LSGT on Brazilian ones)
+	case 0x84: return KeyDASH; // AE13, the yen key of Japanese keyboards: no other key gives KeyDASH on X11
 //	case 0x3a: return KeyCOMMA;
 	case 0x3b: return KeyPERIOD;
 	case 0x3c: return KeySLASH;
@@ -260,7 +381,7 @@ TKey getKeyFromKeycode (uint keycode)
 	case 0x1f: return KeyI;
 	case 0x20: return KeyO;
 	case 0x21: return KeyP;
-	case 0x26: return KeyQ;
+	case 0x26: return KeyA;
 	case 0x27: return KeyS;
 	case 0x28: return KeyD;
 	case 0x29: return KeyF;
@@ -292,6 +413,7 @@ TKey getKeyFromKeySym (KeySym keysym)
 	{
 	case XK_BackSpace: return KeyBACK;
 	case XK_Tab: return KeyTAB;
+	case XK_ISO_Left_Tab: return KeyTAB; // Shift+Tab
 	case XK_Return: return KeyRETURN;
 	case XK_Sys_Req: return KeySNAPSHOT;
 	case XK_Scroll_Lock: return KeySCROLL;
@@ -335,6 +457,7 @@ TKey getKeyFromKeySym (KeySym keysym)
 	case XK_KP_Add: return KeyADD;
 	case XK_KP_Subtract: return KeySUBTRACT;
 	case XK_KP_Decimal: return KeyDECIMAL;
+	case XK_KP_Separator: return KeyDECIMAL; // the decimal comma of the keypad, as on Windows
 //	case XK_period: return KeyDECIMAL;
 	case XK_KP_Divide: return KeyDIVIDE;
 	case XK_F1: return KeyF1;
@@ -359,6 +482,12 @@ TKey getKeyFromKeySym (KeySym keysym)
 	case XK_Mode_switch: return KeyMENU;
 	case XK_ISO_Level3_Shift: return KeyMENU;
 	case XK_Menu: return KeyAPPS;
+	// Japanese keyboards; without these, Zenkaku_Hankaku falls back to its keycode, the apostrophe's
+	case XK_Zenkaku_Hankaku: return KeyKANJI;
+	case XK_Kanji: return KeyKANJI;
+	case XK_Henkan_Mode: return KeyCONVERT;
+	case XK_Muhenkan: return KeyNONCONVERT;
+	case XK_Hiragana_Katakana: return KeyKANA;
 	case XK_Alt_L: return KeyMENU;
 	case XK_Alt_R: return KeyMENU;
 	case XK_space: return KeySPACE;
@@ -419,6 +548,191 @@ TKey getKeyFromKeySym (KeySym keysym)
 	break;
 	}
 	return KeyNOKEY;
+}
+
+// the keys of the character block of the keyboard besides the letters and the digits, in the order they are
+// given out to the keys whose position belongs to another key
+static const TKey s_PunctuationKeys[] = { KeySEMICOLON, KeyEQUALS, KeyCOMMA, KeyDASH, KeyPERIOD, KeySLASH, KeyTILDE,
+	KeyLBRACKET, KeyBACKSLASH, KeyRBRACKET, KeyAPOSTROPHE, KeyPARAGRAPH, KeyOEM_102 };
+
+// whether a key is one of the character keys: a letter, a digit or punctuation. Which TKey each of these keys
+// has depends on the keyboard layout, and each has one TKey whatever the modifiers.
+static bool isCharacterKey(TKey key)
+{
+	if ((key >= KeyA && key <= KeyZ) || (key >= Key0 && key <= Key9))
+		return true;
+
+	for (uint i = 0; i < sizeof(s_PunctuationKeys) / sizeof(s_PunctuationKeys[0]); ++i)
+	{
+		if (s_PunctuationKeys[i] == key)
+			return true;
+	}
+
+	return false;
+}
+
+// the key named after a punctuation character, for a key that cannot have the key of its position
+static TKey getPunctuationKeyFromKeySym(KeySym keysym)
+{
+	switch (keysym)
+	{
+	case XK_semicolon: return KeySEMICOLON;
+	case XK_equal: return KeyEQUALS;
+	case XK_comma: return KeyCOMMA;
+	case XK_minus: return KeyDASH;
+	case XK_period: return KeyPERIOD;
+	case XK_slash: return KeySLASH;
+	case XK_grave: return KeyTILDE;
+	case XK_bracketleft: return KeyLBRACKET;
+	case XK_backslash: return KeyBACKSLASH;
+	case XK_bracketright: return KeyRBRACKET;
+	case XK_apostrophe: return KeyAPOSTROPHE;
+	default: break;
+	}
+	return KeyNOKEY;
+}
+
+// The character key of each keycode, for one group (layout) of the keyboard.
+// A letter key is the key of its letter. The other keys are the key of their position (getKeyFromKeycode),
+// which for a letter position means that the layout has no key for that letter (Cyrillic, Greek). A key whose
+// position belongs to another key gets a key of its own: without that, on AZERTY the comma was KeyM like the
+// m key, and on BEPO seven keys shared their key with a letter.
+const std::vector<TKey> &CUnixEventEmitter::getKeycodeKeys(uint group)
+{
+	std::vector<TKey> &keys = m_KeycodeKeys[group & 3];
+	if (!keys.empty())
+		return keys;
+
+	keys.resize(256, KeyNOKEY);
+
+	int minKeycode = 8, maxKeycode = 255;
+	XDisplayKeycodes(_dpy, &minKeycode, &maxKeycode);
+	if (minKeycode < 0)
+		minKeycode = 0;
+	if (maxKeycode > 255)
+		maxKeycode = 255;
+
+	// the keys that are given, and those among them that a letter key has
+	std::vector<bool> taken(KeyCount, false);
+	std::vector<bool> letter(KeyCount, false);
+	std::vector<KeySym> keysyms(256, NoSymbol);
+
+	// the letters
+	for (int keycode = minKeycode; keycode <= maxKeycode; ++keycode)
+	{
+		KeySym keysym = XkbKeycodeToKeysym(_dpy, (KeyCode)keycode, group & 3, 0);
+
+		// a key with fewer groups than the keyboard has
+		if (keysym == NoSymbol && (group & 3) != 0)
+			keysym = XkbKeycodeToKeysym(_dpy, (KeyCode)keycode, 0, 0);
+
+		keysyms[keycode] = keysym;
+
+		TKey key = getKeyFromKeySym(keysym);
+		if (key >= KeyA && key <= KeyZ)
+		{
+			keys[keycode] = key;
+			taken[key] = true;
+			letter[key] = true;
+		}
+	}
+
+	// the keys of their position
+	std::vector<int> displaced;
+	for (int keycode = minKeycode; keycode <= maxKeycode; ++keycode)
+	{
+		if (keys[keycode] != KeyNOKEY || keysyms[keycode] == NoSymbol)
+			continue;
+
+		TKey key = getKeyFromKeycode(keycode);
+		if (key == KeyNOKEY)
+			continue;
+
+		if (!isCharacterKey(key))
+		{
+			// the decimal key of the keypad: nothing else is at its position
+			keys[keycode] = key;
+		}
+		else if (getKeyFromKeySym(keysyms[keycode]) != KeyNOKEY)
+		{
+			// no character key in this layout (Zenkaku_Hankaku): its keysym names it, its position stays free
+		}
+		else if (!letter[key])
+		{
+			// two positions have the same key where a keyboard has only one of them (LSGT and AB11)
+			keys[keycode] = key;
+			taken[key] = true;
+		}
+		else
+		{
+			displaced.push_back(keycode);
+		}
+	}
+
+	// the keys whose position is taken: the key named after their character when it is free
+	for (uint i = 0; i < displaced.size(); ++i)
+	{
+		TKey key = getPunctuationKeyFromKeySym(keysyms[displaced[i]]);
+		if (key != KeyNOKEY && !taken[key])
+		{
+			keys[displaced[i]] = key;
+			taken[key] = true;
+		}
+	}
+
+	// then the first punctuation key that is free
+	for (uint i = 0; i < displaced.size(); ++i)
+	{
+		int keycode = displaced[i];
+
+		for (uint j = 0; j < sizeof(s_PunctuationKeys) / sizeof(s_PunctuationKeys[0]) && keys[keycode] == KeyNOKEY; ++j)
+		{
+			if (!taken[s_PunctuationKeys[j]])
+			{
+				keys[keycode] = s_PunctuationKeys[j];
+				taken[s_PunctuationKeys[j]] = true;
+			}
+		}
+
+		const char *keysymName = XKeysymToString(keysyms[keycode]);
+		if (keys[keycode] == KeyNOKEY)
+		{
+			// more character keys than there are keys for them: shared, as all of these were before
+			keys[keycode] = getKeyFromKeycode(keycode);
+			nlwarning("3D: No key is left for X keycode %d (%s) of keyboard group %u, it shares %s with another key", keycode, keysymName ? keysymName : "", group & 3, CEventKey::getStringFromKey(keys[keycode]).c_str());
+		}
+		else
+		{
+			nldebug("3D: X keycode %d (%s) of keyboard group %u is %s, as %s is another key of this layout", keycode, keysymName ? keysymName : "", group & 3, CEventKey::getStringFromKey(keys[keycode]).c_str(), CEventKey::getStringFromKey(getKeyFromKeycode(keycode)).c_str());
+		}
+	}
+
+	return keys;
+}
+
+// the key of a key event
+TKey CUnixEventEmitter::getKeyFromKeyEvent(uint keycode, KeySym keysym, uint state)
+{
+	// the keys that are no characters follow their keysym, which follows the modifiers: the keypad with Num Lock,
+	// Shift+Tab
+	TKey key = getKeyFromKeySym(keysym);
+	if (key != KeyNOKEY && !isCharacterKey(key))
+		return key;
+
+	// a character key is the same key at all its levels, the one the layout of the group gives its keycode
+	if (keycode < 256)
+	{
+		TKey layoutKey = getKeycodeKeys(XkbGroupForCoreState(state))[keycode];
+		if (layoutKey != KeyNOKEY)
+			return layoutKey;
+	}
+
+	// a letter from a key that has none at its first level
+	if (key != KeyNOKEY)
+		return key;
+
+	// the keys that give an unknown keysym with modifiers (Ctrl+Pause gives Break): by the keysym of their first level
+	return getKeyFromKeySym(XkbKeycodeToKeysym(_dpy, keycode, 0, 0));
 }
 
 // check if the next pressed key is the same
@@ -510,8 +824,11 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	{
 		// save keycode because XFilterEvent could set it to 0
 		uint keyCode = event.xkey.keycode;
-		KeySym k;
-		static char Text[256];
+		KeySym k = NoSymbol;
+		char Text[256];
+		// the text of the key: Text, or longText when an input method commits more than Text holds
+		std::vector<char> longText;
+		const char *text = Text;
 		int c = 0;
 
 		// check if event is filtered
@@ -524,55 +841,90 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 
 #ifdef X_HAVE_UTF8_STRING
 			if (_ic)
+			{
 				c = Xutf8LookupString(_ic, &event.xkey, Text, sizeof(Text), &k, &status);
+
+				if (status == XBufferOverflow && c > 0)
+				{
+					// nothing was written, c is the size the text needs
+					longText.resize(c);
+					c = Xutf8LookupString(_ic, &event.xkey, &longText[0], (int)longText.size(), &k, &status);
+					text = &longText[0];
+				}
+
+				// no text with these two, and a text that still does not fit is dropped
+				if (status == XLookupKeySym || status == XBufferOverflow)
+					c = 0;
+			}
 #endif
 
 			if (status == XLookupNone)
+			{
 				c = XLookupString(&event.xkey, Text, sizeof(Text), &k, nullptr);
+				text = Text;
+			}
 		}
 		else
 		{
-			k = XKeycodeToKeysym(_dpy, keyCode, 0);
+			// the keysym the key has with the modifiers held (the keypad follows Num Lock), as a lookup gives it
+			unsigned int unusedModifiers = 0;
+			if (!XkbLookupKeySym(_dpy, (KeyCode)keyCode, event.xkey.state, &unusedModifiers, &k))
+				k = XkbKeycodeToKeysym(_dpy, keyCode, 0, 0);
 		}
 
 		// send CEventKeyDown event only if keyCode is defined
 		if (keyCode)
 		{
-			TKey key = getKeyFromKeySym(k);
-			if (key == KeyNOKEY)
-				key = getKeyFromKeycode(keyCode);
+			TKey key = getKeyFromKeyEvent(keyCode, k, event.xkey.state);
 
-			// search for key in map
-			std::map<TKey, bool>::const_iterator it = _PressedKeys.find(key);
+			// An input method server gives back the key presses it does not use: the same press, with the
+			// same time, comes a second time and is not filtered then. Its key down was posted the first time.
+			bool givenBack = !filtered && keyCode == m_FilteredKeycode && event.xkey.time == m_FilteredTime;
+			m_FilteredKeycode = filtered ? keyCode : 0;
+			m_FilteredTime = event.xkey.time;
 
-			// if key is not found or value is false, that's the first time
-			bool firstTime = (it == _PressedKeys.end()) || !it->second;
+			if (!givenBack)
+			{
+				// search for key in map
+				std::map<TKey, bool>::const_iterator it = _PressedKeys.find(key);
 
-			server->postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), firstTime, this));
-			_PressedKeys[key] = true;
+				// if key is not found or value is false, that's the first time
+				bool firstTime = (it == _PressedKeys.end()) || !it->second;
+
+				server->postEvent(new CEventKeyDown(key, getKeyButton(event.xbutton.state), firstTime, this));
+				_PressedKeys[key] = true;
+
+				// its release reports the same key, whatever the modifiers are by then
+				m_PressedKeycodes[keyCode] = key;
+			}
 
 			// don't send a control character when deleting
 			if (key == KeyDELETE)
 				c = 0;
 		}
 
-		Text[c] = '\0';
-		if (c>0)
+		if (c > 0)
 		{
 #ifdef X_HAVE_UTF8_STRING
-			::u32string ucstr = NLMISC::CUtfStringView(Text).toUtf32();
+			// One event for each character: an input method commits whole words. The text is taken by its
+			// length, as it is not terminated and Xlib gives a NUL byte for Ctrl+Space, Ctrl+2 and Ctrl+@, which
+			// is posted as the character it is, as before.
+			::u32string ucstr = NLMISC::CUtfStringView(std::string(text, (size_t)c)).toUtf32();
 
-			CEventChar *charEvent = new CEventChar (ucstr[0], getKeyButton(event.xbutton.state), this);
+			for (size_t i = 0; i < ucstr.size(); ++i)
+			{
+				CEventChar *charEvent = new CEventChar(ucstr[i], getKeyButton(event.xbutton.state), this);
 
-			// raw if not processed by IME
-			charEvent->setRaw(keyCode != 0);
+				// raw if not processed by IME
+				charEvent->setRaw(keyCode != 0);
 
-			server->postEvent (charEvent);
+				server->postEvent(charEvent);
+			}
 #else
 			// FIXME: Convert locale to UTF-32
 			for (int i = 0; i < c; i++)
 			{
-				CEventChar *charEvent = new CEventChar ((u32char)(unsigned char)Text[i], getKeyButton(event.xbutton.state), this);
+				CEventChar *charEvent = new CEventChar ((u32char)(unsigned char)text[i], getKeyButton(event.xbutton.state), this);
 
 				// raw if not processed by IME
 				charEvent->setRaw(keyCode != 0);
@@ -587,13 +939,20 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	{
 		if (!keyRepeat(_dpy, &event))
 		{
-			KeySym k;
-			// only need to get correct KeySym
-			int c = XLookupString(&event.xkey, nullptr, 0, &k, nullptr);
-
-			TKey key = getKeyFromKeySym(k);
-			if (key == KeyNOKEY)
-				key = getKeyFromKeycode(event.xkey.keycode);
+			// the key its press reported: looked up again, the keysym follows the modifiers held now,
+			// and a Shift key that gives Caps_Lock at its second level would be released as Caps Lock
+			TKey key;
+			std::map<uint, TKey>::iterator it = m_PressedKeycodes.find(event.xkey.keycode);
+			if (it != m_PressedKeycodes.end())
+			{
+				key = it->second;
+				m_PressedKeycodes.erase(it);
+			}
+			else
+			{
+				// pressed before the window had the focus: the key without modifiers
+				key = getKeyFromKeyEvent(event.xkey.keycode, XkbKeycodeToKeysym(_dpy, event.xkey.keycode, 0, 0), event.xkey.state);
+			}
 
 			server->postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
 			_PressedKeys[key] = false;
@@ -750,6 +1109,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	}
 	case FocusIn:
 		// keyboard focus
+		m_Focus = true;
 #ifdef X_HAVE_UTF8_STRING
 		if (_ic) XSetICFocus(_ic);
 #endif
@@ -758,6 +1118,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		break;
 	case FocusOut:
 		// keyboard focus
+		m_Focus = false;
 #ifdef X_HAVE_UTF8_STRING
 		if (_ic) XUnsetICFocus(_ic);
 #endif
@@ -769,6 +1130,10 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	case MappingNotify:
 		// update keymap
 		XRefreshKeyboardMapping((XMappingEvent *)&event);
+
+		// the keys of the layout are read again when the next key needs them
+		for (uint i = 0; i < sizeof(m_KeycodeKeys) / sizeof(m_KeycodeKeys[0]); ++i)
+			m_KeycodeKeys[i].clear();
 		break;
 	case DestroyNotify:
 		// XIM server has crashed
@@ -777,7 +1142,9 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	case ClientMessage:
 		if ((event.xclient.format == 32) && ((Atom)event.xclient.data.l[0] == XA_WM_DELETE_WINDOW))
 		{
-			server->postEvent(new CEventDestroyWindow(this));
+			// the window manager asks to close the window (close box, Alt+F4): a request, as WM_CLOSE on
+			// Windows. The window is still there and the application decides what to do.
+			server->postEvent(new CEventCloseWindow(this));
 		}
 		break;
 	default:

@@ -117,6 +117,13 @@ void		splitString(const std::string &str, const std::string &separator, std::vec
 	string::size_type pos=0;
 	string::size_type newPos=0;
 	retList.clear();
+	// an empty separator separates nothing, and find() would never advance
+	if (separator.empty())
+	{
+		if (!str.empty())
+			retList.push_back(str);
+		return;
+	}
 	while( (newPos= str.find(separator,pos)) != string::npos)
 	{
 		// if not empty sub str. (skip repetition of separator )
@@ -137,6 +144,13 @@ void		splitUCString(const ucstring &ucstr, const ucstring &separator, std::vecto
 	ucstring::size_type pos=0;
 	ucstring::size_type newPos=0;
 	retList.clear();
+	// an empty separator separates nothing, and find() would never advance
+	if (separator.empty())
+	{
+		if (!ucstr.empty())
+			retList.push_back(ucstr);
+		return;
+	}
 	while( (newPos= ucstr.find(separator,pos)) != ucstring::npos)
 	{
 		// if not empty sub str. (skip repetition of separator )

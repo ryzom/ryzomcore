@@ -53,6 +53,14 @@ public:
 		Disconnecting,
 	};
 
+	/// What receiveStreamRecord() found
+	enum TStreamRecord
+	{
+		NoStreamRecord, // No complete message has arrived
+		StreamRecord, // A message
+		StreamError, // The stream cannot be read any further, the connection is of no use any more
+	};
+
 	/// Why the last connection attempt ended before it was established
 	enum TFailure
 	{
@@ -114,6 +122,23 @@ public:
 
 	/// Receive a datagram
 	bool receiveDatagram(NLMISC::CBitMemStream &msgin);
+
+	/// When the datagram that receiveDatagram() gave last arrived from the network: NLMISC::CTime::getLocalTime() in
+	/// milliseconds, the low 32 bits (the main thread may take it much later)
+	uint32 lastDatagramArrivalTime() const;
+
+	/// The connection is of protocol level ryzomcore/4.2: the server sends some classes of messages on streams instead
+	/// of in the datagrams, up to CLFECOMMON::StreamClassMax streams, numbered in the order it opens them. Which
+	/// messages are on which stream is the server's choice.
+	bool streams() const;
+
+	/// The session ends and the connection is kept for the next one (limbo mode). The streams may still carry messages
+	/// of the session that ends: they are dropped, up to the mark the frontend puts in each stream when it ends it.
+	void endStreamSession();
+
+	/// Take the next message out of a stream, in the order the server sent them on it (main thread only).
+	/// streamNumber is below CLFECOMMON::StreamClassMax, msgin is an input stream.
+	TStreamRecord receiveStreamRecord(uint streamNumber, NLMISC::CBitMemStream &msgin);
 
 	/// Check if quick is supported
 	bool isSupported() const;

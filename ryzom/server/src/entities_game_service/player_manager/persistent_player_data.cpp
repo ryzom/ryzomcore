@@ -383,6 +383,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	uint32 version=~0u;\
 	prepareToLoad();\
 	_HPB= 0x12345678; \
+	m_ComaStartDate = 0; \
 
 #define PERSISTENT_POST_APPLY\
 	if (version!=~0u)\
@@ -403,6 +404,8 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	\
 	postLoadTreatment();\
 	if(!IsRingShard && _HPB!=0x12345678) { _PhysScores._PhysicalScores[SCORES::hit_points].Current = _HPB; }\
+	/* only a character that is loaded dead goes on with the coma of its save */\
+	if (_PhysScores._PhysicalScores[SCORES::hit_points].Current > 0) { m_ComaStartDate = 0; }\
 
 #define PERSISTENT_DATA\
 	FLAG(CLEAR,clear())\
@@ -429,6 +432,9 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 \
 	/* property for backup character HP independently of what happened in ring session*/\
 	PROP(sint32,_HPB)\
+\
+	/* date the coma of a dead character began, so that a login does not start the coma again */\
+	PROP2(ComaStartDate, uint32, m_ComaStartDate, m_ComaStartDate = val)\
 \
 	LPROP_MAP2(FactionPoints, string, uint32,\
 	for(uint32 i = 0; i < (PVP_CLAN::EndClans-PVP_CLAN::BeginClans+1); ++i),\
@@ -1532,6 +1538,7 @@ private:
 		else\
 			STOP( NLMISC::toString("<SPAWN_ZONE> %s lost the respawn point with index %hu", _Char.getId().toString().c_str(), _RegularRespawnPoints[i]) );\
 	}\
+	respawnPointNames.insert(respawnPointNames.end(), m_RespawnPointsNotLoaded.begin(), m_RespawnPointsNotLoaded.end());\
 
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,clearRespawnPoints())\
@@ -1540,6 +1547,8 @@ private:
 	TRespawnPoint respawnPoint = CZoneManager::getInstance().getTpSpawnZoneIdByName(val);\
 	if (respawnPoint != InvalidSpawnZoneId)\
 		_RegularRespawnPoints.push_back(respawnPoint);\
+	else if (IsRingShard)\
+		m_RespawnPointsNotLoaded.push_back(val);\
 	else\
 		( nlwarning("<SPAWN_ZONE> %s lost the respawn point '%s'", _Char.getId().toString().c_str(), val.c_str()) );\
 }\
@@ -1554,7 +1563,7 @@ private:
 		{\
 			CMissionRespawnPoints& missionRespawnPoints = _MissionRespawnPointsByContinent[sint32(continent)];\
 			missionRespawnPoints.apply(pdr, _Char);\
-			if (missionRespawnPoints.empty())\
+			if (missionRespawnPoints.empty() && !missionRespawnPoints.hasPointsNotLoaded())\
 			{\
 				_MissionRespawnPointsByContinent.erase(sint32(continent));\
 				( nlwarning("<SPAWN_ZONE> %s has lost all mission respawn points of continent '%s'", _Char.getId().toString().c_str(), key.c_str()) );\
@@ -1586,6 +1595,7 @@ private:
 		else\
 			STOP( NLMISC::toString("<SPAWN_ZONE> %s lost the mission respawn point with index %hu", c.getId().toString().c_str(), (*this)[i]) );\
 	}\
+	respawnPointNames.insert(respawnPointNames.end(), m_PointsNotLoaded.begin(), m_PointsNotLoaded.end());\
 
 #define PERSISTENT_DATA\
 	LPROP_VECT2(MissionRespawnPoints, string, VECT_LOGIC(respawnPointNames), respawnPointNames[i],\
@@ -1593,6 +1603,8 @@ private:
 	TRespawnPoint respawnPoint = CZoneManager::getInstance().getTpSpawnZoneIdByName(val);\
 	if (respawnPoint != InvalidSpawnZoneId)\
 		push_back(respawnPoint);\
+	else if (IsRingShard)\
+		m_PointsNotLoaded.push_back(val);\
 	else\
 		( nlwarning("<SPAWN_ZONE> %s lost the mission respawn point '%s'", c.getId().toString().c_str(), val.c_str()) );\
 }\

@@ -67,7 +67,7 @@ class CEntityPhrases
 {
 public:
 	/// default constructor
-	CEntityPhrases(const NLMISC::CEntityId &entityId) : _EntityId(entityId)
+	CEntityPhrases(const NLMISC::CEntityId &entityId) : _EntityId(entityId), _CombatLatencyEndDate(0.0)
 	{}
 
 	/// destructor
@@ -117,6 +117,7 @@ public:
 				_CurrentAction->stopBeforeExecution();
 
 			clearAttackFlag();
+			clearCombatLatencyEndDate();
 
 			// if current action is the cyclic one, re init phrase parameters
 			if (_CurrentAction == _CyclicAction)
@@ -163,6 +164,7 @@ public:
 		_CyclicActionInfos.reset();
 
 		clearAttackFlag();
+		clearCombatLatencyEndDate();
 	}
 
 	/// set next phrase
@@ -241,6 +243,20 @@ public:
 	// free actor (clear attack actor)
 	void clearAttackFlag();
 
+	/**
+	 * End date of the latency of the last combat action that the entity launched, in ticks with the fraction,
+	 * or 0 when the next combat action does not follow one.
+	 * An action ends at the first tick at or after its latency end date, and the next one is launched in that
+	 * tick. A combat action that follows another one this way counts its latency from this date and not from
+	 * the tick (CCombatPhrase::launch), so the attack period is the latency of the weapon and not that latency
+	 * rounded up to whole ticks. The date is set when a combat action is launched, and cleared when the entity
+	 * launches another kind of action, is given a new cyclic action, or has its actions cancelled. The copy that
+	 * renewCyclicAction() makes of the cyclic action is not a new one: the date is kept.
+	 */
+	inline double getCombatLatencyEndDate() const { return _CombatLatencyEndDate; }
+	inline void setCombatLatencyEndDate(double date) { _CombatLatencyEndDate = date; }
+	inline void clearCombatLatencyEndDate() { _CombatLatencyEndDate = 0.0; }
+
 private:
 	/// the entity current cyclic action if any
 	CSPhrasePtr			_CyclicAction;
@@ -259,6 +275,9 @@ private:
 
 	/// associated entityId
 	NLMISC::CEntityId	_EntityId;
+
+	/// end date of the latency of the last combat action launched, 0 if none to follow (see getCombatLatencyEndDate)
+	double				_CombatLatencyEndDate;
 };
 
 /**
@@ -499,10 +518,9 @@ public:
 	 * \param minQuality harvested raw material min quality
 	 * \param maxQuality harvested raw material max quality
 	 * \param quantity harvested raw material quantity
-	 * \param deposit true if the entity harvest a deposit
 	 * \return false if the phrase cannot be built
 	 */
-	bool harvestDefault(const TDataSetRow &actorRowId, const NLMISC::CSheetId &rawMaterialSheet, uint16 minQuality, uint16 maxQuality, uint16 quantity, bool deposit = false );
+	bool harvestDefault(const TDataSetRow &actorRowId, const NLMISC::CSheetId &rawMaterialSheet, uint16 minQuality, uint16 maxQuality, uint16 quantity);
 		
 	/**
 	 * entity1 attacks entity2 using a default attack or any other attacks

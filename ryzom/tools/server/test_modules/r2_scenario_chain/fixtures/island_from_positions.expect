@@ -1,0 +1,27 @@
+# A scenario of the first format whose location number names one island while its content stands on
+# another. The islands of this test are in fixtures/islands. Where the content stands decides, and the
+# author is told.
+upgrade: ok
+version_update: changed
+version_update_note: uiR2EDVersionNoteIslandMismatch(uiR2_Deserts05, uiR2_Deserts07)
+version_update_note: uiR2EDVersionNoteFirstAct()
+version_update_note: uiR2EDVersionNoteEmptyGroups(1)
+absent: version_update_failure
+absent: dropped_update
+absent: late_update
+save: ok
+roundtrip: ok
+reload_version_update: current
+translate: ok
+rt_check_limits: bots_per_act=205 aliases_per_act=1048575 (default) islands=7
+rt_check: ok
+rt_check_serial: ok
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Description.LocationId = 4
+scenario_at: Locations = <size 1>
+scenario_at: Locations[0].IslandName = uiR2_Deserts07
+scenario_at: Acts[1].LocationId = @Locations[0].InstanceId
+rt_at: Locations[0].Island = uiR2_Deserts07

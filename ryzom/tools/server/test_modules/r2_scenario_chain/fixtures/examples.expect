@@ -1,0 +1,21 @@
+# The example scenarios of the client. They were saved by the editors before this one, and the version
+# update has nothing to change in them: they come out as they went in, apart from the versions the save
+# gives them, and the update makes no request.
+upgrade: unchanged
+version_update: unchanged
+absent: version_update_note
+absent: version_update_failure
+absent: dropped_update
+absent: late_update
+save: ok
+scenario_vs_file: same
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+# when the test ends the scenario comes back from the server, which has the versions the save gave it
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload

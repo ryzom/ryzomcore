@@ -784,10 +784,10 @@ namespace NLGUI
 			{
 				if ((*it)->data == nullptr)
 				{
-					LOG_DL("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
+					LOG_DL("(%s) starting new download '%s'", _Id.c_str(), (*it)->url.c_str());
 					if (!startCurlDownload(*it))
 					{
-						LOG_DL("(%s) failed to start '%s)'", _Id.c_str(), it->url.c_str());
+						LOG_DL("(%s) failed to start '%s)'", _Id.c_str(), (*it)->url.c_str());
 						// out of the queue before its callback runs, as in checkDownloads; the callback can release the
 						// downloads of the page, so the queue is walked again from the start
 						CDataDownload *download = *it;
@@ -967,7 +967,7 @@ namespace NLGUI
 		{
 			if((*it)->url == finalUrl)
 			{
-				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), img);
+				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), view);
 				TextureDownloadCB *cb = dynamic_cast<TextureDownloadCB*>(*it);
 				if (cb)
 				{
@@ -2575,8 +2575,11 @@ namespace NLGUI
 		viewText->setModulateGlobalColor(ErrorColorGlobalColor);
 		viewText->setMultiLine (true);
 		getParagraph()->addChild (viewText);
-		if(!_TitlePrefix.empty())
-			setTitle (_TitlePrefix);
+		// The error has taken the place of the page: the window has its prefix alone (setTitle would put
+		// the prefix before the prefix), as after a page that gives no title (endBuild). Without a prefix
+		// that is no title, and not the wait text of the request that failed.
+		_TitleString = _TitlePrefix;
+		setContainerTitle (_TitleString);
 
 		updateRefreshButton();
 		invalidateCoords();
@@ -3851,11 +3854,13 @@ namespace NLGUI
 		releaseDownloads();
 		updateRefreshButton();
 
-		// Reset the title
+		// The title bar says that the page is on its way. That text is not the title of a page and is not
+		// kept as one (_TitleString): a page that gives no title would leave it in the title bar for good,
+		// and an answer that is not a page puts the title of the page that stays back.
 		if(_TitlePrefix.empty())
-			setTitle (CI18N::get("uiPleaseWait"));
+			setContainerTitle (CI18N::get("uiPleaseWait"));
 		else
-			setTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
+			setContainerTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
 
 		url = upgradeInsecureUrl(url);
 
@@ -4209,7 +4214,8 @@ namespace NLGUI
 		}
 		else if (_TrustedDomain && type.find("text/lua") == 0)
 		{
-			setTitle(_TitleString);
+			// the page stays, and its title comes back in place of the wait text
+			setContainerTitle(_TitleString);
 
 			_LuaScript = "\nlocal __CURRENT_WINDOW__=\""+this->_Id+"\" \n"+content;
 			CLuaManager::getInstance().executeLuaScript(_LuaScript, true);
@@ -4401,6 +4407,9 @@ namespace NLGUI
 	void CGroupHTML::beginBuild ()
 	{
 		_Browsing = true;
+
+		// a new page: it has no title until it gives one (htmlTITLE)
+		_TitleString.clear();
 	}
 
 	void CGroupHTML::endBuild ()
@@ -4409,11 +4418,12 @@ namespace NLGUI
 		_Browsing = false;
 		updateRefreshButton();
 
-		// check that the title is set, or reset it (in the case the page
-		// does not provide a title)
+		// The page gave no title: the window has its prefix alone, in place of the title of the page
+		// before or of the wait text (setTitle would put the prefix before the prefix).
 		if (_TitleString.empty())
 		{
-			setTitle(_TitlePrefix);
+			_TitleString = _TitlePrefix;
+			setContainerTitle(_TitleString);
 		}
 
 		invalidateCoords();
@@ -6105,11 +6115,18 @@ namespace NLGUI
 		// read general property
 		string id = elm.getAttribute("id");
 
-		// Widget template name (old)
-		string templateName = elm.getAttribute("z_btn_tmpl");
-		// Input name is the new
-		if (elm.hasNonEmptyAttribute("z_input_tmpl"))
-			templateName = elm.getAttribute("z_input_tmpl");
+		// The page names the template of the widget, as a div of the class ryzom-ui-grouptemplate does: only a
+		// page of a trusted domain may. A template is interface XML with actions of its own, and the name of
+		// the input goes into it as a parameter. Another page gets the default widget of this browser.
+		string templateName;
+		if (_TrustedDomain)
+		{
+			// Widget template name (old)
+			templateName = elm.getAttribute("z_btn_tmpl");
+			// Input name is the new
+			if (elm.hasNonEmptyAttribute("z_input_tmpl"))
+				templateName = elm.getAttribute("z_input_tmpl");
+		}
 
 		// Widget minimal width
 		uint32 minWidth = 0;
@@ -6955,11 +6972,24 @@ namespace NLGUI
 
 		_Cells.back()->NewLine = getTR();
 
+		// The grid of <table border> is drawn in the border colours of the table (its bordercolor attribute or
+		// the default grey, or its own CSS border colour), side by side. Without that grid a border the cell
+		// sets through CSS takes the text colour unless the CSS gives one.
 		CSSRect<CSSBorder> border;
-		border.Top.set(   table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
-		border.Right.set( table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
-		border.Bottom.set(table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
-		border.Left.set(  table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		if (table->CellBorder)
+		{
+			border.Top.set(1, CSS_LINE_STYLE_INSET, table->Border->getTopColor());
+			border.Right.set(1, CSS_LINE_STYLE_INSET, table->Border->getRightColor());
+			border.Bottom.set(1, CSS_LINE_STYLE_INSET, table->Border->getBottomColor());
+			border.Left.set(1, CSS_LINE_STYLE_INSET, table->Border->getLeftColor());
+		}
+		else
+		{
+			border.Top.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+			border.Right.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+			border.Bottom.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+			border.Left.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		}
 
 		if (_Style.hasStyle("border-top-width"))	border.Top.Width = _Style.Current.Border.Top.Width;
 		if (_Style.hasStyle("border-right-width"))	border.Right.Width = _Style.Current.Border.Right.Width;
@@ -7031,8 +7061,8 @@ namespace NLGUI
 		// read general property
 		string templateName;
 
-		// Widget template name
-		if (elm.hasNonEmptyAttribute("z_input_tmpl"))
+		// Widget template name: only from a page of a trusted domain (see htmlINPUT)
+		if (_TrustedDomain && elm.hasNonEmptyAttribute("z_input_tmpl"))
 			templateName = elm.getAttribute("z_input_tmpl");
 
 		// Get the string name

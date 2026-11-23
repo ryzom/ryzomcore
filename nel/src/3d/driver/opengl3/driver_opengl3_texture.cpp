@@ -75,7 +75,8 @@ CTextureDrvInfosGL3::CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CD
 CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
 {
 	H_AUTO_OGL(CTextureDrvInfosGL3_CTextureDrvInfosGLDtor)
-	// The id is auto deleted here.
+	// The id is auto deleted here. GL takes the texture out of the units it is bound to, the state cache follows.
+	_Driver->_DriverGLStates.textureDeleted(ID);
 	glDeleteTextures(1,&ID);
 
 	// release profiling texture mem.
@@ -228,6 +229,10 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 		if (!InitFBO)
 		{
 			nglDeleteFramebuffers(1, &FBOId);
+			// (the frame buffer object was bound, and with it gone the frame buffer of the window is: said
+			// here, for the record the driver keeps of what is bound, and as it may be another one than 0, see
+			// CDriverGL3::getWindowFrameBuffer)
+			_Driver->_DriverGLStates.forceBindFramebuffer(_Driver->getWindowFrameBuffer());
 
 			if (AttachDepthStencil)
 			{
@@ -247,7 +252,17 @@ bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 	{
 		if (initFrameBufferObject(tex))
 		{
+			// The active unit loses the texture it has on this target, so the stage is no
+			// longer what the driver has noted for it: its next texture is bound for real.
+			// (setRenderTarget has cleared every stage before this; the picture mode of a
+			// minimized window binds a render target again with the stages in use.)
 			_Driver->_DriverGLStates.forceBindTexture(TextureMode, 0);
+			const uint unit = _Driver->_DriverGLStates.getActiveTexture();
+			if (unit < IDRV_PROGRAM_MAXSAMPLERS)
+			{
+				_Driver->_CurrentTexture[unit] = nullptr;
+				_Driver->_CurrentTextureInfoGL[unit] = nullptr;
+			}
 			_Driver->_DriverGLStates.forceBindFramebuffer(FBOId);
 		}
 		else
@@ -255,7 +270,8 @@ bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 	}
 	else
 	{
-		_Driver->_DriverGLStates.forceBindFramebuffer(0);
+		// the frame buffer of the window, or what stands for it (see CDriverGL3::getWindowFrameBuffer)
+		_Driver->_DriverGLStates.forceBindFramebuffer(_Driver->getWindowFrameBuffer());
 	}
 
 	return true;
@@ -871,6 +887,10 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			_AllocatedTextureMemory-= gltext->TextureMemory;
 			gltext->TextureMemory= 0;
 
+#if NL3D_GL3_STREAM_STATS
+			// The bytes of the pixels that are given to GL below
+			uint64 statBytes = 0;
+#endif
 
 			if (tex.isTextureCube())
 			{
@@ -930,6 +950,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 							glTexImage2D (NLCubeFaceToGLCubeFace[nText], i, glfmt, w, h, 0, glSrcFmt, glSrcType, ptr);
 							bAllUploaded = true;
 							NEL_MEASURE_UPLOAD_TIME_END
+#if NL3D_GL3_STREAM_STATS
+							statBytes += pTInTC->getPixels(i).size();
+#endif
 						}
 						else
 						{
@@ -985,6 +1008,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 								nglCompressedTexImage2D(GL_TEXTURE_2D, i-decalMipMapResize, glfmt,
 															tex.getWidth(i),tex.getHeight(i), 0, size, ptr);
 								bAllUploaded = true;
+#if NL3D_GL3_STREAM_STATS
+								statBytes += size;
+#endif
 							}
 							else
 							{
@@ -1060,6 +1086,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 								glTexImage2D (gltext->TextureMode, i, glfmt, w, h, 0,glSrcFmt, glSrcType, ptr);
 								NEL_MEASURE_UPLOAD_TIME_END
 								bAllUploaded = true;
+#if NL3D_GL3_STREAM_STATS
+								statBytes += uploadTex.getPixels(i).size();
+#endif
 							}
 							else
 							{
@@ -1077,12 +1106,19 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 
 			// profiling. add new TextureMemory usage.
 			_AllocatedTextureMemory+= gltext->TextureMemory;
+
+#if NL3D_GL3_STREAM_STATS
+			++_StreamStats.TextureWholeUploads;
+			_StreamStats.TextureWholeBytes += statBytes;
+			countTextureUpload(tex, statBytes);
+#endif
 		}
 		// b. Load part of the texture case.
 		//==================================
-		// Uses a PBO (Pixel Buffer Object) for async upload. Each rect is orphaned+mapped into
-		// the PBO, then glTexSubImage2D reads from the PBO asynchronously via DMA, avoiding
-		// pipeline stalls that occur with raw CPU pointer uploads.
+		// Uses a PBO (Pixel Buffer Object) for async upload. The pixels of each rect are
+		// copied into buffer memory (which buffer: see below), then glTexSubImage2D reads
+		// from the buffer asynchronously via DMA, avoiding pipeline stalls that occur with
+		// raw CPU pointer uploads.
 		// NOTE: WebGL 2.0 / GLES 3.0 does not support glMapBufferRange on GL_PIXEL_UNPACK_BUFFER,
 		// so we use direct glTexSubImage2D uploads instead.
 		else if (mustLoadPart && !gltext->Compressed)
@@ -1099,18 +1135,24 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				GLint glSrcFmt = getGlSrcTextureFormat(tex, glfmt);
 				GLenum glSrcType = getGlSrcTextureComponentType(tex, glSrcFmt);
 
+#if NL3D_GL3_STREAM_STATS
+				// The bytes of the pixels that are given to GL below
+				uint64 statBytes = 0;
+#endif
+
 				sint nMipMaps;
 #ifndef USE_OPENGLES3
 				if (glSrcFmt == GL_RGBA && tex.getPixelFormat() != CBitmap::RGBA)
 					tex.convertToType(CBitmap::RGBA);
 #endif
+				// The mipmaps that are built here are released behind the uploads, which
+				// read their pixels
+				bool builtMipMaps = false;
 				if (tex.mipMapOn())
 				{
-					bool hadMipMap = tex.getMipMapCount() > 1;
+					builtMipMaps = tex.getMipMapCount() <= 1;
 					tex.buildMipMaps();
 					nMipMaps = tex.getMipMapCount();
-					if (!hadMipMap)
-						tex.releaseMipMaps();
 				}
 				else
 					nMipMaps = 1;
@@ -1144,6 +1186,11 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 						if (bUpload)
 						{
 							sint pixelSize = (sint)(tex.getPixels(i).size() / (w * h));
+
+#if NL3D_GL3_STREAM_STATS
+							++_StreamStats.TexturePartRects;
+							statBytes += (uint64)(rectW * rectH * pixelSize);
+#endif
 
 							// Check if we need to convert Alpha/Luminance to RGBA
 							if (pixelSize == 1 && glSrcFmt == GL_RGBA)
@@ -1225,8 +1272,27 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 #else
-				// Bind PBO for async upload
-				_DriverGLStates.forceBindPixelUnpackBuffer(_PixelUploadPBO);
+				// The pixels of a rectangle are copied row by row into buffer memory, packed,
+				// and GL reads them from the buffer, which is bound as the pixel unpack buffer
+				// for the upload: the pointer of the upload is then an offset into it.
+				// In stream mode that memory is a range of the pixel stream, which stays
+				// mapped: the copy costs no GL call, and nothing on the way returns a value
+				// that the calling thread would have to wait for. GL reads the range when it
+				// executes the upload, which may be after this function has returned: the
+				// stream is told that the frame uses the chunk, and does not write it again
+				// before the GPU has finished the frame.
+				// Else, and for a rectangle that the stream does not take, the buffer of the
+				// driver gets new storage for the rectangle and is mapped for the copy.
+#if NL3D_GL3_TEXTURE_UPLOAD_STREAM
+				const bool pixelStream = _StreamMode;
+#else
+				const bool pixelStream = false;
+#endif
+
+				// The pixels are packed in the buffer. Transient upload state, set back below.
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 
 				// For all rect, update the texture/mipmap.
 				//===============================================
@@ -1260,28 +1326,70 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 							sint pixelSize = (sint)(tex.getPixels(i).size() / (w * h));
 							sint rectBytes = rectW * rectH * pixelSize;
 
-							// Orphan PBO (driver allocates fresh storage, no sync needed)
-							nglBufferData(GL_PIXEL_UNPACK_BUFFER, rectBytes, nullptr, GL_STREAM_DRAW);
+							// A mipmap that the texture has no pixels for has nothing to give to GL
+							if (rectBytes <= 0)
+								goto next_mipmap;
 
-							// Map and copy rect rows into packed PBO
-							void *pboPtr = nglMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, rectBytes,
-								GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-							if (pboPtr)
+#if NL3D_GL3_STREAM_STATS
+							++_StreamStats.TexturePartRects;
+							statBytes += (uint64)rectBytes;
+#endif
+
+							const uint8 *src = (const uint8 *)ptr + y0 * w * pixelSize + x0 * pixelSize;
+							const sint srcStride = w * pixelSize;
+							const sint dstStride = rectW * pixelSize;
+
+							// Where the pixels are in the buffer that is bound for the upload
+							size_t bufferOffset = 0;
+							bool inStream = false;
+
+							// A rectangle of more bytes than a chunk of the stream goes the other way
+							if (pixelStream && (uint32)rectBytes <= NL3D_GL3_PIXEL_STREAM_CHUNK_SIZE)
 							{
-								uint8 *src = (uint8 *)ptr + y0 * w * pixelSize + x0 * pixelSize;
-								sint srcStride = w * pixelSize;
-								sint dstStride = rectW * pixelSize;
-								for (sint row = 0; row < rectH; ++row)
-									memcpy((uint8 *)pboPtr + row * dstStride, src + row * srcStride, dstStride);
-								nglUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+								// When the stream is at its limit it may give up the chunks that only
+								// the uploads before this one read: they are issued
+								_PixelStream.nextDraw();
+								CStreamHandleGL3 handle = _PixelStream.reserve((uint32)rectBytes);
+								// (a stream that has no storage for the range has logged it)
+								if (_PixelStream.isValid(handle))
+								{
+									uint8 *dst = _PixelStream.lock(handle);
+									for (sint row = 0; row < rectH; ++row)
+										memcpy(dst + row * dstStride, src + row * srcStride, dstStride);
+									_PixelStream.unlock(handle);
+									_DriverGLStates.bindPixelUnpackBuffer(_PixelStream.use(handle));
+									bufferOffset = handle.Offset;
+									inStream = true;
+								}
 							}
 
-							// Async upload from PBO (data is packed, no row padding).
-						// Transient upload state — see note in setupTexture().
-							glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-							glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-							glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-							glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, glSrcFmt, glSrcType, nullptr);
+							if (!inStream)
+							{
+								_DriverGLStates.bindPixelUnpackBuffer(_PixelUploadPBO);
+
+								// Orphan PBO (driver allocates fresh storage, no sync needed)
+								nglBufferData(GL_PIXEL_UNPACK_BUFFER, rectBytes, nullptr, GL_STREAM_DRAW);
+
+								// Map and copy rect rows into packed PBO
+								void *pboPtr = nglMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, rectBytes,
+								    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+								if (pboPtr)
+								{
+									for (sint row = 0; row < rectH; ++row)
+										memcpy((uint8 *)pboPtr + row * dstStride, src + row * srcStride, dstStride);
+									nglUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+								}
+							}
+
+#if NL3D_GL3_STREAM_STATS
+							if (inStream)
+								++_StreamStats.TexturePartStreamRects;
+							else if (pixelStream)
+								++_StreamStats.TexturePartRefusedRects;
+#endif
+
+							// Async upload from the buffer (data is packed, no row padding)
+							glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, glSrcFmt, glSrcType, (const GLvoid *)bufferOffset);
 						}
 
 					next_mipmap:
@@ -1295,11 +1403,21 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 					}
 				}
 
-				// Unbind PBO, reset transient pixel store state
-				_DriverGLStates.forceBindPixelUnpackBuffer(0);
+				// Nothing stays bound as the pixel unpack buffer: GL would take the pixels of
+				// the next upload from memory out of it. Reset transient pixel store state.
+				_DriverGLStates.bindPixelUnpackBuffer(0);
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+#endif
+
+				if (builtMipMaps)
+					tex.releaseMipMaps();
+
+#if NL3D_GL3_STREAM_STATS
+				++_StreamStats.TexturePartUploads;
+				_StreamStats.TexturePartBytes += statBytes;
+				countTextureUpload(tex, statBytes);
 #endif
 			}
 		}
@@ -1429,6 +1547,11 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 				GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
 										glfmt, w, h, 0, imageSize, ptr);
 		}
+#if NL3D_GL3_STREAM_STATS
+		++_StreamStats.TextureDirectUploads;
+		_StreamStats.TextureDirectBytes += (uint64)imageSize;
+		countTextureUpload(tex, (uint64)imageSize);
+#endif
 	}
 	else
 	{
@@ -1447,6 +1570,17 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 		glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
 		glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
 		glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+
+#if NL3D_GL3_STREAM_STATS
+		{
+			// The bytes of a pixel, from the size of the mipmap
+			const uint64 pixelSize = (w > 0 && h > 0) ? (uint64)tex.getPixels(nNumMipMap).size() / ((uint64)w * (uint64)h) : 0;
+			const uint64 statBytes = (uint64)(x1 - x0) * (uint64)(y1 - y0) * pixelSize;
+			++_StreamStats.TextureDirectUploads;
+			_StreamStats.TextureDirectBytes += statBytes;
+			countTextureUpload(tex, statBytes);
+		}
+#endif
 	}
 
 	// Disable texture 0
@@ -1475,7 +1609,9 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 	H_AUTO_OGL(activateTexture)
 	if (_CurrentTexture[stage] != tex)
 	{
-		_DriverGLStates.activeTexture(stage);
+		// The unit is made the active one below, and only when something is set on it:
+		// a stage that gets no texture, or the one that GL still has on its unit from
+		// before the stage was unused, costs no GL call.
 		if (tex && tex->TextureDrvShare)
 		{
 			// get the drv info. should be not NULL.
@@ -1504,8 +1640,13 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 					// Cache setup.
 					_CurrentTextureInfoGL[stage] = gltext;
 
-					// setup this texture
-					_DriverGLStates.forceBindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
+					// setup this texture: bound when the unit does not have it, or to change a parameter of it below
+					if (gltext->MagFilter != tex->getMagFilter() || gltext->MinFilter != tex->getMinFilter()
+					    || !_DriverGLStates.isTextureBound(stage, GL_TEXTURE_CUBE_MAP, gltext->ID))
+					{
+						_DriverGLStates.activeTexture(stage);
+						_DriverGLStates.bindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
+					}
 
 					// Change parameters of texture, if necessary.
 					//============================================
@@ -1538,9 +1679,14 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 					// Cache setup.
 					_CurrentTextureInfoGL[stage]= gltext;
 
-					// setup this texture
-					_DriverGLStates.forceBindTexture(gltext->TextureMode, gltext->ID);
-
+					// setup this texture: bound when the unit does not have it, or to change a parameter of it below
+					if (gltext->WrapS != tex->getWrapS() || gltext->WrapT != tex->getWrapT()
+					    || gltext->MagFilter != tex->getMagFilter() || gltext->MinFilter != tex->getMinFilter()
+					    || !_DriverGLStates.isTextureBound(stage, gltext->TextureMode, gltext->ID))
+					{
+						_DriverGLStates.activeTexture(stage);
+						_DriverGLStates.bindTexture(gltext->TextureMode, gltext->ID);
+					}
 
 					// Change parameters of texture, if necessary.
 					//============================================
@@ -1787,6 +1933,19 @@ bool CDriverGL3::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 widt
 		// CTextureMem (shadows, clouds) uses legacy copy-from-framebuffer path.
 		if (tex->isOffscreenTexture())
 		{
+			// A texture without area has no image (setupTextureEx uploads nothing for it), and a frame buffer
+			// that has it attached is never complete: it is refused before anything is allocated for it, and
+			// the render target stays what it is
+			if (tex->getWidth() == 0 || tex->getHeight() == 0)
+			{
+				if (!m_ZeroAreaRenderTargetReported)
+				{
+					m_ZeroAreaRenderTargetReported = true;
+					nlwarning("3D: A render target of %ux%u pixels was asked for; a render target needs an area, it is not set (reported once)", tex->getWidth(), tex->getHeight());
+				}
+				return false;
+			}
+
 			getViewport(_OldViewport);
 
 			if (!width) width = tex->getWidth();

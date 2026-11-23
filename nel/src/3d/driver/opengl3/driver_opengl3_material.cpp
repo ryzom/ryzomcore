@@ -32,17 +32,10 @@ namespace NLDRIVERGL3 {
 
 CMaterialDrvInfosGL3::~CMaterialDrvInfosGL3()
 {
+	// In per-buffer mode every slot that was drawn with has a GL buffer
 	CDriverGL3 *drv = static_cast<CDriverGL3 *>(getDriver());
-	for (int i = 0; i < (int)MaterialUBOId.size(); ++i)
-	{
-		if (MaterialUBOId[i])
-		{
-			if (drv->_DriverGLStates.getCurrBoundUniformBufferBase(NL_BUILTIN_MATERIAL_BINDING) == MaterialUBOId[i])
-				drv->_DriverGLStates.forceBindUniformBufferBase(NL_BUILTIN_MATERIAL_BINDING, 0);
-			nglDeleteBuffers(1, &MaterialUBOId[i]);
-			MaterialUBOId[i] = 0;
-		}
-	}
+	for (size_t i = 0; i < MaterialUBOBlock.size(); ++i)
+		drv->releaseUniformBlock(MaterialUBOBlock[i]);
 }
 
 // Water fragment program GLSL source (4 variants via #defines)
@@ -831,7 +824,8 @@ sint CDriverGL3::beginLightMapMultiPass()
 	if (matDrv->MaterialUBO.size() < neededSlots)
 	{
 		matDrv->MaterialUBO.resize(neededSlots);
-		matDrv->MaterialUBOId.resize(neededSlots, 0);
+		matDrv->MaterialUBOBlock.resize(neededSlots);
+		matDrv->MaterialUBOWritten.resize(neededSlots);
 		matDrv->MaterialUBOTouched.resize(neededSlots, false);
 	}
 
@@ -995,7 +989,7 @@ void CDriverGL3::setupLightMapPass(uint pass)
 
 			activateTexture(stage, text);
 
-			// If texture not NULL, Change texture env fonction.
+			// If texture not NULL, Change texture env function.
 			//==================================================
 			if (text)
 			{

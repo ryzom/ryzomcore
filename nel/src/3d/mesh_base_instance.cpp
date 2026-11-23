@@ -441,6 +441,8 @@ void			CMeshBaseInstance::enableAsyncTextureMode(bool enable)
 				{
 					// copy the texture name into the texture file.
 					CTextureFile	*text= safe_cast<CTextureFile*>(Materials[i].getTexture(uint8(stage)));
+					// a texture file used the normal way again: it leaves the share group of the async texture manager
+					text->enableAsyncShareGroup(false);
 					text->setFileName(AsyncTextures[i].TextureNames[stage]);
 					// clear string space
 					AsyncTextures[i].TextureNames[stage].clear();
@@ -523,6 +525,9 @@ bool			CMeshBaseInstance::isAsyncTextureReady()
 	// test if async loading ended
 	if(_AsyncTextureToLoadRefCount==0)
 	{
+		// the manager that loaded them
+		CAsyncTextureManager	*asyncTextMgr= getOwnerScene()->getAsyncTextureManager();
+
 		// must copy all fileNames into the actual Texture Files. Those are the valid ones now!
 		for(uint i=0;i<_CurrentAsyncTextures.size();i++)
 		{
@@ -532,6 +537,12 @@ bool			CMeshBaseInstance::isAsyncTextureReady()
 				{
 					// copy the texture name into the texture file.
 					CTextureFile	*text= safe_cast<CTextureFile*>(Materials[i].getTexture(uint8(stage)));
+					/* The driver texture of the manager is found through the share group of the manager. The manager
+					   uploads nothing for a file that is not DXTC with mipmaps: the texture file is then one used the
+					   normal way, which shares the driver texture of that file with any other user of it (a static
+					   shape, a preloaded shape), or loads the file when first rendered.
+					*/
+					text->enableAsyncShareGroup(asyncTextMgr && asyncTextMgr->isTextureInDriver(_CurrentAsyncTextures[i].TextIds[stage]));
 					// Since the texture is really uploaded in the driver, the true driver Texture Id will
 					// be bound to this texture.
 					text->setFileName(_CurrentAsyncTextures[i].TextureNames[stage]);

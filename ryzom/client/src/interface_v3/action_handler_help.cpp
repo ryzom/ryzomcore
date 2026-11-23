@@ -124,6 +124,38 @@ std::vector<CInterfaceHelp::CInfoWindow>	CInterfaceHelp::_InfoWindows;
 bool										CInterfaceHelp::_InfoWindowInit= false;
 CInterfaceHelp::CFittedWeaponWeightObserver CInterfaceHelp::_FittedWeaponWeightObserver;
 
+// ***************************************************************************
+/** A raw material shows nothing of the item info but a custom text, and only an item of its own can carry one: the
+ *	info is asked for the slots of the inventories that hold such items. Not for the list of a merchant: the goods of
+ *	the NPC itself come from the sheet, and the server builds an item for each info request on them. A raw material a
+ *	player resells there is an item of its own, and its text is not shown in that list. Nor for a sheet outside of
+ *	the inventories (a craft requirement, a mission reward), which has no slot to ask for.
+ */
+static bool isItemInfoAskedForRawMaterial(uint itemSlotId)
+{
+	nlctassert(MAX_INVENTORY_ANIMAL == 7);
+	switch (itemSlotId >> CItemInfos::SlotIdIndexBitSize)
+	{
+	case INVENTORIES::bag:
+	case INVENTORIES::pet_animal1:
+	case INVENTORIES::pet_animal2:
+	case INVENTORIES::pet_animal3:
+	case INVENTORIES::pet_animal4:
+	case INVENTORIES::pet_animal5:
+	case INVENTORIES::pet_animal6:
+	case INVENTORIES::pet_animal7:
+	case INVENTORIES::temporary:
+	case INVENTORIES::exchange:
+	case INVENTORIES::exchange_proposition:
+	case INVENTORIES::reward_sharing:
+	case INVENTORIES::guild:
+	case INVENTORIES::player_room:
+		return true;
+	default:
+		return false;
+	}
+}
+
 
 // ***************************************************************************
 void	CInterfaceHelp::CInfoWindow::infoReceived()
@@ -376,9 +408,9 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 			_InfoWindows[newIndexWindow].ItemSheet= elt->getSheetId();
 			_InfoWindows[newIndexWindow].ItemSlotId= getInventory().getItemSlotId(elt);
 
-			// Add the waiter only if really needed (not for raw materials)
+			// Add the waiter only if really needed (for a raw material: only in the inventories that hold items of their own)
 			const CItemSheet	*itemSheet= elt->asItemSheet();
-			if(itemSheet && itemSheet->Family != ITEMFAMILY::RAW_MATERIAL )
+			if (itemSheet && (itemSheet->Family != ITEMFAMILY::RAW_MATERIAL || isItemInfoAskedForRawMaterial(_InfoWindows[newIndexWindow].ItemSlotId)))
 				getInventory().addItemInfoWaiter(&_InfoWindows[newIndexWindow]);
 		}
 		else if ( elt->getType() == CCtrlSheetInfo::SheetType_Mission )
@@ -707,16 +739,6 @@ class CHandlerOpenTitleHelp : public IActionHandler
 				return;
 			}
 		}
-
-		CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(NULL);
-		if (!group) return;
-
-		// prepare the help window
-		CSheetHelpSetup setup;
-		setup.setupDefaultIDs();
-		setup.HelpWindow = group;
-		setup.DestSheet = dynamic_cast<CDBCtrlSheet*>(group->getElement(group->getId()+":content:ctrl_slot"));
-
 		// Get name and title
 		// ------------------
 		string name;
@@ -739,7 +761,11 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			title = UserEntity->getTitle();
 			reservedTitle = UserEntity->hasReservedTitle();
 		}
-		else return;
+		else
+		{
+			nlwarning("open_title_help: from=%s is not supported", sFrom.c_str());
+			return;
+		}
 
 		// Get Title info (bricks and skills needed)
 		// -----------------------------------------
@@ -749,6 +775,16 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			nlwarning("cant find unblock.titles");
 			return;
 		}
+
+		// open the help window only now that there is something to show in it
+		CInterfaceGroup *group = CInterfaceHelp::activateNextWindow(nullptr);
+		if (!group) return;
+
+		// prepare the help window
+		CSheetHelpSetup setup;
+		setup.setupDefaultIDs();
+		setup.HelpWindow = group;
+		setup.DestSheet = dynamic_cast<CDBCtrlSheet *>(group->getElement(group->getId() + ":content:ctrl_slot"));
 
 		// get title id number from the title id
 		uint titleIDnb;
@@ -1907,10 +1943,16 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 		strFindReplace(itemText, "%desc", string() );
 
 	// Custom text
-	const	CClientItemInfo	&itemInfo = getInventory().getItemInfo(getInventory().getItemSlotId(item) );
-	if (!itemInfo.CustomText.empty())
+	uint itemSlotId = getInventory().getItemSlotId(item);
+	const	CClientItemInfo	&itemInfo = getInventory().getItemInfo(itemSlotId);
+	// The text is shown when the info held for the slot is this item's, not the one of a former item of the slot: the
+	// refresh that follows the answer of the server shows it. A slot whose info is never asked (a raw material in the
+	// list of a merchant) has no info or never a current one.
+	std::string text;
+	if (getInventory().isItemInfoUpToDate(itemSlotId))
+		text = itemInfo.CustomText.toUtf8();
+	if (!text.empty())
 	{
-		std::string text = itemInfo.CustomText.toUtf8();
 		if (text.size() > 3 && text[0]=='@' && ((text[1]=='W' && text[2]=='E' && text[3]=='B') || (text[1]=='L' && text[2]=='U' && text[3]=='A')))
 		{
 			if (text.size() > 5 && text[4]=='-' && text[5]=='-')
@@ -1925,7 +1967,7 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 		}
 		else
 		{
-			strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText.toUtf8() + "\n");
+			strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + text + "\n");
 			string itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
 			strFindReplace(itemText, "%mfc", itemMFC);
 		}
@@ -3510,19 +3552,20 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
 	}
 	else
-	if( CSheetId(cs->getSheetId()).toString() == "mod_defense_success.sbrick" )
+	// the defense, dodge and parry modifiers show the sheets of their effect families (effect_families.cpp)
+	if( CSheetId(cs->getSheetId()).toString() == "mod_defense.sbrick" )
 	{
 		ustr = CI18N::get("uittModDefenseSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
-	if( CSheetId(cs->getSheetId()).toString() == "mod_dodge_success.sbrick" )
+	if( CSheetId(cs->getSheetId()).toString() == "mod_dodge.sbrick" )
 	{
 		ustr = CI18N::get("uittModDodgeSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
-	if( CSheetId(cs->getSheetId()).toString() == "mod_parry_success.sbrick" )
+	if( CSheetId(cs->getSheetId()).toString() == "mod_parry.sbrick" )
 	{
 		ustr = CI18N::get("uittModParrySuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:PARRY", false);
@@ -3713,6 +3756,7 @@ REGISTER_ACTION_HANDLER( CHandlerAnimalDeadPopupTooltip, "animal_dead_popup_tool
 #include "../entities.h"
 #include "people_interraction.h"
 #include "../net_manager.h"
+#include "../window_desktop.h"
 
 // ***************************************************************************
 class CAHMilkoKick: public IActionHandler
@@ -3885,11 +3929,19 @@ public:
 		CSheetHelpSetup		dummy;
 		dummy.setupDefaultIDs();
 
-		// common method for info and botchat
-		if(infoWindow.CtrlSheet)
+		// The sheet comes from the window's own copy of the item (the icon it displays), not from the slot the window was
+		// opened from: that slot may hold another item or nothing by now, while the window still shows the first one.
+		if (!infoWindow.Window)
+			return;
+		CDBCtrlSheet *ctrlCopy = dynamic_cast<CDBCtrlSheet *>(infoWindow.Window->getElement(infoWindow.Window->getId() + ":content:ctrl_slot"));
+		if (!ctrlCopy)
 		{
-			onMpChangeItemPart(infoWindow.Window, infoWindow.CtrlSheet->getSheetId(), dummy.PrefixForExtra);
+			nlwarning("item_help_mp_change_item_part: the info window '%s' has no 'content:ctrl_slot' sheet", infoWindow.Window->getId().c_str());
+			return;
 		}
+
+		// common method for info and botchat
+		onMpChangeItemPart(infoWindow.Window, ctrlCopy->getSheetId(), dummy.PrefixForExtra);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHItemHelpMpChangeItemPart, "item_help_mp_change_item_part");
@@ -4009,8 +4061,9 @@ public:
 			NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 			if (Driver)
 			{
+				// on another virtual desktop the next window is not activated either (WindowDesktop)
 				HWND wnd = (HWND) Driver->getDisplay();
-				ShowWindow(wnd, SW_MINIMIZE);
+				ShowWindow(wnd, WindowDesktop::isRequested() ? SW_SHOWMINNOACTIVE : SW_MINIMIZE);
 			}
 		#endif
 		browseFAQ(ClientCfg.ConfigFile);

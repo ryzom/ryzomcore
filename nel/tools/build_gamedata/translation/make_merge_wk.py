@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../configuration")
 from scripts import *
 from buildsite import *
@@ -54,7 +54,7 @@ try:
 	subprocess.call([ TranslationTools, "merge_string_diff" ])
 	subprocess.call([ TranslationTools, "merge_r2_string_diff" ])
 	subprocess.call([ TranslationTools, "merge_worksheet_diff", "bot_names.txt" ])
-except Exception, e:
+except Exception as e:
 	printLog(log, "<" + processName + "> " + str(e))
 printLog(log, "")
 
@@ -67,7 +67,7 @@ try:
 	subprocess.call([ TranslationTools, "make_string_diff" ])
 	subprocess.call([ TranslationTools, "make_r2_string_diff" ])
 	subprocess.call([ TranslationTools, "make_worksheet_diff", "bot_names.txt" ])
-except Exception, e:
+except Exception as e:
 	printLog(log, "<" + processName + "> " + str(e))
 
 
@@ -84,7 +84,7 @@ for diffFile in diffFiles:
 #	subprocess.call([ TranslationTools, "clean_phrase_diff" ])
 #	subprocess.call([ TranslationTools, "clean_clause_diff" ])
 #	subprocess.call([ TranslationTools, "clean_words_diff" ])
-#except Exception, e:
+#except Exception as e:
 #	printLog(log, "<" + processName + "> " + str(e))
 #printLog(log, "")
 
@@ -96,7 +96,7 @@ try:
 	subprocess.call([ TranslationTools, "merge_string_diff" ])
 	subprocess.call([ TranslationTools, "merge_r2_string_diff" ])
 	subprocess.call([ TranslationTools, "merge_worksheet_diff", "bot_names.txt" ])
-except Exception, e:
+except Exception as e:
 	printLog(log, "<" + processName + "> " + str(e))
 printLog(log, "")
 
@@ -112,4 +112,4 @@ if os.path.isfile("make_merge_wk.log"):
 shutil.copy("log.log", "make_merge_wk_" + time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + ".log")
 shutil.move("log.log", "make_merge_wk.log")
 
-raw_input("PRESS ANY KEY TO EXIT")
+input("PRESS ANY KEY TO EXIT")

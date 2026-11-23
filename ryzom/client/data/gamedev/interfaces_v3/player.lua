@@ -461,9 +461,9 @@ end
 -- regen_text_disabled_color="255 255 255"
 function game:formatRegenTimer(timer, dbPath)
 	if timer > 60 then
-		return string.format("%dm", timer / 60);
+		return string.format("%dm", math.floor(timer / 60));
 	else
-		return string.format("%ds", timer);
+		return string.format("%ds", math.floor(timer));
 	end
 end
 
@@ -683,6 +683,7 @@ function game:updatePlayerBonusMalus()
 		mustShowBonus= true;
 		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":SHEET", getSheetId('big_xpcat_' .. tostring(iconLevel) .. '.sbrick' ) );
 		setDbProp(dbLocalBonusBase  .. tostring(destIndex) .. ":DISABLED", 0 );
+		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":DISABLED_TIME", 0 );
 		self.BonusMalus.XPCatSlotAfter = destIndex;
 		destIndex= destIndex+1;
 	else
@@ -707,6 +708,7 @@ function game:updatePlayerBonusMalus()
 		mustShowBonus= true;
 		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":SHEET", getSheetId('big_ring_xpcat_' .. tostring(iconLevel) .. '.sbrick' ) );
 		setDbProp(dbLocalBonusBase  .. tostring(destIndex) .. ":DISABLED", 0 );
+		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":DISABLED_TIME", 0 );
 		self.BonusMalus.RingXPCatSlotAfter = destIndex;
 		destIndex= destIndex+1;
 	else
@@ -734,6 +736,7 @@ function game:updatePlayerBonusMalus()
 		mustShowBonus= true;
 		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":SHEET", getSheetId('big_outpost_pvp_' .. tostring(pvpOutpostLevel) .. '.sbrick' ) );
 		setDbProp(dbLocalBonusBase  .. tostring(destIndex) .. ":DISABLED", 0 );
+		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":DISABLED_TIME", 0 );
 		self.BonusMalus.OutpostSlotAfter = destIndex;
 		destIndex= destIndex+1;
 	else
@@ -787,6 +790,7 @@ function game:updatePlayerBonusMalus()
 		mustShowMalus= true;
 		setDbProp(dbLocalMalusBase .. tostring(destIndex) .. ":SHEET", getSheetId('death_penalty.sbrick' ) );
 		setDbProp(dbLocalMalusBase  .. tostring(destIndex) .. ":DISABLED", 0 );
+		setDbProp(dbLocalMalusBase .. tostring(destIndex) .. ":DISABLED_TIME", 0 );
 		self.BonusMalus.DeathPenaltyAfter = destIndex;
 		destIndex= destIndex+1;
 	else
@@ -905,6 +909,7 @@ end
 
 function game:timeInSecondsToReadableTime(regenTime)			
 	local seconds = math.fmod(regenTime, 60)	
+	if seconds == math.floor(seconds) then seconds = math.floor(seconds) end -- 30, not 30.0, from Lua 5.3 on
 	local minutes = math.fmod(math.floor(regenTime / 60), 60)	
 	local hours = math.floor(regenTime / 3600)	
 	local result = ""

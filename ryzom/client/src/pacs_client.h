@@ -31,8 +31,15 @@
 // std
 #include <string>
 
-// Size max of an entity in PACS (Trees and creatures)
+// Size max of an entity in PACS (creatures and objects: the diameter of their cylinder is clamped to it, the sides of their box to half of it)
 #define RYZOM_ENTITY_SIZE_MAX 16
+
+// Size max of the bounding box of a PACS primitive over one evaluation (its size and its move).
+// The collisions of the landscape are not clamped: they take the scale of their instance, and the
+// largest in the data is 33.1 m wide. A primitive is listed in two cells of the grid at most on each
+// axis, so a cell must not be smaller than this, and a collision test looks no farther than this for
+// the primitives on its left. A larger primitive does not collide over its whole size.
+#define RYZOM_PACS_PRIMITIVE_SIZE_MAX 40
 
 class CIGCallback; // collision with igs of the landscapes (trees..)
 

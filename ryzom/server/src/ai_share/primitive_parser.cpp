@@ -202,6 +202,14 @@ static bool parseVerticalPos(const IPrimitive *prim, uint32 &verticalPos, const 
 	}
 }
 
+// The scenario service gives the bots and the states of a Ring scenario the heights of the ground the editor placed
+// their points on: they take the layer nearest to them (STARTHGT, HEIGHTS), not the one the vertical pos rule takes.
+static bool parsePointHeights(const IPrimitive *prim)
+{
+	string s;
+	return prim->getPropertyByName("point_heights", s) && s == "true";
+}
+
 //---------------------------------------------------------------------------------------
 // handy routine for reading the family flags
 //---------------------------------------------------------------------------------------
@@ -1010,6 +1018,14 @@ static void parsePrimState(const CAIAliasDescriptionNode *treeNode,const IPrimit
 	CAIActions::exec("VERTPOS", verticalPos);
 	if (!keywords->empty())
 		CAIActions::execute("KEYWORDS",*keywords);
+	if (numPoints != 0 && parsePointHeights(prim))
+	{
+		const CPrimVector *pointArray = prim->getPrimVector();
+		std::vector<CAIActions::CArg> heights;
+		for (uint i = 0; i < numPoints; ++i)
+			heights.push_back(CAIActions::CArg(sint32(pointArray[i].z * 1000)));
+		CAIActions::execute("HEIGHTS", heights);
+	}
 	if (!points.empty())	
 		CAIActions::execute(pointsType,points);
 	
@@ -1789,6 +1805,8 @@ static void parsePrimBotNpc(const CAIAliasDescriptionNode *treeNode,const IPrimi
 	CAIActions::begin(treeNode->getAlias());
 	CAIActions::exec("BOTNPC",uniqueId);
 	CAIActions::exec("STARTPOS",x,y,theta, verticalPos);
+	if (parsePointHeights(prim))
+		CAIActions::exec("STARTHGT", sint32(point->Point.z * 1000));
 	CAIActions::exec("LOOK",look);
 //	CAIActions::exec("STATS",stats+NLMISC::toString("_lvl_%02d",level),level);
 	CAIActions::exec("STATS");	//,level);
@@ -3896,21 +3914,25 @@ void parsePrimFile(const std::string &filename)
 	// read the file into memory and parse to generate 'prims' data tree
 	CPrimitives prims;
 
+	// The path is resolved before the file is opened: CIFile::open warns about a file it cannot
+	// open, and a primitive given by its name alone is in the search paths, not in the working directory
 	string sFilename;
-	bool opened;
+	bool opened = false;
 	CIFile fileIn;
-	if (fileIn.open (filename))
+	if (CFile::fileExists(filename))
 	{
 		nlinfo("Opening %s in %s", filename.c_str(), CPath::getCurrentPath().c_str());
 		sFilename = filename;
-		opened = true;
 	}
 	else
 	{
-		// If file not found, search in path
-		sFilename = CPath::lookup( filename, false);
+		// If file not found, search in path (empty when it is not there either, the warning is below)
+		sFilename = CPath::lookup(filename, false, false);
 		nlinfo("Opening in %s", filename.c_str());
-		opened = (fileIn.open (sFilename.c_str()));
+	}
+	if (!sFilename.empty())
+	{
+		opened = fileIn.open(sFilename);
 	}
 	
 	nlinfo("Load&parse primitive file '%s' (in '%s')", 
@@ -3988,7 +4010,14 @@ void parsePrimFile(const std::string &filename)
 	else
 	{
 		// if file not found sFilename is the result of CPath::lookup so if not in path sFilename is an empty string
-		nlwarning ("Failed to open file '%s'  for reading.", sFilename.empty() ? filename.c_str():sFilename.c_str());
+		if (sFilename.empty())
+		{
+			nlwarning("Primitive file '%s' cannot be opened as given (current path '%s') and is not in the search paths", filename.c_str(), CPath::getCurrentPath().c_str());
+		}
+		else
+		{
+			nlwarning("Failed to open file '%s' for reading.", sFilename.c_str());
+		}
 
 		return;
 	}

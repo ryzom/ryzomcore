@@ -43,9 +43,6 @@ CExchangeView::CExchangeView()
 {
 	_InterlocutorView = NULL;
 	_ExchangeSlots.resize(NbExchangeSlots);
-	_PackerTicketCount = 0;
-	_MountTicketCount = 0;
-	_ZigTicketCount = 0;
 }
 
 // ****************************************************************************
@@ -117,6 +114,10 @@ bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exch
 	if (item->getLockedByOwner())
 		return false;
 
+	// Can't trade an item that is worn or held, it has to be taken off first
+	if (item->getRefInventory() != NULL)
+		return false;
+
 	// You cannot exchange genesis named items
 	if (item->getPhraseId().find("genesis_") == 0)
 	{
@@ -141,36 +142,9 @@ bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exch
 		removeItemFromExchange(exchangeSlot);
 	}
 
-	// check the pet animal count of interlocutor
-	if (isPetTicket(form->Type) && _InterlocutorView != NULL)
-	{
-		uint petIndex = c->getAnimalByTicket(item);
-		if (petIndex != ~0)
-		{
-			// check that the pet animal is empty
-			if (!c->checkPackAnimalEmptyInventory(petIndex))
-			{
-				CCharacter::sendDynamicSystemMessage(c->getId(), "PACK_ANIMAL_INVENTORY_MUST_BE_EMPTY");
-				return false;
-			}
-			// check that the pet animal is not mounted
-			if (c->getPlayerPets()[petIndex].IsMounted)
-			{
-				CCharacter::sendDynamicSystemMessage(c->getId(), "ANIMAL_MOUNTED");
-				return false;
-			}
-			if (c->getPlayerPets()[petIndex].PetSheetId != form->PetSheet && c->getPlayerPets()[petIndex].PetStatus != CPetAnimal::stable)
-			{
-				CCharacter::sendDynamicSystemMessage(c->getId(), "ANIMAL_CUSTOM_MUST_BE_IN_STABLE");
-				return false;
-			}
-		}
-		else
-			nlwarning("Pet animal ticket not found for %s", c->getId().toString().c_str());
-
-		// update ticket count
-		(*getPetTicketCount(form->Type))++;
-	}
+	// check that a pet animal can be given to the interlocutor
+	if (isPetTicket(form->Type) && _InterlocutorView != NULL && !canGivePetTicket(item))
+		return false;
 
 	_ExchangeSlots[exchangeSlot].InvSrc = INVENTORIES::TInventory(invSrc);
 	_ExchangeSlots[exchangeSlot].InvSlot = invSlot;
@@ -217,6 +191,10 @@ bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 invSrc, uint32 invSlo
 
 	quantity = min(quantity, item->getNonLockedStackSize());
 	if (quantity == 0)
+		return false;
+
+	// an item that is worn or held is never given away
+	if (item->getRefInventory() != NULL)
 		return false;
 
 	if (getExchangeItem(exchangeSlot) != NULL)
@@ -357,6 +335,36 @@ bool CExchangeView::isEmpty() const
 	for (uint i = 0; i < NbExchangeSlots; i++)
 	{
 		if (_ExchangeSlots[i].InvSlot != INVENTORIES::INVALID_INVENTORY_SLOT)
+			return false;
+	}
+
+	return true;
+}
+
+// ****************************************************************************
+bool CExchangeView::containsItem(const CGameItemPtr &item) const
+{
+	for (uint i = 0; i < NbExchangeSlots; i++)
+	{
+		if (getExchangeItem(i) == item)
+			return true;
+	}
+
+	return false;
+}
+
+// ****************************************************************************
+bool CExchangeView::checkPetTickets()
+{
+	if (_InterlocutorView == NULL)
+		return true;
+
+	for (uint i = 0; i < NbExchangeSlots; i++)
+	{
+		CGameItemPtr item = getExchangeItem(i);
+		if (item == NULL || item->getStaticForm() == NULL || !isPetTicket(item->getStaticForm()->Type))
+			continue;
+		if (!canGivePetTicket(item))
 			return false;
 	}
 
@@ -531,17 +539,50 @@ bool CExchangeView::isPetTicket(ITEM_TYPE::TItemType itemType) const
 }
 
 // ****************************************************************************
-uint32 * CExchangeView::getPetTicketCount(ITEM_TYPE::TItemType itemType)
+bool CExchangeView::canGivePetTicket(const CGameItemPtr &item)
 {
-	if (itemType == ITEM_TYPE::MEKTOUB_PACKER_TICKET)
-		return &_PackerTicketCount;
+	uint petIndex = getCharacter()->getAnimalByTicket(item);
+	if (petIndex == ~0)
+	{
+		nlwarning("Pet animal ticket not found for %s", getCharacter()->getId().toString().c_str());
+		return true;
+	}
 
-	if (itemType == ITEM_TYPE::MEKTOUB_MOUNT_TICKET)
-		return &_MountTicketCount;
-	if (itemType == ITEM_TYPE::ANIMAL_TICKET)
-		return &_ZigTicketCount;
+	// check that the pet animal is empty
+	if (!getCharacter()->checkPackAnimalEmptyInventory(petIndex))
+	{
+		CCharacter::sendDynamicSystemMessage(getCharacter()->getId(), "PACK_ANIMAL_INVENTORY_MUST_BE_EMPTY");
+		return false;
+	}
 
-	return NULL;
+	// check that the pet animal is not mounted
+	if (getCharacter()->getPlayerPets()[petIndex].IsMounted)
+	{
+		CCharacter::sendDynamicSystemMessage(getCharacter()->getId(), "ANIMAL_MOUNTED");
+		return false;
+	}
+
+	// check that an animal whose sheet is not the one of its ticket is in a stable
+	if (getCharacter()->getPlayerPets()[petIndex].PetSheetId != item->getStaticForm()->PetSheet && getCharacter()->getPlayerPets()[petIndex].PetStatus != CPetAnimal::stable)
+	{
+		CCharacter::sendDynamicSystemMessage(getCharacter()->getId(), "ANIMAL_CUSTOM_MUST_BE_IN_STABLE");
+		return false;
+	}
+
+	return true;
+}
+
+// ****************************************************************************
+uint32 CExchangeView::getPetTicketExchanged(ITEM_TYPE::TItemType itemType) const
+{
+	uint32 count = 0;
+	for (uint i = 0; i < NbExchangeSlots; i++)
+	{
+		CGameItemPtr item = getExchangeItem(i);
+		if (item != NULL && item->getStaticForm() != NULL && item->getStaticForm()->Type == itemType)
+			count++;
+	}
+	return count;
 }
 
 /////////////////////////////////////////////////////////////

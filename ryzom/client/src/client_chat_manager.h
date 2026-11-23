@@ -142,7 +142,8 @@ public:
 		/**
 		 *	display a player tell message
 		 */
-		virtual void	displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName) =0;
+		// ucstr is the sentence shown, rawMessage what the sender wrote
+		virtual void	displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName, const std::string &rawMessage) =0;
 		/**
 		 *	Clear a channel.
 		 *	\param dynChatDbIndex is valid only if mode==dyn_chat. Contrary to displayChat, this is the Db Index (0..MaxDynChanPerPlayer)

@@ -57,7 +57,9 @@ bool ZoneBuilder::init(const QString &pathName, bool displayProgress)
 		return false;
 	if (pathName != m_lastPathName)
 	{
-		m_lastPathName = pathName;
+		// the zone bank is reset below, so until this directory has loaded no directory is
+		m_lastPathName.clear();
+
 		QString zoneBankPath = pathName;
 		zoneBankPath += "/zoneligos/";
 
@@ -77,6 +79,9 @@ bool ZoneBuilder::init(const QString &pathName, bool displayProgress)
 			m_zoneBank.reset();
 			return false;
 		}
+
+		// only a directory that loaded is remembered, so a corrected one is read again
+		m_lastPathName = pathName;
 	}
 	return true;
 }

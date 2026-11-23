@@ -142,6 +142,10 @@ public:
 	//@{
 	/// Read the leading 48 bytes of the container's 0x2510 leaf into \a tm12 (see modContextTM).
 	static bool modAppContextTM(const CStorageContainer *modApp, float *tm12);
+	/// Read the container's 0x2511 leaf, the mod-context bounding box (the bounds of the vertices the modifier
+	/// was applied to, in the mod-context space: min x, y, z then max x, y, z), into \a box6. Returns false
+	/// when absent.
+	static bool modAppContextBox(const CStorageContainer *modApp, float *box6);
 	/// The container's 0x2512 child (container or raw leaf), NULL when absent.
 	static IStorageObject *modAppLocalModData(const CStorageContainer *modApp);
 	//@}

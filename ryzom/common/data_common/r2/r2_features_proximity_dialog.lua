@@ -14,7 +14,7 @@ local classProximityDialogVersion = 1
 
 feature.Components.ProximityDialog =
 	{
-		PropertySheetHeader = r2.getDisplayButtonHeader("r2.dialogs:openEditor()", "uiR2EdEditDialogButton"),
+		PropertySheetHeader = r2.getDisplayButtonHeader("r2.dialogs:openEditor", "uiR2EdEditDialogButton"),
 		BaseClass="ChatSequence",			
 		Name="ProximityDialog",
 		InEventUI = true,
@@ -40,9 +40,10 @@ feature.Components.ProximityDialog =
 			},	
 		},
 		
-		updateVersion = function(this, scenarioValue, currentValue )
-			
-		end,		
+		-- the class has had one version
+		updateVersion = function(this, scenarioValue, currentValue, update)
+			return true
+		end,
 	}
 
 local component = feature.Components.ProximityDialog  
@@ -153,7 +154,7 @@ function component.createGhostComponents(this, act)
 
 end
 
-function onComponentCreated(this)
+local function onComponentCreated(this)
 	local x = this.Position.x + 3
 	local y = this.Position.y + 3
 	local zoneTrigger = r2.Features["ZoneTrigger"].Components.ZoneTrigger.createComponent(x, y)
@@ -165,6 +166,20 @@ function onComponentCreated(this)
 	this._zoneTriggerId = zoneTrigger.InstanceId
 end
 
+-- the dialog with the zone trigger it starts from, as the other features make theirs
+component.createComponent = function(x, y)
+	local proxDialog = r2.newComponent("ProximityDialog")
+	assert(proxDialog)
+	proxDialog.Name = r2:genInstanceName(i18n.get("uiR2EDProximityDialog")):toUtf8()
+	proxDialog.Base = r2.Translator.getDebugBase("palette.entities.botobjects.dialog")
+	proxDialog.Position.x = x
+	proxDialog.Position.y = y
+	proxDialog.Position.z = r2:snapZToGround(x, y)
+	proxDialog.AutoStart = 0
+	onComponentCreated(proxDialog)
+	return proxDialog
+end
+
 component.create = function()	
 	if r2:getLeftQuota() <= 0 then 
 		r2:makeRoomMsg()
@@ -173,15 +188,7 @@ component.create = function()
 
 	local function createComponent(x, y)
 		r2.requestNewAction(i18n.get("uiR2EDNewProximityDialogAction"))
-		local proxDialog = r2.newComponent("ProximityDialog")
-		assert(proxDialog)
-		proxDialog.Name = r2:genInstanceName(i18n.get("uiR2EDProximityDialog")):toUtf8()
-		proxDialog.Base = r2.Translator.getDebugBase("palette.entities.botobjects.dialog")
-		proxDialog.Position.x = x
-		proxDialog.Position.y = y
-		proxDialog.Position.z = r2:snapZToGround(x, y)
-		proxDialog.AutoStart = 0
-		onComponentCreated(proxDialog)
+		local proxDialog = component.createComponent(x, y)
 		r2:setCookie(proxDialog.InstanceId, "DisplayProp", 1)
 		r2.requestInsertNode(r2:getCurrentAct().InstanceId, "Features", -1, "", proxDialog)	
 	end
@@ -249,9 +256,7 @@ end
 function component.initLogicEntitiesInstancesMenu(this, subMenu, calledFunction)
 	local entitiesTable = r2.Scenario:getAllInstancesByType(this.Name)
 	for key, entity in pairs(entitiesTable) do
-		local uc_name = ucstring()
-		uc_name:fromUtf8(entity.Name)
-		subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+		subMenu:addLine(entity.Name, "lua", r2:uiCall(calledFunction, entity.InstanceId), entity.InstanceId)
 	end
 
 	if table.getn(entitiesTable)==0 then

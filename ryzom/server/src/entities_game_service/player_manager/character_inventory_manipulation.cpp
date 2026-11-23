@@ -192,9 +192,7 @@ void CCharacter::initInventoriesDb()
 	_WearEquipmentMalus += pHand->getWearMalus();
 	CEquipInventory* pEquip = (CEquipInventory*)(CInventoryBase*)_Inventory[INVENTORIES::equipment];
 	_WearEquipmentMalus += pEquip->getWearMalus();
-	//	_PropertyDatabase.setProp( _DataIndexReminder->Modifiers.TotalMalusEquip, (uint32)(_WearEquipmentMalus * 50) );
-	CBankAccessor_PLR::getMODIFIERS().setTOTAL_MALUS_EQUIP(
-		_PropertyDatabase, checkedCast<uint8>(_WearEquipmentMalus * 50));
+	updateWearMalusDBEntry();
 
 	// update parry skill if no item in right hand
 	if (getRightHandItem() == NULL)
@@ -336,10 +334,18 @@ void CCharacter::itemPickup(const NLMISC::CEntityId &entity, bool harvest)
 						return;
 					}
 
-					// check creature and character are not too far away
+					// check creature and character are not too far away, measured from the edge of the creature: the client
+					// walks to the edge of a large one, which can be further than MaxHarvestDistance from its centre. Its
+					// size there includes the scale a GM can give it (eventSetBotScale)
+					CMirrorPropValueRO<TYPE_VPB> visualPropertyB(TheDataset, creature->getEntityRowId(), DSPropertyVPB);
+					const SAltLookProp2 altLook((uint64)visualPropertyB());
+					float scale = form->getScale();
+					if (altLook.PropertySubData.Scale != 0)
+						scale *= (float)altLook.PropertySubData.Scale / 100.0f;
 					const double distance = PHRASE_UTILITIES::getDistance(_Id, entity);
+					const double maxDistance = MaxHarvestDistance + form->getColRadius() * scale;
 
-					if (distance < 0 || distance > MaxHarvestDistance)
+					if (distance < 0 || distance > maxDistance)
 					{
 						sendDynamicSystemMessage(_Id, "EGS_HARVEST_CORPSE_TOO_FAR");
 						sendCloseTempInventoryImpulsion();
@@ -732,6 +738,15 @@ void CCharacter::destroyItem(INVENTORIES::TInventory invId, uint32 slot, uint32 
 		return;
 	}
 
+	// The hands and the equipment only refer to items of the bag: a whole item or stack destroyed through them was
+	// only taken off and stayed in the bag, while its owner was told that it is destroyed. The caller names the
+	// inventory the item is in.
+	if (inv->isRefInventory())
+	{
+		nlwarning("<CCharacter::destroyItem> %s: cannot destroy through inventory %u, which only refers to items", _Id.toString().c_str(), (uint)invId);
+		return;
+	}
+
 	// check if slot is valid
 	if (slot >= inv->getSlotCount())
 	{
@@ -849,6 +864,15 @@ void CCharacter::moveItem(INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVE
 	if (dstInv == NULL)
 	{
 		nlwarning("invalid dst inventory %u", dstInvId);
+		return;
+	}
+
+	// The hands and the equipment only refer to items of the bag: equipCharacter fills them and unequipCharacter
+	// empties them. Removing an item from one only unlinks it, so the destination would be given an item that is
+	// still in the bag, and inserting into one would take the item out of its real inventory.
+	if (srcInv->isRefInventory() || dstInv->isRefInventory())
+	{
+		nlwarning("<CCharacter::moveItem> %s: cannot move from inventory %u to inventory %u, one of them only refers to items", _Id.toString().c_str(), (uint)srcInvId, (uint)dstInvId);
 		return;
 	}
 
@@ -1185,10 +1209,8 @@ void CCharacter::unequipCharacter(INVENTORIES::TInventory invId, uint32 slot, bo
 		// ITEMFAMILY::RANGE_WEAPON )
 		_WearEquipmentMalus -= form->WearEquipmentMalus;
 	}
+	updateWearMalusDBEntry();
 
-	//	_PropertyDatabase.setProp(_DataIndexReminder->Modifiers.TotalMalusEquip, uint32(_WearEquipmentMalus * 50));
-	CBankAccessor_PLR::getMODIFIERS().setTOTAL_MALUS_EQUIP(
-		_PropertyDatabase, checkedCast<uint8>(_WearEquipmentMalus * 50));
 	// remove item modifiers
 	removeItemModifiers(item);
 	// if unequipped item may have a protection type, we must re-compute max protection
@@ -2774,7 +2796,9 @@ void CCharacter::sendItemInfos(uint32 slotId)
 		}
 
 		item->damage(skillVal, infos.CurrentDamage, infos.MaxDamage);
-		infos.HitRate = (uint16)(item->hitRate() * 6); // nb hit per minute
+		// nb hit per minute, to one decimal: the latency of an attack follows the float hit rate (CCombatWeapon)
+		infos.HitRate = floorf(item->hitRate() * 60.0f + 0.5f) / 10.0f;
+
 		infos.SapLoadCurrent = item->sapLoad();
 		infos.SapLoadMax = item->maxSapLoad();
 		infos.Range = item->range();
@@ -2982,6 +3006,32 @@ void CCharacter::createRechargeItem(uint32 sapRecharge)
 	sendDynamicSystemMessage(_EntityRowId, "ITEM_IS_RECHARGED", params);
 }
 
+// ****************************************************************************
+bool CCharacter::isInventoryWithinReach(INVENTORIES::TInventory invId, const char *context)
+{
+	// The room and the pack animals must be within reach, as for moving an item (moveItem). The client grays the
+	// entries for an inventory that is not available, but its menu can be older than the state.
+	if (invId == INVENTORIES::player_room && !getRoomInterface().canUseInventory(this, this))
+	{
+		nldebug("<%s> %s uses its room inventory, which it cannot use, refused", context, _Id.toString().c_str());
+		return false; // canUseInventory has told a trial player why
+	}
+	if (invId >= INVENTORIES::pet_animal && invId < INVENTORIES::max_pet_animal)
+	{
+		// the availability the client grays on, which selling and crafting also use
+		const uint32 beastIndex = invId - INVENTORIES::pet_animal;
+		if (beastIndex >= _PlayerPets.size() || (_PlayerPets[beastIndex].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) == 0)
+		{
+			nldebug("<%s> %s uses the inventory of pack animal %u, which is out of reach, refused", context, _Id.toString().c_str(), beastIndex);
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
+			params[0].Int = beastIndex + 1;
+			sendDynamicSystemMessage(_Id, "ANIMAL_INVENTORY_INACCESSIBLE", params);
+			return false;
+		}
+	}
+	return true;
+}
+
 // check if enchant or recharge an item
 // ****************************************************************************
 void CCharacter::enchantOrRechargeItem(INVENTORIES::TInventory invId, uint32 slot)
@@ -2992,26 +3042,9 @@ void CCharacter::enchantOrRechargeItem(INVENTORIES::TInventory invId, uint32 slo
 
 	if (!EnchantSystemEnabled)
 		return;
-	// The room and the pack animals must be within reach, as for moving an item (moveItem). The client grays the
-	// entries for an inventory that is not available, but its menu can be older than the state.
-	if (invId == INVENTORIES::player_room && !getRoomInterface().canUseInventory(this, this))
-	{
-		nldebug("<enchantOrRechargeItem> %s uses slot %u of its room inventory, which it cannot use, refused", _Id.toString().c_str(), slot);
-		return; // canUseInventory has told a trial player why
-	}
-	if (invId >= INVENTORIES::pet_animal && invId < INVENTORIES::max_pet_animal)
-	{
-		// the availability the client grays on, which selling and crafting also use
-		const uint32 beastIndex = invId - INVENTORIES::pet_animal;
-		if (beastIndex >= _PlayerPets.size() || (_PlayerPets[beastIndex].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) == 0)
-		{
-			nldebug("<enchantOrRechargeItem> %s uses slot %u of pack animal %u, which is out of reach, refused", _Id.toString().c_str(), slot, beastIndex);
-			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
-			params[0].Int = beastIndex + 1;
-			sendDynamicSystemMessage(_Id, "ANIMAL_INVENTORY_INACCESSIBLE", params);
-			return;
-		}
-	}
+
+	if (!isInventoryWithinReach(invId, "enchantOrRechargeItem"))
+		return;
 
 	CInventoryPtr inv = getInventory(invId);
 

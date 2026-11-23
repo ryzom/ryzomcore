@@ -22,6 +22,7 @@
 #include "stdpch.h"
 #include "ais_actions.h"
 #include "states.h"
+#include "ring_scenario_guard.h"
 
 #include "dyn_grp_inline.h"
 
@@ -62,6 +63,33 @@ static CAIEventReaction *lookupEventInEventReactionContainer(uint32 alias)
 	if (!CWorkPtr::eventReactionContainer())
 		return NULL;
 	return	NLMISC::safe_cast<CAIEventReaction*>(CWorkPtr::eventReactionContainer()->eventReactions().getChildByAlias(alias));
+}
+
+/// A state names its movement and its activity by a word, which is looked up in the one table of
+/// the profiles of the service. That table also holds the profiles of bots and of the groups of the
+/// shard, which are not for a state of a scenario. A state of a primitive of the shard names what
+/// the shard wrote. A state of the scenario of a Ring session, which is loaded as it was uploaded,
+/// names one of the profiles a state of a scenario has: any other word is refused, the refusal is
+/// logged for the session, and the state is left without that profile, as for a word that names
+/// none. False for a word that is refused: the caller gives the state no profile.
+static bool acceptStateProfile(const std::string &word, bool activity, const std::string &stateName)
+{
+	if (!CRingScenarioGuard::isLoadingScenario())
+		return true;
+
+	static const char *const movements[] = { "idle", "follow_route", "stand_on_vertices", "wander", "stand_on_start_point", "no_change" };
+	static const char *const activities[] = { "no_change", "normal", "guard", "bandit" };
+	const char *const *const words = activity ? activities : movements;
+	const size_t count = activity ? sizeof(activities) / sizeof(activities[0]) : sizeof(movements) / sizeof(movements[0]);
+	for (size_t i = 0; i < count; ++i)
+	{
+		if (word == words[i])
+			return true;
+	}
+
+	CRingScenarioGuard::logLoadRefusal(toString("the state '%s' names the %s profile '%s', which is not one of a state of a scenario: the state has no %s profile",
+	    ringLogText(stateName, 64).c_str(), activity ? "activity" : "move", ringLogText(word, 64).c_str(), activity ? "activity" : "move"));
+	return false;
 }
 
 //static CAIStateProfile	*lookupProfileInState(uint32 alias)
@@ -335,6 +363,12 @@ DEFINE_ACTION(BaseContextState,MOVEPROF)
 		aiMovement = "no_change";
 	}
 	
+	if (!acceptStateProfile(aiMovement, false, CWorkPtr::stateState()->getName()))
+	{
+		CWorkPtr::stateState()->setMoveProfile(NULL);
+		return;
+	}
+
 	IAIProfileFactory* aiProfile = lookupAIGrpProfile(aiMovement.c_str());
 	if	(!aiProfile)
 	{
@@ -359,6 +393,12 @@ DEFINE_ACTION(BaseContextState,ACTPROF)
 	{
 		// set the default ai_profile
 		aiMovement = "no_change";
+	}
+
+	if (!acceptStateProfile(aiMovement, true, CWorkPtr::stateState()->getName()))
+	{
+		CWorkPtr::stateState()->setActivityProfile(NULL);
+		return;
 	}
 
 	IAIProfileFactory* aiProfile = lookupAIGrpProfile(aiMovement.c_str());
@@ -423,6 +463,7 @@ DEFINE_ACTION(ContextPositionalState,PATH)
 		points.push_back(CAIVector(x,y));
 		LOG("----  - (%.3f,%.3f)",x,y);
 	}
+	state->shape().setOwnerName(state->getAliasFullName());
 	if (!state->shape().setPath(state->shape().getVerticalPos(), points))
 	{
 		nlwarning("CAIStatePositional: error while placing the points of '%s'", 
@@ -448,11 +489,33 @@ DEFINE_ACTION(ContextPositionalState,PATAT)
 		points.push_back(CAIVector(x,y));
 		LOG("----  - (%.3f,%.3f)",x,y);
 	}
+	state->shape().setOwnerName(state->getAliasFullName());
 	if (!state->shape().setPatat(state->shape().getVerticalPos(), points))
 	{
 		nlwarning("CAIStatePositional: error while placing the points of '%s'", 
 			state->getAliasFullName().c_str());
 	}
+}
+
+DEFINE_ACTION(ContextPositionalState, HEIGHTS)
+{
+	CAIStatePositional *state = dynamic_cast<CAIStatePositional *>(CWorkPtr::stateState());
+	if (state == NULL)
+		return;
+
+	// the heights in millimetres of the points of the PATH or PATAT that follows (a state of a Ring scenario)
+	std::vector<sint32> heights;
+	for (uint i = 0; i < args.size(); ++i)
+	{
+		sint32 height;
+		if (!args[i].get(height))
+		{
+			nlwarning("CAIStatePositional: height %u of '%s' is not a number, its points are placed by their vertical pos", i, state->getAliasFullName().c_str());
+			return;
+		}
+		heights.push_back(height);
+	}
+	state->shape().setNextHeights(heights);
 }
 
 //----------------------------------------------------------------------------
@@ -553,6 +616,12 @@ DEFINE_ACTION(ContextStateProfile,MOVEPROF)
 	string type;
 	if (!getArgs(args,name(),type)) return;
 
+	if (!acceptStateProfile(type, false, sp->getName()))
+	{
+		sp->setMoveProfile(NULL);
+		return;
+	}
+
 	IAIProfileFactory* profile = lookupAIGrpProfile(type.c_str());
 	if	(!profile)
 	{
@@ -576,6 +645,11 @@ DEFINE_ACTION(ContextStateProfile,ACTPROF)
 		return;
 	
 	IAIProfileFactory* profile = NULL;
+	if (!type.empty() && !acceptStateProfile(type, true, sp->getName()))
+	{
+		sp->setActivityProfile(NULL);
+		return;
+	}
 	if (!type.empty())
 	{
 		profile = lookupAIGrpProfile(type.c_str());
@@ -968,6 +1042,19 @@ DEFINE_ACTION(ContextNpcBot,STARTPOS)
 	bot->setStartPos(double(x)/1000.0, double(y)/1000.0, theta, TVerticalPos(verticalPos));
 }
 
+DEFINE_ACTION(ContextNpcBot, STARTHGT)
+{
+	CBotNpc *bot = CWorkPtr::botNpc();
+	if (bot == NULL)
+		return;
+
+	// the height of the start position in millimetres (a bot of a Ring scenario), after its STARTPOS
+	sint32 height;
+	if (!getArgs(args, name(), height))
+		return;
+
+	bot->setStartHeight(height);
+}
 
 //---------------------------------------------------------------------------------------
 // Control over verbose nature of logging

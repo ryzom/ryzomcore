@@ -1,7 +1,5 @@
 /** \file zone_lighter.h
  * Class to light zones
- *
- * $Id$
  */
 
 /* Copyright, 2000, 2001 Nevrax Ltd.

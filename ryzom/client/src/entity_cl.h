@@ -1210,6 +1210,11 @@ public:
 	 *	\return distance from entity to camera computed (helper for deriver)
 	 */
 	virtual	float		updateAsyncTexture();
+	/** Called by updateAsyncTexture() when instances that were loading became the current ones.
+	 *	A new current instance is shown unless the one it replaces was hidden: the user entity
+	 *	applies the visibility of its view again here.
+	 */
+	virtual	void		onInstancesLoaded() { }
 	/// Update the Lod Texture When needed
 	virtual	void		updateLodTexture();
 	//@}

@@ -311,35 +311,15 @@ void CAiWrapperServer::stopControlNpc(NLMISC::CEntityId clientId, NLMISC::CEntit
 	CUnifiedNetwork::getInstance()->send("AIS",msgout);
 }
 
-void CAiWrapperServer::triggerUserTrigger(const std::string& groupName, uint32 triggerId)
+void CAiWrapperServer::triggerUserTrigger(uint32 aiInstanceId, TAIAlias groupAlias, uint32 triggerId)
 {
-/*
-	uint32 messageVersion = 1;
-	uint32 nbString=2;
-
-	std::string script = NLMISC::toString("()setEvent(%d);", triggerId);
-
-
-	CMessage msgout("R2_NPC_GROUP_SCRIPT_BY_NAME");
-	msgout.serial(messageVersion);
-	msgout.serial(nbString);
-	msgout.serial(const_cast<std::string&>(groupName));
-	msgout.serial(script);
-
-	CUnifiedNetwork::getInstance()->send("AIS",msgout);
-
-*/
-
-
-
-	{
-		std::string script = NLMISC::toString("\"()setEvent(%d);\"", triggerId);
-		CMessage msgout("EXEC_COMMAND");
-		std::string command = NLMISC::toString("script %s %s", groupName.c_str(), script.c_str());
-		msgout.serial(command);
-		CUnifiedNetwork::getInstance()->send("AIS",msgout);
-	}
-
+	// The group is named by the instance of its session and by its alias. Its name holds the id the
+	// client gave it: it is not put in a command line, and no group of another instance is looked for.
+	CMessage msgout("R2_GROUP_USER_EVENT");
+	msgout.serial(aiInstanceId);
+	msgout.serial(groupAlias);
+	msgout.serial(triggerId);
+	CUnifiedNetwork::getInstance()->send("AIS", msgout);
 }
 
 void CAiWrapperServer::setPioneerRight(NLMISC::CEntityId entityId, const R2::TPioneerRight& right)

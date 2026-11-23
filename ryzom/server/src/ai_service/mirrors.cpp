@@ -153,9 +153,8 @@ void CMirrors::initMirror()
 }
 
 // a big bad global var !
-extern CAIEntityPhysical	*TempSpeaker;
-extern CBotPlayer			*TempPlayer;
-
+extern NLMISC::CRefPtr<CAIEntityPhysical> TempSpeaker;
+extern NLMISC::CRefPtr<CBotPlayer> TempPlayer;
 
 void	CMirrors::processMirrorUpdates()
 {

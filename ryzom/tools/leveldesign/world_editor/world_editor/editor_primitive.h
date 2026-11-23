@@ -84,6 +84,9 @@ void InvalidateAllPrimitives ();
 // verify the structures of the primitives, if they conform to the XML
 void VerifyPrimitivesStructures();
 
+// Remove a primitive that is being freed from the property dialogs, every primitive editor does it in its destructor
+void RemovePrimitiveFromPropertiesDialogs(const NLLIGO::IPrimitive *primitive);
+
 // ***************************************************************************
 // IPrimitiveEditor
 // ***************************************************************************
@@ -227,6 +230,7 @@ public:
 
 	~CPrimNodeEditor ()
 	{
+		RemovePrimitiveFromPropertiesDialogs(this);
 		removeFromLogicTree ();
 	}
 
@@ -272,6 +276,7 @@ public:
 	
 	~CPrimPointEditor ()
 	{
+		RemovePrimitiveFromPropertiesDialogs(this);
 		removeFromLogicTree ();
 	}
 
@@ -317,6 +322,7 @@ public:
 
 	~CPrimPathEditor ()
 	{
+		RemovePrimitiveFromPropertiesDialogs(this);
 		removeFromLogicTree ();
 	}
 
@@ -364,6 +370,7 @@ public:
 
 	~CPrimZoneEditor ()
 	{
+		RemovePrimitiveFromPropertiesDialogs(this);
 		removeFromLogicTree ();
 	}
 
@@ -409,6 +416,7 @@ public:
 
 	~CPrimAliasEditor ()
 	{
+		RemovePrimitiveFromPropertiesDialogs(this);
 		removeFromLogicTree ();
 	}
 

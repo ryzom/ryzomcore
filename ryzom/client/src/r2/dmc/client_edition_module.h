@@ -143,7 +143,9 @@ We send a message to the Server. If the node modification is accepted by the ser
 ( so the client can apply the message with _ServerAnswerForseener backuped message). The server forward the message to other client connected to edition.
 
 - setMute
-Because multiEdition is disable, most of the time the server answer is not listen. We use the setMute function to not listen server result.
+With instant feedback (CDynamicMapClient::setInstantFeedBackFlag) the editor shows its own edits when they are made, and
+setMute keeps the answer of the server from applying them a second time (onOwnNode(Set|Inserted|Erased|Moved)). The edits of
+the other editors (onNode(Set|Inserted|Erased|Moved)) are always applied, and reach the undo history too.
 
 
   Heavy modifications:
@@ -540,26 +542,23 @@ public:
 		\param hlScenario The edition scenario (compressed)
 	*/
 	virtual void onScenarioUploaded(NLNET::IModuleProxy *sender, const R2::CObjectSerializerClient &hlScenario) NL_OVERRIDE ;
-	/*! Server answer from a requestSetNode.
-		Broadcast to all co-editor when a node is set
+	/*! Another editor of the session set a node: the server sends the edit to every editor but the one that made it.
+		Applied whether the client is mute or not.
 		Same options than requestSetNode
 		\see requestSetNode
 	*/
 	virtual void onNodeSet(NLNET::IModuleProxy *sender, const std::string &instanceId, const std::string &attrName, const R2::CObjectSerializerClient &value) NL_OVERRIDE;
-	/*! Server answer from a requestInsertNode.
-		Broadcast to all co-editor when a node is insert
+	/*! Another editor of the session inserted a node (see onNodeSet).
 		Same options than requestInsertNode
 		\see requestInsertNode
 	*/
 	virtual void onNodeInserted(NLNET::IModuleProxy *sender, const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObjectSerializerClient &value) NL_OVERRIDE;
-	/*! Server answer from a requestEraseNode
-		Broadcast to all co-editor when a node is erased
+	/*! Another editor of the session erased a node (see onNodeSet).
 		Same options than requestEraseNode
 		\see requestEraseNode
 	*/
 	virtual void onNodeErased(NLNET::IModuleProxy *sender, const std::string &instanceId, const std::string &attrName, sint32 position) NL_OVERRIDE;
-	/*! Server answer from a requestMoveNode
-		Broadcast to all co-editor when a node is moved
+	/*! Another editor of the session moved a node (see onNodeSet).
 		Same options than requestMoveNode
 		\see requestMoveNode
 	*/
@@ -603,10 +602,19 @@ public:
 	*/
 	virtual void multiPartMsgFoot(NLNET::IModuleProxy *sender) NL_OVERRIDE;
 
-	/*! setMute Mode. When mute is true then client do not apply scenario update messages. It is not necessary when ther is only on editor
-	\param mute If true the client do not apply onNode(Set|Inset|Moved)
+	/*! setMute Mode. When mute is true the client does not apply the answers of the server to its own edits, which the
+		editor showed when they were made (instant feedback). The edits of the other editors are applied either way.
+	\param mute If true the client do not apply onOwnNode(Set|Inserted|Erased|Moved)
 	*/
 	void setMute(bool mute);
+
+	/*! The server accepted an edit of this editor (see CServerAnswerForseener): it is applied now, unless the client
+		is mute.
+	*/
+	void onOwnNodeSet(const std::string &instanceId, const std::string &attrName, const R2::CObject *value);
+	void onOwnNodeInserted(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObject *value);
+	void onOwnNodeErased(const std::string &instanceId, const std::string &attrName, sint32 position);
+	void onOwnNodeMoved(const std::string &instanceId1, const std::string &attrName1, sint32 position1, const std::string &instanceId2, const std::string &attrName2, sint32 position2);
 	//! }
 
 	/////////////////////////////////////////////////////
@@ -629,6 +637,9 @@ public:
 	void startingScenario(class NLNET::IModuleProxy * proxy, uint32 charId) NL_OVERRIDE;
 	//! The User ask the dss to start an animation/test scenario (the user click on the "Go Test" button)
 	bool requestStartScenario();
+	/// The header of the scenario the editor shows, with the changes made since it was loaded or started: the one a
+	/// save of it would write (r2.Version.save with headerOnly, which writes nothing). False when it could not be made.
+	bool makeCurrentScenarioHeader(TScenarioHeader &header);
 	//!}
 
 	/////////////////////////////////////////////////////
@@ -851,6 +862,8 @@ public:
 	virtual void saveUserComponentFileAccepted(NLNET::IModuleProxy *senderModuleProxy, const std::string& md5, const std::string& signature, bool ok) NL_OVERRIDE;
 	virtual void loadUserComponentFileAccepted(NLNET::IModuleProxy *senderModuleProxy, const std::string& md5, bool ok) NL_OVERRIDE;
 	virtual bool addToUserComponentLoadList( const std::string& filename, CUserComponentValidatorLoadSuccededCallback* cb=nullptr);
+	/// Tells the scripts that the load of a user component file ended without the file (r2.onUserComponentLoadEnded)
+	void userComponentLoadEnded(const std::string &filename, const std::string &messageId);
 	/*!
 	*/
 	void loadScenarioSucceded(const std::string& filename, const std::string& body, const CScenarioValidator::TValues& values);
@@ -941,7 +954,7 @@ public:
 
 
 	/*!
-	Get the list of all property of an object. Mainly used for debug fonction (to dump an object)
+	Get the list of all property of an object. Mainly used for debug function (to dump an object)
 	\param component The object.
 	\return the list of property (an ObjectTable)
 	*/
@@ -1189,6 +1202,16 @@ private:
 
 	std::string _RingAccess;
 	bool _Mute;
+	// the buffer of the scenario was written since the last requestStartScenario, so a test may read it back
+	bool m_TestBufferSaved;
+	// the last requestStartScenario did not write the buffer, as the scenario may not be saved: the test starts the
+	// scenario the editor shows
+	bool m_TestBufferProtected;
+	// the header that such a start sends: the one its save would have written
+	TScenarioHeader m_ProtectedHeader;
+	// the header of the values the last r2.Version.save made without writing them (r2.Version.ProtectedHeader),
+	// after the md5 of the body of the scenario of the editor
+	void makeHeaderFromSaveValues(TScenarioHeader &header);
 
 	bool _MustStartScenario;
 	bool _ScenarioUpToDate;

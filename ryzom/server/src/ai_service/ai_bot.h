@@ -121,6 +121,18 @@ public:
 	virtual float getSpeedFactor() const NL_OVERRIDE { return _SpeedFactor; }
 	virtual void setSpeedFactor(float value) { _SpeedFactor = value; }
 	
+	/// The update of the profile of the bot. It hides the one of the holder: the bot is kept for
+	/// the time of the update, whoever asks for it (see CBot::releaseSpawnObj).
+	void updateProfile(uint ticks);
+
+	/// The bot leaves its group and the world map, once. The destructor does it. A bot that is
+	/// despawned while an update holds a reference to it does it at its despawn: the object then
+	/// lives until that update returns, and is in no group and in no place meanwhile.
+	void despawned();
+	/// True once the bot left its group. The code of an update that raised an event tests it when
+	/// the event returns: the handlers of an event are script, and a script can despawn the bot.
+	bool isDespawned() const { return _Despawned; }
+
 public:
 	TPropList _PropList;
 	
@@ -135,6 +147,8 @@ private:
 	uint32	_LastSelfHealTick;
 	
 	float	_SpeedFactor;
+
+	bool	_Despawned;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -270,6 +284,8 @@ protected:
 	virtual CSpawnBot* getSpawnBot(TDataSetRow const& row, NLMISC::CEntityId const& id, float radius) = 0;
 	
 	virtual void sheetChanged();
+	/// Gives up the spawn object, which is deleted unless an update that runs for it holds a reference
+	void releaseSpawnObj();
 	bool finalizeSpawn(RYAI_MAP_CRUNCH::CWorldPosition const& botWPos, CAngle const& spawnTheta, float botMeterSize);
 	virtual void initAdditionalMirrorValues() {}
 	void setSheetDelayed(uint32 step);

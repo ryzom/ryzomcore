@@ -363,47 +363,43 @@ end
 -- called when a gm/ai has do a scheduleStartAct (Animation or test time)
 function r2.onScheduleStartAct(errorId, actId, nbSeconds)
 	if (r2.Mode == "DM" or r2.Mode == "AnimationModeDm") then
+		-- the translated text 'textId' with the number of the act in the place of %1
+		local function actText(textId)
+			return replaceTag(tostring(i18n.get(textId)), "%%1", numberText(actId))
+		end
 		if errorId == 0 then
-			local ucStringMsg = ucstring()	
-
-			local str = "Act " .. actId 
+			local str
 			if nbSeconds ~= 0 then
-				str = str .. " will start in " .. nbSeconds .. " seconds"
+				str = replaceTag(actText("uiR2EDActStartsIn"), "%%2", numberText(nbSeconds))
+			else
+				str = actText("uiR2EDActStartsNow")
 			end
-			ucStringMsg:fromUtf8(str)		
-			displaySystemInfo(ucStringMsg, "BC")
+			displaySystemInfo(str, "BC")
 		elseif errorId == 1 then
-			messageBox("Act ".. actId .." can not be started because another act is already starting.")
+			messageBox(actText("uiR2EDActStartBusy"))
 		elseif errorId == 2 then
-			messageBox("Act ".. actId .." can not be started because this act does not exist.")		
+			messageBox(actText("uiR2EDActStartUnknown"))
 		end
 	end
 end
 
 function r2.onDisconnected()
-	local str = "You have been disconnected by the server."
-	local ucStringMsg = ucstring()	
+	local str = tostring(i18n.get("uiR2EDDisconnected"))
 	messageBox(str)
-	ucStringMsg:fromUtf8(str)				
-	displaySystemInfo(ucStringMsg, "BC")
+	displaySystemInfo(str, "BC")
 end
 
+-- The server tells a character that the owner of the session kicked it, with the seconds it has left to
+-- leave by itself, or that the kick was lifted
 function r2.onKicked(timeBeforeDisconnection, kicked)
+	local str
 	if kicked then
-		local str = "You have been kicked. You must come back to mainland or leave this session otherwise you will be disconnected in "
-			.. tostring(timeBeforeDisconnection) .. " secondes."
-		local ucStringMsg = ucstring()	
-		messageBox(str)
-		ucStringMsg:fromUtf8(str)				
-		displaySystemInfo(ucStringMsg, "BC")
+		str = replaceTag(tostring(i18n.get("uiR2EDKicked")), "%%1", numberText(timeBeforeDisconnection))
 	else
-		local str = "You have been unkicked."
-		local ucStringMsg = ucstring()	
-		messageBox(str)
-		ucStringMsg:fromUtf8(str)				
-		displaySystemInfo(ucStringMsg, "BC")
+		str = tostring(i18n.get("uiR2EDUnkicked"))
 	end
-
+	messageBox(str)
+	displaySystemInfo(str, "BC")
 end
 
 -- called in start mode of a dm
@@ -436,9 +432,98 @@ function r2.onScenarioHeaderUpdated(scenario)
 	-- or use r2.getScenarioHeader();
 end
 
+-- The modes of the editor in which the author works (r2.Mode, set by CEditor::setMode). The others are
+-- the waits between them, behind the connection window, and the mode in which an animation gets its
+-- file (see authorIsThere).
+local workingModes = { Edit = true, Test = true, DM = true, AnimationModeDm = true, r2ed_anim_test = true }
+
+-- A working mode is not always one the editor stays in, nor one the author sees the game in:
+-- * The mode the editor starts in is chosen from the role of the user (CEditor::autoConfigInit) before
+--   the server has said what the session is doing. The server's word follows and sets the mode again
+--   (CEditor::onEditionModeConnected, CEditor::onAnimationModeConnected). An animation launched at the
+--   Ring terminal goes AnimationModeDm (AnimationModePlay when it has no master), AnimationModeLoading,
+--   AnimationModeGoingToDM, and then AnimationModeDm or AnimationModePlay for good.
+-- * After a teleport the client draws frames it does not show, with the loading screen left on the
+--   screen.
+-- The client knows both, and the wait screen and the start of a test it is about to go to:
+-- r2:isModeSettled (CEditor::isModeSettled).
+
+-- True when the author is there to read a message, and no change of mode that comes by itself is about
+-- to close its box: in a mode the author works in, once it is settled, and in AnimationModeLoading while
+-- the form in which the author of an animation chooses the file to load is shown.
+-- That form is not shown while a file is loaded and started: the one the author has just chosen in it,
+-- or the one an animation was launched with at the Ring terminal (r2:getStartingAnimationFilename,
+-- loaded by UnitTest.testLoadAnimationScenarioUi without a word from the author). The start changes
+-- the mode at once. The form comes back when the file is refused, and the author is at the choice: the
+-- editor waits there for the author.
+local function authorIsThere()
+	if workingModes[r2.Mode] then
+		return r2:isModeSettled()
+	end
+	if r2.Mode ~= "AnimationModeLoading" then
+		return false
+	end
+	local form = r2:getForm("LoadScenario")
+	return form ~= nil and form.active == true
+end
+
+-- An error message that waits for the author, if there is one. The refusal of a scenario comes while
+-- the editor waits for its test, and it is back in edition a moment later; every change of mode closes
+-- the message box (CEditor::setMode disables the modal window), so the author saw the box for an
+-- instant or not at all, and the system line scrolls away. The message is kept and shown once the
+-- author is there: r2.UIMainLoop asks each frame.
+r2.PendingErrorMessage = nil
+
+-- A message the author must see, from the scripts: in a message box, once. Now when the author is there
+-- to read it (authorIsThere), and kept for that moment otherwise (while the editor starts, between two
+-- modes, in a mode that is not settled, while the file of an animation is loaded). Several
+-- messages that wait are shown together. A message about a file that was refused is shown when the
+-- author is back at the choice of a file, before another file is loaded.
+function r2.showErrorMessage(text)
+	if authorIsThere() then
+		messageBox(text)
+	elseif r2.PendingErrorMessage ~= nil then
+		r2.PendingErrorMessage = tostring(r2.PendingErrorMessage) .. "\n\n" .. tostring(text)
+	else
+		r2.PendingErrorMessage = text
+	end
+end
+
+-- Called each frame by r2.UIMainLoop, in every mode.
+function r2.showPendingErrorMessage()
+	local pending = r2.PendingErrorMessage
+	if pending == nil or not authorIsThere() then
+		return
+	end
+	r2.PendingErrorMessage = nil
+	messageBox(pending)
+end
+
+-- The client calls this when a test cannot start and nothing has been sent to the server: the save of
+-- the scenario for the test failed (CClientEditionModule::requestStartScenario). The editor stays in
+-- edition with its scenario. r2:tryGoTest has frozen the button and the menu entry that start a test
+-- until the editor comes back from it: they are free again, and the author is told ('msg' is the id of
+-- a translated text).
+function r2.onTestStartFailed(msg)
+	-- (an animation that is loaded starts the same way, without these controls in use: the message is
+	-- shown whether they are found or not)
+	local toolbar = getUI("ui:interface:r2ed_toolbar")
+	local goTestTool = toolbar and toolbar:find("r2ed_tool_start")
+	if goTestTool then
+		goTestTool.unselected.button.frozen = false
+	end
+	local mainMenu = getUI("ui:interface:r2ed_main_menu")
+	local goTestMenu = mainMenu and mainMenu:find("go_test")
+	if goTestMenu then
+		goTestMenu.grayed = false
+	end
+	r2.onSystemMessageReceived("ERR", "", msg)
+end
+
 function r2.onSystemMessageReceived(msgType, msgWho, msg)
 	local ucStringMsg = ucstring()
 	ucStringMsg:fromUtf8(msg)
+	local msgId = msg -- the id of a translated text, when the message is one
 	if string.len(msg) > 2 and string.sub(msg, 1, 2) == "ui" then
 		ucStringMsg = i18n.get(msg)	
 		msg = ucStringMsg:toString()
@@ -461,7 +546,18 @@ function r2.onSystemMessageReceived(msgType, msgWho, msg)
 		printMsgML(msg)
 	elseif msgType == "ERR" then
 		printMsgML(msg)
-		messageBox(msg)
+		if msgId == "uiR2EDServerRefuseToLoad" and r2.Mode == "AnimationModeLoading" then
+			-- The scenario service refuses the file of the animation. The load ends with this message
+			-- and no start follows (CClientEditionModule::loadScenarioFileAccepted); the client
+			-- brings the form back for the other ways a load fails (CDynamicMapClient::
+			-- loadAnimationFromBuffer), and not for this one. The author would sit behind the
+			-- connection window with a message that waits for a form: the form comes back here, and
+			-- the message is shown with it.
+			UnitTest.testLoadAnimationScenarioUi(true)
+		end
+		-- in a message box, once: now, or when the wait is over (a box opened during a wait is closed
+		-- by the change of mode that ends it)
+		r2.showErrorMessage(msg)
 	end
 end
 
@@ -1106,49 +1202,9 @@ function r2.getDisplayButtonHeader(func, buttonText)
 		[[
 				<ctrl style="text_button_16" id="help" posref="TL TL" color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255" 
 					onclick_l="lua" params_l="%s" hardtext="%s"/>
-		]], func, buttonText)
+		]], r2:uiCall(func), buttonText)
 	
 	return header
-end
-
-function r2.updateLogicEvents(this, invalidEvents)
-	assert(invalidEvents)
-	assert(this)
-	
-	local actions = this.Behavior.Actions
-	assert(actions)
-	
-
-	local function updateLogicEvent(k, action)
-
-		local event = action.Event
-		assert(event)
-		if invalidEvents[event.Type] then
-			local instanceId = tostring(event.InstanceId)
-			r2.requestSetNode(instanceId, "Type", tostring(invalidEvents[event.Type]))
-		end
-	end
-
-	forEach(actions, updateLogicEvent)
-
-end
-
-function r2.updateLogicActions(this, invalidActions, entityClass)
-	assert(invalidActions)
-	assert(this)
-	assert(entityClass)
-	
-	local instance = r2:getInstanceFromId(this.Entity)
-	if not instance or not instance:isKindOf(entityClass) then
-		return
-	end
-
-	local action = this.Action
-	assert(action)
-	
-	if invalidActions[action.Type] then
-		r2.requestSetNode(action.InstanceId, "Type", invalidActions[action.Type])
-	end
 end
 
 

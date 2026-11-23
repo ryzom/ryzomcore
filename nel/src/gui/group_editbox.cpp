@@ -1052,6 +1052,11 @@ namespace NLGUI
 			maxPos = _CursorPos;
 		}
 
+		// a pasted number is refused when out of bounds, like a typed digit
+		const ::u32string previousInput = _InputString;
+		const sint32 previousCursorPos = _CursorPos;
+		const sint32 previousSelectCursorPos = _SelectCursorPos;
+
 		if (replace)
 		{
 			_InputString = _InputString.substr(0, minPos) + toAdd + _InputString.substr(maxPos);
@@ -1073,6 +1078,37 @@ namespace NLGUI
 				_SelectCursorPos = maxPos+(sint32)toAdd.length();
 			}
 		}
+
+		if (!isWithinBounds(_InputString))
+		{
+			_InputString = previousInput;
+			_CursorPos = previousCursorPos;
+			_SelectCursorPos = previousSelectCursorPos;
+		}
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CGroupEditBox::isWithinBounds(const ::u32string &str) const
+	{
+		bool bounded = (_EntryType == Integer && (_IntegerMinValue != INT_MIN || _IntegerMaxValue != INT_MAX))
+			|| (_EntryType == PositiveInteger && (_PositiveIntegerMinValue != 0 || _PositiveIntegerMaxValue != UINT_MAX));
+		if (!bounded)
+			return true;
+
+		// a string without digits counts as 0, digits that do not parse are a number too large for the type
+		std::string utf8 = CUtfStringView(str).toUtf8();
+		bool hasDigits = utf8.find_first_of("0123456789") != std::string::npos;
+		if (_EntryType == Integer)
+		{
+			sint32 value;
+			if (!fromString(utf8, value) && hasDigits)
+				return false;
+			return value >= _IntegerMinValue && value <= _IntegerMaxValue;
+		}
+		uint32 value;
+		if (!fromString(utf8, value) && hasDigits)
+			return false;
+		return value >= _PositiveIntegerMinValue && value <= _PositiveIntegerMaxValue;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1196,30 +1232,13 @@ namespace NLGUI
 								break;
 						}
 						// verify integer bounds
-						if(_EntryType==Integer && (_IntegerMinValue!=INT_MIN || _IntegerMaxValue!=INT_MAX))
+						if (_EntryType == Integer || _EntryType == PositiveInteger)
 						{
 							// estimate new string
-							::u32string	copyStr= _InputString;
-							::u32string::iterator it = copyStr.begin() + _CursorPos;
-							copyStr.insert(it, c);
-							sint32	value;
-							fromString(CUtfStringView(copyStr).toUtf8(), value);
+							::u32string copyStr = _InputString;
+							copyStr.insert(copyStr.begin() + _CursorPos, c);
 							// if out of bounds, abort char
-							if(value<_IntegerMinValue || value>_IntegerMaxValue)
-								return;
-						}
-						// verify integer bounds
-						if(_EntryType==PositiveInteger && (_PositiveIntegerMinValue!=0 || _PositiveIntegerMaxValue!=UINT_MAX))
-						{
-							// estimate new string
-							::u32string	copyStr= _InputString;
-							::u32string::iterator it = copyStr.begin() + _CursorPos;
-							copyStr.insert(it, c);
-							// \todo yoyo: this doesn't really work i think....
-							uint32	value;
-							fromString(CUtfStringView(copyStr).toUtf8(), value);
-							// if out of bounds, abort char
-							if(value<_PositiveIntegerMinValue || value>_PositiveIntegerMaxValue)
+							if (!isWithinBounds(copyStr))
 								return;
 						}
 						// verify max num char

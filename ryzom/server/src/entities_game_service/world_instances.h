@@ -79,8 +79,8 @@ public:
 	/// Retrieve the AIS service ID for a given instance, return false if no instance match
 	bool getAIServiceIdForInstance(uint32 instanceNumber, NLNET::TServiceId &AISId);
 
-	/// Retrieve the instance name for a given AIS service ID
-	bool getAIInstanceNameFromeServiceId(NLNET::TServiceId AISID, std::string & name);
+	/// Retrieve the names of the instances of a given AIS service ID, return false if it has none
+	bool getAIInstanceNamesFromServiceId(NLNET::TServiceId AISID, std::vector<std::string> & names);
 
 private:
 	// Private constructor, enforce singleton

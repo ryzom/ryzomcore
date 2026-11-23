@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, tarfile, argparse
+import time, sys, os, shutil, subprocess, tarfile, argparse
 sys.path.append("configuration")
 
 parser = argparse.ArgumentParser(description='Ryzom Core - Build Gamedata - Shard Patch')
@@ -78,16 +78,30 @@ printLog(log, ">>> Archive new admin_install.tgz <<<")
 mkPath(log, PatchmanBridgeServerDirectory)
 adminInstallTgz = PatchmanBridgeServerDirectory + "/admin_install.tgz"
 patchmanExecutable = findFileMultiDir(log, LinuxServiceExecutableDirectories, "ryzom_patchman_service")
+# the service dashboard for the servers, from the cross-platform tools build of the quick start
+try:
+	LinuxToolExecutableDirectories
+except NameError:
+	LinuxToolExecutableDirectories = [ ]
+servdashCli = findFileMultiDir(log, LinuxToolExecutableDirectories, "servdash_cli")
+if servdashCli == "":
+	printLog(log, "MISSING servdash_cli")
 if patchmanExecutable == "":
 	printLog(log, "MISSING ryzom_patchman_service")
-elif needUpdateDirNoSubdirFile(log, PatchmanCfgAdminDirectory + "/bin", adminInstallTgz) or needUpdateDirNoSubdirFile(log, PatchmanCfgAdminDirectory + "/patchman", adminInstallTgz) or needUpdate(log, patchmanExecutable, adminInstallTgz):
+elif needUpdateDirNoSubdirFile(log, PatchmanCfgAdminDirectory + "/bin", adminInstallTgz) or needUpdateDirNoSubdirFile(log, PatchmanCfgAdminDirectory + "/patchman", adminInstallTgz) or needUpdate(log, patchmanExecutable, adminInstallTgz) or (servdashCli != "" and needUpdate(log, servdashCli, adminInstallTgz)):
 	printLog(log, "WRITE " + adminInstallTgz)
 	if os.path.isfile(adminInstallTgz):
 		os.remove(adminInstallTgz)
+	# the executables are built on a Windows file system, which has no executable bit to keep
+	def executable(tarinfo):
+		tarinfo.mode = 0o755
+		return tarinfo
 	tar = tarfile.open(adminInstallTgz, "w:gz")
 	tar.add(PatchmanCfgAdminDirectory + "/bin", arcname = "bin")
 	tar.add(PatchmanCfgAdminDirectory + "/patchman", arcname = "patchman")
-	tar.add(patchmanExecutable, arcname = "patchman/ryzom_patchman_service")
+	tar.add(patchmanExecutable, arcname = "patchman/ryzom_patchman_service", filter = executable)
+	if servdashCli != "":
+		tar.add(servdashCli, arcname = "bin/servdash_cli", filter = executable)
 	tar.close()
 else:
 	printLog(log, "SKIP " + adminInstallTgz)

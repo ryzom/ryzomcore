@@ -72,6 +72,7 @@ void CEntityPhrases::stopCyclicAction(const TDataSetRow &entityRowId)
 		_CyclicAction->cyclic(false);
 		_CyclicAction = NULL;
 		_CyclicActionInfos.reset();
+		clearCombatLatencyEndDate();
 		
 		CCharacter *character = PlayerManager.getChar(entityRowId);
 		if (character)
@@ -88,6 +89,9 @@ bool CEntityPhrases::cancelCombatActions(const TDataSetRow &entityRowId, bool di
 {
 	H_AUTO(CEntityPhrases_cancelCombatActions);
 	
+	// the next combat action starts a new sequence, whether the current one is stopped now or at its end
+	clearCombatLatencyEndDate();
+
 	bool returnValue = true;
 	if (_CurrentAction != NULL && _CurrentAction->getType() ==  BRICK_TYPE::COMBAT)
 	{
@@ -205,15 +209,20 @@ CSPhrasePtr &CEntityPhrases::renewCyclicAction()
 		if (_NextAction == _CyclicAction)
 			_NextAction = NULL;
 		
+		// executePhrase() adds the copy as a new cyclic action, which clears the latency end date of the last
+		// combat action (CPhraseManager::addPhrase). The copy is the same action going on: it follows that date.
+		const double combatLatencyEndDate = _CombatLatencyEndDate;
 		CSPhrasePtr ptr = CPhraseManager::getInstance().executePhrase( _CyclicActionInfos.ActorRowId, _CyclicActionInfos.TargetRowId, _CyclicActionInfos.CyclicActionBricks, true );
 		if (ptr.isNull())
 		{
 			_CyclicAction = NULL;
 			_CyclicActionInfos.reset();
+			clearCombatLatencyEndDate();
 		}
 		else
 		{
 			setCyclicAction( ptr, _CyclicActionInfos );
+			_CombatLatencyEndDate = combatLatencyEndDate;
 		}
 	}
 	
@@ -531,6 +540,13 @@ void CPhraseManager::updateEntityCurrentAction(const TDataSetRow &entityId, CEnt
 			case CSPhrase::SecondValidated:
 				if ( phrase->executionEndDate() <= time && !phrase->idle())
 				{
+					// a combat action is told where the latency of the previous one ended (see CEntityPhrases::getCombatLatencyEndDate)
+					CCombatPhrase *combatPhrase = NULL;
+					if (phrase->getType() == BRICK_TYPE::COMBAT)
+						combatPhrase = dynamic_cast<CCombatPhrase*>( static_cast<CSPhrase*> (phrase));
+					if (combatPhrase)
+						combatPhrase->previousLatencyEndDate(entityPhrases.getCombatLatencyEndDate());
+
 					if (!phrase->launch())
 					{
 						deletePhrase = true;
@@ -538,6 +554,11 @@ void CPhraseManager::updateEntityCurrentAction(const TDataSetRow &entityId, CEnt
 					}
 					else
 					{
+						// the next combat action follows this one, unless this is another kind of action
+						if (combatPhrase)
+							entityPhrases.setCombatLatencyEndDate(phrase->latencyEndDate());
+						else
+							entityPhrases.clearCombatLatencyEndDate();
 						phrase->setState(CSPhrase::Latent);
 					}
 				}
@@ -887,6 +908,9 @@ bool CPhraseManager::addPhrase( const TDataSetRow &actorRowId, CSPhrasePtr &phra
 			//egs_pminfo( "Set next cyclic action" );
 			entityPhrases.setNextPhrase(phrase); // ensure no time is lost when switching action
 			entityPhrases.setCyclicAction(phrase, cyclicInfos);
+			// the new cyclic action does not follow the latency of the one it replaces
+			// (CEntityPhrases::renewCyclicAction comes through here too, and puts the date back)
+			entityPhrases.clearCombatLatencyEndDate();
 		}
 		else
 		{
@@ -1342,7 +1366,7 @@ bool CPhraseManager::checkPhraseValidity( const std::vector<NLMISC::CSheetId> &b
 			nlwarning("<CPhraseManager::checkPhraseValidity> Cannot find brick object for brick sheet %s", (*it).toString().c_str() );
 			return false;
 		}
-		
+
 		mandatoryFamilies.insert( brick->MandatoryFamilies.begin(), brick->MandatoryFamilies.end() );
 		allowedFamilies.insert( brick->OptionalFamilies.begin(), brick->OptionalFamilies.end() );
 		allowedFamilies.insert( brick->CreditFamilies.begin(), brick->CreditFamilies.end() );
@@ -1451,7 +1475,17 @@ CSPhrasePtr CPhraseManager::buildSabrinaPhrase( const TDataSetRow &actorRowId, c
 	// if actor is invalid return NULL
 	if ( !TheDataset.isAccessible(actorRowId) )
 		return NULL;
-	
+
+	// a brick that lost a property at load (reported then, with its sheet) would cost nothing or work with default
+	// values: its phrases stay known and memorized (a build for the memorization is no execution), so they work again
+	// once the sheet is fixed, and are not built for an execution
+	for (uint i = 0; execution && i < brickIds.size(); ++i)
+	{
+		const CStaticBrick *brick = CSheets::getSBrickForm(brickIds[i]);
+		if (brick && brick->HasBadProperty)
+			return NULL;
+	}
+
 	CSPhrasePtr phrase = ISPhraseFactory::buildPhrase(actorRowId,brickIds, execution);
 	if (!phrase)
 	{
@@ -1986,6 +2020,11 @@ void CPhraseManager::breakLaunchingLinks(CEntityBase * entity)
 			continue
 			);
 		
+		// a phrase that applies from this list is still in it: the static action that one of its own links starts
+		// must not break the links it gives after that one
+		if (magicPhrase->addingLink())
+			continue;
+
 		magicPhrase->breakNewLink(true);
 	}
 	
@@ -2024,29 +2063,21 @@ const CEntityPhrases *CPhraseManager::getEntityPhrases(TDataSetRow rowId) const
 //--------------------------------------------------------------
 //						harvestDefault()  
 //--------------------------------------------------------------
-bool CPhraseManager::harvestDefault(const TDataSetRow &actorRowId, const CSheetId &rawMaterialSheet, uint16 minQuality, uint16 maxQuality, uint16 quantity, bool deposit )
+bool CPhraseManager::harvestDefault(const TDataSetRow &actorRowId, const CSheetId &rawMaterialSheet, uint16 minQuality, uint16 maxQuality, uint16 quantity)
 {
 	H_AUTO(CPhraseManager_harvestDefault);
-	
+
+	// quartering; the deposit harvest of bhf01.sbrick was replaced by the forage actions, and bhf01 has no sheet
 	vector<CSheetId> bricks;
 	static const CSheetId quarteringBrick("bhq01.sbrick");
-	static const CSheetId foragingBrick("bhf01.sbrick");
-	
+
 	if (quarteringBrick == CSheetId::Unknown)
 	{
 		nlwarning("ERROR : cannot find quartering brick : bhq01.sbrick.");
 		return false;
 	}
-	if (foragingBrick == CSheetId::Unknown)
-	{
-		nlwarning("ERROR : cannot find foraging brick : bhf01.sbrick.");
-		return false;
-	}
-	
-	if (deposit)
-		bricks.push_back( foragingBrick );
-	else
-		bricks.push_back( quarteringBrick );
+
+	bricks.push_back(quarteringBrick);
 	
 	TDataSetRow nullId;
 	

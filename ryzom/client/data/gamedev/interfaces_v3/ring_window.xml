@@ -318,8 +318,8 @@
 					<instance template="header_but" tooltip="uiRAP_LevelTooltip" color="%rap_col_odd_color" w="60" id="level" criterion="Level" text="uiRAP_Level" target="%rap_column_path:level"/>					
 					<instance template="header_but" tooltip="uiRAP_PlayerCountTooltip" color="%rap_col_even_color" w="60" id="player_count" criterion="PlayerCount" text="uiRAP_PlayerCount" target="%rap_column_path:player_count"/>
 					<instance template="header_but" tooltip="uiRAP_LanguageTooltip" color="%rap_col_odd_color" w="70" id="language" criterion="Language" text="uiRAP_Language" target="%rap_column_path:language"/>
-					<instance template="header_but" tooltip="uiRAP_ScenarioTypeTooltip" color="%rap_col_even_color" w="40" id="launch_date" criterion="ScenarioType" text="uiRAP_ScenarioType" target="%rap_column_path:scenario_type"/>
-					<instance template="header_but" tooltip="uiRAP_LaunchDateTooltip" color="%rap_col_odd_color" w="120" id="scenario_type" criterion="LaunchDate" text="uiRAP_LaunchDate" target="%rap_column_path:launch_date"/>
+					<instance template="header_but" tooltip="uiRAP_ScenarioTypeTooltip" color="%rap_col_even_color" w="40" id="scenario_type" criterion="ScenarioType" text="uiRAP_ScenarioType" target="%rap_column_path:scenario_type"/>
+					<instance template="header_but" tooltip="uiRAP_LaunchDateTooltip" color="%rap_col_odd_color" w="120" id="launch_date" criterion="LaunchDate" text="uiRAP_LaunchDate" target="%rap_column_path:launch_date"/>
 
 					<!--
 					<instance template="header_but" tooltip="uiRAP_AuthorRRPRatingTooltip" color="%rap_col_even_color" w="120" id="author_rrp_rating" criterion="AuthorRRPRating" text="uiRAP_AuthorRRPRating" target="%rap_column_path:author_rrp_rating"/>
@@ -619,9 +619,10 @@
 <group type="modal" id="invite_character" exit_click_out="true" posref="MM MR" w="212" child_resize_h="true" child_resize_hmargin="8" options="skin_modal"
 	on_active="" on_active_params="" >
 
-	<view type="text" id="text" case_mode="%case_first_word_letter_up" posref="TL TL" x="6" y="-4" color="255 255 255 255" global_color="false" fontsize="14" shadow="true" hardtext="uiPeopleAddContact" />
+	<view type="text" id="text" case_mode="%case_first_word_letter_up" posref="TL TL" x="6" y="-4" color="255 255 255 255" global_color="false" fontsize="14" shadow="true" hardtext="uiRAP_InviteTitle" />
 
-	<instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_chars="255" entry_type="playername" />
+	<!-- Enter in the edit box invites, as the OK button does. The box keeps the id the handler looks for. -->
+	<instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="r2ed_invite_character" max_num_chars="255" entry_type="playername" />
 	
 	<instance template="button_ok_cancel" posparent="add_contact_eb" posref="BR TR" x="0" y="-4" 
 				onclick_ok="r2ed_invite_character" 
@@ -692,7 +693,7 @@
 >
 	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" 
 	 color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" 
-	 multi_line_space="0" case_mode="%case_first_sentence_letter_up" hardtext="uiRingWarningFreeTrial"/>
+	 multi_line_space="0" case_mode="%case_normal" hardtext="uiRingWarningFreeTrial"/>
 	<ctrl style="button_ok" posref="BM BM" x="0" y="8" onclick_l="leave_modal" hardtext="uittOK" avoid_resize_parent="true" />
 </group>
 
@@ -703,7 +704,7 @@
 >
 	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" 
 	 color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" 
-	 multi_line_space="0" case_mode="%case_first_sentence_letter_up" hardtext="uiRingWarningNewcomer"/>
+	 multi_line_space="0" case_mode="%case_normal" hardtext="uiRingWarningNewcomer"/>
 	<ctrl style="button_ok" posref="BM BM" x="0" y="8" onclick_l="leave_modal" hardtext="uittOK" avoid_resize_parent="true" />
 </group>
 

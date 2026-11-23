@@ -44,6 +44,16 @@ CVariable<uint32>	DelayBeforeItemTP("egs","DelayBeforeItemTP","delay between ite
 CVariable<float>			MaxDistanceForXpGain("egs","MaxDistanceForXpGain", "max distance from combat to gain Xp at creature death (in meters)", 50.0f, 0, true );
 CVariable<float>			XPTeamMemberDivisorValue("egs","XPTeamMemberDivisorValue", "for team XP progression, add this value to the xp divisor for each team member above one", 0.9f, 0, true );
 CVariable<float>			MaxXPGainPerPlayer("egs","MaxXPGainPerPlayer", "Max XP gain by any one player on any creature (each team member can gain up to this value)", 30.0f, 0, true );
+static void cbKillCreditNonPlayerDamage(IVariable &var);
+CVariable<uint32>			KillCreditNonPlayerDamage("egs","KillCreditNonPlayerDamage", "non-player damage the player or team that did the most damage to a creature must also beat to get its loot and xp: 0 none, 1 only damage players gave up by losing aggro or entering water, 2 all (guards and other creatures too)", 0, 0, true, cbKillCreditNonPlayerDamage ); // 0 on this branch, the rule of the game it is built for
+static void cbKillCreditNonPlayerDamage(IVariable &var)
+{
+	if (KillCreditNonPlayerDamage.get() > 2)
+	{
+		nlwarning("KillCreditNonPlayerDamage %u is not 0, 1 or 2, using 1", KillCreditNonPlayerDamage.get());
+		KillCreditNonPlayerDamage.set(1);
+	}
+}
 
 CVariable<uint32>			NbTickForRegenCreature("egs","NbTickForRegenCreature", "nb tick needed for regenerate scores of all creature (total creature / number regenerated per tick)", 64, 0, true );
 
@@ -295,15 +305,15 @@ CVariable<uint32>			AurasUpdateFrequency("egs","AurasUpdateFrequency", "update f
 // update frequency of locate deposit effect
 CVariable<uint32>			ForageLocateDepositUpdateFrequency("egs","ForageLocateDepositUpdateFrequency", "update frequency of locate deposit effect", 25, 0, true );
 
-// characteristic brick progression step
-CVariable<uint32>			CharacteristicBrickStep("egs","CharacteristicBrickStep", "characteristic brick progression step(brick xxxx05 match a charac value of characteristic 5*CharacteristicBrickStep)", 5, 0, true);
-
 // Variable regen divisor & factor
 CVariable<float>			RegenDivisor("egs","RegenDivisor", "Divisor used for compute regenerate per seconde in repos (divide characteristics per divisor)", 16.0f, 0, true, CPlayerService::updateRegen );
 CVariable<float>			RegenReposFactor("egs","RegenReposFactor", "Divisor used for compute regenerate per seconde in action (regen repos / factor)", 2.0f, 0, true, CPlayerService::updateRegen );
 CVariable<float>			RegenOffset("egs","RegenOffset", "Regen offset", 1.6f, 0, true, CPlayerService::updateRegen );
 
 // Max value for player's characteristics
+// characteristic brick progression step (CCharacter::checkCharacAndScoresValues of this branch)
+CVariable<uint32>			CharacteristicBrickStep("egs","CharacteristicBrickStep", "characteristic brick progression step(brick xxxx05 match a charac value of characteristic 5*CharacteristicBrickStep)", 5, 0, true);
+
 CVariable<uint16>			MaxCharacteristicValue("egs","MaxCharacteristicValue", "Max value for player's characteristics", 250, 0, true);
 
 // COMBAT config

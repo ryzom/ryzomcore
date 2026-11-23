@@ -75,8 +75,10 @@ void *nlGetSymbolAddress(NL_LIB_HANDLE libHandle, const std::string &procName)
   const string	nlLibPrefix;	// empty
   const string	nlLibExt(".dll");
 #elif defined(NL_OS_MAC)
+  // the libraries loaded at run time, the drivers, are loadable modules (CMake MODULE, a Mach-O bundle), which CMake
+  // names lib<name>.so on macOS as well; .dylib is the extension of the shared libraries a program is linked with
   const string	nlLibPrefix("lib");
-  const string	nlLibExt(".dylib");
+  const string	nlLibExt(".so");
 #elif defined(NL_OS_UNIX)
   const string	nlLibPrefix("lib");
   const string	nlLibExt(".so");

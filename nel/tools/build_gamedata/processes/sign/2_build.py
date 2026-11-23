@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -53,7 +53,10 @@ if SignToolSha1 != "":
 		if (fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*"):
 			if needUpdateLogRemoveDest(log, unsignedDirectory + "/" + fileName, signedDirectory + "/" + fileName):
 				shutil.copy(unsignedDirectory + "/" + fileName, signedDirectory + "/" + fileName)
-				subprocess.call([ SignToolExecutable, "sign", "/sha1", SignToolSha1, "/t", SignToolTimestamp, signedDirectory + "/" + fileName ])
+				if subprocess.call([ SignToolExecutable, "sign", "/sha1", SignToolSha1, "/fd", "sha256", "/tr", SignToolTimestamp, "/td", "sha256", signedDirectory + "/" + fileName ]) != 0:
+					# an unsigned copy must not pass for a signed one, the next run tries again
+					printLog(log, "FAIL sign " + signedDirectory + "/" + fileName)
+					os.remove(signedDirectory + "/" + fileName)
 
 log.close()
 

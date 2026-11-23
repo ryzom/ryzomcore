@@ -168,6 +168,7 @@ public:
 
 	/// Show or hide the NeL window
 	virtual void			showWindow(bool show) NL_OVERRIDE;
+	virtual void			setWindowActivation(bool activate) NL_OVERRIDE;
 
 	/// Release the window.
 	virtual	void			release() NL_OVERRIDE;
@@ -176,9 +177,22 @@ public:
 	virtual bool			activate(void) NL_OVERRIDE;
 	/// Return true if driver is still active. Return false else. If he user close the window, must return false.
 	virtual bool			isActive() NL_OVERRIDE;
+	/// Return true while the window is minimized (iconified) by the window system.
+	virtual bool			isWindowMinimized() const NL_OVERRIDE;
+	/// Restore the window when it is minimized, and ask the window system to bring it in front.
+	virtual void			restoreWindow() NL_OVERRIDE;
 	/// Return an OS dependent window handle. Under Win32, it is a HWND.
 	virtual nlWindow		getDisplay () NL_OVERRIDE;
 
+	// @}
+
+
+	/// \name Picture of the minimized window
+	// @{
+	/// The driver supplies the pictures of the minimized window out of the frames drawn, or no longer
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied) NL_OVERRIDE;
+	/// Return true while the frames of the minimized window are read back for the window system
+	virtual bool			isMinimizedWindowPictureWanted() const NL_OVERRIDE;
 	// @}
 
 
@@ -264,8 +278,8 @@ public:
 	/// Get the render target manager
 	virtual CRenderTargetManager	&getRenderTargetManager() NL_OVERRIDE { return _RenderTargetManager; }
 
-	/// Set a texture the size of the window as render target
-	virtual void					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0) NL_OVERRIDE;
+	/// Set a texture the size of the window as render target, false and no render target when it has no area
+	virtual bool					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0) NL_OVERRIDE;
 
 	/// Draw the render target to the back buffer
 	virtual void					endDefaultRenderTarget(UScene *scene) NL_OVERRIDE;

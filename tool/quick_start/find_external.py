@@ -1,8 +1,7 @@
 
 # This script detects all external library paths
 # Useful for locating all dynamic libraries
-
-from .common_config import *
+# Standard library only: dump_wine.py imports it as a plain module to probe the externals of a Wine prefix
 
 import os
 
@@ -13,6 +12,7 @@ def FilterExternalDirs(libs, prefixPaths):
 		"curl": "include/curl/curl.h",
 		"ffmpeg": "include/libavcodec/codec.h",
 		"freetype2": "include/freetype2/ft2build.h",
+		"giflib": "include/gif_lib.h",
 		"gl": "include/GL/glcorearb.h",
 		"gles": "include/GLES2/gl2.h",
 		"iconv": "include/iconv.h",
@@ -68,6 +68,7 @@ def FindPrefixPaths(externalDir):
 		"include/curl/curl.h",
 		"include/libavcodec/codec.h",
 		"include/freetype2/ft2build.h",
+		"include/gif_lib.h",
 		"include/GL/glcorearb.h",
 		"include/GLES2/gl2.h",
 		"include/iconv.h",
@@ -127,7 +128,7 @@ def FindBinPaths(prefixPaths):
 	return res
 
 def FindVSPrefixPaths(toolset, platform):
-	# 2021q4_external_v143_x64
+	# 2026q4_external_v143_x64
 	dirExt = "_external_" + toolset + "_" + platform
 	found = []
 	for dir in os.listdir("C:\\"):
@@ -144,23 +145,37 @@ def FindVSPrefixPaths(toolset, platform):
 		return FindVSPrefixPaths("v140", platform)
 	return []
 
+# The version of a lua.h as a number, 502 for Lua 5.2
+def LuaHeaderVersion(luaHeader):
+	# Lua 5.5 defines LUA_VERSION_NUM from LUA_VERSION_MAJOR_N and LUA_VERSION_MINOR_N, earlier versions as a number
+	major = None
+	minor = None
+	fi = open(luaHeader)
+	line = fi.readline()
+	while line:
+		syms = line.strip().split()
+		if len(syms) >= 3 and syms[0] == "#define":
+			if syms[1] == "LUA_VERSION_MAJOR_N":
+				major = int(syms[2])
+			elif syms[1] == "LUA_VERSION_MINOR_N":
+				minor = int(syms[2])
+			elif syms[1] == "LUA_VERSION_NUM" and syms[2].isdigit():
+				fi.close()
+				return int(syms[2])
+		if major is not None and minor is not None:
+			fi.close()
+			return major * 100 + minor
+		line = fi.readline()
+	fi.close()
+	return
+
 def FindLuaVersion(prefixPaths):
 	for dir in prefixPaths:
 		luaHeader = os.path.join(dir, "include/lua.h")
 		if os.path.isfile(luaHeader):
-			fi = open(luaHeader)
-			line = fi.readline()
-			while line:
-				if "LUA_VERSION_NUM" in line:
-					fi.close()
-					line = line.strip()
-					syms = line.split()
-					vers = syms[len(syms) - 1]
-					return int(vers)
-				line = fi.readline()
-			fi.close()
-	# TODO: For linux, if hunter, don't care,
-	# otherwise, detect which lua version the system luabind depends on!
+			luaVersion = LuaHeaderVersion(luaHeader)
+			if luaVersion:
+				return luaVersion
 	return
 
 def FindMsQuic(prefixPaths):

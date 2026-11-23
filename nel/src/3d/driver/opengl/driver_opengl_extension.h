@@ -312,8 +312,8 @@ bool registerWGlExtensions(CGlExtensions &ext, HDC hDC);
 bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen);
 #endif // NL_OS_WINDOWS
 
-/// This function test and register the extensions for the current GL context.
-void registerGlExtensions(CGlExtensions &ext);
+/// This function test and register the extensions for the current GL context, false when there is no current context.
+bool registerGlExtensions(CGlExtensions &ext);
 
 #ifdef NL_STATIC
 } // NLDRIVERGL/ES

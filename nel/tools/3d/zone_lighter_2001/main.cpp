@@ -1,7 +1,5 @@
 /** \file zone_lighter.cpp
  * zone_lighter.cpp : Very simple zone lighter
- *
- * $Id$
  */
 
 /* Copyright, 2000 Nevrax Ltd.

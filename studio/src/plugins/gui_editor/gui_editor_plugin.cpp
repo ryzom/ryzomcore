@@ -47,9 +47,17 @@ namespace GUIEditor
 	
 	bool GUIEditorPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 	{
-		Q_UNUSED(errorString);
 		m_plugMan = pluginManager;
-		GUIEditorContext *context = new GUIEditorContext( this );
+		GUIEditorContext *context = NULL;
+		try
+		{
+			context = new GUIEditorContext( this );
+		}
+		catch( const NLMISC::Exception &e )
+		{
+			*errorString = QString::fromUtf8( e.what() );
+			return false;
+		}
 		GUIEditorWindow *window = static_cast< GUIEditorWindow* >( context->widget() );
 		
 		addAutoReleasedObject( context );

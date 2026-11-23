@@ -26,6 +26,7 @@
 #include "people_interraction.h"
 #include "nel/gui/interface_expr.h"
 #include "interface_manager.h"
+#include "../client_ctrl.h"
 #include "nel/gui/action_handler.h"
 #include "action_handler_misc.h"
 #include "chat_window.h"
@@ -228,6 +229,9 @@ struct CDebugConsoleEntryHandler : public IChatWindowListener
 {
 	virtual void msgEntered(const string &msg, CChatWindow * /* chatWindow */) NL_OVERRIDE
 	{
+		// a line of the console is a command, without the '/' of the chat
+		if (ClientCtrl::refuseTypedCommand(msg))
+			return;
 		NLMISC::ICommand::execute( msg, g_log );
 	}
 };

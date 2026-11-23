@@ -125,6 +125,21 @@ namespace NLGUI
 	}
 
 	//==================================================================
+	bool CInterfaceExpr::callUserFct(const std::string &name, TArgList &args, CInterfaceExprValue &result)
+	{
+		if(!_UserFct)	_UserFct= new TUserFctMap;
+
+		TUserFctMap::iterator fctIt = _UserFct->find(name);
+		if (fctIt == _UserFct->end())
+		{
+			nlwarning("<CInterfaceExpr::callUserFct> : Unknown function %s", name.c_str());
+			return false;
+		}
+		nlassert(fctIt->second != NULL);
+		return fctIt->second(args, result);
+	}
+
+	//==================================================================
 	/** tool fct : skip space, tab and carret-returns
 	  */
 	static const char *skipBlank(const char *start)

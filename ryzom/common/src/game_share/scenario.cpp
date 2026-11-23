@@ -149,9 +149,127 @@ CScenario::~CScenario()
 
 
 
+// A scenario is changed one value at a time, and each value that is received is within the limits of the reader
+// (CObjectSerializer::MaxDepth, MaxNodes). The whole tree is kept within them too: it is cloned, walked and
+// written by code that recurses once per table, and what is written of it (to the clients that connect, to the
+// file of a session) is read back with these limits.
+//
+// How a value goes in the tree, for fitsInTree
+enum TTreeChange
+{
+	// the value becomes one more entry of the table
+	TreeAdd,
+	// the entries of the table are replaced by the entries of the value (setObject on a table)
+	TreeReplace,
+	// the value becomes an entry of the table, and is a value of the tree already
+	TreeMove
+};
+
+// True if the tree is within the limits once value is in the table into, in the way that change tells; if not,
+// a warning says for which operation it is refused. The tree is walked once, for its number of entries and
+// the number of them that are replaced.
+static bool fitsInTree(const CObject *tree, const CObject *into, const CObject *value, TTreeChange change, const char *operation)
+{
+	uint32 valueDepth = 0;
+	uint32 valueNodes = 0;
+	bool fits = CObjectSerializer::measure(value, valueDepth, valueNodes);
+
+	// the tables from the root of the tree to the table, the table included
+	uint32 intoDepth = 0;
+	for (const CObject *table = into; table; table = table->getParent())
+	{
+		++intoDepth;
+	}
+	// the table that the entries of the value go in stands for the value itself, when it is a table
+	uint32 newDepth = intoDepth + valueDepth;
+	if (change == TreeReplace && valueDepth != 0)
+	{
+		--newDepth;
+	}
+	fits = fits && newDepth <= CObjectSerializer::MaxDepth;
+
+	uint32 treeDepth = 0;
+	uint32 treeNodes = 0;
+	uint32 replacedNodes = 0;
+	if (fits && change != TreeMove)
+	{
+		fits = CObjectSerializer::measure(tree, treeDepth, treeNodes, change == TreeReplace ? into : nullptr, &replacedNodes);
+		// the value is an entry itself when it is added
+		uint32 addedNodes = valueNodes + (change == TreeAdd ? 1 : 0);
+		fits = fits && treeNodes - replacedNodes + addedNodes <= CObjectSerializer::MaxNodes;
+	}
+
+	if (!fits)
+	{
+		nlwarning("CScenario::%s : refused, the scenario would have tables nested deeper than %u or more than %u table entries (value: %u deep, %u entries, in a table %u deep; scenario: %u entries, %u replaced)",
+			operation, (uint)CObjectSerializer::MaxDepth, (uint)CObjectSerializer::MaxNodes, valueDepth, valueNodes, intoDepth, treeNodes, replacedNodes);
+	}
+	return fits;
+}
+
+// True if no instance id that the value or a table in it carries names a node of the scenario outside replaced
+// (the part of the tree that the value takes the place of, or null), and none is carried twice; if not, a
+// warning says for which operation it is refused. An id names one node: a client creates one instance per id,
+// and another node with the id of one it shows would be the same instance twice.
+static bool idsAreFree(CInstanceMap &instances, const CObject *value, const CObject *replaced, std::set<std::string> &carried, const char *operation)
+{
+	if (!value->isTable())
+	{
+		return true;
+	}
+	if (value->isString("InstanceId"))
+	{
+		std::string id = value->toString("InstanceId");
+		const CObject *named = instances.find(id);
+		bool inScenario = named != nullptr;
+		// an id that the scenario has is free for a node of the part that the value replaces only
+		while (named && named != replaced)
+		{
+			named = named->getParent();
+		}
+		if (!carried.insert(id).second || (inScenario && named == nullptr))
+		{
+			nlwarning("CScenario::%s : refused, the instance id '%s' is already in the scenario or twice in the value", operation, id.c_str());
+			return false;
+		}
+	}
+	for (uint32 k = 0; k < value->getSize(); ++k)
+	{
+		const CObject *entry = value->getValueAtPos(k).getPtr();
+		if (entry && !idsAreFree(instances, entry, replaced, carried, operation))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 bool CScenario::setNode( const std::string& instanceId, const std::string& attrName, CObject* value)
 {
 	_Clean = false;
+	if (!canSetNode(instanceId, attrName, value))
+	{
+		return false;
+	}
+	CObject *found = _InstanceMap->find(instanceId);
+	// setObject replaces the entries of a table: the ids of what it replaces leave the instance map, and those
+	// of the value, which it copies, come in
+	CObject *replaced = attrName.empty() ? found : found->getAttr(attrName).getPtr();
+	if (replaced && replaced->isTable())
+	{
+		_InstanceMap->remove(replaced);
+	}
+	bool set = found->setObject(attrName, value);
+	CObject *taken = attrName.empty() ? found : found->getAttr(attrName).getPtr();
+	if (taken && taken->isTable())
+	{
+		_InstanceMap->add(taken);
+	}
+	return set;
+}
+
+bool CScenario::canSetNode(const std::string& instanceId, const std::string& attrName, const CObject* value) const
+{
 	CObject* found= _InstanceMap->find(instanceId);
 
 	if (!found)
@@ -159,8 +277,53 @@ bool CScenario::setNode( const std::string& instanceId, const std::string& attrN
 		nlwarning("CScenario::setNode : couldn't find object with id = %s", instanceId.c_str());
 		return false;
 	}
-	return found->setObject(attrName, value);
+	// a message can come with the tree that is no value, or with compressed data that gives no tree
+	if (!value)
+	{
+		nlwarning("CScenario::setNode : no value to set in object with id = %s", instanceId.c_str());
+		return false;
+	}
 
+	// What setObject below does: without an attribute name the entries of the object are replaced; an
+	// attribute that is a table has its entries replaced; one that the object does not have is added; one
+	// that is a string or a number takes the value, or refuses it, and the tree keeps its shape.
+	// What is replaced takes a value of its own kind, and setObject stops on another one: a table takes the
+	// entries of a table, a number a number, a text a text or a number.
+	const CObject *into = found;
+	TTreeChange change = TreeReplace;
+	bool sameKind = value->isTable();
+	if (!attrName.empty())
+	{
+		const CObject *attr = found->getAttr(attrName);
+		if (!attr)
+		{
+			change = TreeAdd;
+			sameKind = true;
+		}
+		else
+		{
+			into = attr->isTable() ? attr : nullptr;
+			sameKind = attr->isTable() == value->isTable() && (attr->isString() || !value->isString());
+		}
+	}
+	if (!sameKind)
+	{
+		nlwarning("CScenario::setNode : the value is not of the kind of '%s' in object with id = %s", attrName.c_str(), instanceId.c_str());
+		return false;
+	}
+	// the entries of a whole object are replaced by a value of its own id: what names the object by its id (the
+	// edits of the other editors, references, the instances of a client) goes on naming it
+	if (attrName.empty() && (!value->isString("InstanceId") || value->toString("InstanceId") != instanceId))
+	{
+		nlwarning("CScenario::setNode : refused, the value of the whole object '%s' does not carry its instance id", instanceId.c_str());
+		return false;
+	}
+	if (into && !fitsInTree(_HighLevel, into, value, change, "setNode"))
+	{
+		return false;
+	}
+	std::set<std::string> carried;
+	return idsAreFree(*_InstanceMap, value, change == TreeReplace ? into : nullptr, carried, "setNode");
 }
 
 bool  CScenario::insertNode(const std::string&  instanceId, const std::string & attrName, sint32 position,
@@ -181,6 +344,27 @@ bool  CScenario::insertNode(const std::string&  instanceId, const std::string & 
 	if (!found)
 	{
 		nlwarning("CScenario::insertNode : couldn't find attribute '%s' in object with id = %s", attrName.c_str(), instanceId.c_str());
+		return false;
+	}
+	// a message can come with the tree that is no value, or with compressed data that gives no tree
+	if (!value)
+	{
+		nlwarning("CScenario::insertNode : no value to insert in object with id = %s", instanceId.c_str());
+		return false;
+	}
+	// the attribute can be a text or a number, and the position is -1 or one the table has: insert stops on others
+	if (!found->isTable() || position < -1 || position > static_cast<sint32>(found->getSize()))
+	{
+		nlwarning("CScenario::insertNode : no table '%s', or no position %d in it, in object with id = %s", attrName.c_str(), (int)position, instanceId.c_str());
+		return false;
+	}
+	if (!fitsInTree(_HighLevel, found, value, TreeAdd, "insertNode"))
+	{
+		return false;
+	}
+	std::set<std::string> carried;
+	if (!idsAreFree(*_InstanceMap, value, nullptr, carried, "insertNode"))
+	{
 		return false;
 	}
 
@@ -292,6 +476,32 @@ bool CScenario::moveNode( const std::string& instanceId1, const std::string& att
 		return false;
 	}
 
+	// The value that take() below removes from the tree. It is not moved into itself or under one of its own
+	// values, which would make a loop of it that nothing can walk to an end, and not to a place that nests
+	// the tables of the scenario deeper than they are read.
+	const CObject *moved = position1 == -1 ? from : from->getValueAtPos(static_cast<uint32>(position1)).getPtr();
+	for (const CObject *table = to; table; table = table->getParent())
+	{
+		if (table == moved)
+		{
+			nlwarning("<CScenario::moveNode> Can not move node (%s, %s, %d) under itself, to (%s, %s, %d)",
+				instanceId1.c_str(), attrName1.c_str(), position1, instanceId2.c_str(), attrName2.c_str(), position2);
+			return false;
+		}
+	}
+	if (!fitsInTree(_HighLevel, to, moved, TreeMove, "moveNode"))
+	{
+		return false;
+	}
+	// a value taken out of the table it goes back into leaves that table one shorter when it is inserted: the end of
+	// the table is then one place nearer, and the insert below would fail with the value already taken out of the tree
+	if (moved->getParent() == to && position2 == static_cast<sint32>(to->getSize()))
+	{
+		nlwarning("<CScenario::moveNode> Can not move node (%s, %s, %d) to (%s, %s, %d): its own table has %u values without it",
+			instanceId1.c_str(), attrName1.c_str(), position1, instanceId2.c_str(), attrName2.c_str(), position2, (uint)to->getSize() - 1);
+		return false;
+	}
+
 	CObject::TSmartPtr removed = from->take(position1);
 
 	if (!removed)
@@ -354,7 +564,9 @@ void CInstanceMap::add(CObject* root)
 		if ( root->isString(_IdName) )
 		{
 			std::string instanceId = root->toString(_IdName);
-			if ( _Map.find(instanceId) != _Map.end())
+			// an entry whose node was deleted is free (the entries keep weak pointers)
+			std::map<std::string, CObject::TRefPtr>::const_iterator found = _Map.find(instanceId);
+			if (found != _Map.end() && (CObject *)found->second != nullptr)
 			{
 				nlwarning("Trying to add object to the instance map but object already exist. Objec t is :");
 				root->dump();
@@ -404,7 +616,11 @@ void CInstanceMap::remove(CObject* root)
 				root->dump();
 				return;
 			}
-			_Map.erase(found);
+			// the entry of another node of the same id (which the map kept first) stays
+			if ((CObject *)found->second == root || (CObject *)found->second == nullptr)
+			{
+				_Map.erase(found);
+			}
 		}
 		sint32 size = root->getSize() ;
 		sint32 first = 0;
@@ -817,6 +1033,72 @@ void CEmoteBehavior::load() const
 
 
 
+std::string CScenarioValidator::normalizeRules(const std::string &rules)
+{
+	// A header carries "Mastered" or "Masterless" (r2.Version.save). Older clients wrote the text of uiR2EDstrict
+	// or uiR2EDliberal in the language of the client: these are those texts in the shipped languages (r2_<lang>.uxt),
+	// so that a file saved in one language is read right in another. An empty text (a scenario without access
+	// rules, saved by an older client) is masterless, as the editor shows it and the scenario service runs it.
+	if (rules.empty())
+		return "Masterless";
+	static const char *masteredWords[] =
+	{
+		"Mastered",
+		"Anim\xc3\xa9", // fr, Animé
+		"Gemeistert", // de
+		"Dominado", // es
+		"\xd0\xa3\xd0\xbf\xd1\x80\xd0\xb0\xd0\xb2\xd0\xbb\xd1\x8f\xd0\xb5\xd0\xbc\xd1\x8b\xd0\xb9", // ru, Управляемый
+	};
+	static const char *masterlessWords[] =
+	{
+		"Masterless",
+		"Autonome", // fr
+		"Meisterlos", // de
+		"Sin amo", // es
+		"\xd0\x9d\xd0\xb5\xd1\x83\xd0\xbf\xd1\x80\xd0\xb0\xd0\xb2\xd0\xbb\xd1\x8f\xd0\xb5\xd0\xbc\xd1\x8b\xd0\xb9", // ru, Неуправляемый
+	};
+	for (uint i = 0; i < sizeof(masteredWords) / sizeof(masteredWords[0]); ++i)
+	{
+		if (rules == masteredWords[i])
+			return "Mastered";
+	}
+	for (uint i = 0; i < sizeof(masterlessWords) / sizeof(masterlessWords[0]); ++i)
+	{
+		if (rules == masterlessWords[i])
+			return "Masterless";
+	}
+	return rules;
+}
+
+std::string CScenarioValidator::getRulesOfBody() const
+{
+	// The scenario is the table of the file, and AccessRules a property of its first level only: two spaces of
+	// indent, then a long string or a quoted one, as the serializer writes them
+	static const std::string key("\n  AccessRules = ");
+	std::string::size_type pos = _ScenarioBody.find(key);
+	if (pos != std::string::npos)
+	{
+		pos += key.size();
+		std::string value;
+		if (_ScenarioBody.compare(pos, 2, "[[") == 0)
+		{
+			std::string::size_type end = _ScenarioBody.find("]]", pos + 2);
+			if (end != std::string::npos)
+				value = _ScenarioBody.substr(pos + 2, end - (pos + 2));
+		}
+		else if (_ScenarioBody.compare(pos, 1, "\"") == 0)
+		{
+			std::string::size_type end = _ScenarioBody.find('"', pos + 1);
+			if (end != std::string::npos)
+				value = _ScenarioBody.substr(pos + 1, end - (pos + 1));
+		}
+		if (value == "strict")
+			return "Mastered";
+	}
+	// no access rules, empty ones or "liberal": masterless, as the save writes them and the editor shows them
+	return "Masterless";
+}
+
 bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenarioValidator::TValues& values, std::string& md5,  std::string& signature, bool checkMD5)
 {
 
@@ -887,11 +1169,14 @@ bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenar
 					tmp = tmp.replace("\\n", "\n");
 
 					values.push_back( std::make_pair( result[0].substr(commentLen), tmp));
+					// whatever the language of the client that saved it (the md5s below are of the text as it is)
+					if (values.back().first == "Rules")
+						values.back().second = normalizeRules(values.back().second);
 				}
 			}
 		}
 
-		if (values.size() >=2
+		if (values.size() >= 4
 			&& values[0].first == "Version"
 			&& values[1].first == "Signature"
 			&& values[2].first == "HeaderMD5" && values[3].first =="BodyMD5")
@@ -991,7 +1276,7 @@ bool CScenarioValidator::setScenarioToSave(const std::string& filename, CObject*
 	return true;
 }
 
-std::string CScenarioValidator::AutoSaveSignature;
+std::map<std::string, std::string> CScenarioValidator::AutoSaveSignatures;
 
 bool CScenarioValidator::applySave(const std::string& signature)
 {
@@ -1043,23 +1328,34 @@ bool CScenarioValidator::applySave(const std::string& signature)
 		out2 += _ScenarioBody;
 
 		out.serialBuffer((uint8*)out2.c_str(), (uint)out2.size());
-		if (_Filename != std::string("save/r2_buffer.dat") )
+
+		// the file is saved once the close has put it in its place: only then does the signature match it
+		out.close();
+
+		// the editor's buffer of the scenario of a character, save/r2_buffer_<character>.dat (getScenarioBufferFileName
+		// in the client), keeps its signature for this process to recognise its own copy
+		if (!NLMISC::startsWith(_Filename, "save/r2_buffer_"))
 		{
 			nlinfo("Scenario %s saved", _Filename.c_str());
 		}
 		else
 		{
-			AutoSaveSignature = signature;
+			AutoSaveSignatures[_Filename] = signature;
 		}
 
-		out.close();
-
 		return true;
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		// out is not closed here: a close would put what was written so far in the place of the file.
+		// Its destructor deletes the temporary file and leaves the file as it was.
+		nlwarning("Can't save: the file %s can not be saved: %s", _Filename.c_str(), e.what());
+
+		return false;
 	}
 	catch (...)
 	{
 		nlwarning("Can't save: the file %s can not be saved.", _Filename.c_str());
-		out.close();
 
 		return false;
 	}
@@ -1146,7 +1442,7 @@ bool CUserComponentValidator::setUserComponentToLoad( const std::string& filenam
 			}
 		}
 
-		if (values.size() >=2
+		if (values.size() >= 4
 			&& values[0].first == "Version"
 			&& values[1].first == "Signature"
 			&& values[2].first == "HeaderMD5" && values[3].first =="BodyMD5")
@@ -1310,19 +1606,28 @@ bool CUserComponentValidator::applySave(const std::string& signature)
 
 
 		out.serialBuffer((uint8*)out2.c_str(),(uint)out2.size());
-		if (_Filename != std::string("save/r2_buffer.dat") )
+
+		// the file is saved once the close has put it in its place
+		out.close();
+
+		if (_Filename != std::string("save/r2_buffer.dat"))
 		{
 			nlinfo("UserComponent %s saved", _Filename.c_str());
 		}
 
-		out.close();
-
 		return true;
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		// out is not closed here: a close would put what was written so far in the place of the file.
+		// Its destructor deletes the temporary file and leaves the file as it was.
+		nlwarning("Can't save user component: the file %s can not be saved: %s", _Filename.c_str(), e.what());
+
+		return false;
 	}
 	catch (...)
 	{
 		nlwarning("Can't save user component: the file %s can not be saved.", _Filename.c_str());
-		out.close();
 
 		return false;
 	}

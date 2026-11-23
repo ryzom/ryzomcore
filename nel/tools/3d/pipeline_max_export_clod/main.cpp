@@ -177,13 +177,6 @@ static bool buildLodCharacter(INode &node, SNodeTMCache &tmCache, CSceneClassCon
 			}
 		}
 	}
-	if (hasSkin && !hasPhysique)
-	{
-		// Skin modifier: zero corpus hits under Max 3-era assets; refuse like the shape exporter.
-		fprintf(stderr, "ERROR: clod '%s': Skin modifier not implemented (Physique-only corpus)\n",
-		        name.c_str());
-		return false;
-	}
 
 	// Base mesh (materials, transform) — exportLighting is irrelevant for lod characters (no
 	// lightmap path) but kept for interface parity with the shared mesh builders.
@@ -212,7 +205,7 @@ static bool buildLodCharacter(INode &node, SNodeTMCache &tmCache, CSceneClassCon
 	std::string err;
 	if (!PHYSIQUESKIN::applyPhysiqueSkinning(buildMesh, node, mods, modApps, ssc, &err))
 	{
-		fprintf(stderr, "ERROR: clod '%s' Physique skinning failed: %s\n", name.c_str(), err.c_str());
+		fprintf(stderr, "ERROR: clod '%s' skinning failed: %s\n", name.c_str(), err.c_str());
 		return false;
 	}
 	buildMesh.VertexFlags |= NL3D::CVertexBuffer::PaletteSkinFlag;

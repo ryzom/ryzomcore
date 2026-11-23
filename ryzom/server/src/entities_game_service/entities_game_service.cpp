@@ -126,6 +126,7 @@
 #include "pvp_manager/pvp_faction_reward_manager/pvp_faction_reward_manager.h"
 #include "player_manager/player_manager.h"
 #include "modules/r2_give_item.h"
+#include "modules/shard_unifier_client.h"
 
 #include "server_share/logger_service_client.h"
 #include "server_share/stl_allocator_checker.h"
@@ -393,6 +394,22 @@ void processMirrorUpdates()
 			}
 		}
 		TheDataset.endChangedValuesForProp();
+
+		// Name (the input output service gives a bot its name a little after the bot is there, and another name when
+		// the bot is renamed): the encyclopedia of the characters shows the name of the bot of a rite or task
+		TheDataset.beginChangedValuesForProp( DSPropertyNAME_STRING_ID );
+		while( (entityIndex = TheDataset.getNextChangedValueForProp()) != LAST_CHANGED )
+		{
+			if ( !TheDataset.isAccessible( entityIndex ) )
+				continue;
+			const CEntityId &entityId = TheDataset.getEntityId( entityIndex );
+			if ( entityId.getType() != RYZOMID::npc && entityId.getType() != RYZOMID::creature )
+				continue;
+			CCreature * creature = CreatureManager.getCreature( entityId );
+			if ( creature )
+				creature->sendEncyclopediaNpcName();
+		}
+		TheDataset.endChangedValuesForProp();
 	}
 }
 
@@ -499,6 +516,28 @@ struct CPlayerCharId
 	uint32			PlayerId;
 	vector<CChar>	Chars;
 };
+
+/*
+ * Take the temporary files out of a listing of a directory of saves: the backup service writes a save to
+ * "<file>.tmp<n>" before it puts it in the place of the file, and such a file can be seen while it is written
+ * or stay behind after a failure. It is not a save, and its name would be read as that of its file.
+ */
+static void removeTemporaryOutputFiles(std::vector<string> &files)
+{
+	uint kept = 0;
+	for (uint i = 0; i < files.size(); ++i)
+	{
+		if (CFile::isTemporaryOutputFilename(files[i]))
+		{
+			nlinfo("Skipping the temporary file '%s'", files[i].c_str());
+			continue;
+		}
+		if (kept != i)
+			files[kept] = files[i];
+		++kept;
+	}
+	files.resize(kept);
+}
 
 /*
  * loadAndResaveCheckCharacters
@@ -1620,8 +1659,16 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 		{
 			const CShardNames::TSessionName &sn = shardNames[i];
 
-			// create an unified dynamic channel with a well known chanId
-			DynChatEGS.addLocalizedChan("RING_"+toUpper(sn.ShortName), CEntityId(RYZOMID::dynChatGroup, RingDynChanOffset+sn.SessionId.asInt()), false, false, true);
+			// create an unified dynamic channel with a well known chanId; its title is the phrase RING_CHANNEL ("Ring
+			// Channel <name>") with the display name the shard configuration gives the mainland (HomeMainlandNames),
+			// since an operator names shards freely; a mainland without a display name shows its short name
+			if (sn.DisplayName.empty())
+			{
+				nlwarning("HomeMainlandNames: the mainland of session %u has no display name, its Ring channel is titled with its short name '%s'",
+				    sn.SessionId.asInt(), sn.ShortName.c_str());
+			}
+			const std::string &titleName = sn.DisplayName.empty() ? sn.ShortName : sn.DisplayName;
+			DynChatEGS.addChan("RING_" + toUpper(sn.ShortName), ucstring::makeFromUtf8(titleName), CEntityId(RYZOMID::dynChatGroup, RingDynChanOffset + sn.SessionId.asInt()), false, false, true, "RING_CHANNEL");
 		}
 	}
 
@@ -1656,6 +1703,7 @@ NLMISC_COMMAND(loadAndReSaveCharacters,"load and resave the complete set of play
 
 	vector< string > files;
 	CPath::getPathContent( BsiGlobal.getLocalPath() + "characters", true, false, true, files );
+	removeTemporaryOutputFiles(files);
 
 	for( uint32 i = 0; i < files.size(); ++i )
 	{
@@ -1877,10 +1925,20 @@ void CPlayerService::release()
 	// release the world instance callback
 	CWorldInstances::instance().registerAiInstanceReadyCallback(NULL);
 
+	// The modules are released after this function. What waits in one of them for another service, and would
+	// be answered when that service is taken down, is answered now, while the managers the answer reads are there.
+	if (!packingSheets && IShardUnifierEvent::getInstance() != NULL)
+		IShardUnifierEvent::getInstance()->refusePendingNameRequests();
+
 	if (!packingSheets) PlayerManager.saveAllPlayer(); // this can produce huge network messages and needs that the FlushSendingQueuesOnExit variable is on!
 	if (!packingSheets) CDynamicItems::getInstance()->saveAll(); // same
 	if (!packingSheets) CStatDB::getInstance()->saveAll();
 	if (!packingSheets) COutpostManager::getInstance().saveAll();
+
+#ifdef RYZOM_FORGE
+	// wait for the admin command audit records that are still being posted
+	releaseAdmin();
+#endif
 
 	CSingletonRegistry::getInstance()->release();
 
@@ -5644,6 +5702,7 @@ NLMISC_COMMAND( loadResaveAndCheckCharacters, "Check EGS can load all saves, and
 {
 	vector< string > files;
 	CPath::getPathContent( BsiGlobal.getLocalPath() + "characters", true, false, true, files );
+	removeTemporaryOutputFiles(files);
 	loadAndResaveCheckCharacters( files, log, true );
 	return true;
 }

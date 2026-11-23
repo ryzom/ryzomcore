@@ -2391,6 +2391,7 @@ namespace RSMGR
 				{	"STSS",	CRingSessionManagerWebItf::cb_startSession	},
 				{	"CLSS",	CRingSessionManagerWebItf::cb_closeSession	},
 				{	"CLESS",	CRingSessionManagerWebItf::cb_closeEditSession	},
+				{	"CLANSS",	CRingSessionManagerWebItf::cb_closeAnimSessions	},
 				{	"AFC",	CRingSessionManagerWebItf::cb_addFriendCharacter	},
 				{	"RFC",	CRingSessionManagerWebItf::cb_removeFriendCharacter	},
 				{	"ABC",	CRingSessionManagerWebItf::cb_addBannedCharacter	},
@@ -2476,6 +2477,23 @@ namespace RSMGR
 			_CallbackServer->setDisconnectionCallback (_cbDisconnection, this);
 
 			_CallbackServer->init(port);
+		}
+
+		/// Open the interface socket on the specified address, whatever the BindAddress of the service is (a port for clients)
+		void openItf(const NLNET::CInetAddress &addr)
+		{
+			NLNET::TCallbackItem *arrayPtr;
+			uint32 arraySize;
+
+
+
+			getCallbakArray(arrayPtr, arraySize);
+			_CallbackServer->addCallbackArray(arrayPtr, arraySize);
+
+			_CallbackServer->setConnectionCallback (_cbConnection, this);
+			_CallbackServer->setDisconnectionCallback (_cbDisconnection, this);
+
+			_CallbackServer->init(addr);
 		}
 
 		/** Must be called evenly, update the network subclass to receive message
@@ -2589,6 +2607,7 @@ namespace RSMGR
 		//         18 : Can't find session log to validate session access
 		//         19 : Can't find scenario info to validate session access
 		//         20 : Scenario is not allowed to free trial players
+		//         21 : Character is kicked from the session
 
 		void joinSessionResult(NLNET::TSockId dest, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const TSessionPartStatus &participantStatus)
 		{
@@ -2922,6 +2941,31 @@ namespace RSMGR
 
 
 			callback->on_closeEditSession(from, charId);
+
+		}
+
+		static void cb_closeAnimSessions (NLNET::CMessage &message, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase)
+		{
+			H_AUTO(closeAnimSessions_on_closeAnimSessions);
+#ifdef NL_DEBUG
+			nldebug("CRingSessionManagerWeb::cb_closeAnimSessions received from class '%s'", typeid(netbase).name());
+#endif
+			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
+
+			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
+
+			if (callback  == nullptr)
+				return;
+			uint32	charId;
+			nlRead(message, serial, charId);
+
+
+#ifdef NL_DEBUG
+			nldebug("CRingSessionManagerWeb::cb_closeAnimSessions : calling on_closeAnimSessions");
+#endif
+
+
+			callback->on_closeAnimSessions(from, charId);
 
 		}
 
@@ -3642,6 +3686,13 @@ namespace RSMGR
 		//                         5 : internal error
 		virtual void on_closeEditSession(NLNET::TSockId from, uint32 charId) =0;
 
+		// Close the animation sessions that the character owns and that are open, and nothing else
+		// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+		//                         1 : char not found
+		//                         2 : failed to close the sessions, internal error
+		//                         3 : the character owns no open animation session
+		virtual void on_closeAnimSessions(NLNET::TSockId from, uint32 charId) =0;
+
 		// Add a character in a user friend list
 		// Return 'invokeResult' : 0 : ok
 		//                         1 : user not found
@@ -3723,7 +3774,7 @@ namespace RSMGR
 		//                1 : char not found
 		//                2 : session not found
 		//                3 : character already subscribed to or invited in the session
-		//                4 : session not public
+		//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
 		//                5 : character banned
 		//                6 : no place left, session is full
 		//                7 : session owner not found
@@ -3773,6 +3824,7 @@ namespace RSMGR
 		//                3 : kicked character has no participation in the session
 		//                4 : internal error
 		//                5 : owner char don't own the session
+		//                6 : the owner of the session can't be kicked
 		virtual void on_kickCharacter(NLNET::TSockId from, uint32 ownerCharId, TSessionId sessionId, uint32 kickedCharId) =0;
 
 		// Unkick a character from a session
@@ -4117,6 +4169,22 @@ namespace RSMGR
 
 			_CallbackClient->send(message);
 		}
+		// Close the animation sessions that the character owns and that are open, and nothing else
+		// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+		//                         1 : char not found
+		//                         2 : failed to close the sessions, internal error
+		//                         3 : the character owns no open animation session
+
+		void closeAnimSessions(uint32 charId)
+		{
+#ifdef NL_DEBUG
+			nldebug("CRingSessionManagerWebClient::closeAnimSessions called");
+#endif
+			NLNET::CMessage message("CLANSS");
+			nlWrite(message, serial, charId);
+
+			_CallbackClient->send(message);
+		}
 		// Add a character in a user friend list
 		// Return 'invokeResult' : 0 : ok
 		//                         1 : user not found
@@ -4293,7 +4361,7 @@ namespace RSMGR
 		//                1 : char not found
 		//                2 : session not found
 		//                3 : character already subscribed to or invited in the session
-		//                4 : session not public
+		//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
 		//                5 : character banned
 		//                6 : no place left, session is full
 		//                7 : session owner not found
@@ -4412,6 +4480,7 @@ namespace RSMGR
 		//                3 : kicked character has no participation in the session
 		//                4 : internal error
 		//                5 : owner char don't own the session
+		//                6 : the owner of the session can't be kicked
 
 		void kickCharacter(uint32 ownerCharId, TSessionId sessionId, uint32 kickedCharId)
 		{
@@ -4790,6 +4859,7 @@ namespace RSMGR
 		//         18 : Can't find session log to validate session access
 		//         19 : Can't find scenario info to validate session access
 		//         20 : Scenario is not allowed to free trial players
+		//         21 : Character is kicked from the session
 		virtual void on_joinSessionResult(NLNET::TSockId from, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const TSessionPartStatus &participantStatus) =0;
 
 		// See joinSessionResult.
@@ -5339,6 +5409,7 @@ namespace RSMGR
 			{
 				{	"AUTH",	CSessionBrowserServerWebItf::cb_authenticate	},
 				{	"GSL",	CSessionBrowserServerWebItf::cb_getSessionList	},
+				{	"GESL",	CSessionBrowserServerWebItf::cb_getEditSessionList	},
 				{	"GCL",	CSessionBrowserServerWebItf::cb_getCharList	},
 				{	"ICBN",	CSessionBrowserServerWebItf::cb_inviteCharacterByName	},
 				{	"GMSR",	CSessionBrowserServerWebItf::cb_getMyRatings	},
@@ -5405,6 +5476,27 @@ namespace RSMGR
 			_CallbackServer->init(port);
 		}
 
+		/// Open the interface socket on the specified address, whatever the BindAddress of the service is (a port for clients)
+		void openItf(const NLNET::CInetAddress &addr)
+		{
+			NLNET::TCallbackItem *arrayPtr;
+			uint32 arraySize;
+
+
+			// add callback array of the base interface class
+			CRingSessionManagerWebItf::getCallbakArray(arrayPtr, arraySize);
+			_CallbackServer->addCallbackArray(arrayPtr, arraySize);
+
+
+			getCallbakArray(arrayPtr, arraySize);
+			_CallbackServer->addCallbackArray(arrayPtr, arraySize);
+
+			_CallbackServer->setConnectionCallback (_cbConnection, this);
+			_CallbackServer->setDisconnectionCallback (_cbDisconnection, this);
+
+			_CallbackServer->init(addr);
+		}
+
 		/** Must be called evenly, update the network subclass to receive message
 		 *	and dispatch method invokation.
 		 */
@@ -5431,6 +5523,20 @@ namespace RSMGR
 			nldebug("CSessionBrowserServerWeb::sessionList called");
 #endif
 			NLNET::CMessage message("SL");
+			nlWrite(message, serial, charId);
+			nlWrite(message, serialCont, const_cast < std::vector < TSessionDesc >& > (sessions));
+
+			_CallbackServer->send(message, dest);
+		}
+		// Return the list of the edit sessions the character is invited to
+
+		void editSessionList(NLNET::TSockId dest, uint32 charId, const std::vector < TSessionDesc > &sessions)
+		{
+			H_AUTO(editSessionList_editSessionList);
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWeb::editSessionList called");
+#endif
+			NLNET::CMessage message("ESL");
 			nlWrite(message, serial, charId);
 			nlWrite(message, serialCont, const_cast < std::vector < TSessionDesc >& > (sessions));
 
@@ -5589,6 +5695,31 @@ namespace RSMGR
 
 
 			callback->on_getSessionList(from, charId);
+
+		}
+
+		static void cb_getEditSessionList (NLNET::CMessage &message, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase)
+		{
+			H_AUTO(getEditSessionList_on_getEditSessionList);
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWeb::cb_getEditSessionList received from class '%s'", typeid(netbase).name());
+#endif
+			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
+
+			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
+
+			if (callback  == nullptr)
+				return;
+			uint32	charId;
+			nlRead(message, serial, charId);
+
+
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWeb::cb_getEditSessionList : calling on_getEditSessionList");
+#endif
+
+
+			callback->on_getEditSessionList(from, charId);
 
 		}
 
@@ -5820,6 +5951,10 @@ namespace RSMGR
 		// for the requesting character.
 		virtual void on_getSessionList(NLNET::TSockId from, uint32 charId) =0;
 
+		// Ask for the list of the edit sessions of other characters
+		// that the requesting character is invited to as an editor.
+		virtual void on_getEditSessionList(NLNET::TSockId from, uint32 charId) =0;
+
 		// Ask for the list of player characters that are available
 		// for the requesting session.
 		virtual void on_getCharList(NLNET::TSockId from, uint32 charId, TSessionId sessionId) =0;
@@ -5882,6 +6017,7 @@ namespace RSMGR
 			static NLNET::TCallbackItem callbackArray[] =
 			{
 				{	"SL",	CSessionBrowserServerWebClientItf::cb_sessionList	},
+				{	"ESL",	CSessionBrowserServerWebClientItf::cb_editSessionList	},
 				{	"CL",	CSessionBrowserServerWebClientItf::cb_charList	},
 				{	"PR",	CSessionBrowserServerWebClientItf::cb_playerRatings	},
 				{	"SAS",	CSessionBrowserServerWebClientItf::cb_sessionAverageScores	},
@@ -5913,6 +6049,7 @@ namespace RSMGR
 			if (!initialized)
 			{
 			messageNames.insert(std::make_pair(std::string("on_sessionList"), std::string("SL")));
+			messageNames.insert(std::make_pair(std::string("on_editSessionList"), std::string("ESL")));
 			messageNames.insert(std::make_pair(std::string("on_charList"), std::string("CL")));
 			messageNames.insert(std::make_pair(std::string("on_playerRatings"), std::string("PR")));
 			messageNames.insert(std::make_pair(std::string("on_sessionAverageScores"), std::string("SAS")));
@@ -6007,6 +6144,19 @@ namespace RSMGR
 			nldebug("CSessionBrowserServerWebClient::getSessionList called");
 #endif
 			NLNET::CMessage message("GSL");
+			nlWrite(message, serial, charId);
+
+			_CallbackClient->send(message);
+		}
+		// Ask for the list of the edit sessions of other characters
+		// that the requesting character is invited to as an editor.
+
+		void getEditSessionList(uint32 charId)
+		{
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWebClient::getEditSessionList called");
+#endif
+			NLNET::CMessage message("GESL");
 			nlWrite(message, serial, charId);
 
 			_CallbackClient->send(message);
@@ -6152,6 +6302,30 @@ namespace RSMGR
 #endif
 
 			callback->on_sessionList(from, charId, sessions);
+		}
+
+		static void cb_editSessionList (NLNET::CMessage &message, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase)
+		{
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWebClient::cb_editSessionList received from class '%s'", typeid(netbase).name());
+#endif
+			ICallbackClientAdaptor *adaptor = static_cast< ICallbackClientAdaptor *>(netbase.getUserData());
+
+			CSessionBrowserServerWebClientItf *callback = (CSessionBrowserServerWebClientItf *)adaptor->getContainerClass();
+
+			if (callback  == nullptr)
+				return;
+			uint32	charId;
+			std::vector < TSessionDesc >	sessions;
+			nlRead(message, serial, charId);
+			nlRead(message, serialCont, sessions);
+
+
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWebClient::cb_editSessionList : calling on_editSessionList");
+#endif
+
+			callback->on_editSessionList(from, charId, sessions);
 		}
 
 		static void cb_charList (NLNET::CMessage &message, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase)
@@ -6343,6 +6517,9 @@ namespace RSMGR
 
 		// Return the list of available session
 		virtual void on_sessionList(NLNET::TSockId from, uint32 charId, const std::vector < TSessionDesc > &sessions) =0;
+
+		// Return the list of the edit sessions the character is invited to
+		virtual void on_editSessionList(NLNET::TSockId from, uint32 charId, const std::vector < TSessionDesc > &sessions) =0;
 
 		// Return the list of player characters in the session
 		virtual void on_charList(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::vector < TCharDesc > &characters) =0;

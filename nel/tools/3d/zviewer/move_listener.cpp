@@ -175,8 +175,6 @@ void CMoveListener::changeViewMatrix()
 \****************************************************************/
 void CMoveListener::operator()(const CEvent& event)
 {
-	static const float eps = 0.001f;
-
 	// Rotation
 	if (event==EventMouseMoveId)
 	{
@@ -186,16 +184,27 @@ void CMoveListener::operator()(const CEvent& event)
 		{
 			if(_CursorInit)
 			{
-				float difx =  0.5f-mouseEvent->X;
-				if ( (float)fabs(difx) > eps)
+				// Mouse positions are fractions of the window, measure the motion in whole pixels
+				// from the pixel the cursor is put back on, so that both axes turn the same per pixel
+				// and the half pixel of an odd window size does not drift the view
+				uint32 width, height;
+				_Scene->getDriver()->getWindowSize(width, height);
+				if (width > 0 && height > 0)
 				{
-					_RotZ += _RotSpeed*(difx);
+					sint centerX = (sint)((float)width * 0.5f);
+					sint centerY = (sint)((float)height * 0.5f);
+					sint mouseX = (sint)floor(mouseEvent->X * (float)width + 0.5f);
+					sint mouseY = (sint)floor((1.f - mouseEvent->Y) * (float)height + 0.5f);
+
+					// one window width of motion turns by _RotSpeed radians
+					float radPerPixel = _RotSpeed / (float)width;
+					_RotZ += radPerPixel * (float)(centerX - mouseX);
+					_RotX += radPerPixel * (float)(centerY - mouseY);
+
+					// stop short of looking straight up or down, past it the view flips over
+					const float maxRotX = (float)Pi * 0.5f - 0.001f;
+					clamp(_RotX, -maxRotX, maxRotX);
 				}
-				float dify =  -(0.5f-mouseEvent->Y);
-				if ( (float)fabs(dify) > eps)
-				{
-					_RotX += _RotSpeed*(dify);
-				}	
 			}
 			else
 			{

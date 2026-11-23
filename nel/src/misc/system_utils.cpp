@@ -19,7 +19,10 @@
 
 #include "stdmisc.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/app_context.h"
 #include "nel/misc/utf_string_view.h"
+#include "nel/misc/common.h"
+#include "nel/misc/string_common.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -70,6 +73,14 @@
 #include "nel/misc/file.h"
 #endif
 
+// The signals that end a session are handled where the event emitters of the drivers poll for them
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+#define NL_END_SESSION_SIGNALS 1
+#include <signal.h>
+#include <string.h>
+#include <unistd.h>
+#endif
+
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -83,6 +94,178 @@ static const uint32 KeyMaxLength = 1024;
 namespace NLMISC {
 
 nlWindow CSystemUtils::s_window = EmptyWindow;
+
+#ifdef NL_END_SESSION_SIGNALS
+static const int s_EndSessionSignals[] = { SIGTERM, SIGHUP };
+static const uint s_EndSessionSignalCount = sizeof(s_EndSessionSignals) / sizeof(s_EndSessionSignals[0]);
+// how long a signal waits for pollEndSession before it ends the process, in seconds
+static const unsigned int s_EndSessionPollTimeout = 5;
+#endif
+
+// What the end of the session needs to know. The application sets the function, and the event emitter of a driver
+// calls it. With NeL linked statically, the application and each driver library have a copy of this file and of its
+// static variables, so the state is one object that the NeL context of the application holds for all of them.
+struct CEndSessionState
+{
+	CEndSessionState()
+	    : Callback(nullptr)
+	{
+#ifdef NL_END_SESSION_SIGNALS
+		for (uint i = 0; i < s_EndSessionSignalCount; ++i)
+			ActionSet[i] = false;
+		AlarmActionSet = false;
+		Signaled = 0;
+#endif
+	}
+
+	CSystemUtils::TEndSessionCallback Callback;
+
+#ifdef NL_END_SESSION_SIGNALS
+	struct sigaction PreviousActions[s_EndSessionSignalCount];
+	bool ActionSet[s_EndSessionSignalCount];
+	struct sigaction PreviousAlarmAction;
+	bool AlarmActionSet;
+	// the signal that waits for pollEndSession, 0 when none does
+	volatile sig_atomic_t Signaled;
+#endif
+};
+
+// The state as this copy of the file found it (the signal handlers use it, where nothing may be looked up)
+static CEndSessionState *s_EndSessionState = nullptr;
+
+// The state of the process. It is made at the first use and stays for as long as the process: the other copies of
+// this file keep its address. It is always the one of the NeL context, also for an application that has made no
+// context yet (INelContext::getInstance makes it then): a copy of this file that kept a state of its own, because it
+// was used before there was a context, would not be found by a driver library loaded later.
+static CEndSessionState *getEndSessionState()
+{
+	if (s_EndSessionState == nullptr)
+	{
+		static const char *const name = "NLMISC::CSystemUtils::EndSessionState";
+		INelContext &context = INelContext::getInstance();
+		s_EndSessionState = (CEndSessionState *)context.getSingletonPointer(name);
+		if (s_EndSessionState == nullptr)
+		{
+			s_EndSessionState = new CEndSessionState();
+			context.setSingletonPointer(name, s_EndSessionState);
+		}
+	}
+	return s_EndSessionState;
+}
+
+#ifdef NL_END_SESSION_SIGNALS
+
+// (alarm, signal and raise are safe in a signal handler; s_EndSessionState is set before a handler is)
+static void endSessionSignalHandler(int sig)
+{
+	// a signal that comes while another one waits adds nothing: the first one has its alarm
+	if (!s_EndSessionState->Signaled)
+	{
+		s_EndSessionState->Signaled = sig;
+		alarm(s_EndSessionPollTimeout);
+	}
+}
+
+static void endSessionAlarmHandler(int /* sig */)
+{
+	// Nobody polled in time: the application hangs, or it does not pump its events. The signal that waited ends
+	// the process as it does without a handler.
+	const int sig = s_EndSessionState->Signaled;
+	if (sig)
+	{
+		signal(sig, SIG_DFL);
+		raise(sig);
+	}
+}
+
+#endif // NL_END_SESSION_SIGNALS
+
+void CSystemUtils::setEndSessionCallback(TEndSessionCallback callback)
+{
+	CEndSessionState *state = getEndSessionState();
+	state->Callback = callback;
+
+#ifdef NL_END_SESSION_SIGNALS
+	if (callback != nullptr && !state->AlarmActionSet)
+	{
+		struct sigaction action;
+		memset(&action, 0, sizeof(action));
+		action.sa_handler = endSessionAlarmHandler;
+		action.sa_flags = SA_RESTART;
+		sigemptyset(&action.sa_mask);
+		if (sigaction(SIGALRM, &action, &state->PreviousAlarmAction) == 0)
+			state->AlarmActionSet = true;
+		else
+			nlwarning("Cannot handle the alarm signal: a signal that ends the session waits for the next poll without a limit");
+	}
+	for (uint i = 0; i < s_EndSessionSignalCount; ++i)
+	{
+		if (callback != nullptr && !state->ActionSet[i])
+		{
+			// a signal that whoever started the process had it ignore (nohup) stays ignored
+			struct sigaction previous;
+			if (sigaction(s_EndSessionSignals[i], nullptr, &previous) != 0 || previous.sa_handler == SIG_IGN)
+				continue;
+
+			struct sigaction action;
+			memset(&action, 0, sizeof(action));
+			action.sa_handler = endSessionSignalHandler;
+			// a system call that the signal interrupts is started again; the signals of the list wait for each other
+			action.sa_flags = SA_RESTART;
+			sigemptyset(&action.sa_mask);
+			for (uint j = 0; j < s_EndSessionSignalCount; ++j)
+				sigaddset(&action.sa_mask, s_EndSessionSignals[j]);
+			if (sigaction(s_EndSessionSignals[i], &action, &state->PreviousActions[i]) == 0)
+				state->ActionSet[i] = true;
+			else
+				nlwarning("Cannot handle signal %d to end the session", s_EndSessionSignals[i]);
+		}
+		else if (callback == nullptr && state->ActionSet[i])
+		{
+			sigaction(s_EndSessionSignals[i], &state->PreviousActions[i], nullptr);
+			state->ActionSet[i] = false;
+		}
+	}
+	if (callback == nullptr)
+	{
+		const int waiting = state->Signaled;
+		if (waiting)
+		{
+			alarm(0);
+			state->Signaled = 0;
+		}
+		if (state->AlarmActionSet)
+		{
+			sigaction(SIGALRM, &state->PreviousAlarmAction, nullptr);
+			state->AlarmActionSet = false;
+		}
+		// a signal that still waited for a poll is not lost: it is raised again, for the action it has now
+		if (waiting)
+			raise(waiting);
+	}
+#endif // NL_END_SESSION_SIGNALS
+}
+
+void CSystemUtils::endSession()
+{
+	CEndSessionState *state = getEndSessionState();
+	if (state->Callback != nullptr)
+		state->Callback();
+}
+
+void CSystemUtils::pollEndSession()
+{
+#ifdef NL_END_SESSION_SIGNALS
+	CEndSessionState *state = getEndSessionState();
+	if (state->Signaled)
+	{
+		// polled in time: the alarm of the signal is taken back
+		alarm(0);
+		state->Signaled = 0;
+		endSession();
+	}
+#endif // NL_END_SESSION_SIGNALS
+}
 
 #ifdef NL_OS_WINDOWS
 static bool s_mustUninit = false;
@@ -192,27 +375,14 @@ bool CSystemUtils::copyTextToClipboard(const std::string &text)
 #ifdef NL_OS_WINDOWS
 	if (OpenClipboard(NULL))
 	{
-		// check if unicode format is supported by clipboard
-		bool isUnicode = (IsClipboardFormatAvailable(CF_UNICODETEXT) == TRUE);
+		// The text is always stored as CF_UNICODETEXT: the system converts it for a program that asks for
+		// CF_TEXT. What the clipboard held before says nothing about what it can take.
+		std::wstring textWide = NLMISC::utf8ToWide(text); // Prefer system for API
+		if (text.size() && !textWide.size())
+			textWide = CUtfStringView(text).toWide();
 
 		// allocates a buffer to copy text in global memory
-		std::string textMbcs;
-		std::wstring textWide;
-		if (!isUnicode)
-		{
-			textMbcs = NLMISC::utf8ToMbcs(text); // Prefer system for API
-			if (text.size() && !textMbcs.size()) 
-				textMbcs = CUtfStringView(text).toAscii(); // Fallback to 7-bit ASCII
-		}
-		else
-		{
-			textWide = NLMISC::utf8ToWide(text); // Prefer system for API
-			if (text.size() && !textWide.size()) 
-				textWide = CUtfStringView(text).toWide();
-		}
-		HGLOBAL mem = GlobalAlloc(GHND | GMEM_DDESHARE, isUnicode 
-			? ((textWide.size() + 1) * sizeof(wchar_t))
-			: (textMbcs.size() + 1));
+		HGLOBAL mem = GlobalAlloc(GHND | GMEM_DDESHARE, (textWide.size() + 1) * sizeof(wchar_t));
 
 		if (mem)
 		{
@@ -221,10 +391,7 @@ bool CSystemUtils::copyTextToClipboard(const std::string &text)
 			if (hLock)
 			{
 				// copy text to this buffer
-				if (isUnicode)
-					wcscpy((wchar_t *)hLock, textWide.c_str());
-				else
-					strcpy((char *)hLock, textMbcs.c_str());
+				wcscpy((wchar_t *)hLock, textWide.c_str());
 
 				// unlock buffer
 				GlobalUnlock(mem);
@@ -232,11 +399,21 @@ bool CSystemUtils::copyTextToClipboard(const std::string &text)
 				// empty clipboard
 				EmptyClipboard();
 
-				// set new data to clipboard in the right format
-				SetClipboardData(isUnicode ? CF_UNICODETEXT : CF_TEXT, mem);
-
-				res = true;
+				// set new data to clipboard, which owns the buffer from then on
+				if (SetClipboardData(CF_UNICODETEXT, mem))
+				{
+					mem = NULL;
+					res = true;
+				}
+				else
+				{
+					nlwarning("SetClipboardData failed: %s", NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
+				}
 			}
+
+			// not taken by the clipboard
+			if (mem)
+				GlobalFree(mem);
 		}
 
 		CloseClipboard();
@@ -561,6 +738,369 @@ BOOL WINAPI DDEnumCallbackEx(GUID FAR* lpGUID, LPSTR lpDriverDescription, LPSTR 
 }
 
 #endif
+
+#ifdef NL_OS_WINDOWS
+
+namespace
+{
+
+// IVirtualDesktopManager of shobjidl.h (Windows 10 SDK), declared here for the SDKs before it
+const GUID s_ClsidVirtualDesktopManager = { 0xaa509086, 0x5ca9, 0x4c25, { 0x8f, 0x95, 0x58, 0x9d, 0x3c, 0x07, 0xb4, 0x8a } };
+const IID s_IidVirtualDesktopManager = { 0xa5cd92ff, 0x29be, 0x454c, { 0x8d, 0x04, 0xd8, 0x28, 0x79, 0xfb, 0x3f, 0x1b } };
+
+struct IVirtualDesktopManagerNel : public IUnknown
+{
+	virtual HRESULT STDMETHODCALLTYPE IsWindowOnCurrentVirtualDesktop(HWND topLevelWindow, BOOL *onCurrentDesktop) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetWindowDesktopId(HWND topLevelWindow, GUID *desktopId) = 0;
+	virtual HRESULT STDMETHODCALLTYPE MoveWindowToDesktop(HWND topLevelWindow, REFGUID desktopId) = 0;
+};
+
+// Explorer keeps the virtual desktops of the session in this key, and no API lists them: VirtualDesktopIDs holds
+// their ids in the order of the task view, CurrentVirtualDesktop the one shown, Desktops\{id} Name the name the user
+// gave one
+const wchar_t *s_VirtualDesktopsKey = L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VirtualDesktops";
+
+// the error when that key has no list of desktops
+const char *s_NoVirtualDesktopsError = "Explorer lists no virtual desktops for this session (HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VirtualDesktops): "
+                                       "it does once the session has a second one, made in the task view (Win+Ctrl+D)";
+
+/// A library of the system, by its full path in the directory of the system rather than by the search order; null
+/// when it cannot be loaded
+HMODULE loadSystemLibrary(const wchar_t *name)
+{
+	wchar_t path[MAX_PATH];
+	const UINT length = GetSystemDirectoryW(path, MAX_PATH);
+	const size_t nameLength = wcslen(name);
+	if (length == 0 || length + 1 + nameLength + 1 > MAX_PATH)
+		return nullptr;
+	path[length] = L'\\';
+	memcpy(path + length + 1, name, (nameLength + 1) * sizeof(wchar_t));
+	return LoadLibraryW(path);
+}
+
+bool readDesktopIds(const wchar_t *value, std::vector<GUID> &ids, const std::wstring &keyPath = s_VirtualDesktopsKey)
+{
+	ids.clear();
+	HKEY key;
+	if (RegOpenKeyExW(HKEY_CURRENT_USER, keyPath.c_str(), 0, KEY_READ, &key) != ERROR_SUCCESS)
+		return false;
+	DWORD type = 0;
+	DWORD size = 0;
+	if (RegQueryValueExW(key, value, nullptr, &type, nullptr, &size) == ERROR_SUCCESS && type == REG_BINARY && size >= sizeof(GUID))
+	{
+		std::vector<BYTE> data(size);
+		if (RegQueryValueExW(key, value, nullptr, &type, &data[0], &size) == ERROR_SUCCESS)
+		{
+			for (DWORD i = 0; i + sizeof(GUID) <= size; i += sizeof(GUID))
+			{
+				GUID id;
+				memcpy(&id, &data[i], sizeof(GUID));
+				ids.push_back(id);
+			}
+		}
+	}
+	RegCloseKey(key);
+	return !ids.empty();
+}
+
+std::string desktopName(const GUID &id)
+{
+	wchar_t idText[64];
+	if (StringFromGUID2(id, idText, 64) == 0)
+		return std::string();
+	std::wstring path = std::wstring(s_VirtualDesktopsKey) + L"\\Desktops\\" + idText;
+	HKEY key;
+	if (RegOpenKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, KEY_READ, &key) != ERROR_SUCCESS)
+		return std::string();
+	std::string name;
+	wchar_t text[256];
+	DWORD type = 0;
+	DWORD size = sizeof(text) - sizeof(wchar_t);
+	if (RegQueryValueExW(key, L"Name", nullptr, &type, (BYTE *)text, &size) == ERROR_SUCCESS && type == REG_SZ)
+	{
+		text[size / sizeof(wchar_t)] = 0;
+		name = wideToUtf8(text);
+	}
+	RegCloseKey(key);
+	return name;
+}
+
+/// The id of the desktop shown: Windows 11 keeps it with the others, Windows 10 under the session of the user
+bool readShownDesktopId(GUID &id)
+{
+	std::vector<GUID> ids;
+	if (!readDesktopIds(L"CurrentVirtualDesktop", ids))
+	{
+		// loaded by name, as the SDKs of old compilers declare it for some Windows versions only
+		typedef BOOL(WINAPI * TProcessIdToSessionId)(DWORD, DWORD *);
+		TProcessIdToSessionId processIdToSessionId = (TProcessIdToSessionId)GetProcAddress(GetModuleHandleA("kernel32.dll"), "ProcessIdToSessionId");
+		DWORD session = 0;
+		if (!processIdToSessionId || !processIdToSessionId(GetCurrentProcessId(), &session))
+			return false;
+		std::wstring path = utf8ToWide(toString("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\SessionInfo\\%u\\VirtualDesktops", (uint)session));
+		if (!readDesktopIds(L"CurrentVirtualDesktop", ids, path))
+			return false;
+	}
+	id = ids[0];
+	return true;
+}
+
+uint desktopNumber(const std::vector<GUID> &ids, const GUID &id)
+{
+	for (uint i = 0; i < ids.size(); ++i)
+	{
+		if (IsEqualGUID(ids[i], id))
+			return i + 1;
+	}
+	return 0;
+}
+
+/// COM on this thread for the time of a call, and the virtual desktop manager
+class CVirtualDesktopManager
+{
+public:
+	CVirtualDesktopManager()
+	    : m_Manager(nullptr)
+	    , m_Uninit(false)
+	{
+		// a thread of another apartment already (RPC_E_CHANGED_MODE) can create it as well
+		m_Uninit = SUCCEEDED(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
+		m_Result = CoCreateInstance(s_ClsidVirtualDesktopManager, nullptr, CLSCTX_ALL, s_IidVirtualDesktopManager, (void **)&m_Manager);
+	}
+	~CVirtualDesktopManager()
+	{
+		if (m_Manager)
+			m_Manager->Release();
+		if (m_Uninit)
+			CoUninitialize();
+	}
+	IVirtualDesktopManagerNel *get(std::string &error)
+	{
+		if (!m_Manager)
+			error = toString("this Windows has no virtual desktop manager (Windows 10 and later have one): 0x%08x", (uint)m_Result);
+		return m_Manager;
+	}
+
+private:
+	IVirtualDesktopManagerNel *m_Manager;
+	HRESULT m_Result;
+	bool m_Uninit;
+};
+
+}
+
+#endif // NL_OS_WINDOWS
+
+bool CSystemUtils::getVirtualDesktops(std::vector<std::string> &names, uint &shown, std::string &error)
+{
+	names.clear();
+	shown = 0;
+#ifdef NL_OS_WINDOWS
+	std::vector<GUID> ids;
+	if (!readDesktopIds(L"VirtualDesktopIDs", ids))
+	{
+		error = s_NoVirtualDesktopsError;
+		return false;
+	}
+	for (uint i = 0; i < ids.size(); ++i)
+		names.push_back(desktopName(ids[i]));
+	GUID current;
+	if (readShownDesktopId(current))
+		shown = desktopNumber(ids, current);
+	return true;
+#else
+	error = "virtual desktops are handled on Windows only";
+	return false;
+#endif
+}
+
+bool CSystemUtils::moveWindowToDesktop(nlWindow window, const std::string &desktop, uint &number, std::string &error)
+{
+	number = 0;
+#ifdef NL_OS_WINDOWS
+	std::vector<GUID> ids;
+	if (!readDesktopIds(L"VirtualDesktopIDs", ids))
+	{
+		error = s_NoVirtualDesktopsError;
+		return false;
+	}
+	if (desktop.empty())
+	{
+		error = "no virtual desktop given: its number (1 for the first one) or the name it was given in the task view";
+		return false;
+	}
+	uint index = (uint)ids.size();
+	uint given = 0;
+	if (desktop.find_first_not_of("0123456789") == std::string::npos && fromString(desktop, given))
+	{
+		if (given < 1 || given > ids.size())
+		{
+			error = toString("there is no virtual desktop %u: the session has %u", given, (uint)ids.size());
+			return false;
+		}
+		index = given - 1;
+	}
+	else
+	{
+		for (uint i = 0; i < ids.size() && index == ids.size(); ++i)
+		{
+			if (desktopName(ids[i]) == desktop)
+				index = i;
+		}
+		if (index == ids.size())
+		{
+			error = toString("no virtual desktop is named '%s' (the session has %u; a desktop is named once it is renamed in the task view, and a number gives one by its place)",
+			    desktop.c_str(), (uint)ids.size());
+			return false;
+		}
+	}
+	// known from here on, also when the move then fails
+	number = index + 1;
+	// the system does not keep a desktop for a tool window: the move succeeds, and the window shows on the desktop shown
+	LONG_PTR exStyle = GetWindowLongPtrW((HWND)window, GWL_EXSTYLE);
+	if ((exStyle & WS_EX_TOOLWINDOW) != 0 && (exStyle & WS_EX_APPWINDOW) == 0)
+	{
+		error = "a tool window (WS_EX_TOOLWINDOW) has no virtual desktop of its own and shows on the desktop shown: give it WS_EX_APPWINDOW as well";
+		return false;
+	}
+	CVirtualDesktopManager manager;
+	IVirtualDesktopManagerNel *m = manager.get(error);
+	if (!m)
+		return false;
+	// a window on that desktop already is left as it is
+	GUID on;
+	if (SUCCEEDED(m->GetWindowDesktopId((HWND)window, &on)) && IsEqualGUID(on, ids[index]))
+	{
+		number = index + 1;
+		return true;
+	}
+	HRESULT hr = m->MoveWindowToDesktop((HWND)window, ids[index]);
+	if (FAILED(hr))
+	{
+		error = toString("moving the window to virtual desktop %u failed: 0x%08x", index + 1, (uint)hr);
+		return false;
+	}
+	number = index + 1;
+	return true;
+#else
+	(void)window;
+	(void)desktop;
+	error = "virtual desktops are handled on Windows only";
+	return false;
+#endif
+}
+
+bool CSystemUtils::waitForWindowDesktop(nlWindow window, uint number, uint timeout, std::string &error)
+{
+#ifdef NL_OS_WINDOWS
+	std::vector<GUID> ids;
+	if (!readDesktopIds(L"VirtualDesktopIDs", ids))
+	{
+		error = s_NoVirtualDesktopsError;
+		return false;
+	}
+	GUID current;
+	bool targetShown = readShownDesktopId(current) && desktopNumber(ids, current) == number;
+
+	// DwmGetWindowAttribute(DWMWA_CLOAKED), of Windows 8 and later: the system cloaks a window of a desktop that is
+	// not shown, which hides it from the screen, and the wait is for that as well. Without it the desktop is enough.
+	typedef HRESULT(WINAPI * TDwmGetWindowAttribute)(HWND, DWORD, PVOID, DWORD);
+	HMODULE dwm = loadSystemLibrary(L"dwmapi.dll");
+	TDwmGetWindowAttribute getAttribute = nullptr;
+	if (dwm)
+		getAttribute = (TDwmGetWindowAttribute)GetProcAddress(dwm, "DwmGetWindowAttribute");
+	const DWORD cloakedAttribute = 14;
+
+	bool there = false;
+	// what the system answered last, for the error of a wait that ends without the window there
+	HRESULT lastResult = S_OK;
+	uint lastNumber = 0;
+	CVirtualDesktopManager manager;
+	IVirtualDesktopManagerNel *m = manager.get(error);
+	TTicks start = CTime::getPerformanceTime();
+	while (m)
+	{
+		GUID id;
+		lastResult = m->GetWindowDesktopId((HWND)window, &id);
+		lastNumber = SUCCEEDED(lastResult) ? desktopNumber(ids, id) : 0;
+		if (lastNumber == number)
+		{
+			if (targetShown || !getAttribute)
+			{
+				there = true;
+				break;
+			}
+			DWORD cloaked = 0;
+			lastResult = getAttribute((HWND)window, cloakedAttribute, &cloaked, sizeof(cloaked));
+			if (SUCCEEDED(lastResult) && cloaked != 0)
+			{
+				there = true;
+				break;
+			}
+		}
+		if (CTime::ticksToSecond(CTime::getPerformanceTime() - start) * 1000.0 >= timeout)
+		{
+			if (FAILED(lastResult))
+				error = toString("the window was not on virtual desktop %u, hidden from the desktop shown, after %u ms: the system answered 0x%08x", number, timeout, (uint)lastResult);
+			else if (lastNumber != number)
+				error = toString("the window was not on virtual desktop %u, hidden from the desktop shown, after %u ms: it was on desktop %u (0 for none of the list)", number, timeout, lastNumber);
+			else
+				error = toString("the window was on virtual desktop %u after %u ms, and still not hidden from the desktop shown", number, timeout);
+			break;
+		}
+		MSG msg;
+		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessageW(&msg);
+		}
+		Sleep(5);
+	}
+	if (dwm)
+		FreeLibrary(dwm);
+	return there;
+#else
+	(void)window;
+	(void)number;
+	(void)timeout;
+	error = "virtual desktops are handled on Windows only";
+	return false;
+#endif
+}
+
+bool CSystemUtils::getWindowDesktop(nlWindow window, uint &number, std::string &error)
+{
+	number = 0;
+#ifdef NL_OS_WINDOWS
+	CVirtualDesktopManager manager;
+	IVirtualDesktopManagerNel *m = manager.get(error);
+	if (!m)
+		return false;
+	GUID id;
+	HRESULT hr = m->GetWindowDesktopId((HWND)window, &id);
+	// TYPE_E_ELEMENTNOTFOUND: a window that was never shown yet
+	if (hr == TYPE_E_ELEMENTNOTFOUND)
+		return true;
+	if (FAILED(hr))
+	{
+		error = toString("the virtual desktop of the window is not known: 0x%08x", (uint)hr);
+		return false;
+	}
+	std::vector<GUID> ids;
+	if (!readDesktopIds(L"VirtualDesktopIDs", ids))
+	{
+		error = s_NoVirtualDesktopsError;
+		return false;
+	}
+	// an id that is not in the list: the window is on every desktop
+	number = desktopNumber(ids, id);
+	return true;
+#else
+	(void)window;
+	error = "virtual desktops are handled on Windows only";
+	return false;
+#endif
+}
 
 sint CSystemUtils::getTotalVideoMemory()
 {

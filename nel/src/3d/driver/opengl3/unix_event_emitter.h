@@ -29,6 +29,8 @@
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 
+#include <vector>
+
 #include <X11/Xlib.h>
 
 namespace NLMISC {
@@ -50,8 +52,9 @@ public:
 
 	/**
 	 * initialize CUnixEventEmitter
+	 * \param ownWindow false for a window of the application, which keeps the window manager protocols it has
 	 */
-	void init(Display *dpy, Window win, NL3D::IDriver *driver = nullptr);
+	void init(Display *dpy, Window win, NL3D::IDriver *driver = nullptr, bool ownWindow = true);
 
 	/**
 	 * sends all events to server
@@ -77,7 +80,16 @@ public:
 	void createIM();
 	void closeIM();
 
+	/// The input method stopped and Xlib frees it: forget it, the next events open another one
+	void lostIM();
+
 private:
+
+	/// The key of a key event, from its keycode, the keysym looked up for it and its modifier state
+	TKey getKeyFromKeyEvent(uint keycode, KeySym keysym, uint state);
+
+	/// The character key of each keycode in a keyboard group, read from the layout when first asked for
+	const std::vector<TKey> &getKeycodeKeys(uint group);
 
 	// Private internal server message
 	class CUnixEventServer : CEventServer
@@ -102,8 +114,14 @@ private:
 	Display*				_dpy;
 	Window					_win;
 	std::map<TKey, bool>	_PressedKeys;
+	std::map<uint, TKey>	m_PressedKeycodes; // key reported for each held keycode
+	std::vector<TKey>		m_KeycodeKeys[4]; // character key of each keycode, per keyboard group; empty until read
 	XIM						_im;
 	XIC						_ic;
+	bool					m_LostIM; // the input method stopped, another one is to be opened
+	bool					m_Focus; // the window has the keyboard focus
+	uint					m_FilteredKeycode; // last key press an input method took, 0 when the last one was not
+	Time					m_FilteredTime; // and its time
 	NL3D::IDriver*			_driver;
 	CUnixEventServer		_InternalServer;
 	std::string				_CopiedString;

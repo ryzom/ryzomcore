@@ -221,6 +221,34 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 		return;
 	}
 
+	// The client offers destroy in the bag, the room and the pack animals, and names the bag for an item that is held
+	// or worn. The hands and the equipment only refer to items of the bag (destroyItem refuses them), and the client
+	// can name them when the item leaves its slot while the confirmation is open: a warning, no more.
+	if (inventory != INVENTORIES::bag && inventory != INVENTORIES::player_room && (inventory < INVENTORIES::pet_animal || inventory >= INVENTORIES::max_pet_animal))
+	{
+		nlwarning("<cbItemDestroy> player %s tried to destroy slot %u of inventory %u, refused", user.toString().c_str(), slot, (uint)inventory);
+		return;
+	}
+
+	// the client offers no destroy for an item its owner has locked, where it sees the lock: only the bag and the
+	// pack animals send their RESALE_FLAG, and a locked item moved to the apartment shows unlocked there
+	bool lockShown = inventory == INVENTORIES::bag || (inventory >= INVENTORIES::pet_animal1 && inventory < INVENTORIES::max_pet_animal);
+	CInventoryPtr inv = lockShown ? character->getInventory(INVENTORIES::TInventory(inventory)) : NULL;
+	if (inv != NULL && slot < inv->getSlotCount())
+	{
+		CGameItemPtr item = inv->getItem(slot);
+		if (item != NULL && item->getLockedByOwner())
+		{
+			nlwarning("HACK: %s sent ITEM:DESTROY for a locked item (inventory %u, slot %u), refused", user.toString().c_str(), (uint)inventory, (uint)slot);
+			reportRefusedClientMessage(user);
+			return;
+		}
+	}
+
+	// the room and the pack animals must be within reach, as for moving an item, where the client grays the entry
+	if (!character->isInventoryWithinReach(INVENTORIES::TInventory(inventory), "cbItemDestroy"))
+		return;
+
 	character->setAfkState(false);
 	character->destroyItem( INVENTORIES::TInventory(inventory), slot, quantity, true );
 }
@@ -558,6 +586,16 @@ void cbClientPhraseExecuteFaber( NLNET::CMessage& msgin, const std::string &serv
 	{
 		string name = CEntityIdTranslator::getInstance()->getByEntity(Id).toString();
 		nlwarning("HACK: %s %s tries to craft a brick he doesn't know %s", Id.toString().c_str(), name.c_str(), craftPlan.toString().c_str());
+		return;
+	}
+
+	// the brick must be a craft plan: only the bricks of the plan families carry what the craft reads (the materials,
+	// the item made). The client names the plan of its craft window.
+	const CStaticBrick *planBrick = CSheets::getSBrickForm( craftPlan );
+	if ( planBrick == NULL || planBrick->Faber == NULL )
+	{
+		nlwarning("HACK: %s sent EXECUTE_FABER with the brick %s, which is not a craft plan, refused", Id.toString().c_str(), craftPlan.toString().c_str());
+		reportRefusedClientMessage(Id);
 		return;
 	}
 

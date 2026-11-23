@@ -54,6 +54,10 @@ QWidget( parent )
 CCrashReportWidget::~CCrashReportWidget()
 {
 	m_socket = NULL;
+
+	// the report file was written for this tool only, it goes whichever way the tool is left
+	if (!m_fileName.isEmpty() && QFile::exists(m_fileName) && !QFile::remove(m_fileName))
+		qWarning("Unable to delete the report file %s", qPrintable(m_fileName));
 }
 
 void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::string > > &params )
@@ -225,7 +229,7 @@ void CCrashReportWidget::onSendClicked()
 
 void CCrashReportWidget::onCancelClicked()
 {
-	removeAndQuit();
+	close();
 }
 
 void CCrashReportWidget::onCBClicked()
@@ -280,7 +284,7 @@ void CCrashReportWidget::onReportSent()
 								tr( "Report sent" ),
 								tr( "The report has been sent." ) );
 
-	removeAndQuit();
+	close();
 }
 
 void CCrashReportWidget::onReportFailed()
@@ -290,14 +294,6 @@ void CCrashReportWidget::onReportFailed()
 	QMessageBox::information( this,
 								tr( "Report failed" ),
 								tr( "Failed to send the report..." ) );
-
-	removeAndQuit();
-}
-
-void CCrashReportWidget::removeAndQuit()
-{
-	if( !m_fileName.isEmpty() )
-		QFile::remove( m_fileName );
 
 	close();
 }

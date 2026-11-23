@@ -526,11 +526,11 @@ void	CLogReportNode::report( NLMISC::CLog *targetLog, bool displayDetailsPerServ
 		if ( sumTotalLinesNotUnknown != 0 )
 		{
 			targetLog->displayRawNL( "%s: \t%u distinct WRN, %u total WRN, %u INF, %u DBG, %u STT, %u AST, %u ERR, %u TOTAL",
-				pt->service().c_str(), nb1, nbTotalLines[CLog::LOG_WARNING],
-				nbTotalLines[CLog::LOG_INFO], nbTotalLines[CLog::LOG_DEBUG],
+				pt->service().c_str(), nb1, nbTotalLines[CLog::NL_LOG_WARNING],
+				nbTotalLines[CLog::NL_LOG_INFO], nbTotalLines[CLog::NL_LOG_DEBUG],
 				nbTotalLines[CLog::LOG_STAT], nbTotalLines[CLog::LOG_ASSERT],
 				nbTotalLines[CLog::LOG_ERROR], pt->getNbTotalLines( CLog::LOG_UNKNOWN ) );
-			nb2Sum += nbTotalLines[CLog::LOG_WARNING];
+			nb2Sum += nbTotalLines[CLog::NL_LOG_WARNING];
 		}
 	}
 	targetLog->displayRawNL( "=> %u distinct, %u total WRN (%u pages)", nb1Sum, nb2Sum, nb1Sum / NB_LINES_PER_PAGE + 1 );

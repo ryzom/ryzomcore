@@ -49,7 +49,6 @@ namespace NLGUI
 	/////////////
 
 	CInterfaceLink::TLinkList CInterfaceLink::_LinkList;
-	CInterfaceLink::TLinkVect CInterfaceLink::_LinksWithNoTarget;
 	//
 	CInterfaceLink *CInterfaceLink::_FirstTriggeredLink[2] = { nullptr, nullptr };
 	CInterfaceLink *CInterfaceLink::_LastTriggeredLink[2] = { nullptr, nullptr };
@@ -158,6 +157,20 @@ namespace NLGUI
 	/////////////
 
 	//===========================================================
+	CInterfaceLink::TLinkVect &CInterfaceLink::linksWithNoTarget()
+	{
+		/* The vector is allocated at first use and never freed, so it is not destroyed with the static
+		 * objects of the program. A program that leaves through exit() with its interface still loaded (the
+		 * client after an interface parse error, or when a far TP fails) would destroy these links at that
+		 * point, and the destructor of a link removes its observers from database nodes that the owner of
+		 * the database may have deleted before. removeAllLinks() empties the vector when the interface is
+		 * released.
+		 */
+		static TLinkVect *s_Links = new TLinkVect();
+		return *s_Links;
+	}
+
+	//===========================================================
 	CInterfaceLink::CInterfaceLink() : _On(true)
 	{
 		// add an entry in the links list
@@ -206,7 +219,7 @@ namespace NLGUI
 		{
 			// wrong expression : release the link
 			nlwarning("CInterfaceLink::init : can't parse expression %s", expr.c_str());
-			_LinksWithNoTarget.push_back(TLinkSmartPtr(this));
+			linksWithNoTarget().push_back(TLinkSmartPtr(this));
 			return false;
 		}
 		// Examine the expression, to see which database nodes it depends on
@@ -239,8 +252,8 @@ namespace NLGUI
 		}
 		else
 		{
-			// There are no target for this link, so, put in a dedicated list to ensure that the link will be destroyed at exit
-			_LinksWithNoTarget.push_back(TLinkSmartPtr(this));
+			// There are no target for this link, so, put in a dedicated list to ensure that the link will be destroyed when the interface is released
+			linksWithNoTarget().push_back(TLinkSmartPtr(this));
 		}
 		_CDBTargets = cdbTargets;
 
@@ -263,12 +276,13 @@ namespace NLGUI
 	//===========================================================
 	void CInterfaceLink::uninit()
 	{
-		for (uint32 i = 0; i < _LinksWithNoTarget.size(); i++)
+		TLinkVect &links = linksWithNoTarget();
+		for (uint32 i = 0; i < links.size(); i++)
 		{
-			CInterfaceLink *pLink = _LinksWithNoTarget[i];
+			CInterfaceLink *pLink = links[i];
 			if (pLink == this)
 			{
-				_LinksWithNoTarget.erase(_LinksWithNoTarget.begin()+i);
+				links.erase(links.begin() + i);
 				return;
 			}
 		}
@@ -464,7 +478,7 @@ namespace NLGUI
 	//===========================================================
 	void CInterfaceLink::removeAllLinks()
 	{
-		_LinksWithNoTarget.clear();
+		linksWithNoTarget().clear();
 		TLinkList::iterator curr = _LinkList.begin();
 		TLinkList::iterator nextIt;
 		uint k;
