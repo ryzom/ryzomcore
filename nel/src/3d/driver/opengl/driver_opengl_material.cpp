@@ -2388,6 +2388,9 @@ void CDriverGL::setupWaterPassNV20(const CMaterial &mat)
 	ITexture *tex = mat.getTexture(0);
 	if (tex)
 	{
+		// offset texture shaders read DsDt; the ARB path leaves the bump maps in RGBA8888
+		if (tex->isBumpMap())
+			tex->setUploadFormat(ITexture::DsDt);
 		setupTexture(*tex);
 		activateTexture(0, tex);
 		_DriverGLStates.activeTextureARB(1);
@@ -2407,6 +2410,9 @@ void CDriverGL::setupWaterPassNV20(const CMaterial &mat)
 	tex = mat.getTexture(1);
 	if (tex)
 	{
+		// offset texture shaders read DsDt; the ARB path leaves the bump maps in RGBA8888
+		if (tex->isBumpMap())
+			tex->setUploadFormat(ITexture::DsDt);
 		setupTexture(*tex);
 		activateTexture(1, tex);
 		_DriverGLStates.activeTextureARB(2);
@@ -2471,13 +2477,13 @@ void CDriverGL::setupWaterPass(uint /* pass */)
 	// texture shader path cannot derive the blend alpha from the
 	// reflection luma); legacy envmap draws keep the original NV-first
 	// order by design intent.
-	// NB: an unexplained failure was observed once on modern NVIDIA at
-	// 96f2f6941: after planar (ARB) water had run in the session, flipping
-	// MaxWaterReflections to 0 left all-NV20 water frames with the stage 2
-	// envmap fetch missing (bump map showing as an opaque scrolling
-	// texture), while an NV20-only session renders fine — root cause not
-	// yet identified (FXAA's ARB fragment programs coexist with NV20 water
-	// without issue, so it is not FP usage per se).
+	// Both paths read the same bump maps, the ARB programs as RGBA8888 and
+	// the NV20 offset texture shaders as DsDt, so each sets the upload format
+	// it needs. A bump map left in RGBA8888 by the ARB path makes the NV20
+	// stages inconsistent: the water shows the opaque bump map (that was the
+	// failure of switching the reflections off, or of MaxWaterReflections 0,
+	// after reflections in the session; legacy draws of a session with
+	// reflections, such as those from under the surface, took the same way).
 	const bool calcARB = mat.isWaterCalcReflectivity() && ARBWaterShader[4] != 0;
 	_CurWaterPassIsARB = false;
 	if (_Extensions.NVTextureShader && !calcARB)
