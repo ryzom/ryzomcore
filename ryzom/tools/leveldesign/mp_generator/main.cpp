@@ -22,6 +22,7 @@
 #include "utils.h"
 #include "nel/misc/algo.h"
 #include "nel/misc/common.h"
+#include "nel/misc/mem_displayer.h"
 
 #include <algorithm>
 #include <cerrno>
@@ -44,6 +45,35 @@ static void fail( const std::string &message )
 	fprintf( stderr, "ERROR: %s\n", message.c_str() );
 	exit( 1 );
 }
+
+
+// The warnings NeL gives while a file operation runs: CFile::deleteFile and CFile::replaceFile say the system's reason
+// for a failure only that way. deleteFile warns only once the debug system exists, which this makes sure of.
+class CWarningCapture
+{
+public:
+	CWarningCapture() : m_Displayer( "mp_generator_capture" )
+	{
+		createDebug();
+		INelContext::getInstance().getWarningLog()->addDisplayer( &m_Displayer );
+	}
+	~CWarningCapture()
+	{
+		INelContext::getInstance().getWarningLog()->removeDisplayer( &m_Displayer );
+	}
+	// The warnings given since, on one line
+	string reason()
+	{
+		string text;
+		const deque<string> &lines = m_Displayer.lockStrings();
+		for ( deque<string>::const_iterator it = lines.begin(); it != lines.end(); ++it )
+			text += ( text.empty() ? "" : "; " ) + CSString( *it ).strip();
+		m_Displayer.unlockStrings();
+		return text.empty() ? string( "the system gave no reason" ) : text;
+	}
+private:
+	CLightMemDisplayer m_Displayer;
+};
 
 
 // The line of a position in a text, counting from 1
@@ -496,8 +526,11 @@ void InitCreatureMP()
 		}
 		if ( cells[0].empty() )
 			fail( toString( "%s, line %u: the first cell is empty: every line after the header is a creature model and starts with its code (the table has no comment lines)", CREATURE_MODELS_CSV.c_str(), lineNumber ) );
-		if ( cells.size() < 2 || cells[0].size() != 2 || cells[1].empty() )
-			fail( toString( "%s, line %u: %s is no creature model (code of two letters;name;category)", CREATURE_MODELS_CSV.c_str(), lineNumber, ligne.c_str() ) );
+		// two letters: the code goes into the names of the sheets and parents, which the tool owns by that pattern
+		const string lowerCode = toLowerAscii( string( cells[0] ) );
+		const bool letters = lowerCode.size() == 2 && lowerCode.find_first_not_of( "abcdefghijklmnopqrstuvwxyz" ) == string::npos;
+		if ( cells.size() < 2 || !letters || cells[1].empty() )
+			fail( toString( "%s, line %u: %s is no creature model (code of two letters a to z;name;category)", CREATURE_MODELS_CSV.c_str(), lineNumber, ligne.c_str() ) );
 		const CSString code = cells[0].toLower();
 		const CSString &nom = cells[1];
 		if ( creatureModelNames.find( code ) != creatureModelNames.end() )
@@ -1979,9 +2012,15 @@ void RemoveStaleOutputs()
 	printf( "-- REMOVING RAW MATERIALS THE TABLES NO LONGER HAVE --\n" );
 	for ( uint i = 0; i < staleFiles.size(); ++i )
 	{
-		if ( !CFile::deleteFile( staleFiles[i] ) )
-			fail( toString( "Cannot remove %s (the warning before this gives the system's reason): every changed file is written and %u of the %u stale outputs are removed; once the cause is fixed, run again to remove the others",
-				staleFiles[i].c_str(), i, (uint)staleFiles.size() ) );
+		string reason;
+		{
+			CWarningCapture capture;
+			if ( !CFile::deleteFile( staleFiles[i] ) )
+				reason = capture.reason();
+		}
+		if ( !reason.empty() )
+			fail( toString( "Cannot remove %s (%s): every changed file is written and %u of the %u stale outputs are removed; once the cause is fixed, run again to remove the others",
+				staleFiles[i].c_str(), reason.c_str(), i, (uint)staleFiles.size() ) );
 	}
 	printf( "    %u files removed\n", (uint)staleFiles.size() );
 }
@@ -1991,30 +2030,53 @@ void RemoveStaleOutputs()
 static const char *s_TempSuffix = ".mp_generator_tmp";
 
 
-// Stop on a temporary file a stopped run left beside a file this run makes or may write, before anything is written,
-// whether that file changes this time or not: every file it makes, the quartering tables of the creatures it processes
-// and the item names. In the folders the tool owns FindStaleOutputs also finds such a file by its name. The file it
-// would have become is as that run left it.
+// Stop on the temporary files a stopped run left, before anything is read or written: anywhere below the folders of
+// raw_material_generation.cfg (the leveldesign, the translation, the creatures and their quartering tables), beside a
+// file this run makes or not. A run stopped while renaming may have replaced part of its files already; removing the
+// temporaries and running again completes it, as the run is the same.
 void CheckNoLeftoverTemporaries()
 {
-	vector<string> paths;
-	for ( map<string, CPendingFile>::const_iterator it = pendingFiles.begin(); it != pendingFiles.end(); ++it )
-		paths.push_back( it->second.Path );
-	for ( set<string>::const_iterator it = processedCreatures.begin(); it != processedCreatures.end(); ++it )
+	printf( "-- TEMPORARY FILES OF A STOPPED RUN --\n" );
+	const CSString roots[] = { LEVEL_DESIGN_PATH, TRANSLATION_PATH, CREATURE_PATH, RAW_MATERIAL_ASSIGN };
+	const uint nbRoots = sizeof( roots ) / sizeof( roots[0] );
+	vector<string> leftovers;
+	const string suffix = s_TempSuffix;
+	for ( uint i = 0; i < nbRoots; ++i )
 	{
-		map<string, string>::const_iterator itFile = assignmentFiles.find( "_" + *it + "_mp" );
-		if ( itFile != assignmentFiles.end() )
-			paths.push_back( itFile->second );
+		// a folder inside another of the list, or the same as an earlier one, is walked with that one: in whichever order
+		// the cfg gives them, every file is looked at once (the folders end with /, so a prefix is a folder above)
+		const string key = toLowerAscii( string( roots[i] ) );
+		bool covered = false;
+		for ( uint j = 0; !covered && j < nbRoots; ++j )
+		{
+			const string other = toLowerAscii( string( roots[j] ) );
+			if ( j != i && key.compare( 0, other.size(), other ) == 0 && ( other.size() < key.size() || j < i ) )
+				covered = true;
+		}
+		if ( covered )
+			continue;
+		vector<string> files;
+		CPath::getPathContent( roots[i], true, false, true, files );
+		for ( uint j = 0; j < files.size(); ++j )
+		{
+			if ( files[j].size() > suffix.size() && files[j].compare( files[j].size() - suffix.size(), suffix.size(), suffix ) == 0 )
+				leftovers.push_back( files[j] );
+		}
 	}
-	paths.push_back( ITEM_WORDS_WK );
-	paths.push_back( IC_FAMILIES_FORAGE_SOURCE );
-	for ( uint i = 0; i < paths.size(); ++i )
+	if ( leftovers.empty() )
 	{
-		const string temp = paths[i] + s_TempSuffix;
-		if ( CFile::isExists( temp ) )
-			fail( toString( "%s is the temporary file of %s, which a run stopped while writing left: remove it, then run again (nothing has been written)",
-				temp.c_str(), paths[i].c_str() ) );
+		printf( "    none\n" );
+		return;
 	}
+	std::sort( leftovers.begin(), leftovers.end() );
+	string listed;
+	for ( uint i = 0; i < leftovers.size() && i < 5; ++i )
+		listed += ( i ? ", " : "" ) + leftovers[i];
+	if ( leftovers.size() > 5 )
+		listed += toString( " and %u more", (uint)leftovers.size() - 5 );
+	const bool one = leftovers.size() == 1;
+	fail( toString( "%u temporary %s (*%s) of a run that was stopped while writing %s left: %s. That run may have replaced part of its files already; remove %s, then run again, which completes it (nothing has been written by this run)",
+		(uint)leftovers.size(), one ? "file" : "files", s_TempSuffix, one ? "is" : "are", listed.c_str(), one ? "it" : "them" ) );
 }
 
 
@@ -2123,7 +2185,13 @@ void WritePendingFiles()
 	// then each over its file
 	for ( uint i = 0; i < changed.size(); ++i )
 	{
-		if ( !CFile::replaceFile( changed[i]->Path, temps[i] ) )
+		string reason;
+		{
+			CWarningCapture capture;
+			if ( !CFile::replaceFile( changed[i]->Path, temps[i] ) )
+				reason = capture.reason();
+		}
+		if ( !reason.empty() )
 		{
 			// the temporary files not yet renamed go: they would stop the next run
 			string left;
@@ -2132,8 +2200,8 @@ void WritePendingFiles()
 				if ( CFile::isExists( temps[j] ) && !CFile::deleteFile( temps[j] ) )
 					left += " " + temps[j];
 			}
-			fail( toString( "Cannot rename %s over %s (the warning before this gives the system's reason): %u of the %u changed files were replaced before it, the others are as they were and no stale output was removed; %s",
-				temps[i].c_str(), changed[i]->Path.c_str(), i, (uint)changed.size(),
+			fail( toString( "Cannot rename %s over %s (%s): %u of the %u changed files were replaced before it, the others are as they were and no stale output was removed; %s",
+				temps[i].c_str(), changed[i]->Path.c_str(), reason.c_str(), i, (uint)changed.size(),
 				left.empty() ? "once the cause is fixed, run again, which makes the rest"
 					: ( "these temporary files could not be removed, remove them before running again:" + left ).c_str() ) );
 		}
@@ -2224,7 +2292,15 @@ void	SaveFamiliesForageSource()
 void GenerateDoc()
 {
 	CProducedDocHtml			MainDoc;
-	CFile::createDirectory("doc");
+	// in the working folder, a documentation of the run only: a folder that cannot be made skips it, with a warning
+	errno = 0;
+	if ( !CFile::isDirectory( "doc" ) && !CFile::createDirectory( "doc" ) )
+	{
+		const string reason = strerror( errno );
+		nlwarning( "Cannot create the folder doc in the working folder (%s): the documentation is not written", reason.c_str() );
+		fprintf( stderr, "WARNING: Cannot create the folder doc in the working folder (%s): the documentation is not written\n", reason.c_str() );
+		return;
+	}
 	MainDoc.open( "doc/rm.html", "Raw materials by generation order", true );
 	MainDoc.write( "<table cellpadding=\"1\" cellspacing=\"1\" border=\"0\"><tbody>\n" );
 	MainDoc.write( "<tr>" );
@@ -2396,6 +2472,8 @@ int main( int argc, char* argv[] )
 	
 	SetupDirectories();
 
+	CheckNoLeftoverTemporaries();
+
 	LoadCraftParts();
 
 	LoadCreatureFiles();
@@ -2418,8 +2496,6 @@ int main( int argc, char* argv[] )
 	LoadCustomizedProperties();
 
 	SaveFamiliesForageSource();
-
-	CheckNoLeftoverTemporaries();
 
 	FindStaleOutputs();
 

@@ -1813,6 +1813,26 @@ TEST(ObjectSerializer, ScenarioStaysWithinTheLimits)
 	EXPECT_EQ(3u, root->getAttr("Acts")->getSize());
 	EXPECT_TRUE(scenario.moveNode("Client1_4", "", -1, "Client1_9", "", -1));
 	EXPECT_EQ(2u, root->getAttr("Acts")->getSize());
+	// a value moved within its own table to the place after its last value is refused before it is taken out, as the
+	// table is one shorter without it, and stays where it was; the last place of the table is allowed
+	EXPECT_FALSE(scenario.moveNode("Client1_3", "", -1, "Client1_1", "Acts", 2));
+	EXPECT_EQ(2u, root->getAttr("Acts")->getSize());
+	EXPECT_EQ(act.getPtr(), root->getAttr("Acts")->getValueAtPos(1).getPtr());
+	EXPECT_TRUE(scenario.moveNode("Client1_3", "", -1, "Client1_1", "Acts", 1));
+	EXPECT_EQ(2u, root->getAttr("Acts")->getSize());
+	EXPECT_EQ(act.getPtr(), root->getAttr("Acts")->getValueAtPos(1).getPtr());
+	// the same by the value's place in its table: refused at the end, a real reorder to the last place, and back
+	const CObject *first = root->getAttr("Acts")->getValueAtPos(0).getPtr();
+	EXPECT_FALSE(scenario.moveNode("Client1_1", "Acts", 0, "Client1_1", "Acts", 2));
+	EXPECT_EQ(first, root->getAttr("Acts")->getValueAtPos(0).getPtr());
+	EXPECT_EQ(act.getPtr(), root->getAttr("Acts")->getValueAtPos(1).getPtr());
+	EXPECT_TRUE(scenario.moveNode("Client1_1", "Acts", 0, "Client1_1", "Acts", 1));
+	EXPECT_EQ(2u, root->getAttr("Acts")->getSize());
+	EXPECT_EQ(act.getPtr(), root->getAttr("Acts")->getValueAtPos(0).getPtr());
+	EXPECT_EQ(first, root->getAttr("Acts")->getValueAtPos(1).getPtr());
+	EXPECT_TRUE(scenario.moveNode("Client1_1", "Acts", 0, "Client1_1", "Acts", 1));
+	EXPECT_EQ(first, root->getAttr("Acts")->getValueAtPos(0).getPtr());
+	EXPECT_EQ(act.getPtr(), root->getAttr("Acts")->getValueAtPos(1).getPtr());
 
 	// The entries of a table that is 255 deep are replaced by those of a table: the tables in it are one level
 	// below, at the limit, and not two.

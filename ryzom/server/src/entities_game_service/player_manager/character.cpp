@@ -4940,7 +4940,7 @@ void CCharacter::removeKnownBrick( const CSheetId& brickId )
 			return;
 
 		// clear the brick's bit, the client then no longer shows the brick as known
-		_BrickFamilyBitField[brickForm->Family] &= ~((sint64)1 << (sint64)pos);
+		_BrickFamilyBitField[brickForm->Family] &= ~(sint64)((uint64)1 << pos);
 		CBankAccessor_PLR::getBRICK_FAMILY().getArray(brickForm->Family).setBRICKS(_PropertyDatabase, _BrickFamilyBitField[brickForm->Family]);
 	}
 	else
@@ -19819,6 +19819,33 @@ void CCharacter::consumeItem( INVENTORIES::TInventory inventory, uint32 slot )
 		params[2].Int = secondes;
 		CCharacter::sendDynamicSystemMessage(_Id,"CONSUMABLE_OVERDOSE_TIMER", params);
 
+		return;
+	}
+
+	// the item is destroyed when the consumption ends, before its effect is built: an effect with a part lost at load
+	// (reported then) is refused here, while the item is still there
+	if (form->EffectWhenConsumed != CSheetId::Unknown)
+	{
+		const CStaticRolemasterPhrase *effect = CSheets::getSRolemasterPhrase(form->EffectWhenConsumed);
+		if (!effect)
+		{
+			// no phrase to build: the item would be used up for nothing
+			static std::set<CSheetId> reported;
+			if (reported.insert(form->SheetId).second)
+				nlwarning("<CCharacter::consumeItem> the consumable %s names the effect %s, which is no phrase sheet: it is refused",
+				    form->SheetId.toString().c_str(), form->EffectWhenConsumed.toString().c_str());
+			CCharacter::sendDynamicSystemMessage(_Id, "EGS_ACTION_BROKEN");
+			return;
+		}
+		if (CPhraseManager::getInstance().refusesBrokenBricks(effect->Bricks, _EntityRowId, "the effect", form->SheetId, true))
+			return;
+	}
+	else if (form->ConsumableItem->HasBadProperty)
+	{
+		static std::set<CSheetId> reported;
+		if (reported.insert(form->SheetId).second)
+			nlwarning("<CCharacter::consumeItem> the consumable %s lost a property at load (reported then): it is refused", form->SheetId.toString().c_str());
+		CCharacter::sendDynamicSystemMessage(_Id, "EGS_ACTION_BROKEN");
 		return;
 	}
 

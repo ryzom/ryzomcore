@@ -543,6 +543,14 @@ public:
 	 CSPhrasePtr buildSabrinaPhrase( const TDataSetRow &actorRowId, const TDataSetRow &targetRowId, const std::vector<NLMISC::CSheetId> &brickIds, uint16 phraseId = 0, uint8 nextCounter = 0, bool execution = true);
 
 	 /**
+	  * Whether brickIds hold a brick whose sheet lost a property at load (CStaticBrick::HasBadProperty): it would cost
+	  * nothing or work with default values, so what is built from it to be used is refused. The brick is reported once
+	  * in a run, with what used it (what, and the item when there is one); a player actor is told the action is broken
+	  * when tellActor is set.
+	  */
+	 bool refusesBrokenBricks( const std::vector<NLMISC::CSheetId> &brickIds, const TDataSetRow &actorRowId, const char *what, const NLMISC::CSheetId &item, bool tellActor ) const;
+
+	 /**
 	  * An entity attempts to break a spell being cast
 	  * \param attackSkillLevel: value of the skill of the atacker ( = skill /10)
 	  * \param attacker: the attacking entity

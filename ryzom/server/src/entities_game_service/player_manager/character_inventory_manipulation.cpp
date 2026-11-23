@@ -3314,6 +3314,11 @@ void CCharacter::procEnchantment()
 	{
 		if (rightHandItem->getEnchantment().size() > 0)
 		{
+			// the player asks for the proc (a phrase with a BEPA root): the player is told, the shard's log names the
+			// brick once
+			if (CPhraseManager::getInstance().refusesBrokenBricks(rightHandItem->getEnchantment(), _EntityRowId, "the enchantment", rightHandItem->getSheetId(), true))
+				return;
+
 			CMagicPhrase phrase;
 
 			if (!phrase.buildProc(_EntityRowId, rightHandItem->getEnchantment()))
