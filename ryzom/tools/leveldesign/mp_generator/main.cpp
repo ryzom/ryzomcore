@@ -24,6 +24,8 @@
 #include "nel/misc/common.h"
 
 #include <algorithm>
+#include <cerrno>
+#include <cstring>
 
 TRMItem currentDocItem;
 CRMData SortableData;
@@ -41,6 +43,13 @@ static void fail( const std::string &message )
 	nlwarning( "%s", message.c_str() );
 	fprintf( stderr, "ERROR: %s\n", message.c_str() );
 	exit( 1 );
+}
+
+
+// The line of a position in a text, counting from 1
+static uint lineOf( const string &text, string::size_type pos )
+{
+	return 1 + (uint)std::count( text.begin(), text.begin() + std::min( pos, text.size() ), '\n' );
 }
 
 
@@ -269,13 +278,21 @@ void SaveAssignments()
 		{
 			const string::size_type entryEnd = text.find( entryClose, pos );
 			if ( text.compare( pos, entryOpen.size(), entryOpen ) != 0 || entryEnd == string::npos || entryEnd > end )
-				fail( toString( "The raw material assignment file %s has a Harvest struct this tool does not read", fileName.c_str() ) );
+				fail( toString( "%s, line %u: the Harvest struct of this raw material assignment file holds something other than entries <STRUCT Name=\"MPn\"> ... </STRUCT> at the indentation the tools write, which this tool does not read: correct it",
+					fileName.c_str(), lineOf( text, pos ) ) );
 			// an empty entry (<STRUCT Name="MPn"/>) on its own line: it would swallow the next one
 			const string::size_type lineEnd = text.find( eol, pos );
 			if ( lineEnd != string::npos && lineEnd < entryEnd && text.compare( lineEnd - 2, 2, "/>" ) == 0 )
-				fail( toString( "The raw material assignment file %s has an empty entry (%s), which this tool does not read: remove it", fileName.c_str(), text.substr( pos, lineEnd - pos ).c_str() ) );
+				fail( toString( "%s, line %u: the raw material assignment file has an empty entry (%s), which this tool does not read: remove it", fileName.c_str(), lineOf( text, pos ), text.substr( pos, lineEnd - pos ).c_str() ) );
+			// the entry's first line: <STRUCT Name="MP<number>">, the number up to the quote that closes the name
 			const string entry = text.substr( pos, entryEnd + entryClose.size() - pos );
-			const CSString rest = entry.substr( entry.find( '"', entryOpen.size() ) );
+			string::size_type quote = entryOpen.size();
+			while ( quote < entry.size() && entry[quote] >= '0' && entry[quote] <= '9' )
+				++quote;
+			if ( quote == entryOpen.size() || entry.compare( quote, 2 + eol.size(), "\">" + eol ) != 0 )
+				fail( toString( "%s, line %u: the entry %s is not <STRUCT Name=\"MP<number>\"> on a line of its own, which this tool reads: correct it",
+					fileName.c_str(), lineOf( text, pos ), text.substr( pos, std::min( lineEnd, entryEnd ) - pos ).c_str() ) );
+			const CSString rest = entry.substr( quote );
 			const string item = rest.splitFrom( "Name=\"AssociatedItem\" Value=\"" ).splitTo( "\"" );
 			if ( isPlaceholderMaterial( rest ) )
 			{
@@ -367,12 +384,16 @@ void LoadCraftParts()
 	// the first line names the columns: the part letter, its name, then the stats by their names; a part carries the
 	// stats whose cell is not empty
 	vector<CSString> cells;
+	uint lineNumber = 0;
 	do
+	{
 		ligne = data.splitTo( "\n", true );
+		++lineNumber;
+	}
 	while ( ligne.strip().empty() && !data.empty() );
 	splitCells( ligne, cells );
 	if ( cells.size() < 3 || cells[0] != "Part" || cells[1] != "Name" )
-		fail( toString( "%s must start with a line Part;Name;<stat>;...", ITEM_PARTS_CSV.c_str() ) );
+		fail( toString( "%s, line %u: the table must start with a line Part;Name;<stat>;...", ITEM_PARTS_CSV.c_str(), lineNumber ) );
 	vector<int> columns( cells.size(), -1 );
 	set<int> namedStats;
 	for ( uint c = 2; c < cells.size(); ++c )
@@ -388,14 +409,19 @@ void LoadCraftParts()
 	while ( !data.empty() )
 	{
 		ligne = data.splitTo( "\n", true );
+		++lineNumber;
 		if ( ligne.strip().empty() )
 			continue;
 		splitCells( ligne, cells );
-		if ( cells[0].size() != 1 || cells[0][0] < 'A' || cells[0][0] >= 'A' + NumMPCraftParts || cells.size() > columns.size() )
-			fail( toString( "%s: the line %s is no item part (a letter A to Z, then a cell per column)", ITEM_PARTS_CSV.c_str(), ligne.c_str() ) );
+		if ( cells[0].size() != 1 || cells[0][0] < 'A' || cells[0][0] >= 'A' + NumMPCraftParts )
+			fail( toString( "%s, line %u: %s is no item part: a line starts with the letter of its part, A to Z", ITEM_PARTS_CSV.c_str(), lineNumber, ligne.c_str() ) );
+		// a cell per column of the first line: a short line would leave the stats of its last columns out unseen
+		if ( cells.size() != columns.size() )
+			fail( toString( "%s, line %u: the item part %c has %u cells, the first line names %u columns: every line has a cell per column, empty for a stat the part does not carry",
+				ITEM_PARTS_CSV.c_str(), lineNumber, cells[0][0], (uint)cells.size(), (uint)columns.size() ) );
 		index = cells[0][0] - 'A';
 		if ( found[index] )
-			fail( toString( "%s has two lines for the item part %c", ITEM_PARTS_CSV.c_str(), cells[0][0] ) );
+			fail( toString( "%s, line %u: a second line for the item part %c", ITEM_PARTS_CSV.c_str(), lineNumber, cells[0][0] ) );
 		found[index] = true;
 		for ( int i = 0; i < NumMPStats; ++i )
 			craftParts[index].Carac[i] = false;
@@ -449,20 +475,33 @@ void InitCreatureMP()
 		fail( toString( "Cannot read %s", CREATURE_MODELS_CSV.c_str() ) );
 	data = data.replace( "\r", "" );
 
-	// one line per creature model: its code, its name (the first word of the names of its families), its category;
-	// a line with an empty first cell is a comment
+	// a header line (;Name;Category), then one line per creature model: its code, its name (the first word of the
+	// names of its families), its category. Every line after the header is a model: one whose code cell was emptied
+	// would leave its creatures out unseen
+	uint lineNumber = 0;
+	bool header = true;
 	while ( !data.empty() )
 	{
 		ligne = data.splitTo( "\n", true );
-		splitCells( ligne, cells );
-		if ( cells[0].empty() )
+		++lineNumber;
+		if ( ligne.strip().empty() )
 			continue;
+		splitCells( ligne, cells );
+		if ( header )
+		{
+			if ( cells.size() < 2 || !cells[0].empty() || cells[1] != "Name" )
+				fail( toString( "%s, line %u: the table must start with its header ;Name;Category (as make_tables.py writes it), not %s", CREATURE_MODELS_CSV.c_str(), lineNumber, ligne.c_str() ) );
+			header = false;
+			continue;
+		}
+		if ( cells[0].empty() )
+			fail( toString( "%s, line %u: the first cell is empty: every line after the header is a creature model and starts with its code (the table has no comment lines)", CREATURE_MODELS_CSV.c_str(), lineNumber ) );
 		if ( cells.size() < 2 || cells[0].size() != 2 || cells[1].empty() )
-			fail( toString( "%s: the line %s is no creature model (code;name;category)", CREATURE_MODELS_CSV.c_str(), ligne.c_str() ) );
+			fail( toString( "%s, line %u: %s is no creature model (code of two letters;name;category)", CREATURE_MODELS_CSV.c_str(), lineNumber, ligne.c_str() ) );
 		const CSString code = cells[0].toLower();
 		const CSString &nom = cells[1];
 		if ( creatureModelNames.find( code ) != creatureModelNames.end() )
-			fail( toString( "%s has the creature code %s on two lines", CREATURE_MODELS_CSV.c_str(), code.c_str() ) );
+			fail( toString( "%s, line %u: the creature code %s has a line already", CREATURE_MODELS_CSV.c_str(), lineNumber, code.c_str() ) );
 		creatureModelNames[code] = nom;
 
 		// the creatures of the model (c<code><ecosystem><zone><digit>.creature) in the ecosystems that get raw
@@ -514,29 +553,37 @@ void LoadCreatureClasses()
 		fail( toString( "Cannot read %s", CREATURE_CLASSES_CSV.c_str() ) );
 	data = data.replace( "\r", "" );
 
-	// a header line, then one line per level code: the zone letter and the digit of the creature sheet names, and the
-	// class of the creature's craft materials, or - for none
+	// a header line (Level;Class), then one line per level code: the zone letter and the digit of the creature sheet
+	// names, and the class of the creature's craft materials, or - for none
+	uint lineNumber = 0;
 	do
+	{
 		ligne = data.splitTo( "\n", true );
+		++lineNumber;
+	}
 	while ( ligne.strip().empty() && !data.empty() );
+	splitCells( ligne, cells );
+	if ( cells.size() != 2 || cells[0] != "Level" || cells[1] != "Class" )
+		fail( toString( "%s, line %u: the table must start with its header Level;Class (as make_tables.py writes it), not %s", CREATURE_CLASSES_CSV.c_str(), lineNumber, ligne.c_str() ) );
 	while ( !data.empty() )
 	{
 		ligne = data.splitTo( "\n", true );
+		++lineNumber;
 		if ( ligne.strip().empty() )
 			continue;
 		splitCells( ligne, cells );
 		int classIndex = -2;
-		if ( cells.size() >= 2 && cells[1] == "-" )
+		if ( cells.size() == 2 && cells[1] == "-" )
 			classIndex = -1;
-		for ( int i = 0; cells.size() >= 2 && i < 5; ++i )
+		for ( int i = 0; cells.size() == 2 && i < 5; ++i )
 		{
 			if ( cells[1] == s_ClassNames[i] )
 				classIndex = i;
 		}
-		if ( cells[0].size() != 2 || cells[0][0] < 'a' || cells[0][0] > 'f' || cells[0][1] < '1' || cells[0][1] > '8' || classIndex == -2 )
-			fail( toString( "%s: the line %s is no level code (zone a to f, digit 1 to 8) and class (b3;Basic, Fine, Choice, Excellent, Supreme or -)", CREATURE_CLASSES_CSV.c_str(), ligne.c_str() ) );
+		if ( cells.size() != 2 || cells[0].size() != 2 || cells[0][0] < 'a' || cells[0][0] > 'f' || cells[0][1] < '1' || cells[0][1] > '8' || classIndex == -2 )
+			fail( toString( "%s, line %u: %s is no level code (zone a to f, digit 1 to 8) and class (b3;Basic, Fine, Choice, Excellent, Supreme or -), two cells", CREATURE_CLASSES_CSV.c_str(), lineNumber, ligne.c_str() ) );
 		if ( creatureClasses.find( cells[0] ) != creatureClasses.end() )
-			fail( toString( "%s has the level code %s on two lines", CREATURE_CLASSES_CSV.c_str(), cells[0].c_str() ) );
+			fail( toString( "%s, line %u: the level code %s has a line already", CREATURE_CLASSES_CSV.c_str(), lineNumber, cells[0].c_str() ) );
 		creatureClasses[cells[0]] = classIndex;
 	}
 }
@@ -723,7 +770,16 @@ int GetNumeroMP( const CSString& nomMP, uint lineNumber )
 	if ( result.empty() )
 		fail( toString( "%s, line %u: the family %s is not in %s: the tables make no new family (make_tables.py takes the families from the translation)",
 			FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), ITEM_MP_FAMILY_TYP.c_str() ) );
-	const int res = result.splitTo( "\"" ).atoi();
+	// a number of up to four digits: the sheet names give it four places (m0692...), and the family icons are an array
+	// indexed by it
+	const CSString number = result.splitTo( "\"" );
+	bool digits = !number.empty() && number.size() <= 4;
+	for ( uint i = 0; digits && i < number.size(); ++i )
+		digits = number[i] >= '0' && number[i] <= '9';
+	if ( !digits )
+		fail( toString( "%s, line %u: the family %s has the number %s in %s, which is no number from 0 to 9999: the sheet names give a family number four digits",
+			FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), number.c_str(), ITEM_MP_FAMILY_TYP.c_str() ) );
+	const int res = number.atoi();
 	if ( !WKContent.contains( toString( "\nmpfam%d\t", res ).c_str() ) && !WKContent.contains( toString( "\nmpfam%d ", res ).c_str() ) )
 		fail( toString( "%s, line %u: the family %s (%d) has no text mpfam%d in %s", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), res, res, WK_UXT.c_str() ) );
 	return res;
@@ -1338,13 +1394,13 @@ void NewMP( const CSString& ligne, uint lineNumber )
 	CSortedStringSet specialNames;
 
 	// the cells: family, group, craft parts, attributes, -, location, icon, -, -, -, the specialty and weaknesses of the
-	// first part, those of the second, colour, -, special only, then the special items; a line with an empty first
-	// cell is a header or a comment
+	// first part, those of the second, colour, -, special only, then the special items. Every line after the header is
+	// a family: one whose name cell was emptied would disappear, and its sheets with it
 	vector<CSString> cells;
 	splitCells( ligne, cells );
 	CSString nomMP = cells[0];
 	if ( nomMP.empty() )
-		return;
+		fail( toString( "%s, line %u: the first cell is empty: every line after the header is a family and starts with its name (the table has no comment lines)", FAM_PROP_CSV.c_str(), lineNumber ) );
 	if ( cells.size() < 19 )
 		fail( toString( "%s, line %u: %s has %u cells, a family line has 19 and its special items after them", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), (uint)cells.size() ) );
 
@@ -1434,11 +1490,31 @@ void NewMP( const CSString& ligne, uint lineNumber )
 	}
 	craftStats.color = color.atoi();
 
-	// the special items
+	// the special items: six fields separated by / (the ecosystem and class letters, singular, article, definite
+	// article, plural, plural article: the name the tool writes for it), none empty but the article, which many rows of
+	// item_words_wk.txt leave empty; each item once
 	for ( uint i = 19; i < cells.size(); ++i )
 	{
-		if ( !cells[i].empty() )
-			specialNames.insert( cells[i] );
+		if ( cells[i].empty() )
+			continue;
+		const string item = cells[i];
+		vector<CSString> fields;
+		for ( string::size_type pos = 0;; )
+		{
+			const string::size_type next = item.find( '/', pos );
+			fields.push_back( CSString( item.substr( pos, next == string::npos ? string::npos : next - pos ) ).strip() );
+			if ( next == string::npos )
+				break;
+			pos = next + 1;
+		}
+		bool complete = fields.size() == 6;
+		for ( uint f = 0; complete && f < fields.size(); ++f )
+			complete = f == 2 || !fields[f].empty();
+		if ( !complete )
+			fail( toString( "%s, line %u: %s has the special item %s, which is not six fields separated by /, none empty but the article: the ecosystem and class letters, singular, article, definite article, plural, plural article",
+				FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), cells[i].c_str() ) );
+		if ( !specialNames.insert( cells[i] ).second )
+			fail( toString( "%s, line %u: %s has the special item %s twice (in any case of its letters)", FAM_PROP_CSV.c_str(), lineNumber, nomMP.c_str(), cells[i].c_str() ) );
 	}
 
 	// a creature family gives the materials of the model it is named after
@@ -1808,26 +1884,82 @@ static void CheckNoReferences( const set<string> &names )
 }
 
 
+// A folder that holds the files this tool makes, and the names it gives them
+struct COwnedFolder
+{
+	CSString Folder;
+	char Kind; // 'p' the family, ecosystem and creature model parents, 's' the sheets of one ecosystem, 'd' the deposit family list
+	char Eco; // for 's', the ecosystem letter of its sheets
+	const char *Names; // the names, as a stop says them
+};
+
+
+// Whether a file name is one this tool gives the files of an owned folder
+static bool isOwnedOutputName( const string &name, const COwnedFolder &folder )
+{
+	if ( folder.Kind == 's' )
+	{
+		// m0692chdca01.sitem, its ecosystem letter that of the folder (CreateSheet)
+		return isRawMaterialSheetName( name ) && name[8] == folder.Eco;
+	}
+	if ( folder.Kind == 'p' )
+	{
+		// _m0692.sitem a family (CreateParentSItem), _mc.sitem an ecosystem, _mchd.sitem a creature model (SaveParentSItems)
+		if ( name.size() < 9 || name.compare( 0, 2, "_m" ) != 0 || name.compare( name.size() - 6, 6, ".sitem" ) != 0 )
+			return false;
+		const string middle = name.substr( 2, name.size() - 8 );
+		if ( middle.size() == 4 )
+			return middle.find_first_not_of( "0123456789" ) == string::npos;
+		if ( middle.size() == 1 )
+			return string( "cdfjlp" ).find( middle[0] ) != string::npos;
+		return middle.size() == 3 && middle[0] == 'c' && middle.find_first_not_of( "abcdefghijklmnopqrstuvwxyz" ) == string::npos;
+	}
+	// abhaya_wood_1.mp: the family in lower case, its spaces as _, then _ and its number (NewMP)
+	if ( name.size() < 6 || name.compare( name.size() - 3, 3, ".mp" ) != 0 )
+		return false;
+	const string base = name.substr( 0, name.size() - 3 );
+	const string::size_type underscore = base.rfind( '_' );
+	if ( underscore == string::npos || underscore == 0 || underscore + 1 == base.size() )
+		return false;
+	const string number = base.substr( underscore + 1 );
+	if ( number.find_first_not_of( "0123456789" ) != string::npos || ( number.size() > 1 && number[0] == '0' ) )
+		return false;
+	return base.substr( 0, underscore ).find_first_not_of( "abcdefghijklmnopqrstuvwxyz0123456789_'-" ) == string::npos;
+}
+
+
 // The raw material sheets, their parents and the deposit family files that an earlier run wrote and this one does not:
 // these folders hold what this tool makes from the tables, so a material the tables no longer have goes once all is
-// written (RemoveStaleOutputs). Nothing may name them.
+// written (RemoveStaleOutputs). Nothing may name them. A file of another name there, or a folder, is not the tool's to
+// remove or keep: it stops the run before anything is written.
 vector<string> staleFiles;
 void FindStaleOutputs()
 {
 	printf( "-- RAW MATERIALS THE TABLES NO LONGER HAVE --\n" );
-	struct COutputFolder { CSString Folder; const char *Extension; };
-	const COutputFolder folders[] = { { MP_DIRECTORY + "_parent/", "sitem" }, { MP_DIRECTORY + "common/", "sitem" },
-		{ MP_DIRECTORY + "desert/", "sitem" }, { MP_DIRECTORY + "forest/", "sitem" }, { MP_DIRECTORY + "jungle/", "sitem" },
-		{ MP_DIRECTORY + "lacustre/", "sitem" }, { MP_DIRECTORY + "prime_roots/", "sitem" }, { DEPOSIT_MPS, "mp" } };
+	const char *sheetNames = "m<family><creature or source code><ecosystem><class><variant>.sitem";
+	const COwnedFolder folders[] = {
+		{ MP_DIRECTORY + "_parent/", 'p', 0, "_m<family>.sitem, _m<ecosystem>.sitem and _mc<creature model>.sitem" },
+		{ MP_DIRECTORY + "common/", 's', 'c', sheetNames }, { MP_DIRECTORY + "desert/", 's', 'd', sheetNames },
+		{ MP_DIRECTORY + "forest/", 's', 'f', sheetNames }, { MP_DIRECTORY + "jungle/", 's', 'j', sheetNames },
+		{ MP_DIRECTORY + "lacustre/", 's', 'l', sheetNames }, { MP_DIRECTORY + "prime_roots/", 's', 'p', sheetNames },
+		{ DEPOSIT_MPS, 'd', 0, "<family in lower case, _ for its spaces>_<family number>.mp" } };
 	vector<string> stale;
 	set<string> staleSheets; // the names of the stale files without extension, in lower case
 	for ( uint i = 0; i < sizeof( folders ) / sizeof( folders[0] ); ++i )
 	{
+		// everything there, hidden files, logs and version control folders included; but on Windows getPathContent
+		// skips the entries with the SYSTEM attribute (desktop.ini, Thumbs.db), which this tool neither checks nor removes
 		vector<string> files;
-		CPath::getPathContent( folders[i].Folder, false, false, true, files );
+		CPath::getPathContent( folders[i].Folder, false, true, true, files, NULL, true );
 		for ( uint j = 0; j < files.size(); ++j )
 		{
-			if ( CFile::getExtension( files[j] ) != folders[i].Extension || pendingFiles.count( writtenKey( files[j] ) ) )
+			if ( CFile::isDirectory( files[j] ) )
+				fail( toString( "%s is a folder inside %s, which holds only the files this tool makes (%s): move it out, nothing has been written",
+					files[j].c_str(), folders[i].Folder.c_str(), folders[i].Names ) );
+			if ( !isOwnedOutputName( CFile::getFilename( files[j] ), folders[i] ) )
+				fail( toString( "%s is in %s, which holds only the files this tool makes (%s), and its name is none of them: move it out or remove it (a run stopped while writing leaves <file>.mp_generator_tmp), nothing has been written",
+					files[j].c_str(), folders[i].Folder.c_str(), folders[i].Names ) );
+			if ( pendingFiles.count( writtenKey( files[j] ) ) )
 				continue;
 			stale.push_back( files[j] );
 			staleSheets.insert( toLowerAscii( CFile::getFilenameWithoutExtension( files[j] ) ) );
@@ -1841,47 +1973,172 @@ void FindStaleOutputs()
 }
 
 
+// Remove the stale outputs, once every changed file is in place
 void RemoveStaleOutputs()
 {
 	printf( "-- REMOVING RAW MATERIALS THE TABLES NO LONGER HAVE --\n" );
 	for ( uint i = 0; i < staleFiles.size(); ++i )
 	{
 		if ( !CFile::deleteFile( staleFiles[i] ) )
-			fail( toString( "Cannot remove %s", staleFiles[i].c_str() ) );
+			fail( toString( "Cannot remove %s (the warning before this gives the system's reason): every changed file is written and %u of the %u stale outputs are removed; once the cause is fixed, run again to remove the others",
+				staleFiles[i].c_str(), i, (uint)staleFiles.size() ) );
 	}
 	printf( "    %u files removed\n", (uint)staleFiles.size() );
 }
 
 
-// Write what the run made, once every check has passed: the files whose content changes, in folders made as needed
+// What a temporary file of this tool is called: the file it becomes, and this
+static const char *s_TempSuffix = ".mp_generator_tmp";
+
+
+// Stop on a temporary file a stopped run left beside a file this run makes or may write, before anything is written,
+// whether that file changes this time or not: every file it makes, the quartering tables of the creatures it processes
+// and the item names. In the folders the tool owns FindStaleOutputs also finds such a file by its name. The file it
+// would have become is as that run left it.
+void CheckNoLeftoverTemporaries()
+{
+	vector<string> paths;
+	for ( map<string, CPendingFile>::const_iterator it = pendingFiles.begin(); it != pendingFiles.end(); ++it )
+		paths.push_back( it->second.Path );
+	for ( set<string>::const_iterator it = processedCreatures.begin(); it != processedCreatures.end(); ++it )
+	{
+		map<string, string>::const_iterator itFile = assignmentFiles.find( "_" + *it + "_mp" );
+		if ( itFile != assignmentFiles.end() )
+			paths.push_back( itFile->second );
+	}
+	paths.push_back( ITEM_WORDS_WK );
+	paths.push_back( IC_FAMILIES_FORAGE_SOURCE );
+	for ( uint i = 0; i < paths.size(); ++i )
+	{
+		const string temp = paths[i] + s_TempSuffix;
+		if ( CFile::isExists( temp ) )
+			fail( toString( "%s is the temporary file of %s, which a run stopped while writing left: remove it, then run again (nothing has been written)",
+				temp.c_str(), paths[i].c_str() ) );
+	}
+}
+
+
+// Write a whole file and close it, each step checked (the close too: it is where a full disk shows); false and the
+// reason if one fails
+static bool writeWholeFile( const string &path, const string &content, string &reason )
+{
+	errno = 0;
+	FILE *f = nlfopen( path, "wb" );
+	if ( f == NULL )
+	{
+		reason = toString( "it cannot be created (%s)", strerror( errno ) );
+		return false;
+	}
+	bool written = true;
+	if ( !content.empty() && fwrite( content.data(), 1, content.size(), f ) != content.size() )
+	{
+		reason = toString( "it cannot be written (%s)", strerror( errno ) );
+		written = false;
+	}
+	errno = 0;
+	if ( fclose( f ) != 0 && written )
+	{
+		reason = toString( "it cannot be closed, so what was written may not be on the disk (%s)", strerror( errno ) );
+		written = false;
+	}
+	return written;
+}
+
+
+// Make a folder and the ones above it that are missing, noting each one made, the highest first
+static bool makeFolder( const string &folder, vector<string> &made )
+{
+	const string path = CPath::standardizePath( folder, true );
+	if ( CFile::isDirectory( path ) )
+		return true;
+	const string parent = CFile::getPath( path.substr( 0, path.size() - 1 ) );
+	if ( !parent.empty() && parent != path && !makeFolder( parent, made ) )
+		return false;
+	if ( !CFile::createDirectory( path ) )
+		return false;
+	made.push_back( path );
+	return true;
+}
+
+
+// Write what the run made, once every check has passed: the files whose content changes. Each is written whole to a
+// temporary file beside it; only when all of them are written is each renamed over its file, a step the file system
+// does at once. A failure before the renames removes the temporary files and the folders made for them, and leaves
+// the leveldesign as it was.
 void WritePendingFiles()
 {
 	printf( "-- WRITING --\n" );
-	uint nbWritten = 0;
+	vector<const CPendingFile *> changed;
 	for ( map<string, CPendingFile>::const_iterator it = pendingFiles.begin(); it != pendingFiles.end(); ++it )
 	{
 		const CPendingFile &file = it->second;
 		CSString current;
 		if ( CFile::fileExists( file.Path ) && ( ( file.Content.empty() && CFile::getFileSize( file.Path ) == 0 ) || ( current.readFromFile( file.Path ) && current == file.Content ) ) )
 			continue;
-		const string folder = CFile::getPath( file.Path );
-		if ( !CFile::isDirectory( folder ) && !CFile::createDirectoryTree( folder ) )
-			fail( toString( "Cannot create the folder %s", folder.c_str() ) );
-		if ( file.Content.empty() )
-		{
-			// an empty file (the deposit family list), which CSString::writeToFile does not write
-			FILE *f = nlfopen( file.Path, "wb" );
-			if ( f == NULL )
-				fail( toString( "Cannot write %s", file.Path.c_str() ) );
-			fclose( f );
-		}
-		else if ( !file.Content.writeToFile( file.Path ) )
-		{
-			fail( toString( "Cannot write %s", file.Path.c_str() ) );
-		}
-		++nbWritten;
+		changed.push_back( &file );
 	}
-	printf( "    %u files made, %u written (the others are as they were)\n", (uint)pendingFiles.size(), nbWritten );
+
+	// every changed file to its temporary file
+	vector<string> temps, madeFolders;
+	string failure;
+	for ( uint i = 0; i < changed.size() && failure.empty(); ++i )
+	{
+		const string &path = changed[i]->Path;
+		const string folder = CFile::getPath( path );
+		const string temp = path + s_TempSuffix;
+		string reason;
+		if ( !makeFolder( folder, madeFolders ) )
+			failure = toString( "Cannot create the folder %s for %s (%s)", folder.c_str(), path.c_str(), formatErrorMessage( getLastError() ).c_str() );
+		else if ( CFile::isExists( temp ) )
+			failure = toString( "%s is in the way of the temporary file of %s: a run stopped while writing leaves such a file; remove it", temp.c_str(), path.c_str() );
+		else
+		{
+			// noted before it is written: a file left half written is removed too
+			temps.push_back( temp );
+			if ( !writeWholeFile( temp, changed[i]->Content, reason ) )
+				failure = toString( "Cannot write %s, the temporary file of %s: %s", temp.c_str(), path.c_str(), reason.c_str() );
+		}
+	}
+	if ( !failure.empty() )
+	{
+		string left;
+		for ( uint i = 0; i < temps.size(); ++i )
+		{
+			if ( CFile::isExists( temps[i] ) && !CFile::deleteFile( temps[i] ) )
+				left += " " + temps[i];
+		}
+		string foldersLeft;
+		for ( uint i = (uint)madeFolders.size(); i-- > 0; )
+		{
+			if ( !CFile::deleteDirectory( madeFolders[i] ) )
+				foldersLeft += " " + madeFolders[i];
+		}
+		if ( !left.empty() )
+			failure += "; these temporary files could not be removed, remove them:" + left;
+		if ( !foldersLeft.empty() )
+			failure += "; these folders made for them could not be removed:" + foldersLeft;
+		fail( failure + "; no file of the leveldesign was changed" );
+	}
+
+	// then each over its file
+	for ( uint i = 0; i < changed.size(); ++i )
+	{
+		if ( !CFile::replaceFile( changed[i]->Path, temps[i] ) )
+		{
+			// the temporary files not yet renamed go: they would stop the next run
+			string left;
+			for ( uint j = i; j < temps.size(); ++j )
+			{
+				if ( CFile::isExists( temps[j] ) && !CFile::deleteFile( temps[j] ) )
+					left += " " + temps[j];
+			}
+			fail( toString( "Cannot rename %s over %s (the warning before this gives the system's reason): %u of the %u changed files were replaced before it, the others are as they were and no stale output was removed; %s",
+				temps[i].c_str(), changed[i]->Path.c_str(), i, (uint)changed.size(),
+				left.empty() ? "once the cause is fixed, run again, which makes the rest"
+					: ( "these temporary files could not be removed, remove them before running again:" + left ).c_str() ) );
+		}
+	}
+	printf( "    %u files made, %u written (the others are as they were)\n", (uint)pendingFiles.size(), (uint)changed.size() );
 }
 
 
@@ -1902,8 +2159,17 @@ void	SaveFamiliesForageSource()
 	vector<string> previousIcons;
 	{
 		CSString previous;
-		previous.readFromFile( IC_FAMILIES_FORAGE_SOURCE );
-		const string text = previous.splitFrom( "<ARRAY Name=\"Icons\">" ).splitTo( "</ARRAY>" );
+		if ( !previous.readFromFile( IC_FAMILIES_FORAGE_SOURCE ) )
+			fail( toString( "Cannot read %s: the icons of the families this run does not generate are kept from it (the leveldesign has it in game_element/forage_source)",
+				IC_FAMILIES_FORAGE_SOURCE.c_str() ) );
+		const string whole = previous;
+		const string arrayOpen = "<ARRAY Name=\"Icons\">";
+		const string::size_type arrayBegin = whole.find( arrayOpen );
+		const string::size_type arrayEnd = arrayBegin == string::npos ? string::npos : whole.find( "</ARRAY>", arrayBegin );
+		if ( arrayEnd == string::npos )
+			fail( toString( "%s has no array <ARRAY Name=\"Icons\"> ... </ARRAY>, from which the icons of the families this run does not generate are kept: correct the file",
+				IC_FAMILIES_FORAGE_SOURCE.c_str() ) );
+		const string text = whole.substr( arrayBegin + arrayOpen.size(), arrayEnd - arrayBegin - arrayOpen.size() );
 		// each atom of the array is an icon, "<ATOM Value="..."/>", or "<ATOM/>" when it is empty
 		const string atom = "<ATOM";
 		const string value = "Value=\"";
@@ -2075,9 +2341,12 @@ void LoadFamillesMP()
 	printf( "-- LOADING RAW MATERIAL FAMILIES --\n" );
 
 	// Preload wk.uxt, item_mp_family.typ, and item_mp_group.typ (avoid to reload them each time)
-	FamilyTypContent.readFromFile( ITEM_MP_FAMILY_TYP );
-	GroupTypContent.readFromFile( ITEM_MP_GROUPE_TYP );
-	WKContent.readFromFile( WK_UXT );
+	if ( !FamilyTypContent.readFromFile( ITEM_MP_FAMILY_TYP ) )
+		fail( toString( "Cannot read %s", ITEM_MP_FAMILY_TYP.c_str() ) );
+	if ( !GroupTypContent.readFromFile( ITEM_MP_GROUPE_TYP ) )
+		fail( toString( "Cannot read %s", ITEM_MP_GROUPE_TYP.c_str() ) );
+	if ( !WKContent.readFromFile( WK_UXT ) )
+		fail( toString( "Cannot read %s", WK_UXT.c_str() ) );
 	
 	// avoid huge resize of vector<string>
 	MPFamilies.reserve(1000);
@@ -2090,16 +2359,29 @@ void LoadFamillesMP()
 	// the lines without their carriage returns: one left at the end would be read as a special item of the family
 	fileData = fileData.replace( "\r", "" );
 
-	// every line, a blank one included: stopping at it would leave the families after it out, and their sheets removed
+	// the header (;Group;Craft parts;...), then every line, a blank one included: stopping at it would leave the
+	// families after it out, and their sheets removed
 	uint lineNumber = 0;
+	bool header = true;
 	while ( !fileData.empty() )
 	{
 		ligne = fileData.splitTo( "\n", true );
 		++lineNumber;
 		if ( ligne.strip().empty() )
 			continue;
+		if ( header )
+		{
+			vector<CSString> cells;
+			splitCells( ligne, cells );
+			if ( cells.size() < 3 || !cells[0].empty() || cells[1] != "Group" || cells[2] != "Craft parts" )
+				fail( toString( "%s, line %u: the table must start with its header ;Group;Craft parts;... (as make_tables.py writes it), not %s", FAM_PROP_CSV.c_str(), lineNumber, ligne.c_str() ) );
+			header = false;
+			continue;
+		}
 		NewMP( ligne, lineNumber );
 	}
+	if ( header )
+		fail( toString( "%s has no header and no family", FAM_PROP_CSV.c_str() ) );
 
 	// we manually add Primitive Necklace because it's not specified in raw mats list
 	CreatePrimitiveNecklace();
@@ -2136,6 +2418,8 @@ int main( int argc, char* argv[] )
 	LoadCustomizedProperties();
 
 	SaveFamiliesForageSource();
+
+	CheckNoLeftoverTemporaries();
 
 	FindStaleOutputs();
 
