@@ -313,9 +313,9 @@ struct CClientConfig
 	sint			MaxWaterReflections;
 	/// Max reflection render target textures per eye (L and R each get up to this many); reflected planes tile into shared textures (-1 = as many as needed)
 	sint			MaxWaterReflectionTextures;
-	/// Dev: force realtime planar reflection on all water surfaces
+	/// Dev: force realtime planar reflection on all water surfaces (no effect while WaterReflections is off)
 	bool			ForceWaterReflections;
-	/// Water reflections as a whole (user setting): off gives every water surface its original look
+	/// Water reflections as a whole (user setting, a feature preview): off, the default, gives every water surface its original look
 	bool			WaterReflections;
 	/// Water shapes that may reflect although their asset predates the realtime reflection flag (shape file names, wildcards allowed)
 	std::vector<std::string> WaterReflectionShapes;

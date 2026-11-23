@@ -411,7 +411,7 @@ CClientConfig::CClientConfig()
 	MaxWaterReflections	= 3;
 	MaxWaterReflectionTextures = 1;
 	ForceWaterReflections = false;
-	WaterReflections	= true;
+	WaterReflections	= false;
 
 	GlobalWindPower		= 0.10f;					// Default is 0.25
 	GlobalWindDirection	= CVector(1,0,0);			// Default direction is X>0
