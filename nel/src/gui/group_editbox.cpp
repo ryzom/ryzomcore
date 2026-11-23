@@ -1655,7 +1655,8 @@ namespace NLGUI
 				}
 				else
 				{
-					const ::u32string baseColorTag32 = toColorTag(_ViewText->getColor());
+					// Letter colors modulate the view color, so untagged text stays white.
+					const ::u32string baseColorTag32 = toColorTag(NLMISC::CRGBA::White);
 					::u32string text = baseColorTag32;
 					appendEscapedTaggedText(text, _Prompt, baseColorTag32);
 					uint32 pos = 0;

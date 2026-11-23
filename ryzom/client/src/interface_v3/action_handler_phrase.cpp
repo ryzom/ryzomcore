@@ -1637,7 +1637,7 @@ public:
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 		bool memoryPhrase = pCS->isSPhraseIdMemory();
-		if (phraseMenu)
+		if (pPhraseChatLink)
 		{
 			const char *memoryOnlyIds[] = { "for", "edi", "cut", "copy" };
 			for (uint i = 0; i < sizeof(memoryOnlyIds) / sizeof(memoryOnlyIds[0]); ++i)
