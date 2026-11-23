@@ -182,6 +182,7 @@ public:
 	 */
 	static void writeTextFile(const std::string filename, const ucstring &content, bool utf8 = true);
 
+	/// Write a text as a marked string. This is the inverse of parseMarkedString(), which reads the same text back.
 	static ucstring makeMarkedString(ucchar openMark, ucchar closeMark, const ucstring &text);
 
 	//@{

@@ -520,7 +520,10 @@ void CI18N::removeCComment(ucstring &commentedString)
 			while (++first != last)
 			{
 				temp.push_back(*first);
-				if (*first == ']')
+				if (*first == '\\' && first + 1 != last)
+					// an escaped mark does not end the literal
+					temp.push_back(*++first);
+				else if (*first == ']')
 					break;
 			}
 		}
@@ -545,11 +548,14 @@ void CI18N::removeCComment(ucstring &commentedString)
 				if (first != last)
 					++first;
 			}
-			else
+			else if (first != last)
 			{
 				temp.push_back(*first);
 			}
 		}
+		if (first == last)
+			// the text ends inside a literal or a comment
+			break;
 	}
 	commentedString.swap(temp);
 }
@@ -1333,11 +1339,17 @@ ucstring CI18N::makeMarkedString(ucchar openMark, ucchar closeMark, const ucstri
 			ret += '\\';
 			ret += 't';
 		}
-		else if (*first == closeMark)
+		else if (*first == 8)
 		{
-			// escape the embedded closing mark
+			// the delete character, see parseMarkedString
 			ret += '\\';
-			ret += closeMark;
+			ret += 'd';
+		}
+		else if (*first == openMark || *first == closeMark || *first == '\\')
+		{
+			// escape the embedded marks and the escape character itself
+			ret += '\\';
+			ret += *first;
 		}
 		else
 		{

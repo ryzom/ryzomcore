@@ -26,6 +26,7 @@ add_test_executable(nel_misc_test
         ut_misc_dynlibload.test.cpp
         ut_misc_file.test.cpp
         ut_misc_config_file.test.cpp
+        ut_misc_i18n.test.cpp
         ut_misc_json.test.cpp
         ut_misc_pack_file.test.cpp
         ut_misc_path_safety.test.cpp
