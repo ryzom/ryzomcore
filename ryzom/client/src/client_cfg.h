@@ -301,7 +301,8 @@ struct CClientConfig
 	/// The lighting of the weather scales the light on the ground when the landscape is drawn (the sun and the lamps
 	/// on the ground alike) and dims the landscape light groups. The grass follows WeatherLightingEntities
 	bool			WeatherLightingLandscape;
-	/// A lightning of a thunder storm flashes on what the landscape light groups light
+	/// A lightning of a thunder storm flashes on what the landscape light groups light, which is the buildings.
+	/// Off by default: the flash was not visible in the released game, and its look was not tuned
 	bool			WeatherLightningFlash;
 
 	// Is bloom effect activated

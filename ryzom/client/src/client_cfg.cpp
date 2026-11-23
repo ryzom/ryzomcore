@@ -403,7 +403,7 @@ CClientConfig::CClientConfig()
 
 	WeatherLightingEntities		= true;
 	WeatherLightingLandscape	= true;
-	WeatherLightningFlash		= true;
+	WeatherLightningFlash		= false;
 
 	Bloom				= true;
 	SquareBloom			= true;
