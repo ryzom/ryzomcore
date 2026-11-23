@@ -521,8 +521,17 @@ void CStringManager::parsePhraseDoc(ucstring &doc, uint langNum)
 			while (++first != last)
 			{
 				block.push_back(*first);
-				if (*first == ']')
+				if (*first == '\\' && first + 1 != last)
+					// an escaped mark does not end the text
+					block.push_back(*++first);
+				else if (*first == ']')
 					break;
+			}
+			if (first == last)
+			{
+				// the text is not closed, the block is reported as malformed below
+				blocks.push_back(block);
+				break;
 			}
 		}
 	}
