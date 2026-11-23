@@ -25,6 +25,8 @@
 #include "nel/misc/matrix.h"
 #include "animation_time.h"
 #include <map>
+#include <string>
+#include <vector>
 
 
 namespace NLMISC
@@ -678,12 +680,28 @@ public:
 	// @{
 	/** Maximum number of water planes rendered with realtime planar reflection
 	  * per frame, largest on-screen planes prioritized.
-	  * -1 = unlimited, 0 = realtime reflections disabled (default -1). */
+	  * -1 = unlimited, 0 = no reflection passes (default -1); reflection-capable
+	  * surfaces then keep the calculated reflectivity over their envmap, see
+	  * setRealtimeWaterReflectionsEnabled() for the legacy look. */
 	virtual void		  setMaxRealtimeWaterReflections(sint maxCount) = 0;
 	virtual sint		  getMaxRealtimeWaterReflections() const = 0;
 	/// Enable realtime reflection on all water surfaces regardless of the per-shape artist flag
 	virtual void		  setForceRealtimeWaterReflections(bool force) = 0;
 	virtual bool		  getForceRealtimeWaterReflections() const = 0;
+	/** Realtime water reflection as a whole (default true). When false, no
+	  * surface is reflection-capable (shape flags, the reflection shape list
+	  * and the force-all override are ignored), the reflection render targets
+	  * are released, and every water surface draws its legacy envmap look;
+	  * shapes with the explicit calculated reflectivity option keep it. */
+	virtual void		  setRealtimeWaterReflectionsEnabled(bool enabled) = 0;
+	virtual bool		  getRealtimeWaterReflectionsEnabled() const = 0;
+	/** Water shapes that are reflection-capable as if their artist flag were
+	  * set, by shape file name (case-insensitive, '*' and '?' wildcards as
+	  * NLMISC::testWildCard takes them): for
+	  * assets exported before the flag existed. Applies to existing surfaces
+	  * as well as later ones; an empty list (default) lists none. */
+	virtual void		  setRealtimeWaterReflectionShapes(const std::vector<std::string> &shapeNames) = 0;
+	virtual const std::vector<std::string> &getRealtimeWaterReflectionShapes() const = 0;
 	/** Select the water planes to reflect this frame and save the scene and
 	  * driver state; returns the number of reflection passes to render.
 	  * Call once per frame before the scene render (in the scene

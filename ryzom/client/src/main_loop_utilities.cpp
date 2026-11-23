@@ -226,6 +226,10 @@ void updateFromClientCfg()
 		Scene->setWaterReflectionMaxTextures(ClientCfg.MaxWaterReflectionTextures);
 	if (ClientCfg.ForceWaterReflections != LastClientCfg.ForceWaterReflections)
 		Scene->setForceRealtimeWaterReflections(ClientCfg.ForceWaterReflections);
+	if (ClientCfg.WaterReflectionShapes != LastClientCfg.WaterReflectionShapes)
+		Scene->setRealtimeWaterReflectionShapes(ClientCfg.WaterReflectionShapes);
+	if (ClientCfg.WaterReflections != LastClientCfg.WaterReflections)
+		Scene->setRealtimeWaterReflectionsEnabled(ClientCfg.WaterReflections);
 
 	if (ClientCfg.FxNbMaxPoly != LastClientCfg.FxNbMaxPoly)
 	{

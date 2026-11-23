@@ -29,6 +29,7 @@
 #include "nel/3d/water_height_map.h"
 #include "nel/3d/dru.h"
 #include "nel/3d/scene.h"
+#include "nel/3d/shape_bank.h"
 #include "nel/3d/driver.h"
 #include "nel/3d/render_trav.h"
 #include "nel/3d/anim_detail_trav.h"
@@ -119,11 +120,39 @@ bool CWaterModel::wantsCalcReflectivityUVs() const
 	// explicit artist opt-in for always-envmap surfaces
 	if (shape->isEnvMapCalcReflectivityEnabled()) return true;
 	// reflection-capable surfaces keep the calculated reflectivity when
-	// falling back to the envmap (budget, admission, reflections disabled),
-	// so budget swaps between planar and envmap stay visually continuous
-	if (shape->isRealtimeReflectionEnabled()) return true;
+	// falling back to the envmap (budget, admission, no reflection passes,
+	// unsupported hardware), so budget swaps between planar and envmap stay
+	// visually continuous; with reflection disabled in the scene they are
+	// not capable, and draw the legacy look
+	return isReflectionCapable();
+}
+
+//=======================================================================
+bool CWaterModel::isReflectionCapable() const
+{
+	nlassert(Shape);
 	CScene *scene = getOwnerScene();
-	return scene && scene->getWaterReflectionManager().getForceReflections();
+	if (!scene) return false;
+	const CWaterReflectionManager &reflMgr = scene->getWaterReflectionManager();
+	if (!reflMgr.getEnabled()) return false;
+	CWaterShape *shape = NLMISC::safe_cast<CWaterShape *>((IShape *) Shape);
+	if (shape->isRealtimeReflectionEnabled() || reflMgr.getForceReflections()) return true;
+	// shapes exported before the artist flag existed, listed by name
+	if (_ReflShapesVersion != reflMgr.getReflectionShapesVersion())
+	{
+		_ReflShapesVersion = reflMgr.getReflectionShapesVersion();
+		const CShapeBank *bank = scene->getShapeBank();
+		const std::string *name = bank ? bank->getShapeNameFromShapePtr(shape) : nullptr;
+		_ReflShapeListed = name && reflMgr.isReflectionShape(*name);
+	}
+	return _ReflShapeListed;
+}
+
+//=======================================================================
+void CWaterModel::releasePlanarReflectionTexture()
+{
+	// stage 2 holds the reflection or the envmap of the last draw
+	_WaterMat.setTexture(2, nullptr);
 }
 
 //=======================================================================
@@ -138,6 +167,9 @@ CWaterModel::CWaterModel()
 	_Next = nullptr;
 	_MatrixUpdateDate = 0;
 	_PlanarReflection = nullptr;
+	// matches the manager's initial empty list (version 0)
+	_ReflShapesVersion = 0;
+	_ReflShapeListed = false;
 }
 
 //=======================================================================
@@ -1337,11 +1369,10 @@ uint CWaterModel::getNumWantedVertices()
 	CWaterReflectionManager &reflMgr = scene->getWaterReflectionManager();
 	if (reflMgr.wantsSurfaceReports())
 	{
-		CWaterShape *reflShape = NLMISC::safe_cast<CWaterShape *>((IShape *) Shape);
 		// Surfaces that can never use the reflection do not report:
 		// their stats would rank the plane and inflate the shared render
 		// target sub-region for pixels that never sample it
-		const bool mayReflect = reflShape->isRealtimeReflectionEnabled() || reflMgr.getForceReflections();
+		const bool mayReflect = isReflectionCapable();
 		const float planeZ = getWorldMatrix().getPos().z;
 		if (mayReflect && renderTrav.CamPos.z > planeZ)
 		{
@@ -1373,12 +1404,10 @@ uint CWaterModel::getNumWantedVertices()
 				const NLMISC::CVector2f &b = scr[(k + 1) % numVerts];
 				area2 += a.x * b.y - b.x * a.y;
 			}
-			reflMgr.reportVisibleSurface(planeZ, 0.5f * fabsf(area2), scrMin, scrMax,
-				reflShape->isRealtimeReflectionEnabled());
+			reflMgr.reportVisibleSurface(planeZ, 0.5f * fabsf(area2), scrMin, scrMax, mayReflect);
 
 			// Use this frame's reflection if our plane got one
-			if (reflShape->isRealtimeReflectionEnabled() || reflMgr.getForceReflections())
-				_PlanarReflection = reflMgr.getActiveReflection(planeZ);
+			_PlanarReflection = reflMgr.getActiveReflection(planeZ);
 		}
 	}
 

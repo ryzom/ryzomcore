@@ -35,6 +35,7 @@
 #include <nel/3d/viewport.h>
 
 #include <map>
+#include <string>
 #include <vector>
 
 namespace NL3D {
@@ -65,9 +66,10 @@ class IDriver;
  *   flares exclude themselves at engine level while
  *   isRenderingReflection() is set.
  * - During the main render, water models query getActiveReflection() by
- *   plane height; when available (and allowed by the shape flag or the
- *   force-all override), the water render uses the reflection texture
- *   with projected UVs instead of the static envmap.
+ *   plane height; when available (and allowed by the shape flag, the
+ *   reflection shape list or the force-all override, while reflection is
+ *   enabled), the water render uses the reflection texture with projected
+ *   UVs instead of the static envmap.
  *
  * Render targets use the "fixed mode" strategy validated by the
  * planar_reflection sample: allocation is derived from the window size
@@ -103,6 +105,24 @@ public:
 	/// Enable realtime reflection on all water surfaces regardless of the per-shape artist flag.
 	void			setForceReflections(bool force) { _ForceReflections = force; }
 	bool			getForceReflections() const { return _ForceReflections; }
+	/** Realtime reflection as a whole (default true). When false, no surface
+	  * is reflection-capable: the shape flags, the reflection shape list and
+	  * the force-all override are ignored, no reflection pass is selected,
+	  * the render targets are released, and every surface draws its legacy
+	  * envmap look (shapes with the explicit calculated reflectivity option
+	  * keep that look, since their envmap alpha may not be authored). */
+	void			setEnabled(bool enabled);
+	bool			getEnabled() const { return _Enabled; }
+	/** Water shapes that are reflection-capable as if their artist flag were
+	  * set, by shape file name (case-insensitive, '*' and '?' wildcards), for
+	  * assets exported before the flag existed. Surfaces created before the
+	  * call follow the new list too. */
+	void			setReflectionShapes(const std::vector<std::string> &shapeNames);
+	const std::vector<std::string> &getReflectionShapes() const { return _ReflectionShapes; }
+	/// True when the shape file name matches the reflection shape list.
+	bool			isReflectionShape(const std::string &shapeName) const;
+	/// Changes on every setReflectionShapes() call; surfaces cache their match against it.
+	uint32			getReflectionShapesVersion() const { return _ReflectionShapesVersion; }
 	/// Render reflections at half resolution (default true)
 	void			setHalfRes(bool halfRes) { _HalfRes = halfRes; }
 	bool			getHalfRes() const { return _HalfRes; }
@@ -209,7 +229,7 @@ public:
 	/** True when water models should compute and report visibility stats:
 	  * the app has opted in by calling renderReflections() at least once,
 	  * reflections aren't disabled, and no reflection pass is rendering. */
-	bool			wantsSurfaceReports() const { return _CollectionArmed && _MaxReflections != 0 && !_InReflectionRender; }
+	bool			wantsSurfaceReports() const { return _CollectionArmed && _Enabled && _MaxReflections != 0 && !_InReflectionRender; }
 	/** True once any reflection has been rendered. Used to keep the shared
 	  * water vertex buffer format stable (with the reflection UV channel)
 	  * instead of reallocating it whenever reflections toggle on and off. */
@@ -229,7 +249,7 @@ private:
 		float				PlaneZ;
 		float				Area;		// summed projected screen area
 		NLMISC::CVector2f	Min, Max;	// united screen AABB, [0,1]
-		bool				Allowed;	// at least one surface with the artist flag
+		bool				Allowed;	// at least one reflection-capable surface (artist flag or reflection shape list)
 	};
 
 	// One reflection render target texture, with per-frame shelf-packing
@@ -272,6 +292,9 @@ private:
 	sint								_MaxReflections;
 	sint								_MaxTextures;
 	bool								_ForceReflections;
+	bool								_Enabled;
+	std::vector<std::string>			_ReflectionShapes;	// lower case file name patterns
+	uint32								_ReflectionShapesVersion;
 	bool								_HalfRes;
 	bool								_Pow2;
 	bool								_FixedSize;

@@ -309,12 +309,16 @@ struct CClientConfig
 	bool			Bloom;
 	bool			SquareBloom;
 	float			DensityBloom;
-	/// Max number of water pools with realtime planar reflection per frame (0 = off)
+	/// Max number of water pools with realtime planar reflection per frame (0 = none; reflection-capable water keeps the matching envmap look)
 	sint			MaxWaterReflections;
 	/// Max reflection render target textures per eye (L and R each get up to this many); reflected planes tile into shared textures (-1 = as many as needed)
 	sint			MaxWaterReflectionTextures;
 	/// Dev: force realtime planar reflection on all water surfaces
 	bool			ForceWaterReflections;
+	/// Water reflections as a whole (user setting): off gives every water surface its original look
+	bool			WaterReflections;
+	/// Water shapes that may reflect although their asset predates the realtime reflection flag (shape file names, wildcards allowed)
+	std::vector<std::string> WaterReflectionShapes;
 
 	/// Movie Shooter
 	uint			MovieShooterMemory;
