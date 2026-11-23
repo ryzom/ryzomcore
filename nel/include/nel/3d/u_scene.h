@@ -92,7 +92,7 @@ class UTexture;
 // info for a realtime water reflection pass or an active reflection
 struct UWaterReflectionInfo
 {
-	/// Reflection render target texture (owned by the scene; valid until the next reflection passes)
+	/// Reflection render target texture (owned by the scene; valid until the next reflection passes, or until reflection is disabled)
 	UTexture		*Texture;
 	/// World -> reflected camera space matrix
 	NLMISC::CMatrix	ReflViewMatrix;
@@ -690,9 +690,10 @@ public:
 	virtual bool		  getForceRealtimeWaterReflections() const = 0;
 	/** Realtime water reflection as a whole (default true). When false, no
 	  * surface is reflection-capable (shape flags, the reflection shape list
-	  * and the force-all override are ignored), the reflection render targets
-	  * are released, and every water surface draws its legacy envmap look;
-	  * shapes with the explicit calculated reflectivity option keep it. */
+	  * and the force-all override are ignored), the scene lets go of the
+	  * reflection render targets, and every water surface draws its legacy
+	  * envmap look; shapes with the explicit calculated reflectivity option
+	  * keep it. To be called outside the reflection passes. */
 	virtual void		  setRealtimeWaterReflectionsEnabled(bool enabled) = 0;
 	virtual bool		  getRealtimeWaterReflectionsEnabled() const = 0;
 	/** Water shapes that are reflection-capable as if their artist flag were

@@ -108,7 +108,7 @@ public:
 	/** Realtime reflection as a whole (default true). When false, no surface
 	  * is reflection-capable: the shape flags, the reflection shape list and
 	  * the force-all override are ignored, no reflection pass is selected,
-	  * the render targets are released, and every surface draws its legacy
+	  * the manager lets go of its render targets, and every surface draws its legacy
 	  * envmap look (shapes with the explicit calculated reflectivity option
 	  * keep that look, since their envmap alpha may not be authored). */
 	void			setEnabled(bool enabled);

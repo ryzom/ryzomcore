@@ -89,6 +89,8 @@ protected:
 	std::vector<CTextureUser *>		_WaterReflectionTextures;
 	// Fill a UWaterReflectionInfo from an internal reflection state
 	void fillWaterReflectionInfo(const CWaterReflectionManager::CActiveReflection &refl, UWaterReflectionInfo &info);
+	// Delete the wrappers: they hold the render targets
+	void releaseWaterReflectionTextures();
 
 public:
 
@@ -322,7 +324,7 @@ public:
 	virtual sint		  getMaxRealtimeWaterReflections() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getMaxReflections(); }
 	virtual void		  setForceRealtimeWaterReflections(bool force) NL_OVERRIDE { _Scene.getWaterReflectionManager().setForceReflections(force); }
 	virtual bool		  getForceRealtimeWaterReflections() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getForceReflections(); }
-	virtual void		  setRealtimeWaterReflectionsEnabled(bool enabled) NL_OVERRIDE { _Scene.getWaterReflectionManager().setEnabled(enabled); }
+	virtual void		  setRealtimeWaterReflectionsEnabled(bool enabled) NL_OVERRIDE;
 	virtual bool		  getRealtimeWaterReflectionsEnabled() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getEnabled(); }
 	virtual void		  setRealtimeWaterReflectionShapes(const std::vector<std::string> &shapeNames) NL_OVERRIDE { _Scene.getWaterReflectionManager().setReflectionShapes(shapeNames); }
 	virtual const std::vector<std::string> &getRealtimeWaterReflectionShapes() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getReflectionShapes(); }
