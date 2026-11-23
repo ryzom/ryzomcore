@@ -50,7 +50,12 @@ extern CPlayerManager				PlayerManager;
 extern uint8						TeamMembersStatusMaxValue;
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
+#ifdef RYZOM_FORGE
+// No limit by default: the msg.xml of that game has no TEAM:CANCEL_INVITATION to close the window of the invited player
+CVariable<NLMISC::TGameCycle> TeamInvitationDuration("egs", "TeamInvitationDuration", "duration in ticks of an invitation to join a team (0: no limit)", 0, 0, true);
+#else
 CVariable<NLMISC::TGameCycle> TeamInvitationDuration("egs", "TeamInvitationDuration", "duration in ticks of an invitation to join a team (0: no limit)", 1200, 0, true);
+#endif
 
 //---------------------------------------------------
 // addAllTeamsToChatGroup :

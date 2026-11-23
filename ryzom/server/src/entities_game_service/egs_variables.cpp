@@ -45,7 +45,12 @@ CVariable<float>			MaxDistanceForXpGain("egs","MaxDistanceForXpGain", "max dista
 CVariable<float>			XPTeamMemberDivisorValue("egs","XPTeamMemberDivisorValue", "for team XP progression, add this value to the xp divisor for each team member above one", 0.9f, 0, true );
 CVariable<float>			MaxXPGainPerPlayer("egs","MaxXPGainPerPlayer", "Max XP gain by any one player on any creature (each team member can gain up to this value)", 30.0f, 0, true );
 static void cbKillCreditNonPlayerDamage(IVariable &var);
+#ifdef RYZOM_FORGE
+// None by default: the rule of that game, where the most damage among the players alone gives the kill
+CVariable<uint32>			KillCreditNonPlayerDamage("egs","KillCreditNonPlayerDamage", "non-player damage the player or team that did the most damage to a creature must also beat to get its loot and xp: 0 none, 1 only damage players gave up by losing aggro or entering water, 2 all (guards and other creatures too)", 0, 0, true, cbKillCreditNonPlayerDamage );
+#else
 CVariable<uint32>			KillCreditNonPlayerDamage("egs","KillCreditNonPlayerDamage", "non-player damage the player or team that did the most damage to a creature must also beat to get its loot and xp: 0 none, 1 only damage players gave up by losing aggro or entering water, 2 all (guards and other creatures too)", 1, 0, true, cbKillCreditNonPlayerDamage );
+#endif
 static void cbKillCreditNonPlayerDamage(IVariable &var)
 {
 	if (KillCreditNonPlayerDamage.get() > 2)
