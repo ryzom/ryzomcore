@@ -123,12 +123,12 @@ bool	CShape::setPath(TVerticalPos verticalPos, const std::vector <CAIVector> &po
 			if (newpos.isValid())
 			{
 				if (LogAcceptablePos)
-					nlinfo("StatePositionnal '%s': Path pos Error at position %s, an acceptable position could be %s",
+					nlinfo("CShape '%s': Path pos Error at position %s, an acceptable position could be %s",
 						ownerName(), points[ind].toString().c_str(), newpos.toString().c_str());
 			}
 			else
 			{
-				nlwarning("StatePositionel '%s': Path pos Error at position %s, no acceptable position found around",
+				nlwarning("CShape '%s': Path pos Error at position %s, no acceptable position found around",
 					ownerName(), points[ind].toString().c_str());
 				ret = false;
 			}
@@ -227,7 +227,7 @@ bool	CShape::setPatat(TVerticalPos verticalPos, const std::vector <CAIVector> &p
 	{
 		if	(!_AcceptInvalidPos)
 		{
-			nlwarning("Can't find valid pos for state '%s' at position %s", ownerName(), points[0].toString().c_str());
+			nlwarning("CShape '%s': can't find a valid position at %s", ownerName(), points[0].toString().c_str());
 			ret = false;
 		}
 	}
@@ -252,12 +252,12 @@ bool	CShape::setPatat(TVerticalPos verticalPos, const std::vector <CAIVector> &p
 			if (newpos.isValid())
 			{
 				if (LogAcceptablePos)
-					nlinfo("StatePositionnal '%s': Path pos Error at position %s, an acceptable position could be %s",
+					nlinfo("CShape '%s': Path pos Error at position %s, an acceptable position could be %s",
 						ownerName(), points[ind].toString().c_str(), newpos.toString().c_str());
 			}
 			else
 			{
-				nlwarning("StatePositionnal '%s': Path pos Error at position %s, no acceptable position found around",
+				nlwarning("CShape '%s': Path pos Error at position %s, no acceptable position found around",
 					ownerName(), points[ind].toString().c_str());
 				ret = false;
 			}

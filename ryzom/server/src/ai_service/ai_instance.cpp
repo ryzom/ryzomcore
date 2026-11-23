@@ -746,6 +746,15 @@ CGroupNpc *CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const 
 		return NULL;
 	}
 
+	if (heightKnown)
+	{
+		// a z given with the command that no layer at the point is near places the group by the vertical pos rule
+		RYAI_MAP_CRUNCH::CWorldPosition centre;
+		bool atHeight;
+		if (CWorldContainer::getWorldMap().setWorldPositionNearestHeight(height, 0.0, AITYPES::vp_auto, centre, pos, NULL, &atHeight) && !atHeight)
+			nlwarning("eventCreateNpcGroup: no layer at %s is near the height of %.1f m, the bots are placed on the layer of the vertical pos auto", pos.toString().c_str(), height / 1000.0);
+	}
+
 	// Create a group
 	CGroupNpc* grp = new CGroupNpc(_EventNpcManager, NULL, RYAI_MAP_CRUNCH::Nothing);
 	// Register it in the manager

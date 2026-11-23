@@ -503,6 +503,7 @@ void CNpcZoneShape::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const
 
 void CNpcZoneShape::setPatat(AITYPES::TVerticalPos verticalPos, const std::vector<CAIVector>& points)
 {
+	_shape.setOwnerName(getAliasFullName());
 	if (!_shape.setPatat(verticalPos, points))
 	{
 		nlwarning("CNpcZoneShape::setPatat: error while placing the points of '%s'",
