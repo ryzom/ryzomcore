@@ -235,7 +235,7 @@ private:
 
 	void			resetSelection();
 	void			fillSelection(const std::vector<uint> &mps);
-	void			filterSelectionItemPart(std::vector<uint> &mps, RM_FABER_TYPE::TRMFType itemPartFilter, EGSPD::CPeople::TPeople planCiv);
+	void			filterSelectionItemPart(std::vector<uint> &mps, RM_FABER_TYPE::TRMFType itemPartFilter, ITEM_ORIGIN::EItemOrigin itemOrigin, EGSPD::CPeople::TPeople planCiv);
 	void			filterSelectionItemSpecific(std::vector<uint> &mps, NLMISC::CSheetId specificItemWanted);
 
 	uint			getMaxQuantityChange(uint itemReqLine, uint mpSlot) const;

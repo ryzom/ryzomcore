@@ -498,6 +498,7 @@ void CFaberPhrase::apply()
 		   {
 			   // for each Mp of one type (we have Quantity by type)
 			   uint32 NumMpParameters = (uint32)usedMps[u_mp]->Mp->MpFaberParameters.size();
+			   uint foundParameter = 0;
 
 			   // for each Faber parameters in Mp
 			   for( uint j = 0; j < NumMpParameters; ++j )
@@ -506,6 +507,7 @@ void CFaberPhrase::apply()
 					if( _RootFaberPlan->Faber->NeededMps[mp].MpType == usedMps[u_mp]->Mp->MpFaberParameters[j].MpFaberType )
 					{
 						found_mp = true;
+						foundParameter = j;
 						usedMp++;
 						break;
 					}
@@ -513,6 +515,9 @@ void CFaberPhrase::apply()
 
 			   if (found_mp)
 			   {
+#ifdef RYZOM_FORGE
+				   // The rule of the RYZOM_FORGE server: the ecosystem of the Mp against the civilisation of the plan
+				   nlunreferenced(foundParameter);
 
 				   // Bypass if : Plan is common
 					if ( civRestriction != EGSPD::CPeople::Common )
@@ -554,6 +559,22 @@ void CFaberPhrase::apply()
 								   break;
 						   }
 					}
+#else
+				   // The item part of the Mp says which origin of item it goes into: every origin (common), or the
+				   // origin of the item built. An item of common origin takes any Mp. This is the rule the craft
+				   // window of the client filters its Mps by (CItemSheet::canBuildItemPart).
+				   nlunreferenced(civRestriction);
+				   const ITEM_ORIGIN::EItemOrigin craftCivSpec = usedMps[u_mp]->Mp->MpFaberParameters[foundParameter].CraftCivSpec;
+				   if ( craftCivSpec != ITEM_ORIGIN::COMMON && _CraftedItemStaticForm->Origin != ITEM_ORIGIN::COMMON
+						&& craftCivSpec != _CraftedItemStaticForm->Origin )
+				   {
+						nlwarning( "<CFaberPhrase build> an mp whose item part is for origin %s cannot go into an item of origin %s, plan brick %s",
+							ITEM_ORIGIN::enumToString(craftCivSpec).c_str(), ITEM_ORIGIN::enumToString(_CraftedItemStaticForm->Origin).c_str(),
+							_RootFaberPlan->SheetId.toString().c_str() );
+						stop();
+						return;
+				   }
+#endif
 				   usedMps.erase(usedMps.begin()+u_mp);
 				   break;
 			   }

@@ -4409,8 +4409,9 @@ NLMISC_COMMAND(logFaberMpCompatibles, "log all MP compatibles for faber the item
 		nlwarning("logFaberMpCompatibles: %s is not a brick the client knows", CSheetId(sheetId).toString().c_str());
 		return true;
 	}
-	// the item built, for its origin: the civilisation of the plan decides which MPs it takes
+	// the item built: its origin decides which MPs the plan takes, or with RYZOM_FORGE the civilisation of the plan
 	CItemSheet		*itemBuilt= dynamic_cast<CItemSheet*>(SheetMngr.get(brick->FaberPlan.ItemBuilt));
+	ITEM_ORIGIN::EItemOrigin	itemOrigin= itemBuilt? itemBuilt->ItemOrigin : ITEM_ORIGIN::UNKNOWN;
 	{
 
 		// build array of MP sheetId
@@ -4449,7 +4450,7 @@ NLMISC_COMMAND(logFaberMpCompatibles, "log all MP compatibles for faber the item
 				CItemSheet	*itemSheet= mps[i];
 				bool	ok= true;
 				// check faber type filter
-				if( mpSlot.FaberTypeFilter!=RM_FABER_TYPE::Unknown && !itemSheet->canBuildItemPart(mpSlot.FaberTypeFilter, brick->CivRestriction))
+				if( mpSlot.FaberTypeFilter!=RM_FABER_TYPE::Unknown && !itemSheet->canBuildItemPart(mpSlot.FaberTypeFilter, itemOrigin, brick->CivRestriction))
 					ok= false;
 
 				if(ok)

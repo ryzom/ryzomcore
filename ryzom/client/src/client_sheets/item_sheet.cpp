@@ -780,10 +780,14 @@ bool	CItemSheet::canBuildItemPart(RM_FABER_TYPE::TRMFType e) const
 }
 
 // ***************************************************************************
-bool	CItemSheet::canBuildItemPart(RM_FABER_TYPE::TRMFType e, EGSPD::CPeople::TPeople planCiv) const
+bool	CItemSheet::canBuildItemPart(RM_FABER_TYPE::TRMFType e, ITEM_ORIGIN::EItemOrigin origin, EGSPD::CPeople::TPeople planCiv) const
 {
 	if(!canBuildItemPart(e))
 		return false;
+
+#ifdef RYZOM_FORGE
+	// The rule of the RYZOM_FORGE server: the ecosystem of the MP against the civilisation of the plan
+	nlunreferenced(origin);
 
 	// A common plan takes any MP
 	if(planCiv == EGSPD::CPeople::Common)
@@ -803,6 +807,15 @@ bool	CItemSheet::canBuildItemPart(RM_FABER_TYPE::TRMFType e, EGSPD::CPeople::TPe
 	default:
 		return true;
 	}
+#else
+	// The origin filter of the item part against the origin of the item built: an MP whose part builds items of
+	// every origin, or of this one, and any MP for an item of common origin
+	nlunreferenced(planCiv);
+	const CMpItemPart	&itemPart= getItemPart(e);
+	return itemPart.OriginFilter == ITEM_ORIGIN::COMMON ||
+		itemPart.OriginFilter == origin ||
+		origin == ITEM_ORIGIN::COMMON;
+#endif
 }
 
 // ***************************************************************************
