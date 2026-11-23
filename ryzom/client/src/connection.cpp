@@ -854,11 +854,14 @@ std::string	buildPlayerNameForSaveFile(const std::string &playerNameIn)
 // ------------------------------------------------------------------------------------------------
 std::string buildCharacterFileName(const std::string &playerNameIn, TSessionId homeSessionId)
 {
-	// On this branch the files of a character keep the name they have in an installation, without the home
-	// mainland: the game has one mainland, its own client reads the files of that name (a player can go back to
-	// it), and it keeps more files by that name than the list below (contact groups, channels, item group backup).
+#ifdef RYZOM_FORGE
+	// One shard, ever: the files keep the name they always had there, without the home mainland. The client of
+	// that game keeps more files of a character by that name than this one knows.
 	nlunreferenced(homeSessionId);
 	return buildPlayerNameForSaveFile(playerNameIn);
+#else
+	return buildPlayerNameForSaveFile(playerNameIn) + "_" + NLMISC::toString(homeSessionId.asInt());
+#endif
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -915,6 +918,9 @@ static void recordCharacterFilesCopied(const std::string &newName)
 // accounts that use this folder, used the same files, and each gets a copy.
 static void copyCharacterFilesOfOldName(const std::string &oldName, const std::string &newName)
 {
+	// the same name (RYZOM_FORGE keeps the name without the mainland): nothing to copy, and no list to keep
+	if (oldName == newName)
+		return;
 	if (characterFilesCopied(newName))
 		return;
 	for (uint i = 0; i < CharacterFilePatternCount; ++i)
@@ -2065,9 +2071,11 @@ public:
 		// The files of the old name, without the home mainland, stay: a character of that name on another mainland,
 		// or of another account that uses this folder, may not have had its copy yet. A new character of this name
 		// and mainland does not get them (copyCharacterFilesOfOldName), even when this one was never selected.
+		// (Where the name carries no mainland, with RYZOM_FORGE, the files deleted are those of the name itself
+		// and there is no copy to remember.)
 		string fileName = buildCharacterFileName(playerName, CharacterSummaries[nSelectedSlot].Mainland);
 		deleteCharacterFiles(fileName);
-		if (!characterFilesCopied(fileName))
+		if (fileName != buildPlayerNameForSaveFile(playerName) && !characterFilesCopied(fileName))
 			recordCharacterFilesCopied(fileName);
 
 		// Send the message to the server

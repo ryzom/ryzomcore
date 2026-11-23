@@ -260,7 +260,12 @@
 
 				<node id="sound" name="uigcSound" handler="lua" params="game:configShowOne('sound')" fontsize="11" y_decal="-1" />
 
+				<!-- Not offered with RYZOM_FORGE: its shards have no QUIC listener, and a connection chosen here that
+					they do not have does not fall back. The page itself stays defined below, the code and
+					game:configHideAll look for it. -->
+				<if flags="!ryzom_forge" />
 				<node id="network" name="uigcNetwork" handler="lua" params="game:configShowOne('network')" fontsize="11" y_decal="-1" />
+				<endif />
 			</group>
 
 			<ctrl style="skin_scroll" id="scroll_bar" align="T" target="tree_list" />
