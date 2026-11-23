@@ -238,7 +238,7 @@ DEFINE_ACTION(ContextOutpost,OUTPOGEO)
 		points.push_back(CAIVector(x, y));
 	}
 	NLMISC::CSmartPtr<CAIPlaceOutpost> shape = NLMISC::CSmartPtr<CAIPlaceOutpost>(new CAIPlaceOutpost(outpost));
-	shape->setPatat(AITYPES::vp_auto, points);
+	shape->setPatat(AITYPES::vp_auto, points, outpost->getAliasFullName());
 	shape->setOutpostAlias(outpost->getAlias());
 	outpost->setShape(shape);
 }

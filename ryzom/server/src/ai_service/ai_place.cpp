@@ -287,9 +287,9 @@ bool CAIPlaceShape::calcRandomPos(CAIPos& pos) const
 	return _Shape.calcRandomPos(pos);
 }
 
-bool CAIPlaceShape::setPatat(AITYPES::TVerticalPos verticalPos, std::vector<CAIVector> const& points)
+bool CAIPlaceShape::setPatat(AITYPES::TVerticalPos verticalPos, std::vector<CAIVector> const& points, std::string const& name)
 {
-	_Shape.setOwnerName(getAliasFullName());
+	_Shape.setOwnerName(name.empty() ? getAliasFullName() : name);
 	return _Shape.setPatat(verticalPos, points);
 }
 

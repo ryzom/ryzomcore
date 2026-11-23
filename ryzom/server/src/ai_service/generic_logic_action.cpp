@@ -2580,9 +2580,11 @@ public:
 	void addPropertyZone	(CTmpPropertyZone::TSmartPtr	zone) NL_OVERRIDE
 	{
 		CPropertyZone::TSmartPtr	newZone=new CPropertyZone();
+		// the zone has no name of its own
+		newZone->_Shape.setOwnerName("property zone of a logic action");
 		if (!newZone->_Shape.setPatat(zone->verticalPos, zone->points))
 		{
-			
+			nlwarning("CPropertyZone: error while placing the points of a property zone of a logic action");
 		}
 		newZone->_Properties=zone->properties;
 		newZone->_Target = zone->Target;
