@@ -59,7 +59,7 @@ static CPatchAllocator Allocator;
 
 NEL_3DSMAX_SHARED_API CPatchAllocator &GetAllocator ()
 {
-	// Init fonction
+	// Init function
 	init ();
 
 	return Allocator;

@@ -41,6 +41,7 @@ namespace NLGUI
 
 	class CReflectable;
 	class CReflectedProperty;
+	class CInterfaceExprValue;
 
 #ifdef RYZOM_LUA_UCSTRING
 	/** Text of a Lua 'ucstring' object, for functions bound through luabind (see lua_ihm_ucstring.h).
@@ -229,7 +230,8 @@ namespace NLGUI
 		static int	deleteReflectable(CLuaState &ls);		// params: CInterfaceElement*.... return: none
 		static int	getCurrentWindowUnder(CLuaState &ls);		// params: none. return: CInterfaceElement*  (nil if none)
 		static bool	fileExists(const std::string &fileName);
-		static int	runExprAndPushResult(CLuaState &ls, const std::string &expr);		// Used by runExpr and runFct
+		static int	runExprAndPushResult(CLuaState &ls, const std::string &expr);		// Used by runExpr
+		static void	pushExprValue(CLuaState &ls, const CInterfaceExprValue &value);	// Used by runExpr and runFct
 		static int	runExpr(CLuaState &ls);			// params: "expr". return: any of: nil,bool,string,number, RGBA, UCString
 		static int	runFct(CLuaState &ls);			// params: "expr", param1, param2.... return: any of: nil,bool,string,number, RGBA, UCString
 		static int  runCommand(CLuaState &ls);      // params: "command name", param1, param2 ... return true or false

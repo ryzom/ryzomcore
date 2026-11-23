@@ -330,13 +330,27 @@ std::string CObjectViewer::getModulePath() const
 
 
 // ***************************************************************************
-void CObjectViewer::loadDriverName()
+bool CObjectViewer::loadDriverName()
 {
 	// Load the config file
-	CConfigFile cf;
-	cf.load (getModulePath());
-	CConfigFile::CVar *var = cf.getVarPtr("driver");
-	_Direct3d = var && (var->asString() == "direct3d");
+	std::string configPath = getModulePath();
+	try
+	{
+		CConfigFile cf;
+		cf.load(configPath);
+		CConfigFile::CVar *var = cf.getVarPtr("driver");
+		_Direct3d = var && (var->asString() == "direct3d");
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		std::string msg = toString("Unable to read the configuration file '%s':\n%s\n\n"
+		                           "Place a copy of nel/tools/3d/object_viewer/object_viewer.cfg at that path.",
+		    configPath.c_str(), e.what());
+		nlwarning("%s", msg.c_str());
+		::MessageBox(NULL, nlUtf8ToTStr(msg), _T("NeL object viewer"), MB_OK | MB_ICONERROR);
+		return false;
+	}
+	return true;
 }
 
 // ***************************************************************************
@@ -670,10 +684,29 @@ bool CObjectViewer::initUI (HWND parent)
 		16, 16, 0);
 	
 	// load name of the driver from the config file
-	loadDriverName();
+	if (!loadDriverName())
+		return false;
 
 	// Create a doomy driver
-	IDriver *driver= _Direct3d?CDRU::createD3DDriver():CDRU::createGlDriver();
+	IDriver *driver = NULL;
+	try
+	{
+		driver = _Direct3d ? CDRU::createD3DDriver() : CDRU::createGlDriver();
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		std::string msg = toString("Unable to load the %s driver:\n%s", _Direct3d ? "Direct3D" : "OpenGL", e.what());
+		nlwarning("%s", msg.c_str());
+		::MessageBox(NULL, nlUtf8ToTStr(msg), _T("NeL object viewer"), MB_OK | MB_ICONERROR);
+		return false;
+	}
+	if (!driver)
+	{
+		std::string msg = toString("The %s driver is not part of this build.", _Direct3d ? "Direct3D" : "OpenGL");
+		nlwarning("%s", msg.c_str());
+		::MessageBox(NULL, nlUtf8ToTStr(msg), _T("NeL object viewer"), MB_OK | MB_ICONERROR);
+		return false;
+	}
 
 	// Get parent window
 	CWnd parentWnd;
@@ -730,6 +763,9 @@ bool CObjectViewer::initUI (HWND parent)
 	// Init NELU
 	if (!CNELU::init (viewportRect.right, viewportRect.bottom, viewport, 32, true, view->m_hWnd, false, _Direct3d))
 	{
+		std::string msg = toString("Unable to initialize the %s driver for the view, the log says which step failed.", _Direct3d ? "Direct3D" : "OpenGL");
+		nlwarning("%s", msg.c_str());
+		::MessageBox(NULL, nlUtf8ToTStr(msg), _T("NeL object viewer"), MB_OK | MB_ICONERROR);
 		return false;
 	}	
 	//CNELU::init (640, 480, viewport, 32, true, _MainFrame->m_hWnd);

@@ -41,6 +41,15 @@
 
 Watch out: the Bezier color controler is not supported! Use a point3 interpolation instead.
 
+-> The Euler XYZ rotation controler and the Position XYZ controler are sampled once per frame over
+   the keys of their X, Y and Z tracks, and exported as linear keys. The headless exporter
+   pipeline_max_export_anim does not sample them yet: it writes no track for them and prints a
+   warning naming the node, so the two exports of such a file differ.
+
+-> The animated controlers the export does not read are listed in one warning at the end of the
+   export, their animation is not exported. The biped controlers are not listed, the biped export
+   handles them.
+
 -> Biped controlers are oversampled at export. They are compressed by a post process in build_gamedata
 
 -> All the bezier tang mode are supported:

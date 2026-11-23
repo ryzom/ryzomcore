@@ -196,16 +196,17 @@ bool	isPlayerAllowedToGetAllBricksFromPhrase( const CEntityId& eid,
 			return false;
 		//nldebug( "  Brick %s", (*ibs).toString().c_str() );
 
+#ifndef RYZOM_FORGE
+		// A rolemaster of a civilisation teaches its own and the common bricks. Common means no restriction: explicit
+		// trade lists pass it, they filter the races themselves (CCharacter::getPhrasesOfferedByBot).
+		// (Not with RYZOM_FORGE: there the rolemasters teach across the civilisations.)
+		if (civ != EGSPD::CPeople::Common && staticBrick->CivRestriction != EGSPD::CPeople::Common && staticBrick->CivRestriction != civ)
+			return false;
+#endif
+
 		if ( ! staticBrick->LearnRequiresOneOfSkills.empty() )
 		{
 			//nldebug( "  -> Requires one of %u skills", staticBrick->LearnRequiresOneOfSkills.size() );
-
-			// Check if the civRestriction of the brick is compatible with the specified civRestriction
-//			if ( ! ((civ == EGSPD::CPeople::Common) ||
-//				(staticBrick->CivRestriction == EGSPD::CPeople::Common) ||
-//				    (staticBrick->CivRestriction == civ)) )
-			//if( (staticBrick->CivRestriction != civ) && (staticBrick->CivRestriction != EGSPD::CPeople::Common) )
-			//	return false;
 
 			// Check if the brick is below or equal the skill value limit
 			if ( ! skillRequiredAreBelowSkillValueLimit( skillValueLimit, staticBrick->LearnRequiresOneOfSkills ) )

@@ -49,6 +49,7 @@ public:
 
 	/// Constructor
 	CViewRadar(const TCtorParam &param);
+	~CViewRadar() NL_OVERRIDE;
 
 	bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup) NL_OVERRIDE;
 
@@ -90,6 +91,8 @@ private:
 	class CDBMissionIconqObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
+		CDBMissionIconqObs() : _displayMissionSpots(false)
+		{ }
 		virtual void update( NLMISC::ICDBNode *node) NL_OVERRIDE;
 		bool _displayMissionSpots;
 	};
@@ -98,6 +101,8 @@ private:
 	class CDBMiniMissionSpotsObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
+		CDBMiniMissionSpotsObs() : _displayMiniMissionSpots(false)
+		{ }
 		virtual void update( NLMISC::ICDBNode *node) NL_OVERRIDE;
 		bool _displayMiniMissionSpots;
 

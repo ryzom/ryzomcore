@@ -793,8 +793,9 @@ public:
 	 */
 	virtual bool removeSabrinaEffect( CSEffect *effect, bool activateSleepingEffect = true );
 
-	// add a link to this entity
-	virtual void addLink( CSLinkEffect *effect );
+	// add a link to this entity. newStaticAction is false for the second and later links that one phrase
+	// gives (CMagicPhrase::addLink): they belong to the static action that its first link started.
+	virtual void addLink( CSLinkEffect *effect, bool newStaticAction = true );
 
 	// remove a link from this entity. The effect is not deleted
 	virtual void removeLink( CSLinkEffect *effect, float factorOnSurvivalTime);

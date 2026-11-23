@@ -62,6 +62,7 @@
 #include "sbrick_manager.h"
 #include "sphrase_manager.h"
 #include "action_handler_help.h"
+#include "chat_link_ui.h"
 #include "nel/misc/i18n.h"
 #include "nel/misc/algo.h"
 #include "nel/net/email.h"
@@ -83,6 +84,11 @@ extern NLMISC::CLog		g_log;
 using namespace std;
 using namespace NLMISC;
 using namespace STRING_MANAGER;
+
+namespace
+{
+	std::map<CDBCtrlSheet*, CSPhraseCom> LinkedPhraseByHelpControl;
+}
 
 
 ///////////////////////////////////
@@ -123,6 +129,38 @@ std::deque<uint>							CInterfaceHelp::_ActiveWindows;
 std::vector<CInterfaceHelp::CInfoWindow>	CInterfaceHelp::_InfoWindows;
 bool										CInterfaceHelp::_InfoWindowInit= false;
 CInterfaceHelp::CFittedWeaponWeightObserver CInterfaceHelp::_FittedWeaponWeightObserver;
+
+// ***************************************************************************
+/** A raw material shows nothing of the item info but a custom text, and only an item of its own can carry one: the
+ *	info is asked for the slots of the inventories that hold such items. Not for the list of a merchant: the goods of
+ *	the NPC itself come from the sheet, and the server builds an item for each info request on them. A raw material a
+ *	player resells there is an item of its own, and its text is not shown in that list. Nor for a sheet outside of
+ *	the inventories (a craft requirement, a mission reward), which has no slot to ask for.
+ */
+static bool isItemInfoAskedForRawMaterial(uint itemSlotId)
+{
+	nlctassert(MAX_INVENTORY_ANIMAL == 7);
+	switch (itemSlotId >> CItemInfos::SlotIdIndexBitSize)
+	{
+	case INVENTORIES::bag:
+	case INVENTORIES::pet_animal1:
+	case INVENTORIES::pet_animal2:
+	case INVENTORIES::pet_animal3:
+	case INVENTORIES::pet_animal4:
+	case INVENTORIES::pet_animal5:
+	case INVENTORIES::pet_animal6:
+	case INVENTORIES::pet_animal7:
+	case INVENTORIES::temporary:
+	case INVENTORIES::exchange:
+	case INVENTORIES::exchange_proposition:
+	case INVENTORIES::reward_sharing:
+	case INVENTORIES::guild:
+	case INVENTORIES::player_room:
+		return true;
+	default:
+		return false;
+	}
+}
 
 
 // ***************************************************************************
@@ -209,6 +247,8 @@ void	CInterfaceHelp::release()
 	// it indexes _InfoWindows: updateWindowSPhraseTexts, which the next interface's hand and armor links call, would read the
 	// windows of the released interface before initWindows refills the list
 	_ActiveWindows.clear();
+	LinkedPhraseByHelpControl.clear();
+	CHAT_SHARE::releasePreviewSheets();
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	// add observers for the update of phrase help texts (depends of weight of equipped weapons)
 	for (uint i = 0; i < MAX_HANDINV_ENTRIES; ++i)
@@ -229,7 +269,8 @@ void CInterfaceHelp::CFittedWeaponWeightObserver::update(ICDBNode* node)
 }
 
 // ***************************************************************************
-CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forceKeepWindow)
+CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forceKeepWindow,
+	bool preferNewWindow, uint64 chatLinkId)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -246,6 +287,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		// if the window has been closed, remove it from list
 		if(!group->getActive())
 		{
+			clearInfoWindow(_ActiveWindows[i]);
 			_ActiveWindows.erase(_ActiveWindows.begin()+i);
 		}
 		else
@@ -254,7 +296,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 	bool showSlotAndCreator = false;
 	// If an active window get the same object, abort, but make it top.
-	for(i=0;i<_ActiveWindows.size();i++)
+	for(i=0; !preferNewWindow && i<_ActiveWindows.size();i++)
 	{
 		CInterfaceGroup	*group= _InfoWindows[_ActiveWindows[i]].Window;
 		CDBCtrlSheet		*ctrlSrc= elt;
@@ -262,6 +304,8 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		CDBCtrlSheet		*ctrlDst= dynamic_cast<CDBCtrlSheet*>(group->getCtrl(":ctrl_slot"));
 		if(ctrlDst && ctrlSrc)
 		{
+			if (LinkedPhraseByHelpControl.find(ctrlDst) != LinkedPhraseByHelpControl.end())
+				continue;
 			// if same Aspect
 			if( ctrlSrc->sameAspect(ctrlDst) )
 			{
@@ -294,7 +338,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 	sint	newIndexWindow= -1;
 	bool	mustAddToActiveWindows= true;
 	// if an active window is not in KeepMode, get it.
-	for(i=0;i<_ActiveWindows.size();i++)
+	for(i=0; !preferNewWindow && i<_ActiveWindows.size();i++)
 	{
 		// must also test forceKeep for special Action Help which open Brick Help
 		if(!_InfoWindows[_ActiveWindows[i]].KeepMode && forceKeepWindow!=(sint)_ActiveWindows[i])
@@ -342,14 +386,29 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		}
 		else
 		{
-			// All the info window are opened (and should not be in KeepMode....), take the last recently opened.
-			newIndexWindow= _ActiveWindows.front();
-			// free space
-			_ActiveWindows.pop_front();
+			std::deque<uint>::iterator replacement = _ActiveWindows.begin();
+			if (preferNewWindow)
+			{
+				// Replace the oldest help window without KeepMode.
+				replacement = _ActiveWindows.end();
+				for (std::deque<uint>::iterator it = _ActiveWindows.begin(); it != _ActiveWindows.end(); ++it)
+				{
+					if (!_InfoWindows[*it].KeepMode && forceKeepWindow != (sint)*it)
+					{
+						replacement = it;
+						break;
+					}
+				}
+				if (replacement == _ActiveWindows.end())
+					return nullptr;
+			}
+			newIndexWindow = *replacement;
+			_ActiveWindows.erase(replacement);
 		}
 	}
 
 	// get the next window
+	clearInfoWindow(newIndexWindow);
 	CInterfaceGroup	*group= _InfoWindows[newIndexWindow].Window;
 	nlassert(group);
 
@@ -364,6 +423,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 	group->setActive(true);
 	CWidgetManager::getInstance()->setTopWindow(group);
 	_InfoWindows[newIndexWindow].CtrlSheet= elt;
+	_InfoWindows[newIndexWindow].ChatLinkId = chatLinkId;
 	// insert in list
 	if(mustAddToActiveWindows)
 		_ActiveWindows.push_back(newIndexWindow);
@@ -376,9 +436,9 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 			_InfoWindows[newIndexWindow].ItemSheet= elt->getSheetId();
 			_InfoWindows[newIndexWindow].ItemSlotId= getInventory().getItemSlotId(elt);
 
-			// Add the waiter only if really needed (not for raw materials)
+			// Add the waiter only if really needed (for a raw material: only in the inventories that hold items of their own)
 			const CItemSheet	*itemSheet= elt->asItemSheet();
-			if(itemSheet && itemSheet->Family != ITEMFAMILY::RAW_MATERIAL )
+			if (itemSheet && (itemSheet->Family != ITEMFAMILY::RAW_MATERIAL || isItemInfoAskedForRawMaterial(_InfoWindows[newIndexWindow].ItemSlotId)))
 				getInventory().addItemInfoWaiter(&_InfoWindows[newIndexWindow]);
 		}
 		else if ( elt->getType() == CCtrlSheetInfo::SheetType_Mission )
@@ -407,10 +467,52 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 
 // ***************************************************************************
+bool CInterfaceHelp::activateChatItemWindow(uint64 chatLinkId)
+{
+	if (chatLinkId == 0)
+		return false;
+	for (uint i = 0; i < _InfoWindows.size(); ++i)
+	{
+		CInterfaceGroup *group = _InfoWindows[i].Window;
+		if (_InfoWindows[i].ChatLinkId == chatLinkId && group && group->getActive())
+		{
+			CWidgetManager::getInstance()->setTopWindow(group);
+			return true;
+		}
+	}
+	return false;
+}
+
+// ***************************************************************************
 void			CInterfaceHelp::removeWaiterItemInfo(uint i)
 {
 	if(i<_InfoWindows.size())
+	{
 		getInventory().removeItemInfoWaiter(&_InfoWindows[i]);
+		getInventory().removeItemLinkInfo(_InfoWindows[i].ItemSlotId);
+		_InfoWindows[i].ItemSlotId = 0;
+		_InfoWindows[i].ItemSheet = 0;
+		_InfoWindows[i].ChatLinkId = 0;
+	}
+}
+
+// ***************************************************************************
+void			CInterfaceHelp::clearInfoWindow(uint i)
+{
+	if (i >= _InfoWindows.size())
+		return;
+	if (_InfoWindows[i].Window)
+	{
+		CDBCtrlSheet *helpCtrlSheet = dynamic_cast<CDBCtrlSheet*>(
+			_InfoWindows[i].Window->getElement(_InfoWindows[i].Window->getId()+":content:ctrl_slot"));
+		if (helpCtrlSheet)
+		{
+			helpCtrlSheet->setListMenuRight("");
+			LinkedPhraseByHelpControl.erase(helpCtrlSheet);
+		}
+	}
+	removeWaiterItemInfo(i);
+	removeWaiterMissionInfo(i);
 }
 
 // ***************************************************************************
@@ -455,6 +557,7 @@ void			CInterfaceHelp::closeAll()
 	// For all windows
 	for(uint i=0;i<(uint)maxHelpWindow;i++)
 	{
+		clearInfoWindow(i);
 		_InfoWindows[i].Window->setActive(false);
 	}
 }
@@ -539,7 +642,7 @@ void			CInterfaceHelp::updateWindowSPhraseTexts()
 		uint	index= _ActiveWindows[i];
 		CDBCtrlSheet	*ctrl= _InfoWindows[index].CtrlSheet;
 		CInterfaceGroup	*group= _InfoWindows[index].Window;
-		if(group && ctrl && (ctrl->isSPhraseId() || ctrl->isSPhrase()) )
+		if(group && ctrl)
 		{
 			CSheetHelpSetup setup;
 			setup.setupDefaultIDs();
@@ -547,7 +650,13 @@ void			CInterfaceHelp::updateWindowSPhraseTexts()
 			setup.SrcSheet = ctrl;
 			setup.DestSheet = dynamic_cast<CDBCtrlSheet*>(group->getCtrl("ctrl_slot"));
 
-			if(ctrl->isSPhraseId())
+			std::map<CDBCtrlSheet*, CSPhraseCom>::const_iterator linked =
+				LinkedPhraseByHelpControl.find(setup.DestSheet);
+			if (linked != LinkedPhraseByHelpControl.end())
+			{
+				setupSabrinaPhraseHelp(setup, linked->second, 0);
+			}
+			else if(ctrl->isSPhraseId())
 			{
 				// reset up the complete window
 				setupSabrinaPhraseHelp(setup, pPM->getPhrase(ctrl->getSPhraseId()), 0);
@@ -591,10 +700,25 @@ class CHandlerOpenItemHelp : public IActionHandler
 			string	forceKeepWindowStr= getParam(sParams, "force_keep");
 			if(!forceKeepWindowStr.empty())
 				fromString(forceKeepWindowStr, forceKeepWindow);
+			bool preferNewWindow = false;
+			string preferNewWindowStr = getParam(sParams, "prefer_new");
+			if (!preferNewWindowStr.empty())
+				fromString(preferNewWindowStr, preferNewWindow);
+			uint64 chatLinkId = 0;
+			string chatLinkIdStr = getParam(sParams, "chat_link_id");
+			if (!chatLinkIdStr.empty())
+				fromString(chatLinkIdStr, chatLinkId);
 
 			// open the next window
-			CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(cs, forceKeepWindow);
-			if (!group) return;
+			CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(cs, forceKeepWindow,
+				preferNewWindow, chatLinkId);
+			if (!group)
+			{
+				uint32 slotId = getInventory().getItemSlotId(cs);
+				if (getInventory().isItemLinkSlot(slotId))
+					getInventory().removeItemLinkInfo(slotId);
+				return;
+			}
 			CSheetHelpSetup setup;
 			setup.setupDefaultIDs();
 			setup.HelpWindow = group;
@@ -707,16 +831,6 @@ class CHandlerOpenTitleHelp : public IActionHandler
 				return;
 			}
 		}
-
-		CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(NULL);
-		if (!group) return;
-
-		// prepare the help window
-		CSheetHelpSetup setup;
-		setup.setupDefaultIDs();
-		setup.HelpWindow = group;
-		setup.DestSheet = dynamic_cast<CDBCtrlSheet*>(group->getElement(group->getId()+":content:ctrl_slot"));
-
 		// Get name and title
 		// ------------------
 		string name;
@@ -739,7 +853,11 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			title = UserEntity->getTitle();
 			reservedTitle = UserEntity->hasReservedTitle();
 		}
-		else return;
+		else
+		{
+			nlwarning("open_title_help: from=%s is not supported", sFrom.c_str());
+			return;
+		}
 
 		// Get Title info (bricks and skills needed)
 		// -----------------------------------------
@@ -749,6 +867,16 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			nlwarning("cant find unblock.titles");
 			return;
 		}
+
+		// open the help window only now that there is something to show in it
+		CInterfaceGroup *group = CInterfaceHelp::activateNextWindow(nullptr);
+		if (!group) return;
+
+		// prepare the help window
+		CSheetHelpSetup setup;
+		setup.setupDefaultIDs();
+		setup.HelpWindow = group;
+		setup.DestSheet = dynamic_cast<CDBCtrlSheet *>(group->getElement(group->getId() + ":content:ctrl_slot"));
 
 		// get title id number from the title id
 		uint titleIDnb;
@@ -1875,7 +2003,7 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 	case ITEMFAMILY::PET_ANIMAL_TICKET : itemText= CI18N::get("uihelpItemAnimal"); break;
 	case ITEMFAMILY::TELEPORT : itemText= CI18N::get("uihelpItemTeleport"); break;
 	case ITEMFAMILY::COSMETIC : itemText= CI18N::get("uihelpItemCosmetic"); break;
-	case ITEMFAMILY::SCROLL : itemText= CI18N::get("uihelpItemScroll"); break;
+	case ITEMFAMILY::SCROLL : itemText = CI18N::get("uihelpItemDefaultFormat"); break;
 	case ITEMFAMILY::SCROLL_R2 : itemText = CI18N::get("uihelpItemScrollR2"); break;
 	case ITEMFAMILY::CONSUMABLE : itemText= CI18N::get("uihelpItemConsumableFormat"); break;
 	default: itemText= CI18N::get("uihelpItemDefaultFormat");
@@ -1907,10 +2035,16 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 		strFindReplace(itemText, "%desc", string() );
 
 	// Custom text
-	const	CClientItemInfo	&itemInfo = getInventory().getItemInfo(getInventory().getItemSlotId(item) );
-	if (!itemInfo.CustomText.empty())
+	uint itemSlotId = getInventory().getItemSlotId(item);
+	const	CClientItemInfo	&itemInfo = getInventory().getItemInfo(itemSlotId);
+	// The text is shown when the info held for the slot is this item's, not the one of a former item of the slot: the
+	// refresh that follows the answer of the server shows it. A slot whose info is never asked (a raw material in the
+	// list of a merchant) has no info or never a current one.
+	std::string text;
+	if (getInventory().isItemInfoUpToDate(itemSlotId))
+		text = itemInfo.CustomText.toUtf8();
+	if (pIS->Family != ITEMFAMILY::SCROLL && !text.empty())
 	{
-		std::string text = itemInfo.CustomText.toUtf8();
 		if (text.size() > 3 && text[0]=='@' && ((text[1]=='W' && text[2]=='E' && text[3]=='B') || (text[1]=='L' && text[2]=='U' && text[3]=='A')))
 		{
 			if (text.size() > 5 && text[4]=='-' && text[5]=='-')
@@ -1925,7 +2059,7 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 		}
 		else
 		{
-			strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText.toUtf8() + "\n");
+			strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + text + "\n");
 			string itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
 			strFindReplace(itemText, "%mfc", itemMFC);
 		}
@@ -2438,7 +2572,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
 			cs.VisualPropB.PropertySubData.FeetModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::FEET_SLOT );
 			cs.VisualPropB.PropertySubData.FeetColor = color->getValue32();
-			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			SCharacter3DSetup::setupDBFromCharacterSummary(char3DI->getDBLink(), cs);
 			camHeight = -1.15f;
 		}
 		else if (pIS->ItemType == ITEM_TYPE::LIGHT_GLOVES || pIS->ItemType == ITEM_TYPE::MEDIUM_GLOVES || pIS->ItemType == ITEM_TYPE::HEAVY_GLOVES)
@@ -2446,7 +2580,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
 			cs.VisualPropB.PropertySubData.HandsModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::HANDS_SLOT );
 			cs.VisualPropB.PropertySubData.HandsColor = color->getValue32();
-			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			SCharacter3DSetup::setupDBFromCharacterSummary(char3DI->getDBLink(), cs);
 			//cs.VisualPropB.PropertySubData.HandsColor = pIS->Color;
 		}
 		else if (pIS->ItemType == ITEM_TYPE::LIGHT_SLEEVES || pIS->ItemType == ITEM_TYPE::MEDIUM_SLEEVES || pIS->ItemType == ITEM_TYPE::HEAVY_SLEEVES)
@@ -2454,7 +2588,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
 			cs.VisualPropA.PropertySubData.ArmModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::ARMS_SLOT );
 			cs.VisualPropA.PropertySubData.ArmColor = color->getValue32();
-			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			SCharacter3DSetup::setupDBFromCharacterSummary(char3DI->getDBLink(), cs);
 			//cs.VisualPropA.PropertySubData.ArmColor = pIS->Color;
 			camHeight = -0.55f;
 		}
@@ -2463,7 +2597,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
 			cs.VisualPropA.PropertySubData.TrouserModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::LEGS_SLOT );
 			cs.VisualPropA.PropertySubData.TrouserColor = color->getValue32();
-			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			SCharacter3DSetup::setupDBFromCharacterSummary(char3DI->getDBLink(), cs);
 			camHeight = -1.00f;
 		}
 		else if (pIS->ItemType == ITEM_TYPE::LIGHT_VEST || pIS->ItemType == ITEM_TYPE::MEDIUM_VEST || pIS->ItemType == ITEM_TYPE::HEAVY_VEST)
@@ -2471,7 +2605,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
 			cs.VisualPropA.PropertySubData.JacketModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::CHEST_SLOT );
 			cs.VisualPropA.PropertySubData.JacketColor = color->getValue32();
-			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			SCharacter3DSetup::setupDBFromCharacterSummary(char3DI->getDBLink(), cs);
 			camHeight = -0.55f;
 		}
 		else if (pIS->ItemType == ITEM_TYPE::HEAVY_HELMET)
@@ -2479,7 +2613,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 			CCDBNodeLeaf *color = dbBranch->getLeaf( setup.SrcSheet->getSheet()+":USER_COLOR", false );
 			cs.VisualPropA.PropertySubData.HatModel = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::HEAD_SLOT );
 			cs.VisualPropA.PropertySubData.HatColor = color->getValue32();
-			SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+			SCharacter3DSetup::setupDBFromCharacterSummary(char3DI->getDBLink(), cs);
 			camHeight = -0.35f;
 		}
 	}
@@ -2493,14 +2627,14 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 				pES->ItemType == ITEM_TYPE::MAGICIAN_STAFF || pES->ItemType == ITEM_TYPE::AUTOLAUCH || pES->ItemType == ITEM_TYPE::LAUNCHER || pES->ItemType == ITEM_TYPE::RIFLE)
 				cs.VisualPropA.PropertySubData.WeaponRightHand = 0;
 		}
-		SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+		SCharacter3DSetup::setupDBFromCharacterSummary(char3DI->getDBLink(), cs);
 
 	}
 	else if (pIS->Family == ITEMFAMILY::MELEE_WEAPON || pIS->Family == ITEMFAMILY::RANGE_WEAPON)
 	{
 		cs.VisualPropA.PropertySubData.WeaponRightHand = CVisualSlotManager::getInstance()->sheet2Index( CSheetId(setup.SrcSheet->getSheetId()), SLOTTYPE::RIGHT_HAND_SLOT );
 		cs.VisualPropA.PropertySubData.WeaponLeftHand = 0;
-		SCharacter3DSetup::setupDBFromCharacterSummary("UI:TEMP:CHAR3D", cs);
+		SCharacter3DSetup::setupDBFromCharacterSummary(char3DI->getDBLink(), cs);
 	}
 	else
 		nlwarning("<setupItemPreview> Invalid armour or weapon item type '%s'", ITEM_TYPE::toString( pIS->ItemType ).c_str() );
@@ -3205,6 +3339,7 @@ void setupSabrinaPhraseHelp(CSheetHelpSetup &setup, const CSPhraseCom &phrase, u
 	if(setup.DestSheet)
 	{
 		setup.SrcSheet->copyAspect(setup.DestSheet);
+		setup.DestSheet->setupDisplayAsPhrase(phrase.Bricks, phrase.Name.toUtf8(), phrase.IconIndex);
 		setup.DestSheet->setActive(true);
 	}
 
@@ -3252,6 +3387,41 @@ void setupSabrinaPhraseHelp(CSheetHelpSetup &setup, const CSPhraseCom &phrase, u
 
 	// **** setup the final text
 	setHelpText(setup, phraseText);
+}
+
+
+// ***************************************************************************
+void openSabrinaPhraseHelp(CDBCtrlSheet *sourceSheet, const CSPhraseCom &phrase)
+{
+	if (!sourceSheet || phrase.empty())
+		return;
+
+	// Linked phrases with the same root brick may have different stanzas.
+	CInterfaceGroup *group = CInterfaceHelp::activateNextWindow(sourceSheet, -1, true);
+	if (!group)
+		return;
+
+	CSheetHelpSetup setup;
+	setup.setupDefaultIDs();
+	setup.HelpWindow = group;
+	setup.SrcSheet = sourceSheet;
+	setup.DestSheet = dynamic_cast<CDBCtrlSheet*>(group->getElement(group->getId()+":content:ctrl_slot"));
+	setupSabrinaPhraseHelp(setup, phrase, 0);
+	if (setup.DestSheet)
+	{
+		setup.DestSheet->setListMenuRight("ui:interface:cm_chat_link_phrase");
+		LinkedPhraseByHelpControl[setup.DestSheet] = phrase;
+	}
+}
+
+// ***************************************************************************
+bool getLinkedSabrinaPhrase(CDBCtrlSheet *helpCtrlSheet, CSPhraseCom &phrase)
+{
+	std::map<CDBCtrlSheet*, CSPhraseCom>::const_iterator it = LinkedPhraseByHelpControl.find(helpCtrlSheet);
+	if (it == LinkedPhraseByHelpControl.end() || it->second.empty())
+		return false;
+	phrase = it->second;
+	return true;
 }
 
 
@@ -3366,6 +3536,21 @@ public:
 				setupSabrinaPhraseHelp(setup, pPM->getPhrase(id), 0);
 			}
 		}
+		else if (cs != nullptr && cs->isSPhrase() && cs->getSheetId() != 0)
+		{
+			CSPhraseCom phrase;
+			CSPhraseManager *pPM = CSPhraseManager::getInstance();
+			pPM->buildPhraseFromSheet(phrase, cs->getSheetId());
+			if (phrase.empty()) return;
+			CInterfaceGroup *group = CInterfaceHelp::activateNextWindow(cs);
+			if (!group) return;
+			CSheetHelpSetup setup;
+			setup.setupDefaultIDs();
+			setup.HelpWindow = group;
+			setup.SrcSheet = cs;
+			setup.DestSheet = dynamic_cast<CDBCtrlSheet*>(group->getCtrl("ctrl_slot"));
+			setupSabrinaPhraseHelp(setup, phrase, cs->getSheetId());
+		}
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerOpenPhraseIdHelp, "open_phraseid_help");
@@ -3439,8 +3624,7 @@ public:
 		// Remove the waiter for special ItemInfo
 		uint index;
 		fromString(Params, index);
-		CInterfaceHelp::removeWaiterItemInfo(index);
-		CInterfaceHelp::removeWaiterMissionInfo(index);
+		CInterfaceHelp::clearInfoWindow(index);
 
 		// unpuhsed the "Keep" button.
 		CInterfaceHelp::setKeepMode(index, false);
@@ -3510,19 +3694,20 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
 	}
 	else
-	if( CSheetId(cs->getSheetId()).toString() == "mod_defense_success.sbrick" )
+	// the defense, dodge and parry modifiers show the sheets of their effect families (effect_families.cpp)
+	if( CSheetId(cs->getSheetId()).toString() == "mod_defense.sbrick" )
 	{
 		ustr = CI18N::get("uittModDefenseSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
-	if( CSheetId(cs->getSheetId()).toString() == "mod_dodge_success.sbrick" )
+	if( CSheetId(cs->getSheetId()).toString() == "mod_dodge.sbrick" )
 	{
 		ustr = CI18N::get("uittModDodgeSuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
-	if( CSheetId(cs->getSheetId()).toString() == "mod_parry_success.sbrick" )
+	if( CSheetId(cs->getSheetId()).toString() == "mod_parry.sbrick" )
 	{
 		ustr = CI18N::get("uittModParrySuccess");
 		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:PARRY", false);
@@ -3713,6 +3898,7 @@ REGISTER_ACTION_HANDLER( CHandlerAnimalDeadPopupTooltip, "animal_dead_popup_tool
 #include "../entities.h"
 #include "people_interraction.h"
 #include "../net_manager.h"
+#include "../window_desktop.h"
 
 // ***************************************************************************
 class CAHMilkoKick: public IActionHandler
@@ -3885,11 +4071,19 @@ public:
 		CSheetHelpSetup		dummy;
 		dummy.setupDefaultIDs();
 
-		// common method for info and botchat
-		if(infoWindow.CtrlSheet)
+		// The sheet comes from the window's own copy of the item (the icon it displays), not from the slot the window was
+		// opened from: that slot may hold another item or nothing by now, while the window still shows the first one.
+		if (!infoWindow.Window)
+			return;
+		CDBCtrlSheet *ctrlCopy = dynamic_cast<CDBCtrlSheet *>(infoWindow.Window->getElement(infoWindow.Window->getId() + ":content:ctrl_slot"));
+		if (!ctrlCopy)
 		{
-			onMpChangeItemPart(infoWindow.Window, infoWindow.CtrlSheet->getSheetId(), dummy.PrefixForExtra);
+			nlwarning("item_help_mp_change_item_part: the info window '%s' has no 'content:ctrl_slot' sheet", infoWindow.Window->getId().c_str());
+			return;
 		}
+
+		// common method for info and botchat
+		onMpChangeItemPart(infoWindow.Window, ctrlCopy->getSheetId(), dummy.PrefixForExtra);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHItemHelpMpChangeItemPart, "item_help_mp_change_item_part");
@@ -4009,8 +4203,9 @@ public:
 			NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 			if (Driver)
 			{
+				// on another virtual desktop the next window is not activated either (WindowDesktop)
 				HWND wnd = (HWND) Driver->getDisplay();
-				ShowWindow(wnd, SW_MINIMIZE);
+				ShowWindow(wnd, WindowDesktop::isRequested() ? SW_SHOWMINNOACTIVE : SW_MINIMIZE);
 			}
 		#endif
 		browseFAQ(ClientCfg.ConfigFile);

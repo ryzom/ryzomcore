@@ -67,7 +67,7 @@
 	<!-- r2ed specifics -->
 	<value value="r2ed_palette"			hardtext="uiR2EDPalette" contexts="r2ed"/>
 	<value value="r2ed_scenario"		hardtext="uiR2EDScenario" contexts="r2ed"/>
-	<value value="r2ed_ring_window"		hardtext="uiR2EDRingWindow" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
+	<value value="r2ed_web_admin"		hardtext="uiR2EDRingWindow" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
 	<value value="r2ed_scenario_scores"	hardtext="uiR2EDScoresWindow" contexts="game, r2ed_anim_dm"/>
 
 </template>

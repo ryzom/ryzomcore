@@ -91,10 +91,20 @@ public:
 			scenarioInfo.getScenarioKey().toString().c_str(),
 			scenarioInfo.getSessionAnimatorCharId(),
 			scenarioInfo.getScenarioAuthorName().c_str());
+		// The scenario service announces every start of the scenario of a session. A second one (a start after one
+		// that failed, a restart) replaces the scenario info and keeps the participants and the points gained:
+		// the session is counted once, when it ends.
+		TAnimSessionInfos::iterator it(_AnimSessionInfos.find(sessionId));
+		if (it != _AnimSessionInfos.end())
+		{
+			it->second.ScenarioInfo = scenarioInfo;
+			return;
+		}
 		// create a record for this session
-		_AnimSessionInfos[sessionId].ScenarioInfo = scenarioInfo;
-		_AnimSessionInfos[sessionId].Participants.clear();
-		_AnimSessionInfos[sessionId].RRPGained = 0;
+		TAnimSessionInfo &asi = _AnimSessionInfos[sessionId];
+		asi.ScenarioInfo = scenarioInfo;
+		asi.Participants.clear();
+		asi.RRPGained = 0;
 	}
 
 	/** An animation session is ended, report the RRP gained to SU and release 
@@ -160,7 +170,10 @@ public:
 		nldebug("characterLeaveAnimSession : character %u leave anim session %u", charId, sessionId);
 		// remove the current session (if already stored with this session)
 		TCharCurrentAnimSession::iterator it(_CharCurrentAnimSession.find(charId));
-		if (it != _CharCurrentAnimSession.end() && it->second == sessionId)
+		if (it == _CharCurrentAnimSession.end())
+			nlwarning("characterLeaveAnimSession : the character %u is currently in no session, not in %u",
+				charId, sessionId);
+		else if (it->second == sessionId)
 			_CharCurrentAnimSession.erase(it);
 		else
 			nlwarning("characterLeaveAnimSession : the character %u is currently in session %u, not %u",

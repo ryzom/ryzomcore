@@ -123,6 +123,12 @@ class IServiceUpdatable;
  * -W followed by the path where to save all shard data (SaveFilesDirectory)
  * -Z[u] to just init the config file then return (used for test), use Zu to not release the service
  *
+ * Network related config file variables:
+ *
+ * BindAddress: IP address that the listening sockets of the service bind to, all interfaces when empty or absent.
+ *              "127.0.0.1" keeps the service ports off the network, for a development shard on one machine.
+ *              The public client ports of the frontend service are not affected, see ListenAddress for those.
+ * ListenAddress: address of the frontend service as advertised to the clients (FS only, also -D)
  *
  */
 

@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, argparse
+import time, sys, os, shutil, subprocess, argparse
 sys.path.append("configuration")
 
 parser = argparse.ArgumentParser(description='Ryzom Core - Build Gamedata - Install')
@@ -36,12 +36,12 @@ parser.add_argument('--excludeprocess', '-epc', nargs='+')
 args = parser.parse_args()
 
 if not args.includeproject == None and not args.excludeproject == None:
-	print "ERROR --includeproject cannot be combined with --excludeproject, exit."
-	exit()
+	print("ERROR --includeproject cannot be combined with --excludeproject, exit.")
+	sys.exit()
 
 if not args.includeprocess == None and not args.excludeprocess == None:
-	print "ERROR --includeprocess cannot be combined with --excludeprocess, exit."
-	exit()
+	print("ERROR --includeprocess cannot be combined with --excludeprocess, exit.")
+	sys.exit()
 
 if os.path.isfile("log.log"):
 	os.remove("log.log")
@@ -80,15 +80,15 @@ for projectName in ProjectsToProcess:
 				subprocess.call([ "python", "3_install.py", "--excludeprocess" ] + args.excludeprocess)
 			else:
 				subprocess.call([ "python", "3_install.py" ])
-		except Exception, e:
+		except Exception as e:
 			printLog(log, "<" + projectName + "> " + str(e))
 		os.chdir("..")
 		try:
-			projectLog = open("processes/log.log", "r")
+			projectLog = open("processes/log.log", "r", errors="replace")
 			projectLogData = projectLog.read()
 			projectLog.close()
 			log.write(projectLogData)
-		except Exception, e:
+		except Exception as e:
 			printLog(log, "<" + projectName + "> " + str(e))
 	else:
 		printLog(log, "IGNORE PROJECT " + projectName)

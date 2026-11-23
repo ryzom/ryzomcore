@@ -134,6 +134,15 @@ public:
 	/// Returns a string explaining the network error (see getLastError())
 	static std::string	errorString( uint errorcode );
 
+	/** Sets the address that listening sockets bind to when they are given a port only (CListenSock::init(port), CUdpSock::bind(port)).
+	 * The default is the any address. IService sets it from the BindAddress config variable, for example "127.0.0.1" to keep
+	 * the service ports of a development shard off the network. Sockets bound to an explicit address are not affected.
+	 */
+	static void			setDefaultBindAddress(const CIPv6Address &address);
+
+	/// Returns the address that listening sockets bind to when they are given a port only, see setDefaultBindAddress()
+	static const CIPv6Address &defaultBindAddress();
+
 	/// Change the time out value used in getDataAvailable(), which is 0 by default
 	void				setTimeOutValue( long sec, long ms )
 	{

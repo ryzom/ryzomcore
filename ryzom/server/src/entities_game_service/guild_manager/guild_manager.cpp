@@ -126,6 +126,11 @@ IGuildManager &IGuildManager::getInstance()
 	return *(CGuildManager::getInstance());
 }
 
+bool IGuildManager::hasInstance()
+{
+	return CGuildManager::isInitialized();
+}
+
 const std::string &CGuildManager::getCommandHandlerName() const
 {
 	static string name("guildManager");
@@ -183,7 +188,9 @@ void CGuildManager::release()
 		_Instance = NULL;
 	}
 
-	IGuildUnifier::getInstance()->guildManagerReleased();
+	// (a service without the guild unifier module has no one to tell)
+	if (IGuildUnifier::isInitialized())
+		IGuildUnifier::getInstance()->guildManagerReleased();
 }
 
 //----------------------------------------------------------------------------

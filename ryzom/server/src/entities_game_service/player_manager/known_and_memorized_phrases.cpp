@@ -131,29 +131,30 @@ void CMemorizationSet::clear()
 //-----------------------------------------------
 // CMemorizationSet::memorize
 //-----------------------------------------------
-void CMemorizationSet::memorize(uint8 i, const vector<CSheetId> &bricks, uint16 id, const TDataSetRow &rowId)
+bool CMemorizationSet::memorize(uint8 i, const vector<CSheetId> &bricks, uint16 id, const TDataSetRow &rowId)
 {
 	if (i >= Phrases.size() )
 	{
 		nlwarning("<CMemorizationSet::setPhrase> Error, tried to memorized in slot %u while there is %u slots", i, Phrases.size());
-		return;
+		return false;
 	}
 
 	CSPhrasePtr phrase = CPhraseManager::getInstance().buildSabrinaPhrase(rowId, TDataSetRow(), bricks, 0 , 0, false);
 	if (!phrase)
 	{
-		return;
+		return false;
 	}
 	if ( !phrase->evaluate() ) //|| !phrase->validate() )
 	{
 		nlwarning("<CMemorizationSet::setPhrase> phrase is invalid");
-		return;
+		return false;
 	}
 
 	if (Phrases[i] != NULL)
 		delete Phrases[i];
 
 	Phrases[i] = new CMemorizedPhrase(bricks, id);
+	return true;
 }
 
 //-----------------------------------------------
@@ -303,12 +304,29 @@ void CMemorizationSet::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases,
 		{
 			uint16 phraseId = Phrases[phraseIndex]->PhraseId;
 			forget(phraseIndex);
-			if(phraseId < knownPhrases.size())
+			// a known phrase without bricks (emptied) is no phrase the character has
+			if(phraseId < knownPhrases.size() && !knownPhrases[phraseId].PhraseDesc.Bricks.empty())
 			{
 				// check phrase validity and memorize it
 				if ( CPhraseManager::getInstance().checkPhraseValidity(knownPhrases[phraseId].PhraseDesc.Bricks) )
-					memorize(phraseIndex, knownPhrases[phraseId].PhraseDesc.Bricks, phraseId, rowId);
+				{
+					// a phrase the grammar accepts but whose build a brick's values refuse (a sheet changed or broken)
+					// keeps its slot: it would be lost for good with the next save, and works again once the sheet is
+					// fixed; its execution is refused meanwhile
+					if (!memorize(phraseIndex, knownPhrases[phraseId].PhraseDesc.Bricks, phraseId, rowId))
+					{
+						nlwarning("<CMemorizationSet::fixPhrases> %s: known phrase %u ('%s') of memorized slot %u cannot be built with its bricks, the slot keeps it",
+						    TheDataset.getEntityId(rowId).toString().c_str(), (uint)phraseId, knownPhrases[phraseId].PhraseSheetId.toString().c_str(), phraseIndex);
+						memorizeWithoutCheck((uint8)phraseIndex, knownPhrases[phraseId].PhraseDesc.Bricks, phraseId);
+					}
+				}
+				else
+					nlwarning("<CMemorizationSet::fixPhrases> %s: known phrase %u ('%s') of memorized slot %u is not valid with its bricks any more, the slot is emptied",
+					    TheDataset.getEntityId(rowId).toString().c_str(), (uint)phraseId, knownPhrases[phraseId].PhraseSheetId.toString().c_str(), phraseIndex);
 			}
+			else
+				nlwarning("<CMemorizationSet::fixPhrases> %s: memorized slot %u names known phrase %u, which the character does not have or which has no bricks, the slot is emptied",
+				    TheDataset.getEntityId(rowId).toString().c_str(), phraseIndex, (uint)phraseId);
 		}
 	}
 }// fixPhrases //

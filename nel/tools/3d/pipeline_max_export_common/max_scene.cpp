@@ -27,8 +27,10 @@
 #include <nel/misc/types_nl.h>
 #include "max_scene.h"
 
+#include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <set>
 
 #include "../pipeline_max/storage_object.h"
 #include "../pipeline_max/builtin/node_impl.h"
@@ -50,6 +52,75 @@ namespace MAXSCENE {
 // non-keyframer sub-controller carries a default-value chunk (0x2501/0x2503/0x2504/0x2505)
 // anywhere, Max 3 included — the historical fallback never fired, and a non-keyframer resolves
 // to the caller-side identity/zero default exactly as before.
+// The composite controllers that split a value into one float controller per component are
+// evaluated through those: Position XYZ and Scale XYZ (references 0, 1, 2 are x, y, z) and Euler XYZ
+// (three angles in radians, the axis order in chunk 0x1003). Any other controller that is not a
+// keyframer warns once per class and gives the default.
+
+static const NLMISC::CClassId CLASSID_POSITION_XYZ(0x118f7e02, 0xffee238a);
+static const NLMISC::CClassId CLASSID_SCALE_XYZ(0x118f7c01, 0xfeee238b);
+static const NLMISC::CClassId CLASSID_EULER_XYZ(0x00002012, 0x00000000);
+
+static float componentAt0(CSceneClass *ctrl, uint i, float def)
+{
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(ctrl);
+	CSceneClass *sub = rm && i < rm->nbReferences() ? dynamic_cast<CSceneClass *>(rm->getReference(i)) : nullptr;
+	if (sub && !dynamic_cast<CControlKeyFramerBase *>(sub))
+	{
+		fprintf(stderr, "WARNING: controller (0x%08x, 0x%08x) under a component controller not supported; default "
+		        "used\n", sub->classDesc()->classId().a(), sub->classDesc()->classId().b());
+		return def;
+	}
+	return sub ? floatValueAt0(sub, def) : def;
+}
+
+static void warnController(CSceneClass *ctrl, const char *what)
+{
+	static std::set<NLMISC::CClassId> s_Warned;
+	const NLMISC::CClassId cid = ctrl->classDesc()->classId();
+	if (s_Warned.insert(cid).second)
+		fprintf(stderr, "WARNING: %s controller (0x%08x, 0x%08x) not supported; default used\n", what, cid.a(), cid.b());
+}
+
+// The quaternion whose quatToMatrix3 is the rotation part of m.
+static QuatM rotationToQuat(const Matrix3M &m)
+{
+	QuatM q;
+	const float trace = m.m[0][0] + m.m[1][1] + m.m[2][2];
+	if (trace > 0.0f)
+	{
+		const float s = sqrtf(trace + 1.0f) * 2.0f;
+		q.w = 0.25f * s;
+		q.x = (m.m[2][1] - m.m[1][2]) / s;
+		q.y = (m.m[0][2] - m.m[2][0]) / s;
+		q.z = (m.m[1][0] - m.m[0][1]) / s;
+	}
+	else if (m.m[0][0] > m.m[1][1] && m.m[0][0] > m.m[2][2])
+	{
+		const float s = sqrtf(1.0f + m.m[0][0] - m.m[1][1] - m.m[2][2]) * 2.0f;
+		q.w = (m.m[2][1] - m.m[1][2]) / s;
+		q.x = 0.25f * s;
+		q.y = (m.m[0][1] + m.m[1][0]) / s;
+		q.z = (m.m[0][2] + m.m[2][0]) / s;
+	}
+	else if (m.m[1][1] > m.m[2][2])
+	{
+		const float s = sqrtf(1.0f + m.m[1][1] - m.m[0][0] - m.m[2][2]) * 2.0f;
+		q.w = (m.m[0][2] - m.m[2][0]) / s;
+		q.x = (m.m[0][1] + m.m[1][0]) / s;
+		q.y = 0.25f * s;
+		q.z = (m.m[1][2] + m.m[2][1]) / s;
+	}
+	else
+	{
+		const float s = sqrtf(1.0f + m.m[2][2] - m.m[0][0] - m.m[1][1]) * 2.0f;
+		q.w = (m.m[1][0] - m.m[0][1]) / s;
+		q.x = (m.m[0][2] + m.m[2][0]) / s;
+		q.y = (m.m[1][2] + m.m[2][1]) / s;
+		q.z = 0.25f * s;
+	}
+	return q;
+}
 
 Point3M posValueAt0(CSceneClass *ctrl)
 {
@@ -58,6 +129,16 @@ Point3M posValueAt0(CSceneClass *ctrl)
 	{
 		float v[3];
 		if (kf->posValueAt0(v)) { p.x = v[0]; p.y = v[1]; p.z = v[2]; }
+	}
+	else if (ctrl && ctrl->classDesc()->classId() == CLASSID_POSITION_XYZ)
+	{
+		p.x = componentAt0(ctrl, 0, 0.0f);
+		p.y = componentAt0(ctrl, 1, 0.0f);
+		p.z = componentAt0(ctrl, 2, 0.0f);
+	}
+	else if (ctrl)
+	{
+		warnController(ctrl, "position");
 	}
 	return p;
 }
@@ -69,6 +150,41 @@ QuatM rotValueAt0(CSceneClass *ctrl)
 	{
 		float v[4];
 		if (kf->rotValueAt0(v)) { q.x = v[0]; q.y = v[1]; q.z = v[2]; q.w = v[3]; }
+	}
+	else if (ctrl && ctrl->classDesc()->classId() == CLASSID_EULER_XYZ)
+	{
+		// The rotation axes of the first, second and third angle per axis order. The order is stored plus
+		// 100 (except order 0) in newer files, where references 0, 1, 2 are the x, y and z angles and the
+		// six orders of three different axes take their angles per axis; older files store the plain order
+		// with the references in angle order. The repeating orders (XYX, YZY, ZXZ) use reference order
+		// in both.
+		static const int s_Orders[9][3] = { { 0, 1, 2 }, { 0, 2, 1 }, { 1, 2, 0 }, { 1, 0, 2 }, { 2, 0, 1 },
+		                                    { 2, 1, 0 }, { 0, 1, 0 }, { 1, 2, 1 }, { 2, 0, 2 } };
+		sint32 stored = 0;
+		const CStorageContainer::TStorageObjectContainer &orphans = ctrl->orphanedChunks();
+		for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+		{
+			const CStorageRaw *raw = it->first == 0x1003 ? dynamic_cast<const CStorageRaw *>(it->second) : nullptr;
+			if (raw && raw->Value.size() >= 4)
+				memcpy(&stored, &raw->Value[0], 4);
+		}
+		const bool perAxis = stored >= 100;
+		const sint32 order = stored % 100;
+		if (stored < 0 || order > 8)
+		{
+			fprintf(stderr, "WARNING: Euler rotation controller with axis order %i not supported; no rotation used\n",
+			        (int)stored);
+			return q;
+		}
+		const float ang[3] = { componentAt0(ctrl, 0, 0.0f), componentAt0(ctrl, 1, 0.0f), componentAt0(ctrl, 2, 0.0f) };
+		Matrix3M m = Matrix3M::identity();
+		for (int i = 0; i < 3; ++i)
+			m = rotateAxisM3(m, s_Orders[order][i], perAxis && order < 6 ? ang[s_Orders[order][i]] : ang[i]);
+		q = rotationToQuat(m);
+	}
+	else if (ctrl)
+	{
+		warnController(ctrl, "rotation");
 	}
 	return q;
 }
@@ -87,6 +203,17 @@ ScaleValueM scaleValueAt0(CSceneClass *ctrl)
 			s.s.x = v[0]; s.s.y = v[1]; s.s.z = v[2];
 			s.q.x = v[3]; s.q.y = v[4]; s.q.z = v[5]; s.q.w = v[6];
 		}
+	}
+	else if (ctrl && ctrl->classDesc()->classId() == CLASSID_SCALE_XYZ)
+	{
+		// the scale axis stays the identity
+		s.s.x = componentAt0(ctrl, 0, 1.0f);
+		s.s.y = componentAt0(ctrl, 1, 1.0f);
+		s.s.z = componentAt0(ctrl, 2, 1.0f);
+	}
+	else if (ctrl)
+	{
+		warnController(ctrl, "scale");
 	}
 	return s;
 }

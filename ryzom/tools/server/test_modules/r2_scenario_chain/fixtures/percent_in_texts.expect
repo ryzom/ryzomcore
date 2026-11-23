@@ -1,0 +1,18 @@
+# The npcs and the scenery object of two missions have a "%" in their names, and so have the texts of
+# the missions. The names go into the texts in the place of <mission_giver>, <mission_target> and
+# <object_name> as they are: a "%" is no escape there (from Lua 5.2 on the translation stopped with
+# "invalid use of '%' in replacement string"; Lua 5.1 dropped the sign).
+
+upgrade: unchanged
+save: ok
+roundtrip: ok
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+
+rt_has: ()talkTo("Ask Ann %1 %d (100%)", @groupToNotify);
+rt_has: Bob 100% pays 50% more to who finds Ann %1 %d
+rt_has: Ann %1 %d is 100% sure
+rt_has: Bob 100% sent you? 10%, no more
+rt_has: ()talkTo("Light Fire 5%", @groupToNotify);
+rt: acts=2 texts=0

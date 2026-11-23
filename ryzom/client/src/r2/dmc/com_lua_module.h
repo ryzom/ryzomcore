@@ -140,7 +140,8 @@ namespace R2
 
 		static sint luaRequestSetSeason(lua_State* state);
 
-		static void setObjectToLua(lua_State* state, CObject* object);
+		/// Pushes the object as a Lua value. Without the ghosts, what the editor adds to a scenario for itself is left out.
+		static void setObjectToLua(lua_State* state, CObject* object, bool withGhosts = true);
 
 		static CObject::TSmartPtr getObjectFromLua(lua_State* state, sint idx=-1);
 
@@ -154,6 +155,15 @@ namespace R2
 
 		/// Parses scenario text into objects of the client factory, with the Name header value as Ghost_Name
 		CObject::TSmartPtr parseScenario(const std::string &text, const std::string &filename, const CScenarioValidator::TValues &values);
+
+		/** Brings a scenario that was read from a file to the versions of this editor, before it is
+		  * uploaded or shown: r2.Version.updateLoadedScenario gets it as a table and updates the table.
+		  * 'place' says where the scenario comes from, and is part of the id of the texts the author gets:
+		  * "File" for a file that is loaded, "Test" for the scenario a test has saved and reads back.
+		  * Returns the scenario to use, which is the one given when the update had nothing to change, and
+		  * nullptr when the update failed: the author has been told, and the scenario is not to be used.
+		  */
+		CObject::TSmartPtr updateLoadedScenario(CObject *scenario, const char *place);
 
 		static sint luaUpdateScenario(lua_State* state);
 
@@ -175,6 +185,7 @@ namespace R2
 		static sint luaRequestSetStringValue(lua_State* state);
 		static sint luaRequestStringValue(lua_State* state);
 		static sint luaGetScenarioObj(lua_State* state);
+		static sint luaRequestSetScenarioVersions(lua_State* state);
 		static sint luaGetNamespace(lua_State* state);
 		static sint luaGetIslandsLocation(lua_State* state);
 		static sint luaObjectToLua(lua_State* state);

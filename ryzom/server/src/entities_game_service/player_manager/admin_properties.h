@@ -23,7 +23,7 @@
 class CCharacter;
 
 /**
- * properties for CSR characters. Use the init method to init this property for CS characters
+ * properties for CSR characters. Every character has them: the privileges of the admin commands decide who uses them
  * \author Nicolas Brigand
  * \author Nevrax France
  * \date 2004
@@ -33,45 +33,27 @@ class CAdminProperties
 	NL_INSTANCE_COUNTER_DECL(CAdminProperties);
 public:
 
-	CAdminProperties()
-		:_Data(NULL){}
-	~CAdminProperties()
-	{
-		if (_Data)
-		{
-			delete _Data;
-			_Data = NULL;
-		}
-	}
-
-	void init()
-	{
-		_Data = new CData;
-	}
-
 	void setMissionMonitoredUser(const TDataSetRow & row)
 	{
-		if ( !_Data ) return;
-		_Data->MissionUser = row;
+		_MissionUser = row;
 	}
 
 	TDataSetRow getMissionMonitoredUser() const
 	{
-		if ( !_Data ) return TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW );
-		return _Data->MissionUser;
+		return _MissionUser;
 	}
 
+	/// The mission of the monitored character at an entry of its journal: the solo missions, which the CSR has at the
+	/// same entries of its own journal, then the team and the guild missions, which it does not see
 	CMission * getMission( uint indexInJournal ) const;
 
-	static void updateCSRJournal( CCharacter * user, CMission * mission,uint8 idx );
+	/// The CSR monitors the missions of no character anymore: the one it monitored can be monitored again, and the
+	/// journal of the CSR, which had its solo missions, is empty again. Nothing is done for a CSR that monitors none.
+	static void stopMonitoringMissions( CCharacter & csr );
 
 private:
-	struct CData
-	{
-		TDataSetRow MissionUser;
-	};
-
-	CData * _Data;
+	// the character whose missions are monitored: no row when there is none
+	TDataSetRow _MissionUser;
 };
 
 

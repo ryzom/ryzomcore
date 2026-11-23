@@ -125,6 +125,8 @@ namespace R2 {
 	{
 	public:
 		virtual void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) = 0;
+		// the server refused the request: nothing changes on the client
+		virtual void refused(CClientEditionModule* /* client */, NLNET::IModuleProxy * /* server */) {}
 		virtual ~IServerAnswerMsg()	{}
 	};
 
@@ -139,6 +141,12 @@ namespace R2 {
 		{
 			client->onScenarioUploaded(server, _Value.getPtr());
 		}
+		// The editor keeps the scenario it has. The author is told: the scenario that was sent, a file that
+		// was loaded or a scenario brought up to date, is not the one of the session.
+		void refused(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
+		{
+			client->systemMsg(server, "ERR", "", "uiR2EDScenarioUploadRefused");
+		}
 	private:
 		R2::CObject::TSmartPtr _Value;
 	};
@@ -150,9 +158,14 @@ namespace R2 {
 			:_InstanceId(instanceId), _AttrName(attrName), _Value( value?value->clone() : nullptr)
 	    {}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
 		{
-			client->onNodeSet(server, _InstanceId, _AttrName, _Value.getPtr());
+			client->onOwnNodeSet(_InstanceId, _AttrName, _Value.getPtr());
+		}
+		// With instant feedback the editor showed the edit already, and keeps it.
+		void refused(CClientEditionModule* /* client */, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
+		{
+			nlwarning("R2CED: the server refused to set '%s' of '%s', the scenario of this editor and the one of the session may differ", _AttrName.c_str(), _InstanceId.c_str());
 		}
 	private:
 		std::string _InstanceId;
@@ -167,9 +180,13 @@ namespace R2 {
 			:_InstanceId(instanceId), _AttrName(attrName), _Position(position), _Key(key), _Value( value?value->clone() : nullptr)
 	    {}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
 		{
-			client->onNodeInserted(server, _InstanceId, _AttrName, _Position, _Key, _Value.getPtr());
+			client->onOwnNodeInserted(_InstanceId, _AttrName, _Position, _Key, _Value.getPtr());
+		}
+		void refused(CClientEditionModule* /* client */, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
+		{
+			nlwarning("R2CED: the server refused to insert in '%s' of '%s' at %d, the scenario of this editor and the one of the session may differ", _AttrName.c_str(), _InstanceId.c_str(), (int)_Position);
 		}
 	private:
 		std::string _InstanceId;
@@ -185,9 +202,13 @@ namespace R2 {
 		CServerAnswerMsgErased(const std::string &instanceId, const std::string &attrName, sint32 position)
 			:_InstanceId(instanceId), _AttrName(attrName), _Position(position){}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
 		{
-			client->onNodeErased(server, _InstanceId, _AttrName, _Position);
+			client->onOwnNodeErased(_InstanceId, _AttrName, _Position);
+		}
+		void refused(CClientEditionModule* /* client */, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
+		{
+			nlwarning("R2CED: the server refused to erase '%s' of '%s' at %d, the scenario of this editor and the one of the session may differ", _AttrName.c_str(), _InstanceId.c_str(), (int)_Position);
 		}
 	private:
 		std::string _InstanceId;
@@ -203,9 +224,14 @@ namespace R2 {
 			:_InstanceId1(instanceId1), _AttrName1(attrName1), _Position1(position1),
 			_InstanceId2(instanceId2), _AttrName2(attrName2), _Position2(position2){}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
 		{
-			client->onNodeMoved(server, _InstanceId1, _AttrName1, _Position1, _InstanceId2, _AttrName2, _Position2);
+			client->onOwnNodeMoved(_InstanceId1, _AttrName1, _Position1, _InstanceId2, _AttrName2, _Position2);
+		}
+		void refused(CClientEditionModule* /* client */, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
+		{
+			nlwarning("R2CED: the server refused to move '%s' of '%s' at %d to '%s' of '%s' at %d, the scenario of this editor and the one of the session may differ",
+				_AttrName1.c_str(), _InstanceId1.c_str(), (int)_Position1, _AttrName2.c_str(), _InstanceId2.c_str(), (int)_Position2);
 		}
 	private:
 		std::string _InstanceId1;
@@ -248,6 +274,10 @@ void CServerAnswerForseener::ack(CClientEditionModule* client, NLNET::IModulePro
 	if (ok)
 	{
 		msg->ok(client, server);
+	}
+	else
+	{
+		msg->refused(client, server);
 	}
 	delete msg;
 	_Answers.erase(found);
@@ -399,6 +429,8 @@ CClientEditionModule::CClientEditionModule()
 	_Initialized = false;
 	_ChannelId = TChanID::Unknown;
 	_Mute = false;
+	m_TestBufferSaved = false;
+	m_TestBufferProtected = false;
 
 	_ServerAnswerForseener = nullptr;
 }
@@ -591,15 +623,22 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 				CScenarioValidator::TValues values;
 				std::string md5, signature;
 
-				if ( sv.setScenarioToLoad("save/r2_buffer.dat", values, md5, signature, true)
+				// the copy of the character that this process saved itself
+				std::map<std::string, std::string>::const_iterator ownSignature = CScenarioValidator::AutoSaveSignatures.find(getScenarioBufferFileName());
+				if ( sv.setScenarioToLoad(getScenarioBufferFileName(), values, md5, signature, true)
 					&& !md5.empty()
-					&& CScenarioValidator::AutoSaveSignature == signature)
+					&& ownSignature != CScenarioValidator::AutoSaveSignatures.end()
+					&& ownSignature->second == signature)
 				{
-					data = _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", values);
+					data = _Client->getComLuaModule().loadLocal(getScenarioBufferFileName(), values);
 				}
 				else
 				{
-					nlinfo("Data corrupted (the server has refused to accept the scenario).");
+					// the file is not the copy this process saved (another editor started the test, or the file is
+					// older): the scenario of the session is asked from the server, instead of an editor without one
+					nlinfo("R2CED: %s is not the scenario of the session, it is asked from the server", getScenarioBufferFileName().c_str());
+					requestMapConnection(bodyConnection.SessionId.asInt(), bodyConnection.MustTp, true);
+					return true;
 				}
 			}
 			_Client->onEditionModeConnected(bodyConnection.EditSlotId, bodyConnection.SessionId.asInt(), data, bodyConnection.VersionName, bodyConnection.MustTp,  bodyConnection.InitialActIndex);
@@ -923,7 +962,7 @@ void CClientEditionModule::requestMapConnection( uint32 scenarioId, bool mustTp,
 	//	CSerialFactoryBackup fb;
 	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
-	proxy.onMapConnectionAsked(this, (TSessionId)scenarioId, mustTp, mustUpdateHighLevel,  R2::TUserRole::ur_editor);
+	proxy.onMapConnectionAsked(this, (TSessionId)scenarioId, mustUpdateHighLevel, mustTp, R2::TUserRole::ur_editor);
 }
 
 
@@ -1088,9 +1127,21 @@ void CClientEditionModule::startScenario(class NLNET::IModuleProxy * proxy, bool
 		requestReconnection();
 	}
 
-	if (!ok && errorReason.empty())
+	if (!ok && !errorReason.empty())
 	{
-		systemMsg(proxy, "ERR", "", errorReason);
+		// The reason is a text id that the service chose, and it is shown: one line of 256 bytes at most, cut
+		// before a character and not inside one, without control characters
+		std::string::size_type len = errorReason.size();
+		if (len > 256)
+		{
+			for (len = 256; len > 0 && ((uint8)errorReason[len] & 0xC0) == 0x80; --len) { }
+		}
+		std::string reason = errorReason.substr(0, len);
+		for (std::string::size_type i = 0; i < len; ++i)
+		{
+			if ((uint8)reason[i] < 0x20 || reason[i] == 0x7f) { reason[i] = ' '; }
+		}
+		systemMsg(proxy, "ERR", "", reason);
 	}
 }
 
@@ -1101,23 +1152,58 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 	//H_AUTO(R2_CClientEditionModule_startingScenario)
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	bool ok = false;
+	bool updateFailed = false;
 	CObjectSerializerServer hlData;
 	CObjectSerializerServer rtData;
 
 
 	if (_Scenario)
 	{
-		// Some times save is refused: be NevraxScenario must not be changed
+		// The message goes to every editor of the session. The one that started the test reads back the scenario
+		// that it saved for the test (requestStartScenario), when the save was written. The others keep the
+		// scenario they show, which is the session's, and do not read their buffer file, which is not of this
+		// start (an autosave, the buffer of an earlier session). Each editor saves its buffer again as it leaves
+		// edition (CEditor::onEditionModeDisconnected), and the return from the test reads that copy; when this
+		// process has no copy of its own there (the save was refused or not written), the return asks the server
+		// for the scenario instead (ADV_CONN in onProcessModuleMessage). A scenario that may not be saved (reserved
+		// to Ruins of Silan, or Nevrax's) is not written to the buffer: the starter translates the scenario it
+		// shows, with the header its save would have written (requestStartScenario).
+		uint32 myUserId = NetMngr.getUserId();
+		bool starter = myUserId == (charId>>4) || ClientCfg.Local;
+		bool protectedScenario = starter && m_TestBufferProtected;
+		bool notSaved = starter && !protectedScenario && !m_TestBufferSaved && !ClientCfg.Local;
+		m_TestBufferSaved = false;
+		m_TestBufferProtected = false;
+		if (starter && !notSaved)
+		{
+			R2::getEditor().getLua().executeScriptNoThrow("r2.Translator.initStartingActIndex()");
+		}
+		if (!starter || notSaved || protectedScenario)
+		{
+			CScenarioValidator::AutoSaveSignatures.erase(getScenarioBufferFileName());
+			if (protectedScenario)
+				_LastReadHeader = m_ProtectedHeader;
+		}
+		else
 		{
 			CScenarioValidator sv;
 			CScenarioValidator::TValues values;
 			std::string md5, signature;
-			R2::getEditor().getLua().executeScriptNoThrow("r2.Translator.initStartingActIndex()");
 
-			sv.setScenarioToLoad("save/r2_buffer.dat", values, md5, signature, true);
+			sv.setScenarioToLoad(getScenarioBufferFileName(), values, md5, signature, true);
 			_LastReadHeader = values;
 			uint32 lastActIndex = _StartingActIndex;
-			CObject::TSmartPtr hlScenario2 =  _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", _LastReadHeader);
+			CObject::TSmartPtr hlScenario2 =  _Client->getComLuaModule().loadLocal(getScenarioBufferFileName(), _LastReadHeader);
+			// The file is read as a file that is loaded is: a scenario of an earlier version of the editor
+			// is brought up to date for the test. (The save leaves a scenario at the versions it has when an
+			// update would change it, see r2.Version.updateScenarioVersions.)
+			// When the update fails the author has been told, and the test does not start: the scenario
+			// the editor has is the one of before the save, which is not the one to translate.
+			if (hlScenario2)
+			{
+				hlScenario2 = _Client->getComLuaModule().updateLoadedScenario(hlScenario2, "Test");
+				if (!hlScenario2) updateFailed = true;
+			}
 			_StartingActIndex  = lastActIndex;
 			if (hlScenario2)
 			{
@@ -1125,15 +1211,11 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 				_Client->scenarioUpdated(hlScenario2, false, lastActIndex);
 			}
 			_StartingActIndex  = lastActIndex;
-
-
 		}
 
-
-		uint32 myUserId = NetMngr.getUserId();
 		std::string connectionState;
 
-		if (myUserId == (charId>>4) || ClientCfg.Local)
+		if (starter)
 		{
 
 			std::string errorMsg;
@@ -1155,7 +1237,19 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			_Factory->setMaxId("RtEntryText", 0);
 			_Factory->setMaxId("RtPlotItem", 0);
 
-			CObject::TSmartPtr rtDataPtr = _Client->getComLuaModule().translateFeatures(hlScenario , errorMsg);
+			CObject::TSmartPtr rtDataPtr;
+			if (notSaved)
+			{
+				errorMsg = "R2: the scenario was not saved for the test (the save was refused, or the file could not be written), the test does not start";
+			}
+			else if (updateFailed)
+			{
+				errorMsg = "R2: the scenario of the test could not be brought up to date, the test does not start";
+			}
+			else
+			{
+				rtDataPtr = _Client->getComLuaModule().translateFeatures(hlScenario, errorMsg);
+			}
 			rtData.setData(rtDataPtr.getPtr());
 
 			if (rtDataPtr.getPtr())
@@ -1224,11 +1318,84 @@ bool CClientEditionModule::requestStartScenario()
 
 	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
+	// The test runs the scenario that r2.Version.save writes to the buffer file of the character: startingScenario reads
+	// that file back, makes it the scenario of the editor and translates it. When the save raises or returns false,
+	// the file is what it was before, the scenario as it was loaded or tested last: the test would run without
+	// the changes made since, and the editor would take that scenario for its own. The test does not start, the
+	// author is told, and the scenario of the editor stays. The save is written when the server accepts it, which
+	// it answers before its broadcast of the start: startingScenario reads the file only when it was written
+	// (m_TestBufferSaved). A scenario that may not be saved (reserved to Ruins of Silan, or Nevrax's, as an
+	// animation loaded from such a file) is not written there, and keeps its access: the save returns
+	// "protected", and the scenario the editor shows is started (m_TestBufferProtected).
+	m_TestBufferSaved = false;
+	if (!R2::getEditor().getLua().executeScriptNoThrow("local saved = " + getScenarioBufferSaveScript()
+		+ " if not saved then error('the scenario was not saved') end r2.TestBufferProtected = (saved == 'protected')"))
+	{
+		nlwarning("R2: the scenario could not be saved for the test, the test does not start");
+		R2::getEditor().getLua().push(std::string("uiR2EDTestSaveFailed"));
+		R2::getEditor().callEnvFunc("onTestStartFailed", 1, 0);
+		return false;
+	}
+	m_TestBufferProtected = R2::getEditor().getEnv()["TestBufferProtected"].toBoolean();
+
+	// The header such a start sends is the one its save would have written (addToSaveList)
+	m_ProtectedHeader.clear();
+	if (m_TestBufferProtected)
+		makeHeaderFromSaveValues(m_ProtectedHeader);
+
 	CEditor::connectionMsg("uimR2EDGoToDMMode");
 
-	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.startingScenario(this);
+	return true;
+}
+
+void CClientEditionModule::makeHeaderFromSaveValues(TScenarioHeader &header)
+{
+	// the values that r2.Version.save made, after the md5 of the body of the scenario, which is its key at the service
+	header.clear();
+	CScenarioValidator::TValues values;
+	NLGUI::CLuaObject saveValues = R2::getEditor().getEnv()["Version"]["ProtectedHeader"];
+	if (saveValues.isTable())
+	{
+		// a table of tables of one entry, as r2.save takes them (CComLuaModule::luaSave)
+		for (NLGUI::CLuaEnumeration entry = saveValues.enumerate(); entry.hasNext(); entry.next())
+		{
+			NLGUI::CLuaObject &field = entry.nextValue();
+			if (!field.isTable())
+				continue;
+			for (NLGUI::CLuaEnumeration pair = field.enumerate(); pair.hasNext(); pair.next())
+			{
+				if (pair.nextKey().isString() && pair.nextValue().isString())
+					values.push_back(std::make_pair(pair.nextKey().toString(), pair.nextValue().toString()));
+			}
+		}
+	}
+	CScenarioValidator sv;
+	std::string headerMd5;
+	if (sv.setScenarioToSave(getScenarioBufferFileName(), getCurrentScenario()->getHighLevel(), values, headerMd5))
+		header.push_back(std::make_pair(std::string("BodyMD5"), sv.getBodyMd5()));
+	header.insert(header.end(), values.begin(), values.end());
+}
+
+bool CClientEditionModule::makeCurrentScenarioHeader(TScenarioHeader &header)
+{
+	//H_AUTO(R2_CClientEditionModule_makeCurrentScenarioHeader)
+	header.clear();
+	if (!getCurrentScenario() || !getCurrentScenario()->getHighLevel())
+	{
+		nlwarning("R2: no scenario in the editor, no header to make");
+		return false;
+	}
+	// The name of the buffer, as for a test: a scenario that may not be saved there gives its values as well
+	// (see requestStartScenario). The character part of the name has letters, digits and '_' only.
+	if (!R2::getEditor().getLua().executeScriptNoThrow("if not r2.Version.save(\"" + getScenarioBufferFileName()
+		+ "\", true) then error('the header of the scenario could not be made') end"))
+	{
+		nlwarning("R2: the header of the scenario of the editor could not be made");
+		return false;
+	}
+	makeHeaderFromSaveValues(header);
 	return true;
 }
 
@@ -1755,38 +1922,79 @@ void CClientEditionModule::onScenarioUploaded(NLNET::IModuleProxy * /* sender */
 	_Client->scenarioUpdated(hlScenario.getData(), false, 1);//give ownership
 }
 
-// The client request to set a node on a hl scenario.
+// The server sends the edits it accepts to the other editors of the session, and only an answer to the
+// editor that made it (CServerAnswerForseener): these four come from another editor, and are shown even
+// when the answers to this editor's own edits are muted.
+
+// Another editor set a node on the hl scenario.
 void CClientEditionModule::onNodeSet(NLNET::IModuleProxy * /* sender */, const std::string &instanceId, const std::string &attrName, const R2::CObjectSerializerClient &value)
 {
 	//H_AUTO(R2_CClientEditionModule_onNodeSet)
-	if (_Mute) return;
 	CObject::TSmartPtr temp = value.getData();
-	_Client->nodeSet(instanceId, attrName, temp);
+	// the message can come with the tree that is no value, or with compressed data that gives no tree
+	if (!temp)
+	{
+		nlwarning("R2CED: the server set no value in '%s' of '%s', refused", attrName.c_str(), instanceId.c_str());
+		return;
+	}
+	_Client->otherEditorNodeSet(instanceId, attrName, temp);
 }
 
-// The ServerEditionMode inserts a node on a hl scenario.
+// Another editor inserted a node in the hl scenario.
 void CClientEditionModule::onNodeInserted(NLNET::IModuleProxy * /* sender */, const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObjectSerializerClient &value)
 {
 	//H_AUTO(R2_CClientEditionModule_onNodeInserted)
-	if (_Mute) return;
-	_Client->nodeInserted( instanceId, attrName, position, key, value.getData()); //todo ownership
+	CObject::TSmartPtr temp = value.getData();
+	// the message can come with the tree that is no value, or with compressed data that gives no tree
+	if (!temp)
+	{
+		nlwarning("R2CED: the server inserted no value in '%s' of '%s', refused", attrName.c_str(), instanceId.c_str());
+		return;
+	}
+	_Client->otherEditorNodeInserted(instanceId, attrName, position, key, temp); //todo ownership
 }
 
-// The ServerEditionMode erases a node on a hl scenario.
+// Another editor erased a node of the hl scenario.
 void CClientEditionModule::onNodeErased(NLNET::IModuleProxy * /* sender */, const std::string &instanceId, const std::string &attrName, sint32 position)
 {
 	//H_AUTO(R2_CClientEditionModule_onNodeErased)
-	if (_Mute) return;
-	_Client->nodeErased( instanceId, attrName, position);
+	_Client->otherEditorNodeErased(instanceId, attrName, position);
 }
 
-// The ServerEditionMode a move node on a hl scenario.
+// Another editor moved a node of the hl scenario.
 void CClientEditionModule::onNodeMoved(NLNET::IModuleProxy * /* sender */, const std::string &instanceId1, const std::string &attrName1, sint32 position1, const std::string &instanceId2, const std::string &attrName2, sint32 position2)
 {
 	//H_AUTO(R2_CClientEditionModule_onNodeMoved)
-	if (_Mute) return;
-	_Client->nodeMoved(instanceId1, attrName1, position1,
+	_Client->otherEditorNodeMoved(instanceId1, attrName1, position1,
 			instanceId2, attrName2, position2);
+}
+
+// The server accepted an edit of this editor. With instant feedback (setMute) the editor showed it when it
+// was made; else it is shown now.
+void CClientEditionModule::onOwnNodeSet(const std::string &instanceId, const std::string &attrName, const R2::CObject *value)
+{
+	if (_Mute || !value) return;
+	CObject::TSmartPtr temp = value->clone();
+	_Client->nodeSet(instanceId, attrName, temp);
+}
+
+void CClientEditionModule::onOwnNodeInserted(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObject *value)
+{
+	if (_Mute || !value) return;
+	CObject::TSmartPtr temp = value->clone();
+	_Client->nodeInserted(instanceId, attrName, position, key, temp);
+}
+
+void CClientEditionModule::onOwnNodeErased(const std::string &instanceId, const std::string &attrName, sint32 position)
+{
+	if (_Mute) return;
+	_Client->nodeErased(instanceId, attrName, position);
+}
+
+void CClientEditionModule::onOwnNodeMoved(const std::string &instanceId1, const std::string &attrName1, sint32 position1, const std::string &instanceId2, const std::string &attrName2, sint32 position2)
+{
+	if (_Mute) return;
+	_Client->nodeMoved(instanceId1, attrName1, position1, instanceId2, attrName2, position2);
 }
 
 void CClientEditionModule::onQuotaUpdated(NLNET::IModuleProxy * /* senderModuleProxy */, uint32 maxNpcs, uint32 maxStaticObjects)
@@ -2365,22 +2573,55 @@ bool CClientEditionModule::addToUserComponentLoadList( const std::string& filena
 	{
 		R2::getEditor().callEnvFunc( "displayModifiedUserComponentFileError", 0, 0);
 		nlwarning("setUserComponentToLoad failed");
-		return false;
-	}
-
-	if ( !_UserComponentToLoad.insert( std::make_pair(md5, ucv)).second )
-	{
-		nlwarning("Ask 2 time the load of the same user component?"); //or the same empty uc file
 		delete ucv;
 		return false;
 	}
-	DROP_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
+
+	if (_ServerEditionProxy == NULL)
+	{
+		nlwarning("The user component file '%s' is not loaded: the scenario service is not connected", filename.c_str());
+		systemMsg(NULL, "ERR", "", "uiR2EDServerNotConnected");
+		delete ucv;
+		return false;
+	}
+
+	// as for the scenario files (addToLoadList): a newer load of the same header md5 takes the place of the one
+	// still waiting for the answer of the scenario service
+	TUserComponentToLoad::iterator found(_UserComponentToLoad.find(md5));
+	if (found != _UserComponentToLoad.end())
+	{
+		nldebug("The load of the user component file '%s' takes the place of a load still waiting for the scenario service", filename.c_str());
+		// Another file with the same header md5 (two files without a header have the same, empty, one): the
+		// file that waited gets no answer any more. The scripts are told that its load has ended, with the
+		// text for the author.
+		const std::string replaced = found->second->getFilename();
+		delete found->second;
+		found->second = ucv;
+		if (replaced != filename)
+		{
+			userComponentLoadEnded(replaced, "uiR2EDUserComponentNotLoaded");
+		}
+	}
+	else
+	{
+		_UserComponentToLoad.insert(std::make_pair(md5, ucv));
+	}
 
 	CShareServerEditionItfProxy serverEditionModule(_ServerEditionProxy);
 	serverEditionModule.loadUserComponentFile(this, md5, signature);
 	return true;
 }
 
+
+void CClientEditionModule::userComponentLoadEnded(const std::string &filename, const std::string &messageId)
+{
+	// r2.onUserComponentLoadEnded(filename, messageId): the load of a user component file has ended without
+	// the file. messageId is the id of the text for the author, with the file name as %1, or empty when the
+	// author has been told already.
+	R2::getEditor().getLua().push(filename);
+	R2::getEditor().getLua().push(messageId);
+	R2::getEditor().callEnvFunc("onUserComponentLoadEnded", 2, 0);
+}
 
 void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /* senderModuleProxy */, const std::string& md5, bool ok)
 {
@@ -2389,7 +2630,8 @@ void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /
 	TUserComponentToLoad::iterator found(_UserComponentToLoad.find(md5));
 	if (found == _UserComponentToLoad.end())
 	{
-		nlwarning("The client has ask more than one time to save the same file");
+		// the answer to a load that a newer one replaced, which had its answer already
+		nldebug("An answer to the load of a user component file finds no load waiting (md5 '%s')", md5.c_str());
 		return;
 	}
 
@@ -2398,8 +2640,11 @@ void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /
 
 	if (!ok)
 	{
-		nlwarning("The server has refuse the client to load the a file"); //should (can) not happen
-		this->systemMsg(nullptr, "ERR", "", "The server has refuse the client to load the a file");
+		// the key policies of the scenario service refuse the signature of the file
+		nlinfo("The scenario service refuses to load a user component file (md5 '%s')", md5.c_str());
+		this->systemMsg(nullptr, "ERR", "", "uiR2EDServerRefuseToLoad");
+		// the author has the message above: the scripts are told that the load of the file has ended
+		userComponentLoadEnded(userComponentToLoad->getFilename(), "");
 		return;
 	}
 
@@ -2430,7 +2675,11 @@ void CClientEditionModule::saveScenarioFileAccepted(NLNET::IModuleProxy *senderM
 
 	if (ok)
 	{
-		scenarioToSave->applySave(signature);
+		// the buffer of the scenario is what a test reads back (startingScenario)
+		if (scenarioToSave->applySave(signature) && scenarioToSave->getFilename() == getScenarioBufferFileName())
+		{
+			m_TestBufferSaved = true;
+		}
 	}
 	else
 	{
@@ -2448,15 +2697,36 @@ bool CClientEditionModule::addToLoadList( const std::string& filename, CScenario
 	std::string signature;
 	bool ok = true;
 	ok = sv->setScenarioToLoad(filename, values, md5, signature, ClientCfg.CheckR2ScenarioMD5);
-	if (!ok){ return false; }
-
-	if ( !_ScenarioToLoad.insert( std::make_pair(md5, sv)).second )
+	if (!ok)
 	{
-		nlwarning("Ask 2 time the load of the same scenario?"); //or the same empty scenario
 		delete sv;
 		return false;
 	}
-	DROP_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
+
+	if (_ServerEditionProxy == NULL)
+	{
+		nlwarning("The scenario file '%s' is not loaded: the scenario service is not connected", filename.c_str());
+		systemMsg(NULL, "ERR", "", "uiR2EDServerNotConnected");
+		delete sv;
+		return false;
+	}
+
+	// A load waits for the answer of the scenario service, which names it by the md5 of the header. Every file
+	// without a header (all the scenarios of the first editors) has the same, empty, md5: a newer load of such a
+	// file, or of the same file, takes the place of the one still waiting, and the first answer goes to the newer
+	// one. That answer is for the signature of the first request, which files of one md5 share unless one was
+	// signed with another key or its header edited by hand.
+	TScenarioToLoad::iterator found(_ScenarioToLoad.find(md5));
+	if (found != _ScenarioToLoad.end())
+	{
+		nldebug("The load of the scenario file '%s' takes the place of a load still waiting for the scenario service", filename.c_str());
+		delete found->second;
+		found->second = sv;
+	}
+	else
+	{
+		_ScenarioToLoad.insert(std::make_pair(md5, sv));
+	}
 
 	CShareServerEditionItfProxy serverEditionModule(_ServerEditionProxy);
 	serverEditionModule.loadScenarioFile(this, md5, signature);
@@ -2518,7 +2788,7 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 	// only a file that parsed becomes the local copy, which is read back the same way
 	if (object && CFile::fileExists(filename))
 	{
-		CFile::copyFile("save/r2_buffer.dat", filename);
+		CFile::copyFile(getScenarioBufferFileName(), filename);
 	}
 }
 
@@ -2537,7 +2807,8 @@ void CClientEditionModule::loadScenarioFileAccepted(NLNET::IModuleProxy * /* sen
 	TScenarioToLoad::iterator found(_ScenarioToLoad.find(md5));
 	if (found == _ScenarioToLoad.end())
 	{
-		nlwarning("The client has ask more than one time to save the same file");
+		// the answer to a load that a newer one replaced, which had its answer already
+		nldebug("An answer to the load of a scenario file finds no load waiting (md5 '%s')", md5.c_str());
 		return;
 	}
 
@@ -2546,8 +2817,14 @@ void CClientEditionModule::loadScenarioFileAccepted(NLNET::IModuleProxy * /* sen
 
 	if (!ok)
 	{
-		nlwarning("The server has refuse the client to load the a file"); //should (can) not append
-		this->systemMsg(nullptr, "ERR", "", "The server has refuse the client to load the a file");
+		// the key policies of the scenario service refuse the signature of the file
+		nlinfo("The scenario service refuses to load a scenario file (md5 '%s')", md5.c_str());
+		// an animation launched from the terminal starts no more from that file, as when its data is invalid
+		// (CDynamicMapClient::loadAnimationFromBuffer): a later return to the mode would try it again. The form
+		// comes back with the message (r2.onSystemMessageReceived), as the author left it.
+		if (R2::getEditor().getMode() == CEditor::AnimationModeLoading)
+			R2::getEditor().setStartingAnimationFilename("");
+		this->systemMsg(nullptr, "ERR", "", "uiR2EDServerRefuseToLoad");
 		return;
 	}
 
@@ -2790,7 +3067,18 @@ void CMessageSpliter::sendSplitedMsg(uint32 charId, const NLNET::CMessage& msg, 
 // We received first a multiPartMsgHead, then X multiPartMsgBody, then one multiPartMsgFoot
 void CClientEditionModule::multiPartMsgHead(NLNET::IModuleProxy * /* sender */,  const std::string& msgName, uint32 nbPacket, uint32 size)
 {
-	R2::getEditor().getLua().executeScriptNoThrow( NLMISC::toString("r2:onMessageSendingStart('%s', %u, %u)",msgName.c_str(), nbPacket, size ) );
+	// This module also exists without the editor (a Ring session without the editor's interface), and outlives it
+	if (!R2::getEditor().isInitialized())
+	{
+		nlwarning("R2: the start of the message '%s' is not shown, the editor is not started", msgName.c_str());
+		return;
+	}
+	// the name comes from the service: it is given to the function as a value, not written into Lua source
+	CLuaState &lua = R2::getEditor().getLua();
+	lua.push(msgName);
+	lua.push(nbPacket);
+	lua.push(size);
+	R2::getEditor().callEnvMethod("onMessageSendingStart", 3, 0);
 }
 
 void CClientEditionModule::multiPartMsgBody(NLNET::IModuleProxy * /* sender */, uint32 packetId, uint32 packetSize)

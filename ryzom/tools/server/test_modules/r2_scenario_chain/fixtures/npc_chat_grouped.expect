@@ -1,0 +1,33 @@
+# The leader of a group has a chat sequence, which an activity step of the group starts. The dialog
+# stands near the npc, whose position is one in its group, and the handler that starts it is one of the
+# group, which has the activity step.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteChatSequences(1)
+scenario_at: Acts[1].Features = <size 2>
+scenario_at: Acts[1].Features[1].Class = ChatSequence
+scenario_at: Acts[1].Features[1].Name = Zora Orders
+scenario_at: Acts[1].Features[1].Position.x = 24371
+scenario_at: Acts[1].Features[1].Position.y = -1362
+scenario_at: Acts[1].Features[0].Components[0].Components[0].Behavior.ChatSequences = <size 0>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions = <size 1>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Event.Type = begin of activity step
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[0].Action.Type = starts dialog
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[0].Entity = @Acts[1].Features[1].InstanceId
+rt: acts=2 texts=1

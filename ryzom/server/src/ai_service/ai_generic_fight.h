@@ -30,8 +30,8 @@ class CModEntityPhysical;
 class CBotPlayer;
 
 // a big bad global var !
-extern CAIEntityPhysical	*TempSpeaker;
-extern CBotPlayer			*TempPlayer;
+extern NLMISC::CRefPtr<CAIEntityPhysical> TempSpeaker;
+extern NLMISC::CRefPtr<CBotPlayer> TempPlayer;
 extern float getDistBetWeen(CAIEntityPhysical& creat1, CAIEntityPhysical& creat2);
 
 template <class TVectorSrc, class TVectorDst>
@@ -318,6 +318,24 @@ public:
 		{
 			CBot* bot = (*it);
 			if (!reorganizeIteration(bot))
+				break;
+		}
+	}
+	
+	/// The same for a list that an iteration can change: the begin of a fight is an event of the
+	/// group, and a handler that despawns or spawns bots takes them out of the list or adds them.
+	/// No iterator is kept: each step reads the size and the element again. The walk has at most
+	/// as many steps as the list had bots when it began. A bot taken out at or before the current
+	/// step moves the later ones down by one, so one of them is not visited in this update: the next
+	/// update visits it.
+	void reorganize(std::vector<CBot*> const& bots)
+	{
+		H_AUTO(CFightOrganizer_reorganize);
+		_HaveEnnemy = false;
+		
+		for (size_t i=0, count=bots.size(); i<count && i<bots.size(); ++i)
+		{
+			if (!reorganizeIteration(bots[i]))
 				break;
 		}
 	}

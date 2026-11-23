@@ -159,6 +159,10 @@ protected:
 	// get the input data for camera 3d person collision test
 	void getCamera3rdPersonSetupInternal(CVector &cameraStart, CVector &cameraEnd, CVector &cameraTestStart, float &testStartDecal) const;
 
+	// What the third person camera adds to its height and multiplies its distance by while the user rides a mount
+	float mountCameraHeightOffset() const;
+	float mountCameraDistanceFactor() const;
+
 };
 
 

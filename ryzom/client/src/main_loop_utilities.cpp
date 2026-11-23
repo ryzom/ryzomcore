@@ -49,6 +49,24 @@ void initStereoDisplayDevice(); // from init.cpp
 void releaseStereoDisplayDevice(); // from release.cpp
 
 //---------------------------------------------------
+// Reset the sound manager. It makes its mixer again, and that fails as at startup when the sound
+// driver or the device of 'SoundDevice' is gone: the sound is off then, the warning tells why.
+//---------------------------------------------------
+static void resetSoundManager()
+{
+	try
+	{
+		SoundMngr->reset();
+	}
+	catch(const Exception &e)
+	{
+		nlwarning("reset : Error when creating 'SoundMngr' : %s", e.what());
+		delete SoundMngr;
+		SoundMngr = NULL;
+	}
+}
+
+//---------------------------------------------------
 // Compare ClientCfg and LastClientCfg to know what we must update
 //---------------------------------------------------
 void updateFromClientCfg()
@@ -310,7 +328,7 @@ void updateFromClientCfg()
 	if (ClientCfg.GPUSkinning != LastClientCfg.GPUSkinning)
 	{
 		if (Scene)
-			Scene->enableGPUSkinning(ClientCfg.GPUSkinning);
+			Scene->enableGPUSkinning(ClientCfg.GPUSkinning && Driver->supportGPUSkinning());
 	}
 
 	// INTERFACE works
@@ -318,12 +336,6 @@ void updateFromClientCfg()
 
 	// INPUTS
 	//---------------------------------------------------
-	if (ClientCfg.CursorSpeed != LastClientCfg.CursorSpeed)
-		SetMouseSpeed (ClientCfg.CursorSpeed);
-
-	if (ClientCfg.CursorAcceleration != LastClientCfg.CursorAcceleration)
-		SetMouseAcceleration (ClientCfg.CursorAcceleration);
-
 	if (ClientCfg.HardwareCursor != LastClientCfg.HardwareCursor)
 	{
 		if (ClientCfg.HardwareCursor != IsMouseCursorHardware())
@@ -340,10 +352,11 @@ void updateFromClientCfg()
 	bool	mustReloadSoundMngrContinent= false;
 
 	// disable/enable sound?
-	if (ClientCfg.SoundOn != LastClientCfg.SoundOn || ClientCfg.DriverSound != LastClientCfg.DriverSound)
+	if (ClientCfg.SoundOn != LastClientCfg.SoundOn || ClientCfg.DriverSound != LastClientCfg.DriverSound
+		|| ClientCfg.SoundDevice != LastClientCfg.SoundDevice)
 	{
-		// changing sound driver
-		if (ClientCfg.DriverSound != LastClientCfg.DriverSound)
+		// changing sound driver or output device
+		if (ClientCfg.DriverSound != LastClientCfg.DriverSound || ClientCfg.SoundDevice != LastClientCfg.SoundDevice)
 		{
 			if (SoundMngr)
 			{
@@ -379,6 +392,14 @@ void updateFromClientCfg()
 			{
 				SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
 				SoundMngr->setGameMusicVolume(ClientCfg.SoundGameMusicVolume);
+				// and the MP3 player's, which the interface only sets when its slider moves
+				CCDBNodeLeaf *mp3Volume = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MP3_VOLUME", false);
+				if (mp3Volume)
+				{
+					float volume = mp3Volume->getValue32() / 255.f;
+					clamp(volume, 0.f, 1.f);
+					SoundMngr->setUserMusicVolume(volume);
+				}
 			}
 		}
 		else
@@ -393,7 +414,7 @@ void updateFromClientCfg()
 	if ( SoundMngr && LastClientCfg.SoundOn &&
 		(ClientCfg.UseEax != LastClientCfg.UseEax) )
 	{
-		SoundMngr->reset();
+		resetSoundManager();
 
 		mustReloadSoundMngrContinent= true;
 	}
@@ -402,7 +423,7 @@ void updateFromClientCfg()
 	if ( SoundMngr && LastClientCfg.SoundOn &&
 		(ClientCfg.SoundForceSoftwareBuffer != LastClientCfg.SoundForceSoftwareBuffer) )
 	{
-		SoundMngr->reset();
+		resetSoundManager();
 
 		mustReloadSoundMngrContinent= true;
 	}

@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<!-- Islands for the tests of the scenario chain tool: islands of the editor with the boxes and zones its
+     island files have for them today (six desert islands and a lake island). The entry points are in
+     r2_entry_points.txt. -->
+<islands>
+  <complete_island island="uiR2_Deserts05" continent="r2_desert" xmin="24161" ymin="-1598" xmax="24709" ymax="-956">
+    <zone name="10_FV"/>
+    <zone name="10_FW"/>
+    <zone name="10_FX"/>
+    <zone name="10_FY"/>
+    <zone name="7_FV"/>
+    <zone name="7_FW"/>
+    <zone name="7_FX"/>
+    <zone name="7_FY"/>
+    <zone name="8_FV"/>
+    <zone name="8_FW"/>
+    <zone name="8_FX"/>
+    <zone name="8_FY"/>
+    <zone name="9_FV"/>
+    <zone name="9_FW"/>
+    <zone name="9_FX"/>
+    <zone name="9_FY"/>
+  </complete_island>
+  <complete_island island="uiR2_Deserts07" continent="r2_desert" xmin="25755" ymin="-1597" xmax="26238" ymax="-956">
+    <zone name="10_GF"/>
+    <zone name="10_GG"/>
+    <zone name="10_GH"/>
+    <zone name="7_GF"/>
+    <zone name="7_GG"/>
+    <zone name="7_GH"/>
+    <zone name="8_GF"/>
+    <zone name="8_GG"/>
+    <zone name="8_GH"/>
+    <zone name="9_GF"/>
+    <zone name="9_GG"/>
+    <zone name="9_GH"/>
+  </complete_island>
+  <complete_island island="uiR2_Deserts20" continent="r2_desert" xmin="25108" ymin="-2412" xmax="25776" ymax="-1864">
+    <zone name="12_GD"/>
+    <zone name="13_GB"/>
+    <zone name="13_GC"/>
+    <zone name="13_GD"/>
+    <zone name="13_GE"/>
+    <zone name="14_GB"/>
+    <zone name="14_GC"/>
+    <zone name="14_GD"/>
+    <zone name="14_GE"/>
+    <zone name="15_GC"/>
+    <zone name="15_GD"/>
+    <zone name="15_GE"/>
+    <zone name="16_GA"/>
+  </complete_island>
+  <complete_island island="uiR2_Deserts22" continent="r2_desert" xmin="26843" ymin="-2117" xmax="27134" ymax="-1808">
+    <zone name="12_GM"/>
+    <zone name="13_GL"/>
+    <zone name="13_GM"/>
+    <zone name="13_GN"/>
+    <zone name="14_GM"/>
+  </complete_island>
+  <complete_island island="uiR2_Deserts23" continent="r2_desert" xmin="27345" ymin="-2416" xmax="27690" ymax="-1808">
+    <zone name="12_GP"/>
+    <zone name="12_GQ"/>
+    <zone name="13_GP"/>
+    <zone name="13_GQ"/>
+    <zone name="14_GP"/>
+    <zone name="14_GQ"/>
+    <zone name="15_GP"/>
+    <zone name="15_GQ"/>
+  </complete_island>
+  <complete_island island="uiR2_Deserts25" continent="r2_desert" xmin="21271" ymin="-2895" xmax="21957" ymax="-2362">
+    <zone name="15_FF"/>
+    <zone name="15_FG"/>
+    <zone name="16_FD"/>
+    <zone name="16_FE"/>
+    <zone name="16_FF"/>
+    <zone name="16_FG"/>
+    <zone name="16_FH"/>
+    <zone name="17_FD"/>
+    <zone name="17_FE"/>
+    <zone name="17_FF"/>
+    <zone name="17_FG"/>
+    <zone name="18_FD"/>
+    <zone name="18_FE"/>
+    <zone name="18_FF"/>
+    <zone name="18_FG"/>
+  </complete_island>
+</islands>

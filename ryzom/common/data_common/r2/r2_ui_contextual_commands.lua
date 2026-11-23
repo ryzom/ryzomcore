@@ -134,7 +134,7 @@ function r2.ContextualCommands:addToolbarCommand(buttonList, commandDesc, index)
 		icon_over   = iconOver,
 		icon_pushed = iconPushed,
 		onclick_l   = "lua",
-		params_l    = "r2.ContextualCommands:runCommand(" .. tostring(index) .. ")",
+		params_l    = r2:uiCall("r2.ContextualCommands:runCommand", index),
 		w = "32",
 		h = "32",
 		offset_x = select(commandDesc.Separator == true, 8, 0)		

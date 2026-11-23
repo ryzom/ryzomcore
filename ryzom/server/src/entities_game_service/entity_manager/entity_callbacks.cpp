@@ -460,7 +460,6 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	{
 		const std::string & privStr = player->getUserPriv();
 		PlayerManager.addSpecialUser( privStr,c->getId() );
-		c->getAdminProperties().init();
 	}
 	if (player->havePriv(NeverAggroPriv))
 	{

@@ -66,6 +66,13 @@ public:
 	inline const NLMISC::CEntityId & getEntityId(TAIAlias aiid) const;
 
 	/**
+	 * Get a bot entityId, for a caller that knows that the bot may not be there (its AI service is down or starts)
+	 * \param aiid : the AI id of the bot
+	 * \return the entityId of the searched bot, CEntityId::Unknown when no bot has this AI id
+	 */
+	inline const NLMISC::CEntityId & findEntityId(TAIAlias aiid) const;
+
+	/**
 	 * Get a bot AIId
 	 * \param entityId: the entityId of the searched bot
 	 * \return he AI id of the bot
@@ -366,6 +373,17 @@ inline const NLMISC::CEntityId& CAIAliasTranslator::getEntityId(TAIAlias aiid) c
 #endif
 	return NLMISC::CEntityId::Unknown;
 }// CAIAliasTranslator getEntityId
+
+//-----------------------------------------------
+// CAIAliasTranslator findEntityId
+//-----------------------------------------------
+inline const NLMISC::CEntityId& CAIAliasTranslator::findEntityId(TAIAlias aiid) const
+{
+	CHashMap< uint, NLMISC::CEntityId >::const_iterator it = _HashTableAiId.find(aiid);
+	if(  it != _HashTableAiId.end() )
+		return (*it).second;
+	return NLMISC::CEntityId::Unknown;
+}// CAIAliasTranslator findEntityId
 
 
 

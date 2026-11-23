@@ -670,7 +670,7 @@ void CPlugin::init(IPluginAccess *pluginAccess)
 		std::string sheetIDPath = CPath::lookup("sheet_id.bin", false, false);
 		if (sheetIDPath.empty())
 		{
-			_PluginAccess->errorMessage(NULL, "Couldn't find sheet_id.bin, Please check shard monitor paths in world_editor_plugin.cfg.", "Warning", MB_OK|MB_ICONEXCLAMATION);		
+			errorMessage("Couldn't find sheet_id.bin, please check the shard monitor paths in world_editor_plugin.cfg.");
 		}	
 		else
 		{			
@@ -680,7 +680,7 @@ void CPlugin::init(IPluginAccess *pluginAccess)
 	}
 	catch (const Exception &e)
 	{
-		errorMessage (e.what ());
+		errorMessage("%s", e.what());
 	}
 }
 
@@ -733,7 +733,7 @@ void CPlugin::connectDisconnect()
 			}
 			catch(const ESocket &e)
 			{
-				errorMessage (e.what ());
+				errorMessage("%s", e.what());
 				return;
 			}
 			
@@ -782,7 +782,7 @@ void CPlugin::connectDisconnect()
 	}
 	catch (const Exception &e)
 	{
-		errorMessage (e.what ());
+		errorMessage("%s", e.what());
 		delete _Client;
 		_Client = NULL;
 	}

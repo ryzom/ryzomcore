@@ -31,6 +31,7 @@
 // NeL
 #include "nel/misc/rgba.h"
 
+class CChatMessage;
 
 
 
@@ -118,7 +119,8 @@ public:
 	/** Display a message for the given people
 	  * If the window is closed, it causes it to blink (and also the parent window)
 	  */
-	void displayMessage(uint index, const std::string &msg, NLMISC::CRGBA col, uint numBlinks = 0);
+	void displayMessage(uint index, const std::string &msg, NLMISC::CRGBA col, uint numBlinks = 0,
+		const CChatMessage *sharedMessage = NULL);
 	void displayLocalPlayerTell(const std::string &receiver, uint index, const std::string &msg, uint numBlinks = 0);
 	// Is the given people window visible ?
 	bool isPeopleChatVisible(uint index) const;
@@ -185,6 +187,10 @@ private:
 	bool                            _Savable;
 private:
 	void			  updatePeopleMenu(uint index);
+	// Tell if the entry has a chat and this chat is the tell window of the name the entry has now
+	bool isChatOfPeople(uint index) const;
+	// The chat of the entry, forgotten when it is the tell window of a name the entry had before. NULL if none.
+	CGroupContainer *getValidChat(uint index);
 	// from CGroupContainer::IChildrenObs
 	virtual void childrenMoved(uint srcIndex, uint destIndex, CGroupContainer *children) NL_OVERRIDE;
 

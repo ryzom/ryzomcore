@@ -115,9 +115,13 @@
 #include "../../common/src/game_share/ryzom_database_banks.h"
 
 #include "chat_text_manager.h"
+#include "emoji_manager.h"
+#include "emoji_picker.h"
 #include "../npc_icon.h"
 
 #include "nel/gui/lua_helper.h"
+#include "../client_ctrl.h"
+#include "nel/misc/json.h"
 using namespace NLGUI;
 #include "nel/gui/lua_ihm.h"
 #include "nel/web/curl_certificates.h"
@@ -142,6 +146,9 @@ using namespace NLGUI;
 #include "../item_group_manager.h"
 
 #include "group_html_webig.h"
+
+// The build options that are interface feature flags (NL_MSQUIC_AVAILABLE). Last, to keep its macros out of the headers
+#include "config.h"
 
 using namespace NLMISC;
 
@@ -478,6 +485,14 @@ CInterfaceManager::CInterfaceManager()
 	parser->clearFeatureFlags();
 	for (size_t i = 0; i < ClientCfg.UiFeatureFlags.size(); ++i)
 		parser->addFeatureFlag(ClientCfg.UiFeatureFlags[i]);
+
+	// build options that the interface depends on, so that it only uses what this client has
+#ifdef RYZOM_BG_DOWNLOADER
+	parser->addFeatureFlag("bg_downloader");
+#endif
+#ifdef NL_MSQUIC_AVAILABLE
+	parser->addFeatureFlag("quic");
+#endif
 
 	parser->setSetupOptionsCallback( this );
 	parser->addModule( "scene3d", new CIF3DSceneParser() );
@@ -965,6 +980,7 @@ void badXMLParseMessageBox()
 																		NL3D::UDriver::exclamationIcon);
 	if (ret == NL3D::UDriver::yesId)
 	{
+		ClientCtrl::setExitReason("the interface XML did not load, and the user chose to quit");
 		extern void quitCrashReport ();
 		quitCrashReport ();
 		exit (EXIT_FAILURE);
@@ -983,6 +999,8 @@ void CInterfaceManager::initInGame()
 
 	// Init LUA Scripting
 	initLUA();
+
+	CEmojiManager::getInstance().init();
 
 	// Clear the action manager
 	Actions.clear();
@@ -1294,6 +1312,12 @@ void CInterfaceManager::configureQuitDialogBox()
 			}
 		}
 	}
+	else
+	{
+		// The interface XML that declares the dialog is missing or failed to load
+		nlwarning("Interface element '%s' not found, the quit dialog box is not configured", quitDialogStr.c_str());
+		return;
+	}
 
 	// Make all controls have the same size
 	CInterfaceGroup *quitDlgMain = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(quitDialogMainStr));
@@ -1452,6 +1476,12 @@ void CInterfaceManager::uninitInGame1 ()
 		ChatDisplayer = nullptr;
 	}
 
+	// Release interface help before inventory manager
+	CInterfaceHelp::release();
+
+	CEmojiPicker::releaseInstance();
+	CEmojiManager::releaseInstance();
+
 	// Release inventory manager
 	CInventoryManager::releaseInstance();
 	// Same for temp inventory manager
@@ -1526,9 +1556,6 @@ void CInterfaceManager::uninitInGame1 ()
 
 	// Uninit macro manager
 	CMacroCmdManager::getInstance()->uninitInGame();
-
-	// Release interface help
-	CInterfaceHelp::release();
 
 	// Release guild manager
 	CGuildManager::release();
@@ -1967,13 +1994,20 @@ bool CInterfaceManager::loadConfig (const string &filename)
 			{
 				// create placeholder player landmarks file so saveLandmarks will use it
 				// even if shared landmarks file exists
-				COFile f;
-				if (f.open(lmfile, false, false, true))
+				try
 				{
-					std::string xml;
-					xml = "<?xml version=\"1.0\"?>\n<interface_config />";
-					f.serialBuffer((uint8 *)xml.c_str(), xml.size());
-					f.close();
+					COFile f;
+					if (f.open(lmfile, false, false, true))
+					{
+						std::string xml;
+						xml = "<?xml version=\"1.0\"?>\n<interface_config />";
+						f.serialBuffer((uint8 *)xml.c_str(), xml.size());
+						f.close();
+					}
+				}
+				catch (const Exception &e)
+				{
+					nlwarning("Error while writing the file %s : %s.", lmfile.c_str(), e.what());
 				}
 			}
 		}
@@ -2273,9 +2307,9 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 		f.close();
 	}
-	catch(const NLMISC::EStream &)
+	catch (const NLMISC::EStream &e)
 	{
-		nlwarning("Config saving failed.");
+		nlwarning("Config saving failed: %s", e.what());
 		return false;
 	}
 
@@ -2501,6 +2535,10 @@ void CInterfaceManager::processServerIDString()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const string &text, const string &masterGroup, TCaseMode caseMode)
 {
+	// a box that takes the input until it is closed: a control tool learns of it at once
+	if (ClientCtrl::isActive())
+		ClientCtrl::addEvent("message_box", NLMISC::CJsonValue::object().set("group", masterGroup + ":" + msgBoxGroup).set("text", text));
+
 	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup));
 	CViewText		*viewText= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup + ":text"));
 
@@ -2639,6 +2677,8 @@ NLMISC::CRGBA CInterfaceManager::getDebugInfoColor(TSystemInfoMode mode)
 // ***************************************************************************
 void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 {
+	// a control tool reads the system messages, and a command it runs gets those it shows
+	ClientCtrl::showSystemInfo(cat, str);
 	CClientConfig::SSysInfoParam::TMode mode = CClientConfig::SSysInfoParam::Normal;
 	CRGBA color = CRGBA::White;
 
@@ -3089,22 +3129,6 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 		nlwarning ("Error while writing the file %s : %s.", filename.c_str(), e.what ());
 	}
 	return ret;
-}
-
-// ***************************************************************************
-bool CInterfaceManager::deletePlayerConfig (const std::string &playerFileIdent)
-{
-	string fileName= "save/interface_" + playerFileIdent + ".icfg";
-	return CFile::deleteFile(fileName);
-}
-
-
-// ***************************************************************************
-bool CInterfaceManager::deletePlayerKeys (const std::string &playerFileIdent)
-{
-	string fileName = "save/keys_"+playerFileIdent+".xml";
-	string fileNameEditor = "save/keys_r2ed_"+playerFileIdent+".xml";
-	return CFile::deleteFile(fileName) && CFile::deleteFile(fileNameEditor);
 }
 
 // ***************************************************************************

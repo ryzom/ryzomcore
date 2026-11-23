@@ -1,0 +1,1898 @@
+# Ryzom chat emoji picker layout -- GENERATED, do not edit by hand.
+# Regenerate with tools/emoji/gen_emoji_picker.py
+# Groups, order and descriptions come from Unicode's emoji-test.txt;
+# the names are the ones emoji.txt gives the chat.
+# g\ti18n-key\tEnglish label   starts a group
+# e\tname\tdescription      one emoji, in the group above
+g	uiEmojiGroupSmileys	Smileys & Emotion
+e	grinning	grinning face
+e	smiley	grinning face with big eyes
+e	smile	grinning face with smiling eyes
+e	grinning_face_with_smiling_eyes	beaming face with smiling eyes
+e	laughing	grinning squinting face
+e	sweat_smile	grinning face with sweat
+e	rolling_on_the_floor_laughing	rolling on the floor laughing
+e	joy	face with tears of joy
+e	slight_smile	slightly smiling face
+e	upside_down	upside-down face
+e	melting_face	melting face
+e	wink	winking face
+e	blush	smiling face with smiling eyes
+e	innocent	smiling face with halo
+e	smiling_face_with_hearts	smiling face with hearts
+e	heart_eyes	smiling face with heart-eyes
+e	star_struck	star-struck
+e	heart_kiss	face blowing a kiss
+e	kissing_face	kissing face
+e	smiling_face	smiling face
+e	kiss_with_blush	kissing face with closed eyes
+e	kiss_smiling_eyes	kissing face with smiling eyes
+e	smiling_face_with_tear	smiling face with tear
+e	yum	face savoring food
+e	stuck_out_tongue	face with tongue
+e	stuck_out_tongue_wink	winking face with tongue
+e	zany_face	zany face
+e	stuck_out_tongue_closed_eyes	squinting face with tongue
+e	money_face	money-mouth face
+e	hug	smiling face with open hands
+e	face_with_hand_over_mouth	face with hand over mouth
+e	face_with_open_eyes_and_hand_over_mouth	face with open eyes and hand over mouth
+e	face_with_peeking_eye	face with peeking eye
+e	shushing_face	shushing face
+e	thinking	thinking face
+e	saluting_face	saluting face
+e	silence	zipper-mouth face
+e	face_with_raised_eyebrow	face with raised eyebrow
+e	neutral	neutral face
+e	expressionless	expressionless face
+e	speechless	face without mouth
+e	dotted_line_face	dotted line face
+e	face_in_clouds	face in clouds
+e	smirk	smirking face
+e	unamused	unamused face
+e	rolling_eyes	face with rolling eyes
+e	grimacing	grimacing face
+e	face_exhaling	face exhaling
+e	lying	lying face
+e	shaking_face	shaking face
+e	head_shaking_horizontally	head shaking horizontally
+e	head_shaking_vertically	head shaking vertically
+e	relieved	relieved face
+e	pensive	pensive face
+e	sleepy	sleepy face
+e	drooling	drooling face
+e	sleeping	sleeping face
+e	face_with_bags_under_eyes	face with bags under eyes
+e	mask	face with medical mask
+e	sick	face with thermometer
+e	hurt	face with head-bandage
+e	nauseated	nauseated face
+e	face_vomiting	face vomiting
+e	sneezing	sneezing face
+e	hot_face	hot face
+e	cold_face	cold face
+e	woozy_face	woozy face
+e	dizzy	face with crossed-out eyes
+e	face_with_spiral_eyes	face with spiral eyes
+e	exploding_head	exploding head
+e	cowboy	cowboy hat face
+e	partying_face	partying face
+e	disguised_face	disguised face
+e	sunglasses	smiling face with sunglasses
+e	nerd	nerd face
+e	face_with_monocle	face with monocle
+e	oh_no	confused face
+e	face_with_diagonal_mouth	face with diagonal mouth
+e	worried	worried face
+e	frown	slightly frowning face
+e	sad	frowning face
+e	open_mouth	face with open mouth
+e	hushed	hushed face
+e	astonished	astonished face
+e	flushed	flushed face
+e	pleading_face	pleading face
+e	face_holding_back_tears	face holding back tears
+e	frowning	frowning face with open mouth
+e	anguished	anguished face
+e	fear	fearful face
+e	cold_sweat	anxious face with sweat
+e	exhausted	sad but relieved face
+e	cry	crying face
+e	sob	loudly crying face
+e	scream	face screaming in fear
+e	confounded	confounded face
+e	persevere	persevering face
+e	disappointed	disappointed face
+e	sweat	downcast face with sweat
+e	weary	weary face
+e	anguish	tired face
+e	yawning_face	yawning face
+e	triumph	face with steam from nose
+e	rage	enraged face
+e	angry	angry face
+e	face_with_symbols_on_mouth	face with symbols on mouth
+e	smiling_devil	smiling face with horns
+e	devil	angry face with horns
+e	skull	skull
+e	skull_and_crossbones	skull and crossbones
+e	poop	pile of poo
+e	clown	clown face
+e	ogre	ogre
+e	goblin	goblin
+e	ghost	ghost
+e	alien	alien
+e	space_invader	alien monster
+e	robot	robot
+e	smiley_cat	grinning cat
+e	smile_cat	grinning cat with smiling eyes
+e	joy_cat	cat with tears of joy
+e	heart_eyes_cat	smiling cat with heart-eyes
+e	smirk_cat	cat with wry smile
+e	kissing_cat	kissing cat
+e	scream_cat	weary cat
+e	crying_cat	crying cat
+e	angry_cat	pouting cat
+e	see_no_evil	see-no-evil monkey
+e	hear_no_evil	hear-no-evil monkey
+e	speak_no_evil	speak-no-evil monkey
+e	love_letter	love letter
+e	cupid	heart with arrow
+e	gift_heart	heart with ribbon
+e	sparkling_heart	sparkling heart
+e	heart_pulse	growing heart
+e	heartbeat	beating heart
+e	revolving_hearts	revolving hearts
+e	two_hearts	two hearts
+e	heart_box	heart decoration
+e	heart_exclamation	heart exclamation
+e	broken_heart	broken heart
+e	heart_on_fire	heart on fire
+e	mending_heart	mending heart
+e	heart	red heart
+e	pink_heart	pink heart
+e	orange_heart	orange heart
+e	yellow_heart	yellow heart
+e	green_heart	green heart
+e	blue_heart	blue heart
+e	light_blue_heart	light blue heart
+e	purple_heart	purple heart
+e	brown_heart	brown heart
+e	black_heart	black heart
+e	grey_heart	grey heart
+e	white_heart	white heart
+e	lipstick_kiss	kiss mark
+e	100	hundred points
+e	anger	anger symbol
+e	boom	collision
+e	seeing_stars	dizzy
+e	sweat_drops	sweat droplets
+e	dash	dashing away
+e	hole	hole
+e	umm	speech balloon
+e	eye_in_speech_bubble	eye in speech bubble
+e	speech_bubble	left speech bubble
+e	anger_bubble	right anger bubble
+e	thought	thought balloon
+e	zzz	ZZZ
+g	uiEmojiGroupPeople	People & Body
+e	wave	waving hand
+e	stop	raised back of hand
+e	high_five	hand with fingers splayed
+e	hand	raised hand
+e	spock	vulcan salute
+e	rightwards_hand	rightwards hand
+e	leftwards_hand	leftwards hand
+e	palm_down_hand	palm down hand
+e	palm_up_hand	palm up hand
+e	leftwards_pushing_hand	leftwards pushing hand
+e	rightwards_pushing_hand	rightwards pushing hand
+e	ok	OK hand
+e	pinched_fingers	pinched fingers
+e	pinching_hand	pinching hand
+e	peace_sign	victory hand
+e	fingers_crossed	crossed fingers
+e	hand_with_index_finger_and_thumb_crossed	hand with index finger and thumb crossed
+e	love_you_gesture	love-you gesture
+e	rock_on	sign of the horns
+e	call_me	call me hand
+e	point_left	backhand index pointing left
+e	point_right	backhand index pointing right
+e	point_up	backhand index pointing up
+e	middle_finger	middle finger
+e	point_down	backhand index pointing down
+e	wait_one_second	index pointing up
+e	index_pointing_at_the_viewer	index pointing at the viewer
+e	+1	thumbs up
+e	-1	thumbs down
+e	fist	raised fist
+e	fist_bump	oncoming fist
+e	left_fist	left-facing fist
+e	right_fist	right-facing fist
+e	clap	clapping hands
+e	raised_hands	raising hands
+e	heart_hands	heart hands
+e	open_hands	open hands
+e	palms_up_together	palms up together
+e	handshake	handshake
+e	folded_hands	folded hands
+e	writing	writing hand
+e	nail_polish	nail polish
+e	selfie	selfie
+e	muscle	flexed biceps
+e	mechanical_arm	mechanical arm
+e	mechanical_leg	mechanical leg
+e	leg	leg
+e	foot	foot
+e	ear	ear
+e	ear_with_hearing_aid	ear with hearing aid
+e	nose	nose
+e	brain	brain
+e	anatomical_heart	anatomical heart
+e	lungs	lungs
+e	tooth	tooth
+e	bone	bone
+e	eyes	eyes
+e	eye	eye
+e	tongue	tongue
+e	lips	mouth
+e	biting_lip	biting lip
+e	baby	baby
+e	child	child
+e	boy	boy
+e	girl	girl
+e	person	person
+e	person_blond_hair	person: blond hair
+e	man	man
+e	person_beard	person: beard
+e	man_beard	man: beard
+e	woman_beard	woman: beard
+e	man_red_hair	man: red hair
+e	man_curly_hair	man: curly hair
+e	man_white_hair	man: white hair
+e	man_bald	man: bald
+e	woman	woman
+e	woman_red_hair	woman: red hair
+e	person_red_hair	person: red hair
+e	woman_curly_hair	woman: curly hair
+e	person_curly_hair	person: curly hair
+e	woman_white_hair	woman: white hair
+e	person_white_hair	person: white hair
+e	woman_bald	woman: bald
+e	person_bald	person: bald
+e	woman_blond_hair	woman: blond hair
+e	man_blond_hair	man: blond hair
+e	older_person	older person
+e	older_man	old man
+e	older_woman	old woman
+e	person_frowning	person frowning
+e	man_frowning	man frowning
+e	woman_frowning	woman frowning
+e	person_pouting	person pouting
+e	man_pouting	man pouting
+e	woman_pouting	woman pouting
+e	no_signal	person gesturing NO
+e	man_gesturing_no	man gesturing NO
+e	woman_gesturing_no	woman gesturing NO
+e	ok_signal	person gesturing OK
+e	man_gesturing_ok	man gesturing OK
+e	woman_gesturing_ok	woman gesturing OK
+e	information_desk_person	person tipping hand
+e	man_tipping_hand	man tipping hand
+e	woman_tipping_hand	woman tipping hand
+e	raising_hand	person raising hand
+e	man_raising_hand	man raising hand
+e	woman_raising_hand	woman raising hand
+e	deaf_person	deaf person
+e	deaf_man	deaf man
+e	deaf_woman	deaf woman
+e	bow	person bowing
+e	man_bowing	man bowing
+e	woman_bowing	woman bowing
+e	face_palm	person facepalming
+e	man_facepalming	man facepalming
+e	woman_facepalming	woman facepalming
+e	shrug	person shrugging
+e	man_shrugging	man shrugging
+e	woman_shrugging	woman shrugging
+e	health_worker	health worker
+e	man_health_worker	man health worker
+e	woman_health_worker	woman health worker
+e	student	student
+e	man_student	man student
+e	woman_student	woman student
+e	teacher	teacher
+e	man_teacher	man teacher
+e	woman_teacher	woman teacher
+e	judge	judge
+e	man_judge	man judge
+e	woman_judge	woman judge
+e	farmer	farmer
+e	man_farmer	man farmer
+e	woman_farmer	woman farmer
+e	cook	cook
+e	man_cook	man cook
+e	woman_cook	woman cook
+e	mechanic	mechanic
+e	man_mechanic	man mechanic
+e	woman_mechanic	woman mechanic
+e	factory_worker	factory worker
+e	man_factory_worker	man factory worker
+e	woman_factory_worker	woman factory worker
+e	office_worker	office worker
+e	man_office_worker	man office worker
+e	woman_office_worker	woman office worker
+e	scientist	scientist
+e	man_scientist	man scientist
+e	woman_scientist	woman scientist
+e	technologist	technologist
+e	man_technologist	man technologist
+e	woman_technologist	woman technologist
+e	singer	singer
+e	man_singer	man singer
+e	woman_singer	woman singer
+e	artist	artist
+e	man_artist	man artist
+e	woman_artist	woman artist
+e	pilot	pilot
+e	man_pilot	man pilot
+e	woman_pilot	woman pilot
+e	astronaut	astronaut
+e	man_astronaut	man astronaut
+e	woman_astronaut	woman astronaut
+e	firefighter	firefighter
+e	man_firefighter	man firefighter
+e	woman_firefighter	woman firefighter
+e	police	police officer
+e	man_police_officer	man police officer
+e	woman_police_officer	woman police officer
+e	detective	detective
+e	man_detective	man detective
+e	woman_detective	woman detective
+e	guard	guard
+e	man_guard	man guard
+e	woman_guard	woman guard
+e	ninja	ninja
+e	construction_worker	construction worker
+e	man_construction_worker	man construction worker
+e	woman_construction_worker	woman construction worker
+e	person_with_crown	person with crown
+e	prince	prince
+e	princess	princess
+e	turban	person wearing turban
+e	man_wearing_turban	man wearing turban
+e	woman_wearing_turban	woman wearing turban
+e	gua_pi_mao	person with skullcap
+e	woman_with_headscarf	woman with headscarf
+e	tuxedo	person in tuxedo
+e	man_in_tuxedo	man in tuxedo
+e	woman_in_tuxedo	woman in tuxedo
+e	bride	person with veil
+e	man_with_veil	man with veil
+e	woman_with_veil	woman with veil
+e	pregnant	pregnant woman
+e	pregnant_man	pregnant man
+e	pregnant_person	pregnant person
+e	breast_feeding	breast-feeding
+e	woman_feeding_baby	woman feeding baby
+e	man_feeding_baby	man feeding baby
+e	person_feeding_baby	person feeding baby
+e	angel	baby angel
+e	santa	Santa Claus
+e	mother_christmas	Mrs. Claus
+e	mx_claus	Mx Claus
+e	superhero	superhero
+e	man_superhero	man superhero
+e	woman_superhero	woman superhero
+e	supervillain	supervillain
+e	man_supervillain	man supervillain
+e	woman_supervillain	woman supervillain
+e	mage	mage
+e	man_mage	man mage
+e	woman_mage	woman mage
+e	fairy	fairy
+e	man_fairy	man fairy
+e	woman_fairy	woman fairy
+e	vampire	vampire
+e	man_vampire	man vampire
+e	woman_vampire	woman vampire
+e	merperson	merperson
+e	merman	merman
+e	mermaid	mermaid
+e	elf	elf
+e	man_elf	man elf
+e	woman_elf	woman elf
+e	genie	genie
+e	man_genie	man genie
+e	woman_genie	woman genie
+e	zombie	zombie
+e	man_zombie	man zombie
+e	woman_zombie	woman zombie
+e	troll	troll
+e	massage	person getting massage
+e	man_getting_massage	man getting massage
+e	woman_getting_massage	woman getting massage
+e	haircut	person getting haircut
+e	man_getting_haircut	man getting haircut
+e	woman_getting_haircut	woman getting haircut
+e	walking	person walking
+e	man_walking	man walking
+e	woman_walking	woman walking
+e	person_walking_facing_right	person walking facing right
+e	woman_walking_facing_right	woman walking facing right
+e	man_walking_facing_right	man walking facing right
+e	person_standing	person standing
+e	man_standing	man standing
+e	woman_standing	woman standing
+e	person_kneeling	person kneeling
+e	man_kneeling	man kneeling
+e	woman_kneeling	woman kneeling
+e	person_kneeling_facing_right	person kneeling facing right
+e	woman_kneeling_facing_right	woman kneeling facing right
+e	man_kneeling_facing_right	man kneeling facing right
+e	person_with_white_cane	person with white cane
+e	person_with_white_cane_facing_right	person with white cane facing right
+e	man_with_white_cane	man with white cane
+e	man_with_white_cane_facing_right	man with white cane facing right
+e	woman_with_white_cane	woman with white cane
+e	woman_with_white_cane_facing_right	woman with white cane facing right
+e	person_in_motorized_wheelchair	person in motorized wheelchair
+e	person_in_motorized_wheelchair_facing_right	person in motorized wheelchair facing right
+e	man_in_motorized_wheelchair	man in motorized wheelchair
+e	man_in_motorized_wheelchair_facing_right	man in motorized wheelchair facing right
+e	woman_in_motorized_wheelchair	woman in motorized wheelchair
+e	woman_in_motorized_wheelchair_facing_right	woman in motorized wheelchair facing right
+e	person_in_manual_wheelchair	person in manual wheelchair
+e	person_in_manual_wheelchair_facing_right	person in manual wheelchair facing right
+e	man_in_manual_wheelchair	man in manual wheelchair
+e	man_in_manual_wheelchair_facing_right	man in manual wheelchair facing right
+e	woman_in_manual_wheelchair	woman in manual wheelchair
+e	woman_in_manual_wheelchair_facing_right	woman in manual wheelchair facing right
+e	running	person running
+e	man_running	man running
+e	woman_running	woman running
+e	person_running_facing_right	person running facing right
+e	woman_running_facing_right	woman running facing right
+e	man_running_facing_right	man running facing right
+e	dancer	woman dancing
+e	dancing	man dancing
+e	levitating	person in suit levitating
+e	dancers	people with bunny ears
+e	men_with_bunny_ears	men with bunny ears
+e	women_with_bunny_ears	women with bunny ears
+e	person_in_steamy_room	person in steamy room
+e	man_in_steamy_room	man in steamy room
+e	woman_in_steamy_room	woman in steamy room
+e	person_climbing	person climbing
+e	man_climbing	man climbing
+e	woman_climbing	woman climbing
+e	fencing	person fencing
+e	horse_racing	horse racing
+e	skier	skier
+e	snowboarder	snowboarder
+e	golf	person golfing
+e	man_golfing	man golfing
+e	woman_golfing	woman golfing
+e	surf	person surfing
+e	man_surfing	man surfing
+e	woman_surfing	woman surfing
+e	rowboat	person rowing boat
+e	man_rowing_boat	man rowing boat
+e	woman_rowing_boat	woman rowing boat
+e	swim	person swimming
+e	man_swimming	man swimming
+e	woman_swimming	woman swimming
+e	ball	person bouncing ball
+e	man_bouncing_ball	man bouncing ball
+e	woman_bouncing_ball	woman bouncing ball
+e	lift	person lifting weights
+e	man_lifting_weights	man lifting weights
+e	woman_lifting_weights	woman lifting weights
+e	cyclist	person biking
+e	man_biking	man biking
+e	woman_biking	woman biking
+e	mountain_biker	person mountain biking
+e	man_mountain_biking	man mountain biking
+e	woman_mountain_biking	woman mountain biking
+e	cartwheel	person cartwheeling
+e	man_cartwheeling	man cartwheeling
+e	woman_cartwheeling	woman cartwheeling
+e	wrestling	people wrestling
+e	men_wrestling	men wrestling
+e	women_wrestling	women wrestling
+e	water_polo	person playing water polo
+e	man_playing_water_polo	man playing water polo
+e	woman_playing_water_polo	woman playing water polo
+e	handball	person playing handball
+e	man_playing_handball	man playing handball
+e	woman_playing_handball	woman playing handball
+e	juggling	person juggling
+e	man_juggling	man juggling
+e	woman_juggling	woman juggling
+e	person_in_lotus_position	person in lotus position
+e	man_in_lotus_position	man in lotus position
+e	woman_in_lotus_position	woman in lotus position
+e	bath	person taking bath
+e	in_bed	person in bed
+e	people_holding_hands	people holding hands
+e	two_women_holding_hands	women holding hands
+e	man_and_woman_holding_hands	woman and man holding hands
+e	two_men_holding_hands	men holding hands
+e	kiss	kiss
+e	kiss_woman_man	kiss: woman, man
+e	kiss_man_man	kiss: man, man
+e	kiss_woman_woman	kiss: woman, woman
+e	couple_with_heart	couple with heart
+e	couple_with_heart_woman_man	couple with heart: woman, man
+e	couple_with_heart_man_man	couple with heart: man, man
+e	couple_with_heart_woman_woman	couple with heart: woman, woman
+e	family_man_woman_boy	family: man, woman, boy
+e	family_man_woman_girl	family: man, woman, girl
+e	family_man_woman_girl_boy	family: man, woman, girl, boy
+e	family_man_woman_boy_boy	family: man, woman, boy, boy
+e	family_man_woman_girl_girl	family: man, woman, girl, girl
+e	family_man_man_boy	family: man, man, boy
+e	family_man_man_girl	family: man, man, girl
+e	family_man_man_girl_boy	family: man, man, girl, boy
+e	family_man_man_boy_boy	family: man, man, boy, boy
+e	family_man_man_girl_girl	family: man, man, girl, girl
+e	family_woman_woman_boy	family: woman, woman, boy
+e	family_woman_woman_girl	family: woman, woman, girl
+e	family_woman_woman_girl_boy	family: woman, woman, girl, boy
+e	family_woman_woman_boy_boy	family: woman, woman, boy, boy
+e	family_woman_woman_girl_girl	family: woman, woman, girl, girl
+e	family_man_boy	family: man, boy
+e	family_man_boy_boy	family: man, boy, boy
+e	family_man_girl	family: man, girl
+e	family_man_girl_boy	family: man, girl, boy
+e	family_man_girl_girl	family: man, girl, girl
+e	family_woman_boy	family: woman, boy
+e	family_woman_boy_boy	family: woman, boy, boy
+e	family_woman_girl	family: woman, girl
+e	family_woman_girl_boy	family: woman, girl, boy
+e	family_woman_girl_girl	family: woman, girl, girl
+e	speaking_head	speaking head
+e	silhouette	bust in silhouette
+e	silhouettes	busts in silhouette
+e	people_hugging	people hugging
+e	family	family
+e	family_adult_adult_child	family: adult, adult, child
+e	family_adult_adult_child_child	family: adult, adult, child, child
+e	family_adult_child	family: adult, child
+e	family_adult_child_child	family: adult, child, child
+e	footprints	footprints
+e	fingerprint	fingerprint
+g	uiEmojiGroupNature	Animals & Nature
+e	monkey_face	monkey face
+e	monkey	monkey
+e	gorilla	gorilla
+e	orangutan	orangutan
+e	puppy	dog face
+e	dog	dog
+e	guide_dog	guide dog
+e	service_dog	service dog
+e	poodle	poodle
+e	wolf	wolf
+e	fox	fox
+e	raccoon	raccoon
+e	kitten	cat face
+e	cat	cat
+e	black_cat	black cat
+e	lion	lion
+e	tiger_cub	tiger face
+e	tiger	tiger
+e	leopard	leopard
+e	pony	horse face
+e	moose	moose
+e	donkey	donkey
+e	horse	horse
+e	unicorn	unicorn
+e	zebra	zebra
+e	deer	deer
+e	bison	bison
+e	calf	cow face
+e	ox	ox
+e	water_buffalo	water buffalo
+e	cow	cow
+e	piglet	pig face
+e	pig	pig
+e	boar	boar
+e	pig_nose	pig nose
+e	ram	ram
+e	sheep	ewe
+e	goat	goat
+e	arabian_camel	camel
+e	camel	two-hump camel
+e	llama	llama
+e	giraffe	giraffe
+e	elephant	elephant
+e	mammoth	mammoth
+e	rhinoceros	rhinoceros
+e	hippopotamus	hippopotamus
+e	dormouse	mouse face
+e	mouse	mouse
+e	rat	rat
+e	hamster	hamster
+e	bunny	rabbit face
+e	rabbit	rabbit
+e	chipmunk	chipmunk
+e	beaver	beaver
+e	hedgehog	hedgehog
+e	bat	bat
+e	bear	bear
+e	polar_bear	polar bear
+e	koala	koala
+e	panda	panda
+e	sloth	sloth
+e	otter	otter
+e	skunk	skunk
+e	kangaroo	kangaroo
+e	badger	badger
+e	paw_prints	paw prints
+e	turkey	turkey
+e	chicken	chicken
+e	rooster	rooster
+e	hatching	hatching chick
+e	chick	baby chick
+e	new_baby	front-facing baby chick
+e	bird	bird
+e	penguin	penguin
+e	dove	dove
+e	eagle	eagle
+e	duck	duck
+e	swan	swan
+e	owl	owl
+e	dodo	dodo
+e	feather	feather
+e	flamingo	flamingo
+e	peacock	peacock
+e	parrot	parrot
+e	wing	wing
+e	black_bird	black bird
+e	goose	goose
+e	phoenix	phoenix
+e	frog	frog
+e	crocodile	crocodile
+e	turtle	turtle
+e	lizard	lizard
+e	snake	snake
+e	dragon_face	dragon face
+e	dragon	dragon
+e	sauropod	sauropod
+e	t_rex	T-Rex
+e	whale	spouting whale
+e	humpback_whale	whale
+e	dolphin	dolphin
+e	seal	seal
+e	fish	fish
+e	tropical_fish	tropical fish
+e	blowfish	blowfish
+e	shark	shark
+e	octopus	octopus
+e	shell	spiral shell
+e	coral	coral
+e	jellyfish	jellyfish
+e	crab	crab
+e	lobster	lobster
+e	shrimp	shrimp
+e	squid	squid
+e	oyster	oyster
+e	snail	snail
+e	butterfly	butterfly
+e	bug	bug
+e	ant	ant
+e	bee	honeybee
+e	beetle	beetle
+e	lady_beetle	lady beetle
+e	cricket	cricket
+e	cockroach	cockroach
+e	spider	spider
+e	web	spider web
+e	scorpion	scorpion
+e	mosquito	mosquito
+e	fly	fly
+e	worm	worm
+e	microbe	microbe
+e	bouquet	bouquet
+e	cherry_blossom	cherry blossom
+e	white_flower	white flower
+e	lotus	lotus
+e	rosette	rosette
+e	rose	rose
+e	wilted_flower	wilted flower
+e	hibiscus	hibiscus
+e	sunflower	sunflower
+e	blossom	blossom
+e	tulip	tulip
+e	hyacinth	hyacinth
+e	seedling	seedling
+e	potted_plant	potted plant
+e	evergreen_tree	evergreen tree
+e	tree	deciduous tree
+e	palm_tree	palm tree
+e	cactus	cactus
+e	harvest	sheaf of rice
+e	herb	herb
+e	shamrock	shamrock
+e	lucky	four leaf clover
+e	maple_leaf	maple leaf
+e	fallen_leaf	fallen leaf
+e	leaves	leaf fluttering in wind
+e	empty_nest	empty nest
+e	nest_with_eggs	nest with eggs
+e	mushroom	mushroom
+e	leafless_tree	leafless tree
+g	uiEmojiGroupFood	Food & Drink
+e	grapes	grapes
+e	melon	melon
+e	watermelon	watermelon
+e	orange	tangerine
+e	lemon	lemon
+e	lime	lime
+e	banana	banana
+e	pineapple	pineapple
+e	mango	mango
+e	apple	red apple
+e	green_apple	green apple
+e	pear	pear
+e	peach	peach
+e	cherries	cherries
+e	strawberry	strawberry
+e	blueberries	blueberries
+e	kiwi	kiwi fruit
+e	tomato	tomato
+e	olive	olive
+e	coconut	coconut
+e	avocado	avocado
+e	eggplant	eggplant
+e	potato	potato
+e	carrot	carrot
+e	corn	ear of corn
+e	hot_pepper	hot pepper
+e	bell_pepper	bell pepper
+e	cucumber	cucumber
+e	leafy_green	leafy green
+e	broccoli	broccoli
+e	garlic	garlic
+e	onion	onion
+e	peanuts	peanuts
+e	beans	beans
+e	chestnut	chestnut
+e	ginger_root	ginger root
+e	pea_pod	pea pod
+e	brown_mushroom	brown mushroom
+e	root_vegetable	root vegetable
+e	bread	bread
+e	croissant	croissant
+e	baguette	baguette bread
+e	flatbread	flatbread
+e	pretzel	pretzel
+e	bagel	bagel
+e	pancakes	pancakes
+e	waffle	waffle
+e	cheese	cheese wedge
+e	meat	meat on bone
+e	drumstick	poultry leg
+e	cut_of_meat	cut of meat
+e	bacon	bacon
+e	hamburger	hamburger
+e	fries	french fries
+e	pizza	pizza
+e	hotdog	hot dog
+e	sandwich	sandwich
+e	taco	taco
+e	burrito	burrito
+e	tamale	tamale
+e	doner_kebab	stuffed flatbread
+e	falafel	falafel
+e	egg	egg
+e	cooking	cooking
+e	paella	shallow pan of food
+e	food	pot of food
+e	fondue	fondue
+e	bowl_with_spoon	bowl with spoon
+e	salad	green salad
+e	popcorn	popcorn
+e	butter	butter
+e	salt	salt
+e	canned_food	canned food
+e	bento	bento box
+e	senbei	rice cracker
+e	onigiri	rice ball
+e	rice	cooked rice
+e	curry	curry rice
+e	ramen	steaming bowl
+e	spaghetti	spaghetti
+e	yam	roasted sweet potato
+e	oden	oden
+e	sushi	sushi
+e	tempura	fried shrimp
+e	naruto	fish cake with swirl
+e	moon_cake	moon cake
+e	dango	dango
+e	dumpling	dumpling
+e	fortune_cookie	fortune cookie
+e	takeout_box	takeout box
+e	soft_serve	soft ice cream
+e	shaved_ice	shaved ice
+e	ice_cream	ice cream
+e	donut	doughnut
+e	cookie	cookie
+e	birthday	birthday cake
+e	cake	shortcake
+e	cupcake	cupcake
+e	pie	pie
+e	chocolate	chocolate bar
+e	candy	candy
+e	lollipop	lollipop
+e	custard	custard
+e	honey	honey pot
+e	baby_bottle	baby bottle
+e	milk	glass of milk
+e	coffee	hot beverage
+e	teapot	teapot
+e	tea	teacup without handle
+e	sake	sake
+e	champagne	bottle with popping cork
+e	wine	wine glass
+e	cocktail	cocktail glass
+e	tropical_drink	tropical drink
+e	beer	beer mug
+e	beers	clinking beer mugs
+e	clink	clinking glasses
+e	small_glass	tumbler glass
+e	pouring_liquid	pouring liquid
+e	cup_with_straw	cup with straw
+e	bubble_tea	bubble tea
+e	beverage_box	beverage box
+e	mate	mate
+e	ice	ice
+e	chopsticks	chopsticks
+e	hungry	fork and knife with plate
+e	fork_and_knife	fork and knife
+e	spoon	spoon
+e	knife	kitchen knife
+e	jar	jar
+e	vase	amphora
+g	uiEmojiGroupTravel	Travel & Places
+e	earth_africa	globe showing Europe-Africa
+e	earth_americas	globe showing Americas
+e	earth_asia	globe showing Asia-Australia
+e	www	globe with meridians
+e	map	world map
+e	japan	map of Japan
+e	compass	compass
+e	snowy_mountain	snow-capped mountain
+e	mountain	mountain
+e	volcano	volcano
+e	mount_fuji	mount fuji
+e	campsite	camping
+e	beach	beach with umbrella
+e	desert	desert
+e	island	desert island
+e	national_park	national park
+e	stadium	stadium
+e	classical_building	classical building
+e	construction	building construction
+e	brick	brick
+e	rock	rock
+e	wood	wood
+e	hut	hut
+e	houses	houses
+e	derelict_house	derelict house
+e	house	house
+e	suburb	house with garden
+e	office	office building
+e	japan_post	Japanese post office
+e	post_office	post office
+e	hospital	hospital
+e	bank	bank
+e	hotel	hotel
+e	love_hotel	love hotel
+e	convenience_store	convenience store
+e	school	school
+e	department_store	department store
+e	factory	factory
+e	shiro	Japanese castle
+e	castle	castle
+e	wedding	wedding
+e	tower	Tokyo tower
+e	statue	Statue of Liberty
+e	church	church
+e	mosque	mosque
+e	hindu_temple	hindu temple
+e	synagogue	synagogue
+e	shinto_shrine	shinto shrine
+e	kaaba	kaaba
+e	fountain	fountain
+e	tent	tent
+e	foggy	foggy
+e	night	night with stars
+e	city	cityscape
+e	mountain_sunrise	sunrise over mountains
+e	sunrise	sunrise
+e	sunset	cityscape at dusk
+e	city_sunrise	sunset
+e	bridge	bridge at night
+e	hot_springs	hot springs
+e	carousel	carousel horse
+e	playground_slide	playground slide
+e	ferris_wheel	ferris wheel
+e	roller_coaster	roller coaster
+e	barber	barber pole
+e	circus	circus tent
+e	train	locomotive
+e	railway_car	railway car
+e	high_speed_train	high-speed train
+e	bullet_train	bullet train
+e	oncoming_train	train
+e	subway	metro
+e	light_rail	light rail
+e	station	station
+e	oncoming_tram	tram
+e	monorail	monorail
+e	mountain_railway	mountain railway
+e	tram	tram car
+e	bus	bus
+e	oncoming_bus	oncoming bus
+e	trolley	trolleybus
+e	minibus	minibus
+e	ambulance	ambulance
+e	fire_truck	fire engine
+e	police_car	police car
+e	oncoming_police_car	oncoming police car
+e	taxi	taxi
+e	oncoming_taxi	oncoming taxi
+e	car	automobile
+e	oncoming_car	oncoming automobile
+e	recreational_vehicle	sport utility vehicle
+e	pickup_truck	pickup truck
+e	moving_truck	delivery truck
+e	truck	articulated lorry
+e	tractor	tractor
+e	racecar	racing car
+e	motorcycle	motorcycle
+e	scooter	motor scooter
+e	manual_wheelchair	manual wheelchair
+e	motorized_wheelchair	motorized wheelchair
+e	auto_rickshaw	auto rickshaw
+e	bike	bicycle
+e	kick_scooter	kick scooter
+e	skateboard	skateboard
+e	roller_skate	roller skate
+e	bus_stop	bus stop
+e	road	motorway
+e	railway_track	railway track
+e	oil_drum	oil drum
+e	fuel_pump	fuel pump
+e	wheel	wheel
+e	siren	police car light
+e	horizontal_traffic_light	horizontal traffic light
+e	traffic_light	vertical traffic light
+e	stop_sign	stop sign
+e	work_in_progress	construction
+e	anchor	anchor
+e	ring_buoy	ring buoy
+e	boat	sailboat
+e	canoe	canoe
+e	speedboat	speedboat
+e	passenger_ship	passenger ship
+e	ferry	ferry
+e	motor_boat	motor boat
+e	ship	ship
+e	airplane	airplane
+e	small_airplane	small airplane
+e	take_off	airplane departure
+e	landing	airplane arrival
+e	parachute	parachute
+e	seat	seat
+e	helicopter	helicopter
+e	suspension_railway	suspension railway
+e	gondola	mountain cableway
+e	aerial_tramway	aerial tramway
+e	satellite	satellite
+e	rocket	rocket
+e	flying_saucer	flying saucer
+e	bellhop_bell	bellhop bell
+e	luggage	luggage
+e	times_up	hourglass done
+e	time_ticking	hourglass not done
+e	watch	watch
+e	alarm_clock	alarm clock
+e	stopwatch	stopwatch
+e	timer	timer clock
+e	mantelpiece_clock	mantelpiece clock
+e	time	eight o’clock
+e	new_moon	new moon
+e	waxing_crescent_moon	waxing crescent moon
+e	first_quarter_moon	first quarter moon
+e	waxing_moon	waxing gibbous moon
+e	full_moon	full moon
+e	waning_gibbous_moon	waning gibbous moon
+e	last_quarter_moon	last quarter moon
+e	waning_crescent_moon	waning crescent moon
+e	moon	crescent moon
+e	new_moon_face	new moon face
+e	goodnight	first quarter moon face
+e	last_quarter_moon_face	last quarter moon face
+e	temperature	thermometer
+e	sunny	sun
+e	moon_face	full moon face
+e	sun_face	sun with face
+e	ringed_planet	ringed planet
+e	star	star
+e	glowing_star	glowing star
+e	shooting_star	shooting star
+e	milky_way	milky way
+e	cloud	cloud
+e	partly_sunny	sun behind cloud
+e	thunderstorm	cloud with lightning and rain
+e	mostly_sunny	sun behind small cloud
+e	cloudy	sun behind large cloud
+e	sunshowers	sun behind rain cloud
+e	rainy	cloud with rain
+e	snowy	cloud with snow
+e	lightning	cloud with lightning
+e	tornado	tornado
+e	fog	fog
+e	windy	wind face
+e	cyclone	cyclone
+e	rainbow	rainbow
+e	closed_umbrella	closed umbrella
+e	umbrella	umbrella
+e	umbrella_with_rain	umbrella with rain drops
+e	beach_umbrella	umbrella on ground
+e	high_voltage	high voltage
+e	snowflake	snowflake
+e	snowman	snowman
+e	frosty	snowman without snow
+e	comet	comet
+e	fire	fire
+e	drop	droplet
+e	ocean	water wave
+g	uiEmojiGroupActivities	Activities
+e	jack-o-lantern	jack-o-lantern
+e	holiday_tree	Christmas tree
+e	fireworks	fireworks
+e	sparkler	sparkler
+e	firecracker	firecracker
+e	sparkles	sparkles
+e	balloon	balloon
+e	tada	party popper
+e	confetti	confetti ball
+e	wish_tree	tanabata tree
+e	bamboo	pine decoration
+e	dolls	Japanese dolls
+e	carp_streamer	carp streamer
+e	wind_chime	wind chime
+e	moon_ceremony	moon viewing ceremony
+e	red_envelope	red envelope
+e	ribbon	ribbon
+e	gift	wrapped gift
+e	reminder_ribbon	reminder ribbon
+e	ticket	admission tickets
+e	pass	ticket
+e	military_medal	military medal
+e	trophy	trophy
+e	medal	sports medal
+e	first_place	1st place medal
+e	second_place	2nd place medal
+e	third_place	3rd place medal
+e	football	soccer ball
+e	baseball	baseball
+e	softball	softball
+e	basketball	basketball
+e	volleyball	volleyball
+e	american_football	american football
+e	rugby	rugby football
+e	tennis	tennis
+e	flying_disc	flying disc
+e	strike	bowling
+e	cricket_game	cricket game
+e	field_hockey	field hockey
+e	ice_hockey	ice hockey
+e	lacrosse	lacrosse
+e	ping_pong	ping pong
+e	badminton	badminton
+e	boxing_glove	boxing glove
+e	black_belt	martial arts uniform
+e	gooooooooal	goal net
+e	hole_in_one	flag in hole
+e	ice_skate	ice skate
+e	fishing	fishing pole
+e	diving_mask	diving mask
+e	running_shirt	running shirt
+e	ski	skis
+e	sled	sled
+e	curling_stone	curling stone
+e	direct_hit	bullseye
+e	yo_yo	yo-yo
+e	kite	kite
+e	gun	water pistol
+e	billiards	pool 8 ball
+e	crystal_ball	crystal ball
+e	magic_wand	magic wand
+e	video_game	video game
+e	joystick	joystick
+e	slot_machine	slot machine
+e	dice	game die
+e	puzzle_piece	puzzle piece
+e	teddy_bear	teddy bear
+e	piñata	piñata
+e	mirror_ball	mirror ball
+e	nesting_dolls	nesting dolls
+e	spades	spade suit
+e	hearts	heart suit
+e	diamonds	diamond suit
+e	clubs	club suit
+e	chess_pawn	chess pawn
+e	joker	joker
+e	mahjong	mahjong red dragon
+e	playing_cards	flower playing cards
+e	performing_arts	performing arts
+e	picture	framed picture
+e	art	artist palette
+e	thread	thread
+e	sewing_needle	sewing needle
+e	yarn	yarn
+e	knot	knot
+g	uiEmojiGroupObjects	Objects
+e	glasses	glasses
+e	dark_sunglasses	sunglasses
+e	goggles	goggles
+e	lab_coat	lab coat
+e	safety_vest	safety vest
+e	tie	necktie
+e	shirt	t-shirt
+e	jeans	jeans
+e	scarf	scarf
+e	gloves	gloves
+e	coat	coat
+e	socks	socks
+e	dress	dress
+e	kimono	kimono
+e	sari	sari
+e	one_piece_swimsuit	one-piece swimsuit
+e	briefs	briefs
+e	shorts	shorts
+e	bikini	bikini
+e	clothing	woman’s clothes
+e	folding_hand_fan	folding hand fan
+e	purse	purse
+e	handbag	handbag
+e	pouch	clutch bag
+e	shopping_bags	shopping bags
+e	backpack	backpack
+e	thong_sandal	thong sandal
+e	shoe	man’s shoe
+e	athletic_shoe	running shoe
+e	hiking_boot	hiking boot
+e	flat_shoe	flat shoe
+e	high_heels	high-heeled shoe
+e	sandal	woman’s sandal
+e	ballet_shoes	ballet shoes
+e	boot	woman’s boot
+e	hair_pick	hair pick
+e	crown	crown
+e	hat	woman’s hat
+e	top_hat	top hat
+e	graduate	graduation cap
+e	billed_cap	billed cap
+e	military_helmet	military helmet
+e	helmet	rescue worker’s helmet
+e	prayer_beads	prayer beads
+e	lipstick	lipstick
+e	ring	ring
+e	gem	gem stone
+e	mute	muted speaker
+e	speaker	speaker low volume
+e	softer	speaker medium volume
+e	louder	speaker high volume
+e	loudspeaker	loudspeaker
+e	megaphone	megaphone
+e	horn	postal horn
+e	notifications	bell
+e	mute_notifications	bell with slash
+e	musical_score	musical score
+e	music	musical note
+e	musical_notes	musical notes
+e	studio_microphone	studio microphone
+e	volume	level slider
+e	control_knobs	control knobs
+e	microphone	microphone
+e	headphones	headphone
+e	radio	radio
+e	saxophone	saxophone
+e	accordion	accordion
+e	guitar	guitar
+e	piano	musical keyboard
+e	trumpet	trumpet
+e	violin	violin
+e	banjo	banjo
+e	drum	drum
+e	long_drum	long drum
+e	maracas	maracas
+e	flute	flute
+e	harp	harp
+e	mobile_phone	mobile phone
+e	calling	mobile phone with arrow
+e	phone	telephone
+e	landline	telephone receiver
+e	pager	pager
+e	fax	fax machine
+e	battery	battery
+e	low_battery	low battery
+e	electric_plug	electric plug
+e	computer	laptop
+e	desktop_computer	desktop computer
+e	printer	printer
+e	keyboard	keyboard
+e	computer_mouse	computer mouse
+e	trackball	trackball
+e	gold_record	computer disk
+e	floppy_disk	floppy disk
+e	cd	optical disk
+e	dvd	dvd
+e	abacus	abacus
+e	movie_camera	movie camera
+e	film	film frames
+e	projector	film projector
+e	action	clapper board
+e	tv	television
+e	camera	camera
+e	taking_a_picture	camera with flash
+e	video_camera	video camera
+e	vhs	videocassette
+e	search	magnifying glass tilted left
+e	magnifying_glass_tilted_right	magnifying glass tilted right
+e	candle	candle
+e	light_bulb	light bulb
+e	flashlight	flashlight
+e	lantern	red paper lantern
+e	diya_lamp	diya lamp
+e	decorative_notebook	notebook with decorative cover
+e	red_book	closed book
+e	book	open book
+e	green_book	green book
+e	blue_book	blue book
+e	orange_book	orange book
+e	books	books
+e	notebook	notebook
+e	ledger	ledger
+e	page_with_curl	page with curl
+e	scroll	scroll
+e	document	page facing up
+e	headlines	newspaper
+e	newspaper	rolled-up newspaper
+e	place_holder	bookmark tabs
+e	bookmark	bookmark
+e	label	label
+e	money	money bag
+e	coin	coin
+e	yen_banknotes	yen banknote
+e	dollar_bills	dollar banknote
+e	euro_banknotes	euro banknote
+e	pound_notes	pound banknote
+e	losing_money	money with wings
+e	credit_card	credit card
+e	receipt	receipt
+e	stock_market	chart increasing with yen
+e	email	envelope
+e	e-mail	e-mail
+e	mail_received	incoming envelope
+e	mail_sent	envelope with arrow
+e	outbox	outbox tray
+e	inbox	inbox tray
+e	package	package
+e	mailbox	closed mailbox with raised flag
+e	closed_mailbox	closed mailbox with lowered flag
+e	unread_mail	open mailbox with raised flag
+e	inbox_zero	open mailbox with lowered flag
+e	mail_dropoff	postbox
+e	ballot_box	ballot box with ballot
+e	pencil	pencil
+e	black_nib	black nib
+e	fountain_pen	fountain pen
+e	pen	pen
+e	paintbrush	paintbrush
+e	crayon	crayon
+e	memo	memo
+e	briefcase	briefcase
+e	organize	file folder
+e	folder	open file folder
+e	sort	card index dividers
+e	calendar	calendar
+e	date	tear-off calendar
+e	spiral_notepad	spiral notepad
+e	spiral_calendar	spiral calendar
+e	rolodex	card index
+e	chart	chart increasing
+e	downwards_trend	chart decreasing
+e	bar_chart	bar chart
+e	clipboard	clipboard
+e	push_pin	pushpin
+e	pin	round pushpin
+e	paperclip	paperclip
+e	office_supplies	linked paperclips
+e	ruler	straight ruler
+e	carpenter_square	triangular ruler
+e	scissors	scissors
+e	archive	card file box
+e	file_cabinet	file cabinet
+e	wastebasket	wastebasket
+e	locked	locked
+e	unlocked	unlocked
+e	privacy	locked with pen
+e	secure	locked with key
+e	key	key
+e	secret	old key
+e	hammer	hammer
+e	axe	axe
+e	mine	pick
+e	at_work	hammer and pick
+e	working_on_it	hammer and wrench
+e	dagger	dagger
+e	duel	crossed swords
+e	bomb	bomb
+e	boomerang	boomerang
+e	bow_and_arrow	bow and arrow
+e	shield	shield
+e	carpentry_saw	carpentry saw
+e	fixing	wrench
+e	screwdriver	screwdriver
+e	nut_and_bolt	nut and bolt
+e	gear	gear
+e	compression	clamp
+e	justice	balance scale
+e	white_cane	white cane
+e	link	link
+e	broken_chain	broken chain
+e	chains	chains
+e	hook	hook
+e	toolbox	toolbox
+e	magnet	magnet
+e	ladder	ladder
+e	shovel	shovel
+e	alchemy	alembic
+e	test_tube	test tube
+e	petri_dish	petri dish
+e	dna	dna
+e	science	microscope
+e	telescope	telescope
+e	satellite_antenna	satellite antenna
+e	injection	syringe
+e	drop_of_blood	drop of blood
+e	medicine	pill
+e	adhesive_bandage	adhesive bandage
+e	crutch	crutch
+e	stethoscope	stethoscope
+e	x_ray	x-ray
+e	door	door
+e	elevator	elevator
+e	mirror	mirror
+e	window	window
+e	bed	bed
+e	living_room	couch and lamp
+e	chair	chair
+e	toilet	toilet
+e	plunger	plunger
+e	shower	shower
+e	bathtub	bathtub
+e	mouse_trap	mouse trap
+e	razor	razor
+e	lotion_bottle	lotion bottle
+e	safety_pin	safety pin
+e	broom	broom
+e	basket	basket
+e	roll_of_paper	roll of paper
+e	bucket	bucket
+e	soap	soap
+e	bubbles	bubbles
+e	toothbrush	toothbrush
+e	sponge	sponge
+e	fire_extinguisher	fire extinguisher
+e	shopping_cart	shopping cart
+e	smoking	cigarette
+e	coffin	coffin
+e	headstone	headstone
+e	funeral_urn	funeral urn
+e	nazar_amulet	nazar amulet
+e	hamsa	hamsa
+e	rock_carving	moai
+e	placard	placard
+e	identification_card	identification card
+g	uiEmojiGroupSymbols	Symbols
+e	atm	ATM sign
+e	put_litter_in_its_place	litter in bin sign
+e	potable_water	potable water
+e	accessible	wheelchair symbol
+e	mens	men’s room
+e	womens	women’s room
+e	restroom	restroom
+e	baby_change_station	baby symbol
+e	wc	water closet
+e	passport_control	passport control
+e	customs	customs
+e	baggage_claim	baggage claim
+e	locker	left luggage
+e	warning	warning
+e	children_crossing	children crossing
+e	no_entry	no entry
+e	prohibited	prohibited
+e	no_bicycles	no bicycles
+e	no_smoking	no smoking
+e	do_not_litter	no littering
+e	non-potable_water	non-potable water
+e	no_pedestrians	no pedestrians
+e	no_phones	no mobile phones
+e	underage	no one under eighteen
+e	radioactive	radioactive
+e	biohazard	biohazard
+e	up	up arrow
+e	upper_right	up-right arrow
+e	right	right arrow
+e	lower_right	down-right arrow
+e	down	down arrow
+e	lower_left	down-left arrow
+e	left	left arrow
+e	upper_left	up-left arrow
+e	up_down	up-down arrow
+e	left_right	left-right arrow
+e	reply	right arrow curving left
+e	forward	left arrow curving right
+e	heading_up	right arrow curving up
+e	heading_down	right arrow curving down
+e	clockwise	clockwise vertical arrows
+e	counterclockwise	counterclockwise arrows button
+e	back	BACK arrow
+e	end	END arrow
+e	on	ON! arrow
+e	soon	SOON arrow
+e	top	TOP arrow
+e	place_of_worship	place of worship
+e	atom	atom symbol
+e	om	om
+e	star_of_david	star of David
+e	wheel_of_dharma	wheel of dharma
+e	yin_yang	yin yang
+e	cross	latin cross
+e	orthodox_cross	orthodox cross
+e	star_and_crescent	star and crescent
+e	peace	peace symbol
+e	menorah	menorah
+e	dotted_six_pointed_star	dotted six-pointed star
+e	khanda	khanda
+e	aries	Aries
+e	taurus	Taurus
+e	gemini	Gemini
+e	cancer	Cancer
+e	leo	Leo
+e	virgo	Virgo
+e	libra	Libra
+e	scorpius	Scorpio
+e	sagittarius	Sagittarius
+e	capricorn	Capricorn
+e	aquarius	Aquarius
+e	pisces	Pisces
+e	ophiuchus	Ophiuchus
+e	shuffle	shuffle tracks button
+e	repeat	repeat button
+e	repeat_one	repeat single button
+e	play	play button
+e	fast_forward	fast-forward button
+e	next_track	next track button
+e	play_pause	play or pause button
+e	play_reverse	reverse button
+e	rewind	fast reverse button
+e	previous_track	last track button
+e	upvote	upwards button
+e	double_up	fast up button
+e	downvote	downwards button
+e	double_down	fast down button
+e	pause	pause button
+e	stop_button	stop button
+e	record	record button
+e	eject_button	eject button
+e	cinema	cinema
+e	low_brightness	dim button
+e	brightness	bright button
+e	cell_reception	antenna bars
+e	wireless	wireless
+e	vibration_mode	vibration mode
+e	phone_off	mobile phone off
+e	female_sign	female sign
+e	male_sign	male sign
+e	transgender_symbol	transgender symbol
+e	multiplication	multiply
+e	plus	plus
+e	minus	minus
+e	division	divide
+e	heavy_equals_sign	heavy equals sign
+e	infinity	infinity
+e	bangbang	double exclamation mark
+e	interrobang	exclamation question mark
+e	question	red question mark
+e	grey_question	white question mark
+e	grey_exclamation	white exclamation mark
+e	exclamation	red exclamation mark
+e	wavy_dash	wavy dash
+e	exchange	currency exchange
+e	dollars	heavy dollar sign
+e	medical_symbol	medical symbol
+e	recycle	recycling symbol
+e	fleur_de_lis	fleur-de-lis
+e	trident	trident emblem
+e	name_badge	name badge
+e	beginner	Japanese symbol for beginner
+e	circle	hollow red circle
+e	check	check mark button
+e	checkbox	check box with check
+e	check_mark	check mark
+e	cross_mark	cross mark
+e	x	cross mark button
+e	loop	curly loop
+e	double_loop	double curly loop
+e	part_alternation	part alternation mark
+e	eight_spoked_asterisk	eight-spoked asterisk
+e	eight_pointed_star	eight-pointed star
+e	sparkle	sparkle
+e	copyright	copyright
+e	registered	registered
+e	tm	trade mark
+e	splatter	splatter
+e	hash	keycap: #
+e	asterisk	keycap: *
+e	zero	keycap: 0
+e	one	keycap: 1
+e	two	keycap: 2
+e	three	keycap: 3
+e	four	keycap: 4
+e	five	keycap: 5
+e	six	keycap: 6
+e	seven	keycap: 7
+e	eight	keycap: 8
+e	nine	keycap: 9
+e	ten	keycap: 10
+e	capital_abcd	input latin uppercase
+e	abcd	input latin lowercase
+e	1234	input numbers
+e	symbols	input symbols
+e	abc	input latin letters
+e	a	A button (blood type)
+e	ab	AB button (blood type)
+e	b	B button (blood type)
+e	cl	CL button
+e	cool	COOL button
+e	free	FREE button
+e	info	information
+e	id	ID button
+e	metro	circled M
+e	new	NEW button
+e	ng	NG button
+e	o	O button (blood type)
+e	squared_ok	OK button
+e	parking	P button
+e	sos	SOS button
+e	squared_up	UP! button
+e	vs	VS button
+e	japanese_here_button	Japanese “here” button
+e	japanese_service_charge_button	Japanese “service charge” button
+e	japanese_monthly_amount_button	Japanese “monthly amount” button
+e	japanese_not_free_of_charge_button	Japanese “not free of charge” button
+e	japanese_reserved_button	Japanese “reserved” button
+e	japanese_bargain_button	Japanese “bargain” button
+e	japanese_discount_button	Japanese “discount” button
+e	japanese_free_of_charge_button	Japanese “free of charge” button
+e	japanese_prohibited_button	Japanese “prohibited” button
+e	japanese_acceptable_button	Japanese “acceptable” button
+e	japanese_application_button	Japanese “application” button
+e	japanese_passing_grade_button	Japanese “passing grade” button
+e	japanese_vacancy_button	Japanese “vacancy” button
+e	japanese_congratulations_button	Japanese “congratulations” button
+e	japanese_secret_button	Japanese “secret” button
+e	japanese_open_for_business_button	Japanese “open for business” button
+e	japanese_no_vacancy_button	Japanese “no vacancy” button
+e	red_circle	red circle
+e	orange_circle	orange circle
+e	yellow_circle	yellow circle
+e	green_circle	green circle
+e	blue_circle	blue circle
+e	purple_circle	purple circle
+e	brown_circle	brown circle
+e	black_circle	black circle
+e	white_circle	white circle
+e	red_square	red square
+e	orange_square	orange square
+e	yellow_large_square	yellow square
+e	green_large_square	green square
+e	blue_square	blue square
+e	purple_square	purple square
+e	brown_square	brown square
+e	black_large_square	black large square
+e	white_large_square	white large square
+e	black_medium_square	black medium square
+e	white_medium_square	white medium square
+e	black_medium_small_square	black medium-small square
+e	white_medium_small_square	white medium-small square
+e	black_small_square	black small square
+e	white_small_square	white small square
+e	large_orange_diamond	large orange diamond
+e	large_blue_diamond	large blue diamond
+e	small_orange_diamond	small orange diamond
+e	small_blue_diamond	small blue diamond
+e	red_triangle_up	red triangle pointed up
+e	red_triangle_down	red triangle pointed down
+e	cute	diamond with a dot
+e	radio_button	radio button
+e	black_and_white_square	white square button
+e	white_and_black_square	black square button
+g	uiEmojiGroupFlags	Flags
+e	checkered_flag	chequered flag
+e	triangular_flag	triangular flag
+e	crossed_flags	crossed flags
+e	black_flag	black flag
+e	white_flag	white flag
+e	rainbow_flag	rainbow flag
+e	transgender_flag	transgender flag
+e	pirate_flag	pirate flag
+e	flag_ascension_island	flag: Ascension Island
+e	flag_andorra	flag: Andorra
+e	flag_united_arab_emirates	flag: United Arab Emirates
+e	flag_afghanistan	flag: Afghanistan
+e	flag_antigua_and_barbuda	flag: Antigua & Barbuda
+e	flag_anguilla	flag: Anguilla
+e	flag_albania	flag: Albania
+e	flag_armenia	flag: Armenia
+e	flag_angola	flag: Angola
+e	flag_antarctica	flag: Antarctica
+e	flag_argentina	flag: Argentina
+e	flag_american_samoa	flag: American Samoa
+e	flag_austria	flag: Austria
+e	flag_australia	flag: Australia
+e	flag_aruba	flag: Aruba
+e	flag_åland_islands	flag: Åland Islands
+e	flag_azerbaijan	flag: Azerbaijan
+e	flag_bosnia_and_herzegovina	flag: Bosnia & Herzegovina
+e	flag_barbados	flag: Barbados
+e	flag_bangladesh	flag: Bangladesh
+e	flag_belgium	flag: Belgium
+e	flag_burkina_faso	flag: Burkina Faso
+e	flag_bulgaria	flag: Bulgaria
+e	flag_bahrain	flag: Bahrain
+e	flag_burundi	flag: Burundi
+e	flag_benin	flag: Benin
+e	flag_st_barthélemy	flag: St. Barthélemy
+e	flag_bermuda	flag: Bermuda
+e	flag_brunei	flag: Brunei
+e	flag_bolivia	flag: Bolivia
+e	flag_caribbean_netherlands	flag: Caribbean Netherlands
+e	flag_brazil	flag: Brazil
+e	flag_bahamas	flag: Bahamas
+e	flag_bhutan	flag: Bhutan
+e	flag_bouvet_island	flag: Bouvet Island
+e	flag_botswana	flag: Botswana
+e	flag_belarus	flag: Belarus
+e	flag_belize	flag: Belize
+e	flag_canada	flag: Canada
+e	flag_cocos_keeling_islands	flag: Cocos (Keeling) Islands
+e	flag_congo_kinshasa	flag: Congo - Kinshasa
+e	flag_central_african_republic	flag: Central African Republic
+e	flag_congo_brazzaville	flag: Congo - Brazzaville
+e	flag_switzerland	flag: Switzerland
+e	flag_côte_divoire	flag: Côte d’Ivoire
+e	flag_cook_islands	flag: Cook Islands
+e	flag_chile	flag: Chile
+e	flag_cameroon	flag: Cameroon
+e	flag_china	flag: China
+e	flag_colombia	flag: Colombia
+e	flag_clipperton_island	flag: Clipperton Island
+e	flag_sark	flag: Sark
+e	flag_costa_rica	flag: Costa Rica
+e	flag_cuba	flag: Cuba
+e	flag_cape_verde	flag: Cape Verde
+e	flag_curaçao	flag: Curaçao
+e	flag_christmas_island	flag: Christmas Island
+e	flag_cyprus	flag: Cyprus
+e	flag_czechia	flag: Czechia
+e	flag_germany	flag: Germany
+e	flag_diego_garcia	flag: Diego Garcia
+e	flag_djibouti	flag: Djibouti
+e	flag_denmark	flag: Denmark
+e	flag_dominica	flag: Dominica
+e	flag_dominican_republic	flag: Dominican Republic
+e	flag_algeria	flag: Algeria
+e	flag_ceuta_and_melilla	flag: Ceuta & Melilla
+e	flag_ecuador	flag: Ecuador
+e	flag_estonia	flag: Estonia
+e	flag_egypt	flag: Egypt
+e	flag_western_sahara	flag: Western Sahara
+e	flag_eritrea	flag: Eritrea
+e	flag_spain	flag: Spain
+e	flag_ethiopia	flag: Ethiopia
+e	flag_european_union	flag: European Union
+e	flag_finland	flag: Finland
+e	flag_fiji	flag: Fiji
+e	flag_falkland_islands	flag: Falkland Islands
+e	flag_micronesia	flag: Micronesia
+e	flag_faroe_islands	flag: Faroe Islands
+e	flag_france	flag: France
+e	flag_gabon	flag: Gabon
+e	flag_united_kingdom	flag: United Kingdom
+e	flag_grenada	flag: Grenada
+e	flag_georgia	flag: Georgia
+e	flag_french_guiana	flag: French Guiana
+e	flag_guernsey	flag: Guernsey
+e	flag_ghana	flag: Ghana
+e	flag_gibraltar	flag: Gibraltar
+e	flag_greenland	flag: Greenland
+e	flag_gambia	flag: Gambia
+e	flag_guinea	flag: Guinea
+e	flag_guadeloupe	flag: Guadeloupe
+e	flag_equatorial_guinea	flag: Equatorial Guinea
+e	flag_greece	flag: Greece
+e	flag_south_georgia_and_south_sandwich_islands	flag: South Georgia & South Sandwich Islands
+e	flag_guatemala	flag: Guatemala
+e	flag_guam	flag: Guam
+e	flag_guinea_bissau	flag: Guinea-Bissau
+e	flag_guyana	flag: Guyana
+e	flag_hong_kong_sar_china	flag: Hong Kong SAR China
+e	flag_heard_and_mcdonald_islands	flag: Heard & McDonald Islands
+e	flag_honduras	flag: Honduras
+e	flag_croatia	flag: Croatia
+e	flag_haiti	flag: Haiti
+e	flag_hungary	flag: Hungary
+e	flag_canary_islands	flag: Canary Islands
+e	flag_indonesia	flag: Indonesia
+e	flag_ireland	flag: Ireland
+e	flag_israel	flag: Israel
+e	flag_isle_of_man	flag: Isle of Man
+e	flag_india	flag: India
+e	flag_british_indian_ocean_territory	flag: British Indian Ocean Territory
+e	flag_iraq	flag: Iraq
+e	flag_iran	flag: Iran
+e	flag_iceland	flag: Iceland
+e	flag_italy	flag: Italy
+e	flag_jersey	flag: Jersey
+e	flag_jamaica	flag: Jamaica
+e	flag_jordan	flag: Jordan
+e	flag_japan	flag: Japan
+e	flag_kenya	flag: Kenya
+e	flag_kyrgyzstan	flag: Kyrgyzstan
+e	flag_cambodia	flag: Cambodia
+e	flag_kiribati	flag: Kiribati
+e	flag_comoros	flag: Comoros
+e	flag_st_kitts_and_nevis	flag: St. Kitts & Nevis
+e	flag_north_korea	flag: North Korea
+e	flag_south_korea	flag: South Korea
+e	flag_kuwait	flag: Kuwait
+e	flag_cayman_islands	flag: Cayman Islands
+e	flag_kazakhstan	flag: Kazakhstan
+e	flag_laos	flag: Laos
+e	flag_lebanon	flag: Lebanon
+e	flag_st_lucia	flag: St. Lucia
+e	flag_liechtenstein	flag: Liechtenstein
+e	flag_sri_lanka	flag: Sri Lanka
+e	flag_liberia	flag: Liberia
+e	flag_lesotho	flag: Lesotho
+e	flag_lithuania	flag: Lithuania
+e	flag_luxembourg	flag: Luxembourg
+e	flag_latvia	flag: Latvia
+e	flag_libya	flag: Libya
+e	flag_morocco	flag: Morocco
+e	flag_monaco	flag: Monaco
+e	flag_moldova	flag: Moldova
+e	flag_montenegro	flag: Montenegro
+e	flag_st_martin	flag: St. Martin
+e	flag_madagascar	flag: Madagascar
+e	flag_marshall_islands	flag: Marshall Islands
+e	flag_north_macedonia	flag: North Macedonia
+e	flag_mali	flag: Mali
+e	flag_myanmar_burma	flag: Myanmar (Burma)
+e	flag_mongolia	flag: Mongolia
+e	flag_macao_sar_china	flag: Macao SAR China
+e	flag_northern_mariana_islands	flag: Northern Mariana Islands
+e	flag_martinique	flag: Martinique
+e	flag_mauritania	flag: Mauritania
+e	flag_montserrat	flag: Montserrat
+e	flag_malta	flag: Malta
+e	flag_mauritius	flag: Mauritius
+e	flag_maldives	flag: Maldives
+e	flag_malawi	flag: Malawi
+e	flag_mexico	flag: Mexico
+e	flag_malaysia	flag: Malaysia
+e	flag_mozambique	flag: Mozambique
+e	flag_namibia	flag: Namibia
+e	flag_new_caledonia	flag: New Caledonia
+e	flag_niger	flag: Niger
+e	flag_norfolk_island	flag: Norfolk Island
+e	flag_nigeria	flag: Nigeria
+e	flag_nicaragua	flag: Nicaragua
+e	flag_netherlands	flag: Netherlands
+e	flag_norway	flag: Norway
+e	flag_nepal	flag: Nepal
+e	flag_nauru	flag: Nauru
+e	flag_niue	flag: Niue
+e	flag_new_zealand	flag: New Zealand
+e	flag_oman	flag: Oman
+e	flag_panama	flag: Panama
+e	flag_peru	flag: Peru
+e	flag_french_polynesia	flag: French Polynesia
+e	flag_papua_new_guinea	flag: Papua New Guinea
+e	flag_philippines	flag: Philippines
+e	flag_pakistan	flag: Pakistan
+e	flag_poland	flag: Poland
+e	flag_st_pierre_and_miquelon	flag: St. Pierre & Miquelon
+e	flag_pitcairn_islands	flag: Pitcairn Islands
+e	flag_puerto_rico	flag: Puerto Rico
+e	flag_palestinian_territories	flag: Palestinian Territories
+e	flag_portugal	flag: Portugal
+e	flag_palau	flag: Palau
+e	flag_paraguay	flag: Paraguay
+e	flag_qatar	flag: Qatar
+e	flag_réunion	flag: Réunion
+e	flag_romania	flag: Romania
+e	flag_serbia	flag: Serbia
+e	flag_russia	flag: Russia
+e	flag_rwanda	flag: Rwanda
+e	flag_saudi_arabia	flag: Saudi Arabia
+e	flag_solomon_islands	flag: Solomon Islands
+e	flag_seychelles	flag: Seychelles
+e	flag_sudan	flag: Sudan
+e	flag_sweden	flag: Sweden
+e	flag_singapore	flag: Singapore
+e	flag_st_helena	flag: St. Helena
+e	flag_slovenia	flag: Slovenia
+e	flag_svalbard_and_jan_mayen	flag: Svalbard & Jan Mayen
+e	flag_slovakia	flag: Slovakia
+e	flag_sierra_leone	flag: Sierra Leone
+e	flag_san_marino	flag: San Marino
+e	flag_senegal	flag: Senegal
+e	flag_somalia	flag: Somalia
+e	flag_suriname	flag: Suriname
+e	flag_south_sudan	flag: South Sudan
+e	flag_são_tomé_and_príncipe	flag: São Tomé & Príncipe
+e	flag_el_salvador	flag: El Salvador
+e	flag_sint_maarten	flag: Sint Maarten
+e	flag_syria	flag: Syria
+e	flag_eswatini	flag: Eswatini
+e	flag_tristan_da_cunha	flag: Tristan da Cunha
+e	flag_turks_and_caicos_islands	flag: Turks & Caicos Islands
+e	flag_chad	flag: Chad
+e	flag_french_southern_territories	flag: French Southern Territories
+e	flag_togo	flag: Togo
+e	flag_thailand	flag: Thailand
+e	flag_tajikistan	flag: Tajikistan
+e	flag_tokelau	flag: Tokelau
+e	flag_timor_leste	flag: Timor-Leste
+e	flag_turkmenistan	flag: Turkmenistan
+e	flag_tunisia	flag: Tunisia
+e	flag_tonga	flag: Tonga
+e	flag_türkiye	flag: Türkiye
+e	flag_trinidad_and_tobago	flag: Trinidad & Tobago
+e	flag_tuvalu	flag: Tuvalu
+e	flag_taiwan	flag: Taiwan
+e	flag_tanzania	flag: Tanzania
+e	flag_ukraine	flag: Ukraine
+e	flag_uganda	flag: Uganda
+e	flag_us_outlying_islands	flag: U.S. Outlying Islands
+e	flag_united_nations	flag: United Nations
+e	flag_united_states	flag: United States
+e	flag_uruguay	flag: Uruguay
+e	flag_uzbekistan	flag: Uzbekistan
+e	flag_vatican_city	flag: Vatican City
+e	flag_st_vincent_and_grenadines	flag: St. Vincent & Grenadines
+e	flag_venezuela	flag: Venezuela
+e	flag_british_virgin_islands	flag: British Virgin Islands
+e	flag_us_virgin_islands	flag: U.S. Virgin Islands
+e	flag_vietnam	flag: Vietnam
+e	flag_vanuatu	flag: Vanuatu
+e	flag_wallis_and_futuna	flag: Wallis & Futuna
+e	flag_samoa	flag: Samoa
+e	flag_kosovo	flag: Kosovo
+e	flag_yemen	flag: Yemen
+e	flag_mayotte	flag: Mayotte
+e	flag_south_africa	flag: South Africa
+e	flag_zambia	flag: Zambia
+e	flag_zimbabwe	flag: Zimbabwe
+e	flag_england	flag: England
+e	flag_scotland	flag: Scotland
+e	flag_wales	flag: Wales

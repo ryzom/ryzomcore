@@ -173,8 +173,9 @@ public:
 	/// update taker compass. return the number of entries
 	uint updateCompass(CCharacter & user, const std::string & dbPrefix );
 
-	/// apply the consequences of a crash to this mission
-	void applyCrashHandler(bool EGSCrash, const std::string & AIInstanceName );
+	/// apply the consequences of a crash to this mission: a restart of this service (EGSCrash), or the crash of the AI
+	/// service that had the AI instances named
+	void applyCrashHandler(bool EGSCrash, const std::vector<std::string> & AIInstanceNames );
 	
 	/// apply the consequences of a player reconnection
 	void applyPlayerReconnectHandler();
@@ -186,9 +187,12 @@ public:
 	void updateEncyclopedia();
 	
 protected:
-	void updateUserJournalEntry( CCharacter & user, const std::string & dbPrefix );
+	/// monitoring: the user is not of the mission, but the CSR that monitors the missions of the character who has it.
+	/// Its entry has no compass, and its texts are made for the CSR as if the mission were its own: a text with the
+	/// name of the player has the name of the CSR.
+	void updateUserJournalEntry( CCharacter & user, const std::string & dbPrefix, bool monitoring = false );
 	template <class DBType>
-	void _updateUserJournalEntry( CCharacter & user, DBType &missionDb);
+	void _updateUserJournalEntry( CCharacter & user, DBType &missionDb, bool monitoring);
 
 	template <class DBType>
 	uint _updateCompass(CCharacter & user, DBType &missionDb);

@@ -281,6 +281,8 @@ TEST_F(CLoginService_ClientConnectionIT, shouldReturnErrorWhenUserDoesNotExist)
 TEST_F(CLoginService_ClientConnectionIT, shouldAcceptUnknownUsersIfEnabled)
 {
 	loginService.ConfigFile.getVar("AcceptUnknownUsers").setAsInt(1);
+	// an account is only created under a valid account name
+	verifyLogin.login = ucstring::makeFromUtf8("test_login");
 	EXPECT_CALL(*persistence, findUserByLogin)
 	    .Times(1)
 	    .WillOnce(Return(std::make_pair(std::nullopt, "")));
@@ -291,6 +293,20 @@ TEST_F(CLoginService_ClientConnectionIT, shouldAcceptUnknownUsersIfEnabled)
 	auto response = sendMessage<VLPResponse>("VLP", verifyLogin);
 
 	EXPECT_THAT(response, Field("reason", &VLPResponse::reason, IsEmpty()));
+}
+
+TEST_F(CLoginService_ClientConnectionIT, shouldNotCreateUnknownUserWithInvalidAccountName)
+{
+	loginService.ConfigFile.getVar("AcceptUnknownUsers").setAsInt(1);
+	// "test-login": the dash is not allowed in a new account name
+	EXPECT_CALL(*persistence, findUserByLogin)
+	    .WillRepeatedly(Return(std::make_pair(std::nullopt, "")));
+	EXPECT_CALL(*persistence, createUser)
+	    .Times(0);
+
+	auto response = sendMessage<VLPResponse>("VLP", verifyLogin);
+
+	EXPECT_THAT(response, Field("reason", &VLPResponse::reason, StrEq("Invalid account name")));
 }
 
 TEST_F(CLoginService_ClientConnectionIT, shouldReturnErrorWhenNoAuthorizedUserExistsToSelectAShard)

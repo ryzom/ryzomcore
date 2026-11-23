@@ -223,7 +223,19 @@ class ESoundDriver : public NLMISC::Exception
 public:
 	ESoundDriver() : NLMISC::Exception( "Sound driver error" ) {}
 	ESoundDriver( const char *reason ) : NLMISC::Exception( reason ) {}
-	ESoundDriver( const std::string &reason ) : NLMISC::Exception( reason.c_str() ) {}
+	// the reason is text, not a format: it can hold the name of a file or of a device
+	ESoundDriver( const std::string &reason ) : NLMISC::Exception( reason ) {}
+};
+
+
+/**
+ * ESoundDriverDeviceNotFound
+ * The device asked by name is not a device of the sound driver (UAudioMixer::initDevice).
+ */
+class ESoundDriverDeviceNotFound : public ESoundDriver
+{
+public:
+	ESoundDriverDeviceNotFound(const std::string &reason) : ESoundDriver( reason ) {}
 };
 
 

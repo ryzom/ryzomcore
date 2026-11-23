@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("configuration")
 
 if os.path.isfile("log.log"):
@@ -71,6 +71,17 @@ cfg.close()
 printLog(log, "")
 
 printLog(log, ">>> Generate shard dev local.cfg <<<")
+# rrdtool of the externals package, RC_RRDTOOL_DIR comes from .nel/path_config.bat
+rrdToolDir = os.getenv("RC_RRDTOOL_DIR")
+if not rrdToolDir:
+	printLog(log, "ERROR RC_RRDTOOL_DIR is not set, run this from the quick start (call .nel/path_config.bat first)")
+	log.close()
+	sys.exit(1)
+rrdToolPath = os.path.join(rrdToolDir, "bin", "rrdtool.exe").replace("\\", "/")
+if not os.path.isfile(rrdToolPath):
+	printLog(log, "ERROR rrdtool was not found at " + rrdToolPath)
+	log.close()
+	sys.exit(1)
 cfg = open(ShardDevDirectory + "/local.cfg", "w")
 cfg.write("WindowStyle = \"WIN\";\n")
 cfg.write("Paths += {\n")
@@ -87,7 +98,7 @@ for multiDir in InstallShardDataMultiDirectories:
 	mkPath(log, ShardInstallDirectory + "/" + dstDir)
 	cfg.write("	\"" + ShardInstallDirectory + "/" + dstDir + "\",\n")
 cfg.write("};\n")
-cfg.write("RRDToolPath = \"..\\..\\..\\external\\rrdtool\\rrdtool.exe\";\n")
+cfg.write("RRDToolPath = \"" + rrdToolPath + "\";\n")
 cfg.write("StartCommands += {\n")
 cfg.write("	// \"gw_aes.transportRemove aes_l3c\",\n")
 cfg.write("};\n")
@@ -132,12 +143,12 @@ for execDir in InstallShardDataExecutables:
 	for cfgName in execDir[2]:
 		cfgPath = ShardDevDirectory + "/live/" + dstDir + "/" + cfgName
 		found = False
-		with open(cfgPath, "r") as f:
+		with open(cfgPath, "r", encoding="utf-8", errors="surrogateescape") as f:
 			for l in f:
 				if "Paths += {" in l:
 					found = True
 		if not found:
-			with open(cfgPath, "a") as cfg:
+			with open(cfgPath, "a", encoding="utf-8", errors="surrogateescape") as cfg:
 				cfg.write("\n")
 				cfg.write("Paths += {\n")
 				cfg.write("	\"" + ShardDevDirectory + "/live/" + dstDir + "\",\n")
@@ -157,7 +168,7 @@ else:
 		os.remove("log.log")
 	subprocess.call([ PatchmanService, "-C.", "-L." ])
 	if os.path.isfile("log.log"):
-		f = open("log.log", "r")
+		f = open("log.log", "r", encoding="utf-8", errors="replace")
 		for l in f:
 			printLog(log, l.rstrip())
 		f.close()

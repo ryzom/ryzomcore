@@ -47,16 +47,28 @@ enum TReportResult
  * \param title set the title of the report. If empty, it'll display "NeL report"
  * \param subject extended title of the report
  * \param body message displayed in the edit text box. This string will be sent to the crash report tool
- * \param attachment binary file to attach. This is a filename
  * \param synchronous use system() and wait for the crash tool exit code, passes -dev flag; otherwise return defaultResult immediately
  * \param sendReport hide 'dont send' button, or auto enable 'send report' checkbox
  *
+ * A report carries the body only. The crash dump (NL_CRASH_DUMP_FILE) is not part of it and stays on the machine.
+ * The body is written to a file in the log directory first; when that file cannot be created, the body goes to the
+ * standard error output and the log says so.
+ *
  * \return the button clicked or defaultResult
  */
-TReportResult report(const std::string &title, const std::string &subject, const std::string &body, const std::string &attachment, bool synchronous, bool sendReport, TReportResult defaultResult);
+TReportResult report(const std::string &title, const std::string &subject, const std::string &body, bool synchronous, bool sendReport, TReportResult defaultResult);
 
 /// Set the Url of the web service used to post crash reports to. String is copied
 void setReportPostUrl(const char *postUrl);
+
+/// Whether report() starts the crash report tool, a window of its own, for an application with windows (true by
+/// default). Off, a report is the file in the log directory only: for an application whose windows must not show on
+/// the desktop shown. A fatal error then ends the program after its report, as it does wherever the tool does not ask,
+/// and an error or a failed assert is not copied to the clipboard. Kept in the environment, as the report post url is,
+/// so that the modules of the process share it; a program that launchProgram starts on Windows does not inherit it
+/// (on Unix it does).
+void setReportToolEnabled(bool enabled);
+bool isReportToolEnabled();
 
 } // NLMISC
 

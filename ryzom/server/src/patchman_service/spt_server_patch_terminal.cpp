@@ -79,7 +79,7 @@ NLMISC::CVariable<uint32> NumSPTWatches("spt","NumSPTWatches","number of SPT wat
 
 NLMISC::CVariable<string> DevConfigDirectory("spt", "DevConfigDirectory", "Directory used to build developer configuration file", "../../pipeline/shard_dev", 0, true);
 NLMISC::CVariable<string> DevWorkingDirectory("spt", "DevWorkingDirectory", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\pipeline\\shard_dev", 0, true);
-NLMISC::CVariable<string> DevSleepCmd("spt", "DevSleepCmd", "Directory set as default directory in generated startup batch", "%RC_ROOT%\\external\\utils\\nircmd.exe wait 1000", 0, true);
+NLMISC::CVariable<string> DevSleepCmd("spt", "DevSleepCmd", "Directory set as default directory in generated startup batch", "\"%RC_UTILS_DIR%\\nircmd.exe\" wait 1000", 0, true);
 NLMISC::CVariable<string> DevExePrefix("spt", "DevExePrefix", "Executable prefix used in development startup batch", "start ", 0, true);
 NLMISC::CVariable<string> DevExeSuffix("spt", "DevExeSuffix", "Executable suffix used in development startup batch", ".exe", 0, true);
 
@@ -787,6 +787,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		exeMap["ai_service"] = "ryzom_ai_service";
 		exeMap["frontend_service"] = "ryzom_frontend_service";
 		exeMap["dynamic_scenario_service"] = "ryzom_dynamic_scenario_service";
+		exeMap["monitor_service"] = "ryzom_monitor_service";
 	}
 	const std::string &exeSuffix = DevExeSuffix.get();
 
@@ -800,7 +801,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		3: SU MFS
 		4: TICKS NS
 		5: MS IOS
-		6: GPMS EGS
+		6: GPMS EGS MOS
 		7: AI
 		8: DSS
 		9: FS SBS
@@ -817,6 +818,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		priorityMap["ryzom_ios_service"] = 5;
 		priorityMap["ryzom_entities_game_service"] = 6;
 		priorityMap["ryzom_gpm_service"] = 6;
+		priorityMap["ryzom_monitor_service"] = 6;
 		priorityMap["ryzom_ai_service"] = 7;
 		priorityMap["ryzom_dynamic_scenario_service"] = 8;
 		priorityMap["ryzom_frontend_service"] = 9;
@@ -946,6 +948,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		ini << "LaunchCmd=" << launchCmd << "\n";
 		ini << "LaunchArgs=" << cmdLine << "\n";
 		ini << "LaunchCtrl=.\\" << appDesc.AppName << ".launch_ctrl,.\\" << appDesc.AppName << ".state,LAUNCH,RUNNING,STOP,STOPPED\n";
+		ini << "Control=1\n"; // servdash_cli: NeL console over --ctrl, ignored by the Win32 servdash
 		if (priorityIt != priorityMap.end())
 			ini << "Priority=" << priorityIt->second << "\n";
 		ini << "\n";
@@ -967,6 +970,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 			ini << "ReadyPattern=^[^*].+Service Console\n";
 			ini << "LaunchCmd=ryzom_admin_service\n";
 			ini << "LaunchArgs=-A. -C. -L. --fulladminname=admin_executor_service --shortadminname=AES\n";
+			ini << "Control=1\n";
 			if (priorityIt != priorityMap.end())
 				ini << "Priority=" << priorityIt->second << "\n";
 			ini << "\n";

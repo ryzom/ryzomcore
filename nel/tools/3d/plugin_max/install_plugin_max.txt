@@ -1,19 +1,82 @@
 
-If you have installed 3dsmax9 by default, the root path is:
+Installing the NeL plugins for 3dsmax
+=====================================
 
-<3DSMAX> = C:\Program Files\Autodesk\3ds Max 9
+Build with WITH_NEL_MAXPLUGIN=ON and MAXSDK_DIR set to the SDK of the 3dsmax
+version the plugins are for, with the compiler and the architecture that
+version needs. Then install the build, for example:
 
-- Copy following files inside <3DSMAX>/plugins
+    cmake --install <build folder> --prefix <prefix>
 
-nel_export\ReleaseDebug\nel_export.dlu
-tile_utility\ReleaseDebug\neltileutility.dlu
-nel_patch_converter\ReleaseDebug\nelconvertpatch.dlm
+The install puts the plugins under <prefix>/maxplugin, laid out like the
+installation folder of 3dsmax, called <3DSMAX> below: the files at the top of
+maxplugin go to <3DSMAX>, maxplugin/plugins to <3DSMAX>/plugins and
+maxplugin/scripts to <3DSMAX>/scripts.
 
-- Copy following files inside <3DSMAX>/
+Release builds end the names of the binaries with _r, debug builds with _d.
+The names below are the release names.
 
-nel_3dsmax_shared\ReleaseDebug\nel_3dsmax_shared.dll
-nel\lib\object_viewer_rd.dll
-nel\lib\nel_drv_opengl_win_rd.dll
-nel\tools\3d\object_viewer\object_viewer.cfg
 
-- Copy plugin_max\scripts\* dans <3DSMAX>/Scripts
+- maxplugin/plugins -> <3DSMAX>/plugins
+
+  nel_export_r.dlu               NeL Export utility: export, view, node properties
+  tile_utility_r.dlu             NeL tile bank utility
+  ligoscape_utility_r.dlx        Ligoscape utility
+  nel_patch_converter_r.dlm      NeL patch converter
+  nel_patch_edit_r.dlm           NeL patch editor
+  nel_patch_paint_r.dlm          NeL patch painter
+  nel_vertex_tree_paint_r.dlm    vertex tree painter
+  mapext198m3.dlm                map extender
+  keys.cfg                       keys of the patch painter
+  ligoscape.cfg                  configuration of the Ligoscape utility
+
+  The plugin packages (tool/wine_vs2008/package_max_plugin.sh and the scripts
+  in tool/quick_start/win32/install/redist) give six of these files other
+  names: nelexport_r.dlu, neltileutility_r.dlu, nelligoscapeutility_r.dlx,
+  nelconvertpatch_r.dlm, neleditpatch_r.dlm and nelpaintpatch_r.dlm. Before
+  installing over a package install, delete those from <3DSMAX>/plugins:
+  3dsmax would otherwise load both copies, which declare the same class ids.
+
+
+- maxplugin -> <3DSMAX>
+
+  nel_3dsmax_shared_r.dll        code shared by the plugins
+  object_viewer_dll_r.dll        object viewer, used by View in the NeL Export utility
+  object_viewer.cfg              its configuration, read from the folder of object_viewer_dll
+  object_viewer.exe              the object viewer as a program
+  nel_drv_*_win_r.dll            the 3D and sound drivers the object viewer loads
+
+  The object viewer reads the object_viewer.cfg next to object_viewer_dll only
+  when there is no .nel folder in the current directory of 3dsmax or in one of
+  its parents. When there is one, the nearest wins: the viewer reads
+  .nel/tools/object_viewer.cfg in it instead, and stops with a message naming
+  that path when the file is not there.
+
+  The object viewer needs MFC. A build without MFC has no object viewer, and
+  View in the NeL Export utility only says so.
+
+  The DLLs of the external libraries the build links (libxml2, zlib, freetype,
+  libpng, libjpeg, giflib, ogg, vorbis and the others it was built with) go to
+  <3DSMAX> as well, unless they were linked statically.
+
+
+- maxplugin/scripts -> <3DSMAX>/scripts
+
+  The scripts in scripts/startup run when 3dsmax starts. They define the NeL
+  material, lights, particle systems and the other NeL objects, so they are
+  needed to open and to export NeL scenes. The other scripts are tools to run
+  with MAXScript > Run Script.
+
+
+- maxplugin/macroscripts
+
+  Macro scripts of the NeL tools. Run each .mcr file once with MAXScript >
+  Run Script to register its macro scripts, which can then be put on toolbars
+  and menus.
+
+
+- maxplugin/docs
+
+  These notes, the documents about what the export supports (animation,
+  lights, lightmaps, materials, skinning, water, ligoscape) and
+  resolve_troubles.txt. Nothing to copy.

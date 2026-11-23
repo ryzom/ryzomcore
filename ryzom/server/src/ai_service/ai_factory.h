@@ -35,7 +35,11 @@ public:
 template <class BaseClass, class KeyType = std::string>
 class CAiFactoryContainer
 {
-	typedef std::map<KeyType, NLMISC::CDbgPtr<IAiFactory<BaseClass> > > TRegisterCont;
+	// The factories are static objects, which live until the process exits. This container is only
+	// released by the tick release of the service, which several exits skip (naming service lost,
+	// fatal error, second exit signal), so it holds plain pointers: a CDbgPtr left behind would make
+	// the destructor of every factory assert in debug builds.
+	typedef std::map<KeyType, IAiFactory<BaseClass> *> TRegisterCont;
 
 public:
 		

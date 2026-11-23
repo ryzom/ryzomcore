@@ -32,6 +32,7 @@
 
 #include "ais_user_models.h"
 #include "dyn_grp_inline.h"
+#include "ring_scenario_guard.h"
 
 using namespace MULTI_LINE_FORMATER;
 
@@ -118,6 +119,11 @@ void CSpawnBotNpc::processEvent(CCombatInterface::CEvent const& event)
 {
 	++AISStat::BotTotalUpdCtr;
 	++AISStat::BotNpcUpdCtr;
+	
+	// The update raises events of the group (the hp triggers, the events of the fight profile). The
+	// handlers of an event are script, and a script can despawn this bot: the object, and with it
+	// the profile that is being updated, then lives until this function returns (CBot::releaseSpawnObj).
+	NLMISC::CSmartPtr<CSpawnBot> const keptForUpdate(this);
 
 	{
 		H_AUTO(AIHpTrig);
@@ -130,6 +136,8 @@ void CSpawnBotNpc::processEvent(CCombatInterface::CEvent const& event)
 			if (_OldHpPercentage>=0.f && newHpPercentage!=_OldHpPercentage)
 			{
 				persGrp.hpTriggerCb(_OldHpPercentage, newHpPercentage);
+				if (isDespawned())
+					return;
 			}
 			_OldHpPercentage = newHpPercentage;
 		}
@@ -170,6 +178,8 @@ void CSpawnBotNpc::processEvent(CCombatInterface::CEvent const& event)
 		{
 			H_AUTO(BotNpcUpdateProfile);
 			updateProfile(ticks); // then we can update the current bot profile.
+			if (isDespawned())
+				return;
 		}
 	}
 	else
@@ -478,6 +488,8 @@ CBotNpc::~CBotNpc()
 
 void CBotNpc::calcSpawnPos(RYAI_MAP_CRUNCH::CWorldMap const& worldMap)
 {
+	// a place drawn from the state: the height given with the start position is not its height
+	m_HasStartHeight = false;
 	CAIStatePositional const* const state = static_cast<CAIStatePositional*>(grp().getStartState());
 	RYAI_MAP_CRUNCH::CWorldPosition	wp;
 	uint32 maxTries = 100;
@@ -516,7 +528,7 @@ void CBotNpc::calcSpawnPos(RYAI_MAP_CRUNCH::CWorldMap const& worldMap)
 	}
 
 	if (!wp.isValid() && !isStuck())
-		nlwarning("Cannot generate a valid position for Npc %s", getFullName().c_str());
+		RYAI_GROUP_WARNING(getOwner(), NLMISC::toString("Cannot generate a valid position for Npc %s", getFullName().c_str()));
 }
 
 CGroupNpc& CBotNpc::grp() const
@@ -670,7 +682,7 @@ bool CBotNpc::spawn()
 {
 	if (!isSheetValid())
 	{
-		nlwarning("spawn() Aborted for bot '%s' due to bad sheet", getFullName().c_str());
+		RYAI_GROUP_WARNING(getOwner(), NLMISC::toString("spawn() Aborted for bot '%s' due to bad sheet", getFullName().c_str()));
 		return false;
 	}
 
@@ -1152,10 +1164,29 @@ void CBotNpc::setStartPos(double x, double y, float theta, AITYPES::TVerticalPos
 {
 	_StartPos = CAIPos(x, y, 0, theta);
 	_VerticalPos = verticalPos;
+	m_HasStartHeight = false;
+}
+
+void CBotNpc::setStartHeight(sint32 height)
+{
+	m_HasStartHeight = true;
+	m_StartHeight = height;
+	m_StartHeightReported = false;
+}
+
+RYAI_MAP_CRUNCH::CWorldPosition CBotNpc::getStartWorldPos() const
+{
+	RYAI_MAP_CRUNCH::CWorldPosition pos;
+	if (m_HasStartHeight)
+		CWorldContainer::getWorldMap().setWorldPositionNearestHeight(m_StartHeight, 0.0, _VerticalPos, pos, _StartPos);
+	return pos;
 }
 
 void CBotNpc::init()
 {
+	m_HasStartHeight = false;
+	m_StartHeight = 0;
+	m_StartHeightReported = false;
 	_ChatProfile = NULL;
 	_MaxHitRangeForPC = -1.0f;
 	_DispersionRadius = 0;
@@ -1196,9 +1227,21 @@ void CBotNpc::getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& 
 	}
 	else if (_StartPos.isNull())
 		calcSpawnPos(worldMap);
-
-	if (isStuck() || IsRingShard)
+	
+	if ((isStuck() || IsRingShard) && m_HasStartHeight)
+	{
+		bool atHeight;
+		if (worldMap.setWorldPositionNearestHeight(m_StartHeight, 0.0, _VerticalPos, pos, _StartPos, NULL, &atHeight) && !atHeight && !m_StartHeightReported)
+		{
+			m_StartHeightReported = true;
+			nlwarning("CBotNpc: '%s' at %s has a height of %.1f m that no layer there is near, it stands on the layer of its vertical pos",
+			    getAliasFullName().c_str(), _StartPos.toString().c_str(), m_StartHeight / 1000.0);
+		}
+	}
+	else if (isStuck() || IsRingShard)
 		worldMap.setWorldPosition(_VerticalPos, pos, _StartPos);
+	else if (m_HasStartHeight)
+		CWorldContainer::calcNearestWPosAtHeight(m_StartHeight, 0.0, _VerticalPos, worldMap, pos, _StartPos, 10, 200, CWorldContainer::CPosValidatorDefault());
 	else
 		CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, worldMap, pos, _StartPos, 10, 200, CWorldContainer::CPosValidatorDefault());
 
@@ -1252,7 +1295,7 @@ void CBotNpc::sheetChanged()
 
 		// Delete old bot
 		CMirrors::removeEntity(getSpawnObj()->getEntityId());
-		setSpawn(NULL); // automatic smart pointer deletion
+		releaseSpawnObj();
 		notifyBotDespawn();
 
 		// Finalize spawn object creation

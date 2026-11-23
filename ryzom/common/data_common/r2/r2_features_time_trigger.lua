@@ -95,7 +95,8 @@ feature.Components.TimeTriggerFeature =
 local component = feature.Components.TimeTriggerFeature  
 
 function feature.getLogicActionActivate(entity, context, action, rtNpcGrp)
-	local action1 = r2.Translator.createAction("timer_enable", rtNpcGrp.Id, 0)
+	-- the timer is set to the hour of the trigger again, as at the start (feature.Translator)
+	local action1 = r2.Translator.createAction("timer_set_daytime", rtNpcGrp.Id, 0, entity.Hours, entity.Minutes)
 	local action2 = r2.Translator.createAction("generic_event_trigger", rtNpcGrp.Id, 0)
 	local retAction = r2.Translator.createAction("multi_actions", {action1, action2})
 	return retAction, retAction
@@ -220,7 +221,7 @@ component.getLogicEvent = function(this, context, event)
 
 	local eventType = tostring(event.Event.Type)
 	
-	local eventHandler, lastCondition = nil, nil
+	local eventHandler, firstCondition, lastCondition = nil, nil, nil
 
 	if eventType == "On Trigger" then 
 		eventHandler, firstCondition, lastCondition = r2.Translator.createEvent("timer_t0_triggered", "",  rtNpcGrp.Id)
@@ -316,10 +317,9 @@ feature.create = function()
 			return
 		end
 	
-		local component = feature.createComponent( x, y, hours, cyclic)
+		-- the hour and the minute go in the component before it is sent: set after the request, they would not reach it
+		local component = feature.createComponent( x, y, hours, minutes, cyclic)
 		r2.requestInsertNode(r2:getCurrentAct().InstanceId, "Features", -1, "", component)
-		component.Minutes = minutes
-		component.Hours = hours
 		
 	end
 

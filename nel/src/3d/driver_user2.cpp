@@ -81,7 +81,7 @@ void			CDriverUser::deleteScene(UScene	*scene)
 
 // ***************************************************************************
 
-void CDriverUser::beginDefaultRenderTarget(uint32 width, uint32 height)
+bool CDriverUser::beginDefaultRenderTarget(uint32 width, uint32 height)
 {
 	if (_MatRenderTarget.empty())
 	{
@@ -110,8 +110,13 @@ void CDriverUser::beginDefaultRenderTarget(uint32 width, uint32 height)
 	nlassert(!_EffectRenderTarget);
 	if (width == 0 || height == 0)
 		getWindowSize(width, height);
+	// A minimized window, or one resized to nothing, has no area: there is no picture to apply an effect to,
+	// and no texture can be made of that size. The frame goes to the back buffer as it is
+	if (width == 0 || height == 0)
+		return false;
 	_EffectRenderTarget = getRenderTargetManager().getRenderTarget(width, height);
 	setRenderTarget(*_EffectRenderTarget);
+	return true;
 }
 
 // ***************************************************************************

@@ -436,14 +436,11 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 
 //-----------------------------------------------
 // eyesHeight :
-// \todo GUIGUI : do it better in mount mode
+// The mount mode of the controls sets the height of the eyes on a mount (mountEyesHeight()).
 //-----------------------------------------------
 float CUserEntity::eyesHeight()
 {
-	if(!_OnMount)
-		return _EyesHeight * _CharacterScalePos;
-	else
-		return _EyesHeight * _CharacterScalePos;
+	return _EyesHeight * _CharacterScalePos;
 }// eyesHeight //
 
 
@@ -2226,6 +2223,7 @@ void CUserEntity::applyBehaviour(const CBehaviourContext &behaviourContext)	// v
 			animState (MOVE, CAnimationStateSheet::FirstPersonAttack);
 			animIndex (MOVE, CAnimation::UnknownAnim);
 			animOffset(MOVE, 0.0);
+			_SoundId[MOVE] = NLSOUND::CSoundAnimationNoId;
 			_CurrentState = EAM->mState(_CurrentAutomaton, animState(MOVE));
 			if(_CurrentState && _CurrentAnimSet[MOVE])
 			{
@@ -2235,6 +2233,10 @@ void CUserEntity::applyBehaviour(const CBehaviourContext &behaviourContext)	// v
 					animIndex(MOVE, animStatePtr->chooseAnim(_AnimJobSpecialisation, people(), getGender(), 0.0));
 					if(animIndex(MOVE) != CAnimation::UnknownAnim)
 					{
+						// The sound of this animation: without this, the one of the animation set before is played with it
+						const ::CAnimation *anim = animStatePtr->getAnimation(animIndex(MOVE));
+						if(anim)
+							_SoundId[MOVE] = anim->soundId();
 						if(_PlayList)
 						{
 							_PlayList->setAnimation  (MOVE, animId(MOVE));
@@ -2288,7 +2290,9 @@ void CUserEntity::setDead()	// virtual
 	uint kamiFameIndex = CStaticFames::getInstance().getFactionIndex("kami");
 	if (pIM && kamiFameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
-		CCDBNodeLeaf *pLeafKamiFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", kamiFameIndex - 1), false);
+		// the slot of a faction in the database is given by the fame table, as for the fame observers
+		uint kamiFameIndexInDatabase = CStaticFames::getInstance().getDatabaseIndex(kamiFameIndex);
+		CCDBNodeLeaf *pLeafKamiFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%u:VALUE", kamiFameIndexInDatabase), false);
 		if (pLeafKamiFame != nullptr)
 			kamiFame = pLeafKamiFame->getValue8();
 	}
@@ -2298,7 +2302,8 @@ void CUserEntity::setDead()	// virtual
 	uint karavanFameIndex = CStaticFames::getInstance().getFactionIndex("karavan");
 	if (pIM && karavanFameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
-		CCDBNodeLeaf *pLeafKaravanFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", karavanFameIndex - 1), false);
+		uint karavanFameIndexInDatabase = CStaticFames::getInstance().getDatabaseIndex(karavanFameIndex);
+		CCDBNodeLeaf *pLeafKaravanFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%u:VALUE", karavanFameIndexInDatabase), false);
 		if (pLeafKaravanFame != nullptr)
 			karavanFame = pLeafKaravanFame->getValue8();
 	}
@@ -2497,15 +2502,16 @@ void CUserEntity::updateSound(const TTime &time)
 				const ::CAnimation *anim = animStatePtr->getAnimation (animId);
 				if(anim)
 				{
-					// Select the sound ID
-					_SoundId[MOVE] = anim->soundId();
+					// The sound of the walk or run animation, only to find the steps: _SoundId[MOVE] stays
+					// the sound of the animation that is played (CCharacterCL::animEventsProcessing).
+					NLSOUND::TSoundAnimId stepSoundId = anim->soundId();
 
-					if (_SoundId[MOVE] != NLSOUND::CSoundAnimationNoId)
+					if (stepSoundId != NLSOUND::CSoundAnimationNoId)
 					{
 						// retrieve the anim
 						NLSOUND::CSoundAnimManager	*mgr = NLSOUND::CSoundAnimManager::instance();
 
-						string name = mgr->idToName(_SoundId[MOVE]);
+						string name = mgr->idToName(stepSoundId);
 
 						if (!name.empty())
 						{
@@ -3101,6 +3107,10 @@ void CUserEntity::setAFK(bool b, string afkTxt)
 		}
 	}
 
+	// an autowalk running before going afk would leave the afk right away
+	if (b)
+		UserControls.autowalkState(false);
+
 	// send afk state
 	static const string msgName = "COMMAND:AFK";
 	CBitMemStream out;
@@ -3287,8 +3297,10 @@ void CUserEntity::toggleCamera()
 	if(!UserEntity->forceIndoorFPV())
 	{
 		// Leave the 1st Person Mode -> Enter the 3rd Person View Mode
+		// The kept distance is below the minimum when the first person view was entered by zooming in:
+		// the third person view starts at the minimum then, as when zooming out (CView::increaseCameraDist).
 		if     (UserEntity->viewMode() == CUserEntity::FirstPV)
-			UserEntity->viewMode(CUserEntity::ThirdPV);
+			View.cameraDistance(std::max(ClientCfg.CameraDistance, ClientCfg.CameraDistMin));
 		// Leave the 3rd Person Mode -> Enter the 1st Person View Mode
 		else
 			UserEntity->viewMode(CUserEntity::FirstPV);
@@ -3524,6 +3536,15 @@ void CUserEntity::lightOn()
 	_LightOn = false;
 	light();
 }
+
+//---------------------------------------------------
+// onInstancesLoaded :
+// Body parts whose textures finished loading became the current ones, and are shown.
+//---------------------------------------------------
+void CUserEntity::onInstancesLoaded()	// virtual
+{
+	updateVisualDisplay();
+}// onInstancesLoaded //
 
 //---------------------------------------------------
 // light:

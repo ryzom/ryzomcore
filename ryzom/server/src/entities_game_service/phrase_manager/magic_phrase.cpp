@@ -1709,6 +1709,8 @@ void CMagicPhrase::apply()
 
 	{
 		H_AUTO(CMagicPhrase_apply_applyActions);
+		// the links that the actions give in this apply belong to one static action (see addLink)
+		_LinkAdded = false;
 		for ( uint i = 0; i < _Actions.size(); i++ )
 		{
 			if( _Actions[i] )
@@ -1745,7 +1747,7 @@ void CMagicPhrase::apply()
 					params[0].setEIdAIAlias( CEntityBaseManager::getEntityId(_Targets[i].getId()), CAIAliasTranslator::getInstance()->getAIAlias(CEntityBaseManager::getEntityId(_Targets[i].getId())) );
 					PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "MAGIC_TARGET_INVULNERABLE_ALL_MAGIC", params);
 				}
-				else if (invulnerabilityOffensive[i])
+				else if (invulnerabilityOffensive[i] && _Nature == ACTNATURE::OFFENSIVE_MAGIC) // the shield lets a heal through
 				{
 					params[0].setEIdAIAlias( CEntityBaseManager::getEntityId(_Targets[i].getId()), CAIAliasTranslator::getInstance()->getAIAlias(CEntityBaseManager::getEntityId(_Targets[i].getId())) );
 					PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "MAGIC_TARGET_INVULNERABLE_OFFENSIVE", params);
@@ -1762,7 +1764,7 @@ void CMagicPhrase::apply()
 
 			PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "MAGIC_TARGET_INVULNERABLE_ALL_MAGIC", params);
 		}
-		else if (invulnerabilityOffensive[0])
+		else if (invulnerabilityOffensive[0] && _Nature == ACTNATURE::OFFENSIVE_MAGIC)
 		{
 			params[0].setEIdAIAlias( CEntityBaseManager::getEntityId(_Targets[0].getId()), CAIAliasTranslator::getInstance()->getAIAlias(CEntityBaseManager::getEntityId(_Targets[0].getId())) );
 			
@@ -1775,6 +1777,38 @@ void CMagicPhrase::apply()
 
 	// _BeingProcessed = false;
 }//CMagicPhrase apply
+
+//-----------------------------------------------
+// CMagicPhrase addLink
+//-----------------------------------------------
+void CMagicPhrase::addLink( CEntityBase * actor, CSLinkEffect * effect )
+{
+	// The first link starts the static action of the actor, which stops the links of earlier phrases.
+	// A later link joins it as long as the actor still holds a link of this phrase: a static action
+	// of its own would cancel the one in progress and stop those links.
+	bool joinStaticAction = _LinkAdded && actor->getNbLinks() != 0;
+
+	// The database of a character shows NB_LINK_SLOT links, and CCharacter::addLink writes the link in the slot
+	// after the ones held. A link beyond that count starts over as a first link does: the links held are
+	// stopped and it takes the first slot.
+	const bool startOver = joinStaticAction && actor->getNbLinks() >= NB_LINK_SLOT && actor->getId().getType() == RYZOMID::player;
+	if ( startOver )
+	{
+		nlwarning("<CMagicPhrase::addLink> %s holds %u links, as many as its database shows: phrase '%s' (book index %u) stops them to add one more",
+			actor->getId().toString().c_str(), (uint)actor->getNbLinks(),
+			_BrickSheets.empty() ? "" : _BrickSheets[0].toString().c_str(), (uint)phraseBookIndex());
+		joinStaticAction = false;
+	}
+
+	// Stopping links and starting a static action both call breakLaunchingLinks: it must not mark this phrase
+	// when it applies from the launching list (it is still in it), or the links it gives after this one arrive broken.
+	_AddingLink = true;
+	if ( startOver )
+		actor->stopAllLinks();
+	actor->addLink( effect, !joinStaticAction );
+	_AddingLink = false;
+	_LinkAdded = true;
+} // addLink //
 
 //-----------------------------------------------
 // CMagicPhrase stop
@@ -1910,7 +1944,13 @@ void CMagicPhrase::enchantPhrase(CCharacter * user,float successFactor)
 		intensity = 249;
 	behav.Spell.SpellIntensity = 1 + (intensity/50);
 
-	// update caster behaviour
+	// the caster is the only target of the cast (must be done before behaviour): the list still holds the targets
+	// of the previous spell or attack, and the client plays the cast FX on what it finds there
+	CMirrorPropValueList<uint32>	targetList(TheDataset, _ActorRowId, DSPropertyTARGET_LIST);
+	targetList.clear();
+	PHRASE_UTILITIES::updateMirrorTargetList( targetList, _ActorRowId, 0.0f, false, 0 );
+
+	// update caster behaviour (must be done after target list)
 	if ( behav.Behaviour != MBEHAV::UNKNOWN_BEHAVIOUR )
 		PHRASE_UTILITIES::sendUpdateBehaviour( _ActorRowId, behav );
 	else

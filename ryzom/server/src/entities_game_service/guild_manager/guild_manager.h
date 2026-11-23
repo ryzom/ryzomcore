@@ -66,6 +66,8 @@ public:
 	//@{
 	/// get the singleton instance
 	static inline CGuildManager* getInstance();
+	/// true between init() and release() (getInstance() asserts outside of them)
+	static bool isInitialized() { return _Instance != NULL; }
 	// init the guild manager
 	static void init();
 	/// release the manager

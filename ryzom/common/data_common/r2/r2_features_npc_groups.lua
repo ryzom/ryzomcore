@@ -99,11 +99,11 @@ local registerFeature = function ()
 				return i18n.get("uiR2EDScene"):toUtf8()
 			end,
 
-			updateVersion = function(this, scenarioValue, currentValue )
-				local patchValue = scenarioValue			
+			updateVersion = function(this, scenarioValue, currentValue, update)
+				local patchValue = scenarioValue
 				-- version 1 : Remove the "Cost" field -> hold locally now
 				if patchValue < 1 then
-					r2.requestEraseNode(this.InstanceId, "Cost", -1)				
+					update:erase(this, "Cost")
 					patchValue = 1
 				end
 
@@ -235,7 +235,8 @@ local registerFeature = function ()
 			newCopy = function(this)
 				local result = r2.Classes.BaseClass.newCopy(this)
 				
-				local counterNames = {}
+				local counterNames = {} -- [the stem of a generated name] = the number of the last name made with it
+				local stems = {} -- [a palette name] = the stem of the names of its copies
 
 				for k, v in pairs(result.Components) do
 					local category = r2.getPropertyValue(v, "Category")
@@ -245,17 +246,26 @@ local registerFeature = function ()
 						if subCategory=="Kami" or subCategory=="Karavan" then
 							
 							local baseName = r2.PaletteIdToTranslation[this.Components[k-1].Base]
-							if counterNames[baseName]==nil then
-								local uc_name = ucstring()
-								uc_name:fromUtf8(baseName)
-								local name = r2:genInstanceName(uc_name):toUtf8()
-								counterName = string.gsub(name, tostring(uc_name), "")
-								counterNames[baseName] = tonumber(counterName)
-							else
-								counterNames[baseName] = counterNames[baseName]+1
+							local stem = stems[baseName]
+							if stem == nil then
+								-- genInstanceName gives the base name without the digits and spaces it ends with, a
+								-- space, and the first number that no instance of the scenario has with that name.
+								-- The members of the copy take that name and the numbers after it: the stem of the
+								-- generated name, not the palette name, so that a palette name that ends with a
+								-- digit makes names of the same series, and two palette names that only differ by
+								-- such a digit share one count. (The name is not taken apart with the palette name
+								-- either: a translated name is no pattern, "-", "(" and "%" mean something in one.)
+								local name = tostring(r2:genInstanceName(baseName))
+								local _, _, nameStem, counterName = string.find(name, "^(.-)(%d+)$")
+								assert(nameStem ~= nil, "genInstanceName gave '" .. name .. "', which does not end with a number")
+								stem = nameStem
+								stems[baseName] = stem
+								if counterNames[stem] == nil then
+									counterNames[stem] = tonumber(counterName) - 1
+								end
 							end
-							
-							v.Name = baseName .. " " .. counterNames[baseName]
+							counterNames[stem] = counterNames[stem] + 1
+							v.Name = stem .. counterNames[stem]
 						else
 							local sex
 							local sheetClient = r2.getPropertyValue(v, "SheetClient")

@@ -14,7 +14,7 @@ local classZoneTriggerVersion = 1
 
 feature.Components.ZoneTrigger =
 	{
-		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor()", "uiR2EdEditEventsButton"),
+		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor", "uiR2EdEditEventsButton"),
 		BaseClass="LogicEntity",			
 		Name="ZoneTrigger",
 		InEventUI = true,
@@ -147,17 +147,17 @@ feature.Components.ZoneTrigger =
 		
 		end,
 
-	updateVersion = function(this, scenarioValue, currentValue )
+	updateVersion = function(this, scenarioValue, currentValue, update)
 			local patchValue = scenarioValue
 			if patchValue < 1 then
-				if not this.Active then r2.requestSetNode(this.InstanceId, "Active", 1)	end
-				if not this.Cyclic then r2.requestSetNode(this.InstanceId, "Cyclic", 1)	end
+				if this.Active == nil then update:set(this, "Active", 1) end
+				if this.Cyclic == nil then update:set(this, "Cyclic", 1) end
 				patchValue = 1
 			end
-			
+
 			if patchValue == currentValue then return true end
 			return false
-		end,		
+		end,
 
 
 	}
@@ -267,12 +267,14 @@ component.createComponent = function(x, y)
 	comp.Position.z = r2:snapZToGround(x, y)
 
 	local zone = r2.newComponent("Region")
-	r2.Utils.createTriggerRegion(zone, 0, 0, ZoneTriggerRadius) -- the region doesn't inherit the feature position, so must give its pos
+	-- the region inherits the feature position (InheritPos below, its own position is 0): its points get the ground
+	-- under them around the feature
+	r2.Utils.createTriggerRegion(zone, 0, 0, ZoneTriggerRadius, comp.Position)
 	zone.Deletable = 0
 	zone.Position.x = 0 -- comp.Position.x
 	zone.Position.y = 0 --  comp.Position.y
 	zone.Position.z = 0 -- comp.Position.z
-	zone.InheritPos = 1 -- don't inherit position of parents
+	zone.InheritPos = 1 -- inherits the position of the feature
 	zone.Name = r2:genInstanceName(i18n.get("uiR2EDPlaces")):toUtf8()			
 	comp._Zone = zone.InstanceId
 	table.insert(comp.Components, zone)

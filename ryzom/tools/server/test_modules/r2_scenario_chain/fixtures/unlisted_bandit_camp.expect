@@ -1,0 +1,28 @@
+# A scenario the server kept from an earlier editor, with a bandit camp its author added after the list
+# of versions was made. The steps of the bandit camp run from the first version on, and leave the camp,
+# which is up to date, as it is: it keeps its level.
+
+upgrade: unchanged
+version_update: unchanged
+absent: version_update_note
+scenario_vs_file: same
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Acts[1].Features[1].Class = BanditCamp
+scenario_at: Acts[1].Features[1].BanditsLevel = 170
+scenario_at: Acts[1].Features[1].Cost = 0
+scenario_at: Acts[1].Features[1].SitDuration = 20
+scenario_at: Versions.BanditCamp = 2

@@ -110,10 +110,23 @@ namespace R2
 			NLMISC::CEntityId EntityId;
 			bool              WaitingTp; // Client is waiting the tp command + the season after he joined a session
 			std::string		RingAccess;
+			// the access of the character without the override an operator set for it (connectChar)
+			std::string		RingAccessWithoutOverride;
 			bool	EgsReloadPos;
 			TCharMode Mode;
 			bool Newcomer;
 			NLNET::CMessage* WaitingMsg;
+			// The multi-part message that the character is sending: the size in bytes that its head announced, the
+			// bytes of it received so far, its name as the head gave it (cut for the log), and whether it is the
+			// start of a scenario
+			uint32 WaitingMsgSize;
+			uint32 WaitingMsgReceived;
+			std::string WaitingMsgName;
+			bool WaitingMsgIsStart;
+			// true from the refusal of a multi-part message (by its head, or by parts that go beyond the size the
+			// head announced) to its foot or to the next head: the parts that still come are dropped without a line
+			// of log each
+			bool WaitingMsgRefused;
 		};
 
 
@@ -250,13 +263,12 @@ namespace R2
 		/////////////////////////////////////////////////////
 		//// Handle key policies
 		/////////////////////////////////////////////////////
-		// eg of conf
+		// e.g. a shard that accepts only headers signed with its private key (the default accepts every file, see init)
 		// setDefaultKey(0, "PROD");
 		//	addKeyPolicy(0, "DEFAULT", "EMPTY", "REFUSE");
-		//	addKeyPolicy(0, "EMPTY", "EMPTY", "REFUSE"); // Deprecated (scenario older than 22 juin 2006)
-		//	addKeyPolicy(0, "PROD", "PROD:098085b10aa27157d57587464e3b2390 ", "TEST");
-		//	addKeyPolicy(0, "DEV", "DEV:26289fe9502f4db1fa3229e4fb2d8803", "TEST"); // accept current dev key
-		//	addKeyPolicy(0, "DEVOBSOLETE", "DEVOBSOLETE:26289fe9502f4db1fa3229e4fb2d8803", "REFUSE");  // refuse old dev key
+		//	addKeyPolicy(0, "EMPTY", "EMPTY", "REFUSE"); // no signature: the scenarios before 22 June 2006
+		//	addKeyPolicy(0, "PROD", "PROD:098085b10aa27157d57587464e3b2390", "TEST");
+		//	addKeyPolicy(0, "DEV", "DEV:26289fe9502f4db1fa3229e4fb2d8803", "REFUSE"); // the dev key is public: anyone signs with it
 		// reset all policies
 		virtual void resetKeyPolicies(NLNET::IModuleProxy *sender);
 		// set the default key to use e.g. "DEV01" for dev "PROD01" for prod
@@ -299,6 +311,9 @@ namespace R2
 		/////////////////////////////////////////////////////
 		CEditionSession* getSession(TSessionId sessionId) const;
 		TSessionId getSessionIdByCharId(TCharId charId) const NL_OVERRIDE;
+		// connect a character to the map of a session with the role given (implementation of onMapConnectionAsked,
+		// also used for the connections that the server decides itself)
+		void onMapConnectionAskedImpl(NLNET::IModuleProxy *clientEditionProxy, TSessionId sessionId, bool updateHighLevel, bool mustTp, TUserRole role);
 		// implement private task CTaskConnectPlayer
 		void connectChar(TSessionId sessionId, TCharId charId, TUserRole userRole, const std::string& ringAccess, bool newcomer);
 		// implement private task CTaskTryConnectPlayer
@@ -315,6 +330,9 @@ namespace R2
 
 		// wakeUp a session
 		void wakeUpSessionImpl(CEditionSession* session);
+		// The file of a session could not be loaded: the session starts as when it has no file. With 'refuseSave'
+		// the file is there, could not be read and could not be copied: the session is not saved over it.
+		void wakeUpSessionFailed(TSessionId sessionId, bool refuseSave);
 
 		void getStartParams(uint32 charId, TSessionId lastStoredSessionId) NL_OVERRIDE;
 		void getStartParamsImpl(uint32 charId, TSessionId lastStoredSessionId);
@@ -333,7 +351,7 @@ namespace R2
 		NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CServerEditionModule, CModuleBase)
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listSessions, "display the list of session", "no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, hibernateSession, "Hibernate a session", "<sesionId>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, wakeUpSession, "Wake up an hibernating session", "<sesionId>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, wakeUpSession, "Wake up an hibernating session (its file is named by the session and the character that owns it)", "<sessionId> <ownerCharId>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displaySession, "display a session", "<sessionId>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, dumpSession, "dump infos on a session", "<sesionId>")
 
@@ -347,25 +365,25 @@ namespace R2
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayPioneer, "display a pionnieer", "<charId>")
 
 
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, addCharacterInSession, "simulates the msg addCharacterInSessuion", "<sessionId> <charId> ")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, createSession, "simulates the msg CreateSession", "<ownerCharId> <sessionId> <charId>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, addCharacterInSession, "simulates the msg addCharacterInSession", "<sessionId> <charId> <role: ur_editor | ur_animator | ur_player> [<ringAccess> [<isNewcomer: 0 | 1>]]")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, createSession, "simulates the msg CreateSession", "<ownerCharId> <sessionId> <sessionType: 0 (edition) | 1 (animation)>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listAllowedPioneers, "list allowed Pioneers","no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listConnectedPioneers, "list connected Pioneers", "no args")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharMode, "set the mode of a char mode are 'editor' 'tester' 'player' 'dm' )", "<charId> <mode>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayCharRingAccess, "display the RingAccess of a character", "<charId>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharRingAccess, "change the ring access of a character", "<charId> <mode>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharMode, "tell the client of a character that it is in a mode (the rights of the character on the shard stay as they are)", "<charId> <mode: Player | Tester | Editer | Dm>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayCharRingAccess, "display the ring access of a character that is connected to this Ring shard", "<charId>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharRingAccess, "change the ring access of a character that is connected to this Ring shard, until it connects again", "<charId> <ringAccess>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setSessionStartParams, "simulate a SU message", "<userId> <sessionId> <initialIslandLocation> <initialEntryPoint> <initialSeason>")
 
 
 
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharOverrideRingAccess, "Set the overrigde of ring access (for dev only)", "<charId> <mode>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayCharOverrideRingAccess, "Set the overrigde of ring access (for dev only)", "<charId> <mode>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listCharOverrideRingAccess, "list the override of ring access", "no args")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, removeCharOverrideRingAccess, "remove the override of ring access", "no args")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharOverrideRingAccess, "set the override of the ring access of a character (for dev only)", "<charId> <ringAccess>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayCharOverrideRingAccess, "display the override of the ring access of a character", "<charId>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listCharOverrideRingAccess, "list the overrides of ring access", "no args")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, removeCharOverrideRingAccess, "remove the override of the ring access of a character", "<charId>")
 
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, resetKeyPolicies, "reset all key policies", "no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setDefaultKey, "set the default key use eg 'DEV'", "<theKey>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, addKeyPolicy, "add a key Policy(eg 'DEV DEV:01234567890123 Accept' or 'DEFAULT DEFAULT Refuse' or 'EMPTY EMPTY Refuse'  )", "<keyName> <keyValue> <policy>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, addKeyPolicy, "add a key policy, ACCEPT, REFUSE or TEST (eg 'PROD PROD:01234567890123 TEST', 'DEFAULT EMPTY REFUSE' or 'EMPTY EMPTY REFUSE')", "<keyName> <keyValue> <policy>")
 
 		NLMISC_COMMAND_HANDLER_TABLE_END
 
@@ -416,8 +434,11 @@ namespace R2
 
 	// privates methodes
 	private:
-		// Check if a scenario is ok (not to much element)
-		bool checkScenario(CObject* scenario);
+		// Check the run time scenario a client uploaded and the act it is to start in (rt_scenario_check.h), with
+		// the limits of this service: the quotas MaxNpcs and MaxStaticObjects and the aliases of the ligo configuration
+		virtual bool checkRtScenario(CObject *rtScenario, uint32 startingAct, std::string &error, bool *overQuota = nullptr) const NL_OVERRIDE;
+		// The animation module could not start the scenario of the session after its start was answered
+		virtual void animationSessionStartFailed(TSessionId sessionId, uint32 startingAct, const std::string &errorReason) NL_OVERRIDE;
 
 		// Backup current Secenarios (obsolete)
 		void saveToDb();
@@ -458,7 +479,7 @@ namespace R2
 		virtual bool isSessionHibernating(TSessionId sessionId, RSMGR::TSessionType& sessionType, double& x, double& y, double& orient, uint8& season) NL_OVERRIDE;
 
 		// stop the session
-		void stopTest(TSessionId sessionId);
+		void stopTest(TSessionId sessionId) NL_OVERRIDE;
 		// Simulate autoConnection without SU
 		virtual void createSessionWithoutSu(TCharId charId, NLMISC::CEntityId clientEid) NL_OVERRIDE;
 		// Simulate Set Start AiInstance by SU
@@ -475,6 +496,19 @@ namespace R2
 		CScenario* getScenarioById(TSessionId sessionId) const NL_OVERRIDE;
 		// get the current session (available from the moment when the client module is connected)
 		TUserRole getRoleByCharId(TCharId charId) const;
+		// true if the character is an animator or the outland owner of the session it is connected to, or an editor
+		// of an edition session (sessionId and role receive that session and the role of the character in it)
+		virtual bool isCharAnimator(TCharId charId, TSessionId &sessionId, TUserRole &role) const NL_OVERRIDE;
+		// true if the character may use the animator and DM functions (isCharAnimator) of the session that its
+		// requests act on; if not, logs the refusal of the operation named
+		bool isAnimator(TCharId charId, const char *operation) const;
+		// true if the character may change, start and stop the scenario of the session that its requests act on: the
+		// characters isCharAnimator accepts, and the owner of an animation session, who uploads its scenario and starts
+		// it whatever its role; if not, logs the refusal of the operation named
+		bool isAuthor(TCharId charId, const char *operation) const;
+		// true if the sender may send the parts of a multi-part message for the character: a client only sends its
+		// own; if not, logs the refusal of the operation named
+		bool isMultiPartSender(NLNET::IModuleProxy *sender, TCharId charId, const char *operation) const;
 
 		// get the session that is about to be joined by a client, or NULL if not found
 		TPioneersSessionsAllowed * getSessionAllowedForChar(TCharId charId) const NL_OVERRIDE;
@@ -510,6 +544,10 @@ namespace R2
 		bool closeSessionImpl(TSessionId sessionId, std::string& msg);
 
 		CServerEditionModule::CPioneerInfo* getPioneerInfo(TCharId charId);
+		// The multi-part message that the character is sending is refused (the refusal is logged by the caller):
+		// what was received of it is freed, the parts that still come are dropped, and when it is the start of a
+		// scenario the clients of the session get the answer of a refused start
+		void refuseMultiPartMsg(TCharId charId, CPioneerInfo &info);
 
 
 	private: // private types

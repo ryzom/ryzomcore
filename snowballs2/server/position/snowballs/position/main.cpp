@@ -509,7 +509,7 @@ public:
 		CUnifiedNetwork::getInstance()->setServiceUpCallback("CLS", CCLSClientPOS::cbCollisionServiceUp, 0);
 	}
 
-	// Update fonction, called at every frames
+	// Update function, called at every frames
 	bool update()
 	{
 		//_snowball snowball;

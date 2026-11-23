@@ -241,6 +241,11 @@ void CCharacterProgressionPVE::actionReport( TReportAction& reportAction, bool i
 						if (*it == reportAction.TargetRowId)
 							continue;
 
+						// the action counts on the other creatures of the fight, but only on those fought with a known skill: on a
+						// creature the player hurt only with enchantments, it would take all his kill xp for a skill never used on it
+						if (!canCopyActionTo(playerChar, *it))
+							continue;
+
 						CEntityBase *creature = CreatureManager.getCreature(*it);
 						if (creature)
 						{
@@ -337,8 +342,13 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 	// attribute kills for mission system
 	creatureTakenDmg.attributeKillsForMission(creature);
 
-	// get most effective team or single player
-	const sint16 index = creatureTakenDmg.getMaxInflictedDamageTeamIndex();
+	// get most effective team or single player, which must also beat the non-player damage KillCreditNonPlayerDamage counts
+	float nonPlayerDamage = 0.0f;
+	if (KillCreditNonPlayerDamage.get() == 1)
+		nonPlayerDamage = creatureTakenDmg.getTransferedDamage();
+	else if (KillCreditNonPlayerDamage.get() == 2)
+		nonPlayerDamage = std::max(0.0f, creatureTakenDmg.TotalCreatureInflictedDamage); // the running sum can drift below 0 with regen
+	const sint16 index = creatureTakenDmg.getMaxInflictedDamageTeamIndex(nonPlayerDamage);
 
 	CCreature *creaturePtr = CreatureManager.getCreature(creature);
 	// max damage have been done by players
@@ -515,6 +525,39 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 							}
 						}
 					}
+
+					// GainXp is only set by actions on creatures that give xp, so a team breaking a crate that gives none
+					// would get no mission item: also count the other members who fought this creature and stayed near it
+					for (list<CEntityId>::const_iterator itMember = teamMembers.begin(); itMember != teamMembers.end(); ++itMember)
+					{
+						bool gainXp = false;
+						for (uint i = 0; i != members.size(); ++i)
+						{
+							if (members[i].Id == *itMember)
+							{
+								gainXp = members[i].GainXp;
+								break;
+							}
+						}
+						if (gainXp)
+							continue; // counted with the xp above
+
+						TDataSetRow playerRowId = TheDataset.getDataSetRow(*itMember);
+						TCharacterActionsContainer::const_iterator it = _CharacterActions.find(playerRowId);
+						if (it == _CharacterActions.end() || !(*it).second->hasActedOn(creature))
+							continue;
+
+						if (PHRASE_UTILITIES::getDistance(playerRowId, creature) > MaxDistanceForXpGain)
+						{
+							const std::set<TDataSetRow> &aggrolist = creaturePtr->getAggroList();
+							if (aggrolist.find(playerRowId) == aggrolist.end())
+								continue;
+						}
+
+						CCharacter *player = PlayerManager.getChar(playerRowId);
+						if (player)
+							player->getMatchingMissionLootRequirements(itemLevel, creaturePtr->getForm()->getItemsForMissions(), matchingItemsForMissions);
+					}
 				}
 			}
 			// all xp (and mission auto-quartering) go to a single player
@@ -598,7 +641,9 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 	else
 	{
 		// If fictitious entity killed the creature send a message to all players involved to tell em they were not enough implied
-		if (creatureTakenDmg.isMaxCreatureInflictedDamageTransfered())
+		// (when it is the only non-player damage counted, it is what beat them)
+		const bool transfered = KillCreditNonPlayerDamage.get() == 1 ? creatureTakenDmg.getTransferedDamage() > 0.0f : creatureTakenDmg.isMaxCreatureInflictedDamageTransfered();
+		if (transfered)
 		{
 			// Get players list
 			std::set<NLMISC::CEntityId> players(creatureTakenDmg.getAllPlayers());
@@ -1413,13 +1458,10 @@ void CCharacterProgressionPVE::lostAggro(TDataSetRow creature, TDataSetRow playe
 				//nlassert(index >= 0);
 				BOMB_IF( index < 0, "PROGRESSION_BUG: player lost aggro (is in team), found attacked creature with no registered damage for this team", return);
 
+				// the whole team left the fight: it gives up all its damage, and its entry goes with the creature
+				// leaving its list, which removeCreature expects
 				teamAttackedCreatures.erase(teamAttackedCreatures.begin() + i);
-			//	(*itCreature).second.PlayerInflictedDamage.erase((*itCreature).second.PlayerInflictedDamage.begin() + index);
-				CCharacter *playerChar = PlayerManager.getChar(playerId);
-				if (playerChar)
-					(*itCreature).second.transferDamageOnFictitiousCreature(playerId, playerChar->getTeamId());
-				else
-					(*itCreature).second.transferDamageOnFictitiousCreature(playerId, CTEAM::InvalidTeamId);
+				(*itCreature).second.transferTeamDamageOnFictitiousCreature(teamId);
 
 				return;
 			}
@@ -1456,6 +1498,30 @@ bool CCharacterProgressionPVE::checkAggroForTeam( uint16 teamId, TDataSetRow cre
 	return false;
 }
 
+//----------------------------------------------------------------------------
+// CCharacterProgressionPVE::canCopyActionTo
+//----------------------------------------------------------------------------
+bool CCharacterProgressionPVE::canCopyActionTo(const CCharacter *player, TDataSetRow creature) const
+{
+	// the player's own actions on the creature decide when there are some
+	TCharacterActionsContainer::const_iterator itPlayer = _CharacterActions.find(player->getEntityRowId());
+	if (itPlayer != _CharacterActions.end() && itPlayer->second->hasActedOn(creature))
+		return itPlayer->second->hasSkillActionOn(creature);
+
+	// a team member fighting another creature of the fight shares the xp of those his team fights with a known skill
+	CTeam *team = TeamManager.getRealTeam(player->getTeamId());
+	if (!team)
+		return false;
+
+	const list<CEntityId> &members = team->getTeamMembers();
+	for (list<CEntityId>::const_iterator itMember = members.begin(); itMember != members.end(); ++itMember)
+	{
+		TCharacterActionsContainer::const_iterator it = _CharacterActions.find(TheDataset.getDataSetRow(*itMember));
+		if (it != _CharacterActions.end() && it->second->hasSkillActionOn(creature))
+			return true;
+	}
+	return false;
+}
 
 //----------------------------------------------------------------------------
 // CCharacterProgressionPVE::addDamage
@@ -2459,7 +2525,8 @@ bool CCreatureTakenDamage::transferDamageOnFictitiousCreature(const CEntityId &p
 		}
 		else if ( teamId != CTEAM::InvalidTeamId && PlayerInflictedDamage[i].TeamId == teamId)
 		{
-			if (PlayerInflictedDamage[i].TeamMembers.empty())
+			// only a member fighting this creature has a share of the team damage to give up
+			if (!PlayerInflictedDamage[i].hasMember(playerId))
 				return false;
 
 			found = true;
@@ -2478,29 +2545,47 @@ bool CCreatureTakenDamage::transferDamageOnFictitiousCreature(const CEntityId &p
 
 		if (found)
 		{
-			TotalCreatureInflictedDamage += damage;
-
-			const uint nbC = (uint)CreatureInflictedDamage.size();
-			for ( uint j = 0 ; j < nbC ; ++j)
-			{
-				if (CreatureInflictedDamage[j].CreatureId == CEntityId::Unknown)
-				{
-					CreatureInflictedDamage[j].TotalDamage += damage;
-					return retValue;
-				}
-			}
-
-			CCreatureInflictedDamage dam;
-			dam.TotalDamage = damage;
-			dam.CreatureId = CEntityId::Unknown;
-
-			CreatureInflictedDamage.push_back(dam);
-
+			addFictitiousDamage(damage);
 			return retValue;
 		}
 	}
 
 	return false;
+}
+
+//----------------------------------------------------------------------------
+// CCreatureTakenDamage::transferTeamDamageOnFictitiousCreature
+//----------------------------------------------------------------------------
+void CCreatureTakenDamage::transferTeamDamageOnFictitiousCreature(uint16 teamId)
+{
+	const sint16 index = getIndexForTeam(teamId);
+	if (index < 0)
+		return;
+
+	const float damage = PlayerInflictedDamage[index].TotalDamage;
+	PlayerInflictedDamage[index] = PlayerInflictedDamage.back();
+	PlayerInflictedDamage.pop_back();
+	addFictitiousDamage(damage);
+}
+
+//----------------------------------------------------------------------------
+// CCreatureTakenDamage::addFictitiousDamage
+//----------------------------------------------------------------------------
+void CCreatureTakenDamage::addFictitiousDamage(float damage)
+{
+	TotalCreatureInflictedDamage += damage;
+
+	const sint16 index = getIndexForCreature(CEntityId::Unknown);
+	if (index >= 0)
+	{
+		CreatureInflictedDamage[index].TotalDamage += damage;
+		return;
+	}
+
+	CCreatureInflictedDamage dam;
+	dam.TotalDamage = damage;
+	dam.CreatureId = CEntityId::Unknown;
+	CreatureInflictedDamage.push_back(dam);
 }
 
 

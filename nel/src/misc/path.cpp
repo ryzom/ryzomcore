@@ -42,6 +42,7 @@
 #   include <sys/types.h>
 #   include <sys/stat.h>
 #	include <dirent.h>
+#	include <fcntl.h>
 #   include <unistd.h>
 #	include <cstdio>
 #   include <cerrno>
@@ -608,6 +609,23 @@ string CFileContainer::lookup (const string &filename, bool throwException, bool
 	return "";
 }
 
+void CPath::requestFileCheck (const std::string &missingFile)
+{
+	nlwarning ("PATH: Missing file '%s', a files check is requested to the launcher", missingFile.c_str());
+
+	static bool flagCreated = false;
+	if (flagCreated)
+		return;
+	flagCreated = true;
+
+	string flagFile = getLogDirectory() + "needcheck.flag";
+	FILE *file = nlfopen (flagFile, "wb");
+	if (file)
+		fclose (file);
+	else
+		nlwarning ("PATH: Cannot create '%s'", flagFile.c_str());
+}
+
 bool CPath::exists (const std::string &filename)
 {
 	return getInstance()->_FileContainer.exists(filename);
@@ -707,9 +725,10 @@ std::string CFileContainer::getCurrentPath ()
 #ifdef NL_OS_WINDOWS
 	wchar_t buffer[1024];
 
-	if (_wgetcwd(buffer, 1024) == NULL)
+	// no current directory: it was deleted, cannot be read, or its path is longer than the buffer
+	if (_wgetcwd(buffer, 1024) == nullptr)
 	{
-		nlwarning("PATH: _wgetcwd() failed: %d (%s) -- current directory deleted or inaccessible?", errno, strerror(errno));
+		nlwarning("PATH: Can't get the current directory: (errno %d) %s", errno, strerror(errno));
 		return std::string();
 	}
 
@@ -717,9 +736,10 @@ std::string CFileContainer::getCurrentPath ()
 #else
 	char buffer [1024];
 
-	if (getcwd(buffer, 1024) == NULL)
+	// no current directory: it was deleted, cannot be read, or its path is longer than the buffer
+	if (getcwd(buffer, 1024) == nullptr)
 	{
-		nlwarning("PATH: getcwd() failed: %d (%s) -- current directory deleted or inaccessible?", errno, strerror(errno));
+		nlwarning("PATH: Can't get the current directory: (errno %d) %s", errno, strerror(errno));
 		return std::string();
 	}
 
@@ -2615,6 +2635,8 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 		if (fp2 == nullptr)
 		{
 			nlwarning ("PATH: CopyMoveFile error: can't fopen in read write mode '%s'", sdest.c_str());
+			// the source is not left open: on Windows an open file cannot be replaced or deleted
+			fclose(fp1);
 			return false;
 		}
 		static char buffer [1000];
@@ -2643,8 +2665,22 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 			s = fread(buffer, 1, sizeof(buffer), fp1);
 		}
 
+		// The copy is complete only if the source was read to its end and the destination is closed: what
+		// is still buffered is written by the close, so a small file meets a full disk there.
+		const bool readFailed = ferror(fp1) != 0;
 		fclose(fp1);
-		fclose(fp2);
+		const bool closeFailed = fclose(fp2) != 0;
+		const int closeErrno = closeFailed ? errno : 0;
+		if (readFailed)
+		{
+			nlwarning("Error copying '%s' to '%s', reading failed.", ssrc.c_str(), sdest.c_str());
+			return false;
+		}
+		if (closeFailed)
+		{
+			nlwarning("Error copying '%s' to '%s', closing the copy failed, error %d (%s).", ssrc.c_str(), sdest.c_str(), closeErrno, strerror(closeErrno));
+			return false;
+		}
 		if (progress) progress->progress(1.f);
 	}
 	else
@@ -2772,6 +2808,222 @@ bool CFile::moveFile(const std::string &dest, const std::string &src)
 	return CopyMoveFile(dest, src, false);
 }
 
+#ifdef NL_OS_WINDOWS
+// replaceFile: how long a move that another process blocks is tried again, in milliseconds. The callers
+// include the main loop of a service, which cannot wait for seconds.
+static const sint64 s_ReplaceFileRetryMs = 100;
+
+// The rename with POSIX semantics. The SDK declares it (FileRenameInfoEx, the Flags member of FILE_RENAME_INFO
+// and the two flags named below) only when the minimal system of the build is Windows 10 RS1 or later, which
+// it is not here, so it is declared again. Whether the running system and the file system know it shows when
+// the call is made: by a function that is missing, or by the error it gives.
+struct CFileRenameInfoEx // FILE_RENAME_INFO
+{
+	DWORD Flags;
+	HANDLE RootDirectory;
+	DWORD FileNameLength;
+	WCHAR FileName[1];
+};
+static const int s_FileRenameInfoEx = 22; // FileRenameInfoEx of FILE_INFO_BY_HANDLE_CLASS
+static const DWORD s_FileRenameReplaceIfExists = 0x1; // FILE_RENAME_FLAG_REPLACE_IF_EXISTS
+static const DWORD s_FileRenamePosixSemantics = 0x2; // FILE_RENAME_FLAG_POSIX_SEMANTICS
+// Bit 0x40 of the same flags: a read-only destination is replaced as it is. The SDK headers have no name for
+// this bit and do not say from which version of the system it is known.
+static const DWORD s_FileRenameIgnoreReadOnly = 0x40;
+typedef BOOL(WINAPI *TSetFileInformationByHandle)(HANDLE, int, LPVOID, DWORD);
+
+/** Rename a file over another one with POSIX semantics, in one step of the file system.
+ * A destination that other handles have open is replaced as long as they share it for deletion, which a plain
+ * replacing move refuses: they keep the old file, which is gone when the last of them is closed. When this
+ * fails nothing is changed.
+ * \param ignoreReadOnly ask for a read-only destination to be replaced as it is, which not every version of
+ * the system knows. Without it a read-only destination is refused.
+ * \param unsupported set when the error says that the system, an emulation of it or the file system does not
+ * know this rename: the caller then uses the next way to replace
+ * \return 0 or the error of the system
+ */
+static DWORD posixReplaceFile(const std::wstring &wideSrc, const std::wstring &wideDest, bool ignoreReadOnly, bool &unsupported)
+{
+	unsupported = false;
+
+	HMODULE kernel = GetModuleHandleW(L"kernel32.dll");
+	TSetFileInformationByHandle setFileInformationByHandle = NULL;
+	if (kernel != NULL)
+		setFileInformationByHandle = (TSetFileInformationByHandle)GetProcAddress(kernel, "SetFileInformationByHandle");
+	if (setFileInformationByHandle == NULL)
+	{
+		unsupported = true;
+		return ERROR_CALL_NOT_IMPLEMENTED;
+	}
+
+	// the new name is given as a full path
+	const DWORD fullSize = GetFullPathNameW(wideDest.c_str(), 0, NULL, NULL);
+	if (fullSize == 0)
+		return GetLastError();
+	std::vector<WCHAR> fullDest(fullSize);
+	const DWORD fullLength = GetFullPathNameW(wideDest.c_str(), fullSize, &fullDest[0], NULL);
+	if (fullLength == 0 || fullLength >= fullSize)
+		return fullLength == 0 ? GetLastError() : ERROR_BUFFER_OVERFLOW;
+
+	// a rename needs the right to delete the old name, and nothing else of the file
+	HANDLE file = CreateFileW(wideSrc.c_str(), DELETE | SYNCHRONIZE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (file == INVALID_HANDLE_VALUE)
+		return GetLastError();
+
+	const size_t nameBytes = fullLength * sizeof(WCHAR);
+	std::vector<uint8> buffer(offsetof(CFileRenameInfoEx, FileName) + nameBytes + sizeof(WCHAR), 0);
+	CFileRenameInfoEx *info = (CFileRenameInfoEx *)&buffer[0];
+	info->Flags = s_FileRenameReplaceIfExists | s_FileRenamePosixSemantics;
+	if (ignoreReadOnly)
+		info->Flags |= s_FileRenameIgnoreReadOnly;
+	info->RootDirectory = NULL;
+	info->FileNameLength = (DWORD)nameBytes;
+	memcpy(info->FileName, &fullDest[0], nameBytes);
+
+	DWORD error = 0;
+	if (setFileInformationByHandle(file, s_FileRenameInfoEx, info, (DWORD)buffer.size()) == 0)
+	{
+		error = GetLastError();
+		unsupported = error == ERROR_INVALID_PARAMETER || error == ERROR_INVALID_FUNCTION
+		    || error == ERROR_NOT_SUPPORTED || error == ERROR_CALL_NOT_IMPLEMENTED;
+	}
+	CloseHandle(file);
+	return error;
+}
+
+/** Tell if waiting can cure a move that was refused: only when a handle of another process is in its way.
+ * A sharing or lock violation says so. "Access is denied" does not say who denies, so the destination is
+ * asked: if it can be opened for deletion, or is refused only because a handle that does not share deletion
+ * holds it, its access rights are not what refused the move.
+ */
+static bool replaceBlockedByAHolder(DWORD error, const std::wstring &wideDest)
+{
+	if (error == ERROR_SHARING_VIOLATION || error == ERROR_LOCK_VIOLATION)
+		return true;
+	if (error != ERROR_ACCESS_DENIED)
+		return false;
+
+	HANDLE probe = CreateFileW(wideDest.c_str(), DELETE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (probe != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(probe);
+		return true;
+	}
+	return GetLastError() == ERROR_SHARING_VIOLATION;
+}
+#endif
+
+bool CFile::replaceFile(const std::string &dest, const std::string &src)
+{
+	if (dest.empty() || src.empty()) return false;
+	std::string sdest = CPath::standardizePath(dest, false);
+	std::string ssrc = CPath::standardizePath(src, false);
+
+#ifdef NL_OS_WINDOWS
+	std::wstring wideDest = NLMISC::utf8ToWide(sdest);
+	std::wstring wideSrc = NLMISC::utf8ToWide(ssrc);
+
+	// a directory is never replaced by a file, and no waiting changes that
+	const DWORD destAttributes = GetFileAttributesW(wideDest.c_str());
+	if (destAttributes != INVALID_FILE_ATTRIBUTES && (destAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
+	{
+		nlwarning("PATH: replaceFile error: can't move '%s' over '%s', which is a directory", ssrc.c_str(), sdest.c_str());
+		return false;
+	}
+
+	// Three ways to replace, each one rename by the file system without a copy, so the destination is never
+	// seen missing or half written, and a failure changes nothing. The next one is used when the system, an
+	// emulation of it or the file system says that it does not know the one before, or refuses a read-only
+	// destination in the first:
+	// 0. the rename with POSIX semantics that ignores the read-only flag. It also replaces a destination that
+	//    scanners, indexers or sync agents hold open, as they share it for deletion, and a read-only one as
+	//    it is;
+	// 1. the same rename without the bit for the read-only flag, for a system that knows the rename and not
+	//    that bit;
+	// 2. the plain replacing move (no MOVEFILE_COPY_ALLOWED), which any other handle on the destination
+	//    refuses.
+	// The last two do not replace a read-only file: its flag is cleared first, as deleteFile() clears it
+	// before it deletes, and is put back if the file is not replaced after all.
+	// A move that a handle of another process blocks is tried again for a short time, with waits that double
+	// from 1 ms: such a hold usually lasts milliseconds. The time is measured, as a wait lasts up to a timer
+	// tick longer than asked; the waits asked for are counted too, so that a clock that steps cannot prolong
+	// the tries. What waiting cannot cure (access rights, a missing file, another volume) fails at once.
+	const bool destReadOnly = destAttributes != INVALID_FILE_ATTRIBUTES && (destAttributes & FILE_ATTRIBUTE_READONLY) != 0;
+	uint way = 0;
+	bool destFlagCleared = false;
+	DWORD lastError = 0;
+	const TTime startTime = CTime::getLocalTime();
+	sint64 askedMs = 0;
+	sint64 waitMs = 1;
+	for (;;)
+	{
+		if (way < 2)
+		{
+			bool unsupported;
+			lastError = posixReplaceFile(wideSrc, wideDest, way == 0, unsupported);
+			// A system that does not know the bit for the read-only flag may ignore the bit instead of
+			// refusing the call: the read-only destination is then what it refuses, with "access is denied".
+			// That is taken as not knowing the bit. If the refusal has another cause the next way meets it
+			// as well: it then fails with the same error, and the flag it cleared is put back.
+			if (way == 0 && destReadOnly && lastError == ERROR_ACCESS_DENIED)
+				unsupported = true;
+			if (unsupported)
+			{
+				++way;
+				if (!destFlagCleared && destReadOnly)
+				{
+					DWORD writableAttributes = destAttributes & ~(DWORD)FILE_ATTRIBUTE_READONLY;
+					if (writableAttributes == 0)
+						writableAttributes = FILE_ATTRIBUTE_NORMAL;
+					// if this fails, so does the move, and that error is the one reported
+					destFlagCleared = SetFileAttributesW(wideDest.c_str(), writableAttributes) != 0;
+				}
+				continue;
+			}
+		}
+		else
+		{
+			lastError = MoveFileExW(wideSrc.c_str(), wideDest.c_str(), MOVEFILE_REPLACE_EXISTING) != 0 ? 0 : GetLastError();
+		}
+		if (lastError == 0)
+			return true;
+
+		if (!replaceBlockedByAHolder(lastError, wideDest))
+			break;
+		const sint64 elapsedMs = std::max((sint64)(CTime::getLocalTime() - startTime), askedMs);
+		if (elapsedMs >= s_ReplaceFileRetryMs)
+			break;
+		const sint64 thisWaitMs = std::min(waitMs, s_ReplaceFileRetryMs - elapsedMs);
+		nlSleep((uint32)thisWaitMs);
+		askedMs += thisWaitMs;
+		waitMs *= 2;
+	}
+
+	if (destFlagCleared)
+		SetFileAttributesW(wideDest.c_str(), destAttributes);
+
+	nlwarning("PATH: replaceFile error: can't move '%s' over '%s', error %u (%s)",
+	    ssrc.c_str(),
+	    sdest.c_str(),
+	    (uint)lastError,
+	    NLMISC::formatErrorMessage((sint)lastError).c_str());
+	return false;
+#else
+	// rename replaces the destination in one step, whatever its access rights: the rights that count are
+	// those of the directory
+	if (rename(ssrc.c_str(), sdest.c_str()) == -1)
+	{
+		nlwarning("PATH: replaceFile error: can't rename '%s' over '%s', error %d (%s)",
+		    ssrc.c_str(),
+		    sdest.c_str(),
+		    errno,
+		    strerror(errno));
+		return false;
+	}
+	return true;
+#endif
+}
+
 bool CFile::createDirectory(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS
@@ -2814,6 +3066,55 @@ bool CFile::createDirectoryTree(const std::string &filename)
 	}
 
 	return lastResult;
+}
+
+bool CFile::isDirectoryWritable(const std::string &dirname)
+{
+	if (!isDirectory(dirname))
+		return false;
+
+	// The probe is created as a new file: a file that exists is never opened, its name is skipped.
+	// The process id keeps two processes that test the same directory apart.
+#ifdef NL_OS_WINDOWS
+	const uint processId = (uint)GetCurrentProcessId();
+#else
+	const uint processId = (uint)getpid();
+#endif
+	const std::string directory = CPath::standardizePath(dirname);
+	const uint maxTries = 8;
+	for (uint i = 0; i < maxTries; ++i)
+	{
+		const std::string probe = directory + toString("nl_wtest_%u_%u.tmp", processId, i);
+#ifdef NL_OS_WINDOWS
+		// The system deletes the file when the handle is closed, whatever happens to the process in between
+		HANDLE h = CreateFileW(nlUtf8ToWide(probe), GENERIC_WRITE | DELETE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, NULL);
+		if (h != INVALID_HANDLE_VALUE)
+		{
+			CloseHandle(h);
+			return true;
+		}
+		if (GetLastError() != ERROR_FILE_EXISTS)
+			return false;
+#else
+		int fd = open(probe.c_str(), O_CREAT | O_EXCL | O_WRONLY, S_IRUSR | S_IWUSR);
+		if (fd != -1)
+		{
+			close(fd);
+			if (unlink(probe.c_str()) == -1)
+			{
+				// a directory that keeps what is written to it is not one to work in
+				nlwarning("PATH: Can't delete the write test file '%s': (errno %d) %s", probe.c_str(), errno, strerror(errno));
+				return false;
+			}
+			return true;
+		}
+		if (errno != EEXIST)
+			return false;
+#endif
+	}
+
+	nlwarning("PATH: Can't test if '%s' is writable, the %u write test file names of this process are in use", dirname.c_str(), maxTries);
+	return false;
 }
 
 bool CPath::makePathRelative (const std::string &basePath, std::string &relativePath)
@@ -2998,11 +3299,11 @@ bool CFile::setRWAccess(const std::string &filename)
 #ifdef NL_OS_WINDOWS
 	std::wstring wideFile = NLMISC::utf8ToWide(filename);
 
-	// if the file exists and there's no write access
-	if (_waccess (wideFile.c_str(), 00) == 0 && _waccess (wideFile.c_str(), 06) == -1)
+	// if the file exists (the else below is for a file that does not exist, as on the other systems)
+	if (_waccess (wideFile.c_str(), 00) == 0)
 	{
-		// try to set the read/write access
-		if (_wchmod (wideFile.c_str(), _S_IREAD | _S_IWRITE) == -1)
+		// and there's no write access, try to set the read/write access
+		if (_waccess (wideFile.c_str(), 06) == -1 && _wchmod (wideFile.c_str(), _S_IREAD | _S_IWRITE) == -1)
 		{
 			if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
 			{
@@ -3116,6 +3417,20 @@ void CFile::getTemporaryOutputFilename (const std::string &originalFilename, std
 	do
 		tempFilename = originalFilename+".tmp"+toString (i++);
 	while (CFile::isExists(tempFilename));
+}
+
+bool CFile::isTemporaryOutputFilename(const std::string &filename)
+{
+	// ".tmp" and one or more digits, at the end of a name that has something before them
+	std::string::size_type pos = filename.size();
+	while (pos > 0 && filename[pos - 1] >= '0' && filename[pos - 1] <= '9')
+		--pos;
+	if (pos == filename.size() || pos < 5)
+		return false;
+	if (filename.compare(pos - 4, 4, ".tmp") != 0)
+		return false;
+	const char before = filename[pos - 5];
+	return before != '/' && before != '\\';
 }
 
 } // NLMISC

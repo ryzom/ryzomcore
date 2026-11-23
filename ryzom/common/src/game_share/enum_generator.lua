@@ -26,9 +26,9 @@ enum_generator = {}
 local function format_name(name, sep, formater)
 	if type(name)=="string" then
 		return formater(name)
-	elseif type(name)=="table" and table.getn(name)>0 then
+	elseif type(name)=="table" and #name>0 then
 		local str = formater(name[1])
-		for i=2, table.getn(name) do
+		for i=2, #name do
 			str = str..sep..formater(name[i])
 		end
 		return str
@@ -41,9 +41,9 @@ end
 local function format_name2(name, sep, formater1, formater2)
 	if type(name)=="string" then
 		return formater1(name)
-	elseif type(name)=="table" and table.getn(name)>0 then
+	elseif type(name)=="table" and #name>0 then
 		local str = formater1(name[1])
-		for i=2, table.getn(name) do
+		for i=2, #name do
 			str = str..sep..formater2(name[i])
 		end
 		return str

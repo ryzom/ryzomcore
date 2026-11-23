@@ -1125,10 +1125,9 @@ inline void		CPatch::fillFar1VertexVB(CTessFarVertex *pVert)
 		*(CUV*)(CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.TexCoordOff0)= uv;
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.TexCoordOff1, sizeof(CUV));
 		*(CUV*)(CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.TexCoordOff1)= uvDLM;
-		// Set default color.
-		static CRGBA	col(255,255,255,255);
+		// Set default color: the light scale (a grey: the same in RGBA and BGRA), opaque.
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.ColorOff, sizeof(CRGBA));
-		*(CRGBA*)(CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.ColorOff)= col;
+		*(CRGBA *)(CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.ColorOff) = CLandscapeGlobals::LightScaleColor;
 	}
 	else
 	{
@@ -1421,8 +1420,9 @@ void		CPatch::computeGeomorphAlphaFar1VertexListVB(CTessList<CTessFarVertex>  &v
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr, sizeof(CVector))
 		*(CVector*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
 
-		// Set Alpha color.
-		static CRGBA	col(255,255,255,255);
+		// Set Alpha color. The RGB is the light scale (a grey: the same in RGBA and BGRA), which
+		// the far material modulates the texture with when the light is scaled.
+		CRGBA col = CLandscapeGlobals::LightScaleColor;
 		// For Far1, use alpha fro transition.
 		// Prefer Use Pos, because of caching. So little difference between Soft and VertexProgram mode.
 		float	f= (pVert->Src->Pos - CLandscapeGlobals::RefineCenter).sqrnorm();

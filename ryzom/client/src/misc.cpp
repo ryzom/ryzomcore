@@ -26,10 +26,12 @@
 #include "stdpch.h"
 // Client
 #include "misc.h"
+#include "init.h"
 #include "entity_animation_manager.h"
 #include "entities.h"
 #include "sheet_manager.h"
 #include "interface_v3/interface_manager.h"
+#include "interface_v3/input_handler_manager.h"
 #include "continent_manager.h"
 #include "world_database_manager.h"
 #include "client_cfg.h"
@@ -59,6 +61,7 @@
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_loader.h"
+#include "window_desktop.h"
 
 ///////////
 // USING //
@@ -1339,18 +1342,64 @@ void makeInstanceTransparent(UInstance	&inst, uint8 opacity, bool disableZWrite)
 	}
 }
 
+// The size of the window when the client last went from a window to fullscreen in this run (0: it did not)
+static uint16 s_LastWindowWidth = 0;
+static uint16 s_LastWindowHeight = 0;
+
+void getWindowSizeLeavingFullscreen(uint16 &width, uint16 &height)
+{
+	if (s_LastWindowWidth != 0 && s_LastWindowHeight != 0)
+	{
+		width = s_LastWindowWidth;
+		height = s_LastWindowHeight;
+	}
+	else
+	{
+		getDefaultWindowSize(Driver, width, height);
+	}
+}
+
 void setVideoMode(const UDriver::CMode &mode)
 {
 	UDriver::CMode oldMode, newMode = mode;
+	// a client on another virtual desktop stays in a window: a full screen mode would take the monitor of the desktop
+	// shown (WindowDesktop)
+	if (WindowDesktop::isRequested() && !newMode.Windowed)
+	{
+		nlwarning("The client stays in a window on the virtual desktop '%s': a full screen mode would take the monitor of the desktop shown", WindowDesktop::getRequested().c_str());
+		newMode.Windowed = true;
+	}
 	oldMode.Windowed = true; // getCurrentScreenMode may fail if first init ...
 	Driver->getCurrentScreenMode(oldMode);
 	bool wasMaximized = isWindowMaximized();
+	uint32 oldWindowWidth, oldWindowHeight;
+	Driver->getWindowSize(oldWindowWidth, oldWindowHeight);
+	if (oldMode.Windowed && !newMode.Windowed && !wasMaximized && oldWindowWidth != 0 && oldWindowHeight != 0)
+	{
+		// going to fullscreen: the window has this size again on the way back
+		s_LastWindowWidth = (uint16)oldWindowWidth;
+		s_LastWindowHeight = (uint16)oldWindowHeight;
+	}
 	if (!Driver->setMode(newMode) && !newMode.Windowed)
 	{
-		// failed to switch to mode, fall back to windowed
+		// failed to switch to mode, fall back to windowed: the window there was, or the one a client that
+		// leaves fullscreen gets (the size of the refused mode is the size of a screen, not of a window)
 		newMode.Windowed = true;
+		if (oldMode.Windowed && oldWindowWidth != 0 && oldWindowHeight != 0)
+		{
+			newMode.Width = (uint16)oldWindowWidth;
+			newMode.Height = (uint16)oldWindowHeight;
+		}
+		else
+		{
+			getWindowSizeLeavingFullscreen(newMode.Width, newMode.Height);
+		}
 		ClientCfg.Windowed = true;
+		ClientCfg.Width = newMode.Width;
+		ClientCfg.Height = newMode.Height;
 		ClientCfg.writeInt("FullScreen", 0);
+		ClientCfg.writeInt("Width", newMode.Width);
+		ClientCfg.writeInt("Height", newMode.Height);
 
 		// set the window mode
 		Driver->setMode(newMode);
@@ -1366,18 +1415,50 @@ void setVideoMode(const UDriver::CMode &mode)
 	{
 		UDriver::CMode screenMode;
 
-		uint32 posX = 0;
-		uint32 posY = 0;
+		sint32 posX = 0;
+		sint32 posY = 0;
 
 		if (Driver->getCurrentScreenMode(screenMode))
 		{
-			// position is not saved in config so center the window
-			posX = (screenMode.Width - Driver->getWindowWidth())/2;
-			posY = (screenMode.Height - Driver->getWindowHeight())/2;
+			// position is not saved in config so center the window (a window larger than the screen starts
+			// at the corner of the screen)
+			posX = std::max((sint32)0, ((sint32)screenMode.Width - (sint32)Driver->getWindowWidth()) / 2);
+			posY = std::max((sint32)0, ((sint32)screenMode.Height - (sint32)Driver->getWindowHeight()) / 2);
 		}
 
 		Driver->setWindowPos(posX, posY);
 	}
+}
+
+void limitOutgameFrameRate()
+{
+	// when the last frame left this function
+	static TTime s_LastFrameEnd = 0;
+
+	// a sleep of the configuration (Sleep >= 0) is done by the loops themselves and is all there is
+	if (ClientCfg.Sleep < 0)
+	{
+		if (isWindowMinimizedOrWithoutArea() || !CInputHandlerManager::getInstance()->hasFocus())
+		{
+			// nobody looks
+			nlSleep(50);
+		}
+		else if (!ClientCfg.WaitVBL)
+		{
+			// the vertical sync paces the frames when it is on: otherwise the rest of a 60th of a second
+			const TTime frameTime = 16;
+			TTime elapsed = CTime::getLocalTime() - s_LastFrameEnd;
+			if (elapsed >= 0 && elapsed < frameTime)
+				nlSleep((uint32)(frameTime - elapsed));
+		}
+	}
+
+	s_LastFrameEnd = CTime::getLocalTime();
+}
+
+bool isWindowMinimizedOrWithoutArea()
+{
+	return Driver->isWindowMinimized() || Driver->getWindowWidth() == 0 || Driver->getWindowHeight() == 0;
 }
 
 uint getCurrentColorDepth()
@@ -1421,12 +1502,12 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 	NL3D::UDriver::CMode currentMode;
 	Driver->getCurrentScreenMode(currentMode);
 
-	// TODO: for resolutions below 1024x768, could use automatic UI scaling like in login/outgame
-	// Remove modes under 1024x768 (outgame ui limitation) and get the unique strings
+	// Remove modes under 800x600 (the login and character selection screens scale themselves down to the
+	// screen, the interface of the game needs this much) and get the unique strings
 	sint i, j;
 	for (i = 0; i < (sint)videoModes.size(); ++i)
 	{
-		if ((videoModes[i].Width < 1024) || (videoModes[i].Height < 768))
+		if ((videoModes[i].Width < 800) || (videoModes[i].Height < 600))
 		{
 			videoModes.erase(videoModes.begin()+i);
 			--i;
@@ -1481,10 +1562,10 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 				else
 				if (videoModes[i].Width == currentMode.Width &&
 					videoModes[i].Height == currentMode.Height &&
-					videoModes[i].Frequency == currentMode.Frequency &&
 					videoModes[i].DisplayDevice == currentMode.DisplayDevice)
 				{
-					// use current (active) monitor resolution
+					// use current (active) monitor resolution, at whichever frequency (this is the first
+					// mode of that resolution in the list, the frequencies are listed below)
 					nFoundMode = i;
 					nFoundStringMode = j;
 				}
@@ -1492,12 +1573,11 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 		}
 	}
 
-	// If no modes are available, fallback to windowed mode
+	// No mode of the list is the configured or the current one: the caller keeps the mode there is. The
+	// configuration is not touched here, a mode that cannot be set is refused where it is set (setVideoMode)
 	if (nFoundStringMode == -1)
 	{
-		nlwarning("Mode %ux%u not found, fall back to windowed", (uint)ClientCfg.Width, (uint)ClientCfg.Height);
-		ClientCfg.Windowed = true;
-		ClientCfg.writeInt("FullScreen", 0);
+		nlwarning("No video mode of the driver is the configured %ux%u or the current %ux%u", (uint)ClientCfg.Width, (uint)ClientCfg.Height, (uint)currentMode.Width, (uint)currentMode.Height);
 	}
 	else
 	{

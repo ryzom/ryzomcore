@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -210,7 +210,7 @@ else:
 	for zonefile in zonefiles:
 		zone = os.path.basename(zonefile)[0:-len(".zonew")]
 		lr1 = ExportBuildDirectory + "/" + RbankSmoothBuildDirectory + "/" + zone + ".lr"
-		nearzones = subprocess.Popen([ GetNeighbors, zone ], stdout = subprocess.PIPE).communicate()[0].strip().split(" ")
+		nearzones = subprocess.Popen([ GetNeighbors, zone ], stdout = subprocess.PIPE, universal_newlines = True).communicate()[0].strip().split(" ")
 		printLog(log, "ZONE " + zone + ": " + str(nearzones))
 		zoneToBuild = 0
 		for nearzone in nearzones:
@@ -232,7 +232,7 @@ else:
 			zonesToBuild = zonesToBuild[64:]
 		else:
 			zonesToBuild = []
-		print processCommand
+		print(processCommand)
 		callParallelProcess(processCommand)
 	flushParallelProcesses()
 printLog(log, "")

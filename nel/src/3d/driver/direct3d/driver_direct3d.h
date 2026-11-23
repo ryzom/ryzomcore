@@ -35,6 +35,7 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/win_event_emitter.h"
+#include "nel/misc/win_minimized_picture.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/driver.h"
@@ -84,9 +85,6 @@ typedef HCURSOR nlCursor;
 
 // Define this to force the use of pixel shader in the normal shaders (default is undefined)
 //#define NL_FORCE_PIXEL_SHADER_USE_FOR_NORMAL_SHADERS
-
-// Define this to enable profiling by the NV Perf HUD tool (default is undefined)
-//#define NL_D3D_USE_NV_PERF_HUD
 
 // Define this to enable profiling of driver functions (default is undefined).
 //#define NL_PROFILE_DRIVER_D3D
@@ -863,6 +861,10 @@ public:
 	virtual void			endDialogMode();
 	virtual bool			activate();
 	virtual bool			isActive ();
+	virtual bool			isWindowMinimized() const;
+	virtual void			restoreWindow();
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied);
+	virtual bool			isMinimizedWindowPictureWanted() const;
 	virtual	bool			initVertexBufferHard(uint agpMem, uint vramMem);
 
 	// Windows interface
@@ -1607,7 +1609,8 @@ public:
 	friend class CVolatileIndexBuffer;
 
 	// Init render states
-	void initRenderVariables();
+	// false when the internal shaders could not be created
+	bool initRenderVariables();
 
 	// Reset render states
 	void resetRenderVariables();
@@ -2216,7 +2219,8 @@ public:
 
 	// *** Multipass helpers
 
-	void initInternalShaders();
+	// false when an effect could not be created (the log names it)
+	bool initInternalShaders();
 	void releaseInternalShaders();
 	bool setShaderTexture (uint textureHandle, ITexture *texture, CFXCache *cache);
 
@@ -2368,6 +2372,15 @@ private:
 	bool					_Maximized;
 	bool					_WindowFocus;
 	bool					_HandlePossibleSizeChangeNextSize;
+	// The pictures of the minimized window that the driver supplies to the desktop compositor, out of the
+	// frames in the back buffer
+	NLMISC::CWinMinimizedPicture	m_MinimizedPicture;
+	// The desktop compositor shows a picture of the minimized window (see isMinimizedWindowPictureWanted)
+	bool					m_MinimizedPictureMode;
+	// It was said in the log that the back buffer cannot be read
+	bool					m_MinimizedPictureUnreadableReported;
+	// At the swap: the frame in the back buffer is handed over as a picture, when one is due
+	void					takeMinimizedPicture();
 	GfxMode					_CurrentMode;
 	uint					_Interval;
 	bool					_FullScreen;
@@ -2690,6 +2703,9 @@ private:
 	// Backup frame buffer
 	IDirect3DSurface9		*_BackBuffer;
 
+	// A render target without area was refused and reported (setRenderTarget reports it once)
+	bool					m_ZeroAreaRenderTargetReported;
+
 	// Static bitmap buffer to convert rgba to bgra
 	static std::vector<uint8>	_TempBuffer;
 
@@ -2783,6 +2799,10 @@ public:
 	// Test if cursor is in the client area. always true when software cursor is used and window visible
 	// (displayed in software when DirectInput is used)
 	bool isSystemCursorInClientArea();
+
+	// Whether the driver may move the system cursor, which is the user's: only for a window that is activated
+	// (setWindowActivation) and in the foreground
+	bool mayMoveSystemCursor();
 
 	// Check if RGBA cursors are supported
 	bool isAlphaBlendedCursorSupported();

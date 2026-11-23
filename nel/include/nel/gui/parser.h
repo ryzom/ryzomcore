@@ -88,6 +88,8 @@ namespace NLGUI
 		virtual bool getLinkData( uint32 id, SLinkData &linkData ) = 0;
 		virtual void updateLinkData( uint32 id, const SLinkData &linkData ) = 0;
 		virtual void setVariable( const VariableData &v ) = 0;
+		/// Sets the DB entry, and each entry below it, back to the value its <variable> declaration gives; returns how many were set
+		virtual uint resetVariables( const std::string &entry ) = 0;
 		virtual bool serializeVariables( xmlNodePtr parentNode ) const = 0;
 		virtual bool serializeProcs( xmlNodePtr parentNode ) const = 0;
 		virtual bool serializePointerSettings( xmlNodePtr parentNode ) const = 0;

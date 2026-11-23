@@ -189,6 +189,7 @@
 #	ifdef NL_OS_MAC
 #		include <sys/mount.h>
 #		include <sys/sysctl.h>
+#		include <mach/mach.h>
 #	else
 #		include <sys/vfs.h>
 #	endif
@@ -306,6 +307,13 @@ static sint64 getsysctlnum64(const string &name)
 	{
 		nlwarning("SI: Can't get '%s' from sysctl: %s", name.c_str(), strerror (errno));
 	}
+	else if (len == sizeof(sint32))
+	{
+		// a 32 bit value, len is the size sysctl copied: it filled the first 4 bytes only
+		sint32 value32;
+		memcpy(&value32, &value, sizeof(value32));
+		value = value32;
+	}
 	return value;
 }
 
@@ -343,7 +351,7 @@ string CSystemInfo::getOS()
 
 	typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 	typedef BOOL (WINAPI *PGetProductInfo)(DWORD, DWORD, DWORD, DWORD, PDWORD);
-	typedef LONG (WINAPI* PRtlGetVersion)(OSVERSIONINFOEXA*);
+	typedef LONG (WINAPI* PRtlGetVersion)(OSVERSIONINFOEXW*);
 
 	const int BUFSIZE = 80;
 
@@ -366,8 +374,26 @@ string CSystemInfo::getOS()
 
 	if (pRtlGetVersion)
 	{
-		// try RtlGetVersion
-		bOsVersionInfoEx = pRtlGetVersion(&osvi) == 0;
+		// try RtlGetVersion, which takes the wide structure: called with the size of the narrow one, it filled the
+		// version numbers only and left the product type, the suite mask and the service pack at 0
+		OSVERSIONINFOEXW osviW;
+		ZeroMemory(&osviW, sizeof(osviW));
+		osviW.dwOSVersionInfoSize = sizeof(osviW);
+		bOsVersionInfoEx = pRtlGetVersion(&osviW) == 0;
+
+		if (bOsVersionInfoEx)
+		{
+			osvi.dwMajorVersion = osviW.dwMajorVersion;
+			osvi.dwMinorVersion = osviW.dwMinorVersion;
+			osvi.dwBuildNumber = osviW.dwBuildNumber;
+			osvi.dwPlatformId = osviW.dwPlatformId;
+			std::string csdVersion = wideToUtf8(osviW.szCSDVersion);
+			strncpy(osvi.szCSDVersion, csdVersion.c_str(), sizeof(osvi.szCSDVersion) - 1);
+			osvi.wServicePackMajor = osviW.wServicePackMajor;
+			osvi.wServicePackMinor = osviW.wServicePackMinor;
+			osvi.wSuiteMask = osviW.wSuiteMask;
+			osvi.wProductType = osviW.wProductType;
+		}
 	}
 
 	if (!bOsVersionInfoEx)
@@ -404,7 +430,26 @@ string CSystemInfo::getOS()
 		}
 		else if (osvi.dwMajorVersion == 10)
 		{
-			OSString += " Windows 10";
+			// Windows 11 and the servers from 2016 are version 10.0 too, the build number tells them apart
+			DWORD build = osvi.dwBuildNumber & 0xFFFF;
+
+			if (osvi.wProductType == VER_NT_WORKSTATION)
+			{
+				if (build >= 22000)
+					OSString += " Windows 11";
+				else
+					OSString += " Windows 10";
+			}
+			else if (build == 26100)
+				OSString += " Windows Server 2025";
+			else if (build == 20348)
+				OSString += " Windows Server 2022";
+			else if (build == 17763)
+				OSString += " Windows Server 2019";
+			else if (build == 14393)
+				OSString += " Windows Server 2016";
+			else
+				OSString += " Windows Server";
 		}
 		else if (osvi.dwMajorVersion == 6)
 		{
@@ -590,6 +635,9 @@ string CSystemInfo::getOS()
 		}
 
 		PGetProductInfo pGetProductInfo = (PGetProductInfo)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetProductInfo");
+
+		// where the edition is added, see after the switch
+		std::string::size_type editionPos = OSString.size();
 
 		DWORD dwType;
 
@@ -1056,6 +1104,10 @@ string CSystemInfo::getOS()
 			}
 		}
 
+		// the edition names of the servers start with "Server", which a server name above already says
+		if (OSString.find(" Windows Server") != std::string::npos && OSString.compare(editionPos, 7, " Server") == 0)
+			OSString.erase(editionPos, 7);
+
 		if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
 			OSString += " 64-bit";
 		else if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
@@ -1475,10 +1527,24 @@ uint64 CSystemInfo::availablePhysicalMemory ()
 {
 #ifdef NL_OS_WINDOWS
 	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(ms);
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullAvailPhys;
 #elif defined NL_OS_MAC
-	return uint64(getsysctlnum64("hw.usermem"));
+	// the free pages and the inactive ones, which the system takes back first when memory is needed
+	mach_port_t host = mach_host_self();
+	vm_size_t pageSize = 0;
+	vm_statistics64_data_t vmStats;
+	mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+	kern_return_t pageResult = host_page_size(host, &pageSize);
+	kern_return_t statsResult = host_statistics64(host, HOST_VM_INFO64, (host_info64_t)&vmStats, &count);
+	mach_port_deallocate(mach_task_self(), host);
+	if (pageResult != KERN_SUCCESS || statsResult != KERN_SUCCESS)
+	{
+		nlwarning("SI: Can't get the available memory: host_page_size returned %d, host_statistics64 returned %d", (sint)pageResult, (sint)statsResult);
+		return 0;
+	}
+	return ((uint64)vmStats.free_count + (uint64)vmStats.inactive_count) * (uint64)pageSize;
 #elif defined NL_OS_UNIX
 	return getSystemMemory("MemFree:")+getSystemMemory("Buffers:")+getSystemMemory("Cached:");
 #else
@@ -1490,10 +1556,12 @@ uint64 CSystemInfo::totalPhysicalMemory ()
 {
 #ifdef NL_OS_WINDOWS
 	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(ms);
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullTotalPhys;
 #elif defined NL_OS_MAC
-	return uint64(getsysctlnum64("hw.physmem"));
+	// hw.physmem is a 32 bit value, at most 2 GiB
+	return uint64(getsysctlnum64("hw.memsize"));
 #elif defined NL_OS_UNIX
 	return getSystemMemory("MemTotal:");
 #else
@@ -1501,7 +1569,8 @@ uint64 CSystemInfo::totalPhysicalMemory ()
 #endif
 }
 
-#ifndef NL_OS_WINDOWS
+// for /proc/self/stat in getAllocatedSystemMemory, macOS has its own branch there
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 static inline char *skipWS(const char *p)
 {
     while (isspace(*p)) p++;
@@ -1516,26 +1585,80 @@ static inline char *skipToken(const char *p)
 }
 #endif
 
+#ifdef NL_OS_WINDOWS
+// PROCESS_MEMORY_COUNTERS_EX of <psapi.h>, declared here so that neither that header nor psapi.lib is needed:
+// the function is looked up when it is called (kernel32 from Windows 7 on, psapi.dll before)
+struct CProcessMemoryCountersEx
+{
+	DWORD cb;
+	DWORD PageFaultCount;
+	SIZE_T PeakWorkingSetSize;
+	SIZE_T WorkingSetSize;
+	SIZE_T QuotaPeakPagedPoolUsage;
+	SIZE_T QuotaPagedPoolUsage;
+	SIZE_T QuotaPeakNonPagedPoolUsage;
+	SIZE_T QuotaNonPagedPoolUsage;
+	SIZE_T PagefileUsage;
+	SIZE_T PeakPagefileUsage;
+	SIZE_T PrivateUsage;
+};
+#endif
+
 uint64 CSystemInfo::getAllocatedSystemMemory ()
 {
 	uint64 systemMemory = 0;
 #ifdef NL_OS_WINDOWS
-	// Get system memory information
-	HANDLE hHeap[100];
-	DWORD heapCount = GetProcessHeaps (100, hHeap);
-
-	uint heap;
-	for (heap = 0; heap < heapCount; heap++)
+	// The private bytes of the process (its commit charge), from the counters the system keeps for it.
+	// The heaps are not walked for this: HeapWalk on a heap that other threads use can go astray without a
+	// lock, and was seen never to return then; a lock would stop every thread that allocates, and a walk of
+	// the heaps of a large process takes long. This is read every minute by a service that lists ProcessUsedMemory in its GraphVars.
+	typedef BOOL(WINAPI *TGetProcessMemoryInfo)(HANDLE, CProcessMemoryCountersEx *, DWORD);
+	TGetProcessMemoryInfo getProcessMemoryInfo = NULL;
+	HMODULE psapi = NULL;
+	HMODULE kernel = GetModuleHandleW(L"kernel32.dll");
+	if (kernel != NULL)
+		getProcessMemoryInfo = (TGetProcessMemoryInfo)GetProcAddress(kernel, "K32GetProcessMemoryInfo");
+	if (getProcessMemoryInfo == NULL)
 	{
-		PROCESS_HEAP_ENTRY entry;
-		entry.lpData = NULL;
-		while (HeapWalk (hHeap[heap], &entry))
-		{
-			if (entry.wFlags & PROCESS_HEAP_ENTRY_BUSY)
-			{
-				systemMemory += entry.cbData + entry.cbOverhead;
-			}
-		}
+		// before Windows 7 the function is in psapi.dll
+		psapi = LoadLibraryW(L"psapi.dll");
+		if (psapi != NULL)
+			getProcessMemoryInfo = (TGetProcessMemoryInfo)GetProcAddress(psapi, "GetProcessMemoryInfo");
+	}
+
+	CProcessMemoryCountersEx counters;
+	memset(&counters, 0, sizeof(counters));
+	counters.cb = sizeof(counters);
+	if (getProcessMemoryInfo == NULL)
+	{
+		nlwarning("HA: Can't get the memory used by the process: GetProcessMemoryInfo is not found");
+	}
+	else if (getProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters)) == 0)
+	{
+		const DWORD error = GetLastError();
+		nlwarning("HA: Can't get the memory used by the process: GetProcessMemoryInfo failed, error %u", (uint)error);
+	}
+	else
+	{
+		systemMemory = counters.PrivateUsage;
+	}
+
+	if (psapi != NULL)
+		FreeLibrary(psapi);
+
+#elif defined NL_OS_MAC
+
+	// the resident size: the virtual size of a macOS process counts the shared system regions, gigabytes for any process
+	mach_task_basic_info_data_t info;
+	mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+	kern_return_t result = task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info, &count);
+	if (result != KERN_SUCCESS)
+	{
+		nlwarning("HA: Can't get the memory used by the process: task_info returned %d", (sint)result);
+	}
+	else
+	{
+		systemMemory = info.resident_size;
 	}
 
 #elif defined NL_OS_UNIX
@@ -1872,6 +1995,7 @@ uint64 CSystemInfo::virtualMemory ()
 {
 #ifdef NL_OS_WINDOWS
 	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(ms);
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullTotalVirtual - ms.ullAvailVirtual;
 #else

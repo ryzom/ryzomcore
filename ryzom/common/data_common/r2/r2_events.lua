@@ -611,8 +611,8 @@ function r2.events:updateElementEditor()
 					actionType = actionType .. " '" .. instance:getShortName() .. "'"
 				end
 				if actionInst.Action.ValueString and actionInst.Action.ValueString ~= "" then
-					if string.gfind(actionType, "%%1")() then
-						actionType = string.gsub(actionType, "%%1", "'"..tostring(actionInst.Action.ValueString).."'")
+					if string.find(actionType, "%%1") then
+						actionType = replaceTag(actionType, "%%1", "'"..tostring(actionInst.Action.ValueString).."'")
 					else
 						actionType = actionType .. " '" .. tostring(actionInst.Action.ValueString).. "'"
 					end
@@ -967,9 +967,7 @@ function r2.events:initEventMenu(categoryEvent)
 	if logicEntity then
 
 		firstLine = 2
-		local uc_name = ucstring()
-		uc_name:fromUtf8(logicEntity.Name)
-		logicEntityMenu:addLine(uc_name, "lua", "r2.events:setLogicEntity('".. logicEntity.InstanceId .."')", logicEntity.InstanceId)
+		logicEntityMenu:addLine(logicEntity.Name, "lua", r2:uiCall("r2.events:setLogicEntity", logicEntity.InstanceId), logicEntity.InstanceId)
 		logicEntityMenu:addSeparator()
 	
 		logicEntityMenu:addSubMenu(0)

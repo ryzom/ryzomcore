@@ -41,12 +41,15 @@ public:
 	// init : register callback
 	void init();
 
-	/** Create a new channel with localized name.
+	/** Create a new channel whose title is not translated: the title as it is, or, with titlePhrase, a phrase with
+	  * one literal parameter that shows the title (e.g. RING_CHANNEL, "Ring Channel $name$").
 	  * If channel already exist, DYN_CHAT_INVALID_CHAN is returned
 	  */
-	TChanID				addChan(const std::string &name, const ucstring &title, TChanID = NLMISC::CEntityId::Unknown, bool noBroadcast = false, bool forwardPlayerInputs = false, bool unify = false);
+	// clang-format off
+	TChanID				addChan(const std::string &name, const ucstring &title, TChanID = NLMISC::CEntityId::Unknown, bool noBroadcast = false, bool forwardPlayerInputs = false, bool unify = false, const std::string &titlePhrase = std::string());
 	// Add of channel whose name is its string id
 	TChanID				addLocalizedChan(const std::string &name, TChanID = NLMISC::CEntityId::Unknown, bool noBroadcast = false, bool forwardPlayerInputs = false, bool unify = false);
+	// clang-format on
 	// Retrieves id of a channel from its localized name, or DYN_CHAT_INVALID_CHAN if not such channel exists
 	TChanID				getChanIDFromName(const std::string &name) const;	
 	// Returns string name of a channel from its ID, or an empty string if not found
@@ -134,7 +137,9 @@ private:
 	// Clear channel / sessions in IOS side.
 	void			 iosResetDynChat();
 	//
-	TChanID			 addChan(const std::string &name, const ucstring &title, bool localized, TChanID chanID, bool noBroadcast, bool forwardPlayerInputs, bool unify);
+	// clang-format off
+	TChanID			 addChan(const std::string &name, const ucstring &title, bool localized, TChanID chanID, bool noBroadcast, bool forwardPlayerInputs, bool unify, const std::string &titlePhrase);
+	// clang-format on
 
 
 	// message received 

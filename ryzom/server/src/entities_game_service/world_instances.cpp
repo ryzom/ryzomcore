@@ -306,16 +306,14 @@ bool CWorldInstances::getAIServiceIdForInstance(uint32 instanceNumber, NLNET::TS
 }
 
 
-bool CWorldInstances::getAIInstanceNameFromeServiceId(NLNET::TServiceId AISID, std::string & name)
+bool CWorldInstances::getAIInstanceNamesFromServiceId(NLNET::TServiceId AISID, std::vector<std::string> & names)
 {
+	names.clear();
 	for ( TInstanceInfoCont::iterator it = _InstanceInfos.begin(); it != _InstanceInfos.end(); ++it )
 	{
 		if ( (*it).second.AISId == AISID )
-		{
-			name = (*it).second.ContinentName;
-			return true;
-		}
+			names.push_back( (*it).second.ContinentName );
 	}
-	return false;
+	return !names.empty();
 }
 

@@ -24,6 +24,7 @@
 #include "time_client.h"
 #include "global.h"
 #include "nel/misc/events.h"
+#include "nel/misc/co_task.h"
 #include "nel/3d/u_texture.h"
 #include "nel/misc/i18n.h"
 #include "continent.h"
@@ -38,6 +39,7 @@
 #include "bg_downloader_access.h"
 #include "nel/misc/system_utils.h"
 #include "nel/3d/stereo_hmd.h"
+#include "client_ctrl.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -167,6 +169,15 @@ void drawLoadingBitmap (float progress)
 
 void CProgress::internalProgress (float value)
 {
+	// This draws the loading screen, pumps the window events and swaps the buffers: work of the main thread. Where a
+	// co-task is a thread of its own (every platform but Windows) no OpenGL context is current in it, so a call
+	// from there is a defect of the caller, which has to leave the work to the main thread
+	if (CCoTask::isThreaded() && CCoTask::getCurrentTask() != NULL)
+	{
+		nlwarning("PROGRESS: called from a co-task that runs in a thread of its own, the loading screen is not drawn ('%s')", _ProgressMessage.c_str());
+		return;
+	}
+
 	// Get croped value
 	value = getCropedValue (value);
 
@@ -433,7 +444,10 @@ void CProgress::internalProgress (float value)
 	Driver->EventServer.addListener(EventMouseDownId,	this);
 
 	// Update messages
-	CInputHandlerManager::getInstance()->pumpEventsNoIM();
+	{
+		ClientCtrl::CLoadingScope loading(_ProgressMessage, value);
+		CInputHandlerManager::getInstance()->pumpEventsNoIM();
+	}
 
 	Driver->EventServer.removeListener(EventMouseDownId,	this);
 
@@ -441,6 +455,8 @@ void CProgress::internalProgress (float value)
 	bool activeDriver =  Driver->isActive();
 	if ((UseEscapeDuringLoading && Driver->AsyncListener.isKeyPushed (KeyESCAPE)) || !activeDriver)
 	{
+		// the endpoint goes first: nothing it serves may run on what the release takes down
+		ClientCtrl::release(activeDriver ? "Escape on a loading screen (a development build quits there)" : "the window was closed on a loading screen");
 		// Release the application
 		releaseMainLoop(true);
 		release();
@@ -459,6 +475,7 @@ void CProgress::internalProgress (float value)
 	CBGDownloaderAccess::getInstance().update();
 #endif
 	// Display to screen.
+	ClientCtrl::beforeSwap();
 	Driver->swapBuffers();
 
 	// \todo GUIGUI : Remove this when possible.

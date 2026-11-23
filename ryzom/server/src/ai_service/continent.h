@@ -460,16 +460,22 @@ public:
 	//@}
 	
 	void setPosAndRadius(AITYPES::TVerticalPos verticalPos, const CAIPos& pos, uint32 radius);
+	/// The height in millimetres of the ground at its centre, given before setPosAndRadius: its positions are on the
+	/// layer nearest to it rather than on the one the vertical pos rule takes (an event group spawned at a player)
+	void setHeight(sint32 height);
 	
 private:
 	
 	bool calcRandomPos(CAIPos& pos) const;
+	bool placeAt(RYAI_MAP_CRUNCH::CWorldPosition &wpos, const CAIVector &pos) const;
 	
 private:
 	RYAI_MAP_CRUNCH::CWorldPosition	_WorldValidPos;
 	CAIPos					_Pos;
 	float					_Radius;
 	AITYPES::TVerticalPos	_VerticalPos;
+	bool m_HasHeight;
+	sint32 m_Height;
 };
 
 //////////////////////////////////////////////////////////////////////////////

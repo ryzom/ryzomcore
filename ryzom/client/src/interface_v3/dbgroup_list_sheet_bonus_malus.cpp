@@ -50,7 +50,8 @@ CDBGroupListSheetBonusMalus::CDBGroupListSheetBonusMalus(const TCtorParam &param
 CDBGroupListSheetBonusMalus::CSheetChildTimer::CSheetChildTimer()
 :	TimerDB(nullptr)
     , DisabledDB(nullptr)
-    , TimerCache(0),
+    , TimerCache(0)
+    , DisabledCache(-1),
 	_RegenTextColor(NLMISC::CRGBA::White),
 	_RegenTextDisabledColor(NLMISC::CRGBA(127,127,127))
 {
@@ -89,35 +90,48 @@ void CDBGroupListSheetBonusMalus::CSheetChildTimer::init(CDBGroupListSheet *pFat
 }
 
 // ***************************************************************************
+bool CDBGroupListSheetBonusMalus::CSheetChildTimer::isInvalidated(CDBGroupListSheet * /* pFather */)
+{
+	// the server disables and enables an effect, and changes its timer, without changing its sheet
+	if (DisabledDB && DisabledDB->getValue32() != DisabledCache)
+		return true;
+	if (TimerDB && (uint)TimerDB->getValue32() != TimerCache)
+		return true;
+	return false;
+}
+
+// ***************************************************************************
 void CDBGroupListSheetBonusMalus::CSheetChildTimer::update(CDBGroupListSheet * /* pFather */)
 {
+	// grayed while the effect is disabled, whether or not a timer comes with it
+	if (DisabledDB)
+	{
+		DisabledCache = DisabledDB->getValue32();
+		if (DisabledDB->getValue32() == 0)
+		{
+			// active timer
+			Ctrl->setGrayed(false);
+			Ctrl->setRegenTextColor(_RegenTextColor);
+		}
+		else
+		{
+			// skill disabled timer
+			Ctrl->setGrayed(true);
+			Ctrl->setRegenTextColor(_RegenTextDisabledColor);
+		}
+	}
+
 	if(!TimerDB)
 		return;
 
 	NLMISC::TGameCycle tick = TimerDB->getValue32();
 	if (TimerCache != tick)
 	{
-		TimerCache = TimerDB->getValue32();
-		Ctrl->setRegenTickRange(CTickRange(LastGameCycle, TimerCache));
-		if (DisabledDB)
-		{
-			if (DisabledDB->getValue32() == 0)
-			{
-				// active timer
-				Ctrl->setGrayed(false);
-				Ctrl->setRegenTextColor(_RegenTextColor);
-			}
-			else
-			{
-				// skill disabled timer
-				Ctrl->setGrayed(true);
-				Ctrl->setRegenTextColor(_RegenTextDisabledColor);
-			}
-		}
-		else
-		{
+		TimerCache = tick;
+		// no countdown for a time that has passed, or for none (0)
+		Ctrl->setRegenTickRange(tick > LastGameCycle ? CTickRange(LastGameCycle, tick) : CTickRange());
+		if (!DisabledDB)
 			Ctrl->setGrayed(true);
-		}
 	}
 }
 

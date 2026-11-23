@@ -130,6 +130,7 @@ static void cbAddEntities( NLNET::CMessage& msgin, const std::string &serviceNam
 static void cbR2GoLive( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 static void cbR2StopLive( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 static void cbR2StartInstance( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
+static void cbR2GroupUserEvent( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 extern void cbR2NpcBotScriptById( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 extern void cbR2NpcGroupScriptByName( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 static void cbValidateSourceSpawn( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
@@ -163,6 +164,7 @@ TUnifiedCallbackItem CbArray[] =
 	{	"R2_GOLIVE",						cbR2GoLive						},
 	{	"R2_STOPLIVE",						cbR2StopLive					},
 	{	"R2_STARTINSTANCE",					cbR2StartInstance				},
+	{	"R2_GROUP_USER_EVENT",				cbR2GroupUserEvent				},
 	{	"R2_NPC_BOT_SCRIPT_BY_ID",			cbR2NpcBotScriptById			},
 	{	"R2_NPC_GROUP_SCRIPT_BY_NAME",		cbR2NpcGroupScriptByName		},
 	{	"OUTPOST_CREATE_SQUAD",				cbOutpostCreateSquad			},
@@ -229,6 +231,9 @@ void CMessages::notifyBotStopNpcControl(NLNET::TServiceId serviceId, uint32 botA
 
 #include "game_share/task_list.h"
 
+#include "ring_scenario_guard.h"
+#include "script_compiler.h"
+
 
 
 
@@ -280,10 +285,25 @@ public:
 
 		ICommand::execute(toString("createDynamicAIInstance %d", _AiInstance), *InfoLog);
 
+		// The instance is of this session from here on: the functions that act for a session
+		// compare the session they are called for with it
+		CAIInstance *instance = CAIS::instance().getAIInstance(_AiInstance);
+		if (!instance)
+		{
+			nlwarning("RING: the AI instance %u of session %u could not be made, its scenario is not loaded", _AiInstance, _SessionId.asInt());
+			return;
+		}
+		instance->setRingSession(_SessionId);
+
 		AI_SHARE::CAIActionsDataRecordPtr dataRec;
 		dataRec.init(&Pdr);
 
-		dataRec.applyToExecutor(*executer);
+		{
+			// What is in the record was made from the upload of a client: the scripts in it are
+			// compiled as the scripts of a scenario
+			CRingScenarioGuard::CLoadScope loadScope(_SessionId, _AiInstance);
+			dataRec.applyToExecutor(*executer);
+		}
 		{
 			std::string cmd = toString("spawnManagers r2.%04d.%s", _SessionId.asInt(), _IsBase?"base":"act");
 			ICommand::execute(cmd, *InfoLog);
@@ -436,6 +456,65 @@ static void cbR2StartInstance( NLNET::CMessage& msgin, const std::string &servic
 
 }
 
+// A user event of a group of a scenario, asked by the scenario service: a user trigger of the
+// animator, or a chest that was looted. The group is named by the instance of its session and by
+// its alias, which the scenario service gave it: no name of the scenario is looked up for it.
+class CTaskR2GroupUserEvent : public CTask<uint32>
+{
+public:
+	CTaskR2GroupUserEvent(uint32 aiInstance, uint32 groupAlias, uint32 eventId)
+	    : m_AiInstance(aiInstance)
+	    , m_GroupAlias(groupAlias)
+	    , m_EventId(eventId)
+	{
+	}
+
+	virtual void doOperation() NL_OVERRIDE
+	{
+		CAIInstance *instance = CAIS::instance().getAIInstance(m_AiInstance);
+		CGroup *group = instance ? instance->findGroup(m_GroupAlias) : NULL;
+		if (!group || !group->getPersistentStateInstance())
+		{
+			// the act of the group can have been stopped since the event was asked
+			nlwarning("RING: user event %u for the group %s of AI instance %u: the %s is not there, nothing is triggered",
+			    m_EventId, LigoConfig.aliasToString(m_GroupAlias).c_str(), m_AiInstance, instance ? "group" : "instance");
+			return;
+		}
+
+		// the event is triggered as a script of the group does it
+		std::vector<std::string> codeLines;
+		codeLines.push_back(toString("()setEvent(%u);", m_EventId));
+		CSmartPtr<const AIVM::CByteCode> code = AICOMP::CCompiler::getInstance().compileCode(codeLines, "user event of the scenario service");
+		group->getPersistentStateInstance()->interpretCode(NULL, code);
+	}
+
+private:
+	uint32 m_AiInstance;
+	uint32 m_GroupAlias;
+	uint32 m_EventId;
+};
+
+static void cbR2GroupUserEvent(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	uint32 aiInstance;
+	uint32 groupAlias;
+	uint32 eventId;
+	msgin.serial(aiInstance);
+	msgin.serial(groupAlias);
+	msgin.serial(eventId);
+
+	// a group has the user events 0 to 9
+	if (eventId > 9)
+	{
+		nlwarning("RING: R2_GROUP_USER_EVENT from service '%s' refused: user event %u, a group has the events 0 to 9", serviceName.c_str(), eventId);
+		return;
+	}
+
+	// run with the other tasks of the update, where a script can be interpreted
+	uint32 tick = CTimeInterface::gameCycle();
+	CAIS::instance().addTickedTask(tick, new CTaskR2GroupUserEvent(aiInstance, groupAlias, eventId));
+}
+
 //--------------------------------------------------------------------------
 // Messages from the GPMS
 //--------------------------------------------------------------------------
@@ -446,6 +525,58 @@ static void cbAddEntities( NLNET::CMessage& msgin, const std::string &serviceNam
 //	This is where we should deal with player record creation
 }
 
+// How far (in cells, metres) the walk to a prospected source may stray beyond the box between prospector and source
+static const sint32 s_SourceSpawnWalkMargin = 16;
+
+// Whether a walk on the world map from start reaches the map position end without leaving the box around the two,
+// widened by margin cells on each side; reached is the position walked to. Bounded: a surface only reachable by a long
+// way round is out of reach.
+static bool reachesOnWorldMap(const RYAI_MAP_CRUNCH::CWorldMap &worldMap, const RYAI_MAP_CRUNCH::CWorldPosition &start, const RYAI_MAP_CRUNCH::CMapPosition &end, sint32 margin, RYAI_MAP_CRUNCH::CWorldPosition &reached)
+{
+	const sint32 minX = std::min(start.x(), end.x()) - margin;
+	const sint32 maxX = std::max(start.x(), end.x()) + margin;
+	const sint32 minY = std::min(start.y(), end.y()) - margin;
+	const sint32 maxY = std::max(start.y(), end.y()) + margin;
+	static const RYAI_MAP_CRUNCH::CDirection s_Directions[4] = {
+		RYAI_MAP_CRUNCH::CDirection(1, 0),
+		RYAI_MAP_CRUNCH::CDirection(-1, 0),
+		RYAI_MAP_CRUNCH::CDirection(0, 1),
+		RYAI_MAP_CRUNCH::CDirection(0, -1)
+	};
+
+	// breadth first on cell and surface, one bit per surface of each cell of the box
+	const sint32 width = maxX - minX + 1;
+	std::vector<uint8> visited((size_t)width * (size_t)(maxY - minY + 1), 0);
+	std::deque<RYAI_MAP_CRUNCH::CWorldPosition> open;
+	visited[(size_t)(start.y() - minY) * width + (start.x() - minX)] |= (uint8)(1 << start.slot());
+	open.push_back(start);
+	while (!open.empty())
+	{
+		const RYAI_MAP_CRUNCH::CWorldPosition pos = open.front();
+		open.pop_front();
+		if (pos.x() == end.x() && pos.y() == end.y())
+		{
+			reached = pos;
+			return true;
+		}
+		for (uint i = 0; i < 4; ++i)
+		{
+			RYAI_MAP_CRUNCH::CWorldPosition next = pos;
+			if (!worldMap.move(next, s_Directions[i]))
+				continue;
+			if (next.x() < minX || next.x() > maxX || next.y() < minY || next.y() > maxY)
+				continue;
+			uint8 &cell = visited[(size_t)(next.y() - minY) * width + (next.x() - minX)];
+			const uint8 bit = (uint8)(1 << next.slot());
+			if ((cell & bit) == 0)
+			{
+				cell |= bit;
+				open.push_back(next);
+			}
+		}
+	}
+	return false;
+}
 
 //--------------------------------------------------------------------------
 // Messages from the EGS
@@ -457,14 +588,16 @@ void cbValidateSourceSpawn( NLNET::CMessage& msgin, const std::string &serviceNa
 	// Read/write header
 	CMessage msgout( "SRC_SPWN_VLD_R" );
 	uint32 nbSources;
-	//CVector prospectingPos;
-	//msgin.fastRead( prospectingPos );
+	CVector prospectingPos;
+	msgin.serial(prospectingPos);
 
-	// Get world position of prospector
+	// Get world position of prospector, on the surface nearest to the prospector's height
 	const RYAI_MAP_CRUNCH::CWorldMap& worldMap = CWorldContainer::getWorldMap();
-	//RYAI_MAP_CRUNCH::CWorldPosition prospectorWorldPos;
-	//CAIVector prospectingAiPos( (double)prospectingPos.x, (double)prospectingPos.y );
-	//bool isProspectingPosValid = worldMap.setWorldPosition( (double)prospectingPos.z, prospectorWorldPos, prospectingAiPos );
+	RYAI_MAP_CRUNCH::CWorldPosition prospectorWorldPos;
+	CAIVector prospectingAiPos((double)prospectingPos.x, (double)prospectingPos.y);
+	bool isProspectingPosValid = worldMap.setWorldPosition((sint32)(prospectingPos.z * 1000.0f), prospectorWorldPos, prospectingAiPos);
+	if (!isProspectingPosValid)
+		nldebug("Prospector at %s is not on the world map, sources are placed on the highest surface", prospectingPos.asString().c_str());
 
 	msgin.fastRead( nbSources );
 	msgout.fastWrite( nbSources );
@@ -480,24 +613,26 @@ void cbValidateSourceSpawn( NLNET::CMessage& msgin, const std::string &serviceNa
 
 		// Check position
 		RYAI_MAP_CRUNCH::CWorldPosition wPos;
-		CAIVector aiPos( (double)pos2f.x, (double)pos2f.y );
-		std::vector<RYAI_MAP_CRUNCH::CWorldPosition> wPosList;
+		CAIVector aiPos((double)pos2f.x, (double)pos2f.y);
 
-		bool canSpawnHere = worldMap.setWorldPosition( AITYPES::vp_auto, wPos, aiPos );
-
-		//worldMap.getWorldPositions( wPosList, aiPos );
-		//for ( std::vector<RYAI_MAP_CRUNCH::CWorldPosition>::const_iterator it=wPosList.begin(); it!=wPosList.end(); ++it )
+		bool canSpawnHere;
+		if (isProspectingPosValid)
 		{
-			// Discard if the position is in water or in interiors
-			if ( canSpawnHere && (wPos.getFlags() & (RYAI_MAP_CRUNCH::Water | RYAI_MAP_CRUNCH::Interior)) )
-				canSpawnHere = false;
-				//continue;
-
-			msgout.fastWrite( canSpawnHere );
-
-			// TODO: Browse the possible surfaces for the position (x,y), then keep only the one(s)
-			// for which a pathfinding from the prospector to the source limited to 5 surfaces succeeds
+			// only where the prospector can walk to, around obstacles but without a long way round: the plateau above
+			// the cliff the prospector stands under is out of reach, even when some other way leads up to it. The
+			// surface checked is the one walked to (the client still places the source on the ground itself)
+			canSpawnHere = reachesOnWorldMap(worldMap, prospectorWorldPos, RYAI_MAP_CRUNCH::CMapPosition(aiPos), s_SourceSpawnWalkMargin, wPos);
 		}
+		else
+		{
+			canSpawnHere = worldMap.setWorldPosition(AITYPES::vp_auto, wPos, aiPos);
+		}
+
+		// Discard if the position is in water or in interiors
+		if (canSpawnHere && (wPos.getFlags() & (RYAI_MAP_CRUNCH::Water | RYAI_MAP_CRUNCH::Interior)))
+			canSpawnHere = false;
+
+		msgout.fastWrite(canSpawnHere);
 	}
 
 	// Send reply

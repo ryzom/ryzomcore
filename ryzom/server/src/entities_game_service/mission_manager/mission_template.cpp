@@ -883,8 +883,13 @@ bool CMissionTemplate::build(const NLLIGO::IPrimitive* prim,CMissionGlobalParsin
 							ret = false;
 						}
 						CrashHandlers.resize( crashHandlerIndex + 1 );
+						// the names of the AI instances follow the ':', with blanks between them
 						for ( uint p = 1; p < script.size(); ++p )
-							CrashHandlers[crashHandlerIndex].AIInstances.push_back(  script[p] );
+						{
+							vector<string> names;
+							CMissionParser::tokenizeString( script[p], " \t", names );
+							CrashHandlers[crashHandlerIndex].AIInstances.insert( CrashHandlers[crashHandlerIndex].AIInstances.end(), names.begin(), names.end() );
+						}
 						openTag = "crash";
 						crashHandler = true;
 						continue;

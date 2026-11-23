@@ -1,0 +1,41 @@
+// Entry points for the tests of the scenario chain tool: the lines the list of the editor has for the islands
+// of the island files beside this one, and for two islands those files lack today, uiR2_Forest03 and
+// uiR2_Jungle14: a location on one of them is on an island the editor does not have.
+d1	uiR2_Deserts05	uiR2EntryPoint01	24257	-1520	NE
+d1	uiR2_Deserts05	uiR2EntryPoint02	24593	-1447	N
+d1	uiR2_Deserts05	uiR2EntryPoint03	24341	-1184	NE
+d1	uiR2_Deserts05	uiR2EntryPoint04	24535	-1054	S
+o1	uiR2_Deserts07	uiR2EntryPoint01	26051	-1405	N
+o1	uiR2_Deserts07	uiR2EntryPoint02	26153	-1044	S
+o1	uiR2_Deserts07	uiR2EntryPoint03	25855	-1233	E
+o1	uiR2_Deserts07	uiR2EntryPoint04	25818	-1027	SE
+d6	uiR2_Deserts20	uiR2EntryPoint01	25206	-2118	N
+d6	uiR2_Deserts20	uiR2EntryPoint02	25435	-1997	W
+d6	uiR2_Deserts20	uiR2EntryPoint03	25410	-2177	N
+d6	uiR2_Deserts20	uiR2EntryPoint04	25532	-1942	N
+d6	uiR2_Deserts20	uiR2EntryPoint05	25724	-2192	W
+d1	uiR2_Deserts22	uiR2EntryPoint01	26950	-2015	N
+d1	uiR2_Deserts22	uiR2EntryPoint02	26937	-1864	S
+d1	uiR2_Deserts22	uiR2EntryPoint03	27089	-2042	NW
+d1	uiR2_Deserts23	uiR2EntryPoint01	27600	-1924	S
+d1	uiR2_Deserts23	uiR2EntryPoint02	27575	-2351	NW
+d1	uiR2_Deserts23	uiR2EntryPoint03	27545	-2211	N
+d1	uiR2_Deserts23	uiR2EntryPoint04	27442	-1866	S
+d1	uiR2_Deserts23	uiR2EntryPointAlpha01	27467	-2165	N
+d6	uiR2_Deserts25	uiR2EntryPoint01	21845	-2475	S
+d6	uiR2_Deserts25	uiR2EntryPoint02	21891	-2836	W
+d6	uiR2_Deserts25	uiR2EntryPoint03	21442	-2799	NW
+d6	uiR2_Deserts25	uiR2EntryPoint04	21460	-2447	S
+d6	uiR2_Deserts25	uiR2EntryPoint05	21765	-2480	W
+o1	uiR2_Lakes40	uiR2EntryPoint01	38180	-3470	SE
+o1	uiR2_Lakes40	uiR2EntryPoint02	38416	-3819	NE
+o1	uiR2_Lakes40	uiR2EntryPoint03	38151	-3740	N
+f1	uiR2_Forest03	uiR2EntryPoint01	23010	-11209	E
+f1	uiR2_Forest03	uiR2EntryPoint02	23080	-11152	E
+f1	uiR2_Forest03	uiR2EntryPoint03	23400	-11400	NW
+f1	uiR2_Forest03	uiR2EntryPoint04	23400	-11000	SW
+f1	uiR2_Forest03	uiR2EntryPoint05	23000	-11000	SE
+a1	uiR2_Jungle14	uiR2EntryPoint01	40700	-11200	E
+a1	uiR2_Jungle14	uiR2EntryPoint02	40876	-11370	W
+a1	uiR2_Jungle14	uiR2EntryPoint03	40681	-11376	W
+a1	uiR2_Jungle14	uiR2EntryPoint04	40841	-10966	W

@@ -24,6 +24,7 @@
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/win_event_emitter.h"
 #include "nel/misc/event_server.h"
+#include "nel/misc/system_utils.h"
 #include "nel/misc/utf_string_view.h"
 
 #ifdef NL_OS_WINDOWS
@@ -178,24 +179,35 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 		{
 			//if (wParam < KeyCount)
 			//nlinfo("WM_CHAR with %u", wParam);
+			// A character outside the basic plane (an emoji, or a rare ideograph composed by an IME) comes as
+			// two messages, the two halves of a UTF-16 surrogate pair. Half a pair is not a character.
 			wchar_t c = (wchar_t)wParam;
 			if ((c & 0xFC00) == 0xD800)
 			{
+				if (_Utf16Pair)
+					nlwarning("WM_CHAR: the first half 0x%04X of a UTF-16 pair was not followed by its second half, dropped", (uint)_Utf16Pair);
 				_Utf16Pair = c;
 			}
-			else if (_Utf16Pair && (c & 0xFC00) == 0xDC00)
+			else if ((c & 0xFC00) == 0xDC00)
 			{
-				wchar_t cc[] = { _Utf16Pair, c, 0 };
-				_Utf16Pair = 0;
-				CUtfStringView cv = CUtfStringView(cc);
-				for (CUtfStringView::iterator it(cv.begin()), end(cv.end()); it != end; ++it)
-					server->postEvent(new CEventChar(*it, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+				if (_Utf16Pair)
+				{
+					wchar_t cc[] = { _Utf16Pair, c, 0 };
+					_Utf16Pair = 0;
+					CUtfStringView cv = CUtfStringView(cc);
+					for (CUtfStringView::iterator it(cv.begin()), end(cv.end()); it != end; ++it)
+						server->postEvent(new CEventChar(*it, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+				}
+				else
+				{
+					nlwarning("WM_CHAR: the second half 0x%04X of a UTF-16 pair came without its first half, dropped", (uint)c);
+				}
 			}
 			else
 			{
 				if (_Utf16Pair)
 				{
-					server->postEvent(new CEventChar(_Utf16Pair, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+					nlwarning("WM_CHAR: the first half 0x%04X of a UTF-16 pair was not followed by its second half, dropped", (uint)_Utf16Pair);
 					_Utf16Pair = 0;
 				}
 				server->postEvent(new CEventChar(c, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
@@ -310,6 +322,14 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 	case WM_CLOSE:
 		server->postEvent (new CEventCloseWindow (this));
 		return true;
+	case WM_ENDSESSION:
+		// The session of the user ends (the system shuts down or restarts, the user logs off, or an installer
+		// closes the applications whose files it replaces), after WM_QUERYENDSESSION, which DefWindowProc
+		// answers with a yes. The system may end the process as soon as this message is answered, so the
+		// application is told now and not with an event, which would only be dispatched at the next pump.
+		if (wParam)
+			CSystemUtils::endSession();
+		break;
 	case WM_DISPLAYCHANGE:
 		server->postEvent (new CEventDisplayChange (LOWORD(lParam), HIWORD(lParam), (uint)wParam, this));
 		break;
@@ -333,8 +353,10 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 			TMouseButton button=getButtons();
 
 			server->postEvent (new CEventMouseWheel (fX, fY, button, (short) HIWORD(wParam)>=0, this));
-			break;
 		}
+		break;
+	// Not trapped unless the application asked for the IME events (see enableIMEEvents): DefWindowProc
+	// shows the composition window and turns the composed text into WM_CHAR.
 	case WM_IME_SETCONTEXT:
 	case WM_IME_STARTCOMPOSITION:
 	case WM_IME_COMPOSITION:

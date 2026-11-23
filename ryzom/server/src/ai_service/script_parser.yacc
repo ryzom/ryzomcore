@@ -2,6 +2,7 @@
 
 #include "stdpch.h"
 #include "script_compiler.h"
+#include "ring_scenario_guard.h"
 #include <list>
 
 using namespace std;
@@ -23,7 +24,42 @@ extern char aiFile[512];
 extern const char *aiInputScript;
 extern uint aiInputScriptLength;
 extern void aiClean ();
+extern void aiResetLexer ();
 extern int aidebug;			/*  nonzero means print parse trace	*/
+
+// The stacks of the parser grow in the heap: a text nested as deep as the parser reads does not
+// fit the stack of the thread
+#define YYSTACK_USE_ALLOCA 0
+
+// True while the scripts of the scenario of a Ring session are compiled. Such a script is made by a
+// client: what its expressions are made of is tested here, where the scripts of the shard are trusted.
+static bool aiScenario ()
+{
+	return CRingScenarioGuard::isLoadingScenario ();
+}
+void aiOutputError (int line, const char *format, ...);
+
+// The errors of the script of a scenario that are kept. Past them the lexer ends the text
+// (aiTooManyErrors): a script is not read on for the errors it has left.
+static const int aiMaxScenarioErrors = 3;
+// The first error of the text that is compiled
+static std::string aiFirstError;
+
+bool aiTooManyErrors ()
+{
+	return aiScenario () && aiErrorCount >= aiMaxScenarioErrors;
+}
+
+// Called by the lexer for a character no token of the script language begins with. The scripts of
+// the shard keep what they had: the character is written out and the text is read on.
+void aiUnknownCharacter (char c)
+{
+	if (aiScenario ())
+		aiOutputError (aiLine, "the character 0x%02x is not of the script language", (uint)(uint8)c);
+	else
+		fwrite (&c, 1, 1, stdout);
+}
+
 #define fprintf myfprintf
 int myfprintf (FILE *file, const char *format, ...)
 {
@@ -57,18 +93,31 @@ bool aiCompile (std::vector<size_t> &dest, const char *script, const char *scrip
 #endif // AI_COMP_DEBUG
 	aiLine = 1;
 	aiErrorCount = 0;
+	aiFirstError.clear ();
+	// A compilation reads its own text only: nothing the lexer read of an earlier text is left for
+	// this one
+	aiResetLexer ();
 	aiInputScript = script;
 	aiInputScriptLength = (uint)strlen (script);
-	strcpy (aiFile, scriptName);
+	strncpy (aiFile, scriptName, sizeof (aiFile) - 1);
+	aiFile[sizeof (aiFile) - 1] = 0;
 	aiRoot = NULL;
 	
 	nldebug("script compilation of %s", scriptName);
 	aiErrorMessage = toString ("script compilation of %s\n", scriptName);
 	int err = aiparse();
+	// The parser returns before the end of the text when its stack is full: that is a text that did
+	// not compile (err), and the rest of it is dropped here
+	aiResetLexer ();
+	aiInputScript = "";
+	aiInputScriptLength = 0;
 	bool error = err || aiErrorCount;
 	if (error)
 	{
-		nlwarning ("compilation failed for %s - %d error(s)", scriptName, aiErrorCount);
+		if (aiScenario ())
+			CRingScenarioGuard::refuseScript (scriptName, "does not compile (" + (aiFirstError.empty () ? string ("syntax error") : aiFirstError) + ")");
+		else
+			nlwarning ("compilation failed for %s - %d error(s)", scriptName, aiErrorCount);
 		aiErrorMessage += toString ("compilation failed for %s - %d error(s)\n", scriptName, aiErrorCount);
 	}
 	else
@@ -130,6 +179,16 @@ void aiOutputError(int line, const char *format, ...)
 	char buffer[1024];
 	vsnprintf (buffer, sizeof (buffer), format, args);
 	va_end (args);
+	if (aiScenario ())
+	{
+		// The errors of the script of a scenario make one line, when the compilation ends
+		// (aiCompile): the first error says what the script has
+		if (aiErrorCount == 1)
+			aiFirstError = toString ("line %d: %s", line, buffer);
+		if (aiErrorCount <= aiMaxScenarioErrors)
+			aiErrorMessage += toString ("%s(%d):%s\n", aiFile, line, buffer);
+		return;
+	}
 	nlwarning ("%s(%d):%s", aiFile, line, buffer);
 	aiErrorMessage += toString ("%s(%d):%s\n", aiFile, line, buffer);
 }
@@ -141,6 +200,15 @@ void createNode (CByteCodeYacc &dest)
 	dest.ByteCode = new vector<size_t>;
 	dest.Signature[0] = 0;
 	NodeToClear.push_back (dest.ByteCode);
+}
+
+// The code of 'a' becomes the code of dest, to add to. For the rules that add an element to a list
+// they have built so far ($1): a copy of the list for each element, each kept until the end of the
+// compilation, makes the memory of one statement grow with the square of its length.
+void appendNode (CByteCodeYacc &dest, const CByteCodeYacc &a)
+{
+	dest.ByteCode = a.ByteCode;
+	dest.Signature[0] = 0;
 }
 
 void addNode (CByteCodeYacc &dest, size_t src)
@@ -278,6 +346,8 @@ void nativeFunc (CByteCodeYacc &dest, size_t name, const char *in, const char *o
 #define NODE6(dest,a,b,c,d,e,f) createNode (dest); addNode (dest, a); addNode (dest, b); addNode (dest, c); addNode (dest, d); addNode (dest, e); addNode (dest, f);
 #define NODE7(dest,a,b,c,d,e,f,g) createNode (dest); addNode (dest, a); addNode (dest, b); addNode (dest, c); addNode (dest, d); addNode (dest, e); addNode (dest, f); addNode (dest, g);
 #define NODE8(dest,a,b,c,d,e,f,g,h) createNode (dest); addNode (dest, a); addNode (dest, b); addNode (dest, c); addNode (dest, d); addNode (dest, e); addNode (dest, f); addNode (dest, g); addNode (dest, h);
+#define NODEA2(dest,a,b) appendNode (dest, a); addNode (dest, b);
+#define NODEA3(dest,a,b,c) appendNode (dest, a); addNode (dest, b); addNode (dest, c);
 
 #define TYPEF(dest) dest.Signature[0] = 'f'; dest.Signature[1] = 0;
 #define TYPEL(dest) dest.Signature[0] = 'l'; dest.Signature[1] = 0;
@@ -359,7 +429,7 @@ void nativeFunc (CByteCodeYacc &dest, size_t name, const char *in, const char *o
 
 script:			statements { NODE1 ($$, $1); aiRoot = $$.ByteCode; }
 
-condition:		condition TOKEN_LOGIC condition { NODE3 ($$, $1, $3, $2); TYPEL ($$); }
+condition:		condition TOKEN_LOGIC condition { NODEA3 ($$, $1, $3, $2); TYPEL ($$); }
 				| TOKEN_LP condition TOKEN_RP { $$ = $2; }
 				| expression TOKEN_COMP expression
 				{ 
@@ -369,20 +439,24 @@ condition:		condition TOKEN_LOGIC condition { NODE3 ($$, $1, $3, $2); TYPEL ($$)
 				}
 
 expression:		expression TOKEN_ADD expression 
-				{ 
-					NODE3 ($$, $1, $3, $2); TYPEF ($$); 
+				{
+					// The result is typed as a number whatever is added. In the script of a scenario numbers are added
+					// and nothing else, so that the type is the right one for what uses the result.
+					if (aiScenario () && !$1.isFloat ()) aiOutputError (aiLine, "the left '+' expression must be a float in the script of a scenario but it is a %s", $1.getType ());
+					if (aiScenario () && !$3.isFloat ()) aiOutputError (aiLine, "the right '+' expression must be a float in the script of a scenario but it is a %s", $3.getType ());
+					NODEA3 ($$, $1, $3, $2); TYPEF ($$); 
 				}
 				| expression TOKEN_SUB expression 
 				{ 
 					if (!$1.isFloat ()) aiOutputError (aiLine, "the left '-' expression must be a float but it is a %s", $1.getType ());
 					if (!$3.isFloat ()) aiOutputError (aiLine, "the right '-' expression must be a float but it is a %s", $3.getType ());
-					NODE3 ($$, $1, $3, $2); TYPEF ($$); 
+					NODEA3 ($$, $1, $3, $2); TYPEF ($$); 
 				}
 				| expression TOKEN_FACTOR expression
 				{ 
 					if (!$1.isFloat ()) aiOutputError (aiLine, "the left '%s' expression must be a float but it is a %s", $2.Operator, $1.getType ());
 					if (!$3.isFloat ()) aiOutputError (aiLine, "the right '%s' expression must be a float but it is a %s", $2.Operator, $3.getType ());
-					NODE3 ($$, $1, $3, $2); TYPEF ($$); 
+					NODEA3 ($$, $1, $3, $2); TYPEF ($$); 
 				}
 				| TOKEN_LP expression TOKEN_RP { $$ = $2; }
 				| readVar { $$ = $1; }
@@ -439,7 +513,7 @@ setFromFuncSet:	TOKEN_NAME TOKEN_LP TOKEN_RP { NODE3 ($$, CScriptVM::PUSH_THIS, 
 
 setFromFunction:	setFromFuncSet TOKEN_ASSIGNATOR setFromFuncGet { NODE3 ($$, $1, $3, CScriptVM::ASSIGN_FUNC_FROM); }
 
-tupleElem:		tupleElem TOKEN_SEPARATOR writeVar { NODE2 ($$, $1, $3); TYPE2 ($$, $1, $3); }
+tupleElem:		tupleElem TOKEN_SEPARATOR writeVar { NODEA2 ($$, $1, $3); TYPE2 ($$, $1, $3); }
 				| writeVar { $$ = $1; }
 
 tuple:			TOKEN_LP tupleElem TOKEN_RP { $$ = $2; }
@@ -496,7 +570,7 @@ writeVar:		TOKEN_NAME { NODE2 ($$, CScriptVM::SET_VAR_VAL, $1); TYPEF ($$); }
 				| TOKEN_CTXNAME { NODE2 ($$, CScriptVM::SET_CTX_VAR_VAL, $1); TYPEC ($$); }
 				| context TOKEN_CTXNAME { NODE3 ($$, $1, CScriptVM::SET_CONTEXT_CTX_VAR_VAL, $2); TYPEC ($$); }
 				
-expressions:	expressions TOKEN_SEPARATOR expression { NODE2 ($$, $1, $3); TYPE2 ($$, $1, $3); }
+expressions:	expressions TOKEN_SEPARATOR expression { NODEA2 ($$, $1, $3); TYPE2 ($$, $1, $3); }
 				| expressions expression { ERROR_DETECTED ($$, "missing ',' between two expressions"); }
 				| expression { $$ = $1; }
 
@@ -512,11 +586,11 @@ exp:			lValue TOKEN_ASSIGNATOR expression
 				| lValue TOKEN_ASSIGNATOR TOKEN_LP expression { ERROR_DETECTED ($$, "missing ')' at the end of the expression"); }
 				| lValue TOKEN_ASSIGNATOR expression TOKEN_RP { ERROR_DETECTED ($$, "missing '(' at the beginning of the expression");}
 
-printContent:	printContent TOKEN_SEPARATOR TOKEN_CHAIN { NODE3 ($$, $1, CScriptVM::PUSH_PRINT_STRING, $3); }
+printContent:	printContent TOKEN_SEPARATOR TOKEN_CHAIN { NODEA3 ($$, $1, CScriptVM::PUSH_PRINT_STRING, $3); }
 				| TOKEN_CHAIN { NODE2 ($$, CScriptVM::PUSH_PRINT_STRING, $1); }
-				| printContent TOKEN_SEPARATOR TOKEN_NAME { NODE3 ($$, $1, CScriptVM::PUSH_PRINT_VAR, $3); }
+				| printContent TOKEN_SEPARATOR TOKEN_NAME { NODEA3 ($$, $1, CScriptVM::PUSH_PRINT_VAR, $3); }
 				| TOKEN_NAME { NODE2 ($$, CScriptVM::PUSH_PRINT_VAR, $1); }
-				| printContent TOKEN_SEPARATOR TOKEN_STRNAME { NODE3 ($$, $1, CScriptVM::PUSH_PRINT_STR_VAR, $3); }
+				| printContent TOKEN_SEPARATOR TOKEN_STRNAME { NODEA3 ($$, $1, CScriptVM::PUSH_PRINT_STR_VAR, $3); }
 				| TOKEN_STRNAME { NODE2 ($$, CScriptVM::PUSH_PRINT_STR_VAR, $1); }
 
 printString:	TOKEN_PRINT TOKEN_LP printContent TOKEN_RP { NODE2 ($$, $3, CScriptVM::PRINT_STRING); }
@@ -581,10 +655,10 @@ closedStatement:TOKEN_IF TOKEN_LP condition TOKEN_RP closedStatement TOKEN_ELSE 
 				| TOKEN_INCRDECR TOKEN_NAME TOKEN_PV { NODE5 ($$, CScriptVM::PUSH_VAR_VAL, $2, $1, CScriptVM::SET_VAR_VAL, $2); }
 				| context TOKEN_NAME TOKEN_INCRDECR TOKEN_PV { NODE7 ($$, $1, CScriptVM::PUSH_CONTEXT_VAR_VAL, $2, $3, $1, CScriptVM::SET_CONTEXT_VAR_VAL, $2); }
 				| TOKEN_INCRDECR context TOKEN_NAME TOKEN_PV { NODE7 ($$, $2, CScriptVM::PUSH_CONTEXT_VAR_VAL, $3, $1, $2, CScriptVM::SET_CONTEXT_VAR_VAL, $3); }
-				| TOKEN_NAME TOKEN_ASSIGN expression TOKEN_PV { NODE6 ($$, CScriptVM::PUSH_VAR_VAL, $1, $3, $2, CScriptVM::SET_VAR_VAL, $1); }
+				| TOKEN_NAME TOKEN_ASSIGN expression TOKEN_PV { if (aiScenario () && !$3.isFloat ()) aiOutputError (aiLine, "the '%s' expression must be a float in the script of a scenario but it is a %s", $2.Operator, $3.getType ()); NODE6 ($$, CScriptVM::PUSH_VAR_VAL, $1, $3, $2, CScriptVM::SET_VAR_VAL, $1); }
 				| TOKEN_NAME TOKEN_ASSIGN TOKEN_LP expression TOKEN_PV  { ERROR_DETECTED ($$, "missing ')' at the end of the expression");}
 				| TOKEN_NAME TOKEN_ASSIGN expression TOKEN_RP TOKEN_PV  { ERROR_DETECTED ($$, "missing '(' at the beginning of the expression");}
-				| context TOKEN_NAME TOKEN_ASSIGN expression TOKEN_PV { NODE8 ($$, $1, CScriptVM::PUSH_CONTEXT_VAR_VAL, $1, $4, $3, $1, CScriptVM::SET_CONTEXT_VAR_VAL, $2); }
+				| context TOKEN_NAME TOKEN_ASSIGN expression TOKEN_PV { if (aiScenario () && !$4.isFloat ()) aiOutputError (aiLine, "the '%s' expression must be a float in the script of a scenario but it is a %s", $3.Operator, $4.getType ()); NODE8 ($$, $1, CScriptVM::PUSH_CONTEXT_VAR_VAL, $1, $4, $3, $1, CScriptVM::SET_CONTEXT_VAR_VAL, $2); }
 				| context TOKEN_NAME TOKEN_ASSIGN TOKEN_LP expression TOKEN_PV  { ERROR_DETECTED ($$, "missing ')' at the end of the expression");}
 				| context TOKEN_NAME TOKEN_ASSIGN expression TOKEN_RP TOKEN_PV  { ERROR_DETECTED ($$, "missing '(' at the beginning of the expression");}
 				| statementBlock { NODE1 ($$, $1); }

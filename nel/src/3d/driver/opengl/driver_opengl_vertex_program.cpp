@@ -1580,7 +1580,7 @@ bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgra
 #ifdef NL_OS_MAC
 	// Wait for GPU to finish program upload, else draw comands might crash.
 	// Happened to CVegetableBlendLayerModel (glDrawElements()).
-	// For more information, see http://dev.ryzom.com/issues/1006
+	// This was issue 1006 of the former issue tracker.
 	glFinish();
 #endif
 

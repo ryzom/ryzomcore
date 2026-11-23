@@ -27,7 +27,11 @@
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/net/inet_address.h"
 
+#include "game_share/stream_record.h"
+
 #include "fe_receive_task.h"
+#include "stream_queues.h"
+#include "stream_scheduler.h"
 
 /*
 
@@ -74,6 +78,35 @@ struct CQuicBuffer
 	uint8 *Buffer;
 };
 
+class CQuicUserContext;
+
+/// A block of bytes for a stream, from when the main thread takes them out of the queues of the connection until
+/// MsQuic says they were delivered (or dropped with the connection)
+struct CQuicStreamSend
+{
+	CQuicBuffer Buffer; // Data and its length
+	uint8 Data[1];
+};
+
+/// What a stream callback gets (immutable)
+struct CQuicStreamContext
+{
+	CQuicUserContext *User;
+	uint8 StreamClass; // number of the class of messages
+};
+
+/// Why the streams of a connection are of no use any more. Bytes that were taken out of the queues can then not be
+/// delivered, which leaves a hole in a stream, so the main thread disconnects the client.
+enum TQuicStreamFault
+{
+	QuicStreamNoFault = 0,
+	QuicStreamOpenFailed, // A stream could not be opened or started
+	QuicStreamWrongId, // A stream did not get the id of its class
+	QuicStreamSendFailed, // MsQuic refused a block
+	QuicStreamSendCanceled, // MsQuic dropped a block while the connection was still up
+	QuicStreamAbortedByPeer, // The client refused a stream, which a client of this protocol level never does
+};
+
 // User context for quic messages
 class CQuicUserContext
 {
@@ -114,6 +147,9 @@ public:
 	// Handle of the connection, null once closed or given back to MsQuic (taken out under the transceiver's lock)
 	void *Connection;
 
+	// The same handle for the callbacks of the streams, which run while it is open (immutable)
+	void *CallbackConnection = nullptr;
+
 	// The callbacks get the handle as a parameter; everywhere else Connection is read, used or taken out under this
 	// lock (the send thread sends through it, the main thread shuts it down, takeConnection takes it out to close it).
 	// When both are taken, it is locked after the transceiver's OpenConnections lock.
@@ -136,6 +172,82 @@ public:
 	NLMISC::CBitMemStream SendBuffer = NLMISC::CBitMemStream(false, 512);
 	CQuicBuffer SendQuicBuffer;
 	NLMISC::CAtomicInt SentCount = 0;
+
+	/// \name Streams of protocol level ryzomcore/4.2, one per class of messages (game_share/stream_record.h)
+	// @{
+
+	// The connection is of that protocol level (set on the connection thread when it connects, before any datagram of the
+	// client comes in)
+	NLMISC::CAtomicBool Streams = false;
+
+	// The records that wait for the streams (service main thread only)
+	CStreamQueues StreamQueues;
+
+	// What the path to the client takes of stream data per cycle, and where the client is in the turns of the frontend
+	// (service main thread only, see CFeSendSub::grantStreams)
+	CStreamAllowance StreamAllowance;
+	CStreamSchedulerClient StreamTurn;
+	uint32 StreamLastGrant = 0; // bytes it got in the last cycle
+
+	// Bytes taken out of the queues that MsQuic has not completed yet, which is when they were acknowledged
+	// (added by the main thread when it takes them, subtracted on the connection thread, or where a block is dropped)
+	NLMISC::CAtomicInt StreamOutstanding = 0;
+
+	// Set where the fault happens (any thread), acted upon by the main thread
+	NLMISC::CAtomicInt StreamFault = QuicStreamNoFault;
+
+	// The connection is shutting down (set on the connection thread): what fails from then on is no fault
+	NLMISC::CAtomicBool ShuttingDown = false;
+
+	// Datagrams still to send with the bit that says the path to the client changed (set on the connection thread when
+	// the address of the client changes, counted down by the main thread): the client then measures the lateness of
+	// its datagrams against the new path alone
+	NLMISC::CAtomicInt PathChangedDatagrams = 0;
+
+	// What the client last reported: how late the datagrams reach it, in milliseconds (decoded, at most
+	// CLFECOMMON::DatagramLatenessMax), and the number of the datagram it had received last then (service main thread
+	// only)
+	bool QueueDelayKnown = false;
+	uint16 QueueDelay = 0;
+	uint32 QueueDelayAck = 0;
+	/// The congestion window left the streams less room in this cycle than the allowance (CFeSendSub::grantStreams)
+	bool StreamWindowLimited = false;
+	uint32 QueueDelayReports = 0; // how many reports came, and how many of them the allowance has seen
+	uint32 QueueDelayReportsSeen = 0;
+
+	// What MsQuic last said about the path, for the room the streams may take in the congestion window
+	// (stored on the connection thread, read by the main thread; each value on its own, they need not match exactly)
+	NLMISC::CAtomicBool StatValid = false;
+	NLMISC::CAtomicInt StatCongestionWindow = 0; // bytes
+	NLMISC::CAtomicInt StatRtt = 0; // microseconds
+	NLMISC::CAtomicInt StatBytesInFlight = -1; // bytes sent and not acknowledged, -1 if this MsQuic does not tell
+	NLMISC::CAtomicInt StatGrantedCount = 0; // StreamGrantedCount when MsQuic was asked
+	NLMISC::CAtomicInt StatCongestionEvents = 0; // times the connection saw congestion (loss or marks), since it opened
+
+	// Datagrams of the frontend that were not sent: MsQuic dropped them (it could not write them at once, or they no
+	// longer fit), or the one before had not left yet (counted where that happens; the main thread cuts the allowance
+	// of the streams on it)
+	NLMISC::CAtomicInt SendBusyDrops = 0;
+
+	// Datagrams in a row that MsQuic dropped because it could not write them at once (connection thread): after a few,
+	// the next one waits for room instead (see CQuicTransceiver::sendDatagramSwap)
+	NLMISC::CAtomicInt DatagramCancels = 0;
+
+	// The client is reached over another path, of which the allowance of the streams knows nothing yet (set on the
+	// connection thread, taken by the main thread)
+	NLMISC::CAtomicBool PathChanged = false;
+
+	// Bytes taken out of the queues since the connection opened, modulo 2^32 (added by the main thread): with
+	// StatGrantedCount, what was taken since MsQuic was last asked, which its bytes in flight do not count yet
+	NLMISC::CAtomicInt StreamGrantedCount = 0;
+
+	// Handles of the streams, in the order of the classes, null until opened and once taken out to be closed (under
+	// ConnectionMutex; opened and used by whoever flushes: the send thread, or the main thread when it flushes itself)
+	void *StreamHandles[CLFECOMMON::StreamClassMax] = {};
+	bool StreamsOpened = false;
+	CQuicStreamContext StreamContexts[CLFECOMMON::StreamClassMax];
+
+	// @}
 
 #ifdef FE_DEBUG_QUIC
 	// After shutdown, enable ref count debugging
@@ -298,6 +410,36 @@ public:
 
 	/// Shutdown a connection
 	void shutdown(CQuicUserContext *user);
+
+	/// The classes of messages that go on streams, in the order of their streams (those msg.xml declares): a connection
+	/// of protocol level ryzomcore/4.2 gets one stream per class. Set once, when the service starts, before its first
+	/// cycle: nothing reads them before a message is queued for a stream, which the cycles do.
+	static void setStreamClasses(const std::vector<std::string> &names);
+
+	/// How many classes there are (at most CLFECOMMON::StreamClassMax)
+	static uint streamClassCount();
+
+	/// Name of a class, for logs
+	static const char *streamClassName(uint streamClass);
+
+	/// Allocate a block of bytes for a stream
+	static CQuicStreamSend *createStreamSend(uint32 length);
+
+	/// Free a block that was not given to sendStream()
+	static void destroyStreamSend(CQuicStreamSend *send);
+
+	/// Send a block on the stream of a class, after what was sent on it before. The block is taken in all cases: when it
+	/// cannot be sent, it is dropped and the connection gets a fault (CQuicUserContext::StreamFault), unless it is
+	/// shutting down. The first call opens the streams of the connection. Called by whoever flushes.
+	void sendStream(CQuicUserContext *user, uint8 streamClass, CQuicStreamSend *send);
+
+	/// Name of a fault, for logs
+	static const char *streamFaultName(int fault);
+
+	/// Bytes that MsQuic has sent since the process started, for all connections and with all that QUIC adds
+	/// (acknowledgements, data sent again, handshakes), and the UDP and IP headers of its packets counted as IPv6.
+	/// False if there is no MsQuic to ask.
+	static bool egressBytes(uint64 &bytes);
 
 private:
 	friend CQuicTransceiverImpl;

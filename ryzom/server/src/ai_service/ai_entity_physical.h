@@ -432,9 +432,9 @@ public:
 		return moveTo(destPos, denyFlags);
 	}
 	
-	/// Calculate the repulsion with other bots and players
-	CAIVector calcRepulsion(CAIPos const& pos) const;
-	bool calcStraightRepulsion(CAIPos const& pos, CAIVector& repulsion) const;
+	/// Calculate the repulsion with other bots and players (with the players left out when withPlayers is false)
+	CAIVector calcRepulsion(CAIPos const& pos, bool withPlayers = true) const;
+	bool calcStraightRepulsion(CAIPos const& pos, CAIVector& repulsion, bool withPlayers = true) const;
 	
 	void setMoveDecalage(CAIVector const& decalage) { _Decalage = decalage; }
 	CAIVector const& moveDecalage() const { return _Decalage; }

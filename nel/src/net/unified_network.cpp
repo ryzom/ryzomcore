@@ -544,7 +544,17 @@ bool	CUnifiedNetwork::init(const CInetHost *addr, CCallbackNetBase::TRecordingSt
 
 	ThreadCreator = NLMISC::getThreadId();
 
-	vector<CInetAddress> laddr = CInetAddress::localAddresses();
+	// The addresses registered with the naming service, where other services connect to this one
+	vector<CInetAddress> laddr;
+	if (CSock::defaultBindAddress().isAny())
+	{
+		laddr = CInetAddress::localAddresses();
+	}
+	else
+	{
+		// The listen socket is bound to one address only (BindAddress), register just that one
+		laddr.push_back(CInetAddress(CSock::defaultBindAddress(), 0));
+	}
 
 	_RecordingState = rec;
 	_Name = shortName;

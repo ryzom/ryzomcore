@@ -72,6 +72,16 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	if (!driver)
 		return false;
 
+	if (hWnd == driver->_win)
+	{
+		// The pictures of the minimized window: the window declares that it supplies them when it is minimized,
+		// until it is restored, and the requests of the desktop compositor are recorded. Nothing else is done
+		// from here: the driver enters and leaves its picture mode between two frames (see swapBuffers). The
+		// size the window had before it was minimized is the one the driver has before this message (the
+		// client area of a minimized window is empty)
+		driver->m_MinimizedPicture.processMessage(hWnd, message, wParam, lParam, driver->_CurrentMode.Width, driver->_CurrentMode.Height);
+	}
+
 	if(message == WM_SIZE)
 	{
 		if (driver->_CurrentMode.Windowed)
@@ -207,14 +217,38 @@ bool GlWndProc(CDriverGL *driver, const void* e)
 	return driver->_EventEmitter.processMessage(event);
 }
 
+// ***************************************************************************
+void CDriverGL::updateWindowFocus()
+{
+	// The focus is the key state of the window holding the view, in fullscreen too.
+	if (_win == EmptyWindow)
+		return;
+
+	bool focus = [[containerView() window] isKeyWindow] == YES;
+	if (focus == _WindowFocus)
+		return;
+
+	_WindowFocus = focus;
+	_EventEmitter.postFocusEvent(focus);
+
+	// a relative mouse would keep the cursor still for the other applications
+	updateMouseRelative();
+}
+
 #elif defined (NL_OS_UNIX)
 
 static Atom XA_WM_STATE = 0;
 static Atom XA_WM_STATE_FULLSCREEN = 0;
+static Atom XA_WM_STATE_HIDDEN = 0;
 static Atom XA_WM_ICON = 0;
 static Atom XA_WM_WINDOW_TYPE = 0;
 static Atom XA_WM_WINDOW_TYPE_NORMAL = 0;
 static Atom XA_FRAME_EXTENTS = 0;
+
+// The X error handler is for the whole process, while each driver opens its own display: the handler
+// is set when a display opens, and the one it replaced is set back when the last display closes
+static uint s_OpenDisplays = 0;
+static XErrorHandler s_PreviousXErrorsHandler = nullptr;
 
 sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
 {
@@ -222,6 +256,44 @@ sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
 	XGetErrorText(dpy, e->error_code, buf, sizeof(buf));
 	nlwarning("3D: XError: %s", buf);
 	return 1;
+}
+
+// A window manager that follows the Extended Window Manager Hints lists _NET_WM_STATE_HIDDEN in the _NET_WM_STATE
+// property of a window while the window is minimized, and not while the window is only on another desktop. This
+// reads the list from the X server: the changes of the property are events of the window (PropertyNotify), so
+// that it is read when it changed and not every frame.
+static bool isWindowStateHidden(Display *dpy, Window win)
+{
+	Atom type_return = 0;
+	int format_return = 0;
+	unsigned long nitems_return = 0;
+	unsigned long bytes_after_return = 0;
+	unsigned char *data = nullptr;
+
+	// the list has a few atoms, one for each state the window is in
+	int status = XGetWindowProperty(dpy, win, XA_WM_STATE, 0, 1024, False, XA_ATOM, &type_return, &format_return, &nitems_return, &bytes_after_return, &data);
+
+	bool hidden = false;
+
+	// a window without the property is in none of the states
+	if (status == Success && type_return == XA_ATOM && format_return == 32 && data)
+	{
+		// Xlib gives the items of a property of format 32 as long, which is the size of an Atom
+		const Atom *states = (const Atom *)data;
+		for (unsigned long i = 0; i < nitems_return; ++i)
+		{
+			if (states[i] == XA_WM_STATE_HIDDEN)
+			{
+				hidden = true;
+				break;
+			}
+		}
+	}
+
+	if (data)
+		XFree(data);
+
+	return hidden;
 }
 
 bool GlWndProc(CDriverGL *driver, XEvent &e)
@@ -258,6 +330,14 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 		case UnmapNotify:
 		driver->_WndActive = false;
 		break;
+
+		case PropertyNotify:
+		// the window manager minimized or restored the window, or changed another of its states
+		if (e.xproperty.window == (Window)driver->_win && e.xproperty.atom == XA_WM_STATE)
+			driver->_WindowMinimized = e.xproperty.state == PropertyNewValue && isWindowStateHidden(driver->_dpy, driver->_win);
+		// (not answered as handled: the change of a property is nothing the driver takes from an application
+		// that looks at the answer for its own handling)
+		return false;
 
 		case Expose:
 //		nlwarning("Expose event");
@@ -399,12 +479,13 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 
 	if (_dpy == nullptr)
 	{
-		nlerror ("XOpenDisplay failed on '%s'", getenv("DISPLAY"));
+		// no fatal error: setDisplay refuses the display, and the application says so in its own words
+		const char *displayName = getenv("DISPLAY");
+		nlwarning("3D: XOpenDisplay failed on '%s', there is no connection to an X server", displayName ? displayName : "(DISPLAY is not set)");
+		return false;
 	}
-	else
-	{
-		nldebug("3D: XOpenDisplay on '%s' OK", getenv("DISPLAY"));
-	}
+
+	nldebug("3D: XOpenDisplay on '%s' OK", XDisplayString(_dpy));
 
 	_xrandr_version = 0;
 
@@ -464,11 +545,14 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 	}
 
 	// set default X errors handler
-	XSetErrorHandler(nelXErrorsHandler);
+	XErrorHandler previousXErrorsHandler = XSetErrorHandler(nelXErrorsHandler);
+	if (s_OpenDisplays++ == 0)
+		s_PreviousXErrorsHandler = previousXErrorsHandler;
 
 	// define Atoms
 	XA_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
 	XA_WM_STATE_FULLSCREEN = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	XA_WM_STATE_HIDDEN = XInternAtom(_dpy, "_NET_WM_STATE_HIDDEN", False);
 	XA_WM_ICON = XInternAtom(_dpy, "_NET_WM_ICON", False);
 	XA_WM_WINDOW_TYPE = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE", False);
 	XA_WM_WINDOW_TYPE_NORMAL = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE_NORMAL", False);
@@ -534,11 +618,13 @@ bool CDriverGL::unInit()
 
 #elif defined (NL_OS_UNIX)
 
-	// restore default X errors handler
-	XSetErrorHandler(nullptr);
-
 	if (_dpy)
 	{
+		// restore the X errors handler when no other driver has a display open
+		nlassert(s_OpenDisplays > 0);
+		if (--s_OpenDisplays == 0)
+			XSetErrorHandler(s_PreviousXErrorsHandler);
+
 		XCloseDisplay(_dpy);
 		_dpy = nullptr;
 	}
@@ -1019,7 +1105,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		 * parent and [NSView bounds.origin] is relative to it's own coordinate
 		 * system. This are incompatible notations. Qt should handle the conversion.
 		 * Fixes: #1013 Viewport size when embedding NeL Cocoa view in Qt
-		 *   (http://dev.ryzom.com/issues/1013)
+		 *   (issue 1013 of the former issue tracker)
 		 */
 		NSView* view = (NSView*)wnd;
 		if(view.frame.origin.x != 0 || view.frame.origin.y != 0) {
@@ -1045,8 +1131,15 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	NSOpenGLPixelFormat* format =
 		[[NSOpenGLPixelFormat alloc] initWithAttributes:att];
 
-	if(!format)
-		nlerror("cannot create NSOpenGLPixelFormat");
+	if (!format)
+	{
+		// no fatal error: the application says in its own words that it has no display. What was made so
+		// far goes: the window, if it is the driver's (no view of this display exists yet)
+		nlwarning("3D: Cannot create the NSOpenGLPixelFormat, no renderer gives the pixel format the driver asks for");
+		_glView = nil;
+		destroyWindow();
+		return false;
+	}
 
 	// intially set height/width, further updates through CocoaOpenGLView
 	_CurrentMode.Height = mode.Height;
@@ -1057,8 +1150,13 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		initWithFrame:NSMakeRect(0, 0, mode.Width, mode.Height)
 		pixelFormat:format];
 
-	if(!_glView)
-		nlerror("cannot create view");
+	if (!_glView)
+	{
+		nlwarning("3D: Cannot create the OpenGL view");
+		[format release];
+		destroyWindow();
+		return false;
+	}
 
 	// tell the view about the driver so the view is able to update "window" size
 	[_glView setDriver:this];
@@ -1075,8 +1173,18 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// create a opengl context for the view
 	_ctx = [_glView openGLContext];
 
-	if(!_ctx)
-		nlerror("cannot create context");
+	if (!_ctx)
+	{
+		// the view is in the container by now, which for a view of the application is not the driver's to
+		// release: the view leaves it here
+		nlwarning("3D: Cannot create the OpenGL context of the view");
+		[format release];
+		[_glView removeFromSuperview];
+		[_glView release];
+		_glView = nil;
+		destroyWindow();
+		return false;
+	}
 
 	// free the pixel format object
 	[format release];
@@ -1121,13 +1229,88 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		None
 	};
 
-	// first try 24bpp and if that fails 16bpp
-	XVisualInfo *visual_info = glXChooseVisual (_dpy, DefaultScreen(_dpy), sAttribList24bpp);
-	if (visual_info == nullptr)
-		visual_info = glXChooseVisual(_dpy, DefaultScreen(_dpy), sAttribList16bpp);
-	if(visual_info == nullptr)
+	if (_dpy == nullptr)
 	{
-		nlerror("glXChooseVisual() failed");
+		nlwarning("3D: The display cannot be set up, init() got no connection to an X server");
+		return false;
+	}
+
+	XVisualInfo *visual_info = nullptr;
+
+	if (wnd == EmptyWindow)
+	{
+		// first try 24bpp and if that fails 16bpp
+		visual_info = glXChooseVisual(_dpy, DefaultScreen(_dpy), sAttribList24bpp);
+		if (visual_info == nullptr)
+			visual_info = glXChooseVisual(_dpy, DefaultScreen(_dpy), sAttribList16bpp);
+		if (visual_info == nullptr)
+		{
+			int errorBase = 0, eventBase = 0;
+			if (!glXQueryExtension(_dpy, &errorBase, &eventBase))
+				nlwarning("3D: The X server has no GLX extension, OpenGL cannot be used on this display");
+			else
+				nlwarning("3D: glXChooseVisual() failed, the X server has no visual with RGBA colour, double buffering, a depth buffer and a stencil buffer");
+			return false;
+		}
+	}
+	else
+	{
+		// a context can only be made current on a window with its visual, so the window
+		// of the application decides the visual
+		XWindowAttributes windowAttributes;
+		if (!XGetWindowAttributes(_dpy, wnd, &windowAttributes))
+		{
+			nlwarning("3D: XGetWindowAttributes() failed on window 0x%lx", (unsigned long)wnd);
+			return false;
+		}
+
+		// the driver gets no events of such a window, its size comes from the window and then from setMode
+		_CurrentMode.Width = (uint16)windowAttributes.width;
+		_CurrentMode.Height = (uint16)windowAttributes.height;
+
+		XVisualInfo visualTemplate;
+		visualTemplate.visualid = XVisualIDFromVisual(windowAttributes.visual);
+		visualTemplate.screen = XScreenNumberOfScreen(windowAttributes.screen);
+		int visualCount = 0;
+		visual_info = XGetVisualInfo(_dpy, VisualIDMask | VisualScreenMask, &visualTemplate, &visualCount);
+
+		// what the driver needs of the visual of the window
+		std::string lacking;
+		int depthSize = 0, stencilSize = 0;
+		if (visual_info == nullptr)
+		{
+			lacking = "visual info";
+		}
+		else
+		{
+			int useGl = 0, rgba = 0, doubleBuffer = 0;
+			if (glXGetConfig(_dpy, visual_info, GLX_USE_GL, &useGl) != 0 || !useGl)
+				lacking += ", OpenGL support";
+			if (glXGetConfig(_dpy, visual_info, GLX_RGBA, &rgba) != 0 || !rgba)
+				lacking += ", RGBA mode";
+			if (glXGetConfig(_dpy, visual_info, GLX_DOUBLEBUFFER, &doubleBuffer) != 0 || !doubleBuffer)
+				lacking += ", double buffering";
+			if (glXGetConfig(_dpy, visual_info, GLX_DEPTH_SIZE, &depthSize) != 0)
+				depthSize = 0;
+			if (glXGetConfig(_dpy, visual_info, GLX_STENCIL_SIZE, &stencilSize) != 0)
+				stencilSize = 0;
+			if (!lacking.empty())
+				lacking = lacking.substr(2);
+		}
+
+		if (!lacking.empty())
+		{
+			nlwarning("3D: The visual 0x%lx of window 0x%lx has no %s, the driver cannot render into it", (unsigned long)visualTemplate.visualid, (unsigned long)wnd, lacking.c_str());
+			if (visual_info != nullptr)
+				XFree(visual_info);
+			return false;
+		}
+
+		// the driver can draw without a depth buffer, but what it draws is not depth tested
+		if (depthSize == 0)
+			nlwarning("3D: The visual 0x%lx of window 0x%lx has no depth buffer, depth testing has no effect in it", (unsigned long)visualTemplate.visualid, (unsigned long)wnd);
+
+		nlinfo("3D: Rendering into window 0x%lx with its visual 0x%lx, %d depth bits and %d stencil bits", (unsigned long)wnd, (unsigned long)visualTemplate.visualid, depthSize, stencilSize);
 	}
 
 	_visual_info = visual_info;
@@ -1135,13 +1318,22 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	_ctx = glXCreateContext (_dpy, visual_info, None, GL_TRUE);
 	if (_ctx == nullptr)
 	{
-		nlerror("glXCreateContext() failed");
+		nlwarning("3D: glXCreateContext() failed");
+		XFree(_visual_info);
+		_visual_info = nullptr;
+		return false;
 	}
 
 	if (wnd == EmptyWindow)
 	{
 		if (!createWindow(mode))
+		{
+			glXDestroyContext(_dpy, _ctx);
+			_ctx = nullptr;
+			XFree(_visual_info);
+			_visual_info = nullptr;
 			return false;
+		}
 	}
 	else
 	{
@@ -1156,9 +1348,29 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		XChangeWindowAttributes(_dpy, _win, attr_flags, &attr);
 	}
 
-	glXMakeCurrent (_dpy, _win, _ctx);
+	if (!glXMakeCurrent(_dpy, _win, _ctx))
+	{
+		nlwarning("3D: glXMakeCurrent() failed on window 0x%lx", (unsigned long)_win);
 
-	_EventEmitter.init (_dpy, _win, this);
+		// what this function acquired goes here, so that a window of the application is not touched again
+		glXDestroyContext(_dpy, _ctx);
+		_ctx = nullptr;
+		XFree(_visual_info);
+		_visual_info = nullptr;
+		if (_DestroyWindow)
+		{
+			XDestroyWindow(_dpy, _win);
+			_DestroyWindow = false;
+		}
+		_win = EmptyWindow;
+		return false;
+	}
+
+	_EventEmitter.init(_dpy, _win, this, _DestroyWindow);
+
+	// the state the window is in by now (a window of the application may be minimized already): the events
+	// selected just above tell every change after this
+	_WindowMinimized = isWindowStateHidden(_dpy, _win);
 
 	// KDE/GNOME has issues selecting correct fullscreen monitor if window is not visible before setMode()
 	if (!mode.Windowed)
@@ -1334,9 +1546,15 @@ bool CDriverGL::restoreScreenMode()
 // ***************************************************************************
 
 #ifdef XF86VIDMODE
+// the refresh rate of a mode line, 0 for one without totals
+static sint modeLineToFrequency(uint dotClock, uint hTotal, uint vTotal)
+{
+	return (hTotal && vTotal) ? (sint)(1000 * dotClock / (hTotal * vTotal)) : 0;
+}
+
 static sint modeInfoToFrequency(XF86VidModeModeInfo *info)
 {
-	return (info->htotal && info->vtotal) ? (1000 * info->dotclock / (info->htotal * info->vtotal)) : 0;
+	return modeLineToFrequency(info->dotclock, info->htotal, info->vtotal);
 }
 #endif // XF86VIDMODE
 
@@ -1541,14 +1759,14 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask |
 		NSMiniaturizableWindowMask | NSResizableWindowMask;
 
-	// create a cocoa window with the size provided by the mode parameter
-	NSWindow* cocoa_window = [[NSWindow alloc]
+	// create a cocoa window with the size provided by the mode parameter (it keeps the keyboard in fullscreen)
+	NSWindow* cocoa_window = [[CocoaWindow alloc]
 		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
 		styleMask:styleMask backing:NSBackingStoreBuffered defer:NO];
 
 	if(!cocoa_window)
 	{
-		nlerror("cannot create cocoa window");
+		nlwarning("3D: Cannot create the Cocoa window");
 		return false;
 	}
 
@@ -1564,8 +1782,11 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	[closeButton setAction:@selector(applicationShouldTerminate:)];
 	[closeButton setTarget:appDelegate];
 
-	// set the delegate which will handle window move events
-	[cocoa_window setDelegate:[[CocoaWindowDelegate alloc] initWithDriver:this]];
+	// set the delegate which will handle window move and focus events (the delegate of a window made
+	// before is detached, as it watches every window)
+	[m_WindowDelegate detachDriver];
+	m_WindowDelegate = [[CocoaWindowDelegate alloc] initWithDriver:this];
+	[cocoa_window setDelegate:m_WindowDelegate];
 
 	// set the window to non transparent
 	[cocoa_window setOpaque:YES];
@@ -1611,7 +1832,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 	if (window == EmptyWindow)
 	{
-		nlerror("3D: XCreateWindow() failed");
+		nlwarning("3D: XCreateWindow() failed");
 		return false;
 	}
 
@@ -1655,6 +1876,12 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 	_win = window;
 
+#ifdef NL_OS_MAC
+	// the window became the key window before it was the driver's, and need not be (the application may
+	// not be active)
+	updateWindowFocus();
+#endif
+
 	_CurrentMode.Width = mode.Width;
 	_CurrentMode.Height = mode.Height;
 
@@ -1674,11 +1901,26 @@ bool CDriverGL::destroyWindow()
 {
 	H_AUTO_OGL(CDriverGL_destroyWindow)
 
+#ifdef NL_OS_WINDOWS
+	// The picture mode of a minimized window is left while the context is there to release its frame buffer
+	// object, and a window that lives on (one of the application) has its pictures from the desktop compositor
+	// again
+	if (m_MinimizedPictureMode)
+		leaveMinimizedPictureMode();
+	m_MinimizedPicture.release(_win);
+#endif // NL_OS_WINDOWS
+
 	releaseCursors();
 
 	// make sure window icons are deleted
-	std::vector<NLMISC::CBitmap> bitmaps;
-	setWindowIcon(bitmaps);
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	// on X11 the icon is a property of the window: a window of the application keeps the one it has
+	if (_DestroyWindow)
+#endif
+	{
+		std::vector<NLMISC::CBitmap> bitmaps;
+		setWindowIcon(bitmaps);
+	}
 
 #ifdef USE_OPENGLES
 
@@ -1716,10 +1958,22 @@ bool CDriverGL::destroyWindow()
 
 #elif defined(NL_OS_UNIX)
 
-	if (_DestroyWindow && _ctx) // FIXME: _DestroyWindow may need to be removed here as well
+	// the context is the driver's own, also on a window of the application
+	if (_ctx)
+	{
+		// the current context can be the one of another driver, of another window of the application
+		if (glXGetCurrentContext() == _ctx)
+			glXMakeCurrent(_dpy, None, nullptr);
 		glXDestroyContext(_dpy, _ctx);
+		_ctx = nullptr;
+	}
 
-	_ctx = nullptr;
+	// and so is the description of the visual it was made with
+	if (_visual_info)
+	{
+		XFree(_visual_info);
+		_visual_info = nullptr;
+	}
 
 #endif
 
@@ -1733,6 +1987,20 @@ bool CDriverGL::destroyWindow()
 
 	if (_DestroyWindow)
 	{
+		// the dock and the menu bar get their behaviour back, and a new window starts windowed
+		if (m_FullscreenWindow)
+		{
+#ifdef NL_MAC_VERSION_10_6_UP
+			[NSApp setPresentationOptions:m_WindowedPresentationOptions];
+#endif
+			m_FullscreenWindow = false;
+		}
+
+		// the delegate watches every window, it must not reach the driver any more (it is not released,
+		// as a window does not retain its delegate)
+		[m_WindowDelegate detachDriver];
+		m_WindowDelegate = nil;
+
 		[[containerView() window] release];
 		[containerView() release];
 		[_glView release];
@@ -1829,8 +2097,22 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 
 #elif defined(NL_OS_MAC)
 
+	NSWindow *window = [containerView() window];
+
+	// the bits of the title bar, the only ones fullscreen takes away and gives back
+	const NSUInteger titleBarMask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
+
+#if defined(MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
+	// in a full screen space of macOS (the green button), the style mask may only change in a transition of AppKit's
+	if ([window styleMask] & NSFullScreenWindowMask)
+	{
+		nlwarning("3D: The window is in a full screen space of macOS, it keeps its style until it leaves that space");
+		return false;
+	}
+#endif
+
 	// leave fullscreen mode, enter windowed mode
-	if (windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
+	if (windowStyle == EWSWindowed && m_FullscreenWindow)
 	{
 		// disable manual setting of back buffer size, cocoa handles this
 		// automatically as soon as the view gets resized
@@ -1841,18 +2123,32 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 			nlerror("cannot disable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
-		// pull the view back from fullscreen restoring window options
-		[containerView() exitFullScreenModeWithOptions:nil];
+		// give the dock, the menu bar and the window back what they had before fullscreen (the title is cleared
+		// when the title bar comes back)
+#ifdef NL_MAC_VERSION_10_6_UP
+		[NSApp setPresentationOptions:m_WindowedPresentationOptions];
+		NSString *title = [[window title] copy];
+		[window setStyleMask:([window styleMask] & ~titleBarMask) | m_WindowedStyleMask];
+		[window setTitle:title];
+		[title release];
+#endif
+		[window setFrame:m_WindowedFrame display:YES];
+		m_FullscreenWindow = false;
+
+		// the title bar may have new buttons, bind the close button to applicationShouldTerminate again
+		id closeButton = [window standardWindowButton:NSWindowCloseButton];
+		[closeButton setAction:@selector(applicationShouldTerminate:)];
+		[closeButton setTarget:[NSApp delegate]];
 
 		// let the gl view receive key events
-		[[containerView() window] makeFirstResponder:_glView];
+		[window makeFirstResponder:_glView];
 
 		// bring the window containing the gl view to the front
-		[[containerView() window] makeKeyAndOrderFront:nil];
+		[window makeKeyAndOrderFront:nil];
 	}
 
 	// enter fullscreen, leave windowed mode
-	else if (windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
+	else if (windowStyle == EWSFullscreen && !m_FullscreenWindow)
 	{
 		// enable manual back buffer size for mode setting in fullscreen
 		CGLError error = CGLEnable((CGLContextObj)[_ctx CGLContextObj],
@@ -1862,25 +2158,36 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 			nlerror("cannot enable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
-		// put the view in fullscreen mode, hiding the dock but enabling the menubar
-		// to pop up if the mouse hits the top screen border.
-		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
+		// The window itself covers the screen, without a title bar; the dock is hidden and the menu bar pops up when
+		// the mouse hits the top screen border, and <CMD>+<Tab> still switches applications. NSView
+		// enterFullScreenMode moved the view to a window of its own and left this one on screen, empty.
 #ifdef NL_MAC_VERSION_10_6_UP
-		[containerView() enterFullScreenMode:[NSScreen mainScreen] withOptions:
-			[NSDictionary dictionaryWithObjectsAndKeys:
-				[NSNumber numberWithInt:
-					NSApplicationPresentationHideDock |
-					NSApplicationPresentationAutoHideMenuBar],
-				NSFullScreenModeApplicationPresentationOptions, nil]];
+		m_WindowedPresentationOptions = [NSApp presentationOptions];
+		m_WindowedStyleMask = [window styleMask] & titleBarMask;
+		m_WindowedFrame = [window frame];
+		m_FullscreenWindow = true;
+
+		// the screen of the window, the main screen (that of the key window) only for a window on no screen
+		NSScreen *screen = [window screen];
+		if (screen == nil)
+			screen = [NSScreen mainScreen];
+
+		// the title is cleared when the title bar goes
+		NSString *title = [[window title] copy];
+		[NSApp setPresentationOptions:NSApplicationPresentationHideDock | NSApplicationPresentationAutoHideMenuBar];
+		[window setStyleMask:[window styleMask] & ~titleBarMask];
+		[window setTitle:title];
+		[title release];
+		[window setFrame:[screen frame] display:YES];
 #endif
-		/*
-			TODO check if simply using NSView enterFullScreenMode is a good idea.
-			 the context can be set to full screen as well, performance differences?
-		*/
 
 		// let the gl view receive key events
-		[[containerView() window] makeFirstResponder:_glView];
+		[window makeFirstResponder:_glView];
+		[window makeKeyAndOrderFront:nil];
 	}
+
+	// the key state of the window may have changed
+	updateWindowFocus();
 
 #elif defined(NL_OS_UNIX)
 
@@ -1936,6 +2243,10 @@ bool CDriverGL::getMonitorByName(const std::string &name, sint32 &x, sint32 &y, 
 	bool found = false;
 
 #if HAVE_XRANDR
+	// init() got no connection to an X server
+	if (_dpy == nullptr)
+		return false;
+
 	int screen = DefaultScreen(_dpy);
 
 	// xrandr 1.5+
@@ -2022,7 +2333,18 @@ bool CDriverGL::setMode(const GfxMode& amode)
 
 	// don't modify window or screen if managed by a 3rd party library
 	if (!_DestroyWindow)
+	{
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		// on X11 the driver gets no events of such a window, so its owner gives its size here,
+		// as WM_SIZE does on Windows
+		if (amode.Windowed && amode.Width != 0 && amode.Height != 0)
+		{
+			_CurrentMode.Width = amode.Width;
+			_CurrentMode.Height = amode.Height;
+		}
+#endif
 		return true;
+	}
 
 	// a window has a size (the size of a minimized window is empty, and the cursor position is relative to it)
 	if (amode.Windowed && (amode.Width == 0 || amode.Height == 0))
@@ -2041,9 +2363,10 @@ bool CDriverGL::setMode(const GfxMode& amode)
 	cursorPos.x = 0;
 	cursorPos.y = 0;
 
-	BOOL cursorPosOk = isSystemCursorInClientArea()
-		&& GetCursorPos(&cursorPos)
-		&& ScreenToClient(_win, &cursorPos);
+	BOOL cursorPosOk = mayMoveSystemCursor()
+	    && isSystemCursorInClientArea()
+	    && GetCursorPos(&cursorPos)
+	    && ScreenToClient(_win, &cursorPos);
 
 	// FIXME: this probably needs to use _CurrentMode instead of mode
 	sint curX = (sint)cursorPos.x * (sint)mode.Width;
@@ -2478,7 +2801,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	mode.Depth     = NSBitsPerPixelFromDepth([screen depth]);
 
 	// in fullscreen mode
-	if([containerView() isInFullScreenMode])
+	if (m_FullscreenWindow)
 	{
 		// return the size of the back buffer (like having switched monitor mode)
 		mode.Windowed  = false;
@@ -2496,6 +2819,10 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	}
 
 #elif defined(NL_OS_UNIX)
+
+	// init() got no connection to an X server
+	if (_dpy == nullptr)
+		return false;
 
 	bool found = false;
 	int screen = DefaultScreen(_dpy);
@@ -2673,9 +3000,14 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 			mode.Windowed = _CurrentMode.Windowed;
 			mode.OffScreen = false;
 			mode.Depth = (uint) DefaultDepth(_dpy, screen);
-			mode.Frequency = 1000 * pixelClock / (xmode.htotal * xmode.vtotal) ;
+			mode.Frequency = modeLineToFrequency(pixelClock > 0 ? (uint)pixelClock : 0, xmode.htotal, xmode.vtotal);
 			mode.Width = xmode.hdisplay;
 			mode.Height = xmode.vdisplay;
+
+			// the mode line comes with private data of the driver, which is the caller's to free
+			if (xmode.privsize > 0)
+				XFree(xmode.c_private);
+
 			nlinfo("3D: Current XF86VidMode mode: %dx%d, %d Hz, %dbit", mode.Width, mode.Height, mode.Frequency, mode.Depth);
 
 			found = true;
@@ -2748,6 +3080,114 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 #endif // NL_OS_WINDOWS
 }
 
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+
+// ***************************************************************************
+void CDriverGL::getMonitorRects(std::vector<NLMISC::CRect> &monitors) const
+{
+	monitors.clear();
+
+	// init() got no connection to an X server
+	if (_dpy == nullptr)
+		return;
+
+	int screen = DefaultScreen(_dpy);
+
+#ifdef HAVE_XRANDR
+	if (_xrandr_version >= 105)
+	{
+		int nmonitors = 0;
+		XRRMonitorInfo *monitor = XRRGetMonitors(_dpy, RootWindow(_dpy, screen), 1, &nmonitors);
+		if (monitor)
+		{
+			for (sint i = 0; i < nmonitors; ++i)
+			{
+				if (monitor[i].width <= 0 || monitor[i].height <= 0)
+					continue;
+
+				NLMISC::CRect rect(monitor[i].x, monitor[i].y, monitor[i].width, monitor[i].height);
+				if (monitor[i].primary)
+					monitors.insert(monitors.begin(), rect);
+				else
+					monitors.push_back(rect);
+			}
+
+			XRRFreeMonitors(monitor);
+		}
+	}
+#endif // HAVE_XRANDR
+
+	// without the monitors of XRandR 1.5, the X screen is the one rectangle there is
+	if (monitors.empty())
+		monitors.push_back(NLMISC::CRect(0, 0, DisplayWidth(_dpy, screen), DisplayHeight(_dpy, screen)));
+}
+
+#endif // NL_OS_UNIX && !NL_OS_MAC
+
+// ***************************************************************************
+bool CDriverGL::keepWindowPosOnMonitors(sint32 &x, sint32 &y)
+{
+	// only a top level window of the driver has a place of its own on the desktop
+	if (_win == EmptyWindow || !_DestroyWindow)
+		return false;
+
+	// the monitors, and the size of the window with its frame
+	std::vector<NLMISC::CRect> monitors;
+	uint32 width = 0;
+	uint32 height = 0;
+
+#ifdef NL_OS_WINDOWS
+
+	// a minimized window is nowhere (Windows reports it at -32000,-32000): its position is left alone
+	RECT frame;
+	if (IsIconic(_win) || !GetWindowRect(_win, &frame))
+		return false;
+
+	width = (uint32)(frame.right - frame.left);
+	height = (uint32)(frame.bottom - frame.top);
+	getMonitorWorkAreas(monitors);
+
+#elif defined(NL_OS_MAC)
+
+	// Cocoa counts y upwards from the bottom of the screen with the menu bar, which is the first one; NeL counts
+	// it downwards from the top of that screen (see setWindowPos)
+	NSArray *screens = [NSScreen screens];
+	if ([screens count] == 0)
+		return false;
+
+	CGFloat menuScreenHeight = [(NSScreen *)[screens objectAtIndex:0] frame].size.height;
+	for (NSUInteger i = 0; i < [screens count]; ++i)
+	{
+		// the screen without the menu bar and the Dock
+		NSRect visible = [(NSScreen *)[screens objectAtIndex:i] visibleFrame];
+		monitors.push_back(NLMISC::CRect((sint32)visible.origin.x, (sint32)(menuScreenHeight - visible.origin.y - visible.size.height),
+		    (uint32)visible.size.width, (uint32)visible.size.height));
+	}
+
+	NSRect windowFrame = [[containerView() window] frame];
+	width = (uint32)windowFrame.size.width;
+	height = (uint32)windowFrame.size.height;
+
+#elif defined (NL_OS_UNIX)
+
+	// the frame of the window manager as far as it is known: its left and top sizes
+	sint32 frameLeft = std::max(_DecorationWidth, (sint32)0);
+	sint32 frameTop = std::max(_DecorationHeight, (sint32)0);
+	width = (uint32)_CurrentMode.Width + 2 * frameLeft;
+	height = (uint32)_CurrentMode.Height + frameTop + frameLeft;
+	getMonitorRects(monitors);
+
+#endif // NL_OS_WINDOWS
+
+	sint32 wantedX = x;
+	sint32 wantedY = y;
+	if (!keepWindowOnMonitors(monitors, x, y, width, height))
+		return false;
+
+	nlinfo("3D: The window position %d,%d is on no monitor: the window is centered on the primary monitor, at %d,%d", wantedX, wantedY, x, y);
+	return true;
+}
+
 // ***************************************************************************
 void CDriverGL::setWindowPos(sint32 x, sint32 y)
 {
@@ -2759,15 +3199,24 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 	if (_win == EmptyWindow || !_CurrentMode.Windowed)
 		return;
 
+	// a position on no monitor (saved under another monitor layout) leaves the window out of reach
+	if (keepWindowPosOnMonitors(x, y))
+	{
+		_WindowX = x;
+		_WindowY = y;
+	}
+
 #ifdef NL_OS_WINDOWS
 
 	// save relative cursor
 	POINT cursorPos;
-	BOOL cursorPosOk = isSystemCursorInClientArea()
-		&& GetCursorPos(&cursorPos)
-		&& ScreenToClient(_win, &cursorPos);
+	BOOL cursorPosOk = mayMoveSystemCursor()
+	    && isSystemCursorInClientArea()
+	    && GetCursorPos(&cursorPos)
+	    && ScreenToClient(_win, &cursorPos);
 
-	SetWindowPos(_win, NULL, x, y, 0, 0, /*SWP_NOZORDER | SWP_NOACTIVATE |*/ SWP_NOSIZE);
+	// without activation (setWindowActivation) the position neither activates the window nor brings it to the front
+	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOSIZE | (_WindowActivation ? 0 : SWP_NOZORDER | SWP_NOACTIVATE));
 
 	if (cursorPosOk)
 	{
@@ -2809,7 +3258,12 @@ void CDriverGL::showWindow(bool show)
 
 #ifdef NL_OS_WINDOWS
 
-	ShowWindow (_win, show ? SW_SHOW:SW_HIDE);
+	// without activation: shown with SetWindowPos, as the first ShowWindow of a process can take the show state the
+	// process was started with instead
+	if (show && !_WindowActivation)
+		SetWindowPos(_win, NULL, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+	else
+		ShowWindow (_win, show ? SW_SHOW:SW_HIDE);
 
 #elif defined(NL_OS_MAC)
 
@@ -3089,6 +3543,17 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 {
 	H_AUTO_OGL(CDriverGL_getWindowSize)
 
+#ifdef NL_OS_WINDOWS
+	// In the picture mode of a minimized window, the size of the window is the one it had before it was
+	// minimized, which is the size of the frame buffer object the frames are drawn into
+	if (m_MinimizedPictureMode)
+	{
+		width = m_MinimizedPictureWidth;
+		height = m_MinimizedPictureHeight;
+		return;
+	}
+#endif // NL_OS_WINDOWS
+
 	if (_CurrentMode.OffScreen)
 	{
 #ifdef NL_OS_WINDOWS
@@ -3106,7 +3571,7 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 	else
 	{
 #ifdef NL_OS_MAC
-		if([containerView() isInFullScreenMode])
+		if (m_FullscreenWindow)
 		{
 			width = _backBufferWidth;
 			height = _backBufferHeight;
@@ -3160,10 +3625,10 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 #elif defined(NL_OS_MAC)
 
 	// for fullscreen mode, adjust the back buffer size to desired resolution
-	if([containerView() isInFullScreenMode])
+	if (m_FullscreenWindow)
 	{
 		// disable and re-enable fullscreen
-		// fixes #1062 (http://dev.ryzom.com/issues/1062)
+		// fixes #1062 of the former issue tracker
 		setWindowStyle(EWSWindowed);
 		setWindowStyle(EWSFullscreen);
 
@@ -3274,6 +3739,318 @@ bool CDriverGL::isActive()
 
 	return res;
 }
+
+// --------------------------------------------------
+bool CDriverGL::isWindowMinimized() const
+{
+	H_AUTO_OGL(CDriverGL_isWindowMinimized)
+
+	if (_win == EmptyWindow)
+		return false;
+
+	bool res = false;
+
+#ifdef NL_OS_WINDOWS
+
+	res = (IsIconic(_win) != FALSE);
+
+#elif defined(NL_OS_MAC)
+
+	// the window that holds the view of the driver, also in fullscreen
+	res = ([[(NSView *)_win window] isMiniaturized] == YES);
+
+#elif defined (NL_OS_UNIX)
+
+	// what the window manager states in the _NET_WM_STATE property of the window, see GlWndProc
+	res = _WindowMinimized;
+
+#endif // NL_OS_UNIX
+
+	return res;
+}
+
+// --------------------------------------------------
+void CDriverGL::restoreWindow()
+{
+	H_AUTO_OGL(CDriverGL_restoreWindow)
+
+	// only a window of the driver's own, and only when it is minimized
+	if (_win == EmptyWindow || !_DestroyWindow || !isWindowMinimized())
+		return;
+
+#ifdef NL_OS_WINDOWS
+
+	if (!_WindowActivation)
+	{
+		// Restored without being activated (setWindowActivation). Windows maximizes a window only by activating it
+		// (SW_SHOWMAXIMIZED): one that was maximized before it was minimized comes back at its normal size.
+		WINDOWPLACEMENT placement;
+		placement.length = sizeof(placement);
+		if (GetWindowPlacement(_win, &placement) && (placement.flags & WPF_RESTORETOMAXIMIZED) != 0)
+			nlinfo("The window comes back at its normal size, not maximized as before it was minimized: it is not activated (setWindowActivation), and Windows maximizes a window only by activating it");
+		ShowWindow(_win, SW_SHOWNOACTIVATE);
+		return;
+	}
+	ShowWindow(_win, SW_RESTORE);
+	// the system decides whether a program may take the foreground; where it does not let it, the button of
+	// the window flashes in the task bar
+	SetForegroundWindow(_win);
+
+#elif defined(NL_OS_MAC)
+
+	[[(NSView *)_win window] deminiaturize:nil];
+	[NSApp activateIgnoringOtherApps:YES];
+
+#elif defined (NL_OS_UNIX)
+
+	// A client maps its window to leave the iconic state. A window manager that keeps a minimized window mapped
+	// has nothing to do for that request, so it is also asked to activate the window, which shows it.
+	XMapRaised(_dpy, _win);
+
+	XEvent xev;
+	memset(&xev, 0, sizeof(xev));
+	xev.xclient.type = ClientMessage;
+	xev.xclient.window = _win;
+	xev.xclient.message_type = XInternAtom(_dpy, "_NET_ACTIVE_WINDOW", False);
+	xev.xclient.format = 32;
+	xev.xclient.data.l[0] = 1; // 1 for Application, 2 for Page or Taskbar, 0 for old source
+	xev.xclient.data.l[1] = CurrentTime;
+	xev.xclient.data.l[2] = 0;
+	if (!XSendEvent(_dpy, XDefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev))
+	{
+		nlwarning("3D: Failed to ask the window manager to activate the window");
+	}
+	XFlush(_dpy);
+
+#endif // NL_OS_UNIX
+}
+
+// --------------------------------------------------
+void CDriverGL::setMinimizedWindowPictureSupplied(bool supplied)
+{
+	H_AUTO_OGL(CDriverGL_setMinimizedWindowPictureSupplied)
+
+#ifdef NL_OS_WINDOWS
+
+	// Nothing that is drawn into the frame buffer of a minimized window can be read back, and its client area
+	// is empty: in picture mode the frames are drawn into a frame buffer object that stands for the window,
+	// with the depth and the stencil in one render buffer (see enterMinimizedPictureMode). Without these no
+	// picture can be supplied, and the pictures stay those of the desktop compositor
+#ifdef USE_OPENGLES
+	bool frameBufferObject = false;
+#else
+	bool frameBufferObject = supportFrameBufferObject() && supportPackedDepthStencil();
+#endif
+	if (supplied && !frameBufferObject)
+	{
+		if (!m_MinimizedPictureUnsupportedReported)
+		{
+			m_MinimizedPictureUnsupportedReported = true;
+			nlinfo("3D: The picture of the minimized window is not available with this display adapter: the driver has no frame buffer object with a depth and stencil buffer to draw the frames into");
+		}
+		return;
+	}
+
+	// (when it is withdrawn, picture mode is left at the end of the frame, see updateMinimizedPictureMode)
+	m_MinimizedPicture.setSupplied(_win, supplied);
+
+#endif // NL_OS_WINDOWS
+}
+
+// --------------------------------------------------
+bool CDriverGL::isMinimizedWindowPictureWanted() const
+{
+	H_AUTO_OGL(CDriverGL_isMinimizedWindowPictureWanted)
+
+#ifdef NL_OS_WINDOWS
+
+	return m_MinimizedPictureMode;
+
+#else
+
+	// no window system of the other platforms is supplied with such pictures
+	return false;
+
+#endif // NL_OS_WINDOWS
+}
+
+#ifdef NL_OS_WINDOWS
+
+// --------------------------------------------------
+void CDriverGL::endMinimizedPictureFrame()
+{
+	// The frame that ends is in the frame buffer object that stands for the window, and that one is bound,
+	// as long as no texture is the render target (none is at the swap of an ordinary frame)
+	if (_win == EmptyWindow || _RenderTargetFBO || _TextureTarget)
+		return;
+
+	// It is read back the way the frame of a window is, and handed over, when a picture is due
+	if (m_MinimizedPicture.isPictureDue())
+	{
+		NLMISC::TTicks readStart = NLMISC::CTime::getPerformanceTime();
+		CBitmap picture;
+		getBuffer(picture);
+		m_MinimizedPicture.setPicture(_win, picture, readStart);
+	}
+
+#ifndef USE_OPENGLES
+	// The window was restored while this frame was drawn (picture mode is only left after the swap): the
+	// frame is copied to the back buffer of the window, so that the swap shows it. Where the driver cannot
+	// copy between frame buffers, or the window came back at another size, the window gets its first frame
+	// with the next swap
+	if (!IsIconic(_win) && _Extensions.FrameBufferBlit
+		&& _CurrentMode.Width == m_MinimizedPictureWidth && _CurrentMode.Height == m_MinimizedPictureHeight)
+	{
+		// (the copy goes by the scissor, which setupScissor then puts back)
+		glDisable(GL_SCISSOR_TEST);
+		nglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, m_WindowFrameBuffer);
+		nglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
+		nglBlitFramebufferEXT(0, 0, (GLint)m_MinimizedPictureWidth, (GLint)m_MinimizedPictureHeight,
+			0, 0, (GLint)m_MinimizedPictureWidth, (GLint)m_MinimizedPictureHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_WindowFrameBuffer);
+		setupScissor(_CurrScissor);
+	}
+#endif // USE_OPENGLES
+}
+
+// --------------------------------------------------
+void CDriverGL::updateMinimizedPictureMode()
+{
+	// The desktop compositor is told when the last picture is out of date, and the mode follows what it asks
+	// for: entered with its first request, left when it has stopped asking, when the window was restored and
+	// when the pictures are no longer supplied
+	bool wanted = _win != EmptyWindow && m_MinimizedPicture.endFrame(_win);
+	if (wanted && !m_MinimizedPictureMode)
+	{
+		// no frame can be read back without the mode: the window gets the pictures of the compositor again
+		if (!enterMinimizedPictureMode())
+			m_MinimizedPicture.setSupplied(_win, false);
+	}
+	else if (wanted && m_MinimizedPictureMode)
+	{
+		// the window was shown at another size and minimized again since the mode was entered: the frame
+		// buffer object is made again at the size the window has now
+		uint32 width, height;
+		m_MinimizedPicture.getWindowSize(width, height);
+		if (width != m_MinimizedPictureWidth || height != m_MinimizedPictureHeight)
+		{
+			leaveMinimizedPictureMode();
+			if (!enterMinimizedPictureMode())
+				m_MinimizedPicture.setSupplied(_win, false);
+		}
+	}
+	else if (!wanted && m_MinimizedPictureMode)
+	{
+		leaveMinimizedPictureMode();
+	}
+}
+
+// --------------------------------------------------
+bool CDriverGL::enterMinimizedPictureMode()
+{
+#ifndef USE_OPENGLES
+
+	uint32 width, height;
+	m_MinimizedPicture.getWindowSize(width, height);
+
+	// A frame buffer object of the size the window had before it was minimized, with what the frame buffer of
+	// the window has: the colors, and a depth and a stencil buffer
+	GLuint frameBuffer = 0;
+	nglGenFramebuffersEXT(1, &frameBuffer);
+	nglGenRenderbuffersEXT(1, &m_MinimizedPictureColorBuffer);
+	nglGenRenderbuffersEXT(1, &m_MinimizedPictureDepthStencilBuffer);
+	nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_MinimizedPictureColorBuffer);
+	nglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, (GLsizei)width, (GLsizei)height);
+	nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_MinimizedPictureDepthStencilBuffer);
+	nglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH24_STENCIL8_EXT, (GLsizei)width, (GLsizei)height);
+	nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, frameBuffer);
+	nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, m_MinimizedPictureColorBuffer);
+	nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_MinimizedPictureDepthStencilBuffer);
+	nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_MinimizedPictureDepthStencilBuffer);
+
+	GLenum status = (GLenum)nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+	if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+	{
+		nlwarning("3D: The picture of the minimized window is not supplied: the frame buffer object of %ux%u to draw the frames into is not complete (status 0x%x)", width, height, (uint)status);
+		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		nglDeleteFramebuffersEXT(1, &frameBuffer);
+		nglDeleteRenderbuffersEXT(1, &m_MinimizedPictureColorBuffer);
+		nglDeleteRenderbuffersEXT(1, &m_MinimizedPictureDepthStencilBuffer);
+		m_MinimizedPictureColorBuffer = 0;
+		m_MinimizedPictureDepthStencilBuffer = 0;
+		// a texture that is the render target is bound again
+		if (_RenderTargetFBO)
+			activeFrameBufferObject(_RenderTargetFBO.getPtr());
+		return false;
+	}
+
+	// What new render buffers hold is undefined, and a frame does not have to draw over all of the window, nor
+	// to clear its stencil buffer: the three buffers start cleared. A clear goes by the scissor, which is set
+	// again below, and by the write masks, which are those of the defaults that swapBuffers sets after this
+	GLboolean colorMask[4];
+	glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
+	glDisable(GL_SCISSOR_TEST);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	_DriverGLStates.enableZWrite(true);
+	_DriverGLStates.stencilMask(std::numeric_limits<GLuint>::max());
+	glClearColor(0.f, 0.f, 0.f, 0.f);
+	glClearDepth(1.0);
+	glClearStencil(0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glColorMask(colorMask[0], colorMask[1], colorMask[2], colorMask[3]);
+
+	// From here it stands for the frame buffer of the window, and is left bound as that; a texture that is the
+	// render target is bound again, and binds it when it is left
+	m_MinimizedPictureMode = true;
+	m_MinimizedPictureWidth = width;
+	m_MinimizedPictureHeight = height;
+	m_WindowFrameBuffer = frameBuffer;
+	if (_RenderTargetFBO)
+		activeFrameBufferObject(_RenderTargetFBO.getPtr());
+
+	// the viewport and the scissor go by the size of the window, which has changed
+	setupViewport(_CurrViewport);
+	setupScissor(_CurrScissor);
+
+	nldebug("3D: Minimized window: picture mode, the frames are drawn into a frame buffer object of %ux%u", width, height);
+	return true;
+
+#else
+
+	return false;
+
+#endif // USE_OPENGLES
+}
+
+// --------------------------------------------------
+void CDriverGL::leaveMinimizedPictureMode()
+{
+#ifndef USE_OPENGLES
+
+	GLuint frameBuffer = m_WindowFrameBuffer;
+	m_MinimizedPictureMode = false;
+	m_WindowFrameBuffer = 0;
+
+	// The frame buffer of the window is bound again, unless a texture is the render target, which binds it
+	// when it is left
+	if (!_RenderTargetFBO)
+		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	nglDeleteFramebuffersEXT(1, &frameBuffer);
+	nglDeleteRenderbuffersEXT(1, &m_MinimizedPictureColorBuffer);
+	nglDeleteRenderbuffersEXT(1, &m_MinimizedPictureDepthStencilBuffer);
+	m_MinimizedPictureColorBuffer = 0;
+	m_MinimizedPictureDepthStencilBuffer = 0;
+
+	// the viewport and the scissor go by the size of the window, which has changed
+	setupViewport(_CurrViewport);
+	setupScissor(_CurrScissor);
+
+	nldebug("3D: Minimized window: picture mode is left");
+
+#endif // USE_OPENGLES
+}
+
+#endif // NL_OS_WINDOWS
 
 // ***************************************************************************
 bool CDriverGL::supportMonitorColorProperties () const

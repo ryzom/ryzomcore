@@ -20,6 +20,20 @@ if (game==nil) then
 	game= {};
 end
 
+------------------------------------------------------------------------------------------------------------
+function game:staticMapImage(x_pos, y_pos, zoom, icon, label, imageId)
+	local markers = ""
+	if icon ~= "" then
+		markers = [[&markers=icon:]]..icon..[[|color:0x00ff00|label:]]..label..[[|]]..x_pos..[[,]]..y_pos
+	end
+	local attributes = ""
+	if imageId then
+		attributes = [[ id="]]..imageId..[[" width="200" height="200"]]
+	end
+	return [[<img]]..attributes..[[ src="https://api.bmsite.net/maps/static?center=]]..x_pos..[[,]]..y_pos..
+		[[&zoom=]]..zoom..markers..[[&maptype=atys&mapmode=server&size=200x200" />]]
+end
+
 if (game.PVP == nil) then
 	game.PVP = {};
 	game.PVP.tagStartTimer = 0;

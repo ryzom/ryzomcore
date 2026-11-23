@@ -82,8 +82,9 @@ const std::string	FaberPhraseItemResultGroup= FaberPhraseWindow + ":header_opene
 // ***************************************************************************
 CActionPhraseFaber::CActionPhraseFaber()
 {
-	uint size = MAX_PLAYER_INV_ENTRIES + (MAX_ANIMALINV_ENTRIES * MAX_INVENTORY_ANIMAL) +
-		MAX_GUILDINV_ENTRIES + MAX_ROOMINV_ENTRIES;
+	// the bag, the pack animals and the apartment: the inventories the server takes craft materials from
+	// (CCharacter::fillFaberMaterialArray). The guild inventory is not one of them.
+	uint size = MAX_PLAYER_INV_ENTRIES + (MAX_ANIMALINV_ENTRIES * MAX_INVENTORY_ANIMAL) + MAX_ROOMINV_ENTRIES;
 	_InventoryMirror.resize(size);
 	_InventoryObsSetup= false;
 	_ExecuteFromItemPlanBrick = nullptr;
@@ -222,6 +223,12 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 		if(branch) NLGUI::CDBManager::getInstance()->addBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
 	}
 
+	// and for the apartment, whose slots are read from the server database (getInvMirrorItemImage). A craft puts its
+	// result in the temporary inventory, so without this nothing reports the room stack it used up.
+	branch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":ROOM");
+	if (branch) NLGUI::CDBManager::getInstance()->removeBranchObserver(SERVER_INVENTORY ":ROOM", &_DBInventoryObs);
+	if (branch) NLGUI::CDBManager::getInstance()->addBranchObserver(SERVER_INVENTORY ":ROOM", &_DBInventoryObs);
+
 	// Add observers on animal status, cause inventory may become unavailabe during the process
 	for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
@@ -266,6 +273,9 @@ void			CActionPhraseFaber::onCloseFaberCastWindow()
 		branch= NLGUI::CDBManager::getInstance()->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
 		if(branch) branch->removeBranchObserver(&_DBInventoryObs);
 	}
+	// and for the apartment
+	branch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":ROOM");
+	if (branch) branch->removeBranchObserver(&_DBInventoryObs);
 
 	// remove observers on animal status, cause inventory may become unavailabe during the process
 	for(uint i=0;i<MAX_INVENTORY_ANIMAL;i++)
@@ -356,22 +366,6 @@ CItemImage		*CActionPhraseFaber::getInvMirrorItemImage(uint slotIndex, uint& inv
 		return &getInventory().getPAItem(animal, index);
 	}
 	slotIndex -= (MAX_ANIMALINV_ENTRIES * MAX_INVENTORY_ANIMAL);
-
-	if (slotIndex < MAX_GUILDINV_ENTRIES)
-	{
-		if (getInventory().isInventoryAvailable(INVENTORIES::guild))
-		{
-			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":GUILD:" + toString(slotIndex));
-			static CItemImage image;
-			image.build(itemBranch);
-			invId = INVENTORIES::guild;
-			indexInInv = slotIndex;
-			return &image;
-		}
-		return nullptr;
-	}
-	slotIndex -= MAX_GUILDINV_ENTRIES;
 
 	if (slotIndex < MAX_ROOMINV_ENTRIES)
 	{
@@ -665,7 +659,7 @@ void			CActionPhraseFaber::fillSelection(const std::vector<uint> &mps)
 
 
 // ***************************************************************************
-void			CActionPhraseFaber::filterSelectionItemPart(std::vector<uint> &mps, RM_FABER_TYPE::TRMFType itemPartFilter, ITEM_ORIGIN::EItemOrigin originFilter)
+void			CActionPhraseFaber::filterSelectionItemPart(std::vector<uint> &mps, RM_FABER_TYPE::TRMFType itemPartFilter, ITEM_ORIGIN::EItemOrigin itemOrigin, EGSPD::CPeople::TPeople planCiv)
 {
 	// Unknown => no fitler
 	if(itemPartFilter==RM_FABER_TYPE::Unknown)
@@ -681,7 +675,7 @@ void			CActionPhraseFaber::filterSelectionItemPart(std::vector<uint> &mps, RM_FA
 		// test itemPartFilter match.
 		if(itemSheet)
 		{
-			if(itemSheet->canBuildItemPart(itemPartFilter, originFilter))
+			if(itemSheet->canBuildItemPart(itemPartFilter, itemOrigin, planCiv))
 			{
 				res.push_back(mps[i]);
 			}
@@ -855,9 +849,10 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 		// Filter the selection whether it is an itemPart or specificItem reqiurement
 		if(mpBuild.RequirementType==CMPBuild::ItemPartReq)
 		{
+			// the origin of the item built decides, or with RYZOM_FORGE the civilisation of the plan: as on the server
 			CItemSheet	*itemBuilt= dynamic_cast<CItemSheet*>(SheetMngr.get(_ExecuteFromItemPlanBrick->FaberPlan.ItemBuilt));
 			ITEM_ORIGIN::EItemOrigin	itemOrigin= itemBuilt? itemBuilt->ItemOrigin : ITEM_ORIGIN::UNKNOWN;
-			filterSelectionItemPart(selectMps, mpBuild.FaberTypeRequired, itemOrigin);
+			filterSelectionItemPart(selectMps, mpBuild.FaberTypeRequired, itemOrigin, _ExecuteFromItemPlanBrick->CivRestriction);
 		}
 		else if(mpBuild.RequirementType==CMPBuild::SpecificItemReq)
 		{
@@ -1650,19 +1645,25 @@ void	CActionPhraseFaber::updateItemResult()
 	// Stat is computed like server
 	float	statArray[RM_FABER_STAT_TYPE::NumRMStatType];
 	float	statCount[RM_FABER_STAT_TYPE::NumRMStatType];
+	// the stats are summed in whole points: a float sum depends on the order the MPs were put in, and a stat landing
+	// exactly on a percent could show one point less
+	uint32 statPoints[RM_FABER_STAT_TYPE::NumRMStatType];
 	uint64	itemStatBF= 0;
 	for(i=0;i<RM_FABER_STAT_TYPE::NumRMStatType;i++)
 	{
 		statArray[i]= 0;
 		statCount[i]= 0;
+		statPoints[i] = 0;
 	}
 	// Color stat (for armour)
 	uint32		bestItemColor[RM_COLOR::NumColors];
 	for(i=0;i<RM_COLOR::NumColors;i++)
 		bestItemColor[i]= 0;
-	// Stat energy is computed like server
+	// Stat energy is computed like server (CFaberActionMakeGeneric::specializedApply): every MP counts once per stat its
+	// item part is relevant for, so a blade MP (9 stats) weighs more than a grip MP (8 stats)
 	float	statEnergy= 0;
-
+	uint32 statEnergyPoints = 0;
+	uint32 statEnergyWeightReq = 0;
 
 	// **** Parse all Bricks of the phrase executed, to get min level
 	// take The brick with the lowest CR_RECOMMENDED
@@ -1725,6 +1726,14 @@ void	CActionPhraseFaber::updateItemResult()
 		// --- ItemPart requirement?
 		if(mpBuild.RequirementType==CMPBuild::ItemPartReq)
 		{
+			// number of stats this item part is relevant for: the weight of each of its MPs in the energy mean
+			uint32 numRelevantStats = 0;
+			for (uint k = 0; k < RM_FABER_STAT_TYPE::NumRMStatType; k++)
+			{
+				if (RM_FABER_STAT_TYPE::isStatRelevant(mpBuild.FaberTypeRequired, (RM_FABER_STAT_TYPE::TRMStatType)k))
+					numRelevantStats++;
+			}
+
 			// For all slots setuped
 			uint	nSlot= min((uint)MAX_MP_SLOT, mpBuild.NumMpSlot);
 			for(uint j=0;j<nSlot;j++)
@@ -1745,13 +1754,12 @@ void	CActionPhraseFaber::updateItemResult()
 					{
 						if(RM_FABER_STAT_TYPE::isStatRelevant(mpBuild.FaberTypeRequired, (RM_FABER_STAT_TYPE::TRMStatType)k))
 						{
-							// %age to 0-1.
-							statArray[k]+= numMps * (mpIP.Stats[k]/100.f);
+							statPoints[k] += numMps * mpIP.Stats[k];
 						}
 					}
 
-					// Same for total energy
-					statEnergy+= numMps * (mp->Mp.StatEnergy/100.f);
+					// Same for total energy, once per relevant stat
+					statEnergyPoints += numMps * numRelevantStats * mp->Mp.StatEnergy;
 
 					// Increment color stat
 					if(mp->Mp.MpColor>=0 && mp->Mp.MpColor<RM_COLOR::NumColors)
@@ -1779,6 +1787,7 @@ void	CActionPhraseFaber::updateItemResult()
 
 			// Total MP Req
 			totalItemPartMPReq+= mpBuild.QuantityReq;
+			statEnergyWeightReq += mpBuild.QuantityReq * numRelevantStats;
 		}
 
 		// --- Specific Item requirement?
@@ -1801,18 +1810,18 @@ void	CActionPhraseFaber::updateItemResult()
 		}
 	}
 
-	// Mean stat
+	// Mean stat, %age to 0-1.
 	for(i=0;i<RM_FABER_STAT_TYPE::NumRMStatType;i++)
 	{
 		if(statCount[i])
-			statArray[i]/= statCount[i];
+			statArray[i] = statPoints[i] / (100.f * statCount[i]);
 		clamp(statArray[i], 0.f, 1.f);
 	}
 
-	// Mean stat energy
-	if(totalItemPartMPReq)
+	// Mean stat energy, over the weights of all the MPs the plan requires
+	if (statEnergyWeightReq)
 	{
-		statEnergy/= totalItemPartMPReq;
+		statEnergy = statEnergyPoints / (100.f * statEnergyWeightReq);
 		clamp(statEnergy, 0.f, 1.f);
 	}
 
@@ -1934,7 +1943,8 @@ void	CActionPhraseFaber::updateItemResult()
 				CDBViewBar	*statValueBar= dynamic_cast<CDBViewBar*>(groupStat->getElement(groupStat->getId()+":bar" ));
 				CViewText	*statValueText= dynamic_cast<CViewText*>(groupStat->getElement(groupStat->getId()+":textstat" ));
 				CCtrlBase	*statToolTip= dynamic_cast<CCtrlBase*>(groupStat->getElement(groupStat->getId()+":tt" ));
-				uint	sv= uint(statArray[i]*100);
+				// the stretch can leave a whole percent a float error below it
+				uint sv = uint(statArray[i] * 100 + 0.001f);
 				if(statTitle)
 				{
 					statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType));

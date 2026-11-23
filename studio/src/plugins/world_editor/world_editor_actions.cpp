@@ -38,6 +38,8 @@
 #include <nel/ligo/primitive.h>
 #include <nel/ligo/primitive_class.h>
 #include <nel/misc/file.h>
+#include <nel/misc/mem_stream.h>
+#include <nel/misc/o_xml.h>
 
 // Qt includes
 #include <QModelIndex>
@@ -47,6 +49,7 @@
 // libxml
 #include <libxml/xmlstring.h>
 #include <libxml/tree.h>
+#include <libxml/parser.h>
 
 namespace WorldEditor
 {
@@ -217,15 +220,28 @@ void CreateWorldCommand::redo()
 }
 
 
-WorldSaver::WorldSaver( PrimitivesTreeModel *model, LandscapeEditor::ZoneBuilderBase *zoneBuilder, const std::string &dataDir, const std::string &context )
+WorldSaver::WorldSaver(PrimitivesTreeModel *model, LandscapeEditor::ZoneBuilderBase *zoneBuilder, const std::string &dataDir, const std::string &context,
+	WorldFiles *files)
 {
+	nlassert(files);
 	m_model = model;
 	m_zoneBuilder = zoneBuilder;
 	m_dataDir = dataDir;
 	m_context = context;
+	m_worldFiles = files;
+	m_worldEditSaved = false;
 }
 
-bool WorldSaver::save()
+void WorldSaver::setLoadedFile(const std::string &fileName, const std::string &content, const std::string &dataDir,
+	const std::string &context)
+{
+	m_loadedFileName = fileName;
+	m_loadedContent = content;
+	m_loadedDataDir = dataDir;
+	m_loadedContext = context;
+}
+
+bool WorldSaver::makeWorldEdit()
 {
 	QModelIndex pidx = m_model->index( 0, 0 );
 	if( !pidx.isValid() )
@@ -234,31 +250,66 @@ bool WorldSaver::save()
 		return false;
 	}
 
-	int rows = m_model->rowCount( pidx );
-	bool ok = false;
-
-	for( int i = 0; i < rows; i++ )
+	m_data.clear();
+	int rows = m_model->rowCount(pidx);
+	for (int i = 0; i < rows; i++)
 	{
-		QModelIndex idx = m_model->index( i, 0, pidx );
-		
-		Node *node = reinterpret_cast< Node* >( idx.internalPointer() );
-		Node::NodeType t = node->type();
-
-		switch( t )
-		{
-		case Node::LandscapeNodeType: ok = saveLandscapeNode( node ); break;
-		case Node::RootPrimitiveNodeType: ok = savePrimitiveNode( node ); break;
-		}
-
-		if( !ok )
-			return false;
+		QModelIndex idx = m_model->index(i, 0, pidx);
+		Node *node = reinterpret_cast<Node *>(idx.internalPointer());
+		if (LandscapeNode *land = dynamic_cast<LandscapeNode *>(node))
+			m_data.push_back(std::make_pair(std::string("landscape"), std::string(land->fileName().toUtf8().constData())));
+		else if (RootPrimitiveNode *primitive = dynamic_cast<RootPrimitiveNode *>(node))
+			m_data.push_back(std::make_pair(std::string("primitive"), std::string(primitive->fileName().toUtf8().constData())));
 	}
-	
-	ok = saveWorldEditFile();
-	return ok;
+
+	try
+	{
+		return makeWorldEditFile();
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		lastError = "Cannot make the content of " + m_currentFile + ": " + e.what();
+		return false;
+	}
 }
 
-bool WorldSaver::saveLandscapeNode( Node *node )
+bool WorldSaver::prepare()
+{
+	m_savedFiles.clear();
+
+	// the .worldedit content is made first, so that nothing is written when it cannot be made
+	if (!makeWorldEdit())
+		return false;
+
+	try
+	{
+		QModelIndex pidx = m_model->index(0, 0);
+		int rows = m_model->rowCount(pidx);
+		for (int i = 0; i < rows; i++)
+		{
+			QModelIndex idx = m_model->index(i, 0, pidx);
+			Node *node = reinterpret_cast<Node *>(idx.internalPointer());
+			bool ok = true;
+			if (node->type() == Node::LandscapeNodeType)
+				ok = prepareLandscapeNode(node);
+			else if (node->type() == Node::RootPrimitiveNodeType)
+				ok = preparePrimitiveNode(node);
+			if (!ok)
+				return false;
+		}
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		lastError = "Cannot make the content of " + m_currentFile + ": " + e.what();
+		return false;
+	}
+
+	// the .worldedit is written last
+	addSavedFile(m_worldEditFileName, m_worldEditContent, NULL);
+	return true;
+}
+
+bool WorldSaver::prepareLandscapeNode(Node *node)
 {
 	LandscapeNode *n = dynamic_cast< LandscapeNode* >( node );
 	if( n == NULL )
@@ -274,26 +325,13 @@ bool WorldSaver::saveLandscapeNode( Node *node )
 		return false;
 	}
 
-	z->setFileName( n->fileName().toUtf8().constData() );
-	bool ok = z->save();
-
-	if( ok )
-	{
-		std::pair< std::string, std::string > p;
-		p.first = "landscape";
-		p.second = n->fileName().toUtf8().constData();
-		
-		m_data.push_back( p );
-	}
-	else
-	{
-		lastError = "Couldn't save landscape file " + std::string( n->fileName().toUtf8().constData() );
-	}
-
-	return ok;
+	m_currentFile = n->fileName().toUtf8().constData();
+	z->setFileName(m_currentFile);
+	addSavedFile(m_currentFile, Utils::landFileContent(z->ligoZoneRegion()), node);
+	return true;
 }
 
-bool WorldSaver::savePrimitiveNode( Node *node )
+bool WorldSaver::preparePrimitiveNode(Node *node)
 {
 	RootPrimitiveNode *n = dynamic_cast< RootPrimitiveNode* >( node );
 	if( n == NULL )
@@ -302,29 +340,76 @@ bool WorldSaver::savePrimitiveNode( Node *node )
 		return false;
 	}
 
-	bool ok = NLLIGO::saveXmlPrimitiveFile( *(n->primitives()), n->fileName().toUtf8().constData() );
-
-	if( ok )
-	{
-		std::pair< std::string, std::string > p;
-		p.first = "primitive";
-		p.second = n->fileName().toUtf8().constData();
-		
-		m_data.push_back( p );
-	}
-	else
-	{
-		lastError = "Couldn't save primitive file " + std::string( n->fileName().toUtf8().constData() );
-	}
-
-	return ok;
+	m_currentFile = n->fileName().toUtf8().constData();
+	addSavedFile(m_currentFile, Utils::primitivesFileContent(*(n->primitives()), m_currentFile), node);
+	return true;
 }
 
-bool WorldSaver::saveWorldEditFile()
+void WorldSaver::addSavedFile(const std::string &fileName, const std::string &content, Node *node)
+{
+	SavedFile file;
+	file.FileName = fileName;
+	file.Content = content;
+	file.Action = Utils::fileAction(fileName, content, Utils::findFileBaseline(m_worldFiles->Baselines, fileName));
+	file.FileNode = node;
+	m_savedFiles.push_back(file);
+}
+
+std::vector<std::string> WorldSaver::conflicts() const
+{
+	std::vector<std::string> result;
+	for (size_t i = 0; i < m_savedFiles.size(); ++i)
+	{
+		if (m_savedFiles[i].Action == Utils::FileConflict)
+			result.push_back(m_savedFiles[i].FileName);
+	}
+	return result;
+}
+
+bool WorldSaver::write(bool replaceConflicts)
+{
+	m_writtenFiles.clear();
+	m_worldEditSaved = false;
+
+	for (size_t i = 0; i < m_savedFiles.size(); ++i)
+	{
+		const SavedFile &file = m_savedFiles[i];
+
+		// a file the editor did not change keeps what is on disk, and a file that changed on disk as
+		// well is replaced only when the user said so
+		if (file.Action == Utils::FileUnchanged || (file.Action == Utils::FileConflict && !replaceConflicts))
+			continue;
+
+		if (file.Action != Utils::FileUpToDate)
+		{
+			if (!Utils::writeFile(file.FileName, file.Content, lastError))
+				return false;
+			m_writtenFiles.push_back(file.FileName);
+		}
+
+		// the file on disk now has what the editor has
+		Utils::setFileBaseline(m_worldFiles->Baselines, file.FileName, file.Content);
+		if (file.FileNode == NULL)
+		{
+			m_worldEditSaved = true;
+		}
+		else if (LandscapeNode *land = dynamic_cast<LandscapeNode *>(file.FileNode))
+		{
+			if (LandscapeEditor::ZoneRegionObject *z = m_zoneBuilder->zoneRegion(land->id()))
+				z->setModified(false);
+		}
+		else
+		{
+			file.FileNode->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
+		}
+	}
+	return true;
+}
+
+bool WorldSaver::makeWorldEditFile()
 {
 	QModelIndex idx = m_model->index( 0, 0 );
 	Node *node = reinterpret_cast< Node* >( idx.internalPointer() );
-	Node::NodeType t = node->type();
 
 	WorldEditNode *n = dynamic_cast< WorldEditNode* >( node );
 	if( n == NULL )
@@ -333,68 +418,202 @@ bool WorldSaver::saveWorldEditFile()
 		return false;
 	}
 
-	std::string fn = n->data( 0 ).toString().toUtf8().constData();
-	bool ok = writeWorldEditFile( fn );
-
-	return ok;
-}
-
-bool WorldSaver::writeWorldEditFile( const std::string &fn )
-{
-	if( fn.empty() )
-		return false;
-
-	NLMISC::COFile of;
-	if( !of.open( fn, false, true, false ) )
+	m_worldEditFileName = n->data(0).toString().toUtf8().constData();
+	if (m_worldEditFileName.empty())
 	{
-		lastError = "Couldn't open file " + fn + " for writing.";
+		lastError = "The world has no file name, nothing was written.";
 		return false;
 	}
+	m_currentFile = m_worldEditFileName;
 
-	NLMISC::COXml xml;
-	xml.init( &of );
-
-	xmlNodePtr rootNode = xmlNewDocNode (xml.getDocument (), NULL, (const xmlChar*)"NEL_WORLD_EDITOR_PROJECT", NULL);
-	xmlDocSetRootElement (xml.getDocument (), rootNode);
-	xmlNodePtr node = xmlNewChild ( rootNode, NULL, (const xmlChar*)"VERSION", NULL);
-	xmlNodePtr text = xmlNewText ((const xmlChar *) NLMISC::toString( WORLD_EDITOR_FILE_VERSION ).c_str ());
-	xmlAddChild( node, text );
-	node = xmlNewChild ( rootNode, NULL, (const xmlChar*)"DATA_DIRECTORY", NULL); 
-	xmlSetProp (node, (const xmlChar*)"VALUE", (const xmlChar*)m_dataDir.c_str ());
-	node = xmlNewChild ( rootNode, NULL, (const xmlChar*)"CONTEXT", NULL);
-	xmlSetProp (node, (const xmlChar*)"VALUE", (const xmlChar*)m_context.c_str ()); 
-
-	std::vector< std::pair< std::string, std::string > >::const_iterator itr = m_data.begin();
-	while( itr != m_data.end() )
+	NLMISC::CMemStream stream;
 	{
-		const std::pair< std::string, std::string > &p = *itr;
-		
-		node = xmlNewChild ( rootNode, NULL, (const xmlChar*)"DATABASE_ELEMENT", NULL);
-		xmlSetProp (node, (const xmlChar*)"FILENAME", (const xmlChar*)p.second.c_str ());
+		NLMISC::COXml xml;
+		xml.init(&stream);
 
-		if( p.first == "landscape" )
-			xmlSetProp (node, (const xmlChar*)"TYPE", (const xmlChar*)("landscape"));
+		// the file the world was loaded from is updated, a new world is made from the model
+		if (!m_loadedContent.empty() && m_worldEditFileName == m_loadedFileName)
+		{
+			xmlDocPtr updatedDoc = updateLoadedFile(m_worldEditFileName);
+			if (updatedDoc == NULL)
+				return false;
+			xmlDocSetRootElement(xml.getDocument(), xmlDocCopyNode(xmlDocGetRootElement(updatedDoc), xml.getDocument(), 1));
+			xmlFreeDoc(updatedDoc);
+		}
 		else
-			xmlSetProp (node, (const xmlChar*)"TYPE", (const xmlChar*)("primitive"));
+		{
+			xmlNodePtr rootNode = xmlNewDocNode(xml.getDocument(), NULL, (const xmlChar *)"NEL_WORLD_EDITOR_PROJECT", NULL);
+			xmlDocSetRootElement(xml.getDocument(), rootNode);
+			xmlNodePtr node = xmlNewChild(rootNode, NULL, (const xmlChar *)"VERSION", NULL);
+			xmlNodePtr text = xmlNewText((const xmlChar *)NLMISC::toString(WORLD_EDITOR_FILE_VERSION).c_str());
+			xmlAddChild(node, text);
+			node = xmlNewChild(rootNode, NULL, (const xmlChar *)"DATA_DIRECTORY", NULL);
+			xmlSetProp(node, (const xmlChar *)"VALUE", (const xmlChar *)m_dataDir.c_str());
+			node = xmlNewChild(rootNode, NULL, (const xmlChar *)"CONTEXT", NULL);
+			xmlSetProp(node, (const xmlChar *)"VALUE", (const xmlChar *)m_context.c_str());
 
-		++itr;
+			const std::string folder = NLMISC::CFile::getPath(m_worldEditFileName);
+			for (size_t i = 0; i < m_data.size(); ++i)
+				addDatabaseElement(rootNode, m_data[i], folder);
+		}
+
+		xml.flush();
 	}
-
-	xml.flush();
-
-	of.close();
-
-
+	m_worldEditContent = std::string((const char *)stream.buffer(), stream.length());
 	return true;
 }
 
+void WorldSaver::addDatabaseElement(struct _xmlNode *rootNode, const std::pair<std::string, std::string> &entry, const std::string &folder)
+{
+	// as the MFC editor does, the name is relative to the folder of the .worldedit, or absolute when the
+	// two share no folder below the root
+	std::string name = entry.second;
+	NLMISC::CPath::makePathRelative(folder, name);
+
+	xmlNodePtr node = xmlNewChild(rootNode, NULL, (const xmlChar *)"DATABASE_ELEMENT", NULL);
+	xmlSetProp(node, (const xmlChar *)"FILENAME", (const xmlChar *)name.c_str());
+	xmlSetProp(node, (const xmlChar *)"TYPE", (const xmlChar *)(entry.first == "landscape" ? "landscape" : "primitive"));
+}
+
+struct _xmlDoc *WorldSaver::updateLoadedFile(const std::string &fn)
+{
+	// start from the file as it was loaded, so that what this editor does not handle stays as it was
+	xmlDocPtr doc = xmlReadMemory(m_loadedContent.data(), (int)m_loadedContent.size(), fn.c_str(), NULL, XML_PARSE_NOBLANKS);
+	xmlNodePtr rootNode = doc ? xmlDocGetRootElement(doc) : NULL;
+	if (rootNode == NULL)
+	{
+		if (doc)
+			xmlFreeDoc(doc);
+		lastError = "The world editor file " + fn + " as it was loaded cannot be read again, nothing was written.";
+		return NULL;
+	}
+
+	const std::string folder = NLMISC::CFile::getPath(fn);
+	std::vector<bool> written(m_data.size(), false);
+	bool hasDataDir = false;
+	bool hasContext = false;
+
+	xmlNodePtr child = rootNode->children;
+	while (child != NULL)
+	{
+		xmlNodePtr next = child->next;
+		if (child->type == XML_ELEMENT_NODE)
+		{
+			const std::string name = (const char *)child->name;
+			if (name == "DATA_DIRECTORY")
+			{
+				hasDataDir = true;
+				if (m_dataDir != m_loadedDataDir)
+					xmlSetProp(child, (const xmlChar *)"VALUE", (const xmlChar *)m_dataDir.c_str());
+			}
+			else if (name == "CONTEXT")
+			{
+				hasContext = true;
+				if (m_context != m_loadedContext)
+					xmlSetProp(child, (const xmlChar *)"VALUE", (const xmlChar *)m_context.c_str());
+			}
+			else if (name == "DATABASE_ELEMENT")
+			{
+				std::string type;
+				NLMISC::CIXml::getPropertyString(type, child, "TYPE");
+
+				// an element of a type the loader does not read is kept as it is
+				if (type == "landscape" || type == "primitive")
+				{
+					std::string fileName;
+					NLMISC::CIXml::getPropertyString(fileName, child, "FILENAME");
+					const std::string path = Utils::worldEditFilePath(fileName, folder);
+
+					// an element keeps its name when its file is in the model, matched first so that
+					// each file of the model takes one element, or else when its file is not loaded
+					bool keep = false;
+					for (size_t i = 0; i < m_data.size() && !keep; ++i)
+					{
+						if (!written[i] && Utils::sameFilePath(m_data[i].second, path))
+						{
+							written[i] = true;
+							keep = true;
+						}
+					}
+					if (!keep)
+						keep = m_worldFiles->NotLoaded.count(path) != 0;
+
+					// the others were unloaded in the editor
+					if (!keep)
+					{
+						xmlUnlinkNode(child);
+						xmlFreeNode(child);
+					}
+				}
+			}
+		}
+		child = next;
+	}
+
+	if (!hasDataDir && m_dataDir != m_loadedDataDir)
+	{
+		xmlNodePtr node = xmlNewChild(rootNode, NULL, (const xmlChar *)"DATA_DIRECTORY", NULL);
+		xmlSetProp(node, (const xmlChar *)"VALUE", (const xmlChar *)m_dataDir.c_str());
+	}
+	if (!hasContext && m_context != m_loadedContext)
+	{
+		xmlNodePtr node = xmlNewChild(rootNode, NULL, (const xmlChar *)"CONTEXT", NULL);
+		xmlSetProp(node, (const xmlChar *)"VALUE", (const xmlChar *)m_context.c_str());
+	}
+
+	// the files of the model that the file did not name are added
+	for (size_t i = 0; i < m_data.size(); ++i)
+	{
+		if (!written[i])
+			addDatabaseElement(rootNode, m_data[i], folder);
+	}
+
+	return doc;
+}
+
+// Keeps the files that are not loaded in step with a load: true when it changed them
+static bool updateNotLoaded(WorldFiles *files, const QString &fileName, bool loaded)
+{
+	if (files == NULL)
+		return false;
+	const std::string name = fileName.toUtf8().constData();
+	if (loaded)
+		return files->NotLoaded.erase(name) != 0;
+	return files->NotLoaded.insert(name).second;
+}
+
+// Records what the editor and the disk had for a file a load command loaded
+static void setLoadedBaseline(WorldFiles *files, const std::string &fileName, bool diskRead, const std::string &diskContent,
+	const std::string &editorContent)
+{
+	Utils::FileBaseline &baseline = files->Baselines[fileName];
+	baseline.EditorKey = Utils::fileContentKey(editorContent);
+	baseline.DiskKey = diskRead ? Utils::fileContentKey(diskContent) : std::string();
+}
+
+// Undoes what updateNotLoaded changed
+static void restoreNotLoaded(WorldFiles *files, const QString &fileName, bool loaded, bool changed)
+{
+	if (files == NULL || !changed)
+		return;
+	const std::string name = fileName.toUtf8().constData();
+	if (loaded)
+		files->NotLoaded.insert(name);
+	else
+		files->NotLoaded.erase(name);
+}
+
 LoadLandscapeCommand::LoadLandscapeCommand(const QString &fileName, PrimitivesTreeModel *model,
-		LandscapeEditor::ZoneBuilderBase *zoneBuilder, QUndoCommand *parent)
+		LandscapeEditor::ZoneBuilderBase *zoneBuilder, WorldFiles *files, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_id(-1),
 	  m_fileName(fileName),
 	  m_model(model),
-	  m_zoneBuilder(zoneBuilder)
+	  m_zoneBuilder(zoneBuilder),
+	  m_files(files),
+	  m_loaded(false),
+	  m_notLoadedChanged(false),
+	  m_firstRedo(true)
 {
 	setText(QObject::tr("Load land file"));
 }
@@ -405,18 +624,56 @@ LoadLandscapeCommand::~LoadLandscapeCommand()
 
 void LoadLandscapeCommand::undo()
 {
+	restoreNotLoaded(m_files, m_fileName, m_loaded, m_notLoadedChanged);
+	m_notLoadedChanged = false;
+
+	if (!m_loaded)
+		return;
+
 	m_zoneBuilder->deleteZoneRegion(m_id);
 	m_model->deleteNode(landIndex);
 }
 
 void LoadLandscapeCommand::redo()
 {
-	if (m_id == -1)
-		m_id = m_zoneBuilder->loadZoneRegion(m_fileName);
-	else
-		m_zoneBuilder->loadZoneRegion(m_fileName, m_id);
+	// what is on disk, read before the land, for Save to tell whether the file changed on disk
+	const std::string fileName = m_fileName.toUtf8().constData();
+	std::string diskContent;
+	bool diskRead = (m_files != NULL) && Utils::readFile(fileName, diskContent);
 
+	// the first load gives the land a new id, the next ones keep it
+	m_error.clear();
+	int id = m_zoneBuilder->loadZoneRegion(m_fileName, m_id, &m_error);
+	m_loaded = (id != -1);
+	m_notLoadedChanged = updateNotLoaded(m_files, m_fileName, m_loaded);
+	bool firstRedo = m_firstRedo;
+	m_firstRedo = false;
+	if (!m_loaded)
+	{
+		// a land that did not load gets no node, so that saving does not write it back empty; the code
+		// that pushed the command says so the first time, the window after a later redo
+		nlwarning("The land file %s could not be loaded", m_fileName.toUtf8().constData());
+		if (!firstRedo && m_files)
+			m_files->RedoFailures << QObject::tr("Landscape: %1 (%2)").arg(m_fileName, m_error);
+		return;
+	}
+
+	m_id = id;
 	landIndex = m_model->createLandscapeNode(m_fileName, m_id);
+
+	if (m_files)
+	{
+		try
+		{
+			setLoadedBaseline(m_files, fileName, diskRead, diskContent, Utils::landFileContent(m_zoneBuilder->zoneRegion(m_id)->ligoZoneRegion()));
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			// without a baseline Save asks before it replaces a file whose content differs
+			nlwarning("Cannot make the content of %s: %s", fileName.c_str(), e.what());
+			m_files->Baselines.erase(fileName);
+		}
+	}
 }
 
 
@@ -484,12 +741,16 @@ void CreateRootPrimitiveCommand::redo()
 
 
 LoadRootPrimitiveCommand::LoadRootPrimitiveCommand(const QString &fileName, WorldEditorScene *scene,
-		PrimitivesTreeModel *model, QTreeView *view, QUndoCommand *parent)
+		PrimitivesTreeModel *model, QTreeView *view, WorldFiles *files, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_fileName(fileName),
 	  m_scene(scene),
 	  m_model(model),
-	  m_view(view)
+	  m_view(view),
+	  m_files(files),
+	  m_loaded(false),
+	  m_notLoadedChanged(false),
+	  m_firstRedo(true)
 {
 	setText(QObject::tr("Load primitive file"));
 }
@@ -500,6 +761,12 @@ LoadRootPrimitiveCommand::~LoadRootPrimitiveCommand()
 
 void LoadRootPrimitiveCommand::undo()
 {
+	restoreNotLoaded(m_files, m_fileName, m_loaded, m_notLoadedChanged);
+	m_notLoadedChanged = false;
+
+	if (!m_loaded)
+		return;
+
 	// Disable edit points mode
 	m_scene->setEnabledEditPoints(false);
 
@@ -520,15 +787,34 @@ void LoadRootPrimitiveCommand::redo()
 {
 	m_scene->setEnabledEditPoints(false);
 
+	// what is on disk, read before the primitives, for Save to tell whether the file changed on disk
+	const std::string fileName = m_fileName.toUtf8().constData();
+	std::string diskContent;
+	bool diskRead = (m_files != NULL) && Utils::readFile(fileName, diskContent);
+
 	NLLIGO::CPrimitives *primitives = new NLLIGO::CPrimitives();
 
 	// set the primitive context
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = primitives;
 
-	NLLIGO::loadXmlPrimitiveFile(*primitives, m_fileName.toUtf8().constData(), *Utils::ligoConfig());
+	m_loaded = NLLIGO::loadXmlPrimitiveFile(*primitives, m_fileName.toUtf8().constData(), *Utils::ligoConfig());
 
 	// unset the context
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+
+	m_notLoadedChanged = updateNotLoaded(m_files, m_fileName, m_loaded);
+	bool firstRedo = m_firstRedo;
+	m_firstRedo = false;
+	if (!m_loaded)
+	{
+		// a primitive file that did not load gets no node, so that saving does not write it back empty;
+		// the code that pushed the command says so the first time, the window after a later redo
+		nlwarning("The primitive file %s could not be loaded", m_fileName.toUtf8().constData());
+		delete primitives;
+		if (!firstRedo && m_files)
+			m_files->RedoFailures << QObject::tr("Primitive: %1 (it cannot be read)").arg(m_fileName);
+		return;
+	}
 
 
 	// Initialize default values
@@ -543,6 +829,21 @@ void LoadRootPrimitiveCommand::redo()
 	m_rootPrimIndex = m_model->createRootPrimitiveNode(m_fileName, primitives);
 
 	addNewGraphicsItems(m_model->pathToIndex(m_rootPrimIndex), m_model, m_scene);
+
+	// after the default values, which Save then writes only with a change made in the editor
+	if (m_files)
+	{
+		try
+		{
+			setLoadedBaseline(m_files, fileName, diskRead, diskContent, Utils::primitivesFileContent(*primitives, fileName));
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			// without a baseline Save asks before it replaces a file whose content differs
+			nlwarning("Cannot make the content of %s: %s", fileName.c_str(), e.what());
+			m_files->Baselines.erase(fileName);
+		}
+	}
 }
 
 

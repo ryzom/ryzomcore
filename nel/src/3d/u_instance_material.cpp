@@ -157,6 +157,20 @@ bool				UInstanceMaterial::isUserColor() const
 
 // ***************************************************************************
 
+void				UInstanceMaterial::setDoubleSided(bool active)
+{
+	_Object->setDoubleSided(active);
+}
+
+// ***************************************************************************
+
+bool				UInstanceMaterial::getDoubleSided() const
+{
+	return _Object->getDoubleSided();
+}
+
+// ***************************************************************************
+
 void				UInstanceMaterial::setEmissive( CRGBA emissive )
 {
 	_Object->setEmissive(emissive);

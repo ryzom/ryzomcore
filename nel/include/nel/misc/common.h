@@ -478,6 +478,8 @@ std::string formatThousands(const std::string& s);
 
 /// This function executes a program in the background and returns instantly (used for example to launch services in AES).
 /// The program will be launched in the current directory
+/// A program name without a directory is searched for in PATH (on Windows: after the application directory,
+/// the current directory and the system directories)
 bool launchProgram (const std::string &programName, const std::string &arguments, bool log = true);
 
 /// Same but with an array of strings for arguments
@@ -560,6 +562,7 @@ inline std::string toString (const sint8 &t)
 
 /** Explode a string (or ucstring) into a vector of string with *sep* as separator. If sep can be more than 1 char, in this case,
  * we find the entire sep to separator (it s not a set of possible separator)
+ * An empty sep separates nothing: res is src as a whole.
  *
  * \param skipEmpty if true, we don't put in the res vector empty string
  */
@@ -568,6 +571,14 @@ template <class T> void explode (const T &src, const T &sep, std::vector<T> &res
 	std::string::size_type oldpos = 0, pos;
 
 	res.clear ();
+
+	// an empty separator separates nothing, and find() would never advance
+	if (sep.empty())
+	{
+		if (!skipEmpty || !src.empty())
+			res.push_back(src);
+		return;
+	}
 
 	do
 	{

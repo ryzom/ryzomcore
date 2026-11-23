@@ -1,0 +1,28 @@
+# Plot items that have plot item sheets: the first and the last of the 185 by number (r2_plot_item_0 and
+# r2_plot_item_99), and two plot items with one sheet, as two authors of a session can leave them. The
+# update has nothing to do: the scenario is as it was but for its list of versions, the author is told
+# nothing, and the two plot items with one sheet keep it.
+
+upgrade: unchanged
+version_update: unchanged
+no_line: version_update_note: uiR2EDVersionNotePlotItem
+
+scenario_vs_file: same
+save: ok
+roundtrip: ok
+reload_version_update: current
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+rt_plot_item_sheets:
+no_line: rt_plot_item_sheets: refused
+absent: version_update_failure
+
+scenario_at: Versions.PlotItem = 1
+scenario_at: PlotItems[0].SheetId = 8630062
+scenario_at: PlotItems[1].SheetId = 8677166
+scenario_at: PlotItems[2].SheetId = 8632366
+scenario_at: PlotItems[3].SheetId = 8632366
+rt_at: PlotItems[0].SheetId = 8630062
+rt_at: PlotItems[1].SheetId = 8677166
+rt_at: PlotItems[3].SheetId = 8632366

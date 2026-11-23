@@ -99,7 +99,7 @@ public:
 	bool				isFileStaticAliasMapped(const std::string &fileName) const;
 	/// Build a standard human readable alias string
 	std::string			aliasToString(uint32 fullAlias);
-	/// Read a standard human readable alias string
+	/// Read a standard human readable alias string, 0 (no alias) when the string is not one
 	uint32				aliasFromString(const std::string &fullAlias);
 
 

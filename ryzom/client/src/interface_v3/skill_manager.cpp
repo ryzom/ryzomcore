@@ -590,13 +590,17 @@ void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool
 		if (!IngameDbMngr.initInProgress())
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if (bAllUnblocked && show_message)
+			if (bAllUnblocked)
 			{
-				// This is a new title, send a message
-				string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
-				bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
-				string newtitle = CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle);
-				CAHManager::getInstance()->runActionHandler("message_popup", nullptr, string("text1=") + newtitle + "|text0=" + CI18N::get("uiNewTitleBold"));
+				// This is a new title, send a message. Without one it may still be the worn title, unblocked late after a
+				// relog: the civ, cult and item checks only run once the database is in, and it must not be taken off
+				if (show_message)
+				{
+					string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
+					bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
+					string newtitle = CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle);
+					CAHManager::getInstance()->runActionHandler("message_popup", nullptr, string("text1=") + newtitle + "|text0=" + CI18N::get("uiNewTitleBold"));
+				}
 			}
 			else
 			{

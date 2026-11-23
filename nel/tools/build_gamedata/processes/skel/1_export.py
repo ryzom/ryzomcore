@@ -28,7 +28,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -71,8 +71,8 @@ if MaxAvailable:
 			if os.path.isfile(scriptDst):
 				os.remove(scriptDst)
 			tagDiff = 1
-			sSrc = open(scriptSrc, "r")
-			sDst = open(scriptDst, "w")
+			sSrc = open(scriptSrc, "r", encoding="latin-1")
+			sDst = open(scriptDst, "w", encoding="latin-1")
 			for line in sSrc:
 				newline = line.replace("%OutputLogfile%", outputLogfile)
 				newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)

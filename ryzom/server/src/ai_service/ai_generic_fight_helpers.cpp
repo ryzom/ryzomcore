@@ -542,9 +542,17 @@ static void s_updateProfile(
 			// If the target died signal it to whoever is interested
 			if (target && !heal)
 			{
+				// The event is one of the group of the bot, and its handlers are script. A script can
+				// despawn the bot: the update of its profile keeps the object until it returns
+				// (CSpawnBot::updateProfile), and nothing more is done for a bot that left its group.
+				// A script can despawn the group of the target as well: the target is not used after
+				// the event.
+				TDataSetRow const targetRow = target->dataSetRow();
 				profile->eventTargetKilled();
+				if (_Bot->isDespawned())
+					return;
 				s_disengage(_Bot, _RangeCalculated, _Engaged, heal); // Disengage from fight
-				_Bot->forgetAggroFor(target->dataSetRow());
+				_Bot->forgetAggroFor(targetRow);
 			}
 			else
 			{

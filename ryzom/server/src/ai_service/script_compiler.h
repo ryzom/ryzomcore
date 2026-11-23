@@ -315,7 +315,11 @@ public:
 	static bool								getNextToken		(std::string const& text, size_t& index, std::string& tokenName, std::string& textValue);
 	static std::string const&				getOpcodeName		(AIVM::CScriptVM::EOpcode const& op);
 	static AIVM::CScriptVM::EOpcode			getOpcodeAndValue	(std::string const& str, std::string& value);
+	/// The native function a script that is compiled calls. While the scenario of a Ring session is
+	/// loaded (CRingScenarioGuard::CLoadScope) this is NULL for a function a scenario may not call.
 	static CScriptNativeFuncParams*			getNativeFunc		(std::string const& funcName, std::string const& inparams, std::string const& outparams);
+	/// The native function a compiled script calls when it runs
+	static CScriptNativeFuncParams*			getNativeFuncForCall(std::string const& funcName, std::string const& inparams, std::string const& outparams);
 	
 	static CCompiler& getInstance()
 	{
@@ -330,6 +334,9 @@ public:
 	static TRuleList _Rules;
 	static TOpcodeMap _Opcodes;
 private:
+	/// Finds a native function by its name and parameters; signature receives the one that was looked up last
+	static CScriptNativeFuncParams*			findNativeFunc		(std::string const& funcName, std::string const& inparams, std::string const& outparams, std::string& signature);
+
 	static TNativeFuncMap	_NativeFunctions;
 	static TTokenList		_Tokens;		
 	static CCompiler*		_Instance;

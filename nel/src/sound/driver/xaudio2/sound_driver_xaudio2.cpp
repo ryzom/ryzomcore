@@ -154,6 +154,7 @@ CSoundDriverXAudio2::CSoundDriverXAudio2(ISoundDriver::IStringMapperProvider * /
 	_PerformancePCMBufferSize(0), _PerformanceSourcePlayCounter(0)
 {
 	nlwarning(NLSOUND_XAUDIO2_PREFIX "Creating CSoundDriverXAudio2");
+	nlcrashdbg(6524326, "driver created, thread=%u", (unsigned int)getThreadId());
 
 	memset(&_X3DAudioHandle, 0, sizeof(_X3DAudioHandle));
 	memset(&_EmptyListener, 0, sizeof(_EmptyListener));

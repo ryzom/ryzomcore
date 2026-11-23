@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -80,9 +80,9 @@ if MeshExport != "":
 					continue
 				printLog(log, "MESH EXPORT " + srcFile)
 				subprocess.call([ MeshExport, "-d", outDirWithoutCoarse, srcFile ])
-				tagFile = open(tagPath, "w")
-				tagFile.write(time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())) + "\n")
-				tagFile.close()
+				fo = open(tagFile, "w")
+				fo.write(time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())) + "\n")
+				fo.close()
 
 # Export shape 3dsmax
 if MaxAvailable:
@@ -115,8 +115,8 @@ if MaxAvailable:
 			if os.path.isfile(scriptDst):
 				os.remove(scriptDst)
 			tagDiff = 1
-			sSrc = open(scriptSrc, "r")
-			sDst = open(scriptDst, "w")
+			sSrc = open(scriptSrc, "r", encoding="latin-1")
+			sDst = open(scriptDst, "w", encoding="latin-1")
 			for line in sSrc:
 				newline = line.replace("%OutputLogfile%", outputLogfile)
 				newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)
@@ -143,7 +143,7 @@ if MaxAvailable:
 				subprocess.call([ Max, "-U", "MAXScript", "shape_export.ms", "-q", "-mi", "-mip" ])
 				if os.path.exists(outputLogfile):
 					try:
-						lSrc = open(outputLogfile, "r")
+						lSrc = open(outputLogfile, "r", encoding="latin-1")
 						for line in lSrc:
 							lineStrip = line.strip()
 							if (len(lineStrip) > 0):

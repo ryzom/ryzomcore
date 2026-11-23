@@ -76,6 +76,26 @@ void CEncyclopediaManager::update(const CEncyclopediaUpdateMsg &msg)
 	switch (msg.Type)
 	{
 		case CEncyclopediaUpdateMsg::UpdateInit:
+			// This is the whole encyclopedia of the character that enters the game. The albums and the themas are found
+			// by the ids of their names, which are new with each entry: what an earlier entry, or another character,
+			// left here would stay beside the new ones, and stay selected. The interface is new too after a character
+			// selection, and stays over a far teleport: the page of what was selected goes back to the help.
+			_Albums.clear();
+			_AlbumNameSelected = 0;
+			_ThemaNameSelected = 0;
+			_CheckAllFrame = false;
+			{
+				CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_ALBUM);
+				if (pIE != NULL)
+					pIE->setActive(false);
+				pIE = CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_THEMA);
+				if (pIE != NULL)
+					pIE->setActive(false);
+				pIE = CWidgetManager::getInstance()->getElementFromId(PAGE_ENCY_HELP);
+				if (pIE != NULL)
+					pIE->setActive(true);
+			}
+
 			_Initializing = true;
 			for (uint32 i = 0; i < msg.AllAlbums.size(); ++i)
 				updateAlbum(msg.AllAlbums[i]);

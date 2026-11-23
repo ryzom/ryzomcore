@@ -31,6 +31,7 @@
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
 #include "nel/misc/dynloadlib.h"
+#include "nel/misc/report.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/u_driver.h"
@@ -196,6 +197,9 @@ CDriverD3D::CDriverD3D()
 	_CurrentMaterialInfo = NULL;
 	_CurrentShader = NULL;
 	_BackBuffer = NULL;
+	m_ZeroAreaRenderTargetReported = false;
+	m_MinimizedPictureMode = false;
+	m_MinimizedPictureUnreadableReported = false;
 	_Maximized = false;
 	_HandlePossibleSizeChangeNextSize = false;
 	_WindowFocus = true;
@@ -248,13 +252,24 @@ CDriverD3D::CDriverD3D()
 		nlwarning ("Can't create the direct 3d 9 object.");
 
 #ifdef NL_OS_WINDOWS
-		sint val = MessageBoxA(NULL,
-			"Your DirectX version is too old. You need to install the latest one.\r\n\r\n"
-			"Pressing OK will quit the game and automatically open your browser to download the latest version of DirectX.\r\n"
-			"Press Cancel will just quit the game.\r\n", "NeL Error", MB_OKCANCEL);
-		if (val == IDOK)
+		// No box nor browser for a program whose windows must not show on the desktop shown: setWindowActivation()
+		// tells the driver so once it has a window, and before that the sign is the crash report tool that the
+		// program switched off (setReportToolEnabled, kept in the environment for all the modules of the process).
+		if (!isReportToolEnabled())
 		{
-			openURL("https://www.microsoft.com/en-us/download/details.aspx?id=35");
+			nlwarning("The DirectX of this system is too old, or missing: the program quits without its message box, as its windows must not show on the desktop shown");
+		}
+		else
+		{
+			sint val = MessageBoxA(NULL,
+			    "Your DirectX version is too old. You need to install the latest one.\r\n\r\n"
+			    "Pressing OK will quit the game and automatically open your browser to download the latest version of DirectX.\r\n"
+			    "Press Cancel will just quit the game.\r\n",
+			    "NeL Error", MB_OKCANCEL);
+			if (val == IDOK)
+			{
+				openURL("https://www.microsoft.com/en-us/download/details.aspx?id=35");
+			}
 		}
 #endif
 		exit(EXIT_FAILURE);
@@ -515,7 +530,7 @@ void CDriverD3D::resetRenderVariables()
 
 // ***************************************************************************
 
-void CDriverD3D::initRenderVariables()
+bool CDriverD3D::initRenderVariables()
 {
 	H_AUTO_D3D(CDriver3D_initRenderVariables);
 	uint i;
@@ -624,7 +639,7 @@ void CDriverD3D::initRenderVariables()
 	_CurrentShader = NULL;
 
 	// Shaders
-	initInternalShaders();
+	bool shadersOk = initInternalShaders();
 
 	// Fog default values
 	_FogStart = 0;
@@ -652,6 +667,8 @@ void CDriverD3D::initRenderVariables()
 
 	// Flush caches
 	updateRenderVariablesInternal();
+
+	return shadersOk;
 }
 
 // ***************************************************************************
@@ -1164,6 +1181,17 @@ void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPAR
 {
 	H_AUTO_D3D(D3DWndProc);
 
+	// The pictures of the minimized window: the window declares that it supplies them when it is minimized, until
+	// it is restored, and the requests of the desktop compositor are recorded, for swapBuffers. The driver keeps
+	// the size the window had before it was minimized (see handlePossibleSizeChange).
+	// A fullscreen device is lost for as long as its window is minimized, and nothing is drawn with it: no picture
+	// can be supplied then. That minimize is not passed on, and the window keeps the pictures of the compositor
+	if (driver != NULL && hWnd == driver->_HWnd
+		&& !(driver->_FullScreen && message == WM_SIZE && wParam == SIZE_MINIMIZED))
+	{
+		driver->m_MinimizedPicture.processMessage(hWnd, message, wParam, lParam, driver->_CurrentMode.Width, driver->_CurrentMode.Height);
+	}
+
 	// Check this message in parents
 
 	if ((message == WM_SIZE) || (message == WM_EXITSIZEMOVE) || (message == WM_MOVE))
@@ -1566,26 +1594,8 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		return false;
 	}
 
-	// The following code is taken from the NVPerfHud user guide
 	// Set default settings
 	_Rasterizer = RASTERIZER;
-#ifdef NL_D3D_USE_NV_PERF_HUD
-		// Look for 'NVIDIA NVPerfHUD' adapter
-		// If it is present, override default settings
-		for (UINT adapterIndex = 0; adapterIndex < _D3D->GetAdapterCount(); adapterIndex++)
-		{
-			D3DADAPTER_IDENTIFIER9 identifier;
-			HRESULT res = _D3D->GetAdapterIdentifier(adapterIndex, 0, &identifier);
-			if (strstr(identifier.Description, "PerfHUD") != 0)
-			{
-				adapter = adapterIndex;
-				_Adapter = adapter;
-				_Rasterizer = D3DDEVTYPE_REF;
-				nlinfo("Using NVIDIA NVPerfHUD adapter");
-				break;
-			}
-		}
-#endif
 
 	// Create device options
 	D3DPRESENT_PARAMETERS parameters;
@@ -1596,24 +1606,6 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		return false;
 	}
 
-	#if WITH_PERFHUD
-		// Look for 'NVIDIA PerfHUD' adapter
-		// If it is present, override default settings
-		for (UINT gAdapter=0;gAdapter<_D3D->GetAdapterCount();gAdapter++)
-		{
-			D3DADAPTER_IDENTIFIER9 Identifier;
-			HRESULT Res;
-			Res = _D3D->GetAdapterIdentifier(gAdapter,0,&Identifier);
-
-			if (strstr(Identifier.Description,"PerfHUD") != 0)
-			{
-				nlinfo ("Setting up with PerfHUD");
-				adapter=gAdapter;
-				_Rasterizer=D3DDEVTYPE_REF;
-				break;
-			}
-		}
-	#endif /* WITH_PERFHUD */
 	// Create the D3D device
 	HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_PUREDEVICE, &parameters, &_DeviceInterface);
 	if (result != D3D_OK)
@@ -1751,7 +1743,21 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	}
 
 	// Reset render state cache
-	initRenderVariables();
+	if (!initRenderVariables())
+	{
+		// Without its internal effects the driver cannot draw lightmaps, clouds or water
+		// d3dx9_42.dll and d3dx9_43.dll load the effect compiler from a DLL of its own when it is first needed;
+		// the versions before them have it built in.
+#if defined(D3DX_SDK_VERSION) && (D3DX_SDK_VERSION >= 42)
+		nlwarning("Can't create the internal effects of the Direct3D driver. d3dx9_%d.dll compiles them with D3DCompiler_%d.dll, which the DirectX end-user runtime installs: check that it is there", D3DX_SDK_VERSION, D3DX_SDK_VERSION);
+#elif defined(D3DX_SDK_VERSION)
+		nlwarning("Can't create the internal effects of the Direct3D driver (compiled by d3dx9_%d.dll)", D3DX_SDK_VERSION);
+#else
+		nlwarning("Can't create the internal effects of the Direct3D driver");
+#endif
+		release();
+		return false;
+	}
 
 	// *** Event init
 
@@ -1901,6 +1907,11 @@ bool CDriverD3D::release()
 		std::vector<NLMISC::CBitmap> bitmaps;
 		setWindowIcon(bitmaps);
 
+		// a window that lives on (one that was handed to the driver) has its pictures from the desktop
+		// compositor again
+		m_MinimizedPicture.release(_HWnd);
+		m_MinimizedPictureMode = false;
+
 		if (_DestroyWindow)
 			DestroyWindow (_HWnd);
 		_HWnd = NULL;
@@ -1977,6 +1988,81 @@ bool CDriverD3D::activate()
 bool CDriverD3D::isActive ()
 {
 	return (IsWindow(_HWnd) != 0);
+}
+
+// ***************************************************************************
+bool CDriverD3D::isWindowMinimized() const
+{
+	// the driver keeps the size the window had before it was minimized, so that getWindowSize does not tell
+	return _HWnd != NULL && IsIconic(_HWnd) != FALSE;
+}
+
+// ***************************************************************************
+void CDriverD3D::restoreWindow()
+{
+	// only a window of the driver's own, and only when it is minimized
+	if (_HWnd == NULL || !_DestroyWindow || !isWindowMinimized())
+		return;
+
+	if (!_WindowActivation)
+	{
+		// Restored without being activated (setWindowActivation). Windows maximizes a window only by activating it
+		// (SW_SHOWMAXIMIZED): one that was maximized before it was minimized comes back at its normal size.
+		WINDOWPLACEMENT placement;
+		placement.length = sizeof(placement);
+		if (GetWindowPlacement(_HWnd, &placement) && (placement.flags & WPF_RESTORETOMAXIMIZED) != 0)
+			nlinfo("The window comes back at its normal size, not maximized as before it was minimized: it is not activated (setWindowActivation), and Windows maximizes a window only by activating it");
+		ShowWindow(_HWnd, SW_SHOWNOACTIVATE);
+		return;
+	}
+	ShowWindow(_HWnd, SW_RESTORE);
+	// the system decides whether a program may take the foreground; where it does not let it, the button of
+	// the window flashes in the task bar
+	SetForegroundWindow(_HWnd);
+}
+
+// ***************************************************************************
+void CDriverD3D::setMinimizedWindowPictureSupplied(bool supplied)
+{
+	m_MinimizedPicture.setSupplied(_HWnd, supplied);
+}
+
+// ***************************************************************************
+bool CDriverD3D::isMinimizedWindowPictureWanted() const
+{
+	return m_MinimizedPictureMode;
+}
+
+// ***************************************************************************
+void CDriverD3D::takeMinimizedPicture()
+{
+	// The back buffer keeps the size the window had before it was minimized, and the frames are drawn into it
+	// as for a window that is shown: the frame that ends is read from it when a picture is due
+
+	if (_HWnd == NULL || !m_MinimizedPicture.isPictureDue())
+		return;
+
+	// nothing was drawn with a lost device: the picture waits for a frame
+	if (_Lost)
+		return;
+
+	// The back buffer can only be locked without multisampling (see the presentation flags set for the
+	// device): with it there is no frame to read, and the window gets the pictures of the compositor again
+	if (_CurrentMode.AntiAlias != -1)
+	{
+		if (!m_MinimizedPictureUnreadableReported)
+		{
+			m_MinimizedPictureUnreadableReported = true;
+			nlinfo("3D: The picture of the minimized window is not available with antialiasing: the back buffer cannot be read");
+		}
+		m_MinimizedPicture.setSupplied(_HWnd, false);
+		return;
+	}
+
+	NLMISC::TTicks readStart = NLMISC::CTime::getPerformanceTime();
+	NLMISC::CBitmap picture;
+	getBuffer(picture);
+	m_MinimizedPicture.setPicture(_HWnd, picture, readStart);
 }
 
 // ***************************************************************************
@@ -2124,6 +2210,10 @@ bool CDriverD3D::swapBuffers()
 	// todo hulud volatile
 	//_DeviceInterface->SetStreamSource(0, _VolatileVertexBufferRAM[1]->VertexBuffer, 0, 12);
 
+	// The frame that ends is the picture of the minimized window, when the desktop compositor waits for one
+	if (m_MinimizedPicture.isSupplied())
+		takeMinimizedPicture();
+
 	// End now
 	if (!endScene())
 	{
@@ -2149,6 +2239,13 @@ bool CDriverD3D::swapBuffers()
 
 	// Check window size
 	handlePossibleSizeChange ();
+
+	// The end of the frame for the pictures of the minimized window: the desktop compositor is told when the
+	// last one is out of date, and whether it shows a picture is known for the next frame
+	if (m_MinimizedPicture.isSupplied())
+		m_MinimizedPictureMode = _HWnd != NULL && m_MinimizedPicture.endFrame(_HWnd);
+	else
+		m_MinimizedPictureMode = false;
 
 	// Reset the profiling counter.
 	_PrimitiveProfileIn.reset();
@@ -2503,6 +2600,20 @@ void CDriverD3D::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 // ***************************************************************************
 void CDriverD3D::setWindowPos(sint32 x, sint32 y)
 {
+	// a position on no monitor (saved under another monitor layout) leaves the window out of reach. Only a top
+	// level window of the driver has a place of its own on the desktop, and a minimized one is nowhere (Windows
+	// reports it at -32000,-32000)
+	RECT frame;
+	if (_HWnd && _DestroyWindow && !_FullScreen && !IsIconic(_HWnd) && GetWindowRect(_HWnd, &frame))
+	{
+		std::vector<NLMISC::CRect> monitors;
+		getMonitorWorkAreas(monitors);
+		sint32 wantedX = x;
+		sint32 wantedY = y;
+		if (keepWindowOnMonitors(monitors, x, y, (uint32)(frame.right - frame.left), (uint32)(frame.bottom - frame.top)))
+			nlinfo("3D: The window position %d,%d is on no monitor: the window is centered on the primary monitor, at %d,%d", wantedX, wantedY, x, y);
+	}
+
 	_WindowX = x;
 	_WindowY = y;
 	SetWindowPos(_HWnd, NULL, _WindowX, _WindowY, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
@@ -2511,7 +2622,12 @@ void CDriverD3D::setWindowPos(sint32 x, sint32 y)
 // ***************************************************************************
 void CDriverD3D::showWindow(bool show)
 {
-	ShowWindow (_HWnd, show ? SW_SHOW:SW_HIDE);
+	// without activation: shown with SetWindowPos, as the first ShowWindow of a process can take the show state the
+	// process was started with instead
+	if (show && !_WindowActivation)
+		SetWindowPos(_HWnd, NULL, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+	else
+		ShowWindow (_HWnd, show ? SW_SHOW:SW_HIDE);
 }
 
 // ***************************************************************************
@@ -2619,17 +2735,21 @@ bool CDriverD3D::setMode (const GfxMode& mode)
 			return false;
 	}
 
+	// a window that is not activated (setWindowActivation) and not shown yet stays hidden, and showWindow() shows it
+	const bool visible = _WindowActivation || IsWindowVisible(_HWnd);
+	const LONG visibleStyle = visible ? WS_VISIBLE : 0;
+
 	// set the mode
 	if( mode.Windowed )
 	{
 		// Set windowed-mode style
-		SetWindowLongW( _HWnd, GWL_STYLE, D3D_WINDOWED_STYLE|WS_VISIBLE);
+		SetWindowLongW(_HWnd, GWL_STYLE, D3D_WINDOWED_STYLE | visibleStyle);
 		_FullScreen = false;
 	}
 	else
 	{
 		// Set fullscreen-mode style
-		SetWindowLongW( _HWnd, GWL_STYLE, D3D_FULLSCREEN_STYLE|WS_VISIBLE);
+		SetWindowLongW(_HWnd, GWL_STYLE, D3D_FULLSCREEN_STYLE | visibleStyle);
 		_FullScreen = true;
 	}
 
@@ -2649,11 +2769,14 @@ bool CDriverD3D::setMode (const GfxMode& mode)
 			WndRect.bottom=_WindowY+_CurrentMode.Height;
 			AdjustWindowRect(&WndRect, GetWindowLongW (_HWnd, GWL_STYLE), FALSE);
 
+			// without activation (setWindowActivation) the window is neither activated nor brought to the front, and one
+			// not shown yet is left for showWindow()
+			UINT showFlags = _WindowActivation ? SWP_SHOWWINDOW : (SWP_NOACTIVATE | SWP_NOZORDER | (visible ? SWP_SHOWWINDOW : 0));
 			SetWindowPos( _HWnd, HWND_NOTOPMOST,
 				std::max ((int)WndRect.left, 0), std::max ((int)WndRect.top, 0),
 						  ( WndRect.right - WndRect.left ),
 						  ( WndRect.bottom - WndRect.top ),
-						  SWP_NOMOVE | SWP_SHOWWINDOW );
+						  SWP_NOMOVE | showFlags );
 		}
 		return true;
 	}
@@ -2820,16 +2943,13 @@ bool CDriverD3D::reset (const GfxMode& mode)
 #ifndef NL_NO_ASM
 		CFpuRestorer fpuRestorer; // fpu control word is changed by "Reset"
 #endif
-		if (_Rasterizer!=D3DDEVTYPE_REF)
+		HRESULT hr = _DeviceInterface->Reset (&parameters);
+		if (hr != D3D_OK)
 		{
-			HRESULT hr = _DeviceInterface->Reset (&parameters);
-			if (hr != D3D_OK)
-			{
-				nlwarning("CDriverD3D::reset: Reset on _DeviceInterface error 0x%x", hr);
-				// tmp
-				nlstopex(("CDriverD3D::reset: Reset on _DeviceInterface"));
-				return false;
-			}
+			nlwarning("CDriverD3D::reset: Reset on _DeviceInterface error 0x%x", hr);
+			// tmp
+			nlstopex(("CDriverD3D::reset: Reset on _DeviceInterface"));
+			return false;
 		}
 	}
 
