@@ -925,7 +925,7 @@ namespace NLGUI
 			{
 				for (sint k = 0; k < length; ++k)
 				{
-					if (isdigit(str[k]) || str[k]== ' ' ||
+					if ((str[k] < 0x80 && isdigit((int)str[k])) || str[k]== ' ' ||
 						(_EntryType==PositiveFloat && str[k]=='.') )
 					{
 						if (!isFiltered(str[k]))
@@ -941,7 +941,7 @@ namespace NLGUI
 			{
 				for (sint k = 0; k < length; ++k)
 				{
-					if (isdigit(str[k]) || str[k]== ' ' || str[k]== '-' ||
+					if ((str[k] < 0x80 && isdigit((int)str[k])) || str[k]== ' ' || str[k]== '-' ||
 						(_EntryType==Float && str[k]=='.') )
 					{
 						if (!isFiltered(str[k]))

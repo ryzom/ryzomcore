@@ -42,6 +42,92 @@ using namespace NL3D;
 
 typedef std::string::size_type TCharPos; // index of a chracter in a string
 
+namespace
+{
+	// Chinese and Japanese are written without spaces between words: a line may break between two of
+	// their characters (ideographs, kana, their punctuation and the full-width forms)
+	bool isBreakAnywhereChar(u32char c)
+	{
+		return (c >= 0x2E80 && c <= 0x9FFF)
+			|| (c >= 0xF900 && c <= 0xFAFF)
+			|| (c >= 0xFE30 && c <= 0xFE4F)
+			|| (c >= 0xFF00 && c <= 0xFFEF)
+			|| (c >= 0x20000 && c <= 0x3FFFF);
+	}
+
+	// The characters that do not begin a line: the ideographic space, closing marks and punctuation, small
+	// kana, voiced sound marks, iteration and prolonged sound marks (the usual rules of Japanese line breaking)
+	bool isNoLineStartChar(u32char c)
+	{
+		switch (c)
+		{
+		case 0x3000: case 0x3001: case 0x3002: case 0x3005: case 0x3009: case 0x300B: case 0x300D: case 0x300F:
+		case 0x3011: case 0x3015: case 0x3017: case 0x3019: case 0x301B: case 0x301C: case 0x301E: case 0x301F:
+		case 0x303B:
+		case 0x3041: case 0x3043: case 0x3045: case 0x3047: case 0x3049: case 0x3063: case 0x3083: case 0x3085:
+		case 0x3087: case 0x308E: case 0x3095: case 0x3096: case 0x3099: case 0x309A: case 0x309B: case 0x309C:
+		case 0x309D: case 0x309E:
+		case 0x30A0: case 0x30A1: case 0x30A3: case 0x30A5: case 0x30A7: case 0x30A9: case 0x30C3: case 0x30E3:
+		case 0x30E5: case 0x30E7: case 0x30EE: case 0x30F5: case 0x30F6: case 0x30FB: case 0x30FC: case 0x30FD:
+		case 0x30FE:
+		case 0xFF01: case 0xFF09: case 0xFF0C: case 0xFF0E: case 0xFF1A: case 0xFF1B: case 0xFF1F: case 0xFF3D:
+		case 0xFF5D: case 0xFF5E: case 0xFF60: case 0xFF61: case 0xFF63: case 0xFF64: case 0xFF65: case 0xFF9E:
+		case 0xFF9F:
+			return true;
+		default:
+			return (c >= 0x31F0 && c <= 0x31FF) // small katakana extension
+				|| (c >= 0xFF67 && c <= 0xFF70); // half-width small katakana and prolonged sound mark
+		}
+	}
+
+	// The characters that do not end a line: opening marks
+	bool isNoLineEndChar(u32char c)
+	{
+		switch (c)
+		{
+		case 0x3008: case 0x300A: case 0x300C: case 0x300E: case 0x3010: case 0x3014: case 0x3016: case 0x3018:
+		case 0x301A: case 0x301D: case 0xFF08: case 0xFF3B: case 0xFF5B: case 0xFF5F: case 0xFF62:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	// The blank characters, which the fonts of the interface (Noto Sans and its fallbacks) give no glyph and so no
+	// quad in a rendered string: tab (drawn as a space), space, no-break space, the typographic spaces, line and
+	// paragraph separators and other invisible characters, two variation selectors, the ideographic space, the
+	// blank Hangul and Braille characters
+	bool isBlankGlyphChar(u32char c)
+	{
+		return c == 0x09 || c == 0x20 || (c >= 0x80 && c <= 0xA0)
+			|| c == 0x115F || c == 0x1160
+			|| (c >= 0x2000 && c <= 0x200B)
+			|| c == 0x2028 || c == 0x2029 || c == 0x202F || c == 0x205F
+			|| (c >= 0x2060 && c <= 0x2064) || (c >= 0x2066 && c <= 0x2069)
+			|| c == 0x2800 || c == 0x3000 || c == 0x3164
+			|| c == 0xFE00 || c == 0xFE0F || c == 0xFEFF || c == 0xFFA0;
+	}
+
+	// The first place after pos and before end where a line may break inside a word (a text without spaces
+	// between pos and end), or end: between two characters of Chinese or Japanese text, unless the second
+	// may not begin a line or the first may not end one. Latin text next to them stays with them.
+	TCharPos findLineBreakInWord(const std::string &text, TCharPos pos, TCharPos end)
+	{
+		if (pos >= end)
+			return end;
+		CUtfStringView sv(CStringView(text.c_str() + pos, end - pos));
+		u32char prev = 0;
+		for (CUtfStringView::iterator it(sv.begin()), itEnd(sv.end()); it != itEnd; ++it)
+		{
+			u32char c = *it;
+			if (prev && isBreakAnywhereChar(prev) && isBreakAnywhereChar(c) && !isNoLineStartChar(c) && !isNoLineEndChar(prev))
+				return pos + (TCharPos)((const char *)it.ptr() - (const char *)sv.ptr());
+			prev = c;
+		}
+		return end;
+	}
+}
+
 REGISTER_UI_CLASS(CViewText)
 
 namespace NLGUI
@@ -1748,8 +1834,10 @@ namespace NLGUI
 		//for (i = 0; i < textSize; ++i)
 		CUtfStringView sv(_Text);
 		::u32string ucStrLetter(1, ' ');
-		for (CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it, ++i)
+		for (CUtfStringView::iterator it(sv.begin()), end(sv.end()); it != end; ++it)
 		{
+			// the format tags are at byte positions of the text
+			i = (uint)((const char *)it.ptr() - (const char *)sv.ptr());
 			if(isFormatTagChange(i, formatTagIndex))
 			{
 				// If the word was not empty before this color tag
@@ -1863,6 +1951,9 @@ namespace NLGUI
 		std::string	wordValue;
 		CFormatInfo	wordFormat;
 		uint		formatTagIndex= 0;
+		// the end of the last run of text without space, \n or FormatTagChange: a text written without spaces is
+		// cut in several words in it, which need not look for its end again
+		uint		runEnd= 0;
 		//
 		nMaxWidth *= _Scale;
 		while (currPos != _Text.length())
@@ -1925,16 +2016,26 @@ namespace NLGUI
 
 				// Get word until a space, a \n, or a FormatTagChange is encountered
 				uint	i;
-				for(i= (uint)spaceEnd;i<(uint)_Text.length();i++)
+				if ((uint)spaceEnd < runEnd)
 				{
-					char	c= _Text[i];
-					if(c==' ' || c=='\n')
-						break;
-					// If change of color tag, stop the word, but don't take the new color now.
-					if(isFormatTagChange(i, formatTagIndex))
-						break;
+					// inside the run of the previous word
+					i = runEnd;
 				}
-				wordEnd = i;
+				else
+				{
+					for(i= (uint)spaceEnd;i<(uint)_Text.length();i++)
+					{
+						char	c= _Text[i];
+						if(c==' ' || c=='\n')
+							break;
+						// If change of color tag, stop the word, but don't take the new color now.
+						if(isFormatTagChange(i, formatTagIndex))
+							break;
+					}
+					runEnd = i;
+				}
+				// or until a place where a line of text written without spaces may break
+				wordEnd = findLineBreakInWord(_Text, spaceEnd, i);
 
 
 				// Get the word value.
@@ -2024,7 +2125,10 @@ namespace NLGUI
 							if ((uint) (px + si.StringWidth) > nMaxWidth) break;
 							px += si.StringWidth;
 						}
-						ptrdiff_t currChar = std::max((ptrdiff_t)1, (ptrdiff_t)wit.ptr() - (ptrdiff_t)wsv.ptr()); // must fit at least one character otherwise there's an infinite loop
+						// must fit at least one character otherwise there's an infinite loop
+						if (wit != wend && wit == wsv.begin())
+							++wit;
+						ptrdiff_t currChar = std::max((ptrdiff_t)1, (ptrdiff_t)wit.ptr() - (ptrdiff_t)wsv.ptr());
 						wordValue = _Text.substr(spaceEnd, currChar);
 						CWord word;
 						word.build(wordValue, *TextContext, numSpaces);
@@ -2421,13 +2525,20 @@ namespace NLGUI
 			CLine &currLine = *_Lines[i];
 			charIndex += currLine.getNumChars() + currLine.getEndSpaces() + (currLine.getLF() ? 1 : 0);
 		}
-		// skip all spaces at start of line (unless there are only spaces in the line)
-		std::string::size_type nextPos = _Text.find_first_not_of(' ', charIndex);
-		if (nextPos != std::string::npos)
+		// skip all spaces at start of line (unless there are only spaces in the line): the index counts the
+		// characters of the text, which is UTF-8
+		CUtfStringView sv(_Text);
+		CUtfStringView::iterator it(sv.begin()), itEnd(sv.end());
+		for (uint i = 0; it != itEnd && i < charIndex; ++i)
+			++it;
+		uint nextIndex = charIndex;
+		for (; it != itEnd && *it == (u32char)' '; ++it)
+			++nextIndex;
+		if (it != itEnd)
 		{
 			if (getLineFromIndex(charIndex) == (sint) line)
 			{
-				return (sint) nextPos;
+				return (sint) nextIndex;
 			}
 		}
 		return charIndex;
@@ -2775,16 +2886,16 @@ namespace NLGUI
 		CUtfStringView::iterator it(sv.begin()), end(sv.end());
 		for (j = 0; it != end && j < charStart; ++j, ++it)
 		{
-			if(*it == (u32char)' ')
+			if(isBlankGlyphChar(*it))
 				quadStart--;
 		}
 		for (j = charStart; it != end && j < charEnd; ++j, ++it)
 		{
-			if(*it == (u32char)' ')
+			if(isBlankGlyphChar(*it))
 				quadSize--;
 		}
 		// select what quad to skip
-		CViewRenderer::getTextContext(_FontName)->setStringSelection(stringId, quadStart, quadSize); // FIXME: This assumes spaces are the only empty glyphs!
+		CViewRenderer::getTextContext(_FontName)->setStringSelection(stringId, quadStart, quadSize); // FIXME: This assumes the blanks of isBlankGlyphChar are the only empty glyphs!
 	}
 
 	// ***************************************************************************
@@ -3033,18 +3144,21 @@ namespace NLGUI
 				if (wordEnd == std::string::npos)
 					wordEnd = _Text.length();
 
-				// Get the word
-				wordValue = _Text.substr(currPos, wordEnd - currPos);
+				// The parts of the word between the places where a line of text written without spaces may break
+				for (TCharPos partEnd; currPos < wordEnd; currPos = partEnd)
+				{
+					partEnd = findLineBreakInWord(_Text, currPos, wordEnd);
 
-				// Compute width of word
-				si = TextContext->getStringInfo(wordValue);
+					// Get the word
+					wordValue = _Text.substr(currPos, partEnd - currPos);
 
-				// Larger ?
-				if (maxWidth < si.StringWidth)
-					maxWidth = si.StringWidth;
+					// Compute width of word
+					si = TextContext->getStringInfo(wordValue);
 
-				// Next word
-				currPos = wordEnd;
+					// Larger ?
+					if (maxWidth < si.StringWidth)
+						maxWidth = si.StringWidth;
+				}
 			}
 		}
 
@@ -3447,22 +3561,25 @@ namespace NLGUI
 		buildFormatTagText(text, tempText, tempLetterColors, tempTooltips);
 		setCase (tempText, _CaseMode);
 
-		// decal for spaces (not inserted in VertexBuffer)
-		uint textIndex = 0;
-		uint spacesNb = 0;
-		for(uint i=0; i<tempLetterColors.size(); i++)
+		// the format tags are at byte positions of the text, the letter colors at the letters that have a glyph:
+		// count those before each tag (blanks are not inserted in VertexBuffer)
 		{
-			CFormatTag & formatTag = tempLetterColors[i];
-
-			while(textIndex<formatTag.Index)
+			CUtfStringView sv(tempText);
+			CUtfStringView::iterator it(sv.begin()), itEnd(sv.end());
+			uint letterIndex = 0;
+			for(uint i=0; i<tempLetterColors.size(); i++)
 			{
-				if(tempText[textIndex] == ' ')
-					spacesNb++;
+				CFormatTag & formatTag = tempLetterColors[i];
 
-				textIndex++;
+				while (it != itEnd && (uint)((const char *)it.ptr() - (const char *)sv.ptr()) < formatTag.Index)
+				{
+					if (!isBlankGlyphChar(*it))
+						letterIndex++;
+					++it;
+				}
+
+				formatTag.Index = letterIndex;
 			}
-
-			formatTag.Index -= spacesNb;
 		}
 
 		// convert in ULetterColors
