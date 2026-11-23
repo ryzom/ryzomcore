@@ -75,25 +75,29 @@ r2.acts = {
 	},
 }
 
+-------------------------- the Outland islands ("... Outland NN" in English): their number is not one of the islands
+-------------------------- of the ecosystem. By name of island and not by the word in their translated name, which
+-------------------------- is only "Outland" in English
+r2.acts.outlandIslands =
+{
+	uiR2_Deserts07 = true, uiR2_Deserts12 = true,
+	uiR2_Forest09 = true, uiR2_Forest13 = true, uiR2_Forest21 = true, uiR2_Forest26 = true, uiR2_Forest28 = true,
+	uiR2_Jungle11 = true, uiR2_Jungle19 = true, uiR2_Jungle21 = true, uiR2_Jungle26 = true, uiR2_Jungle30 = true,
+	uiR2_Jungle33 = true, uiR2_Jungle35 = true, uiR2_Jungle44 = true, uiR2_Jungle45 = true, uiR2_Jungle46 = true,
+	uiR2_Jungle47 = true, uiR2_Jungle48 = true,
+	uiR2_Lakes25 = true, uiR2_Lakes28 = true, uiR2_Lakes29 = true, uiR2_Lakes30 = true, uiR2_Lakes32 = true,
+	uiR2_Lakes35 = true, uiR2_Lakes36 = true, uiR2_Lakes37 = true, uiR2_Lakes40 = true,
+	uiR2_Primes02 = true, uiR2_Primes28 = true,
+}
+
 -------------------------- to sort islands in function of their translated name -----------
 function r2.acts:getIslandNb(islandName)
 
-	local islandTrans = i18n.get(islandName)
-	local islandNb = string.sub(islandTrans, -5)
-	local endLen = 6
-	if string.sub(islandNb, 1, 1) ~= " " then
-		islandNb = string.sub(islandNb, 3)
-		endLen = endLen-1
-	else
-		islandNb = string.sub(islandNb, 2)
-	end
+	if r2.acts.outlandIslands[islandName] then return nil end
 
-	-- outland test
-	local outland = string.sub(islandTrans, 1, -endLen)
-	outland = string.sub(outland, -7)
-	if outland=="Outland" then return nil end
-
-	islandNb = string.sub(islandNb, 1, -2)
+	-- the number of an island is the last number of its translated name: "... (Desert 26)", in any language
+	-- (string.find, since the editor has a string.match of its own: r2_misc.lua)
+	local _, _, islandNb = string.find(i18n.get(islandName), "(%d+)%D*$")
 	return tonumber(islandNb)
 end
 
