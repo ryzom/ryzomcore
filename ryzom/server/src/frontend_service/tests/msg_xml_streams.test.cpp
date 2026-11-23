@@ -95,6 +95,24 @@ static std::string stripped(const std::string &text)
 	return std::string(buffer.begin(), buffer.end());
 }
 
+static std::string splitLines(const std::string &text)
+{
+	std::vector<uint8> buffer(text.begin(), text.end());
+	CGenericXmlMsgHeaderManager::splitAttributeLines(buffer);
+	return std::string(buffer.begin(), buffer.end());
+}
+
+// The text a signature is the MD5 of, once the stream classes are out: with RYZOM_FORGE the file with one attribute
+// per line
+static std::string signed_(const std::string &text)
+{
+#ifdef RYZOM_FORGE
+	return splitLines(text);
+#else
+	return text;
+#endif
+}
+
 // The signature of msg.xml leaves the stream classes out: the file of the repository has the signature of the file
 // before any class was declared (argument 3), byte for byte
 TEST(MsgXmlStreams, SignatureLeavesTheClassesOut)
@@ -113,9 +131,9 @@ TEST(MsgXmlStreams, SignatureLeavesTheClassesOut)
 
 	CHECK(stripped(now) == old);
 	CHECK(stripped(old) == old); // a file without classes is left as it is
-	CHECK(CGenericXmlMsgHeaderManager::getSignature(current, false) == md5Of(old));
-	CHECK(CGenericXmlMsgHeaderManager::getSignature(before, false) == md5Of(old));
-	CHECK(CGenericXmlMsgHeaderManager::getSignature(current, true) == md5Of(old)); // (the file has no carriage returns)
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(current, false) == md5Of(signed_(old)));
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(before, false) == md5Of(signed_(old)));
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(current, true) == md5Of(signed_(old))); // (the file has no carriage returns)
 
 	// The same file with the line ends of a Windows checkout: the frontend's signature of it is that of the old
 	// file with those line ends, and the client's second signature that of the old file without them
@@ -134,8 +152,8 @@ TEST(MsgXmlStreams, SignatureLeavesTheClassesOut)
 	}
 	writeFile(dir + "/crlf.xml", nowCrlf);
 	CHECK(stripped(nowCrlf) == oldCrlf);
-	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/crlf.xml", false) == md5Of(oldCrlf));
-	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/crlf.xml", true) == md5Of(old));
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/crlf.xml", false) == md5Of(signed_(oldCrlf)));
+	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/crlf.xml", true) == md5Of(signed_(old)));
 
 	// More classes, more attributes, tabs, several attributes on a line, a class on the last line without a line end
 	const std::string plain = "<client_messages_description>\n\t<branch name=\"A\">\n\t\t<leaf name=\"X\" description=\"a stream=of words\"/>\n\t\t<leaf name=\"Y\" format=\"u8\"/>\n\t</branch>\n  <leaf name=\"C\"/>\n</client_messages_description>\n";
@@ -203,6 +221,126 @@ TEST(MsgXmlStreams, SignatureLeavesTheClassesOut)
 	NLMISC::CHashKeyMD5 none;
 	none.clear();
 	CHECK(CGenericXmlMsgHeaderManager::getSignature(dir + "/not_there.xml", false) == none);
+}
+
+// The layout with one attribute per line, which the signature of a RYZOM_FORGE build is made of: a file written
+// with each start tag on one line comes back as the file whose attribute lines were joined to make it
+TEST(MsgXmlStreams, OneAttributePerLine)
+{
+	// tags with one attribute or none, closing tags, text and blank lines stay as they are
+	const std::string plain = "<root>\n"
+	                          "  <branch name=\"A\">\n"
+	                          "    <leaf name=\"B\" />\n"
+	                          "\n"
+	                          "    <verbatime>a = b; c = \"d\" e=\"f\"</verbatime>\n"
+	                          "  </branch>\n"
+	                          "</root>\n";
+	CHECK(splitLines(plain) == plain);
+
+	// the second and later attributes go under the first one, the last with what follows it on the line
+	const std::string follow = "    <leaf name=\"FOLLOW\"\n"
+	                           "          sendto=\"AIS\"\n"
+	                           "          format=\"\"\n"
+	                           "          description=\"The client follows its target\" />\n";
+	CHECK(splitLines("    <leaf name=\"FOLLOW\" sendto=\"AIS\" format=\"\" description=\"The client follows its target\" />\n") == follow);
+	// and a text that has one attribute per line already is left as it is
+	CHECK(splitLines(follow) == follow);
+	CHECK(splitLines("  <branch name=\"E\" count=\"256\">\n")
+	    == "  <branch name=\"E\"\n"
+	       "          count=\"256\">\n");
+	CHECK(splitLines("      <branch name=\"\" count=\"10\"> <!-- Change in local_database.xml -->\n")
+	    == "      <branch name=\"\"\n"
+	       "              count=\"10\"> <!-- Change in local_database.xml -->\n");
+
+	// the indentation of the tag is kept as it is, also where it is not the one of its neighbours
+	CHECK(splitLines("      <leaf name=\"SELFKILL\" sendto=\"EGS\" />\n")
+	    == "      <leaf name=\"SELFKILL\"\n"
+	       "            sendto=\"EGS\" />\n");
+
+	// a value with spaces, with a '>' or with what looks like an attribute is one value
+	CHECK(splitLines("<leaf name=\"A B\" format=\"u8 u8 c=&quot;d&quot; e='f' x>y\"/>\n")
+	    == "<leaf name=\"A B\"\n"
+	       "      format=\"u8 u8 c=&quot;d&quot; e='f' x>y\"/>\n");
+
+	// attributes more than one space apart, or after a tab, are not the layout this splits: the line is left,
+	// or split as far as the one-space attributes go; so is a tag indented with a tab
+	CHECK(splitLines("<leaf name=\"A\"  sendto=\"EGS\" format=\"\" />\n") == "<leaf name=\"A\"  sendto=\"EGS\" format=\"\" />\n");
+	CHECK(splitLines("<leaf name=\"A\" sendto=\"EGS\"\tformat=\"\" />\n") == "<leaf name=\"A\"\n      sendto=\"EGS\"\tformat=\"\" />\n");
+	CHECK(splitLines("\t<leaf name=\"A\" sendto=\"EGS\" />\n") == "\t<leaf name=\"A\" sendto=\"EGS\" />\n");
+
+	// a comment is left as it is, with the tags inside it, to the line that ends it
+	const std::string comment = "  <!-- ****OUT OF DATE COMMANDS****\n"
+	                            "<branch name=\"CHEAT\">\n"
+	                            "        <leaf name=\"GOD\"   sendto=\"EGS\" format=\"\" />\n"
+	                            "        <leaf name=\"X\" sendto=\"EGS\" format=\"\" />\n"
+	                            "</branch>\n"
+	                            "-->\n"
+	                            "  <!-- one line --> \n"
+	                            "  <leaf name=\"A\" sendto=\"EGS\" />\n";
+	CHECK(splitLines(comment)
+	    == "  <!-- ****OUT OF DATE COMMANDS****\n"
+	       "<branch name=\"CHEAT\">\n"
+	       "        <leaf name=\"GOD\"   sendto=\"EGS\" format=\"\" />\n"
+	       "        <leaf name=\"X\" sendto=\"EGS\" format=\"\" />\n"
+	       "</branch>\n"
+	       "-->\n"
+	       "  <!-- one line --> \n"
+	       "  <leaf name=\"A\"\n"
+	       "        sendto=\"EGS\" />\n");
+
+	// a comment that a tag's line leaves open goes on below it, and a tag after the end of a comment on its line
+	// is not split
+	const std::string open = "  <branch name=\"\" count=\"10\"> <!-- the slots:\n"
+	                         "    <leaf name=\"OLD\" type=\"I32\" />\n"
+	                         "  --> <leaf name=\"KEPT\" type=\"I32\" />\n"
+	                         "    <leaf name=\"NEW\" type=\"I32\" /> <!-- one --> <!-- two\n"
+	                         "    <leaf name=\"OLD2\" type=\"I32\" />\n"
+	                         "    -->\n";
+	CHECK(splitLines(open)
+	    == "  <branch name=\"\"\n"
+	       "          count=\"10\"> <!-- the slots:\n"
+	       "    <leaf name=\"OLD\" type=\"I32\" />\n"
+	       "  --> <leaf name=\"KEPT\" type=\"I32\" />\n"
+	       "    <leaf name=\"NEW\"\n"
+	       "          type=\"I32\" /> <!-- one --> <!-- two\n"
+	       "    <leaf name=\"OLD2\" type=\"I32\" />\n"
+	       "    -->\n");
+	// "<!-->" does not end the comment it starts
+	CHECK(splitLines("<!-->\n<leaf name=\"A\" b=\"c\" />\n-->\n") == "<!-->\n<leaf name=\"A\" b=\"c\" />\n-->\n");
+
+	// the line ends added are those of the line, and a last line without one is split all the same
+	CHECK(splitLines("  <leaf name=\"A\" sendto=\"EGS\" format=\"\" />\r\n<x a=\"1\" b=\"2\"/>")
+	    == "  <leaf name=\"A\"\r\n"
+	       "        sendto=\"EGS\"\r\n"
+	       "        format=\"\" />\r\n"
+	       "<x a=\"1\"\n"
+	       "   b=\"2\"/>");
+
+	// nothing, and a text of line ends only
+	CHECK(splitLines("") == "");
+	CHECK(splitLines("\n\r\n\n") == "\n\r\n\n");
+
+	// the signature of a database.xml: the MD5 of the file, or of the file without its carriage returns; with
+	// RYZOM_FORGE that of the file in this layout
+	const std::string dir = testDirectory();
+	const std::string compact = "<database_description>\r\n  <branch name=\"E\" count=\"256\">\r\n  </branch>\r\n</database_description>\r\n";
+	writeFile(dir + "/database.xml", compact);
+#ifdef RYZOM_FORGE
+	const std::string compared = splitLines(compact);
+#else
+	const std::string compared = compact;
+#endif
+	std::string comparedText;
+	for (size_t i = 0; i < compared.size(); ++i)
+	{
+		if (compared[i] != '\r')
+			comparedText += compared[i];
+	}
+	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(dir + "/database.xml", false) == md5Of(compared));
+	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(dir + "/database.xml", true) == md5Of(comparedText));
+	NLMISC::CHashKeyMD5 none;
+	none.clear();
+	CHECK(CGenericXmlMsgHeaderManager::getDatabaseSignature(dir + "/not_there.xml", false) == none);
 }
 
 TEST(MsgXmlStreams, ClassesOfTheNodes)

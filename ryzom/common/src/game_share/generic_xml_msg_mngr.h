@@ -337,8 +337,34 @@ public:
 	 * file that has nothing of the kind has the signature it always had, the MD5 of the whole file.
 	 * removeCarriageReturns: of the file without its carriage returns as well (a client compares with both).
 	 * The hash is all zero if the file cannot be read.
+	 * With RYZOM_FORGE the signature is that of the file in the layout the shards and clients of that game have it
+	 * in (see splitAttributeLines), whether the file read has that layout or has each start tag on one line.
 	 */
 	static NLMISC::CHashKeyMD5	getSignature(const std::string &filename, bool removeCarriageReturns);
+
+	/**
+	 * The signature of a database.xml, compared at the same place as that of msg.xml: the MD5 of the file, or of
+	 * the file without its carriage returns. With RYZOM_FORGE it is that of the file in the layout of
+	 * splitAttributeLines as well. The hash is all zero if the file cannot be read.
+	 */
+	static NLMISC::CHashKeyMD5	getDatabaseSignature(const std::string &filename, bool removeCarriageReturns);
+
+	/**
+	 * Give the text of a msg.xml or database.xml the layout with one attribute per line: of a start tag with two
+	 * attributes or more, each attribute after the first goes on a line of its own, aligned with the first one.
+	 * Everything else stays as it is, byte for byte: the indentation of the tags, the comments, the blank lines,
+	 * the tags with one attribute. The line ends added are those of the line that is split.
+	 * A start tag is split when it is the first thing on its line after spaces (not tabs, under which no column
+	 * is the same for everyone), its name and those of its attributes are ASCII without a colon, and its attributes
+	 * are each one space after what comes before, their values between double quotes that close on the line: the
+	 * split goes as far as the attributes are written that way. A tag inside a comment is not split, nor one that
+	 * follows the end of a comment on its line.
+	 * A file whose attribute lines were joined, each with one space, comes back as it was; a file that has one
+	 * attribute per line already is left as it is. The files of the game RYZOM_FORGE is built for are kept with
+	 * each start tag on one line, and their signature is made of this layout, the one its shards and clients
+	 * compare.
+	 */
+	static void					splitAttributeLines(std::vector<uint8> &text);
 
 	/**
 	 * Remove from the text of a msg.xml what declares the stream classes: the lines of the `stream_class` elements,
