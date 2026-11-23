@@ -108,6 +108,16 @@ public:
 	  * in the water VB: reflection-capable shapes (fallback continuity) and
 	  * shapes flagged for calculated reflectivity over the artist envmap. */
 	bool wantsCalcReflectivityUVs() const;
+	/** True when this surface may use a realtime planar reflection, and
+	  * keeps the calculated reflectivity when it falls back to its envmap:
+	  * reflection is enabled in the scene, and the shape has the artist flag,
+	  * matches the scene's reflection shape list, or the force-all override
+	  * is on. */
+	bool isReflectionCapable() const;
+	/** Lets the shared water material drop the last realtime reflection
+	  * texture it holds, so that freed render targets are released at once
+	  * (every water draw sets that stage again before use). */
+	static void releasePlanarReflectionTexture();
 
 	// For Debug purpose
 	void	debugDumpMem(void* &clippedPolyBegin, void* &clippedPolyEnd);
@@ -141,6 +151,10 @@ private:
 	// where the traversal camera state is fresh — from the scene's water
 	// reflection manager; valid for the current render only)
 	const CWaterReflectionManager::CActiveReflection *_PlanarReflection;
+	// whether the shape matches the reflection shape list, as of list version
+	// _ReflShapesVersion (recomputed when the scene's list changes)
+	mutable uint32			   _ReflShapesVersion;
+	mutable bool			   _ReflShapeListed;
 	// link into list of water model to display
 public:
 	CWaterModel **_Prev;

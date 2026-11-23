@@ -3065,6 +3065,12 @@ static vector<UDriver::CMode> VideoModes;
 #define GAME_CONFIG_SOUND_DRIVER_COMBO	"ui:interface:game_config:content:sound:driver_gr:driver"
 #define GAME_CONFIG_SOUND_DRIVER_DB		"UI:TEMP:SOUND_DRIVER"
 
+// The drivers and the devices in use, which the general and the sound page tell
+#define GAME_CONFIG_GRAPHICS_DRIVER_CURRENT	"ui:interface:game_config:content:general:driver_current"
+#define GAME_CONFIG_GRAPHICS_CARD_CURRENT	"ui:interface:game_config:content:general:card_current"
+#define GAME_CONFIG_SOUND_DRIVER_CURRENT	"ui:interface:game_config:content:sound:driver_current"
+#define GAME_CONFIG_SOUND_DEVICE_CURRENT	"ui:interface:game_config:content:sound:device_current"
+
 // Network connection
 #define GAME_CONFIG_CONNECTION_PREFERENCE_COMBO "ui:interface:game_config:content:network:preference"
 #define GAME_CONFIG_CONNECTION_PREFERENCE_DB "UI:TEMP:CONNECTION_PREFERENCE"
@@ -3150,6 +3156,67 @@ void updateVRDevicesComboUI(bool enable)
 }
 
 // ***************************************************************************
+// The name of a sound driver in the interface, NULL for one this client does not know
+static const char *getSoundDriverLabel(NLSOUND::UAudioMixer::TDriver driver)
+{
+	switch (driver)
+	{
+	case NLSOUND::UAudioMixer::DriverAuto:
+		return "Auto";
+	case NLSOUND::UAudioMixer::DriverFMod:
+		return "FMod";
+	case NLSOUND::UAudioMixer::DriverDSound:
+		return "DirectSound";
+	case NLSOUND::UAudioMixer::DriverOpenAl:
+		return "OpenAL";
+	case NLSOUND::UAudioMixer::DriverXAudio2:
+		return "XAudio2";
+	default:
+		return nullptr;
+	}
+}
+
+// ***************************************************************************
+// Set a text of the configuration window that is a value (the name of a device), not the key of a translation
+static void setGameConfigText(const char *id, const std::string &text)
+{
+	CViewText *view = dynamic_cast<CViewText *>(CWidgetManager::getInstance()->getElementFromId(id));
+	if (!view)
+	{
+		nlwarning("Game configuration UI element '%s' not found", id);
+		return;
+	}
+	view->setTextLocalized(text, false);
+}
+
+// ***************************************************************************
+// The general and the sound page tell which driver and which device draw the game and play its sound at the
+// moment: the driver that was asked for may be "Auto", and the device the default one. Called when the window
+// opens, and by updateFromClientCfg when the sound was started again or stopped.
+void updateDriversInUseConfigUI()
+{
+	// what the 3D driver says of itself, and of the card it draws on (the line of the log)
+	setGameConfigText(GAME_CONFIG_GRAPHICS_DRIVER_CURRENT, Driver->getDriverInformation());
+	setGameConfigText(GAME_CONFIG_GRAPHICS_CARD_CURRENT, Driver->getVideocardInformation());
+
+	NLSOUND::UAudioMixer *mixer = SoundMngr ? SoundMngr->getMixer() : nullptr;
+	NLSOUND::UAudioMixer::TDriver driver = mixer ? mixer->getCurrentDriver() : NLSOUND::UAudioMixer::NumDrivers;
+	const char *driverLabel = getSoundDriverLabel(driver);
+	if (!driverLabel)
+	{
+		// the sound is off, or it did not start
+		setGameConfigText(GAME_CONFIG_SOUND_DRIVER_CURRENT, CI18N::get("uigcSoundDriverCurrentNone"));
+		setGameConfigText(GAME_CONFIG_SOUND_DEVICE_CURRENT, CI18N::get("uigcSoundDeviceCurrentNone"));
+		return;
+	}
+	setGameConfigText(GAME_CONFIG_SOUND_DRIVER_CURRENT, driverLabel);
+	// a driver that does not name the device it opened only has its default device (the mixer refuses a name
+	// the driver does not list)
+	std::string device = mixer->getCurrentDeviceName();
+	setGameConfigText(GAME_CONFIG_SOUND_DEVICE_CURRENT, device.empty() ? CI18N::get("uigcSoundDeviceCurrentDefault") : device);
+}
+
+// ***************************************************************************
 void updateSoundDriverComboUI()
 {
 	CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_SOUND_DRIVER_COMBO));
@@ -3190,27 +3257,8 @@ void updateSoundDriverComboUI()
 
 	for(uint i = 0; i < drivers.size(); ++i)
 	{
-		switch(drivers[i].ID)
-		{
-			case NLSOUND::UAudioMixer::DriverAuto:
-				pCB->addText("Auto");
-				break;
-			case NLSOUND::UAudioMixer::DriverFMod:
-				pCB->addText("FMod");
-				break;
-			case NLSOUND::UAudioMixer::DriverDSound:
-				pCB->addText("DirectSound");
-				break;
-			case NLSOUND::UAudioMixer::DriverOpenAl:
-				pCB->addText("OpenAL");
-				break;
-			case NLSOUND::UAudioMixer::DriverXAudio2:
-				pCB->addText("XAudio2");
-				break;
-			default:
-				pCB->addText(drivers[i].Name);
-				break;
-		}
+		const char *label = getSoundDriverLabel(drivers[i].ID);
+		pCB->addText(label ? label : drivers[i].Name);
 
 		if (cfgDriverId == drivers[i].ID)
 			selected = i;
@@ -3387,6 +3435,8 @@ public:
 		CAHManager::getInstance()->runActionHandler("game_config_change_vid_fullscreen", nullptr);
 
 		updateSoundDriverComboUI();
+
+		updateDriversInUseConfigUI();
 
 		updateConnectionConfigUI();
 

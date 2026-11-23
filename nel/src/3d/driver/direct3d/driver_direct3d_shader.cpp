@@ -3266,9 +3266,9 @@ technique technique_water_no_diffuse_1_1							\n\
 
 // Calculated reflectivity variants of the water effects: the ps_2_0
 // technique derives the blend alpha from the per-vertex reflectivity base
-// (TEXCOORD2.z, the shape's stylized fresnel) boosted by the reflection's
-// gamma-space luma — reproducing the original assets' luminance-derived
-// envmap alpha. The ps_1_x techniques are verbatim copies (flat reflection
+// (TEXCOORD2.z, the shape's stylized fresnel) boosted by the square of the
+// reflection's gamma-space luma (see CWaterVertexWriter). The ps_1_x
+// techniques are verbatim copies (flat reflection
 // alpha fallback). ps_2_0 shaders compiled from shaders/water_fp.cg with
 // -DUSE_CALC_REFLECTIVITY.
 
@@ -3285,7 +3285,7 @@ float  scalarFloat0; // bump scale for 1_1 version					\n\
 																	\n\
 pixelshader water_calc_diffuse_2_0 = asm							\n\
 {																	\n\
-	// calculated reflectivity: alpha = lerp(t2.z, 1, luma(reflection))	\n\
+	// calculated reflectivity: alpha = lerp(t2.z, 1, luma(reflection)^2)	\n\
 	ps_2_0;															\n\
 	dcl_2d s0;														\n\
 	dcl_2d s1;														\n\
@@ -3306,6 +3306,7 @@ pixelshader water_calc_diffuse_2_0 = asm							\n\
 	add r0.xy, r0, t2;												\n\
 	texld r3, r0, s2;												\n\
 	dp3 r0.x, r3, c2;												\n\
+	mul r0.x, r0.x, r0.x;												\n\
 	mad r3.w, r0.x, r1.x, t2.z;										\n\
 	mul r0, r3, r2;													\n\
 	mov oC0, r0;													\n\
@@ -3394,7 +3395,7 @@ float  scalarFloat0; // bump scale for 1_1 version					\n\
 																	\n\
 pixelshader water_calc_no_diffuse_2_0 = asm						\n\
 {																	\n\
-	// calculated reflectivity: alpha = lerp(t2.z, 1, luma(reflection))	\n\
+	// calculated reflectivity: alpha = lerp(t2.z, 1, luma(reflection)^2)	\n\
 	ps_2_0;															\n\
 	dcl_2d s0;														\n\
 	dcl_2d s1;														\n\
@@ -3412,6 +3413,7 @@ pixelshader water_calc_no_diffuse_2_0 = asm						\n\
 	add r0.xy, r0, t2;												\n\
 	texld r2, r0, s2;												\n\
 	dp3 r0.x, r2, c2;												\n\
+	mul r0.x, r0.x, r0.x;												\n\
 	mad r2.w, r0.x, r1.x, t2.z;										\n\
 	mov oC0, r2;													\n\
 };																	\n\

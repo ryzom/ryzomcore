@@ -233,6 +233,14 @@ public:
 	 *	ESoundDriver thrown here, the driver is released: initDriver must be called again before a new try.
 	 */
 	virtual void		initDevice(const std::string &deviceName, const CInitInfo &initInfo, NLMISC::IProgressCallback *progressCallback = nullptr) = 0;
+	/** The driver that initDriver made: the one that was chosen when "auto" was asked, never DriverAuto.
+	 *	NumDrivers when there is no driver (before initDriver, and after a failure of initDriver or initDevice).
+	 */
+	virtual TDriver		getCurrentDriver() const = 0;
+	/** The device that initDevice opened, by the name getDevices() has for it: the one that was opened too
+	 *	when the default device was asked. Empty when no device is open, and with a driver that does not tell.
+	 */
+	virtual std::string	getCurrentDeviceName() const = 0;
 
 	/** Initialisation of the clustered sound system.
 	  */

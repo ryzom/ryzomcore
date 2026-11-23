@@ -2104,7 +2104,7 @@ uint32 CDriverD3D::getImplementationVersion () const
 // ***************************************************************************
 const char *CDriverD3D::getDriverInformation ()
 {
-	return "Directx 9 NeL Driver";
+	return "Direct3D 9 NeL Driver";
 }
 
 // ***************************************************************************

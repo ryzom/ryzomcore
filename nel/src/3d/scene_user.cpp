@@ -951,9 +951,7 @@ CSceneUser::CSceneUser(CDriverUser *drv, bool bSmallScene) : _Scene(bSmallScene)
 
 CSceneUser::~CSceneUser()
 {
-	for (uint i = 0; i < _WaterReflectionTextures.size(); ++i)
-		delete _WaterReflectionTextures[i];
-	_WaterReflectionTextures.clear();
+	releaseWaterReflectionTextures();
 	_VisualCollisionManagers.clear();
 	_Landscapes.clear();
 	_CloudScapes.clear();
@@ -1170,6 +1168,23 @@ void CSceneUser::setWaterEnvMap(UWaterEnvMap *waterEnvMap)
 void CSceneUser::updateWaterEnvMaps(TGlobalAnimationTime time)
 {
 	_Scene.updateWaterEnvMaps(time);
+}
+
+// ***************************************************************************
+void CSceneUser::releaseWaterReflectionTextures()
+{
+	for (uint i = 0; i < _WaterReflectionTextures.size(); ++i)
+		delete _WaterReflectionTextures[i];
+	_WaterReflectionTextures.clear();
+}
+
+// ***************************************************************************
+void CSceneUser::setRealtimeWaterReflectionsEnabled(bool enabled)
+{
+	_Scene.getWaterReflectionManager().setEnabled(enabled);
+	// The wrappers would keep the render targets the manager has let go of
+	if (!enabled)
+		releaseWaterReflectionTextures();
 }
 
 // ***************************************************************************

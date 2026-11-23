@@ -301,19 +301,24 @@ struct CClientConfig
 	/// The lighting of the weather scales the light on the ground when the landscape is drawn (the sun and the lamps
 	/// on the ground alike) and dims the landscape light groups. The grass follows WeatherLightingEntities
 	bool			WeatherLightingLandscape;
-	/// A lightning of a thunder storm flashes on what the landscape light groups light
+	/// A lightning of a thunder storm flashes on what the landscape light groups light, which is the buildings.
+	/// Off by default: the flash was not visible in the released game, and its look was not tuned
 	bool			WeatherLightningFlash;
 
 	// Is bloom effect activated
 	bool			Bloom;
 	bool			SquareBloom;
 	float			DensityBloom;
-	/// Max number of water pools with realtime planar reflection per frame (0 = off)
+	/// Max number of water pools with realtime planar reflection per frame (0 = none; reflection-capable water keeps the matching envmap look)
 	sint			MaxWaterReflections;
 	/// Max reflection render target textures per eye (L and R each get up to this many); reflected planes tile into shared textures (-1 = as many as needed)
 	sint			MaxWaterReflectionTextures;
-	/// Dev: force realtime planar reflection on all water surfaces
+	/// Dev: force realtime planar reflection on all water surfaces (no effect while WaterReflections is off)
 	bool			ForceWaterReflections;
+	/// Water reflections as a whole (user setting, a feature preview): off, the default, gives every water surface its original look
+	bool			WaterReflections;
+	/// Water shapes that may reflect although their asset predates the realtime reflection flag (shape file names, wildcards allowed)
+	std::vector<std::string> WaterReflectionShapes;
 
 	/// Movie Shooter
 	uint			MovieShooterMemory;

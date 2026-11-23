@@ -857,7 +857,11 @@ public:
 
 	virtual const char*		getDriverInformation () NL_OVERRIDE
 	{
-		return "Opengl 3.3 Core NeL Driver";
+#ifdef USE_OPENGLES3
+		return "OpenGL ES 3.0 NeL Driver";
+#else
+		return "OpenGL 3.3 Core NeL Driver";
+#endif
 	}
 
 	virtual const char*		getVideocardInformation () NL_OVERRIDE;

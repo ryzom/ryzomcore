@@ -249,6 +249,7 @@ void CSoundDriverXAudio2::release()
 	// XAudio2
 	NLSOUND_XAUDIO2_RELEASE_EX(_MasteringVoice, _MasteringVoice->DestroyVoice());	
 	NLSOUND_XAUDIO2_RELEASE_EX(_XAudio2, _XAudio2->Release());
+	m_DeviceName.clear();
 	_SoundDriverOk = false;
 }
 
@@ -298,7 +299,9 @@ uint CSoundDriverXAudio2::getDeviceIndex(const std::string &device, XAUDIO2_DEVI
 			return i;
 	}
 
+	// the details are those of the device that is taken in its place
 	nldebug("XA2: Device '%s' not found", device.c_str());
+	_XAudio2->GetDeviceDetails(0, deviceDetails);
 	return 0;
 }
 
@@ -335,9 +338,11 @@ void CSoundDriverXAudio2::initDevice(const std::string &device, TSoundOptions op
 
 	// XAudio2
 	XAUDIO2_DEVICE_DETAILS deviceDetails;
+	memset(&deviceDetails, 0, sizeof(deviceDetails));
 	uint deviceIndex = getDeviceIndex(device, &deviceDetails);
 	if (FAILED(hr = _XAudio2->CreateMasteringVoice(&_MasteringVoice, 0, NLSOUND_XAUDIO2_MASTER_SAMPLE_RATE, 0, deviceIndex, NULL)))
 		{ release(); throw ESoundDriver(NLSOUND_XAUDIO2_PREFIX "FAILED CreateMasteringVoice _MasteringVoice!"); return; }
+	m_DeviceName = wideToUtf8(deviceDetails.DisplayName);
 	
 	// X3DAudio
 	// speed of sound in meters per second for dry air at approximately 20C, used with X3DAudioInitialize

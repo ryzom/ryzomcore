@@ -404,7 +404,7 @@ CClientConfig::CClientConfig()
 
 	WeatherLightingEntities		= true;
 	WeatherLightingLandscape	= true;
-	WeatherLightningFlash		= true;
+	WeatherLightningFlash		= false;
 
 	Bloom				= true;
 	SquareBloom			= true;
@@ -412,6 +412,7 @@ CClientConfig::CClientConfig()
 	MaxWaterReflections	= 3;
 	MaxWaterReflectionTextures = 1;
 	ForceWaterReflections = false;
+	WaterReflections	= false;
 
 	GlobalWindPower		= 0.10f;					// Default is 0.25
 	GlobalWindDirection	= CVector(1,0,0);			// Default direction is X>0
@@ -1112,6 +1113,8 @@ void CClientConfig::setValues()
 	READ_INT_FV(MaxWaterReflections)
 	READ_INT_FV(MaxWaterReflectionTextures)
 	READ_BOOL_DEV(ForceWaterReflections)
+	READ_BOOL_FV(WaterReflections)
+	READ_STRINGVECTOR_FV(WaterReflectionShapes)
 
 	// FXAA
 	READ_BOOL_FV(FXAA)

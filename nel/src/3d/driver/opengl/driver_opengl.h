@@ -521,7 +521,7 @@ public:
 
 	virtual const char*		getDriverInformation ()
 	{
-		return "Opengl 1.2 NeL Driver";
+		return "OpenGL 1.2 NeL Driver";
 	}
 
 	virtual const char*		getVideocardInformation ();

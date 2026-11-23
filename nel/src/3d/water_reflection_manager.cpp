@@ -25,6 +25,9 @@
 #include "std3d.h"
 #include "nel/3d/water_reflection_manager.h"
 
+#include "nel/misc/algo.h"
+#include "nel/misc/common.h"
+#include "nel/misc/path.h"
 #include "nel/misc/plane.h"
 
 #include "nel/3d/camera.h"
@@ -33,6 +36,7 @@
 #include "nel/3d/scissor.h"
 #include "nel/3d/texture_offscreen.h"
 #include "nel/3d/u_scene.h"
+#include "nel/3d/water_model.h"
 #include "nel/3d/viewport.h"
 
 #include <algorithm>
@@ -91,6 +95,8 @@ CWaterReflectionManager::CWaterReflectionManager()
 	, _MaxReflections(-1)
 	, _MaxTextures(-1)
 	, _ForceReflections(false)
+	, _Enabled(true)
+	, _ReflectionShapesVersion(0)
 	, _HalfRes(true)
 	, _Pow2(true)
 	, _FixedSize(true)
@@ -129,6 +135,57 @@ void CWaterReflectionManager::release()
 			_Scene->deleteModel(_ReflCamera);
 		_ReflCamera = nullptr;
 	}
+}
+
+// ***************************************************************************
+void CWaterReflectionManager::setEnabled(bool enabled)
+{
+	if (enabled == _Enabled) return;
+	_Enabled = enabled;
+	if (!enabled)
+	{
+		nlassert(!_InReflectionRender);
+		// Back to the legacy look: drop the published reflections and the
+		// render targets, and let the shared water vertex buffer lose the
+		// reflection channel. The reflection camera stays for re-enabling.
+		for (uint i = 0; i < _Views.size(); ++i)
+		{
+			_Views[i].Active.clear();
+			_Views[i].Slots.clear();
+		}
+		// the shared water material still holds the last reflection drawn
+		CWaterModel::releasePlanarReflectionTexture();
+		_Collected.clear();
+		_PrevAdmitted.clear();
+		_HadReflections = false;
+	}
+}
+
+// ***************************************************************************
+void CWaterReflectionManager::setReflectionShapes(const std::vector<std::string> &shapeNames)
+{
+	_ReflectionShapes.clear();
+	_ReflectionShapes.reserve(shapeNames.size());
+	for (uint i = 0; i < shapeNames.size(); ++i)
+	{
+		if (!shapeNames[i].empty())
+			_ReflectionShapes.push_back(toLowerAscii(shapeNames[i]));
+	}
+	++_ReflectionShapesVersion;
+}
+
+// ***************************************************************************
+bool CWaterReflectionManager::isReflectionShape(const std::string &shapeName) const
+{
+	if (_ReflectionShapes.empty()) return false;
+	// the shape bank names shapes by lower case file name; strip a path anyway
+	const std::string name = toLowerAscii(CFile::getFilename(shapeName));
+	for (uint i = 0; i < _ReflectionShapes.size(); ++i)
+	{
+		if (testWildCard(name, _ReflectionShapes[i]))
+			return true;
+	}
+	return false;
 }
 
 // ***************************************************************************
@@ -241,7 +298,7 @@ uint CWaterReflectionManager::beginPasses()
 	}
 	_Passes.clear();
 
-	if (_MaxReflections == 0 || collected.empty())
+	if (!_Enabled || _MaxReflections == 0 || collected.empty())
 	{
 		_PrevAdmitted.clear();
 		return 0;

@@ -108,6 +108,8 @@ public:
 	virtual void getDevices(std::vector<std::string> &devices);
 	/// Initialize the driver with a user selected device. If device.empty(), the default or most appropriate device is used.
 	virtual void initDevice(const std::string &device, TSoundOptions options);
+	/// The device that is open, by its name of getDevices() if the devices are listed.
+	virtual std::string getDeviceName() const;
 
 	/// Return options that are enabled (including those that cannot be disabled on this driver).
 	virtual TSoundOptions getOptions();

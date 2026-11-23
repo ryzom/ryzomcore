@@ -13,9 +13,8 @@
 //
 // USE_CALC_REFLECTIVITY: texture 2 is a reflection (realtime planar RT or
 // artist envmap) whose alpha channel is ignored. The blend alpha is derived from the per-vertex reflectivity base
-// (TEXCOORD2.z, the shape's stylized fresnel) boosted by the reflection's
-// gamma-space luma — reproducing the original assets' luminance-derived
-// envmap alpha (see CWaterShape::setReflectivityFresnel).
+// (TEXCOORD2.z, the shape's stylized fresnel) boosted by the square of the
+// reflection's gamma-space luma (see CWaterShape::setReflectivityFresnel).
 //
 // Driver sets constants:
 //   c[0] = bump0ScaleBias {2*factor, -factor, 0, 0}
@@ -75,9 +74,9 @@ void water_fp(
 	float4 envMap = tex2D(nlTex2, bmValue.xy);
 
 #ifdef USE_CALC_REFLECTIVITY
-	// Blend alpha: per-vertex reflectivity base boosted by reflection luma
+	// Blend alpha: per-vertex reflectivity base boosted by the square of the reflection's luma
 	float lum = dot(envMap.rgb, float3(0.2126, 0.7152, 0.0722));
-	envMap.a = lerp(envMapTexCoord.z, 1.0, lum);
+	envMap.a = lerp(envMapTexCoord.z, 1.0, lum * lum);
 #endif
 
 #ifdef USE_DIFFUSE

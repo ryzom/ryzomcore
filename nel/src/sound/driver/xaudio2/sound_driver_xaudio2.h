@@ -46,6 +46,8 @@ protected:
 	IXAudio2 *_XAudio2;
 	/// Pointer to XAudio2 Mastering Voice.
 	IXAudio2MasteringVoice *_MasteringVoice;
+	/// The name of the device the mastering voice is on
+	std::string m_DeviceName;
 	
 	// system vars
 	/// If XAudio2 is fully initialized.
@@ -135,6 +137,8 @@ public:
 	virtual void getDevices(std::vector<std::string> &devices);
 	/// Initialize the driver with a user selected device. If device.empty(), the default or most appropriate device is used.
 	virtual void initDevice(const std::string &device, TSoundOptions options);
+	/// The device that is open, by its name of getDevices().
+	virtual std::string getDeviceName() const { return m_DeviceName; }
 
 	/// (Internal) Get device index and details from string.
 	uint getDeviceIndex(const std::string &device, XAUDIO2_DEVICE_DETAILS *deviceDetails);

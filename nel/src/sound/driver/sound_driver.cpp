@@ -57,7 +57,7 @@ namespace NLSOUND
 /// Interface version, increase when any part of sound_lowlevel is changed.
 /// Put your name in comment to make sure you don't commit with
 /// the same interface version number as someone else.
-const uint32 ISoundDriver::InterfaceVersion = 0x17; // Nimetu
+const uint32 ISoundDriver::InterfaceVersion = 0x18; // Kaetemi
 
 #ifdef NL_STATIC
 
@@ -89,6 +89,29 @@ typedef uint32 (*ISDRV_VERSION_PROC)(void);
 const char *IDRV_VERSION_PROC_NAME = "NLSOUND_interfaceVersion";
 
 #endif
+
+/// The driver that DriverAuto stands for in this build (DriverAuto itself when the build has no driver)
+static ISoundDriver::TDriver getAutoDriver()
+{
+#ifdef NL_STATIC
+	// the first one the build has, in this order: FMod, OpenAl, XAudio2, DSound
+#	if defined(NL_FMOD_AVAILABLE)
+	return ISoundDriver::DriverFMod;
+#	elif defined(NL_OPENAL_AVAILABLE)
+	return ISoundDriver::DriverOpenAl;
+#	elif defined(NL_XAUDIO2_AVAILABLE)
+	return ISoundDriver::DriverXAudio2;
+#	elif defined(NL_DSOUND_AVAILABLE)
+	return ISoundDriver::DriverDSound;
+#	else
+	return ISoundDriver::DriverAuto;
+#	endif
+#elif defined(NL_OS_WINDOWS)
+	return ISoundDriver::DriverXAudio2;
+#else
+	return ISoundDriver::DriverOpenAl;
+#endif
+}
 
 /// Return driver name from type.
 const char *ISoundDriver::getDriverName(TDriver driverType)
@@ -154,15 +177,9 @@ std::string ISoundDriver::getDriverFileName(TDriver driverType)
 #endif
 		break;
 	case DriverAuto:
-#if defined (NL_COMP_MINGW)
-		return "libnel_drv_xaudio2_win";
-#elif defined (NL_OS_WINDOWS)
-		return "nel_drv_xaudio2_win";
-#elif defined (NL_OS_UNIX)
-		return "nel_drv_openal";
-#else
-#		error "Driver name not define for this platform"
-#endif
+		// the file of the driver it stands for
+		if (getAutoDriver() != DriverAuto)
+			return getDriverFileName(getAutoDriver());
 		break;
 	default:
 		break;
@@ -234,6 +251,11 @@ std::vector<ISoundDriver::TDriver> ISoundDriver::getAvailableDrivers()
  */
 ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TDriver driverType)
 {
+	// DriverAuto stands for one of the drivers of this build. The driver that is made is told which one it is
+	// (getDriverType())
+	if (driverType == DriverAuto)
+		driverType = getAutoDriver();
+
 #ifdef NL_STATIC
 	
 	nlinfo("Creating statically linked sound driver %s", getDriverName(driverType));
@@ -254,20 +276,11 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 #	ifdef NL_XAUDIO2_AVAILABLE
 		case DriverXAudio2: result = createISoundDriverInstanceXAudio2(stringMapper); break;
 #	endif
-		// auto driver = first available in this order: FMod, OpenAl, XAudio2, DSound
-#	if defined(NL_FMOD_AVAILABLE)
-		case DriverAuto: result = createISoundDriverInstanceFMod(stringMapper); break;
-#	elif defined(NL_OPENAL_AVAILABLE)
-		case DriverAuto: result = createISoundDriverInstanceOpenAl(stringMapper); break;
-#	elif defined(NL_XAUDIO2_AVAILABLE)
-		case DriverAuto: result = createISoundDriverInstanceXAudio2(stringMapper); break;
-#	elif defined(NL_DSOUND_AVAILABLE)
-		case DriverAuto: result = createISoundDriverInstanceDSound(stringMapper); break;
-#	endif
-		// unavailable driver = FAIL
+		// unavailable driver = FAIL (DriverAuto too, in a build without a driver)
 		default: throw ESoundDriverNotFound(getDriverName(driverType));
 	}
 	if (!result) throw ESoundDriverCantCreateDriver(getDriverName(driverType)); 
+	result->m_DriverType = driverType;
 	return result;
 	
 #else
@@ -331,6 +344,7 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	{
 		// Fill the DLL name
 		ret->_DllName = driverLib.getLibFileName();
+		ret->m_DriverType = driverType;
 	}
 
 	return ret;

@@ -370,6 +370,13 @@
 				<link expr="@UI:TEMP:SCREEN_RATIO_MODE" action="game_config_change_screen_ratio_mode" />
 			</group>
 
+			<!-- What draws the game at the moment: the 3D driver (Driver3D of client.cfg may be "Auto") and the card as
+				that driver tells it. updateDriversInUseConfigUI (action_handler_game.cpp) sets both texts -->
+			<view style="sgc_title2" type="text" id="driver_current_title" posparent="screen_ratio" posref="BL TL" x="0" y="-12" hardtext="uigcGraphicsDriverCurrent" />
+			<view type="text" id="driver_current" posparent="driver_current_title" posref="BL TL" x="20" y="-4" color="255 255 255 192" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="" />
+			<view style="sgc_title2" type="text" id="card_current_title" posparent="driver_current" posref="BL TL" x="-20" y="-12" hardtext="uigcGraphicsCardCurrent" />
+			<view type="text" id="card_current" posparent="card_current_title" posref="BL TL" x="20" y="-4" color="255 255 255 192" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="" />
+
 		</group>
 		<ctrl style="skin_scroll" id="sb_general" align="T" target="general" posparent="crop" posref="TL TR" x="-8" y="0" />
 
@@ -429,7 +436,8 @@
 				<instance template="tgcw_checkbox" id="square_bloom" text="uiFxSquareBloom" posparent="bloom" posref="BL TL" x="20" y="-2" />
 				<instance template="tgcw_scrollbarfloat" id="density_bloom" text="uiFxDensityBloom" posparent="square_bloom" posref="BL TL" x="0" y="-2" />
 			</group>
-			<instance template="tgcw_scrollbarint" id="water_refl" text="uiFxMaxWaterReflections" posparent="bloom_gr" posref="BL TL" x="20" y="-12" />
+			<instance template="tgcw_checkbox" id="water_reflections" text="uiFxWaterReflections" tooltip="uiFxTooltipWaterReflections" posparent="bloom_gr" posref="BL TL" x="0" y="-12" />
+			<instance template="tgcw_scrollbarint" id="water_refl" text="uiFxMaxWaterReflections" posparent="water_reflections" posref="BL TL" x="20" y="-2" />
 			<instance template="tgcw_scrollbarint" id="water_refl_tex" text="uiFxMaxWaterReflectionTextures" posparent="water_refl" posref="BL TL" x="0" y="-2" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_fx" align="T" target="fx" posparent="crop" posref="TL TR" x="-8" y="0" />
@@ -798,6 +806,14 @@
 			<instance template="tgcw_scrollbarfloat" id="sfx_volume" text="uiSoundSFXVolume" posparent="volume" posref="BL TL" x="20" y="-2" />
 			<instance template="tgcw_scrollbarfloat" id="music_volume" text="uiSoundGameMusicVolume" posparent="sfx_volume" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_scrollbarint" id="mp3_volume" text="uimwMP3Player" posparent="music_volume" posref="BL TL" x="0" y="-2" />
+
+			<!-- What plays the sound at the moment: the sound driver (the one chosen above may be "Auto") and the device it
+				opened (SoundDevice of client.cfg, the default device when it is empty).
+				updateDriversInUseConfigUI (action_handler_game.cpp) sets both texts -->
+			<view style="sgc_title2" type="text" id="driver_current_title" posparent="mp3_volume" posref="BL TL" x="-20" y="-12" hardtext="uigcSoundDriverCurrent" />
+			<view type="text" id="driver_current" posparent="driver_current_title" posref="BL TL" x="20" y="-4" color="255 255 255 192" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="" />
+			<view style="sgc_title2" type="text" id="device_current_title" posparent="driver_current" posref="BL TL" x="-20" y="-12" hardtext="uigcSoundDeviceCurrent" />
+			<view type="text" id="device_current" posparent="device_current_title" posref="BL TL" x="20" y="-4" color="255 255 255 192" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" hardtext="" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_sound" align="T" target="sound" posparent="crop" posref="TL TR" x="-8" y="0" />
 		<!-- *** -->
@@ -931,6 +947,7 @@
 			<param ui="fx:bloom_gr:bloom:c" type="cfg" widget="boolbut" realtime="true" link="Bloom" preset="UI:TEMP:PRESET_FX" />
 			<param ui="fx:bloom_gr:square_bloom:c" type="cfg" widget="boolbut" realtime="true" link="SquareBloom" preset="UI:TEMP:PRESET_FX" />
 			<param ui="fx:bloom_gr:density_bloom:c" type="cfg" widget="sbfloat_round" realtime="true" ui_view="fx:bloom_gr:density_bloom:c_res" link="DensityBloom" preset="UI:TEMP:PRESET_FX" />
+			<param ui="fx:water_reflections:c" type="cfg" widget="boolbut" realtime="true" link="WaterReflections" />
 			<param ui="fx:water_refl:c" type="cfg" widget="sbint" realtime="true" ui_view="fx:water_refl:c_res" link="MaxWaterReflections" preset="UI:TEMP:PRESET_FX" />
 			<param ui="fx:water_refl_tex:c" type="cfg" widget="sbint" realtime="true" ui_view="fx:water_refl_tex:c_res" link="MaxWaterReflectionTextures" />
 

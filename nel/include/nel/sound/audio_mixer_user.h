@@ -120,6 +120,10 @@ public:
 	virtual void		getDevices(std::vector<std::string> &devices) NL_OVERRIDE;
 	/// Initialize the selected device on the currently initialized driver. Leave deviceName empty to select the default device.
 	virtual void		initDevice(const std::string &deviceName, const CInitInfo &initInfo, NLMISC::IProgressCallback *progressCallback = nullptr) NL_OVERRIDE;
+	/// The driver that initDriver made, NumDrivers without one.
+	virtual TDriver		getCurrentDriver() const NL_OVERRIDE;
+	/// The device that initDevice opened, by its name of getDevices(), if the driver tells.
+	virtual std::string	getCurrentDeviceName() const NL_OVERRIDE;
 
 	
 	virtual void		initClusteredSound(NL3D::UScene *uscene, float minGain, float maxDistance, float portalInterpolate) NL_OVERRIDE;
