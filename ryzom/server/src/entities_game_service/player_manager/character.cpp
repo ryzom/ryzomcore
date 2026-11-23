@@ -4512,7 +4512,8 @@ void CCharacter::addKnownBrick( const CSheetId& brickId )
 		}
 		else
 		{
-			_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
+			// shifted unsigned: the bit of index 63 overflows a signed value
+			_BrickFamilyBitField[brickForm->Family] |= (sint64)((uint64)1 << pos);
 //			_PropertyDatabase.setProp( _DataIndexReminder->KnownBricksFamilies[brickForm->Family], _BrickFamilyBitField[brickForm->Family]);
 			CBankAccessor_PLR::getBRICK_FAMILY().getArray(brickForm->Family).setBRICKS(_PropertyDatabase, _BrickFamilyBitField[brickForm->Family]);
 		}
@@ -4627,7 +4628,7 @@ void CCharacter::removeKnownBrick( const CSheetId& brickId )
 			return;
 
 		// clear the brick's bit, the client then no longer shows the brick as known
-		_BrickFamilyBitField[brickForm->Family] &= ~((sint64)1 << (sint64)pos);
+		_BrickFamilyBitField[brickForm->Family] &= ~(sint64)((uint64)1 << pos);
 		CBankAccessor_PLR::getBRICK_FAMILY().getArray(brickForm->Family).setBRICKS(_PropertyDatabase, _BrickFamilyBitField[brickForm->Family]);
 	}
 	else
@@ -9233,7 +9234,7 @@ void CCharacter::setDatabase()
 				nlwarning("brick id %s of %s has index %u in its family, past the 64 places of the family's field: the client is not told it is known",
 				    (*itb).toString().c_str(), _Id.toString().c_str(), (uint)brickForm->IndexInFamily);
 			else
-				_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
+				_BrickFamilyBitField[brickForm->Family] |= (sint64)((uint64)1 << pos);
 
 			// unlock the relative interface if it's the first brick of this type
 			INTERFACE_FLAGS::TInterfaceFlag flag = INTERFACE_FLAGS::Unknown;
@@ -18299,6 +18300,23 @@ void CCharacter::consumeItem( INVENTORIES::TInventory inventory, uint32 slot )
 		params[2].Int = secondes;
 		CCharacter::sendDynamicSystemMessage(_Id,"CONSUMABLE_OVERDOSE_TIMER", params);
 
+		return;
+	}
+
+	// the item is destroyed when the consumption ends, before its effect is built: an effect with a part lost at load
+	// (reported then) is refused here, while the item is still there
+	if (form->EffectWhenConsumed != CSheetId::Unknown)
+	{
+		const CStaticRolemasterPhrase *effect = CSheets::getSRolemasterPhrase(form->EffectWhenConsumed);
+		if (effect && CPhraseManager::getInstance().refusesBrokenBricks(effect->Bricks, _EntityRowId, "the effect", form->SheetId, true))
+			return;
+	}
+	else if (form->ConsumableItem->HasBadProperty)
+	{
+		static std::set<CSheetId> reported;
+		if (reported.insert(form->SheetId).second)
+			nlwarning("<CCharacter::consumeItem> the consumable %s lost a property at load (reported then): it is refused", form->SheetId.toString().c_str());
+		CCharacter::sendDynamicSystemMessage(_Id, "EGS_ACTION_BROKEN");
 		return;
 	}
 

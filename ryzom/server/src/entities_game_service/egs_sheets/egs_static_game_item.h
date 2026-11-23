@@ -143,7 +143,7 @@ struct CConsumable
 	NL_INSTANCE_COUNTER_DECL(CConsumable);
 public:
 
-	CConsumable() : Family(0), LoopTimer(0), MaxNbLoops(1), OverdoseTimer(0), Data(0), ConsumptionTime(0) {}
+	CConsumable() : Family(0), LoopTimer(0), MaxNbLoops(1), OverdoseTimer(0), Data(0), ConsumptionTime(0), HasBadProperty(false) {}
 
 	virtual void serial(NLMISC::IStream &f);
 
@@ -159,6 +159,9 @@ public:
 	std::vector<TBrickParam::IIdPtr> Params;
 	/// params as strings
 	std::vector<std::string>	StringParams;
+	/// a param was left out at load (reported then): the consumable is refused (CCharacter::consumeItem). Rebuilt from
+	/// StringParams with Params, not serialized
+	bool		HasBadProperty;
 
 	//* Break when hit: If a creature hits the player, consumption is immediatly aborted
 	//* Sit: player can consume item sit down

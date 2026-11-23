@@ -1146,10 +1146,12 @@ void loadConsumable(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC
 	}
 	// Parse Params
 	item->ConsumableItem->Params.clear();
+	item->ConsumableItem->HasBadProperty = false;
 	const uint size = (uint)item->ConsumableItem->StringParams.size();
 	for (uint i = 0 ; i < size ; ++i)
 	{
-		addParam(item->ConsumableItem->StringParams[i], item->ConsumableItem->Params, sheetId.toString());
+		if (!addParam(item->ConsumableItem->StringParams[i], item->ConsumableItem->Params, sheetId.toString()))
+			item->ConsumableItem->HasBadProperty = true;
 	}
 }
 
@@ -1365,8 +1367,12 @@ void CStaticItem::serial(NLMISC::IStream &f)
 			ConsumableItem->serial(f);
 			// Params
 			ConsumableItem->Params.clear();
+			ConsumableItem->HasBadProperty = false;
 			for (uint i = 0; i < ConsumableItem->StringParams.size(); ++i)
-				addParam(ConsumableItem->StringParams[i], ConsumableItem->Params, SheetId.toString());
+			{
+				if (!addParam(ConsumableItem->StringParams[i], ConsumableItem->Params, SheetId.toString()))
+					ConsumableItem->HasBadProperty = true;
+			}
 			break;
 
 		case ITEMFAMILY::XP_CATALYSER:

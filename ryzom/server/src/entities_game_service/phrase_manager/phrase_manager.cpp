@@ -1463,6 +1463,32 @@ bool CPhraseManager::checkPhraseValidity( const std::vector<NLMISC::CSheetId> &b
 
 
 //-----------------------------------------------
+//			refusesBrokenBricks()
+//-----------------------------------------------
+bool CPhraseManager::refusesBrokenBricks( const vector<CSheetId> &brickIds, const TDataSetRow &actorRowId, const char *what, const CSheetId &item, bool tellActor ) const
+{
+	for (uint i = 0; i < brickIds.size(); ++i)
+	{
+		const CStaticBrick *brick = CSheets::getSBrickForm(brickIds[i]);
+		if (!brick || !brick->HasBadProperty)
+			continue;
+		// once for each brick: a player may try again and again
+		static std::set<CSheetId> reported;
+		if (reported.insert(brickIds[i]).second)
+		{
+			if (item == CSheetId::Unknown)
+				nlwarning("<CPhraseManager> %s holds the brick %s, whose sheet lost a property at load (reported then): it is refused", what, brickIds[i].toString().c_str());
+			else
+				nlwarning("<CPhraseManager> %s of the item %s holds the brick %s, whose sheet lost a property at load (reported then): it is refused", what, item.toString().c_str(), brickIds[i].toString().c_str());
+		}
+		if (tellActor && TheDataset.isAccessible(actorRowId) && TheDataset.getEntityId(actorRowId).getType() == RYZOMID::player)
+			PHRASE_UTILITIES::sendDynamicSystemMessage(actorRowId, "EGS_ACTION_BROKEN");
+		return true;
+	}
+	return false;
+} // refusesBrokenBricks //
+
+//-----------------------------------------------
 //			buildSabrinaPhrase()
 //-----------------------------------------------
 CSPhrasePtr CPhraseManager::buildSabrinaPhrase( const TDataSetRow &actorRowId, const TDataSetRow &targetRowId, const vector<CSheetId> &brickIds, uint16 phraseId, uint8 nextCounter, bool execution )
@@ -1476,13 +1502,11 @@ CSPhrasePtr CPhraseManager::buildSabrinaPhrase( const TDataSetRow &actorRowId, c
 	if ( !TheDataset.isAccessible(actorRowId) )
 		return NULL;
 
-	// a brick that lost a property at load (reported then, with its sheet) would cost nothing or work with default
-	// values: its phrases stay known and memorized (a build for the memorization is no execution), so they work again
-	// once the sheet is fixed, and are not built for an execution
-	for (uint i = 0; execution && i < brickIds.size(); ++i)
+	// a phrase with a brick that lost a property at load stays known and memorized (a build for the memorization is no
+	// execution), so it works again once the sheet is fixed, and is not built for an execution
+	if (execution)
 	{
-		const CStaticBrick *brick = CSheets::getSBrickForm(brickIds[i]);
-		if (brick && brick->HasBadProperty)
+		if (refusesBrokenBricks(brickIds, actorRowId, "a phrase", CSheetId::Unknown, true))
 			return NULL;
 	}
 
