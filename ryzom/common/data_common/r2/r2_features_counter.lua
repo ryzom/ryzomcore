@@ -249,7 +249,7 @@ component.create = function()
 			debugInfo("Can't create Component")
 			return
 		end
-		local component = feature.Components.CounterFeature.createComponent( x, y, value, tvalue)
+		local component = feature.Components.Counter.createComponent( x, y, value, tvalue)
 		r2.requestInsertNode(r2:getCurrentAct().InstanceId, "Features", -1, "", component)
 		--component.TriggerValue = tvalue
 	end

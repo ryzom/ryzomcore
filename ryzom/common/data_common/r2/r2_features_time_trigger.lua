@@ -317,10 +317,9 @@ feature.create = function()
 			return
 		end
 	
-		local component = feature.createComponent( x, y, hours, cyclic)
+		-- the hour and the minute go in the component before it is sent: set after the request, they would not reach it
+		local component = feature.createComponent( x, y, hours, minutes, cyclic)
 		r2.requestInsertNode(r2:getCurrentAct().InstanceId, "Features", -1, "", component)
-		component.Minutes = minutes
-		component.Hours = hours
 		
 	end
 
