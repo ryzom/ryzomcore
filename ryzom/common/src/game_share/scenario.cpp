@@ -496,6 +496,14 @@ bool CScenario::moveNode( const std::string& instanceId1, const std::string& att
 	{
 		return false;
 	}
+	// a value taken out of the table it goes back into leaves that table one shorter when it is inserted: the end of
+	// the table is then one place nearer, and the insert below would fail with the value already taken out of the tree
+	if (moved->getParent() == to && position2 == static_cast<sint32>(to->getSize()))
+	{
+		nlwarning("<CScenario::moveNode> Can not move node (%s, %s, %d) to (%s, %s, %d): its own table has %u values without it",
+			instanceId1.c_str(), attrName1.c_str(), position1, instanceId2.c_str(), attrName2.c_str(), position2, (uint)to->getSize() - 1);
+		return false;
+	}
 
 	CObject::TSmartPtr removed = from->take(position1);
 
