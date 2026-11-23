@@ -50,6 +50,8 @@ void		CTransformShape::registerBasic()
 CTransformShape::CTransformShape()
 {
 	_NumTrianglesAfterLoadBalancing= 100;
+	_FaceCount = 0;
+	m_FaceCounted = false;
 	_CurrentLightContribution = nullptr;
 	_CurrentUseLocalAttenuation= false;
 	_DistMax = -1.f;
@@ -299,6 +301,7 @@ void	CTransformShape::traverseLoadBalancingPass0()
 
 	// Get the number of triangles this model use now.
 	_FaceCount= getNumTriangles(modelDist);
+	m_FaceCounted = true;
 	_LoadBalancingGroup->addNbFacesPass0(_FaceCount);
 }
 
@@ -306,20 +309,27 @@ void	CTransformShape::traverseLoadBalancingPass0()
 // ***************************************************************************
 void	CTransformShape::traverseLoadBalancingPass1()
 {
-	// Show more polygons for upscaled shapes to preserve visual quality
-	float factor = 1.0f;
+	// A new model may be seen first by a pass that does not count (a water
+	// reflection, the second eye). It keeps its initial budget until pass 0
+	// counts it: a budget of zero faces puts a particle system at its
+	// farthest LOD.
+	if (!m_FaceCounted)
+		return;
+
+	// Show more polygons for upscaled shapes to preserve visual quality. The
+	// count stays as it is, this pass may run several times for each pass 0.
+	float faceCount = _FaceCount;
 	if (getTransformMode() == RotEuler || getTransformMode() == RotQuat)
 	{
-		factor = std::max(1.0f, std::max(getScale().x, std::max(getScale().y, getScale().z)));
+		float factor = std::max(1.0f, std::max(getScale().x, std::max(getScale().y, getScale().z)));
 		if (factor > 1)
 		{
-			_FaceCount = factor * std::max(_FaceCount, factor * 200.0f);
+			faceCount = factor * std::max(faceCount, factor * 200.0f);
 		}
 	}
 
 	// Set the result into the instance.
-	_NumTrianglesAfterLoadBalancing= _LoadBalancingGroup->computeModelNbFace(_FaceCount);
-
+	_NumTrianglesAfterLoadBalancing = _LoadBalancingGroup->computeModelNbFace(faceCount);
 }
 
 // ***************************************************************************

@@ -185,11 +185,15 @@ private:
 
 	/// \name LoadBalancing Traversal
 	// @{
+	// clang-format off
 	// The number of face computed in Pass0.
 	float					_FaceCount;
+	// false until Pass0 has counted the faces of this model once.
+	bool					m_FaceCounted;
 
 	void		traverseLoadBalancingPass0();
 	void		traverseLoadBalancingPass1();
+	// clang-format on
 	// @}
 
 };

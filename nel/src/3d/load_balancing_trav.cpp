@@ -169,7 +169,8 @@ void				CLoadBalancingTrav::traverse()
 	// budgets — visible as per-eye MRM detail and animation-LOD
 	// divergence in the stereo debugger. Replicated passes reuse the
 	// frame's ratios (the 2nd pass below still assigns per-model face
-	// budgets for the pass's own visible list).
+	// budgets for the pass's own visible list, from each model's last count;
+	// a model that was never counted keeps its initial budget).
 	const uint64 frameId = Scene->getFrameId();
 	const bool adapt = !Scene->getWaterReflectionManager().isRenderingReflection()
 		&& frameId != _LastAdaptFrameId;
