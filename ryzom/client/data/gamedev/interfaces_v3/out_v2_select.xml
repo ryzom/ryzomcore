@@ -97,7 +97,9 @@
 	<action handler="set" params="target_property=ui:outgame:charsel:del_but:active|value=0"/>
 	<action handler="set" params="target_property=ui:outgame:charsel:create_new_but:active|value=0"/>
 	<action handler="set" params="target_property=ui:outgame:charsel:resume_session_but:active|value=0"/>
+	<if flags="!ryzom_forge" />
 	<action handler="set" params="target_property=ui:outgame:charsel:close_session_but:active|value=0"/>
+	<endif />
 	
 	<action handler="set" params="target_property=ui:outgame:charsel:quit_but:active|value=0"/>
 </proc>
@@ -117,7 +119,9 @@
 	<action handler="set" params="target_property=ui:outgame:charsel:del_but:active|value=1"/>
 	<action handler="set" params="target_property=ui:outgame:charsel:create_new_but:active|value=1"/>
 	<action handler="set" params="target_property=ui:outgame:charsel:resume_session_but:active|value=1"/>
-	<action handler="set" params="target_property=ui:outgame:charsel:close_session_but:active|value=0"/>
+	<if flags="!ryzom_forge" />
+	<action handler="set" params="target_property=ui:outgame:charsel:close_session_but:active|value=1"/>
+	<endif />
 	
 	<action handler="set" params="target_property=ui:outgame:charsel:quit_but:active|value=1"/>
 </proc>
@@ -471,7 +475,11 @@
 <proc id="charsel_init_buttons">
 	<action handler="add_link" params="id=play_edit_session_del_init|expr=and(not(isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)), not(isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT))))|target=ui:outgame:charsel:play_but:active,ui:outgame:charsel:edit_session_but:active,ui:outgame:charsel:del_but:active" />
 	<action handler="add_link" params="id=create_new_but_init|expr=isCharSelSlotEmpty(@UI:TEMP:CHARSELSLOT)|target=ui:outgame:charsel:create_new_but:active" />
+	<if flags="!ryzom_forge" />
+	<action handler="add_link" params="id=resume_session_but_init|expr=isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)|target=ui:outgame:charsel:resume_session_but:active,ui:outgame:charsel:close_session_but:active,ui:outgame:charsel:in_ring_session:active" />
+	<else />
 	<action handler="add_link" params="id=resume_session_but_init|expr=isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)|target=ui:outgame:charsel:resume_session_but:active,ui:outgame:charsel:in_ring_session:active" />
+	<endif />
 	
 	<action handler="remove_link" params="id=play_edit_session_del_init" />
 	<action handler="remove_link" params="id=create_new_but_init" />
@@ -653,15 +661,17 @@
 	<!-- TEMP: For R2 alpha, don't allow more than one character per user -->
 	<!-- The owner of a scenario that was left running can also close it from here: a scenario that fails to load
 	     cannot be closed from inside -->
-	<!-- Not shown on this branch: the session browser of the live shards has no answer to the request of
-	     this button (closeAnimSessions), the client would wait for it until its time-out. To show it again
-	     once the shards have it: active of the button back in the two links of resume_session_but and in
-	     proc_charsel_init_slot (value=1). -->
-	<ctrl style="valid_txt_button" id="close_session_but" posref="BR BM" x="-112" y="36" hardtext="uiCharSel_CloseSession" active="false"
+	<!-- Not with RYZOM_FORGE: the Ring is not used there, and its session browser has no answer to the request of
+	     this button (the client would wait for one until its time-out). -->
+	<if flags="!ryzom_forge" />
+	<ctrl style="valid_txt_button" id="close_session_but" posref="BR BM" x="-112" y="36" hardtext="uiCharSel_CloseSession"
 					onover="play_sound" params_over="name=specie_but_over"
 					onclick_l="proc" params_l="proc_charsel_close_session"/>
 
+	<link expr="isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)" target="resume_session_but:active,close_session_but:active,in_ring_session:active" />
+	<else />
 	<link expr="isCharSelSlotInRingSession(@UI:TEMP:CHARSELSLOT)" target="resume_session_but:active,in_ring_session:active" />
+	<endif />
 
 
 	<!--*************-->

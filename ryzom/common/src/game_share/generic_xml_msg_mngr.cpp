@@ -364,8 +364,138 @@ std::vector<std::string>	CGenericXmlMsgHeaderManager::checkStreamClassesText(con
 	return problems;
 }
 
-// the signature of a msg.xml
-NLMISC::CHashKeyMD5	CGenericXmlMsgHeaderManager::getSignature(const string &filename, bool removeCarriageReturns)
+// true if text has, at pos, a name of an XML element or attribute in ASCII; end is set past it
+static bool	xmlNameAsciiAt(const uint8 *text, size_t size, size_t pos, size_t &end)
+{
+	if (pos >= size)
+		return false;
+	uint8 c = text[pos];
+	if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_'))
+		return false;
+	end = pos + 1;
+	while (end < size)
+	{
+		c = text[end];
+		if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '-' || c == '.'))
+			break;
+		++end;
+	}
+	return true;
+}
+
+// whether a comment is open at the end of a line, read from `from` on, where one is open or not
+static bool	xmlCommentOpenAfter(const uint8 *line, size_t size, size_t from, bool inComment)
+{
+	static const char s_CommentStart[] = "<!--";
+	static const char s_CommentEnd[] = "-->";
+	const size_t commentStartSize = sizeof(s_CommentStart) - 1;
+	const size_t commentEndSize = sizeof(s_CommentEnd) - 1;
+
+	size_t i = from;
+	while (i < size)
+	{
+		if (inComment && size - i >= commentEndSize && !memcmp(line + i, s_CommentEnd, commentEndSize))
+		{
+			inComment = false;
+			i += commentEndSize;
+		}
+		else if (!inComment && size - i >= commentStartSize && !memcmp(line + i, s_CommentStart, commentStartSize))
+		{
+			inComment = true;
+			i += commentStartSize;
+		}
+		else
+		{
+			++i;
+		}
+	}
+	return inComment;
+}
+
+// the text of a msg.xml or database.xml with one attribute per line
+void	CGenericXmlMsgHeaderManager::splitAttributeLines(std::vector<uint8> &text)
+{
+	std::vector<uint8> out;
+	out.reserve(text.size() + text.size() / 2);
+	bool inComment = false;
+	size_t pos = 0;
+	while (pos < text.size())
+	{
+		// One line, with its end
+		size_t end = pos;
+		while (end < text.size() && text[end] != '\n')
+			++end;
+		if (end < text.size())
+			++end;
+		const uint8 *line = &text[pos];
+		const size_t size = end - pos;
+		pos = end;
+
+		// A line that begins inside a comment is left as it is, whatever it has after the end of the comment
+		if (inComment)
+		{
+			inComment = xmlCommentOpenAfter(line, size, 0, true);
+			out.insert(out.end(), line, line + size);
+			continue;
+		}
+
+		// The attributes of a start tag that is the first thing on its line, after spaces: each one space after
+		// what comes before it, its value between double quotes
+		size_t first = 0;
+		while (first < size && line[first] == ' ')
+			++first;
+		size_t nameEnd = 0;
+		std::vector<std::pair<size_t, size_t> > attributes;
+		size_t tagEnd = 0;
+		if (first < size && line[first] == '<' && xmlNameAsciiAt(line, size, first + 1, nameEnd))
+		{
+			tagEnd = nameEnd;
+			for (;;)
+			{
+				size_t attributeEnd = 0;
+				if (!(tagEnd < size && line[tagEnd] == ' ' && xmlNameAsciiAt(line, size, tagEnd + 1, attributeEnd)))
+					break;
+				if (!(attributeEnd + 1 < size && line[attributeEnd] == '=' && line[attributeEnd + 1] == '"'))
+					break;
+				size_t close = attributeEnd + 2;
+				while (close < size && line[close] != '"')
+					++close;
+				if (close >= size)
+					break;
+				attributes.push_back(std::make_pair(tagEnd + 1, close + 1));
+				tagEnd = close + 1;
+			}
+		}
+
+		// A comment that the line leaves open (one that starts the line, or one after its tag) goes on below
+		inComment = xmlCommentOpenAfter(line, size, 0, false);
+
+		if (attributes.size() < 2)
+		{
+			out.insert(out.end(), line, line + size);
+			continue;
+		}
+
+		// The tag with its first attribute, then each other attribute under the first one, the last of them
+		// with what follows on the line
+		const bool carriageReturn = size >= 2 && line[size - 2] == '\r' && line[size - 1] == '\n';
+		const size_t column = attributes[0].first;
+		out.insert(out.end(), line, line + attributes[0].second);
+		for (size_t i = 1; i < attributes.size(); ++i)
+		{
+			if (carriageReturn)
+				out.push_back('\r');
+			out.push_back('\n');
+			out.insert(out.end(), column, (uint8)' ');
+			out.insert(out.end(), line + attributes[i].first, line + attributes[i].second);
+		}
+		out.insert(out.end(), line + tagEnd, line + size);
+	}
+	text.swap(out);
+}
+
+// the signature of a file: its MD5, once it is the text the signature is made of
+static NLMISC::CHashKeyMD5	signatureOfFile(const string &filename, bool streamClasses, bool removeCarriageReturns)
 {
 	NLMISC::CHashKeyMD5 signature;
 	signature.clear();
@@ -380,12 +510,29 @@ NLMISC::CHashKeyMD5	CGenericXmlMsgHeaderManager::getSignature(const string &file
 	if (!text.empty())
 		file.serialBuffer(&text[0], (uint)text.size());
 
-	removeStreamClasses(text);
+	if (streamClasses)
+		CGenericXmlMsgHeaderManager::removeStreamClasses(text);
+#ifdef RYZOM_FORGE
+	// the shards and clients of that game have these files with one attribute per line, and compare that
+	CGenericXmlMsgHeaderManager::splitAttributeLines(text);
+#endif
 	if (removeCarriageReturns)
 		text.erase(std::remove(text.begin(), text.end(), (uint8)'\r'), text.end());
 
 	static const uint8 nothing = 0;
 	return NLMISC::getMD5(text.empty() ? &nothing : &text[0], (uint32)text.size());
+}
+
+// the signature of a msg.xml
+NLMISC::CHashKeyMD5	CGenericXmlMsgHeaderManager::getSignature(const string &filename, bool removeCarriageReturns)
+{
+	return signatureOfFile(filename, true, removeCarriageReturns);
+}
+
+// the signature of a database.xml
+NLMISC::CHashKeyMD5	CGenericXmlMsgHeaderManager::getDatabaseSignature(const string &filename, bool removeCarriageReturns)
+{
+	return signatureOfFile(filename, false, removeCarriageReturns);
 }
 
 // set callback
