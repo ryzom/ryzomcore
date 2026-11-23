@@ -10,15 +10,61 @@ To add another distribution; simply add a folder with a Dockerfile here or under
 
 Just build the Docker images like this. The quick start scripts will generate the proper command line.
 
+The server images are one per supported Ubuntu LTS: `jammy` (22.04, GCC 11), `noble` (24.04,
+GCC 13, the default server target of `config_default.json`) and `resolute` (26.04, GCC 15).
+Each takes `libmsquic` from packages.microsoft.com at the version its `MSQUIC_VERSION` argument
+names, with the headers of that same release. To build the server for another release, point
+the `Server` filter of `.nel/config.json` at its codename. Images of releases that reached their
+end of standard support move to `archive`, where the toolchain scan does not look.
+
 ```
 docker build -t "ryzombuild_bionic_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_bionic_amd64\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_bionic_amd64_gcc8" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_bionic_amd64_gcc8\Dockerfile" Y:\ryzomcore4\code
-docker build -t "ryzombuild_focal_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_focal_amd64\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_scout_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_amd64\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_scout_amd64_gcc5" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_amd64_gcc5\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_scout_amd64_gcc9" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_amd64_gcc9\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_scout_i386_gcc9" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_i386_gcc9\Dockerfile" Y:\ryzomcore4\code
+docker build -t "ryzombuild_jammy_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_jammy_amd64\Dockerfile" Y:\ryzomcore4\code
+docker build -t "ryzombuild_noble_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_noble_amd64\Dockerfile" Y:\ryzomcore4\code
+docker build -t "ryzombuild_resolute_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_resolute_amd64\Dockerfile" Y:\ryzomcore4\code
 ```
+
+## Windows toolchains under Wine
+
+`ryzombuild_wine_amd64` carries Wine with the 32-bit libraries, Ninja, CMake and Python, and no
+compiler of its own: its label `dev.ryzom.quickstart.toolchain=wine` tells the toolchain scan to
+probe the Wine prefixes of the `ryzombuild_wine_amd64_prefixes` volume instead (`dump_wine.py`, run
+inside the image, reports the Visual Studio installations, Windows and DirectX SDKs, 3ds Max SDKs and
+`*_external_<toolset>_<platform>` externals folders of every prefix on the volume). `configure_docker`
+fills the volume from the packaged prefixes listed under `WinePrefixes` in the configuration (the
+archive of a prefix unpacks to a folder of its own name, the externals archives are bare and unpack
+under `drive_c`) and runs the setup script of the toolchain layer over them.
+
+A toolset becomes a build toolchain when a layer exists for it: the wrapper scripts and CMake toolchain
+file that drive its compiler through Wine, `tool/wine_vs2008` for Visual Studio 2008 (the same layer
+the VS2008 workflow of the GitHub CI uses). The toolchain is keyed like a native one with a `/W` suffix,
+`Win2k/VS/v90/x86/W`, so the target filters pick it up where no native install exists, and a filter can
+exclude it with `"Wine": false`. Its scripts land under `build_docker` like the Linux ones. By hand:
+
+```
+docker build -t "ryzombuild_wine_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_wine_amd64\Dockerfile" Y:\ryzomcore4\code
+docker run --rm -v ryzombuild_wine_amd64_prefixes:/opt/wineprefixes --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" ryzombuild_wine_amd64 python3 /mnt/nel/code/tool/quick_start/dump_wine.py /opt/wineprefixes
+```
+
+## Cross-platform tools
+
+`ryzombuild_xplat_tools` holds the Rust toolchain for the tools of the code repository that are not
+C++ (tool/servdash_cli): the musl target for a generic Linux and the MSVC target through cargo-xwin,
+which fetches the Windows SDK and CRT into the `ryzombuild_xplat_tools_xwin` volume on first use.
+The quick start builds the image with the others and scripts the build; by hand:
+
+```
+docker build -t "ryzombuild_xplat_tools" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_xplat_tools\Dockerfile" Y:\ryzomcore4\code
+docker run --rm -v ryzombuild_xplat_tools_cargo:/usr/local/cargo/registry -v ryzombuild_xplat_tools_xwin:/root/.cache/cargo-xwin -e CARGO_TARGET_DIR=/mnt/nel/build_docker/tools_xplat --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir /mnt/nel/code ryzombuild_xplat_tools cargo build --release --target x86_64-unknown-linux-musl --manifest-path /mnt/nel/code/tool/servdash_cli/Cargo.toml
+docker run --rm -v ryzombuild_xplat_tools_cargo:/usr/local/cargo/registry -v ryzombuild_xplat_tools_xwin:/root/.cache/cargo-xwin -e CARGO_TARGET_DIR=/mnt/nel/build_docker/tools_xplat --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir /mnt/nel/code ryzombuild_xplat_tools cargo xwin build --release --target x86_64-pc-windows-msvc --manifest-path /mnt/nel/code/tool/servdash_cli/Cargo.toml
+```
+
+The image carries the label `dev.ryzom.quickstart.toolchain=none`, which keeps the toolchain scan away from it.
 
 ## Prepare Steam Runtime
 
@@ -43,17 +89,18 @@ del "com.valvesoftware.SteamRuntime.Sdk-i386-scout-sysroot.tar.gz"
 ## Check CMake Version
 
 ```
-docker run --rm ryzombuild_bionic_amd64 cmake --version
-docker run --rm ryzombuild_focal_amd64 cmake --version
+docker run --rm ryzombuild_jammy_amd64 cmake --version
+docker run --rm ryzombuild_noble_amd64 cmake --version
+docker run --rm ryzombuild_resolute_amd64 cmake --version
 docker run --rm steamrt_scout_amd64 cmake --version
 ```
 
 ## Check GCC Version
 
 ```
-docker run --rm ryzombuild_bionic_amd64 gcc -v
-docker run --rm ryzombuild_bionic_amd64_gcc8 gcc -v
-docker run --rm ryzombuild_focal_amd64 gcc -v
+docker run --rm ryzombuild_jammy_amd64 gcc -v
+docker run --rm ryzombuild_noble_amd64 gcc -v
+docker run --rm ryzombuild_resolute_amd64 gcc -v
 docker run --rm ryzombuild_scout_amd64 gcc -v
 docker run --rm ryzombuild_scout_amd64_gcc5 gcc -v
 docker run --rm ryzombuild_scout_amd64_gcc9 gcc -v
@@ -67,11 +114,6 @@ docker run --rm ryzombuild_scout_i386_gcc9 c++ -v
 ```
 docker run --rm -v ryzombuild_jammy_amd64_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_jammy" ryzombuild_jammy_amd64 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DHUNTER_ENABLED=ON -DHUNTER_STATUS_DEBUG=ON -DHUNTER_JOBS_NUMBER=9 -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_PATCH=ON -DWITH_RYZOM_TOOLS=OFF -DWITH_NEL_TOOLS=OFF -DWITH_NELNS=OFF -DWITH_QT5=OFF -DWITH_LIBGSF=OFF -DFINAL_VERSION=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON -DWITH_SSE3=OFF ../code
 docker run --rm -v ryzombuild_jammy_amd64_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_jammy" ryzombuild_jammy_amd64 ninja -j9
-```
-
-```
-docker run --rm -v ryzombuild_focal_amd64_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_focal" ryzombuild_focal_amd64 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DHUNTER_ENABLED=ON -DHUNTER_STATUS_DEBUG=ON -DHUNTER_JOBS_NUMBER=9 -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_PATCH=ON -DWITH_RYZOM_TOOLS=OFF -DWITH_NEL_TOOLS=OFF -DWITH_NELNS=OFF -DWITH_QT5=OFF -DWITH_LIBGSF=OFF -DFINAL_VERSION=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON -DWITH_SSE3=OFF ../code
-docker run --rm -v ryzombuild_focal_amd64_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_focal" ryzombuild_focal_amd64 ninja -j9
 ```
 
 ```

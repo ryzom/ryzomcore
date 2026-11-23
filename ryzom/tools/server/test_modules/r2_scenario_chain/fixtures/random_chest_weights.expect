@@ -1,0 +1,20 @@
+# Two random chests of three items. The weights of the first (25, 25, 50) make whole shares of 100, the
+# weights of the second (33, 33, 33) make thirds. The shares are the result of a division, a float: the
+# script of the chest has the whole ones as whole numbers ("25", not "25.0") and the others with the
+# 14 digits of Lua 5.1, on every Lua version. The height of the chest is written the same way.
+
+upgrade: unchanged
+save: ok
+roundtrip: ok
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+
+rt_has: if (r2_0001_RtNpcGrp_4.r > 0 && r2_0001_RtNpcGrp_4.r <= 25)
+rt_has: if (r2_0001_RtNpcGrp_4.r > 25 && r2_0001_RtNpcGrp_4.r <= 50)
+rt_has: if (r2_0001_RtNpcGrp_4.r > 50 && r2_0001_RtNpcGrp_4.r <= 100)
+rt_has: ()r2_0001_RtNpcGrp_4.activateEasterEgg(1, 1,1, "0:1", 24377, -1367, 0, 0, "r2_0001_RtNpcGrp_4", "Chest 1", "");
+rt_has: if (r2_0001_RtNpcGrp_5.r > 0 && r2_0001_RtNpcGrp_5.r <= 33.333333333333)
+rt_has: if (r2_0001_RtNpcGrp_5.r > 33.333333333333 && r2_0001_RtNpcGrp_5.r <= 66.666666666667)
+rt_has: if (r2_0001_RtNpcGrp_5.r > 66.666666666667 && r2_0001_RtNpcGrp_5.r <= 100)
+rt: acts=2 texts=0 plot_items=3

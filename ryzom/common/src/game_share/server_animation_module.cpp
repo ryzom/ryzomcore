@@ -129,7 +129,14 @@ public:
 class CRtUserTrigger
 {
 public:
+	CRtUserTrigger()
+	    : GrpAlias(0)
+	{
+	}
+
 	std::string FullName;
+	// the alias of the group that gets the event of the trigger: the AI service is given this, not a name
+	TAIAlias GrpAlias;
 	std::string Grp;
 	std::string Name;
 };
@@ -140,13 +147,15 @@ class CRtAct : public NLMISC::CRefCount
 public:
 	typedef std::map<TAIAlias, NLMISC::CSmartPtr<R2::CRtNpc> > TRtNpcs;
 	typedef std::map<TAIAlias, NLMISC::CSmartPtr<R2::CRtGrp> > TRtGrps;
+	typedef std::map<std::string, NLMISC::CSmartPtr<R2::CRtGrp> > TRtGrpsById;
 	typedef std::vector<CRtUserTrigger> TRtUserTriggers;
 	typedef uint32 TEggId;
-	typedef std::string TFullGrpName;
-	typedef std::map<TEggId, TFullGrpName> TActiveEasterEggs;
+	// an active easter egg, and the alias of the group of this act that gets the event when it is looted
+	typedef std::map<TEggId, TAIAlias> TActiveEasterEggs;
 
 public:
 	R2::CRtGrp* getRtGrpByName(const std::string& name) const;
+	void addRtGrp(R2::CRtGrp *rtGrp);
 	void addUserTrigger(const CRtUserTrigger& userTrigger);
 	bool activateEasterEgg(uint32 easterEggId, const std::string & grpControler)
 	{
@@ -160,13 +169,17 @@ public:
 			nlwarning("SAM: Error while activating easter egg. The controler grp is not valid.");
 			return false;
 		}
-		return ActiveEasterEggs.insert(std::make_pair(easterEggId, grpControler)).second;
+		// the group is one of this act: it is kept by its alias, the name the script gave is not used again
+		return ActiveEasterEggs.insert(std::make_pair(easterEggId, first->second->Alias)).second;
 	}
 	bool deactivateEasterEgg(uint32 easterEggId);
 
 public:
 	TRtNpcs RtNpcs;
 	TRtGrps RtGrps;
+	// the groups of RtGrps by the Id of their data: a scenario names a group once, and it is looked up by that
+	// name for every user trigger
+	TRtGrpsById RtGrpsById;
 	uint16 WeatherValue; // 0 for auto weather
 	//uint8  Season; // 0 for auto season
 	uint32 LocationId;
@@ -191,17 +204,19 @@ bool CRtAct::deactivateEasterEgg(uint32 easterEggId)
 
 R2::CRtGrp* CRtAct::getRtGrpByName(const std::string& name) const
 {
-	TRtGrps::const_iterator first(RtGrps.begin()), last(RtGrps.end());
-	for ( ; first != last ; ++first)
+	TRtGrpsById::const_iterator found = RtGrpsById.find(name);
+	return found != RtGrpsById.end() ? found->second.getPtr() : nullptr;
+}
+
+void CRtAct::addRtGrp(R2::CRtGrp *rtGrp)
+{
+	RtGrps[rtGrp->Alias] = rtGrp;
+	CObject *object = rtGrp->ObjectData;
+	if (object && object->isString("Id"))
 	{
-		CObject* object = first->second->ObjectData;
-		if ( object && object->isString("Id") )
-		{
-			std::string data = object->toString("Id");
-			if (data == name) { return first->second; }
-		}
+		// the first group of a name stays the one that is found by it
+		RtGrpsById.insert(std::make_pair(object->toString("Id"), NLMISC::CSmartPtr<R2::CRtGrp>(rtGrp)));
 	}
-	return nullptr;
 }
 
 void CRtAct::addUserTrigger(const CRtUserTrigger& userTrigger)
@@ -212,6 +227,7 @@ void CRtAct::addUserTrigger(const CRtUserTrigger& userTrigger)
 	{
 		UserTriggers.push_back(userTrigger);
 		UserTriggers.back().FullName = rtGrp->FullName;
+		UserTriggers.back().GrpAlias = rtGrp->Alias;
 	}
 	else
 	{
@@ -389,6 +405,8 @@ public:
 
 	TLocations Locations;
 	TActiveEasterEggs ActiveEasterEggs;
+	uint32 RefusedEasterEggs; // activations refused because the session has MaxActiveEasterEggs
+	std::set<uint32> EasterEggIds; // the ids of the chests the session activated since it began
 
 	CBotControler	IncarningBots;
 	CBotControler	TalkingAsBots;
@@ -400,10 +418,14 @@ public:
 	std::set<uint32> CharacternValidePosition;
 	bool	InitialTp;
 	TCharacterInfos CharacterInfos;
+	// true when the clients of the session were answered that it starts: they are told if it cannot be started
+	// (false for the session that is only made to write its primitives for debugging)
+	bool ReportStartFailure;
 
 public:
 	CAnimationSession()
 	{
+		ReportStartFailure = false;
 		WeatherValue = 0; // auto weather
 		CurrSeason = std::numeric_limits<uint8>::max();
 		StartingAct = false;
@@ -418,6 +440,7 @@ public:
 
 		TimingIsFinished = false;
 		ScenarioScore = 0;
+		RefusedEasterEggs = 0;
 	}
 
 	void setStartParams(sint32 x, sint32 y, uint8 season) { InitialX = x; InitialY = y; InitialSeason = season; }
@@ -452,9 +475,10 @@ void CAnimationSession::easterEggLooted(uint32 easterEggId, TSessionId /* scenar
 
 	CRtAct::TActiveEasterEggs::const_iterator found2 = rtAct->ActiveEasterEggs.find(easterEggId);
 	DROP_IF(found2 == rtAct->ActiveEasterEggs.end(), "Error try to loot an unactive easter egg", return);
-	std::string fullname = found2->second;
-
-	CAiWrapper::getInstance().triggerUserTrigger(fullname, 2);
+	// The acts after the base act give out the same aliases, and one of them is loaded at a time:
+	// the alias of a group of another act would name a group of the current one
+	DROP_IF(actId != 0 && actId != CurrentAct, "Error try to loot an easter egg of an act that is not loaded", return);
+	CAiWrapper::getInstance().triggerUserTrigger(AiInstance, found2->second, 2);
 
 
 }
@@ -535,7 +559,7 @@ void CAnimationSession::updateActPositionDescriptions(TActPositionDescriptions& 
 	{
 		CRtAct* act = Acts[actIndex];
 		TActPositionDescription actPositionDescription;
-		if ( act->LocationId <= this->Locations.size())
+		if (act->LocationId < this->Locations.size())
 		{
 			actPositionDescription.Name = act->Name;
 			actPositionDescription.Season = this->Locations[act->LocationId ].Season;
@@ -619,33 +643,66 @@ public:
 		}
 	}
 
-	void setPrimPoint()
+	/// Returns whether the point has a z: the data comes from the client, and a coordinate it lacks is 0
+	bool setPrimPoint()
 	{
 		CObject* attr = nullptr;
 		CPrimPoint* point = dynamic_cast<CPrimPoint*>(_Primitive);
 
 		nlassert(point);
+		point->Point = CPrimVector(NLMISC::CVector::Null);
+		bool hasZ = false;
 		CObject* pt = _Object->getAttr("Pt");
 		if (pt)
-		{
-			attr = pt->getAttr("x");
-			if (attr && attr->isNumber()) {	point->Point.x = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("y");
-			if (attr && attr->isNumber()) {	point->Point.y = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("z");
-			if (attr && attr->isNumber()) {	point->Point.z = static_cast<float>(0.0); 	}
-		}
+			hasZ = readPoint(pt, point->Point);
 
 		attr = _Object->getAttr("Angle");
 		if (attr && attr->isNumber()) {	point->Angle =  static_cast<float>(attr->toNumber()); 	}
+		return hasZ;
 	}
 
-	void setPrimPath();
-	void setPrimZone();
+	/// As setPrimPoint: whether every point has a z
+	bool setPrimPath();
+	bool setPrimZone();
 
 private:
+	/// Reads x, y and z of a point into vector, which keeps its value for a coordinate the point lacks; returns
+	/// whether the point has a z
+	static bool readPoint(CObject *pt, CPrimVector &vector)
+	{
+		CObject *attr = pt->getAttr("x");
+		if (attr && attr->isNumber()) { vector.x = static_cast<float>(attr->toNumber()); }
+
+		attr = pt->getAttr("y");
+		if (attr && attr->isNumber()) { vector.y = static_cast<float>(attr->toNumber()); }
+
+		attr = pt->getAttr("z");
+		if (attr && attr->isNumber())
+		{
+			vector.z = static_cast<float>(attr->toNumber());
+			return true;
+		}
+		return false;
+	}
+
+	/// Reads the points of Pts, each 0 for a coordinate it lacks; returns whether there are points and every one has a z
+	bool readPoints(std::vector<CPrimVector> &points) const
+	{
+		CObject *pts = _Object->getAttr("Pts");
+		if (!pts)
+			return false;
+		bool hasZ = true;
+		uint32 first(0), last(pts->getSize());
+		points.assign(last, CPrimVector(NLMISC::CVector::Null));
+		for (; first != last; ++first)
+		{
+			CObject *pt = pts->getValueAtPos(first);
+			if (!pt || !readPoint(pt, points[first]))
+				hasZ = false;
+		}
+		return hasZ && last != 0;
+	}
+
 	CObject* _Object;
 	IPrimitive* _Primitive;
 };
@@ -682,63 +739,19 @@ void CAttributeToProperty::setAiStateName(const std::string& prefix)
 }
 
 
-void CAttributeToProperty::setPrimPath()
+bool CAttributeToProperty::setPrimPath()
 {
-	CObject* attr = nullptr;
 	CPrimPath* points = dynamic_cast<CPrimPath*>(_Primitive);
 	nlassert(points);
-	CObject* pts = _Object->getAttr("Pts");
-	if (pts)
-	{
-
-		uint32 first(0), last( pts->getSize() );
-		points->VPoints.resize(last);
-		for ( ; first != last ; ++first )
-		{
-			CObject* pt = pts->getValueAtPos(first);
-
-			attr = pt->getAttr("x");
-			if (attr && attr->isNumber()) {	points->VPoints[first].x = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("y");
-			if (attr && attr->isNumber()) {	points->VPoints[first].y = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("z");
-			if (attr && attr->isNumber()) {	points->VPoints[first].z = static_cast<float>(attr->toNumber()); 	}
-
-		}
-
-	}
+	return readPoints(points->VPoints);
 }
 
 
-void CAttributeToProperty::setPrimZone()
+bool CAttributeToProperty::setPrimZone()
 {
-	CObject* attr = nullptr;
 	CPrimZone* points = dynamic_cast<CPrimZone*>(_Primitive);
 	nlassert(points);
-	CObject* pts = _Object->getAttr("Pts");
-	if (pts)
-	{
-
-		uint32 first(0), last( pts->getSize() );
-		points->VPoints.resize(last);
-		for ( ; first != last ; ++first )
-		{
-			CObject* pt = pts->getValueAtPos(first);
-
-			attr = pt->getAttr("x");
-			if (attr && attr->isNumber()) {	points->VPoints[first].x = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("y");
-			if (attr && attr->isNumber()) {	points->VPoints[first].y = static_cast<float>(attr->toNumber()); 	}
-
-			attr = pt->getAttr("z");
-			if (attr && attr->isNumber()) {	points->VPoints[first].z = static_cast<float>(attr->toNumber()); 	}
-
-		}
-
-	}
+	return readPoints(points->VPoints);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -1129,6 +1142,20 @@ IPrimitive* CServerAnimationModule::getAction(CObject* action, const std::string
 
 bool CServerAnimationModule::queueSession(CAnimationSession* session, bool /* runTest */)
 {
+	// The run time scenario comes from a client, and nothing below, in the translation or while the session
+	// runs, tests what it reads from it. The edition module checks the scenario when it is uploaded, so that the
+	// client gets its answer at once. It is checked again here, on the tree that is translated: that tree is a
+	// copy, made through its serial form, of the one that was checked, and the tree a client updates without
+	// starting it, which the message that makes primitives for debugging brings here, was not checked before.
+	std::string error;
+	if (!getEditionModule()->checkRtScenario(session->RtData, session->InitialAct, error))
+	{
+		nlwarning("R2An: session %u (%u characters, first char %u): the run time scenario to start in act %u is refused: %s",
+		    session->SessionId.asInt(), (uint32)session->ConnectedChars.size(),
+		    session->ConnectedChars.empty() ? 0 : session->ConnectedChars[0], session->InitialAct, error.c_str());
+		return false;
+	}
+
 	// write scenario rtdata to a file for debugging
 	try
 	{
@@ -1228,6 +1255,17 @@ void CServerAnimationModule::startAct(TSessionId sessionId, uint32 actId)
 	uint32 aiInstance = animSession->AiInstance;
 	DROP_IF(actId < 1 ||  animSession->Pdrs.size() <= actId, "Invalid Act", return);
 
+	// The acts, the location of each and the act to start in are checked when the scenario is accepted
+	// (queueSession). An act is not started on an index that is out of range all the same: the acts and the
+	// locations are indexed below.
+	uint32 actLocationId = actId < animSession->Acts.size() ? animSession->Acts[actId]->LocationId : std::numeric_limits<uint32>::max();
+	if (actLocationId >= animSession->Locations.size() || animSession->CurrentAct >= animSession->Acts.size())
+	{
+		nlwarning("R2An: session %u: act %u (location %u of %u) cannot be started from act %u of %u, an index is out of range",
+		    sessionId.asInt(), actId, actLocationId, (uint32)animSession->Locations.size(),
+		    animSession->CurrentAct, (uint32)animSession->Acts.size());
+		return;
+	}
 
 	if ( !isLocal )
 	{
@@ -1272,7 +1310,9 @@ void CServerAnimationModule::startAct(TSessionId sessionId, uint32 actId)
 		}
 
 		nlwarning("ERROR: you must check the backup : session_%d_?.r2", sessionId.asInt());
-		BOMB( NLMISC::toString("BIG ERROR: Scenario was not found for session %u, it previously lead to dss crash", sessionId.asInt()), return);
+		// The two scenarios of a session are uploaded apart, and a session can have the run time one alone: the
+		// act is not started, and the service has nothing of its own to stop on
+		nlwarning("BIG ERROR: Scenario was not found for session %u, it previously lead to dss crash", sessionId.asInt());
 		return;
 	}
 
@@ -1504,14 +1544,12 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 		CAttributeToProperty a2pAiState(aiState, state);
 
-		if (aiMovement == "follow_route")
-		{
-			a2pAiState.setPrimPath();
-		}
-		else
-		{
-			a2pAiState.setPrimZone();
-		}
+		const bool pointHeights = aiMovement == "follow_route" ? a2pAiState.setPrimPath() : a2pAiState.setPrimZone();
+		// the editor's tools give each point the height of the ground they placed it on: the AI service puts it on the
+		// layer nearest to its z when a layer is near it (CWorldMap::setWorldPositionNearestHeight). Without a z on
+		// every point, the vertical pos takes the layer of each one
+		if (pointHeights)
+			state->addPropertyByName("point_heights", new CPropertyString("true"));
 
 		a2pAiState.setAttributeAsStringWithPrefix("Id", "name", prefix);
 		a2pAiState.setAttributeAsString("AiActivity", "ai_activity");
@@ -1603,7 +1641,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 			npc_group->insertChild(npc_group_alias);
 //			nlinfo("R2Anim: Group %u %s", npc_group_alias->getFullAlias(), std::string(prefix+component->toString("Id")).c_str());
 			CRtGrp* rtGrp =  new CRtGrp(npc_group_alias->getFullAlias(), component, fullName);
-			animSession->Acts[actId]->RtGrps[rtGrp->Alias] = rtGrp;
+			animSession->Acts[actId]->addRtGrp(rtGrp);
 
 			CObject* npcChild = component->getAttr("Children");
 			uint32 firstNpc(0), lastNpc(npcChild->getSize());
@@ -1630,10 +1668,14 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 				CAttributeToProperty a2p(objectNpc, npc_bot);
 
-				a2p.setPrimPoint();
+				const bool pointHeight = a2p.setPrimPoint();
 				npc_bot->addPropertyByName("class", new CPropertyString("npc_bot"));
 				npc_bot->addPropertyByName("ai_type", new CPropertyString("BOT_NPC"));	// AJM
 				npc_bot->addPropertyByName("vertical_pos", new CPropertyString("auto"));	// AJM
+				// the editor's tools give it the height of the ground they placed it on: the AI service puts it on the
+				// layer nearest to its z when a layer is near it. Without a z, the vertical pos takes its layer
+				if (pointHeight)
+					npc_bot->addPropertyByName("point_heights", new CPropertyString("true"));
 				std::string botname = objectNpc->toString("Name");
 				if (botname.length()==0)
 				{
@@ -2072,10 +2114,19 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 				if (_CharSessions[*first] != sessionId)
 				{
 					TSessionId previousCharSessionId = _CharSessions[*first];
+					// The previous session can be gone, or still be in the queue of the sessions to start. The
+					// AIS has this session by now: it is not given up for that.
 					CAnimationSession* previousSession = getSession( previousCharSessionId );
-					BOMB_IF(!previousSession ,"BUG: Failed to get animation session object with id "+NLMISC::toString(previousCharSessionId.asInt()), return false);
-					std::vector<uint32> & chars = previousSession->ConnectedChars;
-					chars.erase(std::remove(chars.begin(), chars.end(), *first ), chars.end());
+					if (previousSession && previousSession != animSession)
+					{
+						std::vector<uint32> &chars = previousSession->ConnectedChars;
+						chars.erase(std::remove(chars.begin(), chars.end(), *first), chars.end());
+					}
+					else if (!previousSession)
+					{
+						nlwarning("R2An: char %u was attached to session %u, which is not running, and moves to session %u",
+						    *first, previousCharSessionId.asInt(), sessionId.asInt());
+					}
 				}
 				_CharSessions[*first] = sessionId;
 			}
@@ -2100,6 +2151,61 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 	return true;
 }
 
+void CServerAnimationModule::releaseFailedSession(CAnimationSession *animSession)
+{
+	TSessionId sessionId = animSession->SessionId;
+	uint32 startingAct = animSession->InitialAct;
+	bool reportStartFailure = animSession->ReportStartFailure;
+
+	TSessions::iterator found = _Sessions.find(sessionId);
+	if (found != _Sessions.end() && found->second != animSession)
+	{
+		// An animation of this session is running, so the one that was asked for could not be added. The
+		// running one, its characters and its clients stay as they are: the test they are in is the one that
+		// runs, and it can be stopped as usual.
+		nlwarning("R2An: session %u: a scenario was given to start in act %u while the previous animation of the session is still running, it is dropped",
+		    sessionId.asInt(), startingAct);
+		delete animSession;
+		return;
+	}
+
+	// The session was added to the running sessions before its translation. Left there, it would be taken for
+	// a running session with acts that were never made, and no other could be started under its id.
+	if (found != _Sessions.end())
+	{
+		_Sessions.erase(found);
+	}
+
+	// Its characters are not attached to it: that is done at the end of a session that is made. What it has
+	// outside is its texts, which were given to the string manager when it was queued. They are taken back
+	// as when an animation stops, unless a session of the same id is in the queue (the edition module starts one
+	// animation of a session at a time, the message that makes primitives for debugging does not look): the
+	// texts the string manager has are then the ones of that session, which registered them last.
+	bool queuedAgain = false;
+	for (TSessionsQ::const_iterator queued = _QueuedSessions.begin(); queued != _QueuedSessions.end(); ++queued)
+	{
+		if ((*queued)->SessionId == sessionId)
+		{
+			queuedAgain = true;
+		}
+	}
+	if (!queuedAgain)
+	{
+		requestUnloadTable(sessionId);
+	}
+
+	// Nothing else of an animation that stops applies: the AIS and the EGS only get a session at the end of
+	// doMakeAnimationSession, which has no failure after that, and no channel is open for a session that never
+	// ran. What the edition module announced when the start was asked for is for it to take back.
+	nlwarning("R2An: session %u: the animation to start in act %u could not be made, the session is released (%u characters)",
+	    sessionId.asInt(), startingAct, (uint32)animSession->ConnectedChars.size());
+	delete animSession;
+
+	if (reportStartFailure)
+	{
+		getEditionModule()->animationSessionStartFailed(sessionId, startingAct, "uiR2EDInvalidScenario");
+	}
+}
 
 bool CServerAnimationModule::getConnectedChars(TSessionId sessionId, std::vector<TCharId>& chars) const
 {
@@ -2125,8 +2231,10 @@ bool CServerAnimationModule::stopTestImpl(TSessionId sessionId, uint32 & lastAct
 		return false;
 	}
 	uint32 aiInstance = session->AiInstance;
-	requestUnloadTable(sessionId);
-	requestReleaseChannels(sessionId);
+	// (under the id the animation runs for, which the texts and the channels were given under: the id asked for
+	// can be that of an animation session linked to it)
+	requestUnloadTable(session->SessionId);
+	requestReleaseChannels(session->SessionId);
 
 	if ( !_CharacterControlProxy.isNull())
 	{
@@ -2191,8 +2299,20 @@ void CServerAnimationModule::onModuleUpdate()
 	{
 		CAnimationSession *animSession = _QueuedSessions.front();
 		_QueuedSessions.pop_front();
-		doMakeAnimationSession( animSession );
-		nldebug( "R2An: animation session %u processed, %u in queue", animSession->SessionId.asInt(), _QueuedSessions.size() );
+		TSessionId sessionId = animSession->SessionId;
+		bool scheduledStart = animSession->ReportStartFailure;
+		bool made = doMakeAnimationSession(animSession);
+		// made or not, the start that was scheduled for the session is no longer in progress
+		if (scheduledStart)
+		{
+			m_StartingSessions.erase(sessionId);
+		}
+		if (!made)
+		{
+			// the session is deleted there
+			releaseFailedSession(animSession);
+		}
+		nldebug("R2An: animation session %u processed, %u in queue", sessionId.asInt(), _QueuedSessions.size());
 	}
 
 	NLMISC::TTime now = NLMISC::CTime::getLocalTime();
@@ -2205,6 +2325,15 @@ void CServerAnimationModule::onModuleUp(NLNET::IModuleProxy *senderModuleProxy)
 {
 	std::string moduleName = senderModuleProxy->getModuleClassName();
 	// send back a message to the client to open the firewall
+
+	// The modules of the services are known by the class name they declare. A module of a game client declares the
+	// class it wants: it is never taken as one of the service modules below.
+	if (moduleName != "ClientEditionModule" && isClientModule(senderModuleProxy))
+	{
+		nlwarning("R2An: the client module '%s' declares the class '%s', it is not taken as a module of a service",
+			senderModuleProxy->getModuleName().c_str(), moduleName.c_str());
+		return;
+	}
 
 	if ( moduleName == "StringManagerModule")
 	{
@@ -2226,14 +2355,20 @@ void  CServerAnimationModule::onModuleDown(NLNET::IModuleProxy *senderModuleProx
 {
 	std::string moduleName = senderModuleProxy->getModuleClassName();
 
+	// A service module is only forgotten when the module that goes down is the one that was stored: any module can
+	// declare its class name.
 	if ( moduleName == "StringManagerModule")
 	{
-		_StringManagerProxy = nullptr;
-		nlinfo("StringManagerModule disconnected!");
+		if (_StringManagerProxy == senderModuleProxy)
+		{
+			_StringManagerProxy = nullptr;
+			nlinfo("StringManagerModule disconnected!");
+		}
 	}
 	else if ( moduleName == "CharacterControl")
 	{
-		_CharacterControlProxy = nullptr;
+		if (_CharacterControlProxy == senderModuleProxy)
+			_CharacterControlProxy = nullptr;
 	}
 	else if ( moduleName == "ClientEditionModule") // a client has disconnected
 	{
@@ -2325,6 +2460,12 @@ void CServerAnimationModule::stopAct(TSessionId sessionId)
 
 bool CServerAnimationModule::getPosition(TSessionId sessionId, double& x, double& y, double& orient, uint8& season, uint32 actIndex)
 {
+	// a caller that does not test the result has a defined position
+	x = 0;
+	y = 0;
+	orient = 0;
+	season = 0;
+
 	CAnimationSession *animSession = getSession( sessionId );
 
 	if(! animSession) { return false; } // normal case when getStart position while creating scenario
@@ -2442,6 +2583,29 @@ CAnimationSession* CServerAnimationModule::getSessionByCharId(TCharId charId) co
 	return getSession(getSessionIdByCharId(charId));
 }
 
+bool CServerAnimationModule::isAnimator(TCharId charId, const char *operation) const
+{
+	TSessionId sessionId;
+	TUserRole role;
+	bool allowed = getEditionModule()->isCharAnimator(charId, sessionId, role);
+
+	// A request acts on the animation session the character is attached to here, so the role only counts if it was
+	// given for that session: a character that the edition module has moved to another session can still be
+	// attached to the animation of the session it left.
+	TSessionId animSessionId = getSessionIdByCharId(charId);
+	if (allowed && animSessionId.asInt() != 0 && getSession(animSessionId) != getSession(sessionId))
+	{
+		allowed = false;
+	}
+
+	if (!allowed)
+	{
+		nlwarning("R2An: char %u (role '%s' in session %u, attached to the animation of session %u) is not allowed to use '%s', request refused",
+			charId, role.toString().c_str(), sessionId.asInt(), animSessionId.asInt(), operation);
+	}
+	return allowed;
+}
+
 void CServerAnimationModule::addPioneer( TSessionId sessionId, TCharId charId)
 {
 	CAnimationSession* session = getSession(sessionId);
@@ -2469,8 +2633,9 @@ void CServerAnimationModule::addPioneer( TSessionId sessionId, TCharId charId)
 			if (previousCharSessionId != sessionId)
 			{
 
+				// the previous session can be gone, or still be in the queue of the sessions to start
 				CAnimationSession* previousSession = getSession(previousCharSessionId);
-				if (previousSession != session)
+				if (previousSession && previousSession != session)
 				{
 					std::vector<uint32> & chars = previousSession->ConnectedChars;
 					chars.erase(std::remove(chars.begin(), chars.end(), charId ), chars.end());
@@ -2480,7 +2645,14 @@ void CServerAnimationModule::addPioneer( TSessionId sessionId, TCharId charId)
 		}
 
 	}
-	nlinfo("R2An: Char %u is connected as animator", charId);
+	{
+		// with the role the character holds in the session it is connected to: a player, an animator, or an
+		// editor that tests its scenario ('invalid' when the edition module has the character in no session)
+		TSessionId roleSessionId;
+		TUserRole role;
+		getEditionModule()->isCharAnimator(charId, roleSessionId, role);
+		nlinfo("R2An: Char %u is connected to the animation of session %u as '%s'", charId, sessionId.asInt(), role.toString().c_str());
+	}
 	// update weather for that char
 	if ( !isLocal )
 	{
@@ -2534,6 +2706,8 @@ void CServerAnimationModule::onDssTarget( IModuleProxy *senderModuleProxy, const
 
 	bool ok =  checkSecurityInfo(senderModuleProxy, charId, eid, userPriv, extendedPriv);
 	if (!ok) { return ; }
+
+	if (!isAnimator(charId, "onDssTarget")) { return; }
 
 	DROP_IF(!_CharacterControlProxy, "Try to send message to EGS must he is down", return);
 
@@ -3017,6 +3191,11 @@ void CServerAnimationModule::onCharTargetReceived( NLNET::IModuleProxy *senderMo
 	std::vector<std::string> args(param);
 	TCharId charId = static_cast<TCharId>(eid.getShortId());
 
+	// This is the answer of the EGS to onDssTarget. It names the character it acts for: it is never taken from a
+	// client (onProcessModuleMessage keeps the messages of the clients away from this interface), and the character
+	// named must be an animator like the one onDssTarget accepts.
+	if (!isAnimator(charId, "onCharTargetReceived")) { return; }
+
 	const NLNET::TModuleProxyPtr * foundModule = getEditionModule()->getClientProxyPtr(charId);
 	DROP_IF(!foundModule, NLMISC::toString("Invalid Char %u", charId), return);
 
@@ -3035,7 +3214,9 @@ void CServerAnimationModule::onCharTargetReceived( NLNET::IModuleProxy *senderMo
 
 	TSessionId sessionId = charSessionFound->second;
 
+	// a session that is still in the queue of the sessions to start has its characters, but is not found yet
 	CAnimationSession* session = getSession(sessionId);
+	DROP_IF(!session, NLMISC::toString("Session %u of Char %u is not started yet", sessionId.asInt(), charId), return);
 	DROP_IF(session->Acts.empty() , NLMISC::toString("Invalid Session %u for Char %u (No act available)",charSessionFound->second.asInt(),  charId), return);
 
 
@@ -3386,6 +3567,46 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 		bool ok =  checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 		if (!ok) { return true; }
 
+		// "talk_as" (with the name of an NPC) and "stopTalk" (with nothing) are the requests of an earlier way to
+		// talk as an NPC. The string manager, which they were passed on to, has no message "talk_as", and reads the
+		// NPC of a "stopTalk" that these do not name. An animator talks as an NPC, and stops, with the action on
+		// its target (onDssTarget with TALK_AS and STOP_TALK, the buttons of the animation bar), which gives the
+		// string manager the NPC. These two are refused, and nothing is passed on.
+		if (operationName == "talk_as" || operationName == "stopTalk")
+		{
+			nlwarning("R2An: char %u sent '%s', a request that is not served any more (talking as an NPC is asked with the action on a target, TALK_AS and STOP_TALK), request refused",
+				charId, operationName.c_str());
+			return true;
+		}
+
+		// The requests that drive the animation are for the animators of the session. The string queries
+		// (requestStringValue, requestIdList, requestStringTable) stay open to every member.
+		if (operationName == "requestStartAct"
+			|| operationName == "requestStopAct"
+			|| operationName == "requestSetSeason"
+			|| operationName == "requestSetWeather"
+			|| operationName == "requestSetValue")
+		{
+			if (!isAnimator(charId, operationName.c_str())) { return true; }
+		}
+
+		// The string manager keeps the texts of a scenario under the id of its animation session (requestLoadTable).
+		// A request about the texts acts on those of the animation the character is attached to.
+		TSessionId textsSessionId(0);
+		if (operationName == "requestStringValue"
+			|| operationName == "requestIdList"
+			|| operationName == "requestStringTable"
+			|| operationName == "requestSetValue")
+		{
+			CAnimationSession *textsSession = getSessionByCharId(charId);
+			if (!textsSession)
+			{
+				nlwarning("R2An: char %u sent '%s' but is attached to no running animation (session %u), request refused",
+					charId, operationName.c_str(), getSessionIdByCharId(charId).asInt());
+				return true;
+			}
+			textsSessionId = textsSession->SessionId;
+		}
 
 		if (operationName == "requestStartAct")
 		{
@@ -3486,7 +3707,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 		if(operationName == "requestStringValue")
 		{
-			TSessionId scenarioId=(TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			std::string stringId;
 			TModuleId id = senderModuleProxy->getModuleProxyId();
 			nlRead(msgin,serial,stringId);
@@ -3500,7 +3721,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 		if(operationName == "requestIdList")
 		{
-			TSessionId scenarioId = (TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			TModuleId id = senderModuleProxy->getModuleProxyId();
 			CMessage msg("requestIdList");
 			msg.serial(scenarioId);
@@ -3509,31 +3730,10 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 			return true;
 		}
 
-		if(operationName =="talk_as")
-		{
-			std::string name ;
-			nlRead(msgin,serial,name);
-			CMessage msg("talk_as");
-			TModuleId tmp = senderModuleProxy->getModuleProxyId();
-			msg.serial(tmp);
-			msg.serial(name);
-			_StringManagerProxy->sendModuleMessage(this,msg);
-			return true;
-		}
-
-		if(operationName == "stopTalk")
-		{
-			CMessage msg("stopTalk");
-			TModuleId id = senderModuleProxy->getModuleProxyId();
-			msg.serial(id);
-			_StringManagerProxy->sendModuleMessage(this,msg);
-			return true;
-		}
-
 		if(operationName == "requestStringTable")
 		{
 			CMessage msg("requestStringTable");
-			TSessionId scenarioId = (TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			TModuleId id = senderModuleProxy->getModuleProxyId();
 			nlwarning("string table requested!!");
 			msg.serial(scenarioId);
@@ -3544,21 +3744,23 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 		if(operationName=="requestSetValue")
 		{
-			TSessionId scenarioId = (TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			std::string stringId;
 			std::string value;
 			nlRead(msgin,serial,stringId);
 			nlRead(msgin,serial,value);
+			// the character is named for the string manager, which says for whom it refuses a text
 			CMessage msg("requestSetValue");
-			nlRead(msg,serial,scenarioId);
-			nlRead(msg,serial,stringId);
-			nlRead(msg,serial,value);
+			msg.serial(scenarioId);
+			msg.serial(charId);
+			msg.serial(stringId);
+			msg.serial(value);
 			_StringManagerProxy->sendModuleMessage(this,msg);
 			return true;
 		}
 
 	}
-	else if (senderModuleProxy->getModuleClassName() == "ServerEditionModule")
+	else if (senderModuleProxy->getModuleClassName() == "ServerEditionModule" && !isClientSender(senderModuleProxy))
 	{
 
 		if (operationName == "DBG_CREATE_PRIMITIVES")
@@ -3574,11 +3776,36 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 			session->CurrentAct = 0;
 			session->RtData = obj.getData();
 			session->SessionId = sessionId;
-			queueSession(session, false);
+			if (!queueSession(session, false))
+			{
+				// refused, with the reason in the log: nothing is made and no client waits for an answer
+				delete session;
+			}
 
 			return true;
 		}
 	}
+
+	// What comes from a game client is only given to the interface for the clients. The other interface of this
+	// module is for the services (EGS, AIS): returning false here would hand the message to its skeleton, which
+	// calls the handler of a message whoever sent it.
+	if (isClientSender(senderModuleProxy))
+	{
+		// The handlers answer through the interface of the client edition module, which only takes a module of
+		// that class: a client module of another class is refused
+		bool handled = false;
+		if (senderModuleProxy->getModuleClassName() == "ClientEditionModule")
+		{
+			handled = CShareServerAnimationItfSkel::fwdOnProcessModuleMessage(senderModuleProxy, msgin);
+		}
+		if (!handled)
+		{
+			nlwarning("R2An: the module '%s' (class '%s') sent the message '%s', which it cannot send to the interface for the clients, message refused",
+				senderModuleProxy->getModuleName().c_str(), senderModuleProxy->getModuleClassName().c_str(), operationName.c_str());
+		}
+		return true;
+	}
+
 	return false;
 }
 
@@ -3605,7 +3832,11 @@ void CServerAnimationModule::disconnectChar(TCharId charId)
 
 void CServerAnimationModule::scheduleStartSession(const CAnimationMessageAnimationStart &msg)
 {
+	// The task copies the message through its serial form, which throws when it cannot. The session is only
+	// marked once the task is in place: from then until the session is made, or given up, it has a start in
+	// progress, and a mark without a task would hold back every later start of the session.
 	_Tasks.addTaskAt( NLMISC::CTime::getLocalTime() + 1000,  new CTaskScheduleStartSession( this, msg) );
+	m_StartingSessions.insert(msg.SessionId);
 }
 
 
@@ -3627,42 +3858,27 @@ void CServerAnimationModule::scheduleStartSessionImpl(const CAnimationMessageAni
 	session->AiInstance = msg.AiInstance;
 	session->InitialAct = msg.StartingAct;
 	session->ScenarioHeader = msg.ScenarioHeader;
+	session->ReportStartFailure = true;
 
 	// queue session
 	bool ok = queueSession(session);
 	if (!ok)
 	{
-		nlwarning("R2An: can't queue animation session");
+		// The session is not queued. The clients were answered that the scenario starts: the edition module
+		// tells them that it does not, unless an animation of the session runs, which is then the one they
+		// are in (the edition module does not ask for a start in that case).
+		nlwarning("R2An: can't queue animation session %u", msg.SessionId.asInt());
+		delete session;
+		m_StartingSessions.erase(msg.SessionId);
+		if (_Sessions.find(msg.SessionId) == _Sessions.end())
+		{
+			getEditionModule()->animationSessionStartFailed(msg.SessionId, msg.StartingAct, "uiR2EDInvalidScenario");
+		}
 		return;
 	}
 
-
-	// Update animator session info
-	{
-		std::vector<uint32>::const_iterator first(msg.AnimatorCharId.begin()), last(msg.AnimatorCharId.end());
-		for ( ; first != last ; ++first)
-		{
-
-			bool inserted =_CharSessions.insert(std::make_pair(*first, msg.SessionId)).second;
-			if (!inserted)
-			{
-				// lookup the previous sessin id and make sure that we have a session for thsi id
-				TSessionId previousCharSessionId = _CharSessions[*first];
-				nlinfo("R2An::scheduleStartSession Moving char (%u) from Session %u to Session %u", *first, previousCharSessionId.asInt(), msg.SessionId.asInt());
-				BOMB_IF(_Sessions.find(previousCharSessionId)==_Sessions.end(),"scheduleStartSession giving up because failed to find _Sessions entry for character",return);
-				// disconnect from previous scenario
-				if (previousCharSessionId != msg.SessionId)
-				{
-					CAnimationSession* previousSession = getSession( previousCharSessionId );
-					BOMB_IF(!previousSession, "BUG: Failed to get pointer to session object with Id: "+NLMISC::toString(previousCharSessionId.asInt()), return);
-					std::vector<uint32> & chars = previousSession->ConnectedChars;
-					chars.erase(std::remove(chars.begin(), chars.end(), *first ), chars.end());
-				}
-				_CharSessions[*first] = msg.SessionId;
-			}
-			nlinfo("R2An: Char %u is connected as animator", *first);
-		}
-	}
+	// The characters of the session are attached to it when it is made (doMakeAnimationSession): until then
+	// they stay with the animation they are in, and a start that fails leaves them there.
 	session->CurrSeason = std::numeric_limits<uint8>::max();
 }
 
@@ -3923,6 +4139,11 @@ void CServerAnimationModule::deactivateEasterEgg(class NLNET::IModuleProxy * /* 
 	proxy.deactivateEasterEgg(this,  easterEggId, scenarioId);
 }
 
+// The most chests a session has active at a time. A chest takes one unit of the quota of the editor, which the
+// base act and one other act share (MaxNpcs of the edition module, 100 by default); the editor has 10 other
+// acts, and the chests of an act stay active when another act is started: 10 * 100, with some room.
+static const uint32 MaxActiveEasterEggs = 1024;
+
 void CServerAnimationModule::activateEasterEgg(class NLNET::IModuleProxy * /* aisControl */, uint32 easterEggId, TSessionId scenarioId, uint32 actId ,const std::string & items, float x, float y, float z, float heading, const std::string& grpControler, const std::string& name, const std::string& look)
 {
 	DROP_IF(_CharacterControlProxy.isNull(), "No CharacterControlProxy", return);
@@ -3964,6 +4185,33 @@ void CServerAnimationModule::activateEasterEgg(class NLNET::IModuleProxy * /* ai
 
 
 	DROP_IF(actId >= session->Acts.size(), "Error in activateEasterEgg ", return );
+
+	// A chest that is not active in its act is one more. The chests are counted in the acts: the session has
+	// one entry for an id, in whatever number of acts the id is active.
+	uint32 nbActive = 0;
+	for (uint32 i = 0; i < session->Acts.size(); ++i)
+	{
+		nbActive += (uint32)session->Acts[i]->ActiveEasterEggs.size();
+	}
+	// The ids are counted too: a chest has the id the translation gave its group, so a scenario of the
+	// editor uses the ids of its chests again and again. The service that makes the chest can keep one
+	// this module no longer counts as active (a chest removed before it was there); with a largest
+	// number of ids, the chests a session leaves there have that number at most.
+	const bool knownId = session->EasterEggIds.count(easterEggId) != 0;
+	if ((nbActive >= MaxActiveEasterEggs && session->Acts[actId]->ActiveEasterEggs.count(easterEggId) == 0)
+	    || (!knownId && session->EasterEggIds.size() >= MaxActiveEasterEggs))
+	{
+		// the 1st, 2nd, 4th, 8th... refusal of the session is logged
+		++session->RefusedEasterEggs;
+		if ((session->RefusedEasterEggs & (session->RefusedEasterEggs - 1)) == 0)
+		{
+			nlwarning("R2An: session %u: the chest %u is not activated, the session has %u active chests and has used %u chest ids, %u is the most of each (refusal %u)",
+			    scenarioId.asInt(), easterEggId, nbActive, (uint32)session->EasterEggIds.size(), MaxActiveEasterEggs, session->RefusedEasterEggs);
+		}
+		return;
+	}
+	session->EasterEggIds.insert(easterEggId);
+
 	bool ok = session->Acts[actId]->activateEasterEgg(easterEggId, grpControler);
 
 	if (!ok)
@@ -4009,6 +4257,8 @@ void CServerAnimationModule::onUserTriggerTriggered(NLNET::IModuleProxy *senderM
 	bool ok =  checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 	if (!ok) { return; }
 
+	if (!isAnimator(charId, "onUserTriggerTriggered")) { return; }
+
 	TSessionId sessionId = getSessionIdByCharId(charId);
 	CAnimationSession* session = getSession(sessionId);
 	if (session)
@@ -4022,10 +4272,19 @@ void CServerAnimationModule::triggerUserTrigger( TSessionId sessionId, uint32 ac
 {
 	CAnimationSession* animationSession = getSession(sessionId);
 
+	// The acts after the base act give out the same aliases, and one of them is loaded at a time: a
+	// trigger of an act that is not loaded has no group to trigger, and its alias would name a group
+	// of the current act
+	if (animationSession && actId < animationSession->Acts.size() && actId != 0 && actId != animationSession->CurrentAct)
+	{
+		nlwarning("R2An: session %u: user trigger %u of act %u asked while act %u is the current one, nothing is triggered",
+		    sessionId.asInt(), triggerId, actId, animationSession->CurrentAct);
+		return;
+	}
+
 	if (animationSession && actId < animationSession->Acts.size() && triggerId < animationSession->Acts[actId]->UserTriggers.size())
 	{
-		std::string groupName  = animationSession->Acts[actId]->UserTriggers[triggerId].FullName;
-		CAiWrapper::getInstance().triggerUserTrigger(groupName, 1);
+		CAiWrapper::getInstance().triggerUserTrigger(animationSession->AiInstance, animationSession->Acts[actId]->UserTriggers[triggerId].GrpAlias, 1);
 	}
 	else
 	{
@@ -4259,9 +4518,22 @@ NLMISC_CLASS_COMMAND_IMPL(CServerAnimationModule, loadRtFile)
 	if (!file.open(args[0]))
 	{
 		nlwarning("can't open '%s'", args[0].c_str());
+		log.displayNL("can't open '%s'", args[0].c_str());
+		return true;
 	}
+	// a file is read outside of any message: what cannot be read of it is refused with an exception, which
+	// is taken here
 	CObjectSerializerServer obj;
-	obj.serial(file);
+	try
+	{
+		obj.serial(file);
+	}
+	catch (const NLMISC::EStream &e)
+	{
+		nlwarning("R2An: the file '%s' cannot be read: %s", args[0].c_str(), e.what());
+		log.displayNL("the file '%s' cannot be read: %s", args[0].c_str(), e.what());
+		return true;
+	}
 	Pdr.clear();
 //	translateScenarioToPdr(obj.getData(), Pdr);
 
@@ -4287,7 +4559,21 @@ NLMISC_CLASS_COMMAND_IMPL(CServerAnimationModule, stopTest)
 	uint32 dummyLastAct = 0;
 	uint32 id;
 	fromString(args[0], id);
-	stopTest(TSessionId(id), dummyLastAct );
+	TSessionId sessionId(id);
+	// The animation that runs for a session of the edition module is stopped through that module, as every other
+	// stop is: it puts the scenario of the session back in edition, stops the animation here and tells the clients
+	// of the session. Stopped from here alone, the session stays in test mode and its clients in a test that is gone.
+	// (the id given can be that of an animation session linked to the session the animation runs for: the stop is
+	// made for that one, whose clients are in the test)
+	CAnimationSession *running = getSession(sessionId);
+	if (running && getEditionModule()->getScenarioById(running->SessionId))
+	{
+		TSessionId runningId = running->SessionId;
+		getEditionModule()->stopTest(runningId);
+		log.displayNL("The animation of session %u is stopped, the clients of the session are told", runningId.asInt());
+		return true;
+	}
+	stopTest(sessionId, dummyLastAct );
 	return true;
 }
 
@@ -4395,6 +4681,16 @@ bool CServerAnimationModule::isSessionRunning(TSessionId sessionId) const
 {
 	CAnimationSession* session = getSession(sessionId);
 	return session != nullptr;
+}
+
+bool CServerAnimationModule::isSessionStartingOrRunning(TSessionId sessionId) const
+{
+	// The id as it is, without the remap getSession does for a linked session, which has no animation of its
+	// own and reaches the one of the session it is linked to. This is the test doMakeAnimationSession makes: it
+	// keeps the animations by the id their start was asked for and refuses a second one under the same id, so
+	// a start is held back here exactly when it would be refused there, or is on its way there.
+	return _Sessions.find(sessionId) != _Sessions.end()
+	    || m_StartingSessions.find(sessionId) != m_StartingSessions.end();
 }
 
 uint32 CServerAnimationModule::getCurrentAct(TSessionId sessionId) const

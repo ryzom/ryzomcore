@@ -2026,7 +2026,7 @@ bool CEntityBase::removeSabrinaEffect( CSEffect *effect, bool activateSleepingEf
 //-----------------------------------------------
 // CEntityBase::addLink
 //-----------------------------------------------
-void CEntityBase::addLink( CSLinkEffect *effect )
+void CEntityBase::addLink( CSLinkEffect *effect, bool /* newStaticAction */ )
 {
 	if (!effect || !TheDataset.isAccessible(effect->getCreatorRowId()) )
 		return;
@@ -2328,9 +2328,11 @@ bool CEntityBase::canEntityUseAction(CBypassCheckFlags bypassCheckFlags, bool se
 				case EFFECT_FAMILIES::Fear:
 					if (bypassCheckFlags.Flags.Fear)
 						continue;
+					break; // the invulnerability bypass is not a fear bypass
 				case EFFECT_FAMILIES::PowerInvulnerability:
 					if (bypassCheckFlags.Flags.Invulnerability)
 						continue;
+					break;
 				default:;
 				}
 

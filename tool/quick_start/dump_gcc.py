@@ -1,5 +1,6 @@
 
-import subprocess, os, json, csv, io, sys
+import subprocess, os, json, csv, io, sys, glob
+from find_external import LuaHeaderVersion
 
 output = None
 cmd = [ "gcc", "-dumpfullversion", "-dumpversion" ]
@@ -26,32 +27,18 @@ except OSError as e:
 	sys.exit(1)
 osRelease = dict(csv.reader(io.StringIO(output.strip()), delimiter='='))
 
-cmd = [ "find", "/usr/lib", "-name", "libluabind.so" ]
-try:
-	output = bytes.decode(subprocess.check_output(cmd))
-except subprocess.CalledProcessError as e:
-	output = None
-except OSError as e:
-	output = None
+# The ryzom/luabind fork, which the build images install in /usr/local as a static library (the luabind package of
+# Ubuntu does not work). Its Lua is the newest one installed, which luabind's own find_package(Lua) and the FindLua
+# of the NeL build both take; when Lua headers are found, development libraries are assumed to be available.
 luaVer = None
-if output:
-	luaSO = output.strip()
-	cmd = [ "ldd", luaSO ]
-	try:
-		output = bytes.decode(subprocess.check_output(cmd))
-	except subprocess.CalledProcessError as e:
-		output = None
-	except OSError as e:
-		output = None
-	if output:
-		ldd = output.strip()
-		# print(ldd)
-		# Get the Lua version that Luabind depends on
-		# If we can find that, then we assume development libraries are available
-		ldd = ldd[ldd.index("liblua"):]
-		ldd = ldd[:ldd.index(".so")]
-		if len(ldd) > 6:
-			luaVer = ldd[6:]
+if glob.glob("/usr/local/lib/libluabind09.*") + glob.glob("/usr/lib/libluabind09.*") + glob.glob("/usr/lib/*/libluabind09.*"):
+	luaNums = []
+	for luaHeader in glob.glob("/usr/include/lua5.*/lua.h") + glob.glob("/usr/include/lua.h") + glob.glob("/usr/local/include/lua.h"):
+		luaNum = LuaHeaderVersion(luaHeader)
+		if luaNum:
+			luaNums += [ luaNum ]
+	if luaNums:
+		luaVer = str(max(luaNums) // 100) + "." + str(max(luaNums) % 100)
 
 # name = "GCC " + version + " (" + osRelease["PRETTY_NAME"]
 # if luaVer:

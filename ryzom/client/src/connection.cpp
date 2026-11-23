@@ -88,6 +88,8 @@
 #include "main_loop.h"
 
 #include "misc.h"
+#include "client_ctrl.h"
+#include "window_desktop.h"
 
 
 ////////////////
@@ -207,10 +209,7 @@ void connectionRestoreVideoMode ()
 	// And setup hardware mouse if we have to
 	ResetMouseCaptureState();
 	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
-	SetMouseFreeLook ();
-	SetMouseCursor ();
-	SetMouseSpeed (ClientCfg.CursorSpeed);
-	SetMouseAcceleration (ClientCfg.CursorAcceleration);
+	ResetMouseCursor();
 
 	// Restore user UI scaling
 	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
@@ -328,6 +327,7 @@ static	CSoundGlobalMenu	SoundGlobalMenu;
 // ------------------------------------------------------------------------------------------------
 bool connection (const string &cookie, const string &fsaddr)
 {
+	ClientCtrl::setPhase("connecting");
 
 	NLMISC::TTime connStart = ryzomGetLocalTime();
 	NLMISC::TTime connLast = connStart;
@@ -430,8 +430,6 @@ bool connection (const string &cookie, const string &fsaddr)
 		// no ui init if character selection is automatic
 		//SetMouseFreeLook ();
 		//SetMouseCursor ();
-		SetMouseSpeed (ClientCfg.CursorSpeed);
-		SetMouseAcceleration (ClientCfg.CursorAcceleration);
 
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
 		PlayerSelectedSlot = ClientCfg.SelectedSlot;
@@ -462,6 +460,7 @@ bool connection (const string &cookie, const string &fsaddr)
 		switch (InterfaceState)
 		{
 			case AUTO_LOGIN:
+				ClientCtrl::setPhase("connecting");
 				InterfaceState = autoLogin (cookie, fsaddr, firstConnection);
 				break;
 
@@ -482,6 +481,8 @@ bool connection (const string &cookie, const string &fsaddr)
 		}
 	}
 
+	if (InterfaceState == GOGOGO_IN_THE_GAME)
+		ClientCtrl::setPhase("entering_game");
 	firstConnection = false;
 
 	// Restore user UI scaling
@@ -516,6 +517,7 @@ bool connection (const string &cookie, const string &fsaddr)
 // ------------------------------------------------------------------------------------------------
 bool reconnection()
 {
+	ClientCtrl::setPhase("connecting");
 
 	game_exit = false;
 
@@ -598,10 +600,7 @@ bool reconnection()
 		InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 		// no ui init if character selection is automatic
-		SetMouseFreeLook ();
-		SetMouseCursor ();
-		SetMouseSpeed (ClientCfg.CursorSpeed);
-		SetMouseAcceleration (ClientCfg.CursorAcceleration);
+		ResetMouseCursor();
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
 		PlayerSelectedSlot = ClientCfg.SelectedSlot;
 	}
@@ -625,6 +624,8 @@ bool reconnection()
 		}
 		InterfaceState = globalMenu();
 	}
+	if (InterfaceState == GOGOGO_IN_THE_GAME)
+		ClientCtrl::setPhase("entering_game");
 
 	// Restore user UI scaling
 	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
@@ -850,6 +851,110 @@ std::string	buildPlayerNameForSaveFile(const std::string &playerNameIn)
 	return ret;
 }
 
+// ------------------------------------------------------------------------------------------------
+std::string buildCharacterFileName(const std::string &playerNameIn, TSessionId homeSessionId)
+{
+	// On this branch the files of a character keep the name they have in an installation, without the home
+	// mainland: the game has one mainland, its own client reads the files of that name (a player can go back to
+	// it), and it keeps more files by that name than the list below (contact groups, channels, item group backup).
+	nlunreferenced(homeSessionId);
+	return buildPlayerNameForSaveFile(playerNameIn);
+}
+
+// ------------------------------------------------------------------------------------------------
+// The files a character keeps in save/, %s standing for its file name (buildCharacterFileName): its keys, the
+// layouts of the game and of the Ring editor (the editor's in animation play has no prefix), its landmarks, its item
+// groups, and last its chat log, which is the player's record and stays when the character is deleted.
+static const char *const CharacterFilePatterns[] = {
+	"save/keys_%s.xml", "save/keys_r2ed_%s.xml", "save/interface_%s.icfg", "save/r2ed_interface_%s.icfg",
+	"save/%s.icfg", "save/landmarks_%s.xml", "save/groups_%s.xml", "save/log_%s.txt" };
+static const uint CharacterFilePatternCount = sizeof(CharacterFilePatterns) / sizeof(CharacterFilePatterns[0]);
+
+// The new names (buildCharacterFileName) that had their copy of the files of the old name, one per line. The copy
+// is made once: a file the player deletes or moves away does not come back from the old name, and a new character
+// of the name of a deleted one starts without them.
+static const char *const CharacterFilesCopiedList = "save/character_files_copied.txt";
+
+static bool characterFilesCopied(const std::string &newName)
+{
+	CIFile in;
+	if (!CFile::fileExists(CharacterFilesCopiedList) || !in.open(CharacterFilesCopiedList))
+		return false;
+	std::string content;
+	content.resize(in.getFileSize());
+	if (!content.empty())
+		in.serialBuffer((uint8 *)&content[0], (uint)content.size());
+	std::vector<std::string> names;
+	NLMISC::explode(content, std::string("\n"), names, true);
+	for (uint i = 0; i < names.size(); ++i)
+	{
+		std::string name = names[i];
+		if (!name.empty() && name[name.size() - 1] == '\r')
+			name.resize(name.size() - 1);
+		if (name == newName)
+			return true;
+	}
+	return false;
+}
+
+static void recordCharacterFilesCopied(const std::string &newName)
+{
+	COFile out;
+	if (!out.open(CharacterFilesCopiedList, true))
+	{
+		nlwarning("The list %s could not be written: the files of the old name of %s may be copied again", CharacterFilesCopiedList, newName.c_str());
+		return;
+	}
+	std::string line = newName + "\n";
+	out.serialBuffer((uint8 *)&line[0], (uint)line.size());
+}
+
+// The files of a character were named after the character alone before the name of their home mainland was
+// part of the name (buildCharacterFileName). The files of the old name are copied to the new name once
+// (CharacterFilesCopiedList), and left where they are: two characters of the same name on two mainlands, or of two
+// accounts that use this folder, used the same files, and each gets a copy.
+static void copyCharacterFilesOfOldName(const std::string &oldName, const std::string &newName)
+{
+	if (characterFilesCopied(newName))
+		return;
+	for (uint i = 0; i < CharacterFilePatternCount; ++i)
+	{
+		std::string oldFile = NLMISC::toString(CharacterFilePatterns[i], oldName.c_str());
+		std::string newFile = NLMISC::toString(CharacterFilePatterns[i], newName.c_str());
+		if (CFile::fileExists(newFile) || !CFile::fileExists(oldFile))
+			continue;
+		if (CFile::copyFile(newFile, oldFile))
+			nlinfo("The file %s of the character is copied to %s, the name with its home mainland", oldFile.c_str(), newFile.c_str());
+		else
+			nlwarning("The file %s of the character could not be copied to %s, the name with its home mainland: the character starts without it", oldFile.c_str(), newFile.c_str());
+	}
+	recordCharacterFilesCopied(newName);
+}
+
+// Deletes the files of a deleted character, but its chat log (the last of CharacterFilePatterns): a new character
+// of the same name starts with none of them
+static void deleteCharacterFiles(const std::string &fileName)
+{
+	for (uint i = 0; i + 1 < CharacterFilePatternCount; ++i)
+	{
+		std::string file = NLMISC::toString(CharacterFilePatterns[i], fileName.c_str());
+		if (CFile::fileExists(file) && !CFile::deleteFile(file))
+			nlwarning("The file %s of the deleted character could not be deleted", file.c_str());
+	}
+}
+
+// The display name of a mainland, or its session id when the shard names have none for it
+static std::string getMainlandDisplayName(TSessionId mainland)
+{
+	const std::vector<CShardNames::TSessionName> &sessionNames = CShardNames::getInstance().getSessionNames();
+	for (uint i = 0; i < sessionNames.size(); ++i)
+	{
+		if (sessionNames[i].SessionId == mainland)
+			return sessionNames[i].DisplayName;
+	}
+	return NLMISC::toString(mainland.asInt());
+}
+
 
 #ifdef RYZOM_BG_DOWNLOADER
 static bool LuaBGDSuccessFlag = true; // tmp, for debug
@@ -982,6 +1087,7 @@ void updatePatcherPriorityBasedOnCharacters()
 // ------------------------------------------------------------------------------------------------
 TInterfaceState globalMenu()
 {
+	ClientCtrl::setPhase("character_selection");
 	CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_CharacterSelection, "login_step_character_selection"));
 
 #ifdef RYZOM_BG_DOWNLOADER
@@ -1131,7 +1237,11 @@ TInterfaceState globalMenu()
 		#endif
 
 		// Display
+		ClientCtrl::beforeSwap();
 		Driver->swapBuffers();
+
+		// This screen needs no more frames than a display shows
+		limitOutgameFrameRate();
 
 		// SERVER INTERACTIONS WITH INTERFACE
 		if (WaitServerAnswer)
@@ -1204,13 +1314,20 @@ TInterfaceState globalMenu()
 							if (i == CharacterSummaries.size())
 							{
 								Driver->systemMessageBox("You have no character for the current user.\nClient will exit.", "Char loading error", UDriver::okType, UDriver::exclamationIcon);
+								ClientCtrl::setExitReason("the account has no character, and the client was started to play one");
 								exit(-1);
 							}
 							else
 							{
 								UDriver::TMessageBoxId ret = Driver->systemMessageBox("The pre-selected character doesn't exist.\nDo you want to use the first available character instead ?", "Char loading error", UDriver::yesNoType, UDriver::warningIcon);
 								if (ret == UDriver::noId)
+								{
+									// on another virtual desktop nobody was asked: the question went to the log (WindowDesktop)
+									ClientCtrl::setExitReason(WindowDesktop::isRequested()
+									        ? "the character the client was started to play does not exist (on another virtual desktop the client asks nobody to take another one)"
+									        : "the character the client was started to play does not exist, and the user chose to quit");
 									exit(-1);
+								}
 								else
 									charSelect = i;
 							}
@@ -1312,7 +1429,8 @@ TInterfaceState globalMenu()
 
 	//  Init the current Player Name (for interface.cfg and sentence.name save). Make a good File Name.
 	string playerName = CharacterSummaries[PlayerSelectedSlot].Name.toUtf8();
-	PlayerSelectedFileName = buildPlayerNameForSaveFile(playerName);
+	PlayerSelectedFileName = buildCharacterFileName(playerName, CharacterSummaries[PlayerSelectedSlot].Mainland);
+	copyCharacterFilesOfOldName(buildPlayerNameForSaveFile(playerName), PlayerSelectedFileName);
 
 	// Init the current Player Home shard Id and name
 	CharacterHomeSessionId = CharacterSummaries[PlayerSelectedSlot].Mainland;
@@ -1596,6 +1714,21 @@ REGISTER_ACTION_HANDLER (CAHResetPushed, "reset_pushed");
 
 
 
+// A launch from character selection that stops before its far TP: the outro has made the screen black and the
+// buttons were hidden for the launch (proc_charsel_play2). They come back, as after a far TP that fails
+// (CFarTP::requestFarTPToSession), so that the player can retry or choose another character.
+static void showCharSelAfterStoppedLaunch()
+{
+	CViewBase *blackScreen = dynamic_cast<CViewBase *>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:black_screen"));
+	if (blackScreen)
+		blackScreen->setAlpha(0);
+	CAHManager::getInstance()->runActionHandler("proc", nullptr, "charsel_enable_buttons");
+	CAHManager::getInstance()->runActionHandler("set", nullptr, "target_property=ui:outgame:charsel:create_new_but:active|value=0");
+	CInterfaceGroup *charselGroup = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel"));
+	if (charselGroup)
+		CAHManager::getInstance()->runActionHandler("proc", charselGroup, "charsel_init_buttons");
+}
+
 // Launch the game given a slot (slot is reference to the character summaries
 // ------------------------------------------------------------------------------------------------
 class CAHLaunchGame : public IActionHandler
@@ -1628,6 +1761,7 @@ public:
 				else
 				{
 					im->messageBoxWithHelp(CI18N::get("uiBGD_FullPatchNeeded"), "ui:outgame");
+					showCharSelAfterStoppedLaunch();
 				}
 				return;
 			}
@@ -1646,8 +1780,10 @@ public:
 
 			ClientCfg.writeInt("SelectedSlot",PlayerSelectedSlot);
 			if (ClientCfg.SaveConfig)
-				ClientCfg.ConfigFile.save();
+				ClientCfg.saveConfigFile();
 		}
+		if (PlayerSelectedSlot < CharacterSummaries.size())
+			ClientCtrl::setIdentity("character", CharacterSummaries[PlayerSelectedSlot].Name.toUtf8());
 
 
 		/*
@@ -1676,7 +1812,19 @@ public:
 				CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 				sb.init(nullptr);
 				sb.closeEditSession(sb.getCharId());
-				sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
+				// Without an answer, or with a failure of the session manager (2, 3, 5), the session may still be
+				// open: the new scenario does not start in it. 4: the character has no edit session to close.
+				bool answered = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
+				if (!answered || (sb._LastInvokeResult != 0 && sb._LastInvokeResult != 4))
+				{
+					if (answered)
+						nlwarning("The session manager did not close the edit session of char %u: result %u, '%s'", sb.getCharId(), sb._LastInvokeResult, sb._LastInvokeResultMsg.c_str());
+					else
+						nlwarning("The session browser did not answer the request to close the edit session of char %u", sb.getCharId());
+					CInterfaceManager::getInstance()->messageBoxWithHelp(CI18N::get("uiCharSel_CloseSessionFailed"), "ui:outgame");
+					showCharSelAfterStoppedLaunch();
+					return;
+				}
 			}
 			if (FarTP.requestFarTPToSession( (TSessionId)0, PlayerSelectedSlot, CFarTP::LaunchEditor, false ))
 			{
@@ -1722,6 +1870,59 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER (CAHLaunchGame, "launch_game");
+
+// Close the animation session that the character of a slot launched and left running (the slot offers to resume it)
+// ------------------------------------------------------------------------------------------------
+class CAHCloseRingSession : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	{
+		// Get the selected slot
+		string sSlot = getParam(Params, "slot");
+		CInterfaceExprValue result;
+		if (!CInterfaceExpr::eval(sSlot, result))
+			return;
+		sint64 slot = result.getInteger();
+		if (slot < 0 || slot >= (sint64)CharacterSummaries.size())
+			return;
+		if (ClientCfg.Local || !CharacterSummaries[(uint)slot].InRingSession)
+			return;
+
+		// The request names the character and no session: the session browser checks the character against the
+		// account of the connection, and the session manager closes the open animation sessions that the
+		// character owns, and nothing else. It answers 3 when there is none: the session is closed already, which
+		// is what the player asked for.
+		uint32 charId = (NetMngr.getLoginCookie().getUserId() << 4) + (uint32)slot;
+		CSessionBrowserImpl &sb = CSessionBrowserImpl::getInstance();
+		sb.init(NULL);
+		sb.closeAnimSessions(charId);
+		bool answered = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
+		if (!answered || (sb._LastInvokeResult != 0 && sb._LastInvokeResult != 3))
+		{
+			if (answered)
+				nlwarning("The session manager did not close the Ring session of char %u: result %u, '%s'", charId, sb._LastInvokeResult, sb._LastInvokeResultMsg.c_str());
+			else
+				nlwarning("The session browser did not answer the request to close the Ring session of char %u", charId);
+			CInterfaceManager::getInstance()->messageBoxWithHelp(CI18N::get("uiCharSel_CloseSessionFailed"), "ui:outgame");
+			return;
+		}
+
+		// The character summaries are only sent when the account connects. The session is closed, or about to be,
+		// which is what the next summary will say: the slot stops offering to resume it.
+		CharacterSummaries[(uint)slot].InRingSession = false;
+
+		// The buttons of the slot follow the selected slot: select it again
+		CCDBNodeLeaf *selectedSlot = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:CHARSELSLOT", false);
+		if (selectedSlot != NULL)
+		{
+			sint64 selected = selectedSlot->getValue64();
+			selectedSlot->setValue64(-1);
+			selectedSlot->setValue64(selected);
+		}
+	}
+};
+REGISTER_ACTION_HANDLER(CAHCloseRingSession, "close_ring_session");
 
 
 // Ask the server to create a character
@@ -1847,8 +2048,6 @@ public:
 		}
 
 		// Get the selected slot
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-
 		string sSlot = getParam(Params, "slot");
 
 		CInterfaceExprValue result;
@@ -1863,10 +2062,13 @@ public:
 
 		// Yoyo: delete the Local files. To avoid problem if recreate a character with same name.
 		string playerName = CharacterSummaries[nSelectedSlot].Name.toUtf8();
-		string playerDeletedFileName = buildPlayerNameForSaveFile(playerName);
-		// Delete the 2 Local files
-		pIM->deletePlayerConfig(playerDeletedFileName);
-		pIM->deletePlayerKeys(playerDeletedFileName);
+		// The files of the old name, without the home mainland, stay: a character of that name on another mainland,
+		// or of another account that uses this folder, may not have had its copy yet. A new character of this name
+		// and mainland does not get them (copyCharacterFilesOfOldName), even when this one was never selected.
+		string fileName = buildCharacterFileName(playerName, CharacterSummaries[nSelectedSlot].Mainland);
+		deleteCharacterFiles(fileName);
+		if (!characterFilesCopied(fileName))
+			recordCharacterFilesCopied(fileName);
 
 		// Send the message to the server
 		if (!ClientCfg.Local/*ace!ClientCfg.Light*/)
@@ -2468,12 +2670,22 @@ public:
 				}
 				else
 				{
-					// search matching utf-8 string name from character summaries
-					for (uint k = 0; k < CharacterSummaries.size(); ++k)
+					// The character of the account whose keys these are. Its file carries its home mainland
+					// (buildCharacterFileName); a character not selected since has its file of the old name, of its name
+					// alone, offered while it has none of the new name. The entry shows the name with the mainland, as two
+					// characters on two mainlands may have the same name (the name of a summary carries its mainland in
+					// parentheses, as at the character selection; one that has none gets it here).
+					for (uint k = 0; k < CharacterSummaries.size() && name.empty(); ++k)
 					{
-						if (it->first == buildPlayerNameForSaveFile(CharacterSummaries[k].Name.toUtf8()))
+						std::string summaryName = CharacterSummaries[k].Name.toUtf8();
+						if (summaryName.empty())
+							continue;
+						std::string newFileName = buildCharacterFileName(summaryName, CharacterSummaries[k].Mainland);
+						if (it->first == newFileName || (it->first == buildPlayerNameForSaveFile(summaryName) && !keySetFiles.count(newFileName)))
 						{
-							name = CharacterSummaries[k].Name.toUtf8();
+							name = summaryName;
+							if (summaryName.find('(') == std::string::npos)
+								name += " (" + getMainlandDisplayName(CharacterSummaries[k].Mainland) + ")";
 						}
 					}
 				}
@@ -2484,7 +2696,7 @@ public:
 						addSeparator();
 						separatorAdded = true;
 					}
-					addKeySet(it->first, it->first, CI18N::get(std::string("uiCP_KeysetImport") + (it->second & GameKeys ? "_Game" : "")
+					addKeySet(it->first, name, CI18N::get(std::string("uiCP_KeysetImport") + (it->second & GameKeys ? "_Game" : "")
 																						  + (it->second & EditorKeys ? "_Editor" : "")));
 				}
 			}
@@ -2643,47 +2855,74 @@ static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName
 {
 	setTextField(scenarioWnd, uiName, text.toUtf8());
 }
-// helper function for "setScenarioInformation"
-static std::string fieldLookup(const vector< pair< string, string > > &values, const std::string &id)
+// helper function for "setScenarioInformation": the value of a field of the header, or 'missing' when the header has
+// no such field (a scenario without a header has none)
+static std::string fieldLookup(const vector< pair< string, string > > &values, const std::string &id, const std::string &missing = "--")
 {
 	for(uint i=0; i<values.size(); i++)
 	{
 		if (values[i].first == id) return values[i].second;
 	}
-	return "--";
+	return missing;
 }
+
+// The Rules of a header, "Mastered" or "Masterless" in every language (also from the words older clients wrote,
+// see CScenarioValidator::normalizeRules), in the language of this client. Another text as it is.
+static std::string rulesText(const std::string &rules)
+{
+	std::string word = R2::CScenarioValidator::normalizeRules(rules);
+	if (word == "Mastered")
+		return CI18N::get("uiR2EDstrict");
+	if (word == "Masterless")
+		return CI18N::get("uiR2EDliberal");
+	return rules;
+}
+
 //
 static void setScenarioInformation(CInterfaceGroup* scenarioWnd, const string scenarioName)
 {
 	vector< pair< string, string > > values;
-	if(R2::getEditor().isInitialized())
+	if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
 	{
+		// the scenario the editor shows, with the changes made since it was loaded or started (the header the
+		// session keeps is the one of then): the header a save of it would write, as a test sends it
+		if (!R2::getEditor().getDMC().getEditionModule().makeCurrentScenarioHeader(values))
+			nlwarning("The header of the scenario of the editor could not be made: the window shows none");
+	}
+	else if (R2::getEditor().isInitialized())
+	{
+		// a test or an animation: the header of the scenario it runs
 		values = R2::getEditor().getDMC().getEditionModule().getScenarioHeader();
 	}
-	else
+	else if (!scenarioName.empty())
 	{
 		R2::CScenarioValidator sv;
 		std::string md5, signature;
-		sv.setScenarioToLoad(scenarioName, values, md5, signature, false);
+		// a header without Rules (or no header): those of the body, as the launch takes them (load_scenario)
+		if (sv.setScenarioToLoad(scenarioName, values, md5, signature, false) && fieldLookup(values, "Rules", "").empty())
+			values.push_back(std::make_pair(std::string("Rules"), sv.getRulesOfBody()));
 	}
+	// (without a name no file is chosen yet: the window of the Ring terminal has just been opened, and its
+	// fields get what a file without a header gives)
 	//
-	setTextField(scenarioWnd, "rules_value_text",			fieldLookup(values, "Rules"));
-	uint levelRange = 0;
+	setTextField(scenarioWnd, "rules_value_text",			rulesText(fieldLookup(values, "Rules")));
+	// the level the session is listed with: the one the launch sends (the "load_scenario" handler) and the
+	// scenario service makes from the same header when the scenario starts
 	uint32 nLevel;
 	fromString(fieldLookup(values, "Level"), nLevel);
-	switch(nLevel)
-	{
-		case 20:  levelRange = 0; break;
-		case 50:  levelRange = 1; break;
-		case 100: levelRange = 2; break;
-		case 150: levelRange = 3; break;
-		case 200: levelRange = 4; break;
-		case 250: levelRange = 5; break;
-	}
-	setTextField(scenarioWnd, "level_value_text",			CI18N::get("uiRAP_Level" + toString(levelRange)));
-	setTextField(scenarioWnd, "language_value_text",		CI18N::get("uiR2ED" + fieldLookup(values, "Language")));
-	setTextField(scenarioWnd, "type_value_text",			CI18N::get("uiR2ED" + fieldLookup(values, "Type")));
-	setTextField(scenarioWnd, "edit_small_description",		fieldLookup(values, "ShortDescription"));
+	R2::TSessionLevel sessionLevel;
+	sessionLevel.fromCharacterLevel(nLevel);
+	setTextField(scenarioWnd, "level_value_text",			CI18N::get("uiRAP_Level" + toString(sessionLevel.asIndex())));
+	// a session of a header without a language is listed in English (the "load_scenario" handler), and one without a
+	// type as other (the default orientation of the ring database)
+	std::string language = fieldLookup(values, "Language", "");
+	if (language.empty()) language = "en";
+	std::string type = fieldLookup(values, "Type", "");
+	if (type.empty()) type = "so_other";
+	setTextField(scenarioWnd, "language_value_text",		CI18N::get("uiR2ED" + language));
+	setTextField(scenarioWnd, "type_value_text",			CI18N::get("uiR2ED" + type));
+	// the text of this box becomes the description of the session, so no placeholder goes in it
+	setTextField(scenarioWnd, "edit_small_description",		fieldLookup(values, "ShortDescription", ""));
 	if(R2::getEditor().isInitialized())
 	{
 		setTextField(scenarioWnd, "scenario_value_text",		"'" + fieldLookup(values, "Title") + "'");
@@ -2902,7 +3141,11 @@ class CAHScenarioControl : public IActionHandler
 			}
 			else
 			{
+				// the buttons would show the filters of no session, and an update would send them: the window closes
 				nlwarning("getSessionInfo callback return false");
+				pIM->messageBoxWithHelp(CI18N::get("uiRingUpdateScenarioFiltersError"));
+				scenarioWnd->setActive(false);
+				return;
 			}
 		}
 		else
@@ -3200,7 +3443,17 @@ class CAHLoadScenario : public IActionHandler
 		bool launchScenarioFromRingAccessPoint = false;
 
 		vector< pair< string, string > > values;
-		if(R2::getEditor().isInitialized())
+		if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
+		{
+			// the session is listed with the scenario the editor shows, as it is now (see setScenarioInformation)
+			if (!R2::getEditor().getDMC().getEditionModule().makeCurrentScenarioHeader(values))
+			{
+				nlwarning("The header of the scenario of the editor could not be made: no session is scheduled");
+				pIM->messageBoxWithHelp(CI18N::get("uiRingLaunchScenarioError"));
+				return;
+			}
+		}
+		else if (R2::getEditor().isInitialized())
 		{
 			values = R2::getEditor().getDMC().getEditionModule().getScenarioHeader();
 		}
@@ -3208,7 +3461,11 @@ class CAHLoadScenario : public IActionHandler
 		{
 			R2::CScenarioValidator sv;
 			std::string md5, signature;
-			sv.setScenarioToLoad(ScenarioFileName, values, md5, signature, false);
+			// A header without Rules (or no header, as for the files of the first editors): those of the body. The
+			// scenario service takes the header of the start, which r2.Version.save makes from the body as well.
+			// (setScenarioToLoad gives a Rules that is there as "Mastered" or "Masterless", never empty.)
+			if (sv.setScenarioToLoad(ScenarioFileName, values, md5, signature, false) && fieldLookup(values, "Rules", "").empty())
+				values.push_back(std::make_pair(std::string("Rules"), sv.getRulesOfBody()));
 			launchScenarioFromRingAccessPoint = true;
 		}
 
@@ -3235,17 +3492,27 @@ class CAHLoadScenario : public IActionHandler
 			else if(pair.first == "TrialAllowed")	trialAllowed = pair.second;
 		}
 
-		uint nLevel;
+		// The level of the session, made from the level of the header as the scenario service makes it when the
+		// scenario starts: a header whose level is none of those the editor writes still gives a session level.
+		uint32 nLevel;
 		fromString(level, nLevel);
-		R2::TSessionLevel sessionLevel = R2::TSessionLevel::TValues(nLevel/50 + 1);
+		R2::TSessionLevel sessionLevel;
+		sessionLevel.fromCharacterLevel(nLevel);
 
 		// ---- fix for old scenarii
+		// They name the language (the former ScenarioLanguages were French, Deutsch, English and Other). A scenario
+		// of today has one of the codes of ScenarioLanguages (fr, de, en, es, ru, other_lang), which is sent as it
+		// is, and a header without a language has the default of the Scenario class, en.
 		if (lang == "French")
 			lang = "fr";
 		else if (lang == "German" || lang == "Deutsch")
 			lang = "de";
-		else //if (lang == "English")
+		else if (lang == "English" || lang.empty())
 			lang = "en";
+		else if (lang == "Other")
+			lang = "other_lang";
+		else if (std::find(ClientCfg.ScenarioLanguages.begin(), ClientCfg.ScenarioLanguages.end(), lang) == ClientCfg.ScenarioLanguages.end())
+			nlwarning("The language '%s' of the scenario is not one of ScenarioLanguages, the session is listed with it", lang.c_str());
 
 		if (nlstricmp(scenarioType, "Roleplay") == 0 || nlstricmp(scenarioType, "Role play") == 0)
 			scenarioType = "so_story_telling";
@@ -3253,19 +3520,12 @@ class CAHLoadScenario : public IActionHandler
 			scenarioType = "so_hack_slash";
 		// --------------------------
 
-		TRuleType ruleType(TRuleType::rt_strict);
-		if(rules==CI18N::get("uiR2EDliberal"))
-			ruleType = TRuleType(TRuleType::rt_liberal);
-		else if(rules == CI18N::get("uiR2EDstrict"))
+		// "Mastered" or "Masterless" whatever the language of the client that saved the file (a header the server
+		// sent may come from an older client). Only "Mastered" is mastered: an empty or other text is masterless,
+		// as the scenario service records the session (TRunningScenarioInfo::setDMLess) and as the editor shows it
+		TRuleType ruleType(TRuleType::rt_liberal);
+		if (R2::CScenarioValidator::normalizeRules(rules) == "Mastered")
 			ruleType = TRuleType(TRuleType::rt_strict);
-		volatile static bool override = false;
-		if (override)
-		{
-			if(rules== "Masterless")
-				ruleType = TRuleType(TRuleType::rt_liberal);
-			else if(rules == "Mastered")
-				ruleType = TRuleType(TRuleType::rt_strict);
-		}
 
 		TRaceFilter raceFilter;
 		if(races["fyros"])
@@ -3336,7 +3596,10 @@ class CAHLoadScenario : public IActionHandler
 				sessionBrowser.hibernateEditSession(charId);
 				if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
 				{
+					// without an answer the edit session may still be open: no animation session is scheduled
 					nlwarning("hibernateEditSession callback return false");
+					pIM->messageBoxWithHelp(CI18N::get("uiRingLaunchScenarioError"));
+					return;
 				}
 
 			}
@@ -3381,33 +3644,38 @@ class CAHLoadScenario : public IActionHandler
 							sessionBrowser._LastScheduleSessionCharId,
 							sessionStatus.toString());
 
+						// (a join that is refused has told the player why: the launch itself did not fail)
+						bool joinGranted = false;
 						if(sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
 						{
 							// request session
-							FarTP.requestFarTPToSession(sessionBrowser._LastScheduleSessionId, PlayerSelectedSlot, CFarTP::JoinSession,
+							joinGranted = FarTP.requestFarTPToSession(sessionBrowser._LastScheduleSessionId, PlayerSelectedSlot, CFarTP::JoinSession,
 								!R2::getEditor().isInitialized());
+
+							if (sessionBrowser._LastInvokeResult != 0)
+							{
+								nlwarning("inviteCharacter callback use error values %d", sessionBrowser._LastInvokeResult);
+							}
+
+							if(sessionBrowser._LastInvokeResult == 14)
+							{
+								CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
+								if (pVT != nullptr)
+									pVT->setTextLocalized("uiRingWarningFreeTrial", true);
+								CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+							}
 						}
 						else
 						{
+							// _LastInvokeResult is that of an earlier request
 							nlwarning("inviteCharacter callback return false");
-						}
-
-						if (sessionBrowser._LastInvokeResult != 0)
-						{
-							nlwarning("inviteCharacter callback use error values %d", sessionBrowser._LastInvokeResult);
-						}
-
-						if(sessionBrowser._LastInvokeResult == 14)
-						{
-							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-							if (pVT != nullptr)
-								pVT->setTextLocalized("uiRingWarningFreeTrial", true);
-							CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+							launchSuccess = false;
 						}
 
 
-						// invite team
-						if(inviteTeam)
+						// invite team, into the session the player enters: the session manager invites into the
+						// session the character is in, which is the new one once the join is granted
+						if(inviteTeam && launchSuccess && joinGranted)
 						{
 							for (uint i = 0 ; i < 8 ; ++i)
 							{
@@ -3419,20 +3687,18 @@ class CAHLoadScenario : public IActionHandler
 									if (pSMC->getString(val,res))
 									{
 										string charName = CEntityCL::removeTitleAndShardFromName(res);
-										sessionBrowser.inviteCharacterByName(sessionBrowser._LastScheduleSessionCharId, charName);
-
-										if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
+										// The player is told a refusal, with its reason, and a missing answer. The
+										// scenario of the session has not started yet (it starts once this client is
+										// in the session): the session manager takes the invitation all the same,
+										// except that of a free trial player, whose rules it cannot check before.
+										CSessionBrowserImpl::TInviteResult invited = sessionBrowser.inviteCharacterByNameAndTellRefusal(charName, pCaller);
+										if (invited == CSessionBrowserImpl::InviteNoAnswer)
 										{
-											nlwarning("inviteCharacterByName callback return false");
+											// the next ones would wait as long: the team members are not invited
+											break;
 										}
-
-										if(sessionBrowser._LastInvokeResult == 14)
-										{
-											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-											if (pVT != nullptr)
-												pVT->setTextLocalized("uiRingWarningInviteFreeTrial", true);
-											CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
-										}
+										if (invited == CSessionBrowserImpl::InviteGranted)
+											sessionBrowser.tellCharacterInvited(charName, true);
 									}
 								}
 							}
@@ -3470,8 +3736,9 @@ class CAHLoadScenario : public IActionHandler
 		}
 		else
 		{
-			// update session
-			sessionBrowser.updateSessionInfo(charId, sessionBrowser._LastScheduleSessionId, title, 0, description, sessionLevel,
+			// update the session the DM is in (the one init_scenario_control read the filters of), which this process
+			// did not necessarily schedule
+			sessionBrowser.updateSessionInfo(charId, R2::getEditor().getDMC().getEditionModule().getCurrentAdventureId(), title, 0, description, sessionLevel,
 				/*TAccessType::at_public, */TEstimatedDuration::et_medium, 0, raceFilter, religionFilter,
 				guildFilter, shardFilter, levelFilter, !globalAccess, autoInvite, lang, RSMGR::TSessionOrientation(scenarioType));
 
@@ -3723,6 +3990,9 @@ class CAHExportCharacter : public IActionHandler
 			{
 				fd.serial(CS);
 				fd.flush();
+				// the temporary file takes the place of the file here, and only when all of it is written:
+				// after a failed write fd is not closed, its destructor deletes the temporary file
+				fd.close();
 				// validate
 				success = true;
 			}
@@ -3730,7 +4000,6 @@ class CAHExportCharacter : public IActionHandler
 			{
 				nlwarning("%s", e.what());
 			}
-			fd.close();
 		}
 		else
 			nlwarning("Failed to open file: save/character_%s.save", name.c_str());

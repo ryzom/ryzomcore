@@ -402,7 +402,7 @@ void CContinentManager::select(const string &name, const CVectorD &pos, NLMISC::
 		{
 			if (pWS->Maps[i].ContinentName == name)
 			{
-				firstMap = pWS->Maps[i].Name;
+					firstMap =  pWS->Maps[i].Name;
 				break;
 			}
 		}

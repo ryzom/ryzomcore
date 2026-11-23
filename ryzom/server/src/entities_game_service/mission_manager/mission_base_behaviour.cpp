@@ -99,6 +99,7 @@ void CMissionBaseBehaviour::onLoad()
 void CMissionBaseBehaviour::putInGame()
 {
 	nlassert( _Mission );
+	CMissionManager::getInstance()->instanciateLoadedMission(_Mission);
 	if ( _Mission->getEndDate() != 0 )
 	{
 		CMissionManager::getInstance()->addTimedMission(_Mission);
@@ -566,6 +567,34 @@ bool CMissionBaseBehaviour::checkConstraints( bool logForProcessingEvent, const 
 
 
 //----------------------------------------------------------------------------
+// The time and season bounds of a mission (day_period, season) only hold back the actions a player can do again
+// within them. An event sent once (a group spawned, a dyn chat or another mission ended, a queue entry, an escort
+// or AI message, a GM forcing the step) must pass, or the step waiting for it would never end.
+static bool isBoundedByConstraints(CMissionEvent::TMissionEventType type)
+{
+	switch (type)
+	{
+	case CMissionEvent::GiveItem:
+	case CMissionEvent::GiveMoney:
+	case CMissionEvent::EnterZone:
+	case CMissionEvent::Cast:
+	case CMissionEvent::Kill:
+	case CMissionEvent::KillPlayer:
+	case CMissionEvent::BuyItem:
+	case CMissionEvent::SellItem:
+	case CMissionEvent::Forage:
+	case CMissionEvent::Talk:
+	case CMissionEvent::Target:
+	case CMissionEvent::Craft:
+	case CMissionEvent::LootRm:
+	case CMissionEvent::LootItem:
+		return true;
+	default:
+		return false;
+	}
+}
+
+//----------------------------------------------------------------------------
 CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & userRow, std::list< CMissionEvent* > & eventList,uint32 stepIndex )
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
@@ -584,12 +613,12 @@ CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & 
 	//ignore events for empty missions
 	if ( templ->Steps.empty() )
 		return CMissionEvent::Nothing;
-	// check constraints
-	if ( ! checkConstraints( true, sDebugPrefix ) )
-		CMissionEvent::Nothing;
 	// get the event to test ( first of the list )
 	nlassert( !eventList.empty() );
 	CMissionEvent & event = *( *(eventList.begin()) );
+	// outside the time and season bounds of the mission a player action is ignored
+	if (isBoundedByConstraints(event.Type) && !checkConstraints(true, sDebugPrefix))
+		return CMissionEvent::Nothing;
 //	MISDBG("mission %s receiving event %u", CPrimitivesParser::aliasToString(templ->Alias).c_str(), event.Type );
 
 	EGSPD::CActiveStepPD * currentStep = NULL;
@@ -597,7 +626,7 @@ CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & 
 	if ( stepIndex != 0xFFFFFFFF )
 	{
 		EGSPD::CActiveStepPD * step = _Mission->getSteps( stepIndex );
-		nlassert( step ); // TODO: fails if two members of a team with a 'give item' team mission give an item at the exact same time - from CTeam::processTeamMissionStepEvent() from CCharacter::acceptExchange() from cbClientValidateMissionGift()
+		nlassert(step); // CCharacter::acceptExchange checks a gifted step is still active, a team member may have ended it
 		resultEnum = processEventForStep(userRow, *step, event);
 		if ( resultEnum != CMissionEvent::StepEnds )
 			return resultEnum;
@@ -1168,16 +1197,16 @@ void CMissionBaseBehaviour::clearGroupJournalEntry(CCharacter &user, uint8 clien
 	}
 }
 
-void CMissionBaseBehaviour::updateUserJournalEntry( CCharacter & user, const std::string & dbPrefix )
+void CMissionBaseBehaviour::updateUserJournalEntry( CCharacter & user, const std::string & dbPrefix, bool monitoring )
 {
 	if (dbPrefix == "GROUP:")
-		_updateUserJournalEntry( user, CBankAccessor_PLR::getGROUP().getMISSIONS());
+		_updateUserJournalEntry( user, CBankAccessor_PLR::getGROUP().getMISSIONS(), monitoring);
 	else
-		_updateUserJournalEntry( user, CBankAccessor_PLR::getMISSIONS());
+		_updateUserJournalEntry( user, CBankAccessor_PLR::getMISSIONS(), monitoring);
 }
 
 template <class DBType>
-void CMissionBaseBehaviour::_updateUserJournalEntry( CCharacter & user, DBType &missionDb)
+void CMissionBaseBehaviour::_updateUserJournalEntry( CCharacter & user, DBType &missionDb, bool monitoring)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	if( !templ )
@@ -1190,7 +1219,9 @@ void CMissionBaseBehaviour::_updateUserJournalEntry( CCharacter & user, DBType &
 	if (_ClientIndex == 0xFF) // There must be a valid journal entry !!!
 		return;
 
-	user.updateTarget();
+	// the mission options of the bot that the user has as its target: not those of a CSR, who has no part in the mission
+	if ( !monitoring )
+		user.updateTarget();
 
 	const CEntityId & giverId = CAIAliasTranslator::getInstance()->getEntityId(_Mission->getGiver());
 	if ( giverId == CEntityId::Unknown )
@@ -1432,7 +1463,9 @@ void CMissionBaseBehaviour::_updateUserJournalEntry( CCharacter & user, DBType &
 	}
 
 //	uint nbEntry = updateCompass(user,dbPrefix);
-	uint nbEntry = _updateCompass(user, missionDb);
+	// A CSR has no compass for the mission: the name of a target is sent when it changes, to the one user whose compass
+	// is updated then, and the compass is kept up to date for the characters of the mission only
+	uint nbEntry = monitoring ? 0 : _updateCompass(user, missionDb);
 	for ( uint i = nbEntry ; i < NB_JOURNAL_COORDS; i++ )
 	{
 		missionEntry.getTARGET(i).setX(user._PropertyDatabase, 0);
@@ -1646,7 +1679,7 @@ void CMissionBaseBehaviour::applyPlayerReconnectHandler()
 }
 
 // ****************************************************************************
-void CMissionBaseBehaviour::applyCrashHandler(bool EGSCrash, const std::string & AIInstanceName )
+void CMissionBaseBehaviour::applyCrashHandler(bool EGSCrash, const std::vector<std::string> & AIInstanceNames )
 {
 	if ( _Mission->getFinished() )
 		return;
@@ -1657,7 +1690,12 @@ void CMissionBaseBehaviour::applyCrashHandler(bool EGSCrash, const std::string &
 	std::list< CMissionEvent* > eventList;
 	if( index < templ->CrashHandlers.size() )
 	{
-		if ( EGSCrash || ( std::find( templ->CrashHandlers[index].AIInstances.begin(), templ->CrashHandlers[index].AIInstances.end(), AIInstanceName ) != templ->CrashHandlers[index].AIInstances.end() ) )
+		// the handler is for a restart of this service, and for the crash of a service with one of its AI instances
+		const std::vector<std::string> &handled = templ->CrashHandlers[index].AIInstances;
+		bool apply = EGSCrash;
+		for ( uint i = 0; !apply && i < AIInstanceNames.size(); i++ )
+			apply = std::find( handled.begin(), handled.end(), AIInstanceNames[i] ) != handled.end();
+		if ( apply )
 		{
 			for ( uint i = 0; getProcessingState() == CMissionBaseBehaviour::Normal && i< templ->CrashHandlers[index].Actions.size() ; i++ )
 				templ->CrashHandlers[index].Actions[i]->launch(_Mission,eventList);

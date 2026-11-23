@@ -395,8 +395,8 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 						else
 							text+= "\n";
 
-						text+= CI18N::get("uiBotChatFactionType") + PVP_CLAN::toString((PVP_CLAN::TPVPClan)LastFactionType)
-							+  CI18N::get("uiBotChatFactionPointPrice") + NLMISC::formatThousands(toString(LastFactionPointPrice));
+						text += CI18N::get("uiBotChatFactionType") + CI18N::get("uiFactionPoint_" + PVP_CLAN::toString((PVP_CLAN::TPVPClan)LastFactionType))
+						    + CI18N::get("uiBotChatFactionPointPrice") + NLMISC::formatThousands(toString(LastFactionPointPrice));
 					}
 
 					// some additional info for resale

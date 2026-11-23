@@ -56,8 +56,8 @@ public:
 	NL_FORCE_INLINE bool operator!=(int p) const { return (*this != (const T *)(ptrdiff_t)p); } //< != 0
 
 #ifdef NL_CPP14
-	NL_FORCE_INLINE bool operator==(nullptr_t p) const { return (*this == (const T *)(ptrdiff_t)p); } //< == nullptr
-	NL_FORCE_INLINE bool operator!=(nullptr_t p) const { return (*this != (const T *)(ptrdiff_t)p); } //< != nullptr
+	NL_FORCE_INLINE bool operator==(std::nullptr_t p) const { return (*this == (const T *)(ptrdiff_t)p); } //< == nullptr
+	NL_FORCE_INLINE bool operator!=(std::nullptr_t p) const { return (*this != (const T *)(ptrdiff_t)p); } //< != nullptr
 #endif
 
 	NL_FORCE_INLINE T &operator*() { return *m; }

@@ -174,9 +174,8 @@ public:
 
 	/** Build a NeL standard library name according to platform and compilation mode setting.
 	 *	aka : adding decoration one base lib name.
-	 *	e.g : 'mylib' become	'mylib_rd.dll' on Windows ReleaseDebug mode,
-	 *							'libmylib.dylib' under OS X or
-	 *							'libmylib.so' on unix system.
+	 *	e.g : 'mylib' become	'mylib_rd.dll' on Windows ReleaseDebug mode or
+	 *							'libmylib.so' on unix system, macOS included (the name CMake gives a MODULE library).
 	 */
 	static std::string makeLibName(const std::string &baseName);
 	/** Remove NeL standard library name decoration according to platform and compilation mode setting.

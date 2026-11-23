@@ -51,6 +51,10 @@ def FindDockerGCC(image):
 		print("FAILED: " + image)
 		return
 	inspect = json.loads(output)
+	# an image labelled for another kind of toolchain: the cross-platform tools image ("none"), the Wine
+	# images ("wine", probed by find_wine.py)
+	if DockerImageToolchain(image):
+		return
 	arch = inspect[0]["Architecture"]
 	baseCmd = DockerBaseCommand(image, arch, None, None)
 	

@@ -20,6 +20,9 @@
 
 *.sh text eol=lf
 
+# Shell wrappers without an extension, run from a checkout mounted into Docker
+tool/wine_vs2008/winecl-* text eol=lf
+
 *.layout text
 *.looknfeel text
 *.imageset text

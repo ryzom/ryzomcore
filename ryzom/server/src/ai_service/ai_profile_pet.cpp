@@ -137,7 +137,8 @@ CAIPetProfileGotoPoint::CAIPetProfileGotoPoint(CSpawnBotPet* bot, CAIPos const& 
 		return;
 	}
 	_Pos.setXY(gotoPos.toAIVector());
-	_PathCont.setDestination((TVerticalPos)position.h(), _Pos);
+	// to the place found, on its layer (the height of a stable's exit is its primitive's, which has none)
+	_PathCont.setDestinationKeepingLayer(vp_auto, gotoPos);
 	_Valid = true;
 }
 

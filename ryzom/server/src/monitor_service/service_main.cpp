@@ -65,6 +65,10 @@ std::multimap<NLMISC::TTime, CRefPtr<CMonitorClient> > BadLoginClients;
 
 const NLMISC::TTime LOGIN_RETRY_DELAY_IN_MILLISECONDS = 4000;
 
+// Longest login accepted from a client, in bytes (the Login column of the user table holds 64 characters,
+// and the account tools only hand out ASCII logins)
+static const uint s_MaxLoginLength = 64;
+
 // Code taken from login service
 /**
  * Encapsulation of MySQL result
@@ -311,8 +315,15 @@ void clientWantsToConnect ( TSockId from, void *arg )
 
 // ***************************************************************************
 
+// Clients removed by dropMalformedClient, until their disconnection event comes
+static std::set<TSockId> s_DroppedClients;
+
 void clientWantsToDisconnect ( TSockId from, void *arg )
 {
+	// a client that was dropped for a malformed message is removed already
+	if (s_DroppedClients.erase(from) != 0)
+		return;
+
 	// Called when a client wants to disconnect
 	for (uint i = 0; i < Clients.size(); ++i)
 	{
@@ -328,14 +339,47 @@ void clientWantsToDisconnect ( TSockId from, void *arg )
 
 // ***************************************************************************
 
+// A client sent a message that cannot be read: it is refused and the client is disconnected
+static void dropMalformedClient(TSockId from, const char *messageName, const EStream &e)
+{
+	nlwarning("Client %s sent a malformed %s message (%s), the client is disconnected",
+	    from->asString().c_str(), messageName, e.what());
+
+	// Forget the client now: nothing is sent to it anymore, and its messages that are still in the
+	// receive queue find no client (BadLoginClients refers to it by CRefPtr, which becomes NULL)
+	for (uint i = 0; i < Clients.size(); ++i)
+	{
+		if (Clients[i]->getSock() == from)
+		{
+			nlinfo("Remove client %u", i);
+			Clients.erase(Clients.begin() + i);
+			s_DroppedClients.insert(from);
+			break;
+		}
+	}
+
+	// the disconnection event comes with a later update and calls clientWantsToDisconnect
+	Server->disconnect(from);
+}
+
+// ***************************************************************************
+
 void clientSetWindow (CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 {
 	// Called when a client sent a WINDOW message
 	float xmin, ymin, xmax, ymax;
-	msgin.serial(xmin);
-	msgin.serial(ymin);
-	msgin.serial(xmax);
-	msgin.serial(ymax);
+	try
+	{
+		msgin.serial(xmin);
+		msgin.serial(ymin);
+		msgin.serial(xmax);
+		msgin.serial(ymax);
+	}
+	catch (const EStream &e)
+	{
+		dropMalformedClient(from, "WINDOW", e);
+		return;
+	}
 
 	for (uint i = 0; i < Clients.size(); ++i)
 	{
@@ -355,7 +399,15 @@ void clientSetBandwidth (CMessage &msgin, TSockId from, CCallbackNetBase &netbas
 {
 	// Called when a client sent a WINDOW message
 	uint32	bandw;
-	msgin.serial(bandw);
+	try
+	{
+		msgin.serial(bandw);
+	}
+	catch (const EStream &e)
+	{
+		dropMalformedClient(from, "BANDW", e);
+		return;
+	}
 
 	for (uint i = 0; i < Clients.size(); ++i)
 	{
@@ -376,9 +428,17 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 {
 	std::string login;
 	std::string password;
-	sint version = msgin.serialVersion(0);
-	msgin.serial(login);
-	msgin.serial(password);
+	try
+	{
+		msgin.serialVersion(0);
+		msgin.serial(login);
+		msgin.serial(password);
+	}
+	catch (const EStream &e)
+	{
+		dropMalformedClient(from, "AUTHENT", e);
+		return;
+	}
 
 	for (uint i = 0; i < Clients.size(); ++i)
 	{
@@ -386,13 +446,33 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 		{
 			if (!Clients[i]->BadLogin) // don't allow new login attempt while this flag is set
 			{
-				// escape login
-				char escapedLogin[100];
-				size_t len = mysql_real_escape_string(DatabaseConnection, escapedLogin, login.c_str(), login.length());
+				// The login comes from a client that is not authenticated: a login that cannot be in the
+				// user table, or a missing database, fails like a wrong password, without a query
+				int result = -1;
+				if (login.empty())
+				{
+					nlinfo("Client %u (%s) sent an empty login, authentication refused", i, from->asString().c_str());
+				}
+				else if (login.size() > s_MaxLoginLength)
+				{
+					nlwarning("Client %u (%s) sent a login of %u bytes, the maximum is %u, authentication refused",
+					    i, from->asString().c_str(), (uint)login.size(), s_MaxLoginLength);
+				}
+				else if (DatabaseConnection == NULL)
+				{
+					nlwarning("Client %u (%s) cannot be authenticated, there is no database connection (LoginRequired needs DatabaseName, DatabaseHost, DatabaseLogin and DatabasePassword in the config file)",
+					    i, from->asString().c_str());
+				}
+				else
+				{
+					// escape login, which takes up to two bytes per byte and a terminating zero
+					std::vector<char> escapedLogin(login.size() * 2 + 1);
+					mysql_real_escape_string(DatabaseConnection, &escapedLogin[0], login.c_str(), (unsigned long)login.size());
 
-				// make a db request to to db to see if password is valid
-				std::string queryStr = toString("SELECT Password FROM user where Login='%s'", escapedLogin);
-				int result = mysql_query(DatabaseConnection, queryStr.c_str());
+					// make a db request to to db to see if password is valid
+					std::string queryStr = toString("SELECT Password FROM user where Login='%s'", &escapedLogin[0]);
+					result = mysql_query(DatabaseConnection, queryStr.c_str());
+				}
 				if (result == 0)
 				{
 					CMySQLResult sqlResult(DatabaseConnection);
@@ -401,19 +481,20 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 						MYSQL_ROW row =  sqlResult.fetchRow();
 						if (sqlResult.numFields() == 1)
 						{
-							if (strlen(row[0]) > 2)
+							// the stored hash starts with its salt: 19 characters if it starts with '$', else 2
+							const char *storedHash = row[0];
+							size_t hashLength = storedHash != NULL ? strlen(storedHash) : 0;
+							size_t saltLength = (hashLength != 0 && storedHash[0] == '$') ? 19 : 2;
+							if (hashLength <= saltLength)
 							{
-								std::string salt;
-								if (row[0][0] == '$')
-								{
-									salt = std::string(row[0], row[0] + 19);
-								}
-								else
-								{
-									salt = std::string(row[0], row[0] + 2);
-								}
+								nlwarning("The password stored for the login '%s' is too short for its scheme (%u characters), authentication refused",
+								    login.c_str(), (uint)hashLength);
+							}
+							else
+							{
+								std::string salt(storedHash, storedHash + saltLength);
 								std::string cryptedVersion = CCrypt::crypt(password, salt);
-								if (cryptedVersion == row[0])
+								if (cryptedVersion == storedHash)
 								{
 									Clients[i]->Authentificated = true;
 									// password is  good

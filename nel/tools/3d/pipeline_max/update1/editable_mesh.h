@@ -68,6 +68,10 @@ public:
 	virtual const ISceneClassDesc *classDesc() const NL_OVERRIDE;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const NL_OVERRIDE;
 
+	/// Soft selection on (chunk 0x4020 non-zero): the modifiers above act on weights that fall off around the
+	/// selected sub-objects, not on the selection alone. The falloff, pinch and bubble follow in 0x4024..0x4026.
+	bool softSelection() const;
+
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;

@@ -31,12 +31,9 @@ from zulip_service import ZulipClient
 from ryzom_service import RyzomService
 
 
-OWNER_GROUP=10
-PLAYER_GROUP=73
 CUSTOM_PROFILE_TRANSLATIONS="1"
 CUSTOM_PROFILE_TITLE="2"
 CUSTOM_PROFILE_GUILD="3"
-INGAME_FOLDER_ID=2
 
 ALLOWED_COMMANDS = ("playerConnects", "addFactionChannelToCharacter", "removeFactionChannelForCharacter", "deleteMember")
 
@@ -133,19 +130,7 @@ class ShardCommands(RyzomService):
 		return ""
 
 	def addSubscription(self, user, sub):
-		return self.zulip.add_subscriptions(
-			streams = [{"name": sub}],
-			principals = [user],
-			invite_only = True,
-			history_public_to_subscribers = False,
-			topics_policy = json.dumps("empty_topic_only"),
-			message_retention_days = "7",
-			can_add_subscribers_group = OWNER_GROUP,
-			can_remove_subscribers_group = OWNER_GROUP,
-			can_send_message_group = PLAYER_GROUP,
-			send_new_subscription_messages = False,
-			folder_id = INGAME_FOLDER_ID,
-		)
+		return self.zulip.addIngameSubscription(sub, [user])
 
 	def playerConnects(self, command):
 		if len(command) >= 3:

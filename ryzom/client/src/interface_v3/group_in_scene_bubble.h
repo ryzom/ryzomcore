@@ -149,11 +149,15 @@ private:
 		uint32 BotName;
 		uint32 DescWaiting;
 		CGroupInSceneBubble	*Bubble;
+		// opened by a web page (webIgChatOpen), not by a server dyn chat: each kind only ever finds its own bubbles
+		bool WebIg;
+
 	public:
 		CDynBubble()
 		{
 			DescWaiting = 0;
 			Bubble = nullptr;
+			WebIg = false;
 		}
 		void displayOptions(bool bShow);
 		// get string id for an option in the dynchat
@@ -199,8 +203,12 @@ public:
 	// Unlink a bubble
 	void unlink ();
 
-	// Set text
-	void setText (const std::string &text);
+	// Set text, split in pages at each "{break}".
+	// Return false and leave the bubble as it is when the text has no page to show.
+	bool setText(const std::string &text);
+
+	// Split a text in the pages setText would show. No page for an empty text or a text made of "{break}" only.
+	static void splitText(const std::string &text, std::vector<std::string> &textParts);
 
 	// Called from action handler
 	void next();

@@ -35,7 +35,7 @@ end
 
 feature.Components.UserTrigger =
 	{
-		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor()", "uiR2EdEditEventsButton"),
+		PropertySheetHeader = r2.getDisplayButtonHeader("r2.events:openEditor", "uiR2EdEditEventsButton"),
 		BaseClass="LogicEntity",			
 		Name="UserTrigger",
 		InEventUI = true,
@@ -148,7 +148,7 @@ feature.Components.UserTrigger =
 			
 			local rt = r2.newComponent("RtUserTrigger")
 			assert(rt)
-			rt.Name = this.Name
+			rt.Name = r2.Translator.plainText(this.Name)
 			rt.TriggerId = 1
 			rt.Grp = rtNpcGrp.Id
 			

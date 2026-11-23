@@ -104,8 +104,14 @@ void		CDistancePrioritizer::calculatePriorities()
 		{
 			CClientHost *clienthost = GETCLIENTA(icm);
 			
+#ifdef HALF_FREQUENCY_SENDING_TO_CLIENT
 			// Prioritize only at the opposite time of sending for a particular client
 			if ( ! clienthost->whenToSend() )
+#else
+			// Every cycle is a sending cycle: prioritize at each cycle the client is processed,
+			// before its outbox is filled, so that the entities that did not fit in the previous
+			// outboxes come first
+#endif
 			{
 				// Update priorities
 				updatePriorityOfEntitiesSeenByClient( clienthost->clientId() );

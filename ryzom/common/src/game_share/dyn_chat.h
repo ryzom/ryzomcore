@@ -128,12 +128,15 @@ public:
 		ucstring	SenderString;
 		CChatMessage Message;
 	};
+	// clang-format off
 	NLMISC::CHistoric<CHistoricEntry>		Historic;		// historic of messages for IOS
 	uint									HistoricSize;   // Historic size for EGS
 	bool									Localized;      // for EGS only
 	ucstring								Title;          // gives the title of the channel when it is not translated (e.g Localized == false)
+	std::string								TitlePhrase;    // for EGS only: when set, the phrase that shows Title (its literal parameter) instead of Title alone
 	bool									HideBubble;		// hide the display of bubble
 	bool									UniversalChannel;	// treat like universe channel
+	// clang-format on
 public:
 	CDynChatChan();
 //	CDynChatChan(TChanID id = NLMISC::CEntityId::Unknown, NLNET::TServiceId ownerServiceId, bool noBroadcast, bool forwadInput);

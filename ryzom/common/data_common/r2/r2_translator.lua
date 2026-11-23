@@ -9,6 +9,38 @@ local Translator = r2.Translator
 
 Translator.PredatorEnemyFaction = "Player|guard|bandit|herbivore|karavan";
 
+-- A text of the author as the translator writes it between quotes into a script of the AI service.
+-- A text of a script ends at a double quote, stays on its line, and has no escape for either. A
+-- backslash is a character of the text like any other, and the script language reads one that a
+-- double quote follows together with that quote. A script has no control character but the tab and
+-- the ends of its lines, and a text that was pasted can hold others. A double quote becomes two
+-- apostrophes; a line break, and every other character below the space but the tab, becomes a
+-- space; a backslash that is the last character of the text becomes a slash, and a backslash
+-- anywhere else stays. The tab and the character 127 stay, a text of a script can hold them. nil
+-- gives "".
+-- The name of a run-time npc is such a text too (translateNpc, the "npc_say" action,
+-- r2.Utils.getNpcParam): the scripts and actions of a dialog name the npc that speaks, and the AI
+-- service looks for the npc that has this name.
+function Translator.scriptText(text)
+	if text == nil then return "" end
+	local str = tostring(text)
+	str = string.gsub(str, '"', "''")
+	str = string.gsub(str, "\\$", "/")
+	str = string.gsub(str, "[\001-\008\010-\031]", " ")
+	return str
+end
+
+-- A text of the author that goes into the run-time scenario outside a script: a text the npcs say
+-- (the entries of the text manager, the "npc_say" action), the name and the texts of a plot item, the
+-- name of an act or of a user trigger. Nothing ends such a text, and it can have several lines. A text
+-- that was pasted can hold control characters, which the client draws as a glyph when the text is
+-- said: every character below the space but the tab and the two of a line end becomes a space, as in
+-- a text of a script. What is not a text (nil) comes back as it is.
+function Translator.plainText(text)
+	if type(text) ~= "string" then return text end
+	return (string.gsub(text, "[\001-\008\011\012\014-\031]", " "))
+end
+
 -- Namespace global
 function printMsg(str)	
 	messageBox(str)	
@@ -49,7 +81,8 @@ function printMsgML(str)
 	end
 end
 --local devMode = false
-local devMode =   config.R2EDExtendedDebug
+-- config gives the number in the cfg file: 0, the shipped value, is true in Lua
+local devMode = (config.R2EDExtendedDebug == 1)
 local dataDevMode = false
 
 function printWarning( str)
@@ -68,7 +101,10 @@ function printWarning( str)
 	if devMode then
 		assert(nil)
 	else
-		error(str) -- force to exit current translation
+		-- force to exit current translation. The message is for the author: it goes up as it is, without
+		-- the place of this line in front of it (level 0), and doTranslateFeatures knows it by this
+		Translator.LastWarning = str
+		error(str, 0)
 	end
 end
 
@@ -175,7 +211,19 @@ Translator.translateEquipment = function(hlNpc)
 	local instance = r2:getInstanceFromId(instanceId)
 
 	if instance:isKindOf("NpcCustom") then
-		equipment = equipment..r2.getVisualPropertiesFromInstanceId(instanceId);
+		-- the editor gives nothing for an npc whose sheet it does not know
+		local visualProperties = r2.getVisualPropertiesFromInstanceId(instanceId)
+		if visualProperties ~= nil then
+			equipment = equipment..visualProperties
+		else
+			-- the npc goes into the test as its sheet alone makes it: the author is told which one
+			local arguments = { tostring(instance.Name), tostring(instance.SheetClient) }
+			local text = string.gsub(tostring(i18n.get("uiR2EDTranslateUnknownSheet")), "%%(%d)", function(index)
+				return defaulting(arguments[tonumber(index)], "")
+			end)
+			debugInfo(colorTag(255, 255, 0) .. text)
+			displaySystemInfo(text, "BC")
+		end
 	end
 
 	if equipment == nil then
@@ -214,6 +262,28 @@ Translator.getAiActivity = function(hlNpc)
 	return str;
 end
 
+-- An entity gets what it is from its palette entry (Base). One whose entry this editor does not have,
+-- as in a file edited by hand or made for another palette, has no sheet for the client: the scenario
+-- service refuses the act it is in. The test does not start, and the author is told which entity it
+-- is. The entity stays as it is: what becomes of it is the author's choice.
+-- doTranslateFeatures checks every entity of the scenario before the first step of the translation,
+-- which would stop at the missing sheet with an error of its own (r2:isBotObject reads the sheet).
+Translator.checkEntitySheet = function(hlNpc)
+	local sheetClient = hlNpc.SheetClient
+	if sheetClient ~= nil and sheetClient ~= "" then
+		return
+	end
+	local base = hlNpc.Base
+	local key = "uiR2EDTranslateNoSheetClient"
+	if base ~= nil and base ~= "" and not r2.isInPalette(base) then
+		key = "uiR2EDTranslateUnknownBase"
+	end
+	local arguments = { tostring(hlNpc.Name), tostring(defaulting(base, "")) }
+	printWarning((string.gsub(tostring(i18n.get(key)), "%%(%d)", function(index)
+		return defaulting(arguments[tonumber(index)], "")
+	end)))
+end
+
 --  get rtNpc from hlNpc
 Translator.translateNpc = function(hlNpc, context)
 
@@ -226,10 +296,15 @@ Translator.translateNpc = function(hlNpc, context)
 	
 	
 	assert(hlNpc and type(hlNpc) == "userdata")
+
+	-- an entity the translation made itself: the ones of the scenario were checked before the first step
+	Translator.checkEntitySheet(hlNpc)
+
 	local RtNpc = r2.newComponent("RtNpc")
 	
 
-	RtNpc.Name = hlNpc.Name
+	-- the name as the scripts of the scenario write it (Translator.scriptText)
+	RtNpc.Name = Translator.scriptText(hlNpc.Name)
 	
 	
 	RtNpc.SheetClient = hlNpc.SheetClient
@@ -476,7 +551,9 @@ Translator.translateEventHandler = function(context, hlNpc, eventHandler, rtNpcG
 				end
 
 				if multiAction then
-					table.insert(multiAction.Children, firstAction2)
+					if firstAction2 then
+						table.insert(multiAction.Children, firstAction2)
+					end
 				else
 					firstAction = firstAction2
 				end
@@ -491,7 +568,8 @@ Translator.translateEventHandler = function(context, hlNpc, eventHandler, rtNpcG
 	end
 
 	-- if there is actions then the first executed npc_event_handler_action are the dynamic_if from  [firstCondition, lastCondition]
-	if lastCondition then
+	-- A handler without an action that can be translated does nothing, whatever its conditions.
+	if lastCondition and firstAction then
 		table.insert(lastCondition.Children, firstAction)
 		firstAction = firstCondition
 	end
@@ -546,12 +624,13 @@ Translator.translateEventHandlers = function(context, hlNpc, eventHandlers, rtNp
 			else
 				caller = pcall			
 			end
-			if not caller(Translator.translateEventHandler, context, hlNpc, v, rtNpcGrp) then
+			local ok, err = caller(Translator.translateEventHandler, context, hlNpc, v, rtNpcGrp)
+			if not ok then
 				local eventType = v.Event.Type
 				if eventType == nil then eventType = "" end
 				local componentName = hlNpc.Name
 				if componentName == nil then componentName = "" end
-				printWarning("Error in event handler '"..eventType.."' In component "..componentName)
+				printWarning("Error in event handler '"..eventType.."' In component "..componentName..": "..tostring(err))
 			end
 			k, v = next (eventHandlers, k)
 		end	
@@ -570,9 +649,15 @@ Translator.doTranslateFeatures = function(scenarioInstanceId)
 	local result
 
 	r2.LastTranslationErrorMsg = nil
+	Translator.LastWarning = nil
 	ok, result = pcall(Translator.doTranslateFeaturesProtected, scenarioInstanceId)
 	if not ok then
-		printWarning(result)
+		if result ~= nil and result == Translator.LastWarning then
+			-- printWarning has told the author and the log: the same message goes on to the client, once
+			error(result, 0)
+		end
+		-- an error of the scripts themselves, with its place
+		printWarning(tostring(result))
 	end
 
 	return result
@@ -586,16 +671,18 @@ function Translator.initStartingActIndex(startingAct)
 
 	local actId, act = next(acts, nil)
 	local actIndex = 0
+	-- The test starts in the act that is selected. The base act (index 0) is always loaded and is not an
+	-- act to start in: the first act is taken for it.
+	local startingActIndex = 1
 	while (actId ~= nil)
 	do
-		if startingAct and tostring(act.InstanceId) == startingAct then
-			r2.setStartingActIndex(actIndex )
-		else 
-			r2.setStartingActIndex(1)
+		if actIndex > 0 and startingAct and tostring(act.InstanceId) == startingAct then
+			startingActIndex = actIndex
 		end
 		actIndex = actIndex + 1
 		actId, act = next(acts, actId)
 	end
+	r2.setStartingActIndex(startingActIndex)
 end
 Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 	local scenario = r2:getInstanceFromId(scenarioInstanceId)
@@ -612,6 +699,34 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 	local first=true
 
 
+
+	-- every entity of the scenario has a sheet for the client, or the translation stops here with the
+	-- name of the one that has none (Translator.checkEntitySheet)
+	local function recursiveCheckEntities(components)
+		if (components == nil) then
+			return
+		end
+		local k, v = next(components, nil)
+		while k do
+			if v.isKindOf and v:isKindOf("Npc") then
+				Translator.checkEntitySheet(v)
+			end
+			if v.Components then
+				recursiveCheckEntities(v.Components)
+			end
+			if v.SubComponents then
+				recursiveCheckEntities(v.SubComponents)
+			end
+			k, v = next(components, k)
+		end
+	end
+	do
+		local actId, act = next(acts, nil)
+		while (actId ~= nil) do
+			recursiveCheckEntities(act.Features)
+			actId, act = next(acts, actId)
+		end
+	end
 
 	--
 	-- Recursive method that call a specific function (ie createGhostComponent, pretranslate) on a component
@@ -693,10 +808,10 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 			local rtPlotItem = r2.newComponent("RtPlotItem")
 			rtPlotItem.SheetId = plotItem.SheetId
 			
-			rtPlotItem.Description = plotItem.Desc
+			rtPlotItem.Description = Translator.plainText(plotItem.Desc)
 			
-			rtPlotItem.Name = plotItem.Name
-			rtPlotItem.Comment = plotItem.Comment
+			rtPlotItem.Name = Translator.plainText(plotItem.Name)
+			rtPlotItem.Comment = Translator.plainText(plotItem.Comment)
 			table.insert(rtScenario.PlotItems, rtPlotItem)
 			plotItemId, plotItem = next(scenario.PlotItems, plotItemId)
 		end
@@ -849,6 +964,10 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 		rtLocation.EntryPoint = location.EntryPoint
 		local  enumToInt = {Automatic=0, Spring=1, Summer=2, Autumn=3, Winter=4}
 		rtLocation.Season = enumToInt[ location.Season ]
+		-- a location without a season of its own has the season of the server
+		if rtLocation.Season == nil then
+			rtLocation.Season = enumToInt.Automatic
+		end
 		locationMap[location.InstanceId] = locationIndex
 
 		table.insert(rtScenario.Locations, rtLocation)
@@ -862,22 +981,24 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 	-- Act Name, position
 	local actId, act = next(acts, nil)
 	local actIndex = 0
+	-- as Translator.initStartingActIndex
+	local startingActIndex = 1
 	while (actId ~= nil)
 	do
 
 		local rtAct = context.ActIdToRtAct[act.InstanceId]
-		rtAct.Name = act.Name
+		rtAct.Name = Translator.plainText(act.Name)
 
 		rtAct.LocationId = locationMap[ act.LocationId ]
 
-		if startingAct and tostring(act.InstanceId) == startingAct then
-			r2.setStartingActIndex(actIndex )
-		else 
-			r2.setStartingActIndex(1)
+		-- the base act (index 0) is always loaded and is not an act to start in
+		if actIndex > 0 and startingAct and tostring(act.InstanceId) == startingAct then
+			startingActIndex = actIndex
 		end
 		actIndex = actIndex + 1
 		actId, act = next(acts, actId)
 	end
+	r2.setStartingActIndex(startingActIndex)
 	-- Ring accss
 	if ( r2.getMustVerifyRingAccessWhileLoadingAnimation()) then
 		do
@@ -899,13 +1020,14 @@ end
 --first parameter: action type
 Translator.createAction = function(...)
 	local arg = {...}
-	local debug=config.R2EDExtendedDebug
+	local debug = devMode
 	local function header(toto)
 
 		if debug then
 			return "print(\"<"..toto..">\");\n"
 		end
-		return "//"..toto
+		-- a comment line of its own: without the debug prints it is the first line of the script
+		return "//"..toto.."\n"
 	end
 
 	local function footer(toto)
@@ -1201,11 +1323,11 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		if rtGrpId and rtGrpId ~= "" then
 			prefix = r2:getNamespace() .. rtGrpId.."."
 		end
-		local eggId =tostring( tonumber(arg[3]))
-		local actId =tostring( tonumber(arg[4]))
-		local x = tostring(tonumber(arg[5]))
-		local y = tostring(tonumber(arg[6]))
-		local z = tostring(tonumber(arg[7]))
+		local eggId =numberText(tonumber(arg[3]))
+		local actId =numberText(tonumber(arg[4]))
+		local x = numberText(tonumber(arg[5]))
+		local y = numberText(tonumber(arg[6]))
+		local z = numberText(tonumber(arg[7]))
 		local scenario = tostring( r2:getScenarioId())
 
 		local item1Weight	= arg[8]
@@ -1232,18 +1354,19 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			item3Str		= tostring(item3Id)..":"..tostring(item3Qty)
 		end
 
-		local name = arg[17]
+		local name = Translator.scriptText(arg[17])
 
-		local sum12			= tostring(item1Weight + item2Weight)
-		local sum123			= tostring(item1Weight + item2Weight + item3Weight)
+		-- the weights are shares of 100, the result of a division: whole ones are written as whole numbers
+		local sum12			= numberText(item1Weight + item2Weight)
+		local sum123			= numberText(item1Weight + item2Weight + item3Weight)
 
 		action.Parameters = "//random_chest_activate\n"
 			.."(" ..prefix.."r)rndm(0,100);\n"
-			.."if (" ..prefix.. "r > 0 && "..prefix.."r <= "..tostring(item1Weight)..")\n"
+			.."if (" ..prefix.. "r > 0 && "..prefix.."r <= "..numberText(item1Weight)..")\n"
 			.."{\n\t"
 			.."()"..prefix.."activateEasterEgg(" .. eggId .. ", " .. scenario .."," .. actId .. ", \"" .. item1Str.. "\", " .. x.. ", " .. y.. ", " .. z .. ", 0, \""..r2:getNamespace() .. rtGrpId.."\", \""..name.."\", \"\");\n"
 			.."}\n"
-			.."if (" ..prefix.. "r > "..item1Weight.." && "..prefix.."r <= "..sum12..")\n"
+			.."if (" ..prefix.. "r > "..numberText(item1Weight).." && "..prefix.."r <= "..sum12..")\n"
 			.."{\n\t"
 			.."()"..prefix.."activateEasterEgg(" .. eggId .. ", " .. scenario .."," .. actId .. ", \"" .. item2Str.. "\", " .. x.. ", " .. y.. ", " .. z .. ", 0, \""..r2:getNamespace() .. rtGrpId.."\", \""..name.."\", \"\");\n"
 			.."}\n"
@@ -1265,18 +1388,16 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			prefix = r2:getNamespace() .. rtGrpId.."."
 		end
 
-		local eggId =tostring( tonumber(arg[3]))
-		local actId =tostring( tonumber(arg[4]))
+		local eggId =numberText(tonumber(arg[3]))
+		local actId =numberText(tonumber(arg[4]))
 
 		local items = tostring(arg[5])
-		local x = tostring(tonumber(arg[6]))
-		local y = tostring(tonumber(arg[7]))
-		local z = tostring(tonumber(arg[8]))
-		local heading = tostring(tonumber(arg[9]))
-		local name = tostring(arg[10])
-		if not name then name = "" end
-		local look = arg[11]
-		if not look then look = "" end
+		local x = numberText(tonumber(arg[6]))
+		local y = numberText(tonumber(arg[7]))
+		local z = numberText(tonumber(arg[8]))
+		local heading = numberText(tonumber(arg[9]))
+		local name = Translator.scriptText(arg[10])
+		local look = Translator.scriptText(arg[11])
 		local scenario =tostring( r2:getScenarioId())
 
 
@@ -1298,8 +1419,8 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			prefix = r2:getNamespace() .. rtGrpId.."."
 		end
 
-		local eggId =tostring( tonumber(arg[3]))
-		local actId =tostring( tonumber(arg[4]))
+		local eggId =numberText(tonumber(arg[3]))
+		local actId =numberText(tonumber(arg[4]))
 		local scenario =tostring( r2:getScenarioId())
 		assert(eggId and scenario)
 		
@@ -1490,7 +1611,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			facing = "//facing\n" ..
 				"(@group1)"..r2:getNamespace()..param.WhoGrp..".context();\n"
 				.. "(@group2)"..r2:getNamespace()..param.FacingGrp..".context();\n"
-				.. "()"..r2:getNamespace()..rtGrpId..".facing(@group1,\""..param.Who.."\", @group2, \"".. param.Facing.."\");\n \n"
+				.. "()"..r2:getNamespace()..rtGrpId..".facing(@group1,\""..Translator.scriptText(param.Who).."\", @group2, \"".. Translator.scriptText(param.Facing).."\");\n \n"
 			startChat = "()"..prefix.."setTimer(10, 0);\n \n" -- timer 0.4 in on seconde
 
 		end
@@ -1556,6 +1677,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 
 		local i = 0
 		local n = table.getn(param.Emotes)
+		local cases = 0
 		while i ~=  n do
 			i = i +1
 
@@ -1584,17 +1706,18 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 					"\t\t"..	"{\n" ..
 					say ..
 					"\t\t"..	"}\n \n"
+				cases = cases + 1
 		
 			elseif rtGrpId and param.Whos[i] and param.Whos[i] ~= "" and param.Grps[i] and param.Grps[i] ~= "" then
 				local say = ""
 				if param.Says[i] ~= nil and param.Says[i] ~= "" then
-					say = "\t\t\t" .. "()".. r2:getNamespace() .. rtGrpId .. ".npcSay(@group,\"" .. param.Whos[i] .. "\", \"DSS_" .. tostring(r2:getScenarioId()) .. " " .. param.Says[i] .. "\");\n \n"
+					say = "\t\t\t" .. "()".. r2:getNamespace() .. rtGrpId .. ".npcSay(@group,\"" .. Translator.scriptText(param.Whos[i]) .. "\", \"DSS_" .. tostring(r2:getScenarioId()) .. " " .. param.Says[i] .. "\");\n \n"
 				end
 
 				local emote = ""
 				if param.Emotes[i] ~= "" and param.Emotes[i] ~= nil then
 					local behaviorValue = r2.getEmoteBehaviorFromEmoteId(param.Emotes[i])
-					emote =  "\t\t\t" .. "()"..r2:getNamespace()..rtGrpId..".emote(@group,\""..param.Whos[i].."\", \""..behaviorValue.."\");\n"
+					emote =  "\t\t\t" .. "()"..r2:getNamespace()..rtGrpId..".emote(@group,\""..Translator.scriptText(param.Whos[i]).."\", \""..behaviorValue.."\");\n"
 				end
 
 		
@@ -1606,9 +1729,14 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 					say ..
 					emote ..
 					"\t\t"..	"}\n \n"
+				cases = cases + 1
 			end
 
 		end
+
+		-- the script language has no switch without a case: a dialog none of whose steps has a speaker gets no
+		-- action, as a dialog without steps
+		if cases == 0 then return nil end
 
 		code = code .. "\t}\n}"
 
@@ -1633,7 +1761,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		local who = ""
 
 		action.Parameters = "()".. r2:getNamespace() .. baseActRtGrpId .. ".dssMessage(  "..tostring(r2:getScenarioId()) .. ", "
-						.."\"SYS\", \"".. who.. "\", \"" .. msg .. "\");\n"
+						.."\"SYS\", \"".. who.. "\", \"" .. Translator.scriptText(msg) .. "\");\n"
 
 		action.Action = "code"
 		return action
@@ -1757,7 +1885,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		action.Parameters =
 			"// request_item\n"
 			.. "(@groupToNotify)".. grpName ..".context();\n"
-			.."()receiveMissionItems(\"".. items.."\", \"".. phrase .."\", @groupToNotify);\n"
+			.."()receiveMissionItems(\"".. items.."\", \"".. Translator.scriptText(phrase) .."\", @groupToNotify);\n"
 
 
 		action.Action = "code"
@@ -1785,7 +1913,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		action.Parameters =
 			"// give_item\n"
 			.. "(@groupToNotify)".. grpName ..".context();\n"
-			.."()giveMissionItems(\"".. items.."\", \"".. phrase .."\", @groupToNotify);\n"
+			.."()giveMissionItems(\"".. items.."\", \"".. Translator.scriptText(phrase) .."\", @groupToNotify);\n"
 
 
 		
@@ -1807,12 +1935,12 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		local inventoryFullText = texts["inventoryFullText"]
 		local notEnoughPointsText = texts["notEnoughPointsText"]
 
-		local textsArgs = "\""..rewardText.."\", "
-			.."\""..rareRewardText.. "\", "
-			.."\""..inventoryFullText.. "\", "
-			.."\""..notEnoughPointsText.."\""
+		local textsArgs = "\""..Translator.scriptText(rewardText).."\", "
+			.."\""..Translator.scriptText(rareRewardText).. "\", "
+			.."\""..Translator.scriptText(inventoryFullText).. "\", "
+			.."\""..Translator.scriptText(notEnoughPointsText).."\""
 
-		action.Parameters = "//Give reward (giver : '".. rtGiverName.."')\n"
+		action.Parameters = "//Give reward (giver : '".. Translator.scriptText(rtGiverName).."')\n"
 			.."(@groupToNotify)".. rtGiverGrpName..".context();\n"
 			.."()giveReward("..textsArgs..", @groupToNotify);\n"
 
@@ -1853,7 +1981,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		action.Parameters =
 			"// talk_to\n"
 			.. "(@groupToNotify)".. grpName ..".context();\n"
-			.."()talkTo(\"".. phrase .."\", @groupToNotify);\n"
+			.."()talkTo(\"".. Translator.scriptText(phrase) .."\", @groupToNotify);\n"
 
 
 		action.Action = "code"
@@ -2021,9 +2149,6 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			action.Parameters = "()"..prefix.."timerSuspend("..timer..");\n"
 		elseif actionType == "timer_resume" then
 			action.Parameters = "()"..prefix.."timerResume("..timer..");\n"
-		elseif actionType == "timer_enable" then
-			printWarning("timerEnable is not implemented in AIS!")
-			action.Parameters = "()"..prefix.."timerEnable("..timer..");\n" -- !!!NOT IMPLEMENTED IN AIS!!!
 		elseif actionType == "timer_is_enable" then
 			action.Parameters = "("..prefix.."is_enable"..")"..prefix.."timerIsEnabled("..timer..");\n"
 		elseif actionType == "timer_is_suspended" then
@@ -2341,7 +2466,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			end
 		elseif category == "Bandit" then
 			if botAttackable == 0 then
-				code = code.."()setFactionProp(\"faction\", \"civil\");\n"
+				code = code.."()"..prefix.."setFactionProp(\"faction\", \"civil\");\n"
 				if playerAttackable == 1 then
 					code = code.."()"..prefix.."setFactionProp(\"ennemyFaction\", \"Player\");\n"
 					code = code.."()"..prefix.."setFactionProp(\"friendFaction\", \"\");\n"
@@ -2664,7 +2789,8 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 	then
 		action.Parameters = ""
 
-		local str = arg[2]
+		-- what the npc says: a text of the author
+		local str = Translator.plainText(arg[2])
 
 		if str == nil then str = "\n" end
 		if (string.find(str, "\n") == nil) then
@@ -2675,7 +2801,8 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		then
 			assert(arg[3])
 			assert( tostring(arg[3]) )
-			action.Parameters = tostring(arg[3]).."\n"
+			-- "<group>:<name of the npc>", the name as the run-time npc has it
+			action.Parameters = Translator.scriptText(arg[3]).."\n"
 		end
 		action.Parameters = action.Parameters..str
 		return action
@@ -3304,7 +3431,7 @@ Translator.getGenericLogicEventEndOfActivitySequence = function(hlComponent, val
 		local id, id2 = tab[1], tab[2]
 
 		if (id == -1 or id2 == -1) then
-			printWarning("error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
+			printWarning("Error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
 				"': the selected activity step can not be found");
 			return nil, nil, nil
 
@@ -3353,7 +3480,7 @@ Translator.getGenericLogicEventStartOfActivitySequence = function(value, rtNpcGr
 		local id, id2 = tab[1], tab[2]
 
 		if (id == -1 or id2 == -1) then
-			printWarning("error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
+			printWarning("Error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
 				"': the selected activity step can not be found");
 			return nil, nil, nil
 
@@ -3409,7 +3536,7 @@ Translator.getNpcLogicEventEndOfActivityStepImpl = function(value, rtNpcGrp)
 	local id, id2 = tab[1], tab[2]
 
 	if (id == -1 or id2 == -1) then
-		printWarning("error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
+		printWarning("Error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
 			"': the selected activity step can not be found");
 		return nil, nil, nil
 
@@ -3447,7 +3574,7 @@ Translator.getNpcLogicEventBeginOfActivityStepImpl = function(value, rtNpcGrp)
 	local id, id2 = tab[1], tab[2]
 
 	if (id == -1 or id2 == -1) then
-		printWarning("error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
+		printWarning("Error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
 			"': the selected activity step can not be found");
 		return nil, nil, nil
 
@@ -3483,7 +3610,7 @@ Translator.getNpcLogicEventEndOfChatStepImpl = function(hlComponent, context, ev
 
 
 	if (id ==-1 or id2 == -1) then
-		printWarning("error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
+		printWarning("Error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
 			"': the selected chat step can not be found");
 		return nil, nil, nil
 
@@ -4138,7 +4265,7 @@ function Translator.getDialogLogicEvent(entity, context, event)
 		local action =  Translator.createEvent("timer_t2_triggered", states,  rtNpcGrp.Id)
 		local index = Translator.getChatPositionFromDialog(component, event.Event.Value)
 		if index ==  -1  then return nil end
-		local firstCondition = Translator.createAction("if_value_equal", rtNpcGrp.Id, "v1", index + 2, firstCondition)
+		local firstCondition = Translator.createAction("if_value_equal", rtNpcGrp.Id, "v1", index + 2)
 		return action, firstCondition, firstCondition
 
 	elseif eventType == 'end of dialog' then
@@ -4148,7 +4275,7 @@ function Translator.getDialogLogicEvent(entity, context, event)
 		local action =  Translator.createEvent("user_event_4", states,  rtNpcGrp.Id)
 		local index = Translator.getChatPositionFromDialog(component, event.Event.Value)
 		if index == -1  then return nil end
-		local firstCondition = Translator.createAction("if_value_equal", rtNpcGrp.Id, "v1", index+2, firstCondition)
+		local firstCondition = Translator.createAction("if_value_equal", rtNpcGrp.Id, "v1", index+2)
 		return action, firstCondition, firstCondition
 	
 	elseif eventType == 'start of dialog' then
@@ -4425,18 +4552,12 @@ function Translator.CheckPickedEntity(component, prop)
 			local targetId = this[property.Name]
 
 			if targetId ~= r2.RefId("") then
-				-- the id goes into Lua source as a literal, so it may only hold letters, digits and '_'
-				if not string.match(tostring(targetId), "^[%w_]+$") then
-					debugInfo("CheckPickedEntity: refused target id " ..tostring(targetId))
-				else
-					debugInfo("targetId:" ..targetId)
-					local filterFunc = "return " ..property.PickFunction .."('"..targetId.."')"
-					debugInfo("filterfunc: " ..filterFunc)
-					local ok = loadstring(filterFunc)()
-					if ok == false then
-						debugInfo("name: " ..property.Name)
-						r2.requestSetNode(this.InstanceId, property.Name, r2.RefId(""))
-					end
+				debugInfo("targetId:" ..targetId)
+				debugInfo("filterfunc: " ..property.PickFunction)
+				local ok = r2:callByPath(property.PickFunction, tostring(targetId))
+				if ok == false then
+					debugInfo("name: " ..property.Name)
+					r2.requestSetNode(this.InstanceId, property.Name, r2.RefId(""))
 				end
 
 			end

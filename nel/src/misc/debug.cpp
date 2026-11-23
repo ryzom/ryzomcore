@@ -41,14 +41,27 @@
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
 #	define IsDebuggerPresent() false
-#   if !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+#   if !defined(__EMSCRIPTEN__)
 #	    include <execinfo.h>
 #	    ifdef NL_HAVE_BREAKPAD
 #	        include "client/linux/handler/exception_handler.h"
 #	    endif
 #   endif
+#   if defined(NL_OS_MAC)
+#	    include <mach-o/dyld.h>
+#	    include <stdint.h>
+#	    include <limits.h>
+#   endif
 //#	include <malloc.h>
 #	include <errno.h>
+#	if !defined(__EMSCRIPTEN__)
+#		include <signal.h>
+#		include <fcntl.h>
+#		include <string.h>
+#		include <stdlib.h>
+#		include <time.h>
+#		include <sys/types.h>
+#	endif
 #endif
 
 #include "nel/misc/debug.h"
@@ -78,14 +91,14 @@ using namespace std;
 
 // If you don't want to add default displayer, put 0 instead of 1. In this case, you
 // have to manage yourself displayer (in final release for example, we have to put 0)
-// Alternatively, you can use --without-logging when using configure to set
+// Alternatively, you can configure with -DWITH_LOGGING=OFF to set
 // it to 0.
 #ifndef NEL_DEFAULT_DISPLAYER
 #define NEL_DEFAULT_DISPLAYER 1
 #endif // NEL_DEFAULT_DISPLAYER
 
 // Put 0 if you don't want to display in file "log.log"
-// Alternatively, you can use --without-logging when using configure to set
+// Alternatively, you can configure with -DWITH_LOGGING=OFF to set
 // it to 0.
 #ifndef NEL_LOG_IN_FILE
 #define NEL_LOG_IN_FILE 1
@@ -166,6 +179,26 @@ CMsgBoxDisplayer *DefaultMsgBoxDisplayer = nullptr;
 static CStdDisplayer *sd = nullptr;
 static CFileDisplayer *fd = nullptr;
 
+#if !DEFAULT_DISPLAYER
+// Without the default displayers a failed assert or a fatal error still says why, on the standard error output
+class CStdErrDisplayer : public IDisplayer
+{
+public:
+	CStdErrDisplayer() : IDisplayer("DEFAULT_ED") { }
+
+protected:
+	virtual void doDisplay(const CLog::TDisplayInfo &args, const char *message) NL_OVERRIDE
+	{
+		if (args.FileName != nullptr)
+			fprintf(stderr, "%s %s %d %s: %s", logTypeToString(args.LogType), CFile::getFilename(args.FileName).c_str(), args.Line, args.FuncName != nullptr ? args.FuncName : "", message);
+		else
+			fprintf(stderr, "%s", message);
+		fflush(stderr);
+	}
+};
+static CStdErrDisplayer *ed = nullptr;
+#endif // !DEFAULT_DISPLAYER
+
 static TCrashCallback CrashCallback = nullptr;
 
 void setCrashCallback(TCrashCallback crashCallback)
@@ -190,6 +223,19 @@ void setAssert (bool assert)
 	INelContext::getInstance().setNoAssert(!assert);
 }
 
+// The report of a fatal error answered abort, or asked nobody (CMsgBoxDisplayer): every displayer of the error log has
+// the line now, and the program ends
+static void abortAfterError()
+{
+	if (!INelContext::getInstance().getAbortAfterError())
+		return;
+#if defined(NL_OS_WINDOWS) && !defined(NL_COMP_MINGW)
+	// no popup of the system telling that the application aborted, nor its error report
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#endif
+	abort();
+}
+
 void nlFatalError (const char *format, ...)
 {
 	char *str;
@@ -198,6 +244,10 @@ void nlFatalError (const char *format, ...)
 	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == nullptr);
 
 	NLMISC::ErrorLog->displayNL ("%s", str);
+
+	// the error is reported: the breakpoint or the abort that ends the program is no crash to report again
+	markEndOfProgramReported();
+	abortAfterError();
 
 	if (INelContext::getInstance().getDebugNeedAssert())
 			NLMISC_BREAKPOINT;
@@ -217,6 +267,10 @@ void nlError (const char *format, ...)
 	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == nullptr);
 
 	NLMISC::ErrorLog->displayNL ("%s", str);
+
+	// the error is reported: the breakpoint or the abort that ends the program is no crash to report again
+	markEndOfProgramReported();
+	abortAfterError();
 
 	if (INelContext::getInstance().getDebugNeedAssert())
 		NLMISC_BREAKPOINT;
@@ -267,15 +321,23 @@ static void initDebug2 (bool logInFile)
 	}
 #endif // LOG_IN_FILE
 
+#else // DEFAULT_DISPLAYER
+
+	// a failed assert or a fatal error still says why
+	INelContext::getInstance().getAssertLog()->addDisplayer (ed);
+	INelContext::getInstance().getErrorLog()->addDisplayer (ed);
+
+#endif // DEFAULT_DISPLAYER
+
 	// put the message box only in release for error
+	// (with or without the default displayers: it reports asserts and fatal errors, and its report decides whether
+	// the program aborts or breaks)
 
 	if (DefaultMsgBoxDisplayer)
 	{
 		INelContext::getInstance().getAssertLog()->addDisplayer (DefaultMsgBoxDisplayer);
 		INelContext::getInstance().getErrorLog()->addDisplayer (DefaultMsgBoxDisplayer);
 	}
-
-#endif // DEFAULT_DISPLAYER
 }
 
 
@@ -652,7 +714,7 @@ public:
 			{
 				// yoyo: allow only to send the crash report once. Because users usually click ignore,
 				// which create noise into list of bugs (once a player crash, it will surely continues to do it).
-				report(progname + shortExc, subject, _Reason, NL_CRASH_DUMP_FILE, true, !isCrashAlreadyReported(), ReportAbort);
+				report(progname + shortExc, subject, _Reason, true, !isCrashAlreadyReported(), ReportAbort);
 				// TODO: Does this need to be synchronous? Why does this not handle the report result?
 
 				// no more sent mail for crash
@@ -706,21 +768,6 @@ public:
 		}
 		SymCleanup(getProcessHandle());
 		*/
-#elif !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
-		// Make place for stack frames and function names
-		const uint MaxFrame=64;
-		void *trace[MaxFrame];
-		char **messages = (char **)NULL;
-		int i, trace_size = 0;
-
-		trace_size = backtrace(trace, MaxFrame);
-		messages = backtrace_symbols(trace, trace_size);
-		result += "Callstack:\n";
-		_Reason += "-------------------------------\n";
-		for (i=0; i<trace_size; ++i)
-			_Reason += toString("%i : %s\n", i, messages[i]);
-		// free the messages
-		free(messages);
 #endif
 
 // 		_Reason += "-------------------------------\n";
@@ -1119,6 +1166,568 @@ static void exceptionTranslator(unsigned, EXCEPTION_POINTERS *pexp)
 
 #endif // NL_OS_WINDOWS
 
+#if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
+
+// ***************************************************************************
+// Crash signals
+//
+// A crash (SIGSEGV, SIGBUS, SIGFPE, SIGILL, or an abort that nothing reported) writes a report to the log
+// directory, shows it in crash_report when the application has a window and the tool is on (setReportToolEnabled),
+// and then ends the process the way the signal does without the handler (with its core dump, if the system keeps
+// them).
+//
+// The handler runs in a process that is broken: the heap or a lock may be in any state. It allocates nothing,
+// takes no lock of NeL and uses no stream: what it needs is prepared in these static buffers before, and it
+// writes with open(), write() and close(). Besides the functions POSIX allows in a signal handler it relies
+// on backtrace() and backtrace_symbols_fd() (the unwinder is loaded when the handlers are set), on getenv()
+// while nothing changes the environment, on vfork(), and on two accessors of the NeL context that read a flag.
+// The report has a time limit (an alarm), after which the process ends without the rest of it.
+// The report has what such a handler can give: the signal, the call stack and the end of the log file. The log
+// in memory and the crash callback of the application are not in it.
+
+static const int s_CrashSignals[] = { SIGSEGV, SIGBUS, SIGFPE, SIGILL, SIGABRT };
+enum { CrashSignalCount = sizeof(s_CrashSignals) / sizeof(s_CrashSignals[0]) };
+static struct sigaction s_PreviousCrashActions[CrashSignalCount];
+static bool s_CrashHandlersInstalled = false;
+// 1 from the moment a thread writes the report
+static volatile int s_CrashReportInProgress = 0;
+// the end of the program that follows, by abort() or by the trap of NLMISC_BREAKPOINT, is reported already
+static volatile sig_atomic_t s_EndOfProgramReported = 0;
+
+// the directory of the reports, with its final '/', empty for the current directory
+static char s_CrashReportDirectory[1024];
+// the log file whose end goes into the report, empty when there is none
+static char s_CrashLogFile[1024 + 16];
+// the log file the application named with setCrashReportLogFile, instead of the log.log of createDebug
+static char s_CrashLogFileOfApplication[1024 + 16];
+// the name of the program, for the title of the report
+static char s_CrashProgramName[256];
+// crash_report: beside the program, else in PATH; empty when it is in neither
+static char s_CrashToolPath[1024 + 16];
+static bool s_CrashToolResolved = false;
+// the end of the log file that goes into the report
+static const off_t s_CrashLogTailSize = 64 * 1024;
+// the stack the handler runs on, kept for the life of the process
+static void *s_CrashSignalStack = nullptr;
+// the seconds the report may take
+static const unsigned int s_CrashReportTimeout = 30;
+
+// strncat with the size of the buffer, which stays terminated
+static void crashAppend(char *buffer, size_t size, const char *text)
+{
+	size_t length = strlen(buffer);
+	while (*text != '\0' && length + 1 < size)
+		buffer[length++] = *text++;
+	buffer[length] = '\0';
+}
+
+static void crashAppendNumber(char *buffer, size_t size, unsigned long value, unsigned int base)
+{
+	char digits[2 * sizeof(unsigned long) * 4];
+	uint count = 0;
+	do
+	{
+		unsigned int digit = (unsigned int)(value % base);
+		digits[count++] = (char)(digit < 10 ? '0' + digit : 'a' + digit - 10);
+		value /= base;
+	} while (value != 0 && count < sizeof(digits));
+
+	char text[sizeof(digits) + 1];
+	for (uint i = 0; i < count; ++i)
+		text[i] = digits[count - 1 - i];
+	text[count] = '\0';
+	crashAppend(buffer, size, text);
+}
+
+static void crashWrite(int fd, const char *text)
+{
+	size_t length = strlen(text);
+	while (length > 0)
+	{
+		ssize_t written = write(fd, text, length);
+		if (written <= 0)
+		{
+			if (written < 0 && errno == EINTR)
+				continue;
+			return;
+		}
+		text += written;
+		length -= (size_t)written;
+	}
+}
+
+static const char *crashSignalName(int sig)
+{
+	switch (sig)
+	{
+	case SIGSEGV: return "SIGSEGV";
+	case SIGBUS: return "SIGBUS";
+	case SIGFPE: return "SIGFPE";
+	case SIGILL: return "SIGILL";
+	case SIGABRT: return "SIGABRT";
+	default: break;
+	}
+	return "signal";
+}
+
+static const char *crashSignalDescription(int sig)
+{
+	switch (sig)
+	{
+	case SIGSEGV: return "Segmentation fault: the program read or wrote memory it has no access to";
+	case SIGBUS: return "Bus error: the program used an address that does not exist or is misaligned";
+	case SIGFPE: return "Arithmetic exception: an integer division by zero, or an overflow";
+	case SIGILL: return "Illegal instruction";
+	case SIGABRT: return "Abort: the program or one of its libraries ended itself (an uncaught exception, a failed check)";
+	default: break;
+	}
+	return "";
+}
+
+// Whether a signal was sent (kill(), raise(), abort(), sigqueue()) and is not a fault of the program itself.
+// A fault has a positive code; on macOS so have SI_USER and SI_QUEUE.
+static bool crashSignalWasSent(const siginfo_t *info)
+{
+	return info == nullptr || info->si_code <= 0 || info->si_code == SI_USER || info->si_code == SI_QUEUE;
+}
+
+// The paths the handler uses. Called whenever the log directory or the log file changes.
+static void updateCrashReportPaths()
+{
+	s_CrashReportDirectory[0] = '\0';
+	crashAppend(s_CrashReportDirectory, sizeof(s_CrashReportDirectory), LogPath.c_str());
+
+	s_CrashLogFile[0] = '\0';
+	if (s_CrashLogFileOfApplication[0] != '\0')
+	{
+		crashAppend(s_CrashLogFile, sizeof(s_CrashLogFile), s_CrashLogFileOfApplication);
+	}
+	else if (fd != nullptr)
+	{
+		crashAppend(s_CrashLogFile, sizeof(s_CrashLogFile), LogPath.c_str());
+		crashAppend(s_CrashLogFile, sizeof(s_CrashLogFile), "log.log");
+	}
+}
+
+// The path of the running program, empty when the system does not tell
+static std::string getRunningProgramPath()
+{
+	char path[1024];
+	path[0] = '\0';
+#if defined(NL_OS_MAC)
+	// what macOS gives can be relative to the directory the program was started from, and can name a symbolic
+	// link: realpath makes it the absolute path of the file, now, while that directory is still the current one
+	char given[1024];
+	uint32_t givenSize = sizeof(given);
+	char resolved[PATH_MAX];
+	if (_NSGetExecutablePath(given, &givenSize) == 0 && realpath(given, resolved) != nullptr && strlen(resolved) < sizeof(path))
+		strcpy(path, resolved);
+#else
+	// a path that fills the buffer may be cut, and what is left names a directory above the program: unknown
+	ssize_t length = readlink("/proc/self/exe", path, sizeof(path) - 1);
+	if (length <= 0 || (size_t)length >= sizeof(path) - 1)
+		length = 0;
+	path[length] = '\0';
+#endif
+	return path;
+}
+
+// Finds the name of the program and crash_report, once. The tool is looked for beside the running program, then
+// in the directories of PATH. The current directory is no place for it: a file of that name there can be
+// anything, so the empty and the relative entries of PATH are passed over too.
+static void resolveCrashReportTool()
+{
+	if (s_CrashToolResolved)
+		return;
+	s_CrashToolResolved = true;
+
+	const std::string programPath = getRunningProgramPath();
+	const std::string::size_type slash = programPath.rfind('/');
+
+	s_CrashProgramName[0] = '\0';
+	crashAppend(s_CrashProgramName, sizeof(s_CrashProgramName), slash != std::string::npos ? programPath.c_str() + slash + 1 : "The program");
+
+	std::vector<std::string> candidates;
+	if (slash != std::string::npos)
+		candidates.push_back(programPath.substr(0, slash + 1) + "crash_report");
+
+	const char *searchPath = getenv("PATH");
+	if (searchPath != nullptr)
+	{
+		std::vector<std::string> directories;
+		explode(std::string(searchPath), std::string(":"), directories, true);
+		for (uint i = 0; i < directories.size(); ++i)
+		{
+			if (directories[i][0] == '/')
+				candidates.push_back(directories[i] + "/crash_report");
+		}
+	}
+
+	s_CrashToolPath[0] = '\0';
+	for (uint i = 0; i < candidates.size(); ++i)
+	{
+		if (candidates[i].size() < sizeof(s_CrashToolPath) && access(candidates[i].c_str(), X_OK) == 0)
+		{
+			crashAppend(s_CrashToolPath, sizeof(s_CrashToolPath), candidates[i].c_str());
+			break;
+		}
+	}
+}
+
+// Writes the report of a crash signal, and starts crash_report on it for a windowed application.
+static void writeCrashSignalReport(int sig, siginfo_t *info)
+{
+	// A failed assert or a fatal error is reported in full, and then ends the program with abort() or with the
+	// trap of NLMISC_BREAKPOINT, which is an illegal instruction. The code that ends the program says so first
+	// (markEndOfProgramReported): these two signals write no second report then. nlerror says so, the message
+	// box displayer for the answer to abort, and the nlassert and nlassertex of Unix, whose trap follows their
+	// report in a debug build whatever the answer was.
+	if ((sig == SIGABRT || sig == SIGILL) && s_EndOfProgramReported)
+		return;
+
+#if defined(NL_DEBUG) && defined(NL_COMP_GCC)
+	// In this build NLMISC_BREAKPOINT is that trap. nlstop and its variants run it only when the answer to
+	// their report is to break, and the program goes on after any other answer, so they cannot say beforehand
+	// that the program ends: the context has the answer (getDebugNeedAssert) from the report until the trap.
+	if (sig == SIGILL && INelContext::isContextInitialised() && INelContext::getInstance().getDebugNeedAssert())
+		return;
+#endif
+
+	char line[256];
+
+	// nel_report_<time>.log, as report() names its files; another name when that one exists
+	char reportPath[1024 + 64];
+	int out = -1;
+	for (uint attempt = 0; attempt < 16 && out < 0; ++attempt)
+	{
+		reportPath[0] = '\0';
+		crashAppend(reportPath, sizeof(reportPath), s_CrashReportDirectory);
+		crashAppend(reportPath, sizeof(reportPath), "nel_report_");
+		crashAppendNumber(reportPath, sizeof(reportPath), (unsigned long)time(nullptr), 10);
+		if (attempt != 0)
+		{
+			crashAppend(reportPath, sizeof(reportPath), "_");
+			crashAppendNumber(reportPath, sizeof(reportPath), attempt, 10);
+		}
+		crashAppend(reportPath, sizeof(reportPath), ".log");
+		out = open(reportPath, O_WRONLY | O_CREAT | O_EXCL, 0644);
+		if (out < 0 && errno != EEXIST)
+			break;
+	}
+
+	// without a file the report goes to the standard error output
+	const bool reportInFile = (out >= 0);
+	if (!reportInFile)
+	{
+		line[0] = '\0';
+		crashAppend(line, sizeof(line), "NeL: cannot create the crash report '");
+		crashWrite(STDERR_FILENO, line);
+		crashWrite(STDERR_FILENO, reportPath);
+		crashWrite(STDERR_FILENO, "', it follows here\n");
+		out = STDERR_FILENO;
+	}
+
+	line[0] = '\0';
+	crashAppend(line, sizeof(line), s_CrashProgramName);
+	crashAppend(line, sizeof(line), " crashed: ");
+	crashAppend(line, sizeof(line), crashSignalName(sig));
+	crashAppend(line, sizeof(line), " (signal ");
+	crashAppendNumber(line, sizeof(line), (unsigned long)sig, 10);
+	crashAppend(line, sizeof(line), ")\n");
+	crashWrite(out, line);
+	crashWrite(out, crashSignalDescription(sig));
+	crashWrite(out, "\n");
+
+	line[0] = '\0';
+	if (info != nullptr && crashSignalWasSent(info))
+	{
+		// kill(), raise() or abort()
+		crashAppend(line, sizeof(line), "Sent by process ");
+		crashAppendNumber(line, sizeof(line), (unsigned long)info->si_pid, 10);
+		crashAppend(line, sizeof(line), " (this process is ");
+		crashAppendNumber(line, sizeof(line), (unsigned long)getpid(), 10);
+		crashAppend(line, sizeof(line), ")\n");
+	}
+	else if (info != nullptr && sig != SIGABRT)
+	{
+		crashAppend(line, sizeof(line), "Address: 0x");
+		crashAppendNumber(line, sizeof(line), (unsigned long)(size_t)info->si_addr, 16);
+		crashAppend(line, sizeof(line), ", code ");
+		crashAppendNumber(line, sizeof(line), (unsigned long)info->si_code, 10);
+		crashAppend(line, sizeof(line), "\n");
+	}
+	crashWrite(out, line);
+
+	line[0] = '\0';
+	crashAppend(line, sizeof(line), "Time: ");
+	crashAppendNumber(line, sizeof(line), (unsigned long)time(nullptr), 10);
+	crashAppend(line, sizeof(line), " (seconds since 1970-01-01 00:00 UTC)\n");
+	crashWrite(out, line);
+
+	crashWrite(out, "\nCallstack:\n-------------------------------\n");
+	void *frames[64];
+	int frameCount = backtrace(frames, 64);
+	backtrace_symbols_fd(frames, frameCount, out);
+	crashWrite(out, "-------------------------------\n");
+
+	// the end of the log file: a file displayer flushes every line it writes
+	if (s_CrashLogFile[0] != '\0')
+	{
+		int logFile = open(s_CrashLogFile, O_RDONLY);
+		if (logFile >= 0)
+		{
+			crashWrite(out, "\nEnd of the log file ");
+			crashWrite(out, s_CrashLogFile);
+			crashWrite(out, ":\n-------------------------------\n");
+
+			off_t size = lseek(logFile, 0, SEEK_END);
+			if (size > 0 && lseek(logFile, size > s_CrashLogTailSize ? size - s_CrashLogTailSize : 0, SEEK_SET) >= 0)
+			{
+				char buffer[4096];
+				for (;;)
+				{
+					ssize_t count = read(logFile, buffer, sizeof(buffer));
+					if (count < 0 && errno == EINTR)
+						continue;
+					if (count <= 0)
+						break;
+
+					const char *data = buffer;
+					while (count > 0)
+					{
+						ssize_t written = write(out, data, (size_t)count);
+						if (written < 0 && errno == EINTR)
+							continue;
+						if (written <= 0)
+							break;
+						data += written;
+						count -= written;
+					}
+					if (count > 0)
+						break;
+				}
+			}
+
+			close(logFile);
+			crashWrite(out, "\n-------------------------------\n");
+		}
+		else
+		{
+			// it may be relative to a current directory the program has left since
+			crashWrite(out, "\nThe log file ");
+			crashWrite(out, s_CrashLogFile);
+			crashWrite(out, " cannot be opened, the report has no log\n");
+		}
+	}
+	else
+	{
+		crashWrite(out, "\nNo log file\n");
+	}
+
+	if (!reportInFile)
+		return;
+
+	close(out);
+
+	crashWrite(STDERR_FILENO, "NeL: ");
+	crashWrite(STDERR_FILENO, s_CrashProgramName);
+	crashWrite(STDERR_FILENO, " crashed (");
+	crashWrite(STDERR_FILENO, crashSignalName(sig));
+	crashWrite(STDERR_FILENO, "), the report is in '");
+	crashWrite(STDERR_FILENO, reportPath);
+	crashWrite(STDERR_FILENO, "'\n");
+
+	// the report window, for an application that has windows itself and has not switched the tool off
+	// (setReportToolEnabled, a variable of the environment that isReportToolEnabled reads with getenv)
+	if (s_CrashToolPath[0] == '\0' || !INelContext::isContextInitialised() || !INelContext::getInstance().isWindowedApplication() || !isReportToolEnabled())
+		return;
+
+	static char s_Title[256 + 32];
+	s_Title[0] = '\0';
+	crashAppend(s_Title, sizeof(s_Title), s_CrashProgramName);
+	crashAppend(s_Title, sizeof(s_Title), " ");
+	crashAppend(s_Title, sizeof(s_Title), crashSignalName(sig));
+
+	// the same arguments as report() gives the tool, for a report that is not waited for
+	static char s_ArgLog[] = "-log";
+	static char s_ArgTitle[] = "-title";
+	static char s_ArgHost[] = "-host";
+	static char s_ArgSendReport[] = "-sendreport";
+	static char s_ToolName[] = "crash_report";
+	char *arguments[9];
+	uint count = 0;
+	arguments[count++] = s_ToolName;
+	arguments[count++] = s_ArgLog;
+	arguments[count++] = reportPath;
+	arguments[count++] = s_ArgTitle;
+	arguments[count++] = s_Title;
+	char *postUrl = getenv("NL_REPORT_POST_URL");
+	if (postUrl != nullptr && postUrl[0] != '\0')
+	{
+		arguments[count++] = s_ArgHost;
+		arguments[count++] = postUrl;
+	}
+	if (!CrashAlreadyReported)
+		arguments[count++] = s_ArgSendReport;
+	arguments[count] = nullptr;
+
+	// vfork: the child only calls exec, and no fork handler of a library runs in between
+	pid_t child = vfork();
+	if (child == 0)
+	{
+		// the tool starts with no signal blocked
+		sigset_t noSignal;
+		sigemptyset(&noSignal);
+		sigprocmask(SIG_SETMASK, &noSignal, nullptr);
+
+		execv(s_CrashToolPath, arguments);
+		_exit(127);
+	}
+}
+
+static void crashSignalHandler(int sig, siginfo_t *info, void * /* context */)
+{
+	int savedErrno = errno;
+
+	// One report. A thread that crashes while another one writes the report waits here for the end of the
+	// process: the handlers are still set, so its fault does not end the process under the writer. (A second
+	// fault of the writer itself does: the crash signals are blocked in the handler, and the system ends a
+	// process that faults on a blocked signal.)
+	if (!__sync_bool_compare_and_swap(&s_CrashReportInProgress, 0, 1))
+	{
+		for (;;)
+			pause();
+	}
+
+	// The report has a time limit: a writer that waits for what never comes (a lock of the dynamic linker that
+	// a stopped thread holds, a standard error pipe that nobody reads) would leave the crashed process behind,
+	// its other threads waiting above. SIGALRM gets its default action, which ends the process, and is let
+	// through to this thread. After the report the alarm is taken back, and SIGALRM has the action it had and
+	// what was left of an alarm of the program. The mask of the thread comes back when the handler returns.
+	struct sigaction alarmAction, previousAlarmAction;
+	memset(&alarmAction, 0, sizeof(alarmAction));
+	alarmAction.sa_handler = SIG_DFL;
+	sigemptyset(&alarmAction.sa_mask);
+	const bool alarmActionSet = (sigaction(SIGALRM, &alarmAction, &previousAlarmAction) == 0);
+	sigset_t alarmSignal;
+	sigemptyset(&alarmSignal);
+	sigaddset(&alarmSignal, SIGALRM);
+	pthread_sigmask(SIG_UNBLOCK, &alarmSignal, nullptr);
+	const unsigned int previousAlarm = alarm(s_CrashReportTimeout);
+
+	writeCrashSignalReport(sig, info);
+
+	alarm(0);
+	if (alarmActionSet)
+		sigaction(SIGALRM, &previousAlarmAction, nullptr);
+	if (previousAlarm != 0)
+		alarm(previousAlarm);
+
+	// What there was before this handler comes back, for every crash signal: the default action, which ends
+	// the process, or the handler of a tool that was there before.
+	for (uint i = 0; i < CrashSignalCount; ++i)
+		sigaction(s_CrashSignals[i], &s_PreviousCrashActions[i], nullptr);
+
+	errno = savedErrno;
+
+	// A signal that was sent is sent again: it is blocked while its handler runs, so it is delivered when the
+	// handler returns. A fault of the program itself is not raised: the instruction faults again when the
+	// handler returns, with its own address, which is what a core dump and the handler of a sanitizer need.
+	if (crashSignalWasSent(info))
+		raise(sig);
+}
+
+static void installCrashSignalHandlers()
+{
+	updateCrashReportPaths();
+
+	if (s_CrashHandlersInstalled)
+		return;
+	s_CrashHandlersInstalled = true;
+
+	// the first backtrace() loads the unwinder, which allocates memory: not in the handler
+	void *frame[1];
+	backtrace(frame, 1);
+
+	resolveCrashReportTool();
+
+	// An alternate stack for the handler, so that a stack overflow can be reported too. An alternate stack
+	// belongs to one thread: this is the one that starts the debug system, the main thread of a program. On
+	// any other thread the handler runs on the stack of that thread, and a stack overflow there ends the
+	// program without a report, as every crash did before.
+	const size_t stackSize = 128 * 1024;
+	s_CrashSignalStack = malloc(stackSize);
+	stack_t stack;
+	memset(&stack, 0, sizeof(stack));
+	stack.ss_sp = (char *)s_CrashSignalStack;
+	stack.ss_size = stackSize;
+	if (s_CrashSignalStack == nullptr || sigaltstack(&stack, nullptr) != 0)
+		nlwarning("Cannot set an alternate signal stack, a stack overflow will end the program without a crash report");
+
+	struct sigaction action;
+	memset(&action, 0, sizeof(action));
+	action.sa_sigaction = crashSignalHandler;
+	action.sa_flags = SA_SIGINFO | SA_ONSTACK;
+	sigemptyset(&action.sa_mask);
+	for (uint i = 0; i < CrashSignalCount; ++i)
+		sigaddset(&action.sa_mask, s_CrashSignals[i]);
+
+	for (uint i = 0; i < CrashSignalCount; ++i)
+	{
+		if (sigaction(s_CrashSignals[i], &action, &s_PreviousCrashActions[i]) != 0)
+		{
+			nlwarning("Cannot set the handler of signal %d (%s), such a crash writes no report", s_CrashSignals[i], strerror(errno));
+		}
+		else if (!(s_PreviousCrashActions[i].sa_flags & SA_SIGINFO) && s_PreviousCrashActions[i].sa_handler == SIG_IGN)
+		{
+			// a signal the program was started to ignore stays ignored
+			sigaction(s_CrashSignals[i], &s_PreviousCrashActions[i], nullptr);
+		}
+	}
+}
+
+#endif // defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
+
+void setCrashReportLogFile(const std::string &fileName)
+{
+#if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
+	// A relative name is relative to the current directory of now, where the program creates the file: the
+	// handler opens it by its full path, whatever the current directory is by then.
+	std::string path = fileName;
+	if (!path.empty() && path[0] != '/')
+	{
+		char directory[1024];
+		if (getcwd(directory, sizeof(directory)) != nullptr)
+			path = std::string(directory) + "/" + path;
+	}
+
+	s_CrashLogFileOfApplication[0] = '\0';
+	crashAppend(s_CrashLogFileOfApplication, sizeof(s_CrashLogFileOfApplication), path.c_str());
+	updateCrashReportPaths();
+#else
+	nlunreferenced(fileName);
+#endif
+}
+
+void markEndOfProgramReported()
+{
+#if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
+	s_EndOfProgramReported = 1;
+#endif
+}
+
+#ifdef NL_OS_UNIX
+std::string getCrashReportToolPath()
+{
+#if !defined(__EMSCRIPTEN__)
+	resolveCrashReportTool();
+	return s_CrashToolPath;
+#else
+	return std::string();
+#endif
+}
+#endif
+
 void getCallStack(std::string &result, sint skipNFirst)
 {
 #ifdef NL_OS_WINDOWS
@@ -1227,7 +1836,10 @@ void changeLogDirectory(const std::string &dir)
 		DumpHandler->set_minidump_descriptor(google_breakpad::MinidumpDescriptor(LogPath.empty() ? "." : LogPath));
 	}
 #endif
-	if (fd == NULL) return;
+#if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
+	updateCrashReportPaths();
+#endif
+	if (fd == nullptr) return;
 	string p = LogPath + "log.log";
 	fd->setParam(p);
 }
@@ -1244,8 +1856,14 @@ std::string getLogDirectory()
 void destroyDebug()
 {
 	delete sd; sd = nullptr;
+#if !DEFAULT_DISPLAYER
+	delete ed; ed = nullptr;
+#endif
 	delete DefaultMsgBoxDisplayer; DefaultMsgBoxDisplayer = nullptr;
 	delete fd; fd = nullptr;
+#if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
+	updateCrashReportPaths();
+#endif
 	delete DefaultMemDisplayer; DefaultMemDisplayer = nullptr;
 	if (INelContext::isContextInitialised())
 	{
@@ -1308,12 +1926,15 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 #endif //!NL_COMP_MINGW
 
 		INelContext::getInstance().setErrorLog(new CLog (CLog::LOG_ERROR));
-		INelContext::getInstance().setWarningLog(new CLog (CLog::LOG_WARNING));
-		INelContext::getInstance().setInfoLog(new CLog (CLog::LOG_INFO));
-		INelContext::getInstance().setDebugLog(new CLog (CLog::LOG_DEBUG));
+		INelContext::getInstance().setWarningLog(new CLog (CLog::NL_LOG_WARNING));
+		INelContext::getInstance().setInfoLog(new CLog (CLog::NL_LOG_INFO));
+		INelContext::getInstance().setDebugLog(new CLog (CLog::NL_LOG_DEBUG));
 		INelContext::getInstance().setAssertLog(new CLog (CLog::LOG_ASSERT));
 
 		sd = new CStdDisplayer ("DEFAULT_SD");
+#if !DEFAULT_DISPLAYER
+		ed = new CStdErrDisplayer ();
+#endif
 
 #ifdef NL_OS_WINDOWS
 		if (TrapCrashInDebugger || !IsDebuggerPresent ())
@@ -1360,6 +1981,9 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 				google_breakpad::MinidumpDescriptor(LogPath.empty() ? "." : LogPath), NULL, NULL, NULL, true, -1
 			);
 		}
+#elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
+		// a crash writes a report, as the exception translator above makes it do on Windows
+		installCrashSignalHandlers();
 #endif
 
 		INelContext::getInstance().setAlreadyCreateSharedAmongThreads(true);

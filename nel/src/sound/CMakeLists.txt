@@ -153,6 +153,11 @@ IF(WITH_PCH)
   target_precompile_headers(nelsound PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdsound.h)
 ENDIF()
 
+# what a static nelsound needs, for nel-sound.pc
+SET(PC_REQUIRES_PRIVATE "vorbisfile vorbis ogg libxml-2.0")
+IF(FFMPEG_FOUND)
+  STRING(APPEND PC_REQUIRES_PRIVATE " libavcodec libavformat libavutil libswresample")
+ENDIF()
 NL_GEN_PC(nel-sound.pc)
 
 IF(WITH_INSTALL_LIBRARIES OR NOT WITH_STATIC)

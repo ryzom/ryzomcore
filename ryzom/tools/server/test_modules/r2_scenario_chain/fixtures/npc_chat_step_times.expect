@@ -1,0 +1,83 @@
+# Chat steps with two and three actions, some of which turn their npc to the other, and a step with a
+# time below 0. A step of a dialog has one action, so such a step becomes two or three steps. An action
+# whose npc turns comes 10 ticks after its step: the step after it has a time of 1, which brings it 14
+# ticks later, where a time of 0 would bring it after 4 and take the action away. The other further
+# steps follow at once. An activity step lasts as long as each sequence, with the seconds that were
+# added (see npc_chat_time_limit.expect for what a time limit is made of).
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteChatSequences(5)
+scenario_at: Acts[1].Features = <size 6>
+
+# Two actions, the npc of the first turns: times 2 and 1. The dialog (group 5) waits 14 for its second
+# step and 10 for the first line. (10 + 3) + (21 + 3) + (14 + 3) + (2 + 3) = 59 ticks: 6 seconds.
+scenario_at: Acts[1].Features[1].Name = Zora Pair
+scenario_at: Acts[1].Features[1].Components = <size 2>
+scenario_at: Acts[1].Features[1].Components[0].Time = 2
+scenario_at: Acts[1].Features[1].Components[0].Actions[0].Facing = Client1_701
+scenario_at: Acts[1].Features[1].Components[0].Actions[0].Says = Client1_730
+scenario_at: Acts[1].Features[1].Components[1].Time = 1
+scenario_at: Acts[1].Features[1].Components[1].Actions[0].Facing = <empty>
+scenario_at: Acts[1].Features[1].Components[1].Actions[0].Says = Client1_731
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimit = Few Sec
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimitValue = 6
+rt_at: Acts[1].Actions[2].Children[0].Name = process_activity_step1
+rt_has: ()setTimer(61, 0);
+rt_has: ()r2_0001_RtNpcGrp_5.setTimer(21, 1);
+rt_has: ()r2_0001_RtNpcGrp_5.setTimer(14, 1);
+rt_has: ()r2_0001_RtNpcGrp_5.setTimer(10, 0);
+rt_has: ()r2_0001_RtNpcGrp_5.setTimer(2, 0);
+
+# Three actions, the npc of the first turns: times 1, 1 and 0.
+# (10 + 3) + (11 + 3) + (14 + 3) + (4 + 3) + (2 + 3) = 56 ticks: 6 seconds.
+scenario_at: Acts[1].Features[2].Name = Zora First
+scenario_at: Acts[1].Features[2].Components = <size 3>
+scenario_at: Acts[1].Features[2].Components[0].Time = 1
+scenario_at: Acts[1].Features[2].Components[1].Time = 1
+scenario_at: Acts[1].Features[2].Components[2].Time = 0
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[1].TimeLimitValue = 6
+rt_has: ()r2_0001_RtNpcGrp_6.setTimer(14, 1);
+
+# Three actions, the npc of the second turns: times 3, 0 and 1.
+# (10 + 3) + (31 + 3) + (4 + 3) + (14 + 3) + (2 + 3) = 76 ticks: 8 seconds.
+scenario_at: Acts[1].Features[3].Name = Zora Second
+scenario_at: Acts[1].Features[3].Components[0].Time = 3
+scenario_at: Acts[1].Features[3].Components[1].Time = 0
+scenario_at: Acts[1].Features[3].Components[1].Actions[0].Facing = Client1_700
+scenario_at: Acts[1].Features[3].Components[2].Time = 1
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[2].TimeLimitValue = 8
+rt_has: ()setTimer(81, 0);
+rt_has: ()r2_0001_RtNpcGrp_7.setTimer(14, 1);
+
+# Three actions, the npcs of the first and the second turn: times 5, 1 and 1.
+# (10 + 3) + (51 + 3) + (14 + 3) + (14 + 3) + (2 + 3) = 106 ticks: 11 seconds.
+scenario_at: Acts[1].Features[4].Name = Zora Both
+scenario_at: Acts[1].Features[4].Components[0].Time = 5
+scenario_at: Acts[1].Features[4].Components[1].Time = 1
+scenario_at: Acts[1].Features[4].Components[2].Time = 1
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[3].TimeLimitValue = 11
+rt_has: ()setTimer(111, 0);
+
+# Steps of 4 and of -3 seconds: the step keeps its time, whose timer comes at once, and its seconds
+# are not taken off the time limit. (10 + 3) + (41 + 3) + (4 + 3) + (2 + 3) = 69 ticks: 7 seconds.
+scenario_at: Acts[1].Features[5].Name = Zora Back
+scenario_at: Acts[1].Features[5].Components[1].Time = -3
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[4].TimeLimitValue = 7
+rt_has: ()setTimer(71, 0);
+rt_has: ()r2_0001_RtNpcGrp_9.setTimer(-26, 1);

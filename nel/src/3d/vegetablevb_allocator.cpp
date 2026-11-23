@@ -256,11 +256,11 @@ void			CVegetableVBAllocator::deleteVertex(uint vid)
 	if (_UnsynchronizedMode && _Driver)
 	{
 		// Defer the free until the GPU is done with this vertex.
-		uint64 counter = _Driver->getSwapBufferCounter();
-		uint64 stamp = (counter > 0) ? counter - 1 : 0;
+		// Stamp with the current frame: the vertex may have been drawn earlier in this
+		// very frame (see CLandscapeVBAllocator::deleteVertex).
 		SDeferredFree df;
 		df.VertexId = vid;
-		df.FrameCounter = stamp;
+		df.FrameCounter = _Driver->getSwapBufferCounter();
 		_DeferredFreeVertices.push_back(df);
 	}
 	else

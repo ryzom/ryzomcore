@@ -319,15 +319,14 @@ void LandscapeEditorWindow::saveLandscape(int row, bool force)
 			if (!fileName.isEmpty())
 			{
 				regionObject->setFileName(fileName.toUtf8().constData());
+				// save() clears the modified flag of the region itself, and only when the file is written
 				regionObject->save();
-				regionObject->setModified(false);
 				item->setText(fileName);
 			}
 		}
 		else
 		{
 			regionObject->save();
-			regionObject->setModified(false);
 		}
 	}
 }

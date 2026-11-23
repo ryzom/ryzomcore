@@ -90,6 +90,9 @@ public:
 	/// Begins to listen on the specified port (call before running thread)
 	void			init( uint16 port, sint32 maxExpectedBlockSize );
 
+	/// Begins to listen on the specified address (call before running thread)
+	void			init( const CInetAddress& addr, sint32 maxExpectedBlockSize );
+
 	/// Run (exits when the listening socket disconnects)
 	virtual void	run() NL_OVERRIDE;
 
@@ -168,8 +171,11 @@ public:
 	/// Destructor
 	virtual ~CBufServer() NL_OVERRIDE;
 
-	/// Listens on the specified port
+	/// Listens on the specified port, on the default bind address (CSock::defaultBindAddress, the BindAddress of a service)
 	void	init( uint16 port );
+
+	/// Listens on the specified address, whatever the default bind address is (a public port of a service)
+	void	init( const CInetAddress& addr );
 
 	/** Disconnect a connection
 	 * Set hostid to InvalidSockId to disconnect all connections.
@@ -457,7 +463,7 @@ public:
 			// - The set is locked by a receive thread which is removing the closed connections.
 			//   When the set gets unlocked, it is empty so the value is inserted. It means the
 			//   value could be already in the set before it was cleared.
-			//   Note: with a fonction such as tryAcquire(), we could avoid to enter the mutex
+			//   Note: with a function such as tryAcquire(), we could avoid to enter the mutex
 			//   when it is already locked
 			// See clearClosedConnections().
 			NLMISC::CSynchronized<CConnections>::CAccessor removesetsync( &_RemoveSet );

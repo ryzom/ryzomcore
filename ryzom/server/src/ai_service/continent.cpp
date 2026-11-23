@@ -277,6 +277,8 @@ bool CNpcZonePlace::calcRandomPos(CAIPos& pos) const
 //////////////////////////////////////////////////////////////////////////////
 
 CNpcZonePlaceNoPrim::CNpcZonePlaceNoPrim()
+    : m_HasHeight(false)
+    , m_Height(0)
 {
 }
 
@@ -337,14 +339,17 @@ void CNpcZonePlaceNoPrim::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) con
 	while (!foundRandomPos)
 	{
 		if (calcRandomPos(dummyPos))
-			foundRandomPos = CWorldContainer::getWorldMap().setWorldPosition(_VerticalPos, pos, dummyPos);
+			foundRandomPos = placeAt(pos, dummyPos);
 		--maxTries;
 		if (maxTries<=0)
 			break;
 	}
 	if (!foundRandomPos)
 	{
-		if (!CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, pos, _WorldValidPos, _Radius, 1000, CWorldContainer::CPosValidatorDefault()))
+		// the height was measured at the centre, the search starts from the valid position found near it
+		const bool found = m_HasHeight ? CWorldContainer::calcNearestWPosAtHeight(m_Height, _WorldValidPos.toAIVector().distTo(_Pos), _VerticalPos, pos, _WorldValidPos, _Radius, 1000, CWorldContainer::CPosValidatorDefault())
+		                               : CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, pos, _WorldValidPos, _Radius, 1000, CWorldContainer::CPosValidatorDefault());
+		if (!found)
 		{
 			if (LogAcceptablePos)
 				nlwarning("Unvalid place (no collision free position found) at %d %d", _WorldValidPos.toAIVector().x().asInt(), _WorldValidPos.toAIVector().y().asInt());
@@ -363,11 +368,26 @@ void CNpcZonePlaceNoPrim::setPosAndRadius(AITYPES::TVerticalPos verticalPos, con
 	_Pos = pos;
 	_Radius = float(radius)/1000.0f;
 	
-	if (!CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, _WorldValidPos, _Pos, _Radius, 1000, CWorldContainer::CPosValidatorDefault()))
+	const bool found = m_HasHeight ? CWorldContainer::calcNearestWPosAtHeight(m_Height, 0.0, _VerticalPos, _WorldValidPos, _Pos, _Radius, 1000, CWorldContainer::CPosValidatorDefault())
+	                               : CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, _WorldValidPos, _Pos, _Radius, 1000, CWorldContainer::CPosValidatorDefault());
+	if (!found)
 	{
 		if (LogAcceptablePos)
 			nlwarning("Unvalid place (no collision free position found) at %d %d ", _Pos.x().asInt(), _Pos.y().asInt());
 	}
+}
+
+void CNpcZonePlaceNoPrim::setHeight(sint32 height)
+{
+	m_HasHeight = true;
+	m_Height = height;
+}
+
+bool CNpcZonePlaceNoPrim::placeAt(RYAI_MAP_CRUNCH::CWorldPosition &wpos, const CAIVector &pos) const
+{
+	if (m_HasHeight)
+		return CWorldContainer::getWorldMap().setWorldPositionNearestHeight(m_Height, pos.distTo(_Pos), _VerticalPos, wpos, pos);
+	return CWorldContainer::getWorldMap().setWorldPosition(_VerticalPos, wpos, pos);
 }
 
 bool CNpcZonePlaceNoPrim::calcRandomPos(CAIPos& pos) const
@@ -483,6 +503,7 @@ void CNpcZoneShape::getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const
 
 void CNpcZoneShape::setPatat(AITYPES::TVerticalPos verticalPos, const std::vector<CAIVector>& points)
 {
+	_shape.setOwnerName(getAliasFullName());
 	if (!_shape.setPatat(verticalPos, points))
 	{
 		nlwarning("CNpcZoneShape::setPatat: error while placing the points of '%s'",

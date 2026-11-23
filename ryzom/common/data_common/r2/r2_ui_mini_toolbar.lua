@@ -48,7 +48,7 @@ function r2.MiniToolbar:setupButton(button, commandDesc, buttonIndex)
 	button.Env.Toolbar = self
 	
 	button.b.onclick_l = "lua"
-	button.b.params_l  = "r2.runBaseToolbarCommand(getUICaller().parent.Env.Toolbar, " .. tostring(buttonIndex) .. ")"	
+	button.b.params_l  = r2:uiCall("r2.runCallerToolbarCommand", buttonIndex)	
 end
 
 -- retrieve a command list for the given instance

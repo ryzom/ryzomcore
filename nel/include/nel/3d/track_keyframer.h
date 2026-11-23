@@ -219,7 +219,7 @@ public:
 			dateNext=ite->first;
 		}
 
-		// Call evalutation fonction
+		// Call evaluation function
 		evalKey (previous, next, datePrevious, dateNext, date, result);
 
 		return result;

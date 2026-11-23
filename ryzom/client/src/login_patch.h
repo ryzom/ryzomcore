@@ -276,9 +276,12 @@ public:
 	bool bnpUnpack(const std::string &srcBigfile, const std::string &dstPath, std::vector<std::string> &vFilenames);
 
 	const std::string &	getServerVersion () { return ServerVersion; }
-	void downloadFileWithCurl (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = NULL);
-	void downloadFile (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = NULL);
+	void downloadFileWithCurl (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = nullptr);
+	void downloadFile (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = nullptr);
 
+	/// True once the check or the patch thread was asked to stop: a download ends, and so does the wait
+	/// before another attempt
+	bool isStopAsked() const;
 
 private:
 
@@ -312,6 +315,13 @@ private:
 	// Rename src to dst throw an exception if we cant
 	void renameFile (const std::string &src, const std::string &dst);
 
+	/// Test that the directories the patcher writes to can be written to, creating the two below the client
+	/// directory when they are missing. The first one that fails is kept in m_NotWritableDirectory.
+	bool checkWritableDirectories();
+
+	/// The text for the player when the patcher can't write to this directory
+	static std::string getNotWritableMessage(const std::string &directory);
+
 	// Accessors used by the patch thread
 	const std::string &getDescFilename() { return DescFilename; }
 	const std::string &getUpdateBatchFilename() { return UpdateBatchFilename; }
@@ -320,7 +330,13 @@ private:
 	CPatchThread *getPatchThread() { return PatchThread; }
 
 	// Get a file from the server and decompress it if zipped
-	void getServerFile (const std::string &name, bool bZipped = false, const std::string& destName="", NLMISC::IProgressCallback *progress = NULL);
+	void getServerFile (const std::string &name, bool bZipped = false, const std::string& destName="", NLMISC::IProgressCallback *progress = nullptr);
+
+	/// Delete what is kept of a download that a network error cut (m_PartialDownload)
+	void discardPartialDownload();
+
+	/// True if sha1 is the hash that the description gives for this version of the file
+	bool isHashOfDesc(const std::string &fileName, uint32 version, const NLMISC::CHashKey &sha1);
 	// Decompress zipped file override destination file
 	void decompressFile (const std::string &filename);
 	void applyDate (const std::string &sFilename, uint32 nDate);
@@ -375,6 +391,9 @@ private:
 		{
 			ServerPath = serverPath;
 			Available = true;
+			OnProbation = false;
+			AskAgainTime = 0;
+			Failures = 0;
 
 			if (!ServerPath.empty() && ServerPath[ServerPath.size()-1] != '/')
 				ServerPath += '/';
@@ -389,6 +408,12 @@ private:
 		std::string	ServerPath;
 		std::string	DisplayedServerPath;
 		bool		Available;
+		// A server that failed is not available until AskAgainTime (CTime::getLocalTime). Then it is on
+		// probation: one attempt per file until one works. Failures counts the failures in a row, and
+		// the time until the server is asked again doubles with each.
+		bool		OnProbation;
+		NLMISC::TTime	AskAgainTime;
+		uint		Failures;
 	};
 
 	// Patch Servers
@@ -401,6 +426,29 @@ private:
 	std::string ServerVersion;
 
 	bool DownloadInProgress;
+
+	/// False while init() downloads in the thread of its caller: a failed download is not waited for
+	bool m_WaitForServers;
+
+	/// What a network error left of a download. The bytes stay in the file, and the next attempt on the
+	/// same server asks for the rest of the content they came from. Nothing is kept when Size is 0.
+	struct CPartialDownload
+	{
+		std::string Source; // the address that was asked
+		std::string Dest; // the file that holds the bytes
+		std::string ETag; // what the server said about the content: a strong entity tag,
+		std::string LastModified; // and its modification date
+		uint64 Size; // bytes kept
+		sint64 Total; // size of the whole file, -1 if the server did not say
+		bool Appended; // the last transfer went on from kept bytes and added to them
+		CPartialDownload()
+		    : Size(0)
+		    , Total(-1)
+		    , Appended(false)
+		{
+		}
+	};
+	CPartialDownload m_PartialDownload;
 
 	/// Description file
 	std::string						DescFilename;
@@ -446,6 +494,9 @@ private:
 	std::string ClientPatchPath; // Temporary path
 	std::string ReadableClientDataPath; // Where original data can be found
 	std::string WritableClientDataPath; // Where data can be written
+
+	/// Set by init(): the directory of the patcher that can't be written to, empty when all of them can
+	std::string m_NotWritableDirectory;
 
 	/// Output useful information for debugging in the log file
 	bool VerboseLog;

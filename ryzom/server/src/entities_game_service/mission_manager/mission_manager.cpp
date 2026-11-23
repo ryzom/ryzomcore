@@ -240,6 +240,15 @@ void CMissionManager::init()
 {
 	nlassert(_Instance == NULL);
 	_Instance = new CMissionManager();
+
+	// The bots that are there already, when reloadMissions builds the missions again, are the encyclopedia NPC of their
+	// missions again: the AI service describes a bot when it spawns, not a second time
+	const TMapCreatures &creatures = CreatureManager.getCreature();
+	for (TMapCreatures::const_iterator it = creatures.begin(); it != creatures.end(); ++it)
+	{
+		if ((*it).second != NULL)
+			(*it).second->setEncyclopediaNpcOfMissions();
+	}
 }// CMissionManager init
 
 
@@ -261,8 +270,8 @@ CMissionManager::CMissionManager()
 	// get the emote list
 	EMOTE_LIST_PARSER::initEmoteList(_Emotes);
 
-	// get the loaded primitives
-	const CPrimitivesParser::TPrimitivesList & primsList = CPrimitivesParser::getInstance().getPrimitives();
+	// get the loaded primitives (read again by the reloadMissions command)
+	const CPrimitivesParser::TPrimitivesList &primsList = CPrimitivesParser::getInstance().getMissionPrimitives();
 //	const vector<string> & primNamesVect = CPrimitivesParser::getInstance().getPrimitiveFiles();
 
 	// parse mission validation configuration file
@@ -291,6 +300,7 @@ CMissionManager::CMissionManager()
 	}
 	if (countBadMission != 0)
 		MISLOG("Bad missions total : %u", countBadMission);
+	m_NbRefusedMissions = countBadMission;
 
 	// build copy missions
 	for ( uint i = 0; i < globalData.CopyMissions.size(); i++ )
@@ -301,7 +311,7 @@ CMissionManager::CMissionManager()
 			MISLOG("copy mission alias %s references bad mission alias %s, which could not be built",
 				CPrimitivesParser::aliasToString(globalData.CopyMissions[i].first).c_str(),
 				CPrimitivesParser::aliasToString(globalData.CopyMissions[i].second).c_str());
-			_MissionTemplates.erase(globalData.CopyMissions[i].first);
+			m_NbRefusedMissions += (uint)_MissionTemplates.erase(globalData.CopyMissions[i].first);
 		}
 		else
 		{
@@ -348,6 +358,9 @@ CMissionManager::CMissionManager()
 				MISLOG("ref mission alias %s references bad mission alias %s, which could not be built",
 					CPrimitivesParser::aliasToString(refAlias).c_str(),
 					CPrimitivesParser::aliasToString(realAlias).c_str());
+
+			// the reference was built, and is refused here
+			++m_NbRefusedMissions;
 		}
 		else
 			MISLOG("ref mission alias %s was not found!!!", CPrimitivesParser::aliasToString(refAlias).c_str() );
@@ -975,6 +988,26 @@ uint8 CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIA
 	return 0;
 }// CMissionManager::instanciateMission
 
+void CMissionManager::instanciateLoadedMission(CMission * mission)
+{
+	nlassert(mission);
+	CMissionTemplate * templ = getTemplate( mission->getTemplateId() );
+	if ( !templ || templ->isInstance(mission) )
+		return;
+	// a mission that is finished and still in the journal is no instance: it left them when it ended (setSuccessFlag,
+	// setFailureFlag)
+	if ( mission->getFinished() )
+		return;
+
+	// The destructor of its character took the mission out of the instances of its template and out of the mono missions
+	// (deInstanciateMission), as it left the other lists that putInGame puts it back in. A message of the AI, the end
+	// of a parent mission and a mission done once only reach the instances of a template, and a mono mission cannot be
+	// taken while its template has one. The mono timer goes on from where it was.
+	templ->Instances.push_back(mission);
+	if ( mission->getMonoEndDate() != 0 )
+		addMonoMission(mission);
+}// CMissionManager::instanciateLoadedMission
+
 void CMissionManager::deInstanciateMission(CMission * mission)
 {
 	nlassert(mission);
@@ -1008,7 +1041,9 @@ void CMissionManager::deInstanciateMission(CMission * mission)
 	{
 		removeTimedMission(mission);
 	}
-	if ( mission->getMonoEndDate() )
+	// a mission removed when its character is loaded (updateSavedMissions) is not in game yet: it is not a mono mission
+	// that runs
+	if ( mission->getMonoEndDate() && templ && templ->isInstance(mission) )
 	{
 		removeMonoMission(mission);
 	}
@@ -1759,8 +1794,13 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
  */
 inline void CMissionManager::closeDynChat( CCharacter * user, const TDataSetRow & botRow )
 {
-	user->staticActionInProgress(false);
-	user->setCurrentInterlocutor(CEntityId::Unknown);
+	// a bot chat window (mission list, trade, mission gift...) opened since the dyn chat owns the interlocutor now,
+	// clearing it would orphan that window: its end could no longer clean it up
+	if (user->getBotChatType() == BOTCHATTYPE::UnknownFlag && !user->hasBotGift() && user->getCurrentInterlocutor() == TheDataset.getEntityId(botRow))
+	{
+		user->staticActionInProgress(false);
+		user->setCurrentInterlocutor(CEntityId::Unknown);
+	}
 	CMessage msgout( "IMPULSION_ID" );
 	CBitMemStream bms;
 	msgout.serial( (CEntityId&)user->getId() );
@@ -2158,8 +2198,9 @@ void CMissionManager::addCrashHandlingMissions( CMission & mission )
 
 void CMissionManager::applyAICrashConsequences( NLNET::TServiceId aiServiceId )
 {
-	string name;
-	if (CWorldInstances::instance().getAIInstanceNameFromeServiceId(aiServiceId,name))
+	// a service can have several AI instances: a crash handler is for any of them
+	vector<string> names;
+	if (CWorldInstances::instance().getAIInstanceNamesFromServiceId(aiServiceId, names))
 	{
 		// A crash handler can fail its mission. That removes the mission and the ones it stops from
 		// _CrashHandlingMissions (removeCrashHandlingMissions moves the last one into its place) and can delete them: go
@@ -2168,7 +2209,7 @@ void CMissionManager::applyAICrashConsequences( NLNET::TServiceId aiServiceId )
 		for (uint i = 0; i < missions.size(); i++)
 		{
 			if (missions[i] && std::find(_CrashHandlingMissions.begin(), _CrashHandlingMissions.end(), missions[i]) != _CrashHandlingMissions.end())
-				missions[i]->applyCrashHandler(false, name);
+				missions[i]->applyCrashHandler(false, names);
 		}
 	}
 	else
@@ -2409,7 +2450,10 @@ display_months:
 ////////////////////////////////////////
 // functor for orderby clause in command displayMissionStats
 
-struct TOrderByTry : public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+struct TOrderByTry
+#ifndef NL_CPP17
+	: public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+#endif
 {
 	bool operator()(const pair<TAIAlias, TMissionStats*> ms1, const pair<TAIAlias, TMissionStats*> ms2) const
 	{
@@ -2417,7 +2461,10 @@ struct TOrderByTry : public std::binary_function<const pair<TAIAlias, TMissionSt
 	}
 };
 
-struct TOrderBySuccess : public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+struct TOrderBySuccess
+#ifndef NL_CPP17
+	: public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+#endif
 {
 	bool operator()(const pair<TAIAlias, TMissionStats*> ms1, const pair<TAIAlias, TMissionStats*> ms2) const
 	{
@@ -2425,7 +2472,10 @@ struct TOrderBySuccess : public std::binary_function<const pair<TAIAlias, TMissi
 	}
 };
 
-struct TOrderByFail : public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+struct TOrderByFail
+#ifndef NL_CPP17
+	: public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+#endif
 {
 	bool operator()(const pair<TAIAlias, TMissionStats*> ms1, const pair<TAIAlias, TMissionStats*> ms2) const
 	{
@@ -2433,7 +2483,10 @@ struct TOrderByFail : public std::binary_function<const pair<TAIAlias, TMissionS
 	}
 };
 
-struct TOrderByAbandon : public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+struct TOrderByAbandon
+#ifndef NL_CPP17
+	: public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+#endif
 {
 	bool operator()(const pair<TAIAlias, TMissionStats*> ms1, const pair<TAIAlias, TMissionStats*> ms2) const
 	{
@@ -2441,7 +2494,10 @@ struct TOrderByAbandon : public std::binary_function<const pair<TAIAlias, TMissi
 	}
 };
 
-struct TOrderByLastTry : public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+struct TOrderByLastTry
+#ifndef NL_CPP17
+	: public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+#endif
 {
 	bool operator()(const pair<TAIAlias, TMissionStats*> ms1, const pair<TAIAlias, TMissionStats*> ms2) const
 	{

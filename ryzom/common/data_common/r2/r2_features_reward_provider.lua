@@ -172,6 +172,8 @@ end
 function component:textAdapter(text)
 
 	assert(self)
+	-- a text that the component does not have (one of an older editor) is an empty text
+	if text == nil then text = "" end
 	assert(type(text) == "string")
 	local str =  text
 	local reward_giver = ""
@@ -181,7 +183,7 @@ function component:textAdapter(text)
 		if giver then 	reward_giver = giver.Name end
 	end
 	
-	str=string.gsub(str, "<reward_giver>", reward_giver)
+	str = replaceTag(str, "<reward_giver>", reward_giver)
 	return str
 end
 

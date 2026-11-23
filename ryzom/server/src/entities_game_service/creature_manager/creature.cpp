@@ -27,6 +27,7 @@
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
 #include "player_manager/character.h"
+#include "player_manager/character_encyclopedia.h"
 #include "egs_mirror.h"
 #include "egs_sheets/egs_sheets.h"
 #include "mission_manager/mission_manager.h"
@@ -101,6 +102,7 @@ CCreature::CCreature() : CEntityBase(true)
 	_AIGroupAlias = CAIAliasTranslator::Invalid;
 	_AIAlias = CAIAliasTranslator::Invalid;
 	_PrimAlias = 0;
+	_EncyclopediaNpcNameSent = 0;
 	_LootInventory = 0;
 //	harvestable( false );
 	_EntityLooter = CEntityId::Unknown;
@@ -900,6 +902,72 @@ static bool isShopStaticItemFamily(ITEMFAMILY::EItemFamily fam)
 }
 
 //---------------------------------------------------
+// setEncyclopediaNpcOfMissions The encyclopedia missions that the bot proposes name it as their NPC
+//
+//---------------------------------------------------
+void CCreature::setEncyclopediaNpcOfMissions() const
+{
+	CMissionManager *missionManager = CMissionManager::getInstance();
+	for (uint i = 0; i < _MissionsProposed.size(); ++i)
+	{
+		CMissionTemplate *templ = missionManager->getTemplate(_MissionsProposed[i]);
+		if (templ != NULL && templ->EncycloAlbum != -1)
+			templ->EncycloNPC = _AIAlias;
+	}
+}
+
+//---------------------------------------------------
+// sendEncyclopediaNpcName The characters that have an encyclopedia mission of the bot in their encyclopedia get its name
+//
+//---------------------------------------------------
+void CCreature::sendEncyclopediaNpcName()
+{
+	if (_MissionsProposed.empty())
+		return;
+	CMirrorPropValueRO<TYPE_NAME_STRING_ID> nameId(TheDataset, _EntityRowId, DSPropertyNAME_STRING_ID);
+	if (nameId() == 0 || nameId() == _EncyclopediaNpcNameSent)
+		return;
+
+	// The encyclopedia names the bot that the alias gives: the copy of a bot in a room has the alias and the missions
+	// of the bot too, and is not it
+	if (CAIAliasTranslator::getInstance()->findEntityId(_AIAlias) != _Id)
+		return;
+
+	// the themas that name this bot, each with its rite (bit 0) and tasks (bits 1 and up) that do
+	map<pair<uint32, uint32>, uint8> themas;
+	CMissionManager *missionManager = CMissionManager::getInstance();
+	for (uint i = 0; i < _MissionsProposed.size(); ++i)
+	{
+		const CMissionTemplate *templ = missionManager->getTemplate(_MissionsProposed[i]);
+		if (templ == NULL || templ->EncycloAlbum < 0 || templ->EncycloThema < 1 || templ->EncycloTask < 0 || templ->EncycloTask > 7)
+			continue;
+		if (templ->EncycloNPC != _AIAlias)
+			continue;
+		themas[make_pair((uint32)templ->EncycloAlbum, (uint32)templ->EncycloThema)] |= (uint8)(1 << templ->EncycloTask);
+	}
+	if (themas.empty())
+		return;
+	_EncyclopediaNpcNameSent = nameId();
+
+	uint sent = 0;
+	const CPlayerManager::TMapPlayers &players = PlayerManager.getPlayers();
+	for (CPlayerManager::TMapPlayers::const_iterator itPlayer = players.begin(); itPlayer != players.end(); ++itPlayer)
+	{
+		if ((*itPlayer).second.Player == NULL)
+			continue;
+		CCharacter *character = (*itPlayer).second.Player->getActiveCharacter();
+		if (character == NULL || !character->getEnterFlag())
+			continue;
+		for (map<pair<uint32, uint32>, uint8>::const_iterator it = themas.begin(); it != themas.end(); ++it)
+		{
+			if (character->getEncyclopedia().botNameChanged((*it).first.first, (*it).first.second, (*it).second))
+				++sent;
+		}
+	}
+	nldebug("ENCYCLOPEDIA: the bot %u has the name %u, %u themas of characters in game were sent again", _AIAlias, _EncyclopediaNpcNameSent, sent);
+}
+
+//---------------------------------------------------
 // setBotDescription Set all params describe bot relative to bot chat (what selling, what mission proposed etc...)
 //
 //---------------------------------------------------
@@ -969,21 +1037,6 @@ void CCreature::setBotDescription( const CGenNpcDescMsgImp& description )
 	_ExplicitActionSPType= description.getExplicitActionSPType();
 	_FilterExplicitActionTradeByBotRace= description.getFilterExplicitActionTradeByBotRace();
 	
-	// Encyclopedia NPC setup
-	for (uint32 nMis = 0; nMis < _MissionsProposed.size(); ++nMis)
-	{
-		CAIAliasTranslator *pAIAT = CAIAliasTranslator::getInstance();
-		CMissionManager *pMM = CMissionManager::getInstance();
-
-		CMissionTemplate *pMT;
-		pMT = pMM->getTemplate( _MissionsProposed[nMis] );
-		if (pMT != NULL)
-		{
-			if (pMT->EncycloAlbum != -1)
-				pMT->EncycloNPC = description.getAlias();
-		}
-	}
-
 	_WelcomePhrase = description.getWelcomePhrase();
 
 	//_IsDead = false; // commented out because the AIS can resend the message whenever the creature is dead (ex: bodokin 'no drop' bug)
@@ -1072,6 +1125,9 @@ void CCreature::setBotDescription( const CGenNpcDescMsgImp& description )
 	_BotChatCategory.erase(unique(_BotChatCategory.begin(), _BotChatCategory.end()), _BotChatCategory.end());
 
 	_AIAlias = description.getAlias();
+
+	// Encyclopedia NPC setup
+	setEncyclopediaNpcOfMissions();
 
 	// add a level selector for cosmetics
 	if ( cosmeticCategory && _LevelShopSelector.empty() )

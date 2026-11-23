@@ -83,7 +83,7 @@ std::string CVerfiyRightRtScenarioError::toString() const
 		type = None;
 	}
 
-	std::string typeStr( typeTrad[static_cast<uint>(Type)]);
+	std::string typeStr( typeTrad[static_cast<uint>(type)]);
 
 	return NLMISC::toString("Type: '%s' '%s'  : Package: '%s' needed: %d, user: %d)", typeStr.c_str(), Name.c_str(), Package.c_str(), Level, CharLevel );
 

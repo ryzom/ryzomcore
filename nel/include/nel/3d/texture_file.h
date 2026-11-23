@@ -46,7 +46,7 @@ public:
 	 * \author Stephane Coutelas
 	 * \date 2000
 	 */
-	CTextureFile() { _AllowDegradation=true; _SupportSharing= true; _EnlargeCanvasNonPOW2Tex = false; _MipMapSkipAtLoad=0; m_UntrustedMaxSize = 0; }
+	CTextureFile() { _AllowDegradation=true; _SupportSharing= true; _EnlargeCanvasNonPOW2Tex = false; _MipMapSkipAtLoad=0; m_UntrustedMaxSize = 0; m_AsyncShareGroup = false; }
 
 	// copy ctor
 	CTextureFile(const CTextureFile &other);
@@ -72,6 +72,7 @@ public:
 		_EnlargeCanvasNonPOW2Tex = false;
 		_MipMapSkipAtLoad=0;
 		m_UntrustedMaxSize = 0;
+		m_AsyncShareGroup = false;
 	}
 
 
@@ -113,6 +114,17 @@ public:
 	virtual std::string		getShareName() const NL_OVERRIDE;
 	// User can disable the sharing system. Default is to be enabled. Not serialized
 	void					enableSharing(bool enable);
+
+	/** Put the texture in the share group of the async texture manager (CAsyncTextureManager). It then shares its
+	 *	driver texture only with the textures of the same file that are in this group too, and no longer with a
+	 *	texture file used the normal way. The manager uploads a reduced version of the file and swaps other versions
+	 *	in and out over time: the instances in async texture mode must get that driver texture, and a shape that
+	 *	uses the same file without the manager must not.
+	 *	Default is false. Not serialized. This does not touch() the texture: the driver looks the share name up
+	 *	again at the next change of the file name.
+	 */
+	void					enableAsyncShareGroup(bool enable) { m_AsyncShareGroup = enable; }
+	bool					isInAsyncShareGroup() const { return m_AsyncShareGroup; }
 
 
 	/**
@@ -164,6 +176,7 @@ private:
 	bool        _EnlargeCanvasNonPOW2Tex;    // Non power of 2 textures are cropped. Default is false
 	uint8		_MipMapSkipAtLoad;	// Default is 0.
 	uint32		m_UntrustedMaxSize;	// Default is 0, a trusted file.
+	bool		m_AsyncShareGroup;	// Default is false.
 private:
 	void		dupInfo(const CTextureFile &other);
 

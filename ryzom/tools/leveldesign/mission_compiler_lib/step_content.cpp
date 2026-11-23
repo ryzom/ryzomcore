@@ -2103,7 +2103,8 @@ public:
 				throw EParseException(prim, err.c_str());
 			}
 			TKillPlayerInfo kp;
-			kp.ClanName.initWithText(toString("clan%u", i+1), STRING_MANAGER::clan, md, prim, args[0]);			
+			// a faction for the string manager: it has no clan parameter, and the EGS sends the clan's faction
+			kp.ClanName.initWithText(toString("clan%u", i + 1), STRING_MANAGER::faction, md, prim, args[0]);
 			kp.MinLevel.initWithText(toString("minlvl%u", i+1), STRING_MANAGER::integer, md, prim, args[1]);						
 			kp.MaxLevel.initWithText(toString("maxlvl%u", i+1), STRING_MANAGER::integer, md, prim, args[2]);
 			kp.Quantity.initWithText(toString("quantity%u", i+1), STRING_MANAGER::integer, md, prim, args[3]);

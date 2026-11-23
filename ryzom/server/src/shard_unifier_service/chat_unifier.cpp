@@ -186,9 +186,17 @@ namespace CHATUNI
 		//// CChatUnifierSkel interface impl
 		/////////////////////////////////////////////////////////////
 
-		bool resolveFarTell(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, const ucstring &destName,
-			ucstring &senderName, TModuleProxyPtr &destProxy)
+		// IOS forward a tell message to the unifier
+		// If IOS can't find the player locally, it forward
+		// the tell to the unifier
+		void sendFarTell(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const ucstring &text)
 		{
+			nldebug("CU : sendFarTell : module '%s' send far tell '%s' from character %s to '%s'",
+				sender->getModuleName().c_str(),
+				text.toUtf8().c_str(),
+				senderCharId.toString().c_str(),
+				destName.toUtf8().c_str());
+
 			CChatUnifierClientProxy cucSender(sender);
 			// ask the entity locator to find the addressee charId from it's name
 			IEntityLocator *el = IEntityLocator::getInstance();
@@ -197,25 +205,27 @@ namespace CHATUNI
 				// no entity locator, can't forward messages
 				cucSender.recvFarTellFail(this, senderCharId, destName, TFailInfo::fi_no_entity_locator);
 				nldebug("sendFarTell : no entity locator");
-				return false;
+				return;
 			}
 
 			ICharacterSync *charSync = ICharacterSync::getInstance();
+
 			if (charSync == NULL)
 			{
 				// no character synchronizer to retrieve sender name !
 				cucSender.recvFarTellFail(this, senderCharId, destName, TFailInfo::fi_no_char_sync);
 				nldebug("sendFarTell : can't finc character sync singleton");
-				return false;
+				return;
 			}
 
-			senderName = charSync->getCharacterName(uint32(senderCharId.getShortId()));
+			ucstring senderName = charSync->getCharacterName(uint32(senderCharId.getShortId()));
+
 			if (senderName.empty())
 			{
 				// no character synchronizer to retrieve sender name !
 				cucSender.recvFarTellFail(this, senderCharId, destName, TFailInfo::fi_sender_char_unknown);
 				nldebug("sendFarTell : can't get character name from sender char id %s", senderCharId.toString().c_str());
-				return false;
+				return;
 			}
 
 			uint32 hostShardId = 0;
@@ -233,7 +243,7 @@ namespace CHATUNI
 				// the character is not online
 				cucSender.recvFarTellFail(this, senderCharId, destName, TFailInfo::fi_char_offline);
 				nldebug("sendFarTell : no valid host shard id for addressee '%s'", destName.toUtf8().c_str());
-				return false;
+				return;
 			}
 
 			// This player is online, we can forward the tell to him
@@ -245,43 +255,12 @@ namespace CHATUNI
 				// no IOS for the hosting shard !
 				cucSender.recvFarTellFail(this, senderCharId, destName, TFailInfo::fi_no_ios_module);
 				nldebug("sendFarTell : no module proxy for shard %u", hostShardId);
-				return false;
+				return;
 			}
 
-			destProxy = *pproxy;
-			return true;
-		}
-
-		// IOS forward a tell message to the unifier
-		// If IOS can't find the player locally, it forward
-		// the tell to the unifier
-		void sendFarTell(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const ucstring &text)
-		{
-			nldebug("CU : sendFarTell : module '%s' send far tell '%s' from character %s to '%s'",
-				sender->getModuleName().c_str(),
-				text.toUtf8().c_str(),
-				senderCharId.toString().c_str(),
-				destName.toUtf8().c_str());
-
-			ucstring senderName;
-			TModuleProxyPtr destProxy;
-			if (!resolveFarTell(sender, senderCharId, destName, senderName, destProxy))
-				return;
-
-			CChatUnifierClientProxy cucDest(destProxy);
+			// ok, we can send the far tell
+			CChatUnifierClientProxy cucDest(*pproxy);
 			cucDest.recvFarTell(this, senderCharId, senderName, havePrivilege, destName, text);
-		}
-
-		void sendFarTellShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, bool havePrivilege,
-			const ucstring &destName, const CChatMessage &chatMessage)
-		{
-			ucstring senderName;
-			TModuleProxyPtr destProxy;
-			if (!resolveFarTell(sender, senderCharId, destName, senderName, destProxy))
-				return;
-
-			CChatUnifierClientProxy cucDest(destProxy);
-			cucDest.recvFarTellShared(this, senderCharId, senderName, havePrivilege, destName, chatMessage);
 		}
 
 		// IOS forward a guild chat message to the unifier

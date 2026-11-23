@@ -198,12 +198,14 @@ void			CLandscapeVBAllocator::deleteVertex(uint vid)
 	if (_UnsynchronizedMode && _Driver)
 	{
 		// Defer the free until the GPU is done with this vertex.
-		// Stamp with counter-1: the vertex was last drawn in the previous frame.
-		uint64 counter = _Driver->getSwapBufferCounter();
-		uint64 stamp = (counter > 0) ? counter - 1 : 0;
+		// Stamp with the current frame: a frame may render the landscape more than once
+		// (the water reflection passes clip and render it again), so the vertex may have
+		// been drawn earlier in this very frame. processDeferredFrees() hands it out
+		// again when the stamp is below IDriver::getSwapBufferInFlight(), which is when
+		// the GPU has finished the frame of the stamp.
 		SDeferredFree df;
 		df.VertexId = vid;
-		df.FrameCounter = stamp;
+		df.FrameCounter = _Driver->getSwapBufferCounter();
 		_DeferredFreeVertices.push_back(df);
 	}
 	else
@@ -243,7 +245,15 @@ void			CLandscapeVBAllocator::processDeferredFrees(uint64 swapBufferInFlight)
 void			CLandscapeVBAllocator::forceReallocation()
 {
 	if (_NumVerticesAllocated > 0)
+	{
+		// Giving the vertex buffer the usage and the number of vertices it has changes
+		// nothing. It is emptied first: that destroys its driver side, and the next time
+		// it is made active it gets a new one, with storage that no issued draw reads.
+		// Until then the vertices are written to the local memory of the vertex buffer,
+		// as after a growth.
+		deleteVertexBuffer();
 		allocateVertexBuffer(_NumVerticesAllocated);
+	}
 }
 
 
@@ -362,6 +372,8 @@ void				CLandscapeVBAllocator::allocateVertexBuffer(uint32 numVertices)
 // ***************************************************************************
 // ***************************************************************************
 
+// The listings of the vertex programs and their comments are laid out by hand
+// clang-format off
 
 // ***************************************************************************
 /*
@@ -397,7 +409,8 @@ void				CLandscapeVBAllocator::allocateVertexBuffer(uint32 numVertices)
 	c[4]= {0, 1, 0.5, 0}
 	c[5]= RefineCenter
 	c[6]= {TileDistFarSqr, OOTileDistDeltaSqr, *, *}
-	c[7]= ???
+	c[7]= {LightScale, LightScale, LightScale, 1}: the diffuse color of the vertices, see
+		CLandscape::setLightScale()
 	c[8..11]= ModelView Matrix (for Fog).
 	c[12]= PZBModelPosition: landscape center / delta Position to apply before multipliying by mviewMatrix
 
@@ -506,7 +519,8 @@ const string NL3D_LandscapeTestSpeedProgram=
 /*
 	Far0:
 		just project, copy uv0 and uv1
-		NB: leave o[COL0] undefined because the material don't care diffuse RGBA here
+		o[COL0] is the light scale: the material modulates the texture with the diffuse RGB when the
+		light is scaled (the diffuse alpha is not used here)
 */
 // ***********************
 const char* NL3D_LandscapeFar0EndProgram=
@@ -517,6 +531,7 @@ const char* NL3D_LandscapeFar0EndProgram=
 	DP4 o[HPOS].w, c[3], R1;															\n\
 	MOV o[TEX0], v[8];																\n\
 	MOV o[TEX1], v[9];																\n\
+	MOV o[COL0], c[7];					# col= light scale							\n\
 	DP4	o[FOGC].x, c[10], R1;															\n\
 	END																					\n\
 ";
@@ -527,7 +542,8 @@ const char* NL3D_LandscapeFar0EndProgram=
 	Far1:
 		Compute Alpha transition.
 		Project, copy uv0 and uv1,
-		NB: leave o[COL0] RGB undefined because the material don't care diffuse RGB
+		o[COL0] RGB is the light scale: the material modulates the texture with the diffuse RGB when the
+		light is scaled
 */
 // ***********************
 const char* NL3D_LandscapeFar1EndProgram=
@@ -536,6 +552,7 @@ const char* NL3D_LandscapeFar1EndProgram=
 	MUL	R0.x, R0.x, v[12].y;		# R0.x= (sqrDist-TransitionSqrMin) * OOTransitionSqrDelta	\n\
 	MAX R0.x, R0.x, c[4].x;																\n\
 	MIN o[COL0].w, R0.x, c[4].y;	# col.A= clamp(R0.x, 0, 1);							\n\
+	MOV o[COL0].xyz, c[7];			# col.RGB= light scale								\n\
 																						\n\
 	# compute in Projection space														\n\
 	DP4 o[HPOS].x, c[0], R1;															\n\
@@ -553,7 +570,8 @@ const char* NL3D_LandscapeFar1EndProgram=
 /*
 	Tile:
 		just project, copy uv0, uv1.
-		NB: leave o[COL0] undefined because the material don't care diffuse RGBA here
+		o[COL0] is the light scale: the material modulates the tile texture with the diffuse RGB in the
+		RGB passes when the light is scaled (the diffuse alpha is not used here)
 */
 // ***********************
 const char* NL3D_LandscapeTileEndProgram=
@@ -564,11 +582,13 @@ const char* NL3D_LandscapeTileEndProgram=
 	DP4 o[HPOS].w, c[3], R1;															\n\
 	MOV o[TEX0], v[8];																	\n\
 	MOV o[TEX1], v[9];																	\n\
+	MOV o[COL0], c[7];					# col= light scale								\n\
 	DP4	o[FOGC].x, c[10], R1;															\n\
 	END																					\n\
 ";
 
 /// Same version but write Tex0 to take uv2, ie v[13], for lightmap pass
+/// NB: leave o[COL0] undefined because the material don't care diffuse RGBA in this pass
 const char* NL3D_LandscapeTileLightMapEndProgram=
 "	# compute in Projection space														\n\
 	DP4 o[HPOS].x, c[0], R1;															\n\
@@ -581,6 +601,7 @@ const char* NL3D_LandscapeTileLightMapEndProgram=
 	END																					\n\
 ";
 
+// clang-format on
 
 // ***************************************************************************
 void			CLandscapeVBAllocator::deleteVertexProgram()
@@ -709,6 +730,7 @@ CVertexProgramLandscape::CVertexProgramLandscape(CLandscapeVBAllocator::TType ty
 		source->ParamIndices["programConstants0"] = 4;
 		source->ParamIndices["refineCenter"] = 5;
 		source->ParamIndices["tileDist"] = 6;
+		source->ParamIndices["lightScale"] = 7;
 		source->ParamIndices["fog"] = 10;
 		source->ParamIndices["pzbModelPosition"] = 12;
 		addSource(source);
@@ -727,6 +749,8 @@ void CVertexProgramLandscape::buildInfo()
 	nlassert(m_Idx.RefineCenter != std::numeric_limits<uint>::max());
 	m_Idx.TileDist = getUniformIndex("tileDist");
 	nlassert(m_Idx.TileDist != std::numeric_limits<uint>::max());
+	m_Idx.LightScale = getUniformIndex("lightScale");
+	nlassert(m_Idx.LightScale != std::numeric_limits<uint>::max());
 	m_Idx.PZBModelPosition = getUniformIndex("pzbModelPosition");
 	nlassert(m_Idx.PZBModelPosition != std::numeric_limits<uint>::max());
 }

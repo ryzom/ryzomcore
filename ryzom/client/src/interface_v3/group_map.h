@@ -418,6 +418,7 @@ private:
 									  // power of 2
 		SMap				*_AutoMap;	// last map chosen from the player position by the map auto zoom
 		std::string			_AutoMapContinent;	// continent of the last teleport, to switch the map on a continent change
+		bool				_CenterOnPlayerPending;	// a teleport happened, center on the player once the map is loaded
 
 		TPolyButtonVect		_PolyButtons;
 
@@ -572,6 +573,13 @@ private:
 			CLandMarkOptions Options;
 		};
 		std::vector<SMatchedLandmark> _MatchedLandmarks;
+		// clang-format off
+		// a search result picked on another map of the continent, shown from checkCoords: switching the map rebuilds
+		// the result list, and the button of the click with it
+		SMap				*m_SearchTargetMap;
+		NLMISC::CVector2f	m_SearchTargetPos;
+		std::string			m_SearchTargetName;
+		// clang-format on
 
 	//////////////////////
 	// Respawn handling //
@@ -615,6 +623,8 @@ private:
 	void updateLandMarkList(TLandMarkButtonVect &lm);
 	void updateLandMarkTextList(TLandMarkTextVect &lm);
 	void updateMatchedLandmarks();
+	// point the compass to a search result
+	void showSearchTarget(const std::string &name, const NLMISC::CVector2f &pos);
 	//
 	void removeLandMarks(TLandMarkButtonVect &lm);
 	/** create landmarks from the continent (and remove previous ones)
@@ -669,8 +679,8 @@ private:
 	// save the zoom of the current map / restore it after a map change (zoomIfUnknown: zoom on the player if never saved)
 	void saveMapZoom();
 	void restoreMapZoom(bool zoomIfUnknown);
-	// smallest (or largest) map of a continent that contains a world position, NULL if none
-	SMap *findMapAtPos(const std::string &continent, const NLMISC::CVector2f &pos, bool smallest) const;
+	// the most detailed (or the largest) map of a continent that contains a world position, NULL if none
+	SMap *findMapAtWorldPos(const std::string &continent, const NLMISC::CVector2f &worldPos, bool smallest) const;
 	// clamp offsets & change window size if necessary
 	//void fitWindow();
 	//

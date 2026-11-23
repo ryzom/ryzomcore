@@ -876,7 +876,7 @@
 	<instance template="r2ed_tool" id="r2ed_tool_go_test" tooltip="uimR2EDTooltipGoTest" onclick_l="r2ed_go_test" params_l="" posparent="parent" 
 	posref="TL TL" x="0" y="0" 
 	icon="r2ed_go_test.tga" icon_over="r2ed_go_test_over.tga" icon_pushed="r2ed_go_test_pushed.tga"/>-->
-	<instance template="r2ed_tool" id="r2ed_tool_go_edition" tooltip="uimR2EDTooltipGoEdition" onclick_l="r2ed_go_test" params_l="" posparent="parent" 
+	<instance template="r2ed_tool" id="r2ed_tool_go_edition" tooltip="uimR2EDTooltipGoEdition" onclick_l="r2ed_stop_test" params_l="" posparent="parent" 
 	posref="TL TL" x="0" y="0" 
 	icon="r2ed_go_edition.tga" icon_over="r2ed_go_edition_over.tga" icon_pushed="r2ed_go_edition_pushed.tga"/>
 </group>
@@ -1514,6 +1514,7 @@ text_y="-2"
 	<action id="chat_window"		name="uiR2EDChatWindow"		handler="lua"   params="r2:switchChatWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_chat_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=chat_window_key"/>
 	<action id="mail_box"			name="uiR2EDMailBox"		handler="lua"   params="r2:switchMailBoxWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_mail_box_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=mail_box_key"/>
 	<action id="guild_forum"		name="uiR2EDGuildForum"		cond="ne(@SERVER:GUILD:NAME,0)" handler="lua"   params="r2:switchGuildForumWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=TB_Forum_ring.tga" usergroup_r="r2_keyname" usergroup_params_r="id=guild_forum_key"/>
+	<action id="player_admin"		name="uiR2EDPlayerAdmin"	handler="lua"   params="r2:switchPlayerAdminWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_player_admin_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=r2_player_admin_key"/>
 	<separator/>
 	<action id="toggle_fixed_lighting" name="uiR2EDTurnLightOn" handler="lua" params="r2:setFixedLighting(not r2:getFixedLighting())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_light_off_small.tga|id=fixed_lighting_bm"/>
 	<separator/>
@@ -1550,7 +1551,7 @@ text_y="-2"
 	
 	<separator/>
 
-	<action id="toggle_fixed_lighting" name="uiR2EDDivineLight" handler="lua" params="r2:setFixedLighting(not r2:getFixedLighting())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_light_off_small.tga|id=fixed_lighting_bm"/>
+	<action id="toggle_fixed_lighting" name="uiR2EDTurnLightOn" handler="lua" params="r2:setFixedLighting(not r2:getFixedLighting())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_light_off_small.tga|id=fixed_lighting_bm"/>
 	<separator/>
 
 	<action id="reset windows"		name="uiR2EDResetWindows"	handler="lua"   params="r2:resetDesktop(getDesktopIndex())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_resetwindows.tga"/>
@@ -1595,7 +1596,7 @@ text_y="-2"
 
 <group type="menu" id="r2ed_palette_menu" extends="r2ed_base_menu">
 	<!-- TMP for debug -->		
-	<action id="dump_lua_table"		name="uimR2EDDumpLuaTable"		handler="lua"  params="r2:onShowPaletteLuaTable(30)" />
+	<action id="dump_lua_table"		name="uimR2EDMenuDumpLuaTable"		handler="lua"  params="r2:onShowPaletteLuaTable(30)" />
 </group>
 
 

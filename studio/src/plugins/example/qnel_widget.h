@@ -26,20 +26,11 @@
 #include <nel/misc/event_emitter.h>
 
 // Qt includes
-#include <QtOpenGL/QGLWidget>
 #include <QWidget>
 
 class QAction;
 
-/* TODO every platform should use QWidget */
-#if defined(NL_OS_WINDOWS)
 typedef QWidget QNeLWidget;
-#elif defined(NL_OS_MAC)
-typedef QWidget QNeLWidget;
-#elif defined(NL_OS_UNIX)
-typedef QGLWidget QNeLWidget;
-#include <X11/Xlib.h>
-#endif // NL_OS_UNIX
 
 namespace NL3D
 {
@@ -100,13 +91,10 @@ private Q_SLOTS:
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
 	virtual void hideEvent(QHideEvent *hideEvent);
+	virtual void resizeEvent(QResizeEvent *resizeEvent);
 
 #if defined(NL_OS_WINDOWS)
-	virtual bool winEvent(MSG *message, long *result);
-#elif defined(NL_OS_MAC)
-	virtual bool macEvent(EventHandlerCallRef caller, EventRef event);
-#elif defined(NL_OS_UNIX)
-	virtual bool x11Event(XEvent *event);
+	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) NL_OVERRIDE;
 #endif
 
 private:

@@ -37,6 +37,7 @@ using namespace NLMISC;
 
 extern void cfrestart (FILE *);	// used to reinit the file
 extern int cfparse (void *);	// used to parse the file
+extern void cf_clearStrings();	// frees the strings of the parsed values
 //extern FILE *cfin;
 extern int cf_CurrentLine;
 extern char *cf_CurrentFile;
@@ -424,12 +425,17 @@ void CConfigFile::reparse (bool lookupPaths)
 			}
 
 			cfrestart (nullptr);
+			cf_clearStrings();
 			cf_CurrentLine = 0;
+			// still set when an exception left the previous parse
+			if (cf_CurrentFile != nullptr)
+				free(cf_CurrentFile);
 			cf_CurrentFile = nullptr;
 			cf_Ignore = false;
 			cf_OverwriteExistingVariable = (FileNames.size()==1);
 			LoadRoot = (FileNames.size()>1);
 			bool parsingOK = (cfparse (&(_Vars)) == 0);
+			cf_clearStrings();
 //			cf_ifile.close();
 			if (!parsingOK)
 			{
@@ -439,15 +445,24 @@ void CConfigFile::reparse (bool lookupPaths)
 				debugFileName += CFile::getFilename(fn);
 
 				CI18N::writeTextFile(debugFileName, content, true);
-				nlwarning ("CF: Parsing error in file %s line %d, look in '%s' for a preprocessed version of the config file",
-					cf_CurrentFile,
-					cf_CurrentLine,
-					debugFileName.c_str());
+				// cf_CurrentFile is still null when the error comes before the first #fileline
+				nlwarning("CF: Parsing error in file %s line %d, look in '%s' for a preprocessed version of the config file",
+				    cf_CurrentFile != nullptr ? cf_CurrentFile : fn.c_str(),
+				    cf_CurrentLine,
+				    debugFileName.c_str());
+				if (cf_CurrentFile != nullptr)
+				{
+					free(cf_CurrentFile);
+					cf_CurrentFile = nullptr;
+				}
 				throw EParseError (fn, cf_CurrentLine);
 			}
 
 			if (cf_CurrentFile != nullptr)
+			{
 				free(cf_CurrentFile);
+				cf_CurrentFile = nullptr;
+			}
 
 			// reset all 'FromLocalFile' flag on created vars before reading next root cfg
 			for (uint i=0; i<_Vars.size(); ++i)

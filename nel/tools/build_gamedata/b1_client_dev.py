@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, socket
+import time, sys, os, shutil, subprocess, socket
 sys.path.append("configuration")
 
 if os.path.isfile("log.log"):
@@ -56,21 +56,45 @@ if not os.path.isfile(ClientDevLiveDirectory + "/client.cfg"):
 	cfg.write("PreLoadPath          = \"" + InstallDirectory + "\";\n")
 	cfg.write("PatchWanted          = 0;\n")
 	cfg.write("DisplayLuaDebugInfo  = 1;\n")
-	cfg.write("AllowDebugLua        = 1;\n")
-	cfg.write("AllowRemoteAdmin     = 1;\n")
+	# the client of the public shard runs no debug Lua and no commands of the shard's admins: whoever runs that shard
+	# and plays on it is not us, and a control tool that drives this client reads what they wrote
 	cfg.write("FullScreen           = 0;\n")
 	cfg.flush()
 	cfg.close()
 	printLog(log, "")
+else:
+	# the live client.cfg of an earlier install still has the debug Lua and the remote admin commands: those lines go, and
+	# the rest stays as it is, line endings included
+	cfgPath = ClientDevLiveDirectory + "/client.cfg"
+	cfgFile = open(cfgPath, "rb")
+	cfgLines = cfgFile.read().splitlines(True)
+	cfgFile.close()
+	kept = []
+	removed = []
+	for line in cfgLines:
+		if line.split(b"=", 1)[0].strip() in (b"AllowDebugLua", b"AllowRemoteAdmin"):
+			removed.append(line)
+		else:
+			kept.append(line)
+	if len(removed) > 0:
+		printLog(log, ">>> Remove the debug Lua and the remote admin commands from the live dev client.cfg <<<")
+		cfgFile = open(cfgPath, "wb")
+		cfgFile.write(b"".join(kept))
+		cfgFile.close()
+		for line in removed:
+			printLog(log, "Removed from " + cfgPath + ": " + line.decode("utf-8", "surrogateescape").strip())
+		printLog(log, "")
 
 mkPath(log, ClientDevDirectory)
 if not os.path.isfile(ClientDevDirectory + "/client.cfg"):
 	printLog(log, ">>> Generate local dev client.cfg <<<")
-	cfg = open(ClientDevDirectory + "/client.cfg", "w")
-	cfgr = open(ClientDevLiveDirectory + "/client.cfg", "r")
+	cfg = open(ClientDevDirectory + "/client.cfg", "w", encoding="utf-8", errors="surrogateescape")
+	cfgr = open(ClientDevLiveDirectory + "/client.cfg", "r", encoding="utf-8", errors="surrogateescape")
 	for l in cfgr:
 		cfg.write(l)
 	cfgr.close()
+	cfg.write("AllowDebugLua        = 1;\n")
+	cfg.write("AllowRemoteAdmin     = 1;\n")
 	cfg.write("StartupHost          = \"http://" + socket.gethostname() + ":9042\";\n")
 	cfg.write("Application          = {\n")
 	cfg.write("	\"dev\", \"./client_ryzom_r.exe\", \"./\" \n")

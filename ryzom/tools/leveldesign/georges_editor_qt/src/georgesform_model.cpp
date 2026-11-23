@@ -42,6 +42,22 @@ using namespace NLGEORGES;
 namespace NLQT 
 {
 
+	/// Finds the type of a struct entry by its name, in the DFN or in one of its parents
+	static bool getStructEntryType(UFormDfn *dfn, const std::string &name, UFormDfn::TEntryType &type, bool &array)
+	{
+		uint entry;
+		if (dfn->getEntryIndexByName(entry, name))
+			return dfn->getEntryType(entry, type, array);
+
+		for (uint i = 0; i < dfn->getNumParents(); ++i)
+		{
+			UFormDfn *parentDfn = NULL;
+			if (dfn->getParent(i, &parentDfn) && parentDfn && getStructEntryType(parentDfn, name, type, array))
+				return true;
+		}
+		return false;
+	}
+
 	CGeorgesFormModel::CGeorgesFormModel(UFormElm *rootElm, QMap< QString, QStringList> deps,
 		QString comment, QStringList parents, QObject *parent) : QAbstractItemModel(parent) 
 	{
@@ -146,6 +162,10 @@ namespace NLQT
 					{
 						if (Modules::objViewInt())
 						{
+							// the driver is made when the 3D view is first shown, there is no preview before
+							if (!Modules::objViewInt()->getDriver())
+								return QIcon(":/images/pqrticles.png");
+
 							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toUtf8().constData());
 							if (icon)
 							{
@@ -185,6 +205,9 @@ namespace NLQT
 					{
 						if (Modules::objViewInt()) 
 						{
+							if (!Modules::objViewInt()->getDriver())
+								return tr("3D view not shown");
+
 							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toUtf8().constData());
 							if (icon)
 							{
@@ -369,7 +392,7 @@ namespace NLQT
 			while (num < structSize) 
 			{
 				UFormElm::TWhereIsNode *whereN = new UFormElm::TWhereIsNode;
-		UFormElm::TWhereIsValue *whereV = new UFormElm::TWhereIsValue;
+		UFormElm::TWhereIsValue *whereV = new UFormElm::TWhereIsValue(UFormElm::Dummy); // only atoms set it
 				// Append a new item to the current parent's list of children.
 				std::string elmName;
 				if(root->getStructNodeName(num, elmName)) 
@@ -454,7 +477,8 @@ namespace NLQT
 							}
 							if (elmt->isVirtualStruct())
 							{
-								root->getValueByName(value, elmName.c_str(),UFormElm::Eval,whereV);
+								// a virtual struct has no value, it names the DFN it uses
+								elmt->getDfnName(value);
 								elmtType = "VirtualStruct";
 							}
 							switch (*whereN) 
@@ -494,8 +518,24 @@ namespace NLQT
 						else
 						{
 							// add Defaults
-							// TODO: spams warnings for non ATOM values but i dont get type of non existing nodes
-							bool success = root->getValueByName(value, elmName.c_str(),UFormElm::Eval,whereV);
+							// only an atom has a default value, the DFN tells what the left out entry is
+							UFormDfn::TEntryType entryType = UFormDfn::EntryType;
+							bool entryArray = false;
+							UFormDfn *structDfn = root->getStructDfn();
+							if (!structDfn || !getStructEntryType(structDfn, elmName, entryType, entryArray))
+								nlwarning("The DFN of the struct has no entry named '%s'", elmName.c_str());
+							if (entryArray)
+								elmtType = "Array";
+							else if (entryType == UFormDfn::EntryDfn)
+								elmtType = "Struct";
+							else if (entryType == UFormDfn::EntryVirtualDfn)
+								elmtType = "VirtualStruct";
+							if (entryType == UFormDfn::EntryType && !entryArray)
+								root->getValueByName(value, elmName.c_str(),UFormElm::Eval,whereV);
+
+							// getNodeByName says where only for a node the form has, a left out atom comes from its type
+							// and the other entries from the DFN
+							*whereN = (entryType == UFormDfn::EntryType && !entryArray) ? UFormElm::NodeType : UFormElm::NodeDfn;
 							switch (*whereN) 
 							{
 							case UFormElm::NodeForm:
@@ -549,7 +589,7 @@ namespace NLQT
 					QString elmtType;
 
 					UFormElm *elmt = 0;
-					if(root->getArrayNode(&elmt,0) && elmt) 
+					if(root->getArrayNode(&elmt,num) && elmt)
 					{
 						if (elmt->isArray())
 							elmtType = "Array";

@@ -51,10 +51,11 @@ public:
 
 		uint32	size;
 		message.serial(size);
-		if ( size > 512 )
-		{
-			throw NLMISC::EInvalidDataStream();
-		}
+// The following test removed by Sadge because it appears to be pointless and prevents ^2 testing to continue as required
+//		if ( size > 512 )
+//		{
+//			throw NLMISC::EInvalidDataStream();
+//		}
 
 		// The size comes from the sender: a part never holds more than what is left of the message carrying it,
 		// so a larger size is refused before the buffer is allocated

@@ -1,0 +1,25 @@
+# The entry point of the location is a number, the position in the list of the island, and its season
+# has the name of an earlier version; the location has no season of its own (ManualSeason = 0).
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+absent: version_update_note
+scenario_at: Locations[0].EntryPoint = uiR2EntryPoint02
+scenario_at: Locations[0].Season = Autumn
+rt_at: Locations[0].EntryPoint = uiR2EntryPoint02
+rt_at: Locations[0].Season = 3

@@ -226,7 +226,7 @@ static bool tryApplyPhysique(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
 	if (!PHYSIQUESKIN::applyPhysiqueSkinning(buildMesh, node, mods, modApps, ssc, &err))
 	{
 		stats.skip("skinned-physique");
-		fprintf(stderr, "SKIP shape '%s': Physique skinning failed: %s\n",
+		fprintf(stderr, "SKIP shape '%s': skinning failed: %s\n",
 		        nodeName(node).c_str(), err.c_str());
 		return false;
 	}
@@ -339,10 +339,10 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		return ws;
 	}
 
-	// Skinning detection (Physique/Skin). Physique has a production decode path (§10z-six /
-	// PHYSIQUESKIN); Skin (Max 4+) still skips — zero corpus hits under Max 3-era assets.
-	// Detection is on (ClassId, SuperClassId) — Max shares ClassId (0x100, 0) across four
-	// classes (Physique is SuperClassId 0x810).
+	// Skinning detection (Physique/Skin). Both decode in PHYSIQUESKIN (a Skin first when a node has
+	// both, as the reference export does); the skin is applied after the mesh evaluation, which leaves
+	// both modifiers out. Physique detection is on (ClassId, SuperClassId): the ClassId (0x100, 0) is
+	// shared by four classes (Physique is SuperClassId 0x810).
 	bool hasPhysique = false;
 	for (uint i = 0; i < mods.size(); ++i)
 	{
@@ -379,17 +379,16 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 					}
 				}
 			}
-			if (isSkin)
-			{
-				stats.skip("skinned-skin");
-				fprintf(stderr, "SKIP shape '%s': Skin modifier not implemented (Max 4+ ISkin path;"
-				                " corpus era is Physique-only — see design §10z-quat)\n",
-				        name.c_str());
-				return nullptr;
-			}
 			hasPhysique = true;
-			// Physique: continue into the mesh path; skinning is applied after mesh eval.
+			// continue into the mesh path; the skinning is applied after the mesh evaluation
 		}
+	}
+	if (hasPhysique && getenv("PMB_NO_SKIN"))
+	{
+		// Debug: export the evaluated mesh rigid, to compare its geometry with a reference export that
+		// came out without its skin
+		fprintf(stderr, "PMB_NO_SKIN: '%s' exported without its skin\n", name.c_str());
+		hasPhysique = false;
 	}
 
 	// Multi-lod object detection (LOD_NAME_COUNT > 0 = the node has LOD slaves — LOD 0 is the
@@ -566,7 +565,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			baseObjectOf(*slave, &sMods, &sApps);
 			bool slavePhys = false;
 			for (uint mi = 0; mi < sMods.size(); ++mi)
-				if (PHYSIQUESKIN::isPhysiqueModifier(sMods[mi])) { slavePhys = true; break; }
+				if (PHYSIQUESKIN::isPhysiqueModifier(sMods[mi]) || PHYSIQUESKIN::isSkinModifier(sMods[mi])) { slavePhys = true; break; }
 			NL3D::CMesh::CMeshBuild buildMesh;
 			if (!evalAndBuildMesh(*slave, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats,
 			                      slavePhys))
@@ -700,11 +699,12 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	if (getScriptAppDataInt(n, NEL3D_APPDATA_AUTOMATIC_ANIMATION, 0) != 0)
 		meshBase->setAutoAnim(true);
 
-	// Dist max — only for the mesh/multilod path, matching the reference exporter's
-	// buildShape which gates its setDistMax call on the mesh path (`!multiLodObject && buildLods`
-	// block at export_mesh.cpp:466) and returns early before that block for flare/water/
-	// remanence/wavemaker/particle-system builds. See the corresponding comment in exportFile.
-	meshBase->setDistMax(getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f));
+	// Dist max: only for a plain mesh (and water, set in its builder), matching the reference
+	// exporter's buildShape, which sets it at its end when `!multiLodObject && buildLods` and returns
+	// early before that for flare/remanence/wavemaker/particle-system builds. A multi-lod shape keeps
+	// the dist max its build takes from the last lod. See the corresponding comment in exportFile.
+	if (lodCount == 0)
+		meshBase->setDistMax(getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f));
 
 	if (lmCollect && !lmRecv.Geoms.empty())
 		lmc->Scene.Receivers.push_back(lmRecv);
@@ -827,12 +827,12 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		}
 
 		// setDistMax was previously called uniformly here; the reference exporter's
-		// CExportNel::buildShape gates it on the mesh path only (`!multiLodObject && buildLods`
-		// block at export_mesh.cpp:466) and RETURNS EARLY before that block for flare/water/
-		// remanence/wavemaker/particle-system builds, so those keep their shape ctor default
-		// (CFlareShape default = 1000). Discovered when flare export was off by exactly
-		// LOD_DIST_MAX on zo_flare (300 vs ref 1000) even though every other field matched
-		// byte-for-byte. Now applied inside the mesh/multi-lod branch of buildShapeForNode.
+		// CExportNel::buildShape gates it on its tri-object path (`!multiLodObject && buildLods`
+		// at its end) and RETURNS EARLY before that for flare/remanence/wavemaker/particle-system
+		// builds, so those keep their shape ctor default (CFlareShape default = 1000). Discovered
+		// when flare export was off by exactly LOD_DIST_MAX on zo_flare (300 vs ref 1000) even
+		// though every other field matched byte-for-byte. Now applied in the plain mesh branch of
+		// buildShapeForNode and in the water builder.
 
 		// The one shared .shape serializer (nel_gltf/shape_export_bytes.cpp): temp-COFile route
 		// for CMeshMRMGeom's seek-back-then-forward save, CMeshBase v10->v9 and CWaterShape
@@ -955,8 +955,7 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 			// Memory output for the nel_lmscene blob. Serialize through a real file exactly like
 			// save() so the bytes cannot diverge from the direct --lm-scene write (the shape
 			// serializer above takes the same detour for CMemStream's seek limitation).
-			char tmpPath[256];
-			sprintf(tmpPath, "/tmp/pipeline_max_export_shape.%d.lmscene.tmp", (int)PMB_GETPID());
+			std::string tmpPath = NLMISC::CPath::getTemporaryDirectory() + NLMISC::toString("pipeline_max_export_shape.%d.lmscene.tmp", (int)PMB_GETPID());
 			try
 			{
 				lmc->Scene.save(tmpPath);
@@ -1138,16 +1137,9 @@ static int dumpSkin(const std::string &path)
 	return 0;
 }
 
-// --dump-mesh: print a CMesh's VB (all values) + per-rdrpass index triples — GT extraction for
-// decode work (spline caps, UVW Map projections) against reference shapes.
-static int dumpMesh(const std::string &path)
+// Print every value of every vertex of a VB, one vertex per line.
+static void dumpVertexBuffer(const NL3D::CVertexBuffer &vb)
 {
-	NL3D::IShape *shape = loadShape(path);
-	if (!shape) { fprintf(stderr, "cannot load %s\n", path.c_str()); return 2; }
-	printf("class %s\n", shape->getClassName().c_str());
-	NL3D::CMesh *m = dynamic_cast<NL3D::CMesh *>(shape);
-	if (!m) { printf("(not a CMesh)\n"); delete shape; return 0; }
-	const NL3D::CVertexBuffer &vb = m->getVertexBuffer();
 	printf("verts %u format 0x%x size %u\n", vb.getNumVertices(), vb.getVertexFormat(), vb.getVertexSize());
 	NL3D::CVertexBufferRead vbr;
 	const_cast<NL3D::CVertexBuffer &>(vb).lock(vbr);
@@ -1182,6 +1174,25 @@ static int dumpMesh(const std::string &path)
 		}
 		printf("\n");
 	}
+}
+
+// --dump-mesh: print a CMesh's VB (all values) + per-rdrpass index triples — GT extraction for
+// decode work (spline caps, UVW Map projections) against reference shapes. A CMeshMRM prints its
+// full-detail VB only.
+static int dumpMesh(const std::string &path)
+{
+	NL3D::IShape *shape = loadShape(path);
+	if (!shape) { fprintf(stderr, "cannot load %s\n", path.c_str()); return 2; }
+	printf("class %s\n", shape->getClassName().c_str());
+	if (NL3D::CMeshMRM *mrm = dynamic_cast<NL3D::CMeshMRM *>(shape))
+	{
+		dumpVertexBuffer(mrm->getMeshGeom().getVertexBuffer());
+		delete shape;
+		return 0;
+	}
+	NL3D::CMesh *m = dynamic_cast<NL3D::CMesh *>(shape);
+	if (!m) { printf("(not a CMesh or CMeshMRM)\n"); delete shape; return 0; }
+	dumpVertexBuffer(m->getVertexBuffer());
 	for (uint mbk = 0; mbk < m->getNbMatrixBlock(); ++mbk)
 	{
 		for (uint rp = 0; rp < m->getNbRdrPass(mbk); ++rp)

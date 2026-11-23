@@ -589,8 +589,8 @@ namespace NLGUI
 
 			std::string name = rVR.getTextureNameFromId(texId);
 			float scale = rVR.getTextureScaleFromId(texId);
-			uint32 xHotspot = (uint32) (std::max(getX() - xPos, (sint32) 0) * scale);
-			uint32 yHotspot = (uint32) (std::max(getY() - yPos, (sint32) 0) * scale);
+			uint32 xHotspot = (uint32)(std::max(getX() - xPos, (sint32)0) * scale);
+			uint32 yHotspot = (uint32)(std::max(getY() - yPos, (sint32)0) * scale);
 
 			if (CViewRenderer::hwCursorScale == 0.f)
 			{

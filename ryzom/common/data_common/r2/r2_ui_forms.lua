@@ -171,6 +171,14 @@ local scenarioTreeXML =
 ]]
 
 
+-- The Rules of a file header, "Mastered" or "Masterless" in every language (r2.Version.save; the header reader
+-- reads the translated words older clients wrote as these), in the language of this client. Another text as it is.
+local function rulesText(rules)
+	if rules == "Mastered" then return i18n.get("uiR2EDstrict"):toUtf8() end
+	if rules == "Masterless" then return i18n.get("uiR2EDliberal"):toUtf8() end
+	return rules
+end
+
 function r2.setCurrSelectedFile(filename, path)
 
 	local formInstance = r2.CurrentForm.Env.FormInstance
@@ -198,7 +206,7 @@ function r2.setCurrSelectedFile(filename, path)
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Description = ""	
 			end
 			if header.Rules then
-				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = header.Rules
+				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = rulesText(header.Rules)
 			elseif r2.CurrentForm.Env.FormInstance.LoadScenario_Rules then
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = ""	
 			end
@@ -261,7 +269,7 @@ function r2.setCurrSelectedFileToLoad(filename, path)
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Description = ""	
 			end
 			if header.Rules then
-				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = header.Rules
+				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = rulesText(header.Rules)
 			elseif r2.CurrentForm.Env.FormInstance.LoadScenario_Rules then
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = ""	
 			end
@@ -283,8 +291,10 @@ function r2.setCurrSelectedFileToLoad(filename, path)
 					r2.CurrentForm.Env.FormInstance.RingAccess = 0
 					r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = i18n.get("uiR2EDLoadScenario_No"):toUtf8()
 				end
-			elseif r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel then
-				r2.CurrentForm.Env.FormInstance.RingAccess = 0
+			else
+				-- a scenario without a header (the first editors wrote none) has no level to compare here: the
+				-- editor checks its content once it is loaded (r2.RingAccess.verifyScenario)
+				r2.CurrentForm.Env.FormInstance.RingAccess = 1
 				r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = ""	
 			end
 
@@ -309,15 +319,13 @@ local function showFileList(formInstance)
 	for k, v in pairs(files) do
 		if string.lower(nlfile.getExtension(v)) == "r2" then			
 			local shortFilename = nlfile.getFilename(v)
-			local shortFileEscape=string.gsub(shortFilename, "'", "\\'")
 
-			local shortFilename2 = ucstring(shortFilename):toUtf8()
-			local shortFileEscape2 = ucstring(shortFileEscape):toUtf8()
+			local shortFilename2 = shortFilename
 
 
 			local entry = createGroupInstance("r2ed_filelist_entry", "", 
 				{ id = tostring(k),  text = shortFilename2,
-				params_l="r2.setCurrSelectedFile('" .. shortFileEscape2 .. "')" })
+				params_l=r2:uiCall("r2.setCurrSelectedFile", shortFilename) })
 			fileGroupList:addChild(entry)
 		end
 	end
@@ -367,16 +375,15 @@ local function buildScenarioTree(formInstance)
 		local files = getPathContent(searchPath)
 		table.sort(files)
 		for k, v in pairs(files) do
-			if string.lower(nlfile.getExtension(v)) == "r2" then			
+			if string.lower(nlfile.getExtension(v)) == "r2" then
 				local shortFilename = nlfile.getFilename(v)
-				local shortFileEscape=string.gsub(shortFilename, "'", "\\'")
-				
+
 				local fileLeaf= SNode()
 				fileLeaf.Id = shortFilename
 				local len = string.len(shortFilename) - 3
 				fileLeaf.Text = string.sub(shortFilename,0, len)
 				fileLeaf.AHName = "lua"
-				fileLeaf.AHParams = "r2.setCurrSelectedFileToLoad('" .. shortFileEscape .. "', '"..searchPath.."')"				
+				fileLeaf.AHParams = r2:uiCall("r2.setCurrSelectedFileToLoad", shortFilename, searchPath)
 				--if autosave file, plug it in the autosave branch
 				if string.find(shortFilename, "autosave") ~= nil then 
 					autosaveNode:addChild(fileLeaf)
@@ -407,7 +414,7 @@ local function buildScenarioTree(formInstance)
 				local len = string.len(v[1]) - 3
 				fileLeaf.Text = string.gsub(string.sub(v[1],0, len), "_", " ")
 				fileLeaf.AHName = "lua"
-				fileLeaf.AHParams = "r2.setCurrSelectedFileToLoad('" .. v[1] .. "', './Examples/')"				
+				fileLeaf.AHParams = r2:uiCall("r2.setCurrSelectedFileToLoad", v[1], "./examples/")				
 				parentNode:addChild(fileLeaf)
 			end
 		end 
@@ -433,7 +440,7 @@ local function buildScenarioTree(formInstance)
 				local len = string.len(v[1]) - 3
 				fileLeaf.Text = string.gsub(string.sub(v[1],0, len), "_", " ")
 				fileLeaf.AHName = "lua"
-				fileLeaf.AHParams = "r2.setCurrSelectedFileToLoad('" .. v[1] .. "', './Examples/')"				
+				fileLeaf.AHParams = r2:uiCall("r2.setCurrSelectedFileToLoad", v[1], "./examples/")				
 				parentNode:addChild(fileLeaf)
 			end
 		end 
@@ -459,7 +466,7 @@ local function buildScenarioTree(formInstance)
 					local len = string.len(v[1]) - 3
 					fileLeaf.Text = string.gsub(string.sub(v[1],0, len), "_", " ")
 					fileLeaf.AHName = "lua"
-					fileLeaf.AHParams = "r2.setCurrSelectedFileToLoad('" .. v[1] .. "', './Examples/')"				
+					fileLeaf.AHParams = r2:uiCall("r2.setCurrSelectedFileToLoad", v[1], "./examples/")				
 					parentNode:addChild(fileLeaf)
 				end
 			end
@@ -485,7 +492,8 @@ local function buildScenarioTree(formInstance)
 	addNodeToParent("My Files", "my_files", "root")
 	addNodeToParent("Autosave", "autosave", "my_files")
 	addNodeToParent("My scenarios", "my_scenarios", "my_files")
-	parseDirectory("my_scenarios", "./My_scenarios/")
+	-- the folder the scenarios are saved in (ScenarioSavePath of the client configuration)
+	parseDirectory("my_scenarios", r2.getScenarioSavePath())
 
 	--Tmp branch for old scenarios
 	addNodeToParent("Old Scenarios", "old", "root")
@@ -617,11 +625,11 @@ local function showUserDefinedComponent(formInstance)
 				local str = name..description .. md5..tstamp..path
 				debugInfo(str)
 		
-				local entry = createGroupInstance("r2ed_filelist_entry", "", { id = tostring(k), text = "OK: " .. shortFilename, params_l="r2:userComponentOk('" .. shortFilename .. "', '"..str.."')" })
+				local entry = createGroupInstance("r2ed_filelist_entry", "", { id = tostring(k), text = "OK: " .. shortFilename, params_l=r2:uiCall("r2:userComponentOk", shortFilename, (string.gsub(str, "\\n", "\n"))) })
 				fileGroupList:addChild(entry)
 			else
 
-				local entry = createGroupInstance("r2ed_filelist_entry", "", { id = tostring(k), text =  "KO: " .. shortFilename, params_l="r2:userComponentKo('" ..shortFilename .."', 'syntax error')" })
+				local entry = createGroupInstance("r2ed_filelist_entry", "", { id = tostring(k), text =  "KO: " .. shortFilename, params_l=r2:uiCall("r2:userComponentKo", shortFilename, "syntax error") })
 				fileGroupList:addChild(entry)
 			end
 		end

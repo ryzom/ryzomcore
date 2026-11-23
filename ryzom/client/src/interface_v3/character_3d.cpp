@@ -698,16 +698,17 @@ CCharacter3D::~CCharacter3D()
 	// delete instances
 	for (uint32 i = 0; i < NB_CHARACTER3D_PARTS; ++i)
 	{
-		if (!_Instances[i].empty())
-			_Scene->deleteInstance (_Instances[i]);
+		// the advantage fx is a son of the instance: before it, as in createInstance()
+		if (!_InstancesFx[i].AdvantageFx.empty())
+			_Scene->deleteInstance (_InstancesFx[i].AdvantageFx);
 
 		for (uint32 fx = 0; fx < _InstancesFx[i].StaticFx.size(); ++fx)
 			if (!_InstancesFx[i].StaticFx[fx].empty())
 				_Scene->deleteInstance(_InstancesFx[i].StaticFx[fx]);
 		_InstancesFx[i].StaticFx.clear();
 
-		if (!_InstancesFx[i].AdvantageFx.empty())
-			_Scene->deleteInstance (_InstancesFx[i].AdvantageFx);
+		if (!_Instances[i].empty())
+			_Scene->deleteInstance (_Instances[i]);
 	}
 	// delete skeleton
 	if(!_Skeleton.empty())
@@ -1307,9 +1308,12 @@ void CCharacter3D::createInstance (TChar3DPart i, const SCharacter3DSetup::SChar
 		return;
 	}
 
-	// Clear effects even when the replacement has no model.
+	// The fx of the old part go with it, the advantage fx (a son of the instance) before the instance. This is done
+	// first: a part that is replaced by nothing (an empty name, none.shape, a shape that cannot be created) returns
+	// below, and left the fx of the old part.
 	if (!_InstancesFx[i].AdvantageFx.empty())
 		_Scene->deleteInstance (_InstancesFx[i].AdvantageFx);
+
 	uint32 fx;
 	for (fx = 0; fx < _InstancesFx[i].StaticFx.size(); ++fx)
 		if (!_InstancesFx[i].StaticFx[fx].empty())

@@ -29,6 +29,7 @@
 #include "ai_script_data_manager.h"
 
 #include "nf_helpers.h"
+#include "ring_scenario_guard.h"
 
 #include "nel/misc/md5.h"
 
@@ -1215,6 +1216,18 @@ void setZoneState_sf_(CStateInstance* entity, CScriptStack& stack)
 // none
 void break__(CStateInstance* entity, CScriptStack& stack)
 {
+	// The scripts the editor writes for a scenario call this where they find a state they do not
+	// know. A scenario is made by a client and runs beside the scenarios of the other sessions: it
+	// does not stop the service for all of them.
+	TSessionId session = CRingScenarioGuard::getSession(entity);
+	if (session.asInt() != 0)
+	{
+		CGroup *group = entity->getGroup();
+		CRingScenarioGuard::logRefusal(session, group->getAIInstance()->getInstanceNumber(),
+		    "the group '" + group->getName() + "' called break, which stops the service: the script goes on");
+		return;
+	}
+
 	//	_asm int 3;
 	nlassert(false);
 }
@@ -1306,6 +1319,9 @@ void debug_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	std::string msg = (std::string)stack.top();
 	stack.pop();
+	// a function of a scenario: for the group of a Ring session it is a line of its session
+	if (CRingScenarioGuard::logForSession(entity, msg))
+		return;
 	nldebug("%s", msg.c_str());
 }
 
@@ -1327,6 +1343,9 @@ void debug_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float val = (float)stack.top();
 	stack.pop();
+	// a function of a scenario: for the group of a Ring session it is a line of its session
+	if (CRingScenarioGuard::logForSession(entity, NLMISC::toString("%f", val)))
+		return;
 	nldebug("%f", val);
 }
 

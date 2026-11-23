@@ -98,7 +98,9 @@ namespace NLGUI
 		}
 		return res;
 	}
-	static void appendEscapedTaggedText(::u32string &dest, const ::u32string &src, const ::u32string &colorTag)
+
+	static void appendEscapedTaggedText(::u32string &dest, const ::u32string &src,
+		const ::u32string &colorTag)
 	{
 		for (::u32string::const_iterator it = src.begin(); it != src.end(); ++it)
 		{
@@ -111,7 +113,9 @@ namespace NLGUI
 	static ::u32string toColorTag(NLMISC::CRGBA color)
 	{
 		static const char ConvTable[] = "0123456789ABCDEF";
-		return CUtfStringView(NLMISC::toString("@{%c%c%c%c}", ConvTable[color.R >> 4], ConvTable[color.G >> 4], ConvTable[color.B >> 4], ConvTable[color.A >> 4])).toUtf32();
+		return CUtfStringView(NLMISC::toString("@{%c%c%c%c}",
+			ConvTable[color.R >> 4], ConvTable[color.G >> 4],
+			ConvTable[color.B >> 4], ConvTable[color.A >> 4])).toUtf32();
 	}
 
 	static bool isTextTagReplaced(const CGroupEditBox::CTextTag &tag, uint32 start, uint32 length)
@@ -137,7 +141,10 @@ namespace NLGUI
 									_FirstVisibleChar(0),
 									_LastVisibleChar(0),
 									_SelectingText(false),
-									_ViewText(nullptr), _HadTextTags(false), _InputRevision(0),
+									_ViewText(nullptr)
+        ,
+									_HadTextTags(false),
+									_InputRevision(0),
 									_MaxHistoric(0),
 									_CurrentHistoricIndex(-1),
 									_PrevNumLine(1),
@@ -544,7 +551,7 @@ namespace NLGUI
 	xmlNodePtr CGroupEditBox::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == nullptr )
+		if( node == nullptr)
 			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "edit_box" );
@@ -874,7 +881,8 @@ namespace NLGUI
 		size_t previousEnd = 0;
 		for (std::vector<CTextTag>::const_iterator it = textTags.begin(); it != textTags.end(); ++it)
 		{
-			if (it->Length == 0 || it->Start < previousEnd || it->Start > text.size() || it->Length > text.size() - it->Start)
+			if (it->Length == 0 || it->Start < previousEnd || it->Start > text.size() ||
+				it->Length > text.size() - it->Start)
 				return false;
 			previousEnd = it->Start + it->Length;
 		}
@@ -919,7 +927,6 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CGroupEditBox::paste(uint32 maxTextTags)
 	{
-
 		string sString;
 
 		if (CViewRenderer::getInstance()->getDriver()->pasteTextFromClipboard(sString))
@@ -940,14 +947,18 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	bool CGroupEditBox::appendStringFromClipboard(const std::string &str, const std::vector<CTextTag> *textTags, uint32 maxTextTags)
+	bool CGroupEditBox::appendStringFromClipboard(const std::string &str,
+		const std::vector<CTextTag> *textTags, uint32 maxTextTags)
 	{
 		stopParentBlink();
 		makeTopWindow();
+
 		if (_CurrSelection != nullptr && _CurrSelection != this)
 			nlwarning("Selection can only be on focus");
-		const sint32 insertionStart = _CurrSelection == this ? min(_CursorPos, _SelectCursorPos) : _CursorPos;
-		const sint32 insertionEnd = _CurrSelection == this ? max(_CursorPos, _SelectCursorPos) : _CursorPos;
+		const sint32 insertionStart = _CurrSelection == this ?
+			min(_CursorPos, _SelectCursorPos) : _CursorPos;
+		const sint32 insertionEnd = _CurrSelection == this ?
+			max(_CursorPos, _SelectCursorPos) : _CursorPos;
 		const bool tagged = maxTextTags && textTags && !textTags->empty();
 		if (tagged)
 		{
@@ -1134,6 +1145,7 @@ namespace NLGUI
 			minPos = _CursorPos;
 			maxPos = _CursorPos;
 		}
+
 		const uint32 replacedLength = replace ? (uint32)(maxPos - minPos) : 0;
 		const uint32 keptLength = (uint32)_InputString.length() - replacedLength;
 		if (keptLength >= _MaxNumChar)
@@ -1162,6 +1174,12 @@ namespace NLGUI
 		if (toAdd.empty() && (!replace || minPos == maxPos))
 			return true;
 
+		// a pasted number is refused when out of bounds, like a typed digit
+		const ::u32string previousInput = _InputString;
+		const std::vector<CTextTag> previousTextTags = _TextTags;
+		const sint32 previousCursorPos = _CursorPos;
+		const sint32 previousSelectCursorPos = _SelectCursorPos;
+
 		if (replace)
 		{
 			updateTextTags(minPos, maxPos - minPos, (uint32)toAdd.length());
@@ -1186,8 +1204,41 @@ namespace NLGUI
 				_SelectCursorPos = maxPos+(sint32)toAdd.length();
 			}
 		}
+
+		if (!isWithinBounds(_InputString))
+		{
+			_InputString = previousInput;
+			_TextTags = previousTextTags;
+			_CursorPos = previousCursorPos;
+			_SelectCursorPos = previousSelectCursorPos;
+			return false;
+		}
 		++_InputRevision;
 		return true;
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CGroupEditBox::isWithinBounds(const ::u32string &str) const
+	{
+		bool bounded = (_EntryType == Integer && (_IntegerMinValue != INT_MIN || _IntegerMaxValue != INT_MAX))
+			|| (_EntryType == PositiveInteger && (_PositiveIntegerMinValue != 0 || _PositiveIntegerMaxValue != UINT_MAX));
+		if (!bounded)
+			return true;
+
+		// a string without digits counts as 0, digits that do not parse are a number too large for the type
+		std::string utf8 = CUtfStringView(str).toUtf8();
+		bool hasDigits = utf8.find_first_of("0123456789") != std::string::npos;
+		if (_EntryType == Integer)
+		{
+			sint32 value;
+			if (!fromString(utf8, value) && hasDigits)
+				return false;
+			return value >= _IntegerMinValue && value <= _IntegerMaxValue;
+		}
+		uint32 value;
+		if (!fromString(utf8, value) && hasDigits)
+			return false;
+		return value >= _PositiveIntegerMinValue && value <= _PositiveIntegerMaxValue;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1311,30 +1362,13 @@ namespace NLGUI
 								break;
 						}
 						// verify integer bounds
-						if(_EntryType==Integer && (_IntegerMinValue!=INT_MIN || _IntegerMaxValue!=INT_MAX))
+						if (_EntryType == Integer || _EntryType == PositiveInteger)
 						{
 							// estimate new string
-							::u32string	copyStr= _InputString;
-							::u32string::iterator it = copyStr.begin() + _CursorPos;
-							copyStr.insert(it, c);
-							sint32	value;
-							fromString(CUtfStringView(copyStr).toUtf8(), value);
+							::u32string copyStr = _InputString;
+							copyStr.insert(copyStr.begin() + _CursorPos, c);
 							// if out of bounds, abort char
-							if(value<_IntegerMinValue || value>_IntegerMaxValue)
-								return;
-						}
-						// verify integer bounds
-						if(_EntryType==PositiveInteger && (_PositiveIntegerMinValue!=0 || _PositiveIntegerMaxValue!=UINT_MAX))
-						{
-							// estimate new string
-							::u32string	copyStr= _InputString;
-							::u32string::iterator it = copyStr.begin() + _CursorPos;
-							copyStr.insert(it, c);
-							// \todo yoyo: this doesn't really work i think....
-							uint32	value;
-							fromString(CUtfStringView(copyStr).toUtf8(), value);
-							// if out of bounds, abort char
-							if(value<_PositiveIntegerMinValue || value>_PositiveIntegerMaxValue)
+							if (!isWithinBounds(copyStr))
 								return;
 						}
 						// verify max num char
@@ -1550,7 +1584,7 @@ namespace NLGUI
 			else
 			{
 				// Look into the input handler Manager if the key combo has to be considered as handled
-				if( ( CGroupEditBox::comboKeyHandler != nullptr ) && comboKeyHandler->isComboKeyChat(rEDK) )
+				if( ( CGroupEditBox::comboKeyHandler != nullptr) && comboKeyHandler->isComboKeyChat(rEDK) )
 					return true;
 				else
 					return false;
@@ -1680,8 +1714,8 @@ namespace NLGUI
 			{
 				if (_TextTags.empty() && !_HadTextTags)
 				{
-				usTmp = CUtfStringView(_Prompt + _InputString).toUtf8();
-			}
+					usTmp = CUtfStringView(_Prompt + _InputString).toUtf8();
+				}
 				else
 				{
 					const ::u32string baseColorTag32 = toColorTag(_ViewText->getColor());
@@ -1702,7 +1736,7 @@ namespace NLGUI
 				}
 			}
 			if ((_TextTags.empty() && !_HadTextTags) || _EntryType == Password)
-				_ViewText->setText(usTmp);
+				_ViewText->setText (usTmp);
 			else
 				_ViewText->setSingleLineTextFormatTaged(usTmp);
 		}
@@ -1833,7 +1867,7 @@ namespace NLGUI
 		nlwarning("Interface: CGroupEditBox: text 'edit_text' missing or bad type");
 		nlwarning( "Trying to create a new 'edit_text' for %s", getId().c_str() );
 		_ViewText = dynamic_cast< CViewText* >( CInterfaceFactory::createClass( "text" ) );
-		if( _ViewText == nullptr )
+		if( _ViewText == nullptr)
 		{
 			nlwarning( "Failed to create new 'edit_text' for %s", getId().c_str() );
 			return;
@@ -1858,7 +1892,7 @@ namespace NLGUI
 	void CGroupEditBox::setup()
 	{
 		// bind to the controls
-		if( _ViewText == nullptr )
+		if( _ViewText == nullptr)
 			_ViewText = dynamic_cast<CViewText *>(CInterfaceGroup::getView("edit_text"));
 
 		if(_ViewText == nullptr)
@@ -1921,7 +1955,8 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	void CGroupEditBox::addTextTag(uint32 start, uint32 length, NLMISC::CRGBA color, const std::string &reference)
+	void CGroupEditBox::addTextTag(uint32 start, uint32 length, NLMISC::CRGBA color,
+		const std::string &reference)
 	{
 		if (length == 0 || start > _InputString.size() || length > _InputString.size() - start)
 			return;
@@ -1933,7 +1968,8 @@ namespace NLGUI
 		std::vector<CTextTag>::iterator it = _TextTags.begin();
 		while (it != _TextTags.end() && it->Start < start)
 			++it;
-		if ((it != _TextTags.begin() && (it - 1)->Start + (it - 1)->Length > start) || (it != _TextTags.end() && start + length > it->Start))
+		if ((it != _TextTags.begin() && (it - 1)->Start + (it - 1)->Length > start) ||
+			(it != _TextTags.end() && start + length > it->Start))
 			return;
 		_TextTags.insert(it, tag);
 		_HadTextTags = true;
@@ -2074,6 +2110,7 @@ namespace NLGUI
 	{
 		return NLMISC::CUtfStringView(_InputString).toUtf8();
 	}
+
 	// ***************************************************************************
 	sint32 CGroupEditBox::getCursorPosUtf8() const
 	{

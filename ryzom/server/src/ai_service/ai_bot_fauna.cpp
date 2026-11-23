@@ -214,6 +214,11 @@ void CSpawnBotFauna::update(TProfiles activity, uint32 ticksSinceLastUpdate)
 	++AISStat::BotTotalUpdCtr;
 	++AISStat::BotFaunaUpdCtr;
 	
+	// The update raises events of the group (the events of the fight profile). The handlers of an
+	// event are script, and a script can have this bot replaced or removed: the object, and with it
+	// the profile that is being updated, then lives until this function returns (CBot::releaseSpawnObj).
+	NLMISC::CSmartPtr<CSpawnBot> const keptForUpdate(this);
+
 	TProfiles faunaActivity = getAIProfileType();
 	if (faunaActivity==BOT_FLEE && !isFeared() && getUnreachableTarget().isNULL())
 	{
@@ -245,6 +250,8 @@ void CSpawnBotFauna::update(TProfiles activity, uint32 ticksSinceLastUpdate)
 					||	faunaActivity==BOT_GO_AWAY)
 				{
 					getBestTarget	();
+					if (isDespawned())
+						return;
 					faunaActivity=getAIProfileType();	//	activity could have changed.
 					_NextBestTargetUpdate.set(15);		// getbesttarget every 1.5 secs ..
 				}
@@ -290,6 +297,8 @@ void CSpawnBotFauna::update(TProfiles activity, uint32 ticksSinceLastUpdate)
 	if (!isStuned())
 	{
 		updateProfile(ticksSinceLastUpdate);
+		if (isDespawned())
+			return;
 		
 		// if normal activity .. update Aggro.
 		if (	faunaActivity!=BOT_FIGHT
@@ -1318,7 +1327,7 @@ void CBotFauna::sheetChanged()
 		
 		// Delete old bot
 		CMirrors::removeEntity(getSpawnObj()->getEntityId());
-		setSpawn(NULL); // automatic smart pointer deletion
+		releaseSpawnObj();
 		notifyBotDespawn();
 		
 		// Finalize spawn object creation

@@ -1,5 +1,20 @@
 # ryzom-core
 
+## 2026-11-11 — 🐛 Player speed budget in GPMS, speed forced to 0 while afk
+
+Moving while sit or afk was possible with a modified client: the server only forced the speed to 0 when sitting. `CCharacter::applyCurrentSpeed()` (extracted from `applyRegenAndClipCurrentValue`) now also does it while afk, `setAfkState()` recomputes it at once, and refuses afk on a mount. The client leaves afk when a move input is pressed, and no longer shows the "speed factor is zero" message while afk.
+
+Forcing the speed to 0 exposed rubber-banding in `CWorldPositionManager::movePlayer`: a move was cancelled whenever two positions carried the same game tick (leaving afk, lag, mounting). The tick-based `maxDist` is replaced by a credit counted in real time (arrival time of the messages), with a floor, a reserve that grows while moving and a surplus for server stalls (the tick is global, a late tick is a stall of the whole server). New `gpms` variables (`SpeedBudget*`, `SpeedRunLogMinSeconds`) and a `SpeedRun` log of long runs above the speed limit. A client silent more than ~2 s still gets rubber-banding when its positions arrive in one burst: accepted, see `docs/gpms-player-speed-check.md` and `docs/server-tick-and-player-position.md`.
+
+## 2026-10-30 — ✨ nlcrashdbg: debug logs tagged with a crash group id
+
+Added the `nlcrashdbg(id, "format", ...)` macro in `nel/include/nel/misc/debug.h`.
+It is an `nlinfo` prefixed with `CRASHDBG #<id>`, where `<id>` is the id of the
+first report of a crash group. The tool that sends crash reports reads
+`client.log`, so it can pick those lines up and send them with the report, and
+they can all be removed with a grep once the crash is fixed. Not compiled in a
+full client build or run yet. See `docs/crash-debug-logs.md`.
+
 ## 2026-10-06 — 🐛 Validate client-supplied values in EGS callbacks
 
 Crash found from a dump: a `CLIENT:EXCHANGE:ADD` message with an invalid source

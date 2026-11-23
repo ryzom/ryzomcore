@@ -37,7 +37,7 @@ namespace NLMISC {
 class CWinEventEmitter : public IEventEmitter
 {
 public:
-	CWinEventEmitter () : _Utf16Pair(0), _MouseEventsEnabled(true), _KeyboardEventsEnabled(true), _IMEEventsEnabled(true)
+	CWinEventEmitter () : _Utf16Pair(0), _MouseEventsEnabled(true), _KeyboardEventsEnabled(true), _IMEEventsEnabled(false)
 	{
 		_HWnd=NULL;
 		resetButtonFlagState ();
@@ -67,8 +67,17 @@ public:
 	// enable / disable keyboard events to be processed. The default is enabled.
 	void enableKeyboardEvents(bool enabled = true) { _KeyboardEventsEnabled = enabled; }
 
-	// enable / disable other events to be processed. The default is enabled.
+	/** enable / disable the IME events. The default is disabled: the IME messages are left to DefWindowProc,
+	  * which shows the composition window of the system and delivers the composed text as WM_CHAR, so it
+	  * arrives as CEventChar like any typed character.
+	  * When enabled, the IME messages are posted as CEventIME and trapped (processMessage returns true), so
+	  * the system does nothing with them: this is for an application that draws the composition itself. Its
+	  * CEventIME listener reads the composition and passes to DefWindowProc whatever it does not handle.
+	  */
 	void enableIMEEvents(bool enabled = true) { _IMEEventsEnabled = enabled; }
+
+	// Test whether IME events are enabled.
+	bool areIMEEventsEnabled() const { return _IMEEventsEnabled; }
 
 	// Test whether mouse events are enabled.
 	bool areMouseEventsEnabled() const { return _MouseEventsEnabled; }

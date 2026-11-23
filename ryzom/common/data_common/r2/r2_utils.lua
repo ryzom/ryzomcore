@@ -91,11 +91,29 @@ r2.Utils.createGroup = function(x,y,n,base,name,mode)
 	return npcGroup
 end
 
+-- The height of the ground under a point given relative to origin, relative to origin: a world position {x, y, z},
+-- the world origin when it is not given. The AI service puts a point on the layer nearest to its height, so a point
+-- takes the ground's under its own place in the world, not a height found near the world origin. A point off the
+-- ground the AI can use, where the editor may find no height, keeps the height of the region, as all points had
+-- before.
+local function groundHeightAt(x, y, origin)
+	local ox, oy, oz = 0, 0, 0
+	if origin then
+		ox, oy, oz = origin.x, origin.y, origin.z
+	end
+	if not r2:isValidPos(ox + x, oy + y) then
+		return 0
+	end
+	return r2:snapZToGround(ox + x, oy + y) - oz
+end
+
 --region = region to fill
---x,y = region's center
+--x,y = region's center, relative to the region's position
 --r = region's ray
 --nbPoints = number of points to create the region
-r2.Utils.createRegion = function(region,x, y, r,nbPoints)
+--origin = the world position of the region, which its points are relative to ({x, y, z}; the world origin when not
+--given): each point gets the height of the ground under it
+r2.Utils.createRegion = function(region,x, y, r,nbPoints, origin)
 	region.Points = {}
 	local tmpPositions = region.Points
 	local pas = (2 * math.pi)/nbPoints
@@ -104,13 +122,9 @@ r2.Utils.createRegion = function(region,x, y, r,nbPoints)
 	do
 		local tmpVertex =  r2.newComponent("RegionVertex")
 		local tmpPosition = r2.newComponent("Position")
-		local sx, sy, sz 
-		sx = x + r * math.cos(Angle)
-		sy = y + r * math.sin(Angle)
-		sx, sy, sz = r2:snapPosToGround(sx, sy)
-		tmpPosition.x = sx
-		tmpPosition.y = sy
-		tmpPosition.z = sz		
+		tmpPosition.x = x + r * math.cos(Angle)
+		tmpPosition.y = y + r * math.sin(Angle)
+		tmpPosition.z = groundHeightAt(tmpPosition.x, tmpPosition.y, origin)
 		tmpVertex.Position = tmpPosition
 		table.insert(tmpPositions, tmpVertex)
 		Angle = Angle + pas
@@ -119,10 +133,11 @@ r2.Utils.createRegion = function(region,x, y, r,nbPoints)
 end
 
 --region = region to fill
---x,y = region's center
+--x,y = region's center, relative to the region's position
 --r = region's ray
 --nbPoints = number of points to create the region
-r2.Utils.createNonDeleteableRegion = function(region,x, y, r,nbPoints)
+--origin = the world position of the region, as for createRegion
+r2.Utils.createNonDeleteableRegion = function(region,x, y, r,nbPoints, origin)
 	region.Deletable = 0
 	region.Points = {}
 	local tmpPositions = region.Points
@@ -133,13 +148,9 @@ r2.Utils.createNonDeleteableRegion = function(region,x, y, r,nbPoints)
 		local tmpVertex =  r2.newComponent("RegionVertex")
 		tmpVertex.Deletable = 0
 		local tmpPosition = r2.newComponent("Position")
-		local sx, sy, sz 
-		sx = x + r * math.cos(Angle)
-		sy = y + r * math.sin(Angle)
-		sx, sy, sz = r2:snapPosToGround(sx, sy)
-		tmpPosition.x = sx
-		tmpPosition.y = sy
-		tmpPosition.z = sz		
+		tmpPosition.x = x + r * math.cos(Angle)
+		tmpPosition.y = y + r * math.sin(Angle)
+		tmpPosition.z = groundHeightAt(tmpPosition.x, tmpPosition.y, origin)
 		tmpVertex.Position = tmpPosition
 		table.insert(tmpPositions, tmpVertex)
 		Angle = Angle + pas
@@ -148,11 +159,11 @@ r2.Utils.createNonDeleteableRegion = function(region,x, y, r,nbPoints)
 end
 
 --region  = trigger Zone
---x,y = region's center
+--x,y = region's center, relative to the region's position
 --r = region's ray
---nbPoints = number of points to create the region
-r2.Utils.createTriggerRegion = function(region,x, y, r)
-	return r2.Utils.createNonDeleteableRegion(region, x, y, r, 4)
+--origin = the world position of the region, as for createRegion
+r2.Utils.createTriggerRegion = function(region,x, y, r, origin)
+	return r2.Utils.createNonDeleteableRegion(region, x, y, r, 4, origin)
 end
 
 
@@ -465,7 +476,8 @@ r2.Utils.getNpcParam = function(npcId, context)
 		return nil
 	end
 
-	return rtNpcGrp.Name..":"..tostring(who.Name)
+	-- the name as the run-time npc has it (r2.Translator.translateNpc)
+	return rtNpcGrp.Name..":"..r2.Translator.scriptText(who.Name)
 end
 
 

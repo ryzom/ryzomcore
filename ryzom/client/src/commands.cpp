@@ -77,10 +77,12 @@
 #include "continent.h"
 #include "ig_client.h"
 #include "commands.h"
+#include "window_desktop.h"
 #include "entities.h"
 #include "teleport.h"
 #include "nel/misc/cdb_leaf.h"
 #include "view.h"
+#include "motion/user_controls.h"
 #include "misc.h"
 #include "demo.h"
 #include "dummy_progress.h"
@@ -948,6 +950,8 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 
 	nlinfo ("Calling for bug report : '%s %s'", brn.c_str(), sys.c_str());
 
+	if (!WindowDesktop::mayOpen("the bug report tool"))
+		return true;
 	launchProgram(brn, sys);
 
 	// give some cpu to the launched application
@@ -1476,9 +1480,13 @@ NLMISC_COMMAND(ah, "Launch an action handler", "<ActionHandler> <AHparam>")
 	if (args.empty())
 		return false;
 
-	if (!ClientCfg.AllowDebugLua && toLowerAscii(args[0]) == "lua")
+	// An action handler can run Lua in several ways: "lua" itself, also written with its parameters as
+	// "lua:...", "browse" with an "ah:" address, "command", "proc", "set" and the other handlers that evaluate
+	// an expression. So the command needs what the Lua commands need.
+	if (!ClientCfg.AllowDebugLua)
 	{
-		return false; // not allowed!!
+		log.displayNL("The ah command is available only if you add 'AllowDebugLua= 1;' in your client.cfg");
+		return true;
 	}
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -3994,6 +4002,50 @@ NLMISC_COMMAND(dist2side, "Change the distance to the side for a given sheet.", 
 	DIST_TO_COMMAND(dist2side, DistToSide);
 }
 
+//-----------------------------------------------
+// 'camera' : Show or set the direction and the distance of the camera, so that a view can be taken again exactly,
+// for screenshots and for measurements from the same point of view.
+//-----------------------------------------------
+NLMISC_COMMAND(camera, "Show or set the direction of the camera and its distance to the character, in the view from behind the character. Heading in degrees in the world: 0 looks east, 90 north. Pitch in degrees: 0 is level, positive looks up (up to 89). Distance in meters, at least the shortest distance of the view from behind; inside a building that forces the view from the eyes it is left as it is. The character keeps its facing.", "[<heading> <pitch> [<distance>]]")
+{
+	if (args.size() == 1 || args.size() > 3)
+		return false;
+	if (!UserEntity)
+	{
+		log.displayNL("The camera can be set in the game only");
+		return true;
+	}
+
+	if (args.size() >= 2)
+	{
+		float heading, pitch;
+		if (!fromString(args[0], heading) || !fromString(args[1], pitch) || !isValidDouble(heading) || !isValidDouble(pitch))
+			return false;
+		float distance = 0.f;
+		if (args.size() == 3 && (!fromString(args[2], distance) || !isValidDouble(distance) || distance < 0.f))
+			return false;
+
+		// The camera is placed at every frame from the facing of the character, the yaw the player added with the
+		// mouse, and the pitch of the head (CUserControls::commonSetView): the added yaw and the pitch are set here
+		UserControls.resetCameraDeltaYaw();
+		UserControls.appendCameraDeltaYaw(heading * (float)(Pi / 180.0) - UserEntity->frontYaw());
+		UserEntity->setHeadPitch(pitch * Pi / 180.0);
+
+		// As the mouse wheel: not inside a building that forces the view from the eyes. Never below the shortest
+		// distance of the view from behind, so that the same arguments always give the same view
+		if (args.size() == 3 && !UserEntity->forceIndoorFPV())
+			View.cameraDistance(std::max(distance, ClientCfg.CameraDistMin));
+	}
+
+	float heading = (UserEntity->frontYaw() + UserControls.getCameraDeltaYaw()) * (float)(180.0 / Pi);
+	heading = fmodf(fmodf(heading, 360.f) + 540.f, 360.f) - 180.f;
+	if (UserEntity->viewMode() == CUserEntity::FirstPV)
+		log.displayNL("Camera: heading %.1f, pitch %.1f, view from the eyes", heading, UserEntity->getHeadPitch() * 180.0 / Pi);
+	else
+		log.displayNL("Camera: heading %.1f, pitch %.1f, distance %.2f", heading, UserEntity->getHeadPitch() * 180.0 / Pi, ClientCfg.CameraDistance);
+	return true;
+}
+
 
 
 // Change the parent of an entity. 'parent slot' not defined remove the current parent.
@@ -4156,9 +4208,22 @@ NLMISC_COMMAND(skillToInt, "Convert a skill to an int", "")
 	return true;
 }
 
+// The browse action handler runs an address that starts with "ah:" as action handlers with their parameters: that
+// is for the links of the pages of a trusted site. A command a player types, or that a macro runs, opens pages only.
+// The handler reads the address through getParam, which drops the blanks before it: so does this test.
+static bool isActionHandlerAddress(const std::string &url, NLMISC::CLog &log)
+{
+	std::string::size_type start = url.find_first_not_of(" \t\r\n");
+	if (start == std::string::npos || url.compare(start, 3, "ah:") != 0)
+		return false;
+	log.displayNL("'%s' is not the address of a page: this command opens pages, it runs no action handler", url.c_str());
+	return true;
+}
+
 NLMISC_COMMAND(browse, "Browse a HTML document with the internal help web browser.", "")
 {
 	if (args.size() != 1) return false;
+	if (isActionHandlerAddress(args[0], log)) return true;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:help_browser:content:html|url="+args[0]);
 	return true;
@@ -4167,13 +4232,15 @@ NLMISC_COMMAND(browse, "Browse a HTML document with the internal help web browse
 NLMISC_COMMAND(openRingWindow, "Browse the main page in the ring web browser.", "")
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+RingMainURL);
+	// the page shows the sessions and invitations of one character: the one that is in game
+	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url=" + RingMainURL);
 	return true;
 }
 
 NLMISC_COMMAND(browseRingAdmin, "Browse a HTML document with the ring web browser.", "")
 {
 	if (args.size() != 1) return false;
+	if (isActionHandlerAddress(args[0], log)) return true;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+args[0]);
 	return true;
@@ -4385,11 +4452,14 @@ NLMISC_COMMAND(logFaberMpCompatibles, "log all MP compatibles for faber the item
 
 	// get the faber plan
 	CSBrickSheet	*brick= pBM->getBrick(CSheetId(sheetId));
-	// get the origin of the item built
-	CItemSheet		*itemBuilt= NULL;
-	if(brick)
-		itemBuilt= dynamic_cast<CItemSheet*>(SheetMngr.get(brick->FaberPlan.ItemBuilt));
-	if(brick && itemBuilt)
+	if(!brick)
+	{
+		nlwarning("logFaberMpCompatibles: %s is not a brick the client knows", CSheetId(sheetId).toString().c_str());
+		return true;
+	}
+	// the item built: its origin decides which MPs the plan takes, or with RYZOM_FORGE the civilisation of the plan
+	CItemSheet		*itemBuilt= dynamic_cast<CItemSheet*>(SheetMngr.get(brick->FaberPlan.ItemBuilt));
+	ITEM_ORIGIN::EItemOrigin	itemOrigin= itemBuilt? itemBuilt->ItemOrigin : ITEM_ORIGIN::UNKNOWN;
 	{
 
 		// build array of MP sheetId
@@ -4407,7 +4477,11 @@ NLMISC_COMMAND(logFaberMpCompatibles, "log all MP compatibles for faber the item
 		// header
 		uint	numMpSlots= (uint)brick->FaberPlan.ItemPartMps.size();
 		nlinfo("**********  FABERLOG  **********");
-		nlinfo("  ItemBuilt Origin: %s", ITEM_ORIGIN::enumToString(itemBuilt->ItemOrigin).c_str() );
+		if(itemBuilt)
+			nlinfo("  ItemBuilt Origin: %s", ITEM_ORIGIN::enumToString(itemBuilt->ItemOrigin).c_str() );
+		else
+			nlwarning("  ItemBuilt %s: the client has no item sheet of that name", brick->FaberPlan.ItemBuilt.toString().c_str() );
+		nlinfo("  Plan civilisation: %s", EGSPD::CPeople::toString(brick->CivRestriction).c_str() );
 		nlinfo("  NumMPSlot: %d", numMpSlots);
 
 		// Parse All Slots.
@@ -4424,7 +4498,7 @@ NLMISC_COMMAND(logFaberMpCompatibles, "log all MP compatibles for faber the item
 				CItemSheet	*itemSheet= mps[i];
 				bool	ok= true;
 				// check faber type filter
-				if( mpSlot.FaberTypeFilter!=RM_FABER_TYPE::Unknown && !itemSheet->canBuildItemPart(mpSlot.FaberTypeFilter, itemBuilt->ItemOrigin))
+				if( mpSlot.FaberTypeFilter!=RM_FABER_TYPE::Unknown && !itemSheet->canBuildItemPart(mpSlot.FaberTypeFilter, itemOrigin, brick->CivRestriction))
 					ok= false;
 
 				if(ok)
@@ -5223,6 +5297,8 @@ NLMISC_COMMAND(dumpSounds, "Dump names of all loaded sound", "<>")
 // ***************************************************************************
 // LUA
 // ***************************************************************************
+// The Lua commands are in every client, and do nothing unless AllowDebugLua is set in its configuration: the
+// default configuration does not set it, so a client as it is published takes no Lua from its player
 const char	*LUADebugNotEnabledMsg= "Lua Commands are available only if you add 'AllowDebugLua= 1;' in your client.cfg";
 
 NLMISC_COMMAND(luaReload, "reload all .lua script files", "")
@@ -5903,6 +5979,9 @@ NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
 	if (args.size () != 1)
 		return false;
 
+	// refused on another desktop: the command did not do what it was asked
+	if (!WindowDesktop::mayOpen("a browser for " + args[0]))
+		return false;
 	return openURL(args[0]);
 }
 

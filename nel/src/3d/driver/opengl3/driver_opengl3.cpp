@@ -37,6 +37,10 @@
 #include "driver_opengl3_vertex_buffer.h"
 #include "driver_opengl3_uniform_buffer.h"
 
+#if NL3D_GL3_STREAM_STATS
+#include <typeinfo>
+#endif
+
 
 using namespace std;
 using namespace NLMISC;
@@ -200,6 +204,7 @@ CDriverGL3::CDriverGL3()
 #elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	_dpy = nullptr;
+	_WindowMinimized = false;
 	_visual_info = nullptr;
 
 #	ifdef XF86VIDMODE
@@ -208,6 +213,16 @@ CDriverGL3::CDriverGL3()
 #	endif //XF86VIDMODE
 
 #endif // NL_OS_UNIX
+
+#ifdef NL_OS_WINDOWS
+	m_MinimizedPictureMode = false;
+	m_MinimizedPictureWidth = 0;
+	m_MinimizedPictureHeight = 0;
+	m_MinimizedPictureColorBuffer = 0;
+	m_MinimizedPictureDepthStencilBuffer = 0;
+#endif // NL_OS_WINDOWS
+
+	m_WindowFrameBuffer = 0;
 
 	_ColorDepth = ColorDepth32;
 
@@ -266,6 +281,7 @@ CDriverGL3::CDriverGL3()
 	_FogColorOverrideBlack = false;
 
 	_RenderTargetFBO = nullptr;
+	m_ZeroAreaRenderTargetReported = false;
 
 	uint i;
 
@@ -317,28 +333,23 @@ CDriverGL3::CDriverGL3()
 	for (size_t i = 0; i < NL3D_GL3_FRAME_QUEUE_MAX; ++i)
 		_SwapBufferSync[i] = nullptr;
 	_PixelUploadPBO = 0;
-
-#ifdef USE_OPENGLES3
-	_ScratchElementBuffer = 0;
-	_ScratchElementBufferSize = 0;
-#endif
+	_StreamMode = false;
+	_VertexStorageFailureWarned = false;
 
 	_LightMapDynamicLightEnabled = false;
 	_LightMapDynamicLightDirty= false;
-	_LightMapDynUBOId = 0;
 	memset(&_LightMapDynUBOEntry, 0, sizeof(_LightMapDynUBOEntry));
+	memset(&_LightMapDynUBOWritten, 0, sizeof(_LightMapDynUBOWritten));
 	_LightMapDynUBODirty = false;
 	_UseLightMapDynUBO = false;
 	_LightTableMode= false;
-	_LightTableUBOId = 0;
 	_LightTableDirty = false;
+	_LightTableUBOWrittenCount = 0;
+	_UserLightUBOWrittenCount = 0;
 	_UserLightUBODirty = true;
-	_LightTableUBOCapacity = 0;
 	_MaxLightTableSize = NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
-	_CameraUBOId = 0;
 	_CameraUBODirty = true;
 	_CameraUBOUploadDirty = false;
-	_CameraUBOCapacity = 0;
 	_LightTableObjCount = 0;
 	_NumPerPixelLights = 0;
 	for (uint i = 0; i < MaxLight; ++i)
@@ -399,15 +410,14 @@ CDriverGL3::CDriverGL3()
 	memset(m_ProgramUsesObjectUBO, 0, sizeof(m_ProgramUsesObjectUBO));
 	memset(m_ProgramUsesMaterialUBO, 0, sizeof(m_ProgramUsesMaterialUBO));
 	m_NelvpActiveUB = nullptr;
-	_ObjectUBOId = 0;
-	_ObjectUBOCapacity = 0;
+	memset(&_ObjectUBOWritten, 0, sizeof(_ObjectUBOWritten));
 	// _OverrideMaterialUBOId = 0; // Replaced by per-material UBO slots
 	for (sint i = 0; i < UBBindingCount; ++i)
-	{
 		_BoundUserUB[i] = nullptr;
-		_UserUBBoundId[i] = 0;
-	}
 	memset(&_LightMapUBOOverride, 0, sizeof(_LightMapUBOOverride));
+#if NL3D_GL3_STREAM_STATS
+	memset(&_StreamStats, 0, sizeof(_StreamStats));
+#endif
 }
 
 // ***************************************************************************
@@ -558,44 +568,115 @@ bool CDriverGL3::setupDisplay()
 	if (!initProgramPipeline())
 		nlerror("Failed to create Pipeline Object");
 
-	// Create UBOs
-	nglGenBuffers(1, &_LightTableUBOId);
-	nglGenBuffers(1, &_LightMapDynUBOId);
-	nglGenBuffers(1, &_CameraUBOId);
-	nglGenBuffers(1, &_ObjectUBOId);
-	// nglGenBuffers(1, &_OverrideMaterialUBOId); // Replaced by per-material UBO slots
-	nglGenBuffers(1, &_PixelUploadPBO);
+	// Stream mode or per-buffer mode (see _StreamMode), for as long as the display lasts.
+	// Stream mode needs buffer storage with a persistent mapping: a write into a stream
+	// buffer is then a memory copy. Without it, every owner of data keeps a GL buffer.
+	// In both modes a uniform block is bound with its full declared size, also when only
+	// a part of it has data (see useUniformBlock): WebGL 2.0 requires what is bound to
+	// be at least as large as the corresponding uniform block in the shader.
+	_StreamMode = false;
+	_VertexStorageFailureWarned = false;
+	{
+		const char *reason;
+#if defined(USE_OPENGLES3)
+		reason = "OpenGL ES 3.0 has no buffer storage";
+#elif defined(NL3D_GL3_STREAM_FORCE_PER_BUFFER)
+		reason = "NL3D_GL3_STREAM_FORCE_PER_BUFFER is defined";
+#else
+		if (!_Extensions.ARBBufferStorage)
+		{
+			reason = "the context has no buffer storage (OpenGL 4.4 or GL_ARB_buffer_storage)";
+		}
+		else
+		{
+			// The offset of a range bound to a uniform block is a multiple of this
+			GLint uniformAlignment = 0;
+			glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformAlignment);
+			if (uniformAlignment < 1)
+			{
+				nlwarning("3D: GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT is %d, 256 is used, the largest value an implementation may ask for", (int)uniformAlignment);
+				uniformAlignment = 256;
+			}
+			// The mode is one for all the data: a stream that cannot be created has logged
+			// why, and the ones that were created are given up
+			_StreamMode = _UniformStream.init(&_DriverGLStates, "uniform", GL_UNIFORM_BUFFER,
+			                  NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE, (uint32)uniformAlignment,
+			                  NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS, NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS,
+			                  _SwapBufferCounter, _SwapBufferInFlight)
+			    && _IndexStream.init(&_DriverGLStates, "index", GL_ELEMENT_ARRAY_BUFFER,
+			        NL3D_GL3_INDEX_STREAM_CHUNK_SIZE, NL3D_GL3_INDEX_STREAM_ALIGNMENT,
+			        NL3D_GL3_INDEX_STREAM_MIN_CHUNKS, NL3D_GL3_INDEX_STREAM_MAX_CHUNKS,
+			        _SwapBufferCounter, _SwapBufferInFlight)
+			    && _VertexStream.init(&_DriverGLStates, "vertex", GL_ARRAY_BUFFER,
+			        NL3D_GL3_VERTEX_STREAM_CHUNK_SIZE, NL3D_GL3_VERTEX_STREAM_ALIGNMENT,
+			        NL3D_GL3_VERTEX_STREAM_MIN_CHUNKS, NL3D_GL3_VERTEX_STREAM_MAX_CHUNKS,
+			        _SwapBufferCounter, _SwapBufferInFlight)
+#if NL3D_GL3_TEXTURE_UPLOAD_STREAM
+			    && _PixelStream.init(&_DriverGLStates, "pixel", GL_PIXEL_UNPACK_BUFFER,
+			        NL3D_GL3_PIXEL_STREAM_CHUNK_SIZE, NL3D_GL3_PIXEL_STREAM_ALIGNMENT,
+			        NL3D_GL3_PIXEL_STREAM_MIN_CHUNKS, NL3D_GL3_PIXEL_STREAM_MAX_CHUNKS,
+			        _SwapBufferCounter, _SwapBufferInFlight)
+#endif
+			    ;
+			if (!_StreamMode)
+			{
+				_UniformStream.release();
+				_IndexStream.release();
+				_VertexStream.release();
+				_PixelStream.release();
+			}
+			// The first chunk of the pixel stream is bound where GL takes the pixels of
+			// uploads from: nothing stays bound there
+			_DriverGLStates.bindPixelUnpackBuffer(0);
+			reason = "a stream buffer could not be created";
+		}
+#endif
+		if (_StreamMode)
+			nlinfo("3D: stream mode, the uniform blocks, the indices of the draws and the vertices of the stream vertex buffers are written into stream buffers");
+		else
+			nlinfo("3D: per-buffer mode, the uniform blocks, the indices of the draws and the stream vertex buffers have GL buffers of their own: %s", reason);
+	}
 
-#ifdef USE_OPENGLES3
-	// WebGL 2.0 does not support client-side index arrays.
-	// Create a scratch element buffer for uploading index data before draw calls.
-	nglGenBuffers(1, &_ScratchElementBuffer);
+	// The uniform buffer ranges that change for a draw go out in one call where the context
+	// has the command for it (see CDriverGLStates3::flushUniformBufferBindings)
+#if NL3D_GL3_MULTI_BIND && !defined(USE_OPENGLES3)
+	_DriverGLStates.enableMultiBind(_Extensions.ARBMultiBind);
+	// (ranges are only bound in stream mode)
+	if (_StreamMode)
+		nlinfo("3D: uniform buffer ranges are bound %s", _Extensions.ARBMultiBind ? "several in one call (glBindBuffersRange)" : "one per call, the context has no glBindBuffersRange (OpenGL 4.4 or GL_ARB_multi_bind)");
+#else
+	_DriverGLStates.enableMultiBind(false);
+#ifndef USE_OPENGLES3
+	if (_StreamMode)
+		nlinfo("3D: uniform buffer ranges are bound one per call, NL3D_GL3_MULTI_BIND is 0");
+#endif
 #endif
 
-	// Pre-allocate UBOs to their full declared sizes.
-	// WebGL 2.0 requires bound UBOs to be at least as large as the
-	// corresponding uniform block in the shader, even before first use.
+	// The vertex buffers that are written where they are drawn from (see CVertexBufferGL3)
+#ifndef USE_OPENGLES3
+	if (_StreamMode)
 	{
-		// NlLightTable: _MaxLightTableSize × NlLightInfo (96 bytes each)
-		_DriverGLStates.forceBindUniformBuffer(_LightTableUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, _MaxLightTableSize * sizeof(CLightTableUBOEntry), nullptr, GL_STREAM_DRAW);
-		_LightTableUBOCapacity = _MaxLightTableSize;
-
-		// NlLightTable binding for lightmap dynamic UBO (1 entry)
-		_DriverGLStates.forceBindUniformBuffer(_LightMapDynUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CLightTableUBOEntry), nullptr, GL_STREAM_DRAW);
-
-		// NlCamera UBO
-		_DriverGLStates.forceBindUniformBuffer(_CameraUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CCameraUBOData), nullptr, GL_STREAM_DRAW);
-		_CameraUBOCapacity = sizeof(CCameraUBOData);
-
-		// NlModel (object) UBO
-		_DriverGLStates.forceBindUniformBuffer(_ObjectUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CObjectUBOData), nullptr, GL_STREAM_DRAW);
-
-		_DriverGLStates.forceBindUniformBuffer(0);
+#if NL3D_GL3_PERSISTENT_VERTEX_BUFFERS
+		nlinfo("3D: the vertex buffers of the FullRewrite and UnsynchronizedWrite usages have storage that stays mapped");
+#else
+		nlinfo("3D: the vertex buffers of the FullRewrite and UnsynchronizedWrite usages are mapped for every lock, NL3D_GL3_PERSISTENT_VERTEX_BUFFERS is 0");
+#endif
 	}
+#endif
+
+	// The rectangles of the textures that are updated in part (see setupTextureEx)
+#ifndef USE_OPENGLES3
+	if (_StreamMode)
+	{
+#if NL3D_GL3_TEXTURE_UPLOAD_STREAM
+		nlinfo("3D: the pixels of the rectangles of textures that are updated in part are written into a stream buffer");
+#else
+		nlinfo("3D: the pixels of the rectangles of textures that are updated in part go through a buffer that is mapped for each, NL3D_GL3_TEXTURE_UPLOAD_STREAM is 0");
+#endif
+	}
+#endif
+
+	nglGenBuffers(1, &_PixelUploadPBO);
 
 	if (m_UseMegaShaders)
 	{
@@ -710,7 +791,8 @@ bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 		}
 		else
 		{
-			_DriverGLStates.forceBindFramebuffer(0);
+			// the frame buffer of the window, or what stands for it (see getWindowFrameBuffer)
+			_DriverGLStates.forceBindFramebuffer(m_WindowFrameBuffer);
 			return true;
 		}
 	}
@@ -847,7 +929,16 @@ bool CDriverGL3::swapBuffers()
 
 #if defined(NL_OS_WINDOWS)
 
+	// In the picture mode of a minimized window the frame that ends was drawn into the frame buffer object
+	// that stands for the window: it is the picture of the window, when the desktop compositor waits for one
+	if (m_MinimizedPictureMode)
+		endMinimizedPictureFrame();
+
 	SwapBuffers(_hDC);
+
+	// Between two frames: picture mode is entered or left, for the frame to come
+	if (m_MinimizedPictureMode || m_MinimizedPicture.isSupplied())
+		updateMinimizedPictureMode();
 
 #elif defined(NL_OS_MAC)
 
@@ -880,6 +971,12 @@ bool CDriverGL3::swapBuffers()
 		// init no texture.
 		setTexGenModeVP(stage, TexGenDisabled);
 	}
+
+#ifdef NL3D_GLSTATE_CHECK_BINDINGS
+	// With NL3D_GL3_STATE_CHECKS: the bindings that the state cache carries from frame to
+	// frame, and that nothing issues again on its own, are compared with those of GL
+	_DriverGLStates.checkBindings();
+#endif
 
 	// Activate the default material.
 	//===========================================================
@@ -945,8 +1042,162 @@ bool CDriverGL3::swapBuffers()
 	nldebug("Swap buffer: %u, in flight: %u", (unsigned int)_SwapBufferCounter, (unsigned int)_SwapBufferInFlight);
 #endif
 
+	// The streams go on to the new frame, and learn which frames the GPU has finished:
+	// their chunks can be written again. Nothing to do for a stream that is not in use.
+	_UniformStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
+	_IndexStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
+	_VertexStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
+	_PixelStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
+#if NL3D_GL3_STREAM_STATS
+	displayStreamStats();
+#endif
+
 	return true;
 }
+
+#if NL3D_GL3_STREAM_STATS
+// --------------------------------------------------
+static void displayOneStreamStats(const char *name, CStreamBufferGL3 &stream, float perFrame, bool copies)
+{
+	CStreamBufferGL3::CStats stats = stream.fetchStats();
+	if (copies)
+	{
+		nlinfo("3D: %s stream, per frame: %.1f writes, %.0f bytes copied, %.0f bytes reserved; "
+		       "%u chunks, %u written again in place, %u freed of kept handles, %u discarded",
+		    name, (float)stats.Writes * perFrame, (float)stats.Bytes * perFrame, (float)stats.Reserved * perFrame,
+		    stream.getChunkCount(), stats.Reuses, stats.Evacuations, stats.Discards);
+	}
+	else
+	{
+		// The ranges are written by their owners through lock(): the stream knows what it reserved for them, not what they wrote
+		nlinfo("3D: %s stream, per frame: %.1f reservations, %.0f bytes reserved; "
+		       "%u chunks, %u written again in place, %u freed of kept handles, %u discarded",
+		    name, (float)stats.Writes * perFrame, (float)stats.Reserved * perFrame,
+		    stream.getChunkCount(), stats.Reuses, stats.Evacuations, stats.Discards);
+	}
+}
+
+// --------------------------------------------------
+// Orders the names of textures by their uploads, most first; names with as many by name
+static bool textureUploadStatsMore(const std::pair<uint32, const std::string *> &a, const std::pair<uint32, const std::string *> &b)
+{
+	if (a.first != b.first)
+		return a.first > b.first;
+	return *a.second < *b.second;
+}
+
+// --------------------------------------------------
+void CDriverGL3::displayStreamStats()
+{
+	++_StreamStats.Frames;
+	NLMISC::TTime now = NLMISC::CTime::getLocalTime();
+	if (now - _StreamStats.LastTime < 1000)
+		return;
+
+	// Per frame, over the frames since the last lines
+	float perFrame = 1.0f / (float)_StreamStats.Frames;
+	nlinfo("3D: stream stats over %u frames, per frame: object blocks %.1f written, %.1f skipped; material blocks %.1f written",
+	    _StreamStats.Frames,
+	    (float)_StreamStats.ObjectWritten * perFrame, (float)_StreamStats.ObjectSkipped * perFrame,
+	    (float)_StreamStats.MaterialWritten * perFrame);
+	if (_StreamMode)
+	{
+		displayOneStreamStats("uniform", _UniformStream, perFrame, true);
+		nlinfo("3D: uniform stream by kind of block, per frame, writes / bytes reserved: camera %.1f / %.0f, light table %.1f / %.0f, "
+		       "user lights %.1f / %.0f, lightmap light %.1f / %.0f, object %.1f / %.0f, material %.1f / %.0f, user %.1f / %.0f; "
+		       "light table entries added in place: %.1f times, %.0f bytes",
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockCamera] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockCamera] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockLightTable] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockLightTable] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockUserLights] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockUserLights] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockLightMapLight] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockLightMapLight] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockObject] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockObject] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockMaterial] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockMaterial] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockUser] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockUser] * perFrame,
+		    (float)_StreamStats.LightTableAppends * perFrame, (float)_StreamStats.LightTableAppendBytes * perFrame);
+		displayOneStreamStats("index", _IndexStream, perFrame, true);
+		displayOneStreamStats("vertex", _VertexStream, perFrame, false);
+		if (_PixelStream.isInitialized())
+			displayOneStreamStats("pixel", _PixelStream, perFrame, false);
+	}
+	else
+	{
+		nlinfo("3D: uniform blocks in GL buffers, per frame: %.1f writes, %.0f bytes; indices in a GL buffer, per frame: %.1f writes, %.0f bytes",
+		    (float)_StreamStats.BufferWrites * perFrame, (float)_StreamStats.BufferBytes * perFrame,
+		    (float)_StreamStats.IndexBufferWrites * perFrame, (float)_StreamStats.IndexBufferBytes * perFrame);
+	}
+
+	// Both modes: where the indices of the render calls with an index buffer came from
+	nlinfo("3D: index buffers, per frame: %.1f render calls drawn from the GL buffer of their index buffer, "
+	       "%.1f with their indices written for them (%.0f bytes); %.1f times an index buffer gave its GL buffer its indices (%.0f bytes); "
+	       "vertex buffers with a shadow copy, per frame: %.1f uploads (%.0f bytes)",
+	    (float)_StreamStats.IndexObjectDraws * perFrame,
+	    (float)_StreamStats.IndexStreamDraws * perFrame, (float)_StreamStats.IndexStreamDrawBytes * perFrame,
+	    (float)_StreamStats.IndexObjectUploads * perFrame, (float)_StreamStats.IndexObjectUploadBytes * perFrame,
+	    (float)_StreamStats.ShadowUploads * perFrame, (float)_StreamStats.ShadowUploadBytes * perFrame);
+
+	// Both modes: what the locks of the vertex buffers without a shadow copy cost. (The
+	// SmallStream and FullStream ones have a GL buffer of their own in per-buffer mode only.)
+	nlinfo("3D: vertex buffer locks, per frame: %.1f of storage that stays mapped, without a GL call; with a map of the GL buffer: "
+	       "%.1f Immutable, %.1f FullRewrite, %.1f UnsynchronizedWrite, %.1f SmallStream and FullStream; "
+	       "rings of FullRewrite vertex buffers with storage that stays mapped: %u buffers added, %u given new storage at the limit of the ring",
+	    (float)_StreamStats.VertexLocksPersistent * perFrame,
+	    (float)_StreamStats.VertexLocksMapped[CVertexBuffer::Immutable] * perFrame,
+	    (float)_StreamStats.VertexLocksMapped[CVertexBuffer::FullRewrite] * perFrame,
+	    (float)_StreamStats.VertexLocksMapped[CVertexBuffer::UnsynchronizedWrite] * perFrame,
+	    (float)(_StreamStats.VertexLocksMapped[CVertexBuffer::SmallStream] + _StreamStats.VertexLocksMapped[CVertexBuffer::FullStream]) * perFrame,
+	    _StreamStats.VertexRingAdds, _StreamStats.VertexRingDiscards);
+
+	// Both modes: the pixels of textures that were given to GL, by the three ways they get there
+	nlinfo("3D: texture uploads, per frame: %.1f whole textures in setupTextureEx (%.0f bytes); "
+	       "%.1f textures in part, in %.1f rectangles of a mipmap (%.0f bytes), of which %.1f read from the pixel stream "
+	       "and %.1f that it did not take (more bytes than a chunk, or no storage); %.1f calls of uploadTexture (%.0f bytes)",
+	    (float)_StreamStats.TextureWholeUploads * perFrame, (float)_StreamStats.TextureWholeBytes * perFrame,
+	    (float)_StreamStats.TexturePartUploads * perFrame, (float)_StreamStats.TexturePartRects * perFrame, (float)_StreamStats.TexturePartBytes * perFrame,
+	    (float)_StreamStats.TexturePartStreamRects * perFrame, (float)_StreamStats.TexturePartRefusedRects * perFrame,
+	    (float)_StreamStats.TextureDirectUploads * perFrame, (float)_StreamStats.TextureDirectBytes * perFrame);
+	if (!_TextureUploadStats.empty())
+	{
+		// The names with the most uploads since the last lines
+		std::vector<std::pair<uint32, const std::string *> > most;
+		most.reserve(_TextureUploadStats.size());
+		for (std::map<std::string, CTextureUploadStats>::const_iterator it = _TextureUploadStats.begin(); it != _TextureUploadStats.end(); ++it)
+			most.push_back(std::make_pair(it->second.Uploads, &it->first));
+		std::sort(most.begin(), most.end(), textureUploadStatsMore);
+		std::string line;
+		for (size_t i = 0; i < most.size() && i < 6; ++i)
+		{
+			const CTextureUploadStats &stats = _TextureUploadStats[*most[i].second];
+			if (i)
+				line += "; ";
+			line += NLMISC::toString("'%s' %u uploads, %" NL_I64 "u bytes, %u textures",
+			    most[i].second->c_str(), stats.Uploads, stats.Bytes, (uint)stats.Textures.size());
+		}
+		nlinfo("3D: textures uploaded most often over these %u frames, of %u names: %s",
+		    _StreamStats.Frames, (uint)_TextureUploadStats.size(), line.c_str());
+		_TextureUploadStats.clear();
+	}
+
+	memset(&_StreamStats, 0, sizeof(_StreamStats));
+	_StreamStats.LastTime = now;
+}
+
+// --------------------------------------------------
+void CDriverGL3::countTextureUpload(ITexture &tex, uint64 bytes)
+{
+	// A texture that is shared has a name of its own. One that is not is named by its
+	// class, which says who fills it, and its size.
+	std::string name;
+	if (tex.supportSharing())
+		name = tex.getShareName();
+	else
+		name = NLMISC::toString("%s %ux%u", typeid(tex).name(), (uint)tex.getWidth(), (uint)tex.getHeight());
+
+	CTextureUploadStats &stats = _TextureUploadStats[name];
+	++stats.Uploads;
+	stats.Bytes += bytes;
+	stats.Textures.insert(&tex);
+}
+#endif
 
 // --------------------------------------------------
 bool CDriverGL3::release()
@@ -954,7 +1205,19 @@ bool CDriverGL3::release()
 	H_AUTO_OGL(CDriverGL3_release)
 
 	// release only if the driver was initialized
-	if (!_Initialized) return true;
+	if (!_Initialized)
+	{
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+		// a display that was refused, or never set up, still has the X connection and the error
+		// handler of init(), and what setDisplay did before it stopped
+		if (_dpy)
+		{
+			destroyWindow();
+			unInit();
+		}
+#endif
+		return true;
+	}
 
 	// hide window
 	showWindow(false);
@@ -975,27 +1238,23 @@ bool CDriverGL3::release()
 		delete it->PixelProgram;
 	m_PPBuiltinCache.clear();
 
-	// Delete UBOs
-	if (_LightTableUBOId)
-	{
-		nglDeleteBuffers(1, &_LightTableUBOId);
-		_LightTableUBOId = 0;
-	}
-	if (_LightMapDynUBOId)
-	{
-		nglDeleteBuffers(1, &_LightMapDynUBOId);
-		_LightMapDynUBOId = 0;
-	}
-	if (_CameraUBOId)
-	{
-		nglDeleteBuffers(1, &_CameraUBOId);
-		_CameraUBOId = 0;
-	}
-	if (_ObjectUBOId)
-	{
-		nglDeleteBuffers(1, &_ObjectUBOId);
-		_ObjectUBOId = 0;
-	}
+	// Delete the buffers of the uniform blocks and of the indices: the ones of the
+	// driver itself in per-buffer mode, the streams in stream mode. The handles into
+	// a stream go stale with it. The blocks of the materials and of the uniform
+	// buffers go with their owners.
+	releaseUniformBlock(_CameraUBOBlock);
+	releaseUniformBlock(_LightTableUBOBlock);
+	releaseUniformBlock(_UserLightUBOBlock);
+	releaseUniformBlock(_LightMapDynUBOBlock);
+	releaseUniformBlock(_ObjectUBOBlock);
+	releaseIndexBlock(_ScratchIndices);
+	releaseIndexBlock(_QuadIndices);
+	_UniformStream.release();
+	_IndexStream.release();
+	// The vertex buffers that have their vertices in the vertex stream are destroyed
+	// below. Their ranges go stale here, and they have nothing of their own to delete.
+	_VertexStream.release();
+	_PixelStream.release();
 	// Replaced by per-material UBO slots
 	// if (_OverrideMaterialUBOId)
 	// {
@@ -1007,14 +1266,6 @@ bool CDriverGL3::release()
 		nglDeleteBuffers(1, &_PixelUploadPBO);
 		_PixelUploadPBO = 0;
 	}
-
-#ifdef USE_OPENGLES3
-	if (_ScratchElementBuffer)
-	{
-		nglDeleteBuffers(1, &_ScratchElementBuffer);
-		_ScratchElementBuffer = 0;
-	}
-#endif
 
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();
@@ -1250,6 +1501,16 @@ void CDriverGL3::getZBuffer (std::vector<float>  &zbuffer)
 	CRect	rect(0,0);
 	getWindowSize(rect.Width, rect.Height);
 	getZBufferPart(zbuffer, rect);
+
+	// OpenGL reads the rows from the bottom of the window: the first row is the top one, as in getBuffer
+	if (zbuffer.size() == (size_t)rect.Width * rect.Height)
+	{
+		for (uint32 y = 0; y < rect.Height / 2; ++y)
+		{
+			std::swap_ranges(zbuffer.begin() + (size_t)y * rect.Width, zbuffer.begin() + (size_t)(y + 1) * rect.Width,
+			    zbuffer.begin() + (size_t)(rect.Height - 1 - y) * rect.Width);
+		}
+	}
 }
 
 void CDriverGL3::getBuffer (CBitmap &bitmap)

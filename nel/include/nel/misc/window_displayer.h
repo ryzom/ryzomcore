@@ -74,6 +74,9 @@ protected:
 	// display a string (MT)
 	virtual void doDisplay (const NLMISC::CLog::TDisplayInfo &args, const char *message) NL_OVERRIDE;
 
+	// the end of update() (MT): a displayer with command queues of its own runs them here
+	virtual void updateExtra() { }
+
 	// true for windows
 	bool needSlashR;
 

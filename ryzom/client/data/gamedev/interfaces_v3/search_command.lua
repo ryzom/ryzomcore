@@ -1159,7 +1159,7 @@ function SearchCommand:search(uiId)
 	local used_searchcommand_by_config = getDbProp("UI:SAVE:CHAT:CHAT_AUTOCOMPLETE")
 	if(used_searchcommand_by_config == 0)then
 		SearchCommand:clear_mention(uiId)
-                SearchCommand:write_command_help_clear(uiId)
+		SearchCommand:write_command_help_clear(uiId)
 		do return end
     end
 	--##end checking on/off via settings
@@ -1965,7 +1965,7 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
         sub_command_slot = 2
     elseif(command_to_show_argument == "c")then
         sub_command_slot = 3
-        end
+    end
 
     if(sub_command_slot ~= 0)then
         local sub_command = SearchCommand:read_sub_command(sub_command_slot,uiId)
@@ -1979,7 +1979,7 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
                 command_to_show_argument_new=sub_command
                 special_offset=sub_command_slot - 1
                 sub_command_found = true
-    end
+            end
         end
     end
     
@@ -2582,7 +2582,7 @@ function SearchCommand:finish_commands(command_name,uiId,mention_number)
     local insert_text = command_name
     if(SearchCommand:get_command_type(command_name) == "eScript")then
                     insert_text = "()"..SearchCommand:replace_escript_param(command_name)
-        end
+    end
 
     --A continent is only half of its slot: "<ContinentName>@" wants the group id
     --behind the @. So the completion brings the separator with it and the caret

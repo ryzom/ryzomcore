@@ -1,0 +1,32 @@
+# The locations have an empty entry point name. Such a location is as a scenario of the first list of
+# entry points, which had no entry point of its own: on an island of that list it gets the entry point the
+# island had then (uiR2EntryPointAlpha01 on uiR2_Deserts23, which the author is told as an entry point found
+# by its place; the first entry point on uiR2_Deserts22, where the two are the same), on another island
+# the first entry point. It is not counted among the names no list has.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteEntryPoints(1)
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsFar
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUncertain
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUnknown
+no_line: version_update_note: uiR2EDVersionNoteIsland
+scenario_at: Locations[0].EntryPoint = uiR2EntryPointAlpha01
+scenario_at: Locations[1].EntryPoint = uiR2EntryPoint01
+scenario_at: Locations[2].EntryPoint = uiR2EntryPoint01
+rt_at: Locations[0].EntryPoint = uiR2EntryPointAlpha01

@@ -195,6 +195,15 @@ void CAsyncFileManagerSound::CLoadWavFile::run (void)
 			return;
 		}
 
+		// The sound drivers play PCM of 1 or 2 channels (their sample formats are mono and stereo, see
+		// IBuffer::bufferFormatToSampleFormat). A file of another channel count is refused here, where its name is
+		// known, and no driver buffer gets a format that it cannot hold.
+		if (bufferFormat == IBuffer::FormatPcm && channels != 1 && channels != 2)
+		{
+			nlwarning("Cannot load the sound '%s', it has %u channels and only mono and stereo are supported", _Filename.c_str(), (uint)channels);
+			return;
+		}
+
 		_pDestbuffer->setFormat(bufferFormat, channels, bitsPerSample, frequency);
 		if (!_pDestbuffer->fill(&result[0], (uint)result.size()))
 		{

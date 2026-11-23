@@ -84,7 +84,9 @@ public:
 };
 
 // add params to brick (input for code generator)
-void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &params);
+// A property the server does not know, or one with the wrong arguments, is reported with sheetName and left out:
+// it returns false then.
+bool addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &params, const std::string &sheetName);
 
 /**
  * Faber class for sabrina bricks (for bricks are faber plan mandatory)
@@ -422,7 +424,11 @@ public:
 	sint32									MinFameValue;
 	/// when false the brick can't be used when player has no item in hand
 	bool									UsableWithEmptyHands;
-	
+	/// a property of the sheet was left out (reported at load): without it the brick would cost nothing or work
+	/// with default values, so what holds it is refused when it is to be used: phrases, item enchantments and consumable
+	/// effects (CPhraseManager::refusesBrokenBricks)
+	bool									HasBadProperty;
+
 public:	
 	/// Constructor
 	CStaticBrick();

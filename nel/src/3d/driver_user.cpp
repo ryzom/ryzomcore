@@ -375,6 +375,13 @@ void CDriverUser::showWindow(bool show)
 }
 
 // ***************************************************************************
+void CDriverUser::setWindowActivation(bool activate)
+{
+	NL3D_HAUTO_UI_DRIVER;
+	_Driver->setWindowActivation(activate);
+}
+
+// ***************************************************************************
 void			CDriverUser::release()
 {
 	NL3D_HAUTO_UI_DRIVER;
@@ -418,6 +425,22 @@ bool			CDriverUser::isActive()
 	return _Driver->isActive();
 }
 
+// ***************************************************************************
+bool			CDriverUser::isWindowMinimized() const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->isWindowMinimized();
+}
+
+// ***************************************************************************
+void			CDriverUser::restoreWindow()
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->restoreWindow();
+}
+
 
 // ***************************************************************************
 nlWindow		CDriverUser::getDisplay ()
@@ -425,6 +448,22 @@ nlWindow		CDriverUser::getDisplay ()
 	NL3D_HAUTO_UI_DRIVER;
 
 	return _Driver->getDisplay ();
+}
+
+// ***************************************************************************
+void			CDriverUser::setMinimizedWindowPictureSupplied(bool supplied)
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->setMinimizedWindowPictureSupplied(supplied);
+}
+
+// ***************************************************************************
+bool			CDriverUser::isMinimizedWindowPictureWanted() const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->isMinimizedWindowPictureWanted();
 }
 
 
@@ -1319,6 +1358,18 @@ void			CDriverUser::drawWiredQuad (float xcenter, float ycenter, float radius, C
 // ***************************************************************************
 UDriver::TMessageBoxId	CDriverUser::systemMessageBox (const char* message, const char* title, TMessageBoxType type, TMessageBoxIcon icon)
 {
+
+	// a window that is not activated has no message box either: it would take the focus on the desktop shown, or switch
+	// the screen to the desktop of the window (setWindowActivation). The message goes to the log, with the answer
+	// that changes nothing.
+	if (!_Driver->getWindowActivation())
+	{
+		static const TMessageBoxId s_Answers[] = { okId, cancelId, noId, ignoreId, cancelId, cancelId };
+		static const char *const s_Names[] = { "ok", "cancel", "no", "ignore", "cancel", "cancel" };
+		uint answer = (uint)type < sizeof(s_Answers) / sizeof(s_Answers[0]) ? (uint)type : 0;
+		nlwarning("Message box '%s', not shown as the window is not activated, answered %s: %s", title ? title : "", s_Names[answer], message ? message : "");
+		return s_Answers[answer];
+	}
 
 	IDriver::TMessageBoxId		dret;
 	IDriver::TMessageBoxType	dtype= (IDriver::TMessageBoxType)(uint32)type;

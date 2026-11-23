@@ -355,6 +355,11 @@ public:
 		_Sessions = sessions;
 	}
 
+	// Return the list of the edit sessions the character is invited to
+	virtual void on_editSessionList(NLNET::TSockId from, uint32 charId, const std::vector < TSessionDesc > &sessions)
+	{
+	}
+
 	///////////////////////////////////////////////////////////////////////
 	//
 	///////////////////////////////////////////////////////////////////////

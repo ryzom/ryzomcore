@@ -46,6 +46,7 @@
 #include <set>
 #include <string>
 
+class CCharacterInfos;
 
 
 
@@ -174,12 +175,14 @@ public :
 
 	struct CMessageHistoryEntry
 	{
-		CMessageHistoryEntry() : Exported(false) {}
+		CMessageHistoryEntry() : Exported(false), Dropped(false) {}
 		CChatMessage Message;
 		std::string Channel;
 		std::string ExternalId;
 		std::set<NLMISC::CEntityId> Receivers;
 		bool Exported;
+		// A tell that reached nobody but looks sent to its sender (mute, ignore list)
+		bool Dropped;
 	};
 	CMessageHistoryEntry *findMessage(const std::string &messageId);
 	CMessageHistoryEntry *rememberMessage(const CChatMessage &message);
@@ -224,8 +227,9 @@ public :
 	 * Transmit a chat message to the receiver
 	 */
 	void farTell(  const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr   );
-	void farTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &receiver, const CChatMessage &message);
+	void bridgeTell(const std::string &sender, const CCharacterInfos *receiver, const ucstring &text);
 	void echoTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &receiver, const CChatMessage &message);
+	bool dropTell(const NLMISC::CEntityId &senderCharId, const std::string &receiver, bool structuredMessage);
 	/**
 	 * Transmit a chat message to the receiver
 	 * \param sender is the id of the speaking char

@@ -187,6 +187,10 @@ private:
 	bool                            _Savable;
 private:
 	void			  updatePeopleMenu(uint index);
+	// Tell if the entry has a chat and this chat is the tell window of the name the entry has now
+	bool isChatOfPeople(uint index) const;
+	// The chat of the entry, forgotten when it is the tell window of a name the entry had before. NULL if none.
+	CGroupContainer *getValidChat(uint index);
 	// from CGroupContainer::IChildrenObs
 	virtual void childrenMoved(uint srcIndex, uint destIndex, CGroupContainer *children) NL_OVERRIDE;
 

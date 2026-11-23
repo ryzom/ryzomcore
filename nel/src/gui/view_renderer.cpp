@@ -1574,7 +1574,7 @@ namespace NLGUI
 		}
 	}
 
-	float CViewRenderer::getTextureScaleFromId (sint32 id) const
+	float CViewRenderer::getTextureScaleFromId(sint32 id) const
 	{
 		if ((id < 0) || (id >= (sint32)_SImageIterators.size()))
 		{

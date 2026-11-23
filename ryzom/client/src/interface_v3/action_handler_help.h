@@ -30,7 +30,6 @@
 
 class CSPhraseCom;
 
-
 // Struct that tells how to setup a help window
 class CSheetHelpSetup
 {
@@ -77,7 +76,7 @@ void refreshMissionHelp(CSheetHelpSetup &setup, const CPrerequisitInfos &infos);
 
 class CPetAnimalItemInfoWaiter : public IItemInfoWaiter
 {
-	void infoReceived()
+	void infoReceived() NL_OVERRIDE
 	{
 		//ItemSheet
 		//ItemSlotId
@@ -93,7 +92,8 @@ class	CInterfaceHelp
 {
 public:
 	// Open and set the group next to the element
-	static CInterfaceGroup	*activateNextWindow(CDBCtrlSheet *elt, sint forceKeepWindow=-1, bool preferNewWindow=false, uint64 chatLinkId=0);
+	static CInterfaceGroup	*activateNextWindow(CDBCtrlSheet *elt, sint forceKeepWindow=-1,
+		bool preferNewWindow=false, uint64 chatLinkId=0);
 
 	// Bring an existing item help window for this chat link to the front.
 	static bool				activateChatItemWindow(uint64 chatLinkId);
@@ -146,13 +146,14 @@ private:
 		CInterfaceGroupPtr	Window;
 		// The item used to open this window (may be destroyed while the window stays open)
 		NLMISC::CRefPtr<CDBCtrlSheet> CtrlSheet;
-		uint64			ChatLinkId;
 		// KeepMode
 		bool			KeepMode;
 		// The button for KeepMode. Button state == KeepMode
 		CCtrlBaseButtonPtr	KeepButton;
+		// The chat link that opened this window (0 if none)
+		uint64			ChatLinkId;
 	public:
-		CInfoWindow() : ChatLinkId(0) { KeepMode = false; }
+		CInfoWindow() : ChatLinkId(0) {KeepMode= false;}
 		virtual void	infoReceived() NL_OVERRIDE;
 		virtual void	missionInfoReceived(const CPrerequisitInfos &infos) NL_OVERRIDE;
 	};

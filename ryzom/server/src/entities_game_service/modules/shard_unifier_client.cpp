@@ -195,7 +195,7 @@ public:
 	{
 		if (module->getModuleClassName() == "CharacterSynchronisation")
 		{
-			WARN_IF(_CharacterSynch != NULL, ("CShardUnifierClient::onModuleUp : receiving module for class CharacterSynchronisation as '%s', but already have one as '%s', replacing", module->getModuleName().c_str(), _CharacterSynch->getModuleName().c_str()));
+			WARN_IF(_CharacterSynch != NULL, "CShardUnifierClient::onModuleUp : receiving module for class CharacterSynchronisation as '" << module->getModuleName() << "', but already have one as '" << _CharacterSynch->getModuleName() << "', replacing");
 			_CharacterSynch = module;
 
 			// register us in the server
@@ -214,7 +214,7 @@ public:
 		}
 		else if (module->getModuleClassName() == "EntityLocator")
 		{
-			WARN_IF(_EntityLocator != NULL, ("CShardUnifierClient::onModuleUp : receiving module for class EntityLocator as '%s', but already have one as '%s', replacing", module->getModuleName().c_str(), _EntityLocator->getModuleName().c_str()));
+			WARN_IF(_EntityLocator != NULL, "CShardUnifierClient::onModuleUp : receiving module for class EntityLocator as '" << module->getModuleName() << "', but already have one as '" << _EntityLocator->getModuleName() << "', replacing");
 			_EntityLocator = module;
 
 			// send the initial state
@@ -255,6 +255,29 @@ public:
 		}
 	}
 
+	/// Refuses the name validations and the character creations that wait for the unifier: when it goes down, and
+	/// when the service stops (IShardUnifierEvent::refusePendingNameRequests).
+	void refusePendingNameRequests() NL_OVERRIDE
+	{
+		while (!_PendingNameToValidate.empty())
+		{
+			TCharacterNameValidationInfo &cnvi = _PendingNameToValidate.begin()->second;
+
+			sendIfNameIsValide( cnvi.UserId, false);
+
+			_PendingNameToValidate.erase(_PendingNameToValidate.begin());
+		}
+
+		while (!_CreateCharPending.empty())
+		{
+			TCreatePendingInfo &cpi = _CreateCharPending.begin()->second;
+
+			cbCreateChar_part2(cpi.UserId, cpi.CreateCharMsg, false);
+
+			_CreateCharPending.erase(_CreateCharPending.begin());
+		}
+	}
+
 	void onModuleDown(IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module == _CharacterSynch)
@@ -262,23 +285,7 @@ public:
 			_CharacterSynch = NULL;
 
 			// fail all validation and character creation pending
-			while (!_PendingNameToValidate.empty())
-			{
-				TCharacterNameValidationInfo &cnvi = _PendingNameToValidate.begin()->second;
-
-				sendIfNameIsValide( cnvi.UserId, false);
-
-				_PendingNameToValidate.erase(_PendingNameToValidate.begin());
-			}
-
-			while (!_CreateCharPending.empty())
-			{
-				TCreatePendingInfo &cpi = _CreateCharPending.begin()->second;
-
-				cbCreateChar_part2(cpi.UserId, cpi.CreateCharMsg, false);
-
-				_CreateCharPending.erase(_CreateCharPending.begin());
-			}
+			refusePendingNameRequests();
 		}
 		else if (module == _EntityLocator)
 		{
@@ -332,8 +339,11 @@ public:
 					character->setContactOnlineStatus(charEid, online);
 				}
 			}
-			// update the guild member list
-			IGuildManager::getInstance().characterConnectionEvent(charEid, online);
+			// update the guild member list. When the service stops, the guild manager is released before the
+			// modules are (CPlayerService::release), and the entity locator that goes down after that brings
+			// onModuleDown here for every character that was online elsewhere: no member list is left to update.
+			if (IGuildManager::hasInstance())
+				IGuildManager::getInstance().characterConnectionEvent(charEid, online);
 		}
 	}
 

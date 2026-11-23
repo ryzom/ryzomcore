@@ -67,8 +67,10 @@ public:
 	void addTriggerRequest( const TDataSetRow & rowId, sint32 triggerId );
 	/// fill a player trigger page
 	void fillTriggerPage(const NLMISC::CEntityId & eId, uint16 clientSession, bool resetPage );
-	/// a user left a trigger, remove its request
+	/// remove the trigger request of a user and close its window
 	void removeTriggerRequest( const TDataSetRow & rowId);
+	/// a user left a trigger, remove its request if it is for that trigger
+	void leaveTrigger(const TDataSetRow &rowId, sint32 triggerId);
 	/// teleport a user through a lift
 	void triggerTeleport(CCharacter * user, uint16 index);
 	/// pacs trigger will launch an url and no more teleport a player
@@ -167,11 +169,21 @@ private:
 		CTriggerRequest()
 		{
 			Timer = NULL;
+			TriggerId = 0;
+			EnterX = 0;
+			EnterY = 0;
 		}
+		// clang-format off
 		uint8								Page;
 		uint16								Session;
 		std::vector<CTriggerRequestEntry>	Entries;
 		CTimer*								Timer;
+		/// the trigger the request was opened for
+		sint32								TriggerId;
+		/// where the user entered the trigger (mm), the request is only valid near it
+		sint32								EnterX;
+		sint32								EnterY;
+		// clang-format on
 	};
 
 	///\name structs and members used during parsing only
@@ -210,6 +222,9 @@ private:
 	/// trigger requests of the players
 	typedef CHashMap< TDataSetRow , CTriggerRequest , TDataSetRow::CHashCode > TTriggerRequestCont;
 	TTriggerRequestCont		_TriggerRequests;
+
+	/// delete the timeout of a trigger request and erase the request
+	void eraseTriggerRequest(TTriggerRequestCont::iterator it);
 
 	/// physical buildings by Alias
 	std::map<TAIAlias,IBuildingPhysical*> _BuildingPhysicals;

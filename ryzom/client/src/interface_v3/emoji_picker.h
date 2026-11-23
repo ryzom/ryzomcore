@@ -24,6 +24,7 @@ namespace NLGUI
 {
 	class CCtrlBase;
 	class CGroupEditBox;
+	class CInterfaceGroup;
 }
 
 /** Emoji picker window shared by all chat inputs; its frame is in interaction.xml.
@@ -55,6 +56,7 @@ private:
 	static CEmojiPicker *_Instance;
 
 	bool show();
+	void moveToPointer(NLGUI::CInterfaceGroup *win);
 	void buildTabs();
 	void fillGrid(sint32 gridWidth);
 	void updateTabs();

@@ -177,16 +177,16 @@ function r2.ScenarioWindow:updateLeftQuota()
 			self.LeftQuota, self.LeftStaticQuota = act:getLeftQuota() 
 			local uc_tooltip = ucstring()
 
-			quotaViewText.hardtext = string.format("(%d)", self.LeftQuota)
-			uc_tooltip:fromUtf8(i18n.get("uiR2EDScene"):toUtf8() .. " (" .. self.LeftQuota .. ")")
-			quotaTooltip.tooltip = uc_tooltip
-			quotaMacroViewText.hardtext = string.format("(%d)", self.LeftQuota)
-			uc_tooltip:fromUtf8(i18n.get("uiR2EDMacroComponents"):toUtf8() .. " (" .. self.LeftQuota .. ")")
-			quotaMacroTooltip.tooltip = uc_tooltip		
-			quotaViewTextMisc.hardtext = string.format("(%d)", self.LeftStaticQuota)
-			quotaViewTextMisc2.hardtext = string.format("(%d)", self.LeftStaticQuota)
-			uc_tooltip:fromUtf8(i18n.get("uiR2EDbotObjects"):toUtf8() .. " (" .. self.LeftStaticQuota .. ")")
-			quotaMiscTooltip.tooltip = uc_tooltip			
+			-- whole counts, but floats from Lua 5.3 on: 287, not 287.0
+			local leftQuota = math.floor(self.LeftQuota)
+			local leftStaticQuota = math.floor(self.LeftStaticQuota)
+			quotaViewText.hardtext = string.format("(%d)", leftQuota)
+			quotaTooltip.tooltip = string.format("%s (%d)", tostring(i18n.get("uiR2EDScene")), leftQuota)
+			quotaMacroViewText.hardtext = string.format("(%d)", leftQuota)
+			quotaMacroTooltip.tooltip = string.format("%s (%d)", tostring(i18n.get("uiR2EDMacroComponents")), leftQuota)
+			quotaViewTextMisc.hardtext = string.format("(%d)", leftStaticQuota)
+			quotaViewTextMisc2.hardtext = string.format("(%d)", leftStaticQuota)
+			quotaMiscTooltip.tooltip = string.format("%s (%d)", tostring(i18n.get("uiR2EDbotObjects")), leftStaticQuota)
 			
 			quotaViewText.color_rgba = select(self.LeftQuota >= 0, CRGBA(255, 255, 255), CRGBA(255, 0, 0))
 			quotaViewTextMisc.color_rgba = select(self.LeftStaticQuota >= 0, CRGBA(255, 255, 255), CRGBA(255, 0, 0))
@@ -524,7 +524,7 @@ function r2.ScenarioWindow:setActNotes()
 	local actNotes = actGr:find("act_notes"):find("small_description").uc_input_string:toUtf8()
 
 	if act==nil then act = r2:getCurrentAct() end
-	if actNotes~=act.ShortDescription then
+	if actNotes ~= (act.ShortDescription or "") then
 		r2.requestSetNode(act.InstanceId, "ShortDescription", actNotes)
 	end
 
@@ -593,8 +593,13 @@ function r2.ScenarioWindow:updateActProperties()
 	assert(season)
 	local uc_season = ucstring()
 	local seasonStr = seasons[location.Season]
-	uc_season:fromUtf8(i18n.get(seasonStr):toUtf8())
-	season.uc_hardtext = uc_season
+	-- a location without a season of its own has none to show
+	if seasonStr then
+		local uc_season = i18n.get(seasonStr)
+		season.text = uc_season
+	else
+		season.text = ""
+	end
 
 	-- manual weather
 	local weatherGr = actGr:find("weather")
@@ -618,9 +623,8 @@ function r2.ScenarioWindow:updateActProperties()
 		assert(notesGr)
 		local notesAct = notesGr:find("small_description")
 		assert(notesAct)
-		local uc_notes = ucstring()
-		uc_notes:fromUtf8(act.ShortDescription)
-		notesAct.uc_input_string = uc_notes
+		-- an act of an older editor may have no notes: the window shows an empty text (setActNotes compares with it)
+		notesAct.input_string = act.ShortDescription or ""
 	end
 	
 	-- pre act notes
@@ -732,24 +736,20 @@ function r2.ScenarioWindow:updateScenarioProperties()
 	end
 
 	-- scenario title
-	local ucTitle = ucstring()
-	ucTitle:fromUtf8(scenario.Description.Title)
-	getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.uc_input_string	= ucTitle
+	-- a scenario of an older editor may have no title, notes or name: the window shows an empty text
+	-- (setScenarioNotes and onTitleChanged compare with it)
+	getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.input_string = scenario.Description.Title or ""
 
 	-- scenario notes
 	local notesGr = scenarioGr:find("scenario_notes")
 	assert(notesGr)
 	local notesScenario = notesGr:find("small_description")
 	assert(notesScenario)
-	local uc_notes = ucstring()
-	uc_notes:fromUtf8(scenario.Description.ShortDescription)
-	notesScenario.uc_input_string = uc_notes
+	notesScenario.input_string = scenario.Description.ShortDescription or ""
 	
 	-- scenario name
 	local scenarioName = scenarioUI:find("scenario_name_text")
-	local uc_name = ucstring()
-	uc_name:fromUtf8(i18n.get("uiR2EDScenarioFilename"):toUtf8() .. " " ..ucstring(scenario:getName()):toUtf8())
-	scenarioName.uc_hardtext = uc_name
+	scenarioName.text = i18n.get("uiR2EDScenarioFilename"):toUtf8() .. " " .. (scenario:getName() or "")
 
 	self.lockComboBoxes = false
 end
@@ -765,7 +765,7 @@ function r2.ScenarioWindow:setScenarioNotes()
 
 	local scenarioNotes = scenarioGr:find("scenario_notes"):find("small_description").uc_input_string:toUtf8()
 
-	if r2.Scenario and scenarioNotes~= r2.Scenario.Description.ShortDescription then
+	if r2.Scenario and scenarioNotes ~= (r2.Scenario.Description.ShortDescription or "") then
 		r2.requestNewAction(i18n.get("uiR2EDChangeScenarioDescription"))
 		r2.requestSetNode(r2.Scenario.Description.InstanceId, "ShortDescription", scenarioNotes)
 		r2.requestEndAction()
@@ -859,8 +859,8 @@ end
 -- the scenario title was changed by the user
 function r2.ScenarioWindow:onTitleChanged()
 	if self.lockComboBoxes then return end	
-	local newTitle = getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.uc_input_string:toUtf8()
-	if newTitle ~= r2.Scenario.Description.Title then
+	local newTitle = getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.input_string
+	if newTitle ~= (r2.Scenario.Description.Title or "") then
 		r2.requestNewAction(i18n.get("uiR2EDChangeScenarioTitle"))	
 		r2.requestSetNode(r2.Scenario.Description.InstanceId, "Title", newTitle)
 		r2.requestEndAction()

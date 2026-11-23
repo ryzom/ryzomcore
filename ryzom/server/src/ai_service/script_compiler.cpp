@@ -18,6 +18,9 @@
 
 #include "script_vm.h"
 #include "script_compiler.h"
+#include "ring_scenario_guard.h"
+
+#include "game_share/rt_scenario_check.h"
 
 // Compiler special keywords (tokens and rules)
 static std::string const s_kw_NUMBER       = "NUMBER";
@@ -1026,6 +1029,7 @@ CCompiler::CCompiler()
 	// Natives Funcs ---------------------------------------------------------
 	
 	registerNativeFunc();
+	CRingScenarioGuard::checkFunctionList();
 }
 
 CSmartPtr<CSubRuleTracer> CCompiler::buildCodeTree (const string &code) const
@@ -1077,6 +1081,25 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCode (const std::vector<std::
 	CSubRuleTracer::_PreviousTracers.clear();
 	CSubRuleTracer::_NextTracers.clear();
 	
+	// The script of a scenario of a Ring session is what the scenario service accepts at upload: of
+	// a size, without the loops and script functions the editor never writes, calling the functions
+	// of a scenario. The same test is made here, on the text as it is compiled.
+	if (CRingScenarioGuard::isLoadingScenario())
+	{
+		std::string text;
+		for (size_t i = 0; i < sourceCodeLines.size(); ++i)
+		{
+			text += sourceCodeLines[i];
+			text += '\n';
+		}
+		std::string refusal;
+		if (!R2::checkRtScenarioScript(text, false, refusal))
+		{
+			CRingScenarioGuard::refuseScript(fullName, refusal);
+			return NULL;
+		}
+	}
+
 	typedef const std::vector<std::string> TList; // because there a problem with const in the macro.
 	string code="{ \n";
 	// Concatenates lines, avoid parts after // ..
@@ -1098,6 +1121,12 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCode (const std::vector<std::
 				if ( !inQuote && ('/' == str[i]) )
 				{
 					++i;
+					// a '/' that ends the line: there is no character after it to copy
+					if (str.size() == i)
+					{
+						code += '/';
+						break;
+					}
 					if ('/' == str[i])
 						break;
 
@@ -1222,8 +1251,8 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCodeYacc (const string &sourc
 
 		return tmp;
 	}
-	else if (debug)
-		nlstop;
+	else if (debug && !CRingScenarioGuard::isLoadingScenario())
+		nlstop; // the debugging stop is for the scripts of the shard: a scenario is made by a client
 
 	return NULL;
 }
@@ -1345,6 +1374,27 @@ void CCompiler::addDeprecatedNativeFunc(std::string const& signature)
 CScriptNativeFuncParams* CCompiler::getNativeFunc(const std::string &funcName, const std::string &inparams, const std::string &outparams)
 {
 	std::string signature;
+	CScriptNativeFuncParams *funcParam = findNativeFunc(funcName, inparams, outparams, signature);
+
+	// The scripts of the scenario of a Ring session call the functions of a scenario only. For the
+	// compilers a function that is refused is a function that does not exist: the script that
+	// calls it does not compile, and the action that holds it does nothing.
+	if (funcParam && CRingScenarioGuard::isLoadingScenario() && !CRingScenarioGuard::isScenarioFunction(signature))
+	{
+		CRingScenarioGuard::refuseFunction(signature);
+		return NULL;
+	}
+	return funcParam;
+}
+
+CScriptNativeFuncParams *CCompiler::getNativeFuncForCall(const std::string &funcName, const std::string &inparams, const std::string &outparams)
+{
+	std::string signature;
+	return findNativeFunc(funcName, inparams, outparams, signature);
+}
+
+CScriptNativeFuncParams *CCompiler::findNativeFunc(const std::string &funcName, const std::string &inparams, const std::string &outparams, std::string &signature)
+{
 	TStringId strId;
 	TNativeFuncMap::iterator it;
 	// Normal params
@@ -1490,7 +1540,7 @@ CCaseTracer::CCaseTracer(const CSmartPtr<CSubRuleTracer> &tracer, const string &
 			const string &strRef=valChldTracer->_TextValue;
 			float f;
 			NLMISC::fromString(strRef, f);
-			_sortValue=*((size_t*)&f);
+			_sortValue = AIVM::floatToOpcode(f);
 			break;
 		}
 		if (!valChldTracer)
@@ -1957,7 +2007,7 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 					string &strRef=_childTracers[index]->_TextValue;
 					float f;
 					NLMISC::fromString(strRef, f);
-					byteCode.push_back(*((size_t*)&f));
+					byteCode.push_back(AIVM::floatToOpcode(f));
 					jumpTable.newCodeBlock();
 					break;
 				}

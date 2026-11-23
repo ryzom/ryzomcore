@@ -184,7 +184,8 @@ void CChatInputFilter::displayMessage(const string &msg, NLMISC::CRGBA col, uint
 	// If at least one window is visible, no need to make the window blink.
 	for(it = _ListeningWindows.begin(); it != _ListeningWindows.end(); ++it)
 	{
-		(*it)->displayMessage(msg, col, FilterType, DynamicChatDbIndex, windowVisibleTmp ? 0  : numBlinks, nullptr, sharedMessage, senderName);
+		(*it)->displayMessage(msg, col, FilterType, DynamicChatDbIndex, windowVisibleTmp ? 0  : numBlinks, nullptr,
+			sharedMessage, senderName);
 	}
 	if (windowVisible) *windowVisible = windowVisibleTmp;
 }
@@ -246,7 +247,8 @@ void CChatInputFilter::clearMessages()
 
 
 //=============================================================================================================
-CChatTargetFilter::CChatTargetFilter() : _Chat(nullptr), _TargetPartyChat(nullptr)
+CChatTargetFilter::CChatTargetFilter() : _Chat(nullptr)
+    , _TargetPartyChat(nullptr)
 {
 	_TargetGroup= CChatGroup::say;
 	_TargetDynamicChannelDbIndex= 0;
@@ -312,11 +314,12 @@ void CChatTargetFilter::msgEntered(const string &msg, CChatWindow *chatWindow)
 		// the target must be a player, make a tell on him
 		if (CHAT_SHARE::getCurrentRequest())
 			CHAT_SHARE::setCurrentRequestSent(ChatMngr.tell(_TargetPlayer, *CHAT_SHARE::getCurrentRequest()));
-		else
-		ChatMngr.tell(_TargetPlayer, msg);
-		// direct output in the chat
-		if (!CHAT_SHARE::getCurrentRequest())
-		chatWindow->displayLocalPlayerTell(_TargetPlayer, msg);
+		else if (!ChatMngr.tellShared(_TargetPlayer, msg))
+		{
+			ChatMngr.tell(_TargetPlayer, msg);
+			// direct output in the chat
+			chatWindow->displayLocalPlayerTell(_TargetPlayer, msg);
+		}
 	}
 	else
 	{
@@ -327,7 +330,7 @@ void CChatTargetFilter::msgEntered(const string &msg, CChatWindow *chatWindow)
 		if (CHAT_SHARE::getCurrentRequest())
 			CHAT_SHARE::setCurrentRequestSent(ChatMngr.chat(*CHAT_SHARE::getCurrentRequest(), _TargetGroup == CChatGroup::team));
 		else
-		ChatMngr.chat(msg, _TargetGroup == CChatGroup::team);
+			ChatMngr.chat(msg, _TargetGroup == CChatGroup::team);
 	}
 }
 

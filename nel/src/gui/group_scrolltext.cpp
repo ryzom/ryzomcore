@@ -41,7 +41,18 @@ namespace NLGUI
 	//========================================================================
 	CGroupScrollText::CGroupScrollText(const TCtorParam &param) :
 											CInterfaceGroup(param),
-											_List(nullptr), _ScrollBar(nullptr), _ButtonAdd(nullptr), _ButtonSub(nullptr), _ButtonNewest(nullptr), _ButtonUnread(nullptr), _UnreadSeen(false), _LastCheckMs(0),
+											_List(nullptr)
+    ,
+											_ScrollBar(nullptr)
+    ,
+											_ButtonAdd(nullptr)
+    ,
+											_ButtonSub(nullptr)
+    ,
+											_ButtonNewest(nullptr),
+											_ButtonUnread(nullptr),
+											_UnreadSeen(false),
+											_LastCheckMs(0),
 											_Settuped(false),
 											_InvertScrollBar(true),
 											_ListHeight(0),
@@ -161,7 +172,8 @@ namespace NLGUI
 	//========================================================================
 	bool CGroupScrollText::isLineVisible(const CViewBase *line) const
 	{
-		return line->getYReal() >= _List->getYReal() && line->getYReal() + line->getHReal() <= _List->getYReal() + _List->getMaxHReal();
+		return line->getYReal() >= _List->getYReal() &&
+			line->getYReal() + line->getHReal() <= _List->getYReal() + _List->getMaxHReal();
 	}
 
 	//========================================================================
@@ -234,7 +246,8 @@ namespace NLGUI
 		{
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 			NLMISC::CRGBA color(255, 255, 255, CWidgetManager::getInstance()->getGlobalColorForContent().A / 2);
-			rVR.drawRotFlipBitmap(_RenderLayer, _List->getXReal(), _FirstUnread->getYReal() + _FirstUnread->getHReal(), _List->getWReal(), 1, 0, false, rVR.getBlankTextureId(), color);
+			rVR.drawRotFlipBitmap(_RenderLayer, _List->getXReal(), _FirstUnread->getYReal() + _FirstUnread->getHReal(),
+				_List->getWReal(), 1, 0, false, rVR.getBlankTextureId(), color);
 		}
 	}
 
@@ -374,7 +387,7 @@ namespace NLGUI
 	class CSTUp : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 
@@ -396,7 +409,7 @@ namespace NLGUI
 	class CSTDown : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 
@@ -413,14 +426,15 @@ namespace NLGUI
 		}
 	};
 	REGISTER_ACTION_HANDLER (CSTDown, "gst_sub");
+
 	// ***************************************************************************
 	class CSTNewest : public IActionHandler
 	{
-	public: virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+	public:
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CGroupScrollText *pST = dynamic_cast<CGroupScrollText*>(pCaller->getParent());
 			if (pST) pST->scrollToNewest();
-
 }
 	};
 	REGISTER_ACTION_HANDLER (CSTNewest, "gst_newest");
@@ -428,7 +442,8 @@ namespace NLGUI
 	// ***************************************************************************
 	class CSTUnread : public IActionHandler
 	{
-	public: virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+	public:
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CGroupScrollText *pST = dynamic_cast<CGroupScrollText*>(pCaller->getParent());
 			if (pST) pST->scrollToUnread();

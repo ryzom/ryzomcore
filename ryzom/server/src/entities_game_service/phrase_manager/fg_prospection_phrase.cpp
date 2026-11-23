@@ -142,7 +142,7 @@ CSourceSpawnPosValidator::CSourceSpawnPosValidator( uint32 aiInstanceNumber, con
 	if ( _AisId.get() != 0 )
 	{
 		_MsgOut.setType( "SRC_SPWN_VLD" );
-		//_MsgOut.serial( const_cast<CVector&>(prospectingPos) );
+		_MsgOut.serial(const_cast<CVector &>(prospectingPos));
 		_SizePos = (uint16)_MsgOut.reserve( sizeof(_NbItems) );
 		_NbItems = 0;
 	}
@@ -782,6 +782,10 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 				pos, weather, _EcotypeSpec,
 				_MaterialGroupFilter, _MaterialFamilyFilter, _CraftableItemPartFilter,
 				_MaterialEnergy, _FindExactMaterialEnergy, fromNeighbourhood, true, &deposit, &depositForK, reason );
+			// keep the reason of every failed attempt: a depleted site found by one probe must not be hidden by the
+			// "no deposit here" of a later probe that strayed off the deposit
+			if (!rawMaterial && reason != NFUnknown)
+				reasons.insert(reason);
 			if ( rawMaterial || (!deposit) )
 				break; // stop attempts if RM found (rawMaterial) or impossible to find one (!deposit)
 		}
@@ -886,12 +890,24 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 	}
 	else
 	{
-		// Message to explain why nothing has been found
+		// Message to explain why nothing has been found.
+		// Every probe point of the cone gave its own reason, and one is reported, in this order: a source that
+		// could not spawn, a depleted deposit, a depleted site, then the steps of the selection from the last to the
+		// first (material at the point, weather/time/season, stat energy, material filters, ecotype, no deposit).
+		// A depleted site comes before the material at the point, although the selection finds it earlier.
 		const char *reasonStr = NULL;
+
+		// No more sources can be spawned!
+		// "No more forage sources can be seen at the moment."
+		MSG_REASON( NFCantSpawnSource )
+
+		// The quantity in the deposit is 0
+		// "Some raw materials used to be present here, but all have been pulled out and the deposit is now empty for a while."
+		else MSG_REASON( NFDepositDepleted )
 
 		// RMs could be found but the site is depleted
 		// => "Some raw materials used to be present here, but the place seems exhausted."
-		MSG_REASON( NFSiteDepleted )
+		else MSG_REASON( NFSiteDepleted )
 
 		// A matching deposit has been found but stat does not match exactly at the random points
 		// => the player has to retry of move a little to find
@@ -908,39 +924,32 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 		// => "Some specified raw materials were detected near by, though."
 		else MSG_REASON( NFNoLocalMaterialForFilter )
 
-		// No deposit found with matching group/family filter at the random points
-		// => "No specified raw materials are present in the area."
-		else MSG_REASON( NFNoDepositForFilter )
+		// Deposits with time/weather not matching at the random points (the last filter on the deposits: the
+		// weather is reported when season and time of day match, the time of day when the season matches)
+		// => "No specified raw materials are present in the area in these weather conditions/at the moment/in this season."
+		else MSG_REASON( NFInvalidCurrentWeather )
+		else MSG_REASON( NFInvalidCurrentTimeOfDay )
+		else MSG_REASON( NFInvalidCurrentSeason )
+
+		// No deposit found with matching stat at the random points
+		// => "You could detect the presence of raw materials, but they have a higher class than your current prospecting action allows to find."
+		else MSG_REASON( NFStatEnergyTooHigh )
 
 		// No deposit found with exactly matching stat at the random points
 		// => "You could detect the presence of raw materials, but they have a different class than the materials searched by your current prospecting action."
 		else MSG_REASON( NFStatEnergyDifferent )
-		
-		// No deposit found with matching stat at the random points
-		// => "You could detect the presence of raw materials, but they have a higher class than your current prospecting action allows to find."
-		else MSG_REASON( NFStatEnergyTooHigh )
+
+		// No deposit found with matching group/family filter at the random points
+		// => "No specified raw materials are present in the area."
+		else MSG_REASON( NFNoDepositForFilter )
 
 		// Ecotype spec not matching any deposit at the random points
 		// => "The terrain specialization cannot be used here."
 		else MSG_REASON( NFInvalidEcotype )
 
-		// Deposits with time/weather not matching at the random points
-		// => "No specified raw materials are present in the area in this season/at the moment/in these weather conditions."
-		else MSG_REASON( NFInvalidCurrentSeason )
-		else MSG_REASON( NFInvalidCurrentTimeOfDay )
-		else MSG_REASON( NFInvalidCurrentWeather )
-
 		// No deposit found at the random points
 		// "No raw materials were detected in this area."
 		else MSG_REASON( NFNoDepositHere )
-
-		// The quantity in the deposit is 0
-		// "Some raw materials used to be present here, but all have been pulled out and the deposit is now empty for a while."
-		else MSG_REASON( NFDepositDepleted )
-
-		// No more sources can be spawned!
-		// "No more forage sources can be seen at the moment."
-		else MSG_REASON( NFCantSpawnSource )
 
 		if ( reasonStr )
 			PHRASE_UTILITIES::sendDynamicSystemMessage( _ActorRowId, reasonStr );

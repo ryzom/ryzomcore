@@ -39,6 +39,7 @@ CBotPlayer::CBotPlayer(CManagerPlayer* owner, TDataSetRow const& DataSetRow, NLM
 	nlassert(owner->playerList().find(dataSetRow())==owner->playerList().end());
 #endif
 	owner->playerList().insert(std::make_pair(dataSetRow(), this));
+	m_WhoSeesMe.init(*CMirrors::DataSet, DataSetRow, DSPropertyWHO_SEES_ME);
 	NLMISC::CSheetId sheetId = CMirrors::sheet(DataSetRow);
 	_Sheet = AISHEETS::CSheets::getInstance()->lookupRaceStats(sheetId);
 }
@@ -253,6 +254,8 @@ void CBotPlayer::updateInsideTriggerZones(const std::set<uint32>& newInsideTrigg
 
 CManagerPlayer::~CManagerPlayer()
 {
+	// No trigger zone leave here: the manager only dies with its AI instance, and the zones
+	// and their player counts die with it
 	TPlayerMap::iterator it = _spawnedPlayers.begin();
 	while (it != _spawnedPlayers.end())
 	{
@@ -321,6 +324,8 @@ void CManagerPlayer::removeDespawnedPlayer(TDataSetRow const& dataSetRow)
 					_teams.erase(it);
 			}
 		}
+		// the trigger zones of the instance lose this player (logout, teleport or instance change)
+		getOwner()->removePlayerFromZoneTriggers(player);
 		player->despawnBot();
 		removeChildByIndex(player->getChildIndex());
 	}

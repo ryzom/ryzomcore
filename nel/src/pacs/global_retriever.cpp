@@ -2604,10 +2604,15 @@ void	NLPACS::CGlobalRetriever::waitEndOfAsyncLoading()
 			// Finished loaded a lr, stream it into rbank
 			if (ite->Finished)
 			{
-				if (!ite->_Buffer.isReading())
-					ite->_Buffer.invert();
+				// a loader whose file was not found has an empty buffer (see CLrLoader::run, which warns about it):
+				// there is nothing to load from it, reading it would throw
+				if (ite->Successful)
+				{
+					if (!ite->_Buffer.isReading())
+						ite->_Buffer.invert();
 
-				const_cast<CRetrieverBank*>(_RetrieverBank)->loadRetriever(ite->LrId, ite->_Buffer);
+					const_cast<CRetrieverBank*>(_RetrieverBank)->loadRetriever(ite->LrId, ite->_Buffer);
+				}
 
 				ite->_Buffer.clear();
 
@@ -2664,7 +2669,7 @@ void	NLPACS::CGlobalRetriever::refreshLrAroundNow(const CVector &position, float
 		CIFile		f;
 		if (!f.open(CPath::lookup(fname, false)))
 		{
-			nlwarning("Couldn't find file '%s' to load, retriever loading aborted", fname.c_str());
+			nlwarning("ASSET ERROR: local retriever file '%s' not found, its area has no collision data", fname.c_str());
 			continue;
 		}
 
@@ -2684,7 +2689,8 @@ void	NLPACS::CGlobalRetriever::CLrLoader::run()
 
 	if (!f.open(CPath::lookup(LoadFile, false)))
 	{
-		nlwarning("Couldn't find file '%s' to load, retriever loading aborted", LoadFile.c_str());
+		nlwarning("ASSET ERROR: local retriever file '%s' not found, its area has no collision data", LoadFile.c_str());
+		CPath::requestFileCheck(LoadFile);
 		_Buffer.clear();
 		Finished = true;
 		return;

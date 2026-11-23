@@ -56,7 +56,7 @@ public:
 	}
 
 	
-	void onModuleUp(IModuleProxy *proxy)
+	void onModuleUp(IModuleProxy *proxy) NL_OVERRIDE
 	{
 		if (proxy->getModuleClassName() == "ChatUnifierServer")
 		{
@@ -71,7 +71,7 @@ public:
 		}
 	}
 
-	void onModuleDown(IModuleProxy *proxy)
+	void onModuleDown(IModuleProxy *proxy) NL_OVERRIDE
 	{
 		if (proxy == _ChatUnifierServer)
 		{
@@ -93,7 +93,7 @@ public:
 //		nlwarning("CChatUnifierClient : failed to dispatch message '%s'", message.getName().c_str());
 //	}
 
-	std::string buildModuleManifest() const
+	std::string buildModuleManifest() const NL_OVERRIDE
 	{
 		_Manifest = "chatUnifierClient(shardId=";
 		_Manifest += toString("%u", IService::getInstance()->getShardId());
@@ -106,7 +106,7 @@ public:
 	/** IChatUnifierClient implementation */
 	/**************************************/
 
-	void sendFarTell(const CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const ucstring &text)
+	void sendFarTell(const CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const ucstring &text) NL_OVERRIDE
 	{
 		if (_ChatUnifierServer == NULL)
 			return;
@@ -115,37 +115,28 @@ public:
 
 		cuc.sendFarTell(this, senderCharId, havePrivilege, destName, text);
 	}
-	bool sendFarTellShared(const CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const CChatMessage &message)
-	{
-		if (_ChatUnifierServer == nullptr)
-			return false;
 
-		CChatUnifierProxy cuc(_ChatUnifierServer);
-		cuc.sendFarTellShared(this, senderCharId, havePrivilege, destName, message);
-		return true;
-	}
-
-	void sendFarGuildChat(const ucstring &senderName, uint32 guildId, const ucstring &text)
+	void sendFarGuildChat(const ucstring &senderName, uint32 guildId, const ucstring &text) NL_OVERRIDE
 	{
 		CChatUnifierClientProxy::broadcast_farGuildChat(_Peers.begin(), _Peers.end(), this, senderName, guildId, text);
 	}
 
-	void sendFarGuildChatShared(const ucstring &senderName, uint32 guildId, const CChatMessage &message)
+	void sendFarGuildChatShared(const ucstring &senderName, uint32 guildId, const CChatMessage &message) NL_OVERRIDE
 	{
 		CChatUnifierClientProxy::broadcast_farGuildChatShared(_Peers.begin(), _Peers.end(), this, senderName, guildId, message);
 	}
 
-	void sendFarGuildChat2(const ucstring &senderName, uint32 guildId, const std::string &phraseName)
+	void sendFarGuildChat2(const ucstring &senderName, uint32 guildId, const std::string &phraseName) NL_OVERRIDE
 	{
 		CChatUnifierClientProxy::broadcast_farGuildChat2(_Peers.begin(), _Peers.end(), this, senderName, guildId, phraseName);
 	}
 
-	void sendFarGuildChat2Ex(const ucstring &senderName, uint32 guildId, uint32 phraseId)
+	void sendFarGuildChat2Ex(const ucstring &senderName, uint32 guildId, uint32 phraseId) NL_OVERRIDE
 	{
 		CChatUnifierClientProxy::broadcast_farGuildChat2Ex(_Peers.begin(), _Peers.end(), this, senderName, guildId, phraseId);
 	}
 
-	void sendUniverseChat(const ucstring &senderName, uint32 homeSessionId, const ucstring &text)
+	void sendUniverseChat(const ucstring &senderName, uint32 homeSessionId, const ucstring &text) NL_OVERRIDE
 	{
 		CChatUnifierClientProxy::broadcast_universeBroadcast(_Peers.begin(), _Peers.end(), this, senderName, homeSessionId, text);
 
@@ -160,7 +151,7 @@ public:
 		}
 	}
 
-	void sendUniverseChatShared(const ucstring &senderName, uint32 homeSessionId, const CChatMessage &message)
+	void sendUniverseChatShared(const ucstring &senderName, uint32 homeSessionId, const CChatMessage &message) NL_OVERRIDE
 	{
 		CChatUnifierClientProxy::broadcast_universeBroadcastShared(_Peers.begin(), _Peers.end(), this, senderName, homeSessionId, message);
 
@@ -172,7 +163,7 @@ public:
 		}
 	}
 
-	void sendUnifiedDynChat(const NLMISC::CEntityId &dynCharId, const ucstring &senderName, const ucstring &text)
+	void sendUnifiedDynChat(const NLMISC::CEntityId &dynCharId, const ucstring &senderName, const ucstring &text) NL_OVERRIDE
 	{
 #ifdef NL_OS_WINDOWS
 #	pragma message (NL_LOC_WRN "Add the message in the interface")
@@ -180,7 +171,7 @@ public:
 		CChatUnifierClientProxy::broadcast_dynChanBroadcast(_Peers.begin(), _Peers.end(), this, dynCharId, senderName, text);
 	}
 
-	void sendUnifiedDynChatShared(const NLMISC::CEntityId &dynCharId, const ucstring &senderName, const CChatMessage &message)
+	void sendUnifiedDynChatShared(const NLMISC::CEntityId &dynCharId, const ucstring &senderName, const CChatMessage &message) NL_OVERRIDE
 	{
 		CChatUnifierClientProxy::broadcast_dynChanBroadcastShared(_Peers.begin(), _Peers.end(), this, dynCharId, senderName, message);
 	}
@@ -192,7 +183,7 @@ public:
 	/******************************************/
 
 	// SU send a far tell failure to IOS. This mean that the player is offline or unknow
-	void recvFarTellFail(NLNET::IModuleProxy *sender, const CEntityId &senderCharId, const ucstring &destName, TFailInfo failInfo)
+	void recvFarTellFail(NLNET::IModuleProxy *sender, const CEntityId &senderCharId, const ucstring &destName, TFailInfo failInfo) NL_OVERRIDE
 	{
 		nldebug("IOSCU: recvFarTellFail : receiving a far tell failure from %s to '%s'", senderCharId.toString().c_str(), destName.toUtf8().c_str());
 		// try to retrieve the sender char
@@ -235,21 +226,15 @@ public:
 	}
 
 	// SU send a far tell to the IOS hosting the addressee character
-	void recvFarTell(NLNET::IModuleProxy *sender, const CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const ucstring &text)
+	void recvFarTell(NLNET::IModuleProxy *sender, const CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const ucstring &text) NL_OVERRIDE
 	{
 		nldebug("IOSCU: recvFarTell : receiving a far tell from %s to '%s'", senderCharId.toString().c_str(), destName.toUtf8().c_str());
 		CChatManager &cm = IOS->getChatManager();
 		cm.farTell(senderCharId, senderName, havePrivilege, destName, text);
 	}
-	void recvFarTellShared(NLNET::IModuleProxy *sender, const CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const CChatMessage &message)
-	{
-		nldebug("IOSCU: recvFarTellShared : receiving a far tell from %s to '%s'", senderCharId.toString().c_str(), destName.toUtf8().c_str());
-		CChatManager &cm = IOS->getChatManager();
-		cm.farTellShared(senderCharId, senderName, havePrivilege, destName, message);
-	}
 
 	// SU forward a guild chat message to the IOS
-	void farGuildChat(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const ucstring &text)
+	void farGuildChat(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const ucstring &text) NL_OVERRIDE
 	{
 		CChatManager &cm = IOS->getChatManager();
 
@@ -257,7 +242,8 @@ public:
 		TGroupId grpId(RYZOMID::chatGroup, guildId, 0, 0);
 		cm.farChatInGroup(grpId, 0, text, senderName);
 	}
-	void farGuildChatShared(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const CChatMessage &message)
+
+	void farGuildChatShared(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const CChatMessage &message) NL_OVERRIDE
 	{
 		CChatManager &cm = IOS->getChatManager();
 		TGroupId grpId(RYZOMID::chatGroup, guildId, 0, 0);
@@ -265,17 +251,17 @@ public:
 	}
 
 	// SU forward a guild chat message to the IOS
-	void farGuildChat2(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const ucstring &phraseName)
+	void farGuildChat2(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const ucstring &phraseName) NL_OVERRIDE
 	{
 	}
 
 	// SU forward a guild chat message to the IOS
-	void farGuildChat2Ex(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, uint32 phraseId)
+	void farGuildChat2Ex(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, uint32 phraseId) NL_OVERRIDE
 	{
 	}
 
 	// IOS forward a universe chat message to the IOS
-	virtual void universeBroadcast(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 senderHomeSession, const ucstring &text)
+	virtual void universeBroadcast(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 senderHomeSession, const ucstring &text) NL_OVERRIDE
 	{
 		CChatManager &cm = IOS->getChatManager();
 
@@ -289,7 +275,8 @@ public:
 		TGroupId grpId(RYZOMID::chatGroup,0);
 		cm.farChatInGroup(grpId, senderHomeSession, text, senderName);
 	}
-	virtual void universeBroadcastShared(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 senderHomeSession, const CChatMessage &message)
+
+	virtual void universeBroadcastShared(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 senderHomeSession, const CChatMessage &message) NL_OVERRIDE
 	{
 		CChatManager &cm = IOS->getChatManager();
 		TGroupId grpId(RYZOMID::chatGroup,0);
@@ -297,7 +284,7 @@ public:
 	}
 
 	// IOS forward a dyn chat chat message to the IOSs
-	virtual void dynChanBroadcast(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text)
+	virtual void dynChanBroadcast(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text) NL_OVERRIDE
 	{
 		CChatManager &cm = IOS->getChatManager();
 
@@ -318,13 +305,14 @@ public:
 			dcc = dcc->getNextChannelSession(); // next session in this channel
 		}						
 	}
-	virtual void dynChanBroadcastShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &message)
+
+	virtual void dynChanBroadcastShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &message) NL_OVERRIDE
 	{
 		IOS->getChatManager().farDynChatShared(chanId, senderName, message);
 	}
 
 	// SU send a broadcast message to the IOS
-	void recvBroadcastMessage(NLNET::IModuleProxy *sender, const ucstring &message)
+	void recvBroadcastMessage(NLNET::IModuleProxy *sender, const ucstring &message) NL_OVERRIDE
 	{
 	}
 

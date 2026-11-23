@@ -4041,11 +4041,6 @@ NLMISC_CATEGORISED_DYNVARIABLE( ms, string, Status, "Mirrors online status" )
 }
 
 
-static string MainNbEntities = "?";
-
-// This command must be here to prevent to compile the same one in mirror.cpp (which would crash)
-NLMISC_CATEGORISED_VARIABLE( ms, string, MainNbEntities, "Not available on MS" );
-
 NLMISC_CATEGORISED_DYNVARIABLE( ms, float, EmittedKBPerSec, "Output rate for mirror deltas & messages" )
 {
 	if ( get )

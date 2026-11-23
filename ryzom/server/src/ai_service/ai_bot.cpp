@@ -22,10 +22,12 @@
 #include "visual_properties_interface.h"
 #include "server_share/msg_brick_service.h"
 #include "server_share/r2_variables.h"
+#include "ring_scenario_guard.h"
 
 using namespace MULTI_LINE_FORMATER;
 
 extern NLLIGO::CLigoConfig LigoConfig;
+extern NLMISC::CRefPtr<CAIEntityPhysical> TempSpeaker;
 
 //////////////////////////////////////////////////////////////////////////////
 // CSpawnBot                                                                //
@@ -41,6 +43,7 @@ CSpawnBot::CSpawnBot(TDataSetRow const& entityIndex, CBot& owner, NLMISC::CEntit
 , _LastHealTick(0)
 , _LastSelfHealTick(0)
 , _SpeedFactor(1.f)
+, _Despawned(false)
 {
 	nlassert(owner.getOwner()->getSpawnObj());
 	spawnGrp().incSpawnedBot(getPersistent());
@@ -50,10 +53,36 @@ CSpawnBot::CSpawnBot(TDataSetRow const& entityIndex, CBot& owner, NLMISC::CEntit
 
 CSpawnBot::~CSpawnBot()
 {
+	despawned();
+	// The list is empty when the base classes are destroyed: an entry tells its owner that it
+	// goes. It can have got entries since the bot left its group.
+	clearAggroList();
+}
+
+void CSpawnBot::despawned()
+{
+	if (_Despawned)
+		return;
+	_Despawned = true;
+
 	clearAggroList();
 	getPersistent().unlinkFromWorldMap();
 	spawnGrp().decSpawnedBot();
 	getPersistent().getSpawnCounter().dec();
+	// A profile that was set while the profile of the bot is updated waits for the end of that
+	// update. It is not begun for a bot that left its group: it goes as the profile of the bot
+	// goes, without a begin and without an end. Last here: the event of the last bot that leaves
+	// (decSpawnedBot) can set one.
+	dropNextAIProfile();
+}
+
+void CSpawnBot::updateProfile(uint ticks)
+{
+	// The update of a profile raises events of the group (see CBot::releaseSpawnObj). The bot
+	// outlives the update, and its profile is released with it: the destructor of a profile uses
+	// its bot.
+	NLMISC::CSmartPtr<CSpawnBot> const keptForUpdate(this);
+	CProfilePtr::updateProfile(ticks);
 }
 
 CAIInstance* CSpawnBot::getAIInstance() const
@@ -600,7 +629,7 @@ bool CBot::spawn()
 		return true;
 	if (getSheet()->SheetId() == NLMISC::CSheetId::Unknown)
 	{
-		nlwarning("Bot '%s'%s: invalid sheet id", getAliasFullName().c_str(), getAliasString().c_str());
+		RYAI_GROUP_WARNING(getOwner(), NLMISC::toString("Bot '%s'%s: invalid sheet id", getAliasFullName().c_str(), getAliasString().c_str()));
 		return false;
 	}
 	if (!getSpawnCounter().remainToMax())
@@ -615,7 +644,7 @@ bool CBot::spawn()
 	// Check the initial position is valid
 	if (!botWPos.isValid() && !isStuck())
 	{
-		nlwarning("Bot '%s'%s: invalid spawn pos and not stuck", getAliasFullName().c_str(), getAliasString().c_str());
+		RYAI_GROUP_WARNING(getOwner(), NLMISC::toString("Bot '%s'%s: invalid spawn pos and not stuck", getAliasFullName().c_str(), getAliasString().c_str()));
 		return false;
 	}
 	
@@ -632,8 +661,24 @@ void CBot::despawnBot()
 		return;
 	
 	CMirrors::removeEntity(getSpawnObj()->getEntityId());
-	setSpawn(NULL); // automatic smart pointer deletion
+	releaseSpawnObj();
 	notifyBotDespawn();
+}
+
+void CBot::releaseSpawnObj()
+{
+	// An update of the bot, or of its fight, holds a reference to the spawn object while it runs.
+	// It raises events of the group, the handlers of an event are script, and a script can despawn
+	// the bot. The object is then not deleted here but when that update returns. To everything else
+	// it is gone as if it were deleted here: it leaves its group and the world map now, in the
+	// order its destructor does it. It is the speaker of no event from here on, held or not: the
+	// last bot that leaves its group raises an event of the group.
+	CSpawnBot* const spawnBot = getSpawnObj();
+	if (spawnBot && (CAIEntityPhysical*)TempSpeaker==spawnBot)
+		TempSpeaker = NULL;
+	if (spawnBot && spawnBot->getRefCount()>1)
+		spawnBot->despawned();
+	setSpawn(NULL);
 }
 
 bool CBot::reSpawn(bool sendMessage)
@@ -662,7 +707,7 @@ void CBot::sheetChanged()
 		
 		// Delete old bot
 		CMirrors::removeEntity(getSpawnObj()->getEntityId());
-		setSpawn(NULL); // automatic smart pointer deletion
+		releaseSpawnObj();
 		notifyBotDespawn();
 		
 		// Finalize spawn object creation

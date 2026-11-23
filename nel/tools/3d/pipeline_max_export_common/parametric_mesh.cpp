@@ -39,30 +39,90 @@ const NLMISC::CClassId CLASSID_CYLINDER(0x00000012, 0x00000000);
 const NLMISC::CClassId CLASSID_SPHERE(0x00000011, 0x00000000);
 const NLMISC::CClassId CLASSID_PLANE(0x081f1dfc, 0x77566f65);
 
-// Box "generate mapping coords" UV for one vertex, by face type. Each face projects onto its two
-// in-plane axes; validated against ~/shape_export_dataset primuv_box (and generalises to
-// primuv_box_multiseg because the projection is by vertex coordinate, not face index). w=width,
-// l=length, h=height (the Box pblock params; signed — the formula tracks how positions are built).
-enum TBoxUvFace { BX_BOTTOM, BX_TOP, BX_SIDE_Y, BX_SIDE_X };
-static inline NLMISC::CVector boxUvFor(const NLMISC::CVector &p, TBoxUvFace ft, float l, float w, float h)
+// The Box map verts as the primitive numbers them: three grids, one per axis pair, (lsegs + 1) x
+// (hsegs + 1) for the X sides, (wsegs + 1) x (hsegs + 1) for the Y sides and (wsegs + 1) x (lsegs + 1)
+// for the Z sides, each running from 0 to 1, opposite sides sharing their grid. A face picks its grid
+// by the main axis of its normal and each corner its grid point by rounding its position; the -X, +Y
+// and -Z sides run u the other way.
+static void boxSharedUVs(const std::vector<NLMISC::CVector> &verts, const std::vector<SPrimTri> &tris,
+                         float l, float w, float h, sint ws, sint ls, sint hs,
+                         std::vector<NLMISC::CVector> &uvVerts, std::vector<uint32> &uvFaces)
 {
-	float u = 0.0f, v = 0.0f;
-	switch (ft)
+	const sint lp = ls + 1, wp = ws + 1, hp = hs + 1;
+	const sint xbase = 0, ybase = lp * hp, zbase = lp * hp + hp * wp;
+	const NLMISC::CVector va(-w * 0.5f, -l * 0.5f, 0.0f); // the corner the vertices were built from
+	if (w == 0.0f) w = 0.0001f;
+	if (l == 0.0f) l = 0.0001f;
+	if (h == 0.0f) h = 0.0001f;
+	const float dw = 1.0f / (float)ws, dl = 1.0f / (float)ls, dh = 1.0f / (float)hs;
+	uvVerts.clear();
+	float v = 0.0f;
+	for (sint iz = 0; iz < hp; ++iz, v += dh)
 	{
-		case BX_BOTTOM:  u = 0.5f - p.x / w; v = 0.5f + p.y / l; break; // -Z face (U mirrored vs top)
-		case BX_TOP:     u = 0.5f + p.x / w; v = 0.5f + p.y / l; break;
-		case BX_SIDE_Y:  u = 0.5f + p.x / w; v = p.z / h; break;       // ±Y faces share this mapping
-		case BX_SIDE_X:  u = 0.5f + p.y / l; v = p.z / h; break;       // ±X faces share this mapping
+		float u = 0.0f;
+		for (sint iy = 0; iy < lp; ++iy, u += dl)
+			uvVerts.push_back(NLMISC::CVector(u, v, 0.0f));
 	}
-	return NLMISC::CVector(u, v, 0.0f);
+	v = 0.0f;
+	for (sint iz = 0; iz < hp; ++iz, v += dh)
+	{
+		float u = 0.0f;
+		for (sint ix = 0; ix < wp; ++ix, u += dw)
+			uvVerts.push_back(NLMISC::CVector(u, v, 0.0f));
+	}
+	v = 0.0f;
+	for (sint iy = 0; iy < lp; ++iy, v += dl)
+	{
+		float u = 0.0f;
+		for (sint ix = 0; ix < wp; ++ix, u += dw)
+			uvVerts.push_back(NLMISC::CVector(u, v, 0.0f));
+	}
+	uvFaces.resize(tris.size() * 3);
+	for (uint t = 0; t < tris.size(); ++t)
+	{
+		const NLMISC::CVector &p0 = verts[tris[t].V[0]], &p1 = verts[tris[t].V[1]], &p2 = verts[tris[t].V[2]];
+		const NLMISC::CVector n = (p0 - p2) ^ (p1 - p0);
+		const float ax = fabsf(n.x), ay = fabsf(n.y), az = fabsf(n.z);
+		const int axis = (ax >= ay && ax >= az) ? 0 : (ay >= az ? 1 : 2);
+		const bool neg = axis == 0 ? n.x < 0.0f : (axis == 1 ? n.y < 0.0f : n.z < 0.0f);
+		for (uint c = 0; c < 3; ++c)
+		{
+			const NLMISC::CVector &p = verts[tris[t].V[c]];
+			sint iu, iv, index;
+			switch (axis)
+			{
+			case 0:
+				iu = (sint)(((float)ls * (p.y - va.y) / l) + 0.5f);
+				iv = (sint)(((float)hs * (p.z - va.z) / h) + 0.5f);
+				if (neg) iu = ls - iu;
+				index = xbase + iv * lp + iu;
+				break;
+			case 1:
+				iu = (sint)(((float)ws * (p.x - va.x) / w) + 0.5f);
+				iv = (sint)(((float)hs * (p.z - va.z) / h) + 0.5f);
+				if (!neg) iu = ws - iu;
+				index = ybase + iv * wp + iu;
+				break;
+			default:
+				iu = (sint)(((float)ws * (p.x - va.x) / w) + 0.5f);
+				iv = (sint)(((float)ls * (p.y - va.y) / l) + 0.5f);
+				if (neg) iu = ws - iu;
+				index = zbase + iv * wp + iu;
+				break;
+			}
+			uvFaces[t * 3 + c] = (index >= 0 && index < (sint)uvVerts.size()) ? (uint32)index : 0;
+		}
+	}
 }
 
 bool buildParametricMesh(const NLMISC::CClassId &cid,
                          const std::map<sint32, OLDPBLOCK::SParam> &params,
                          std::vector<NLMISC::CVector> &verts,
                          std::vector<SPrimTri> &tris,
-                         std::vector<NLMISC::CVector> *uvVerts)
+                         std::vector<NLMISC::CVector> *uvVerts,
+                         std::vector<uint32> *uvFaces)
 {
+	if (uvFaces) uvFaces->clear();
 	using OLDPBLOCK::paramFloat;
 	using OLDPBLOCK::paramInt;
 
@@ -114,26 +174,16 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 		static const uint32 sideSg[4]  = { 0x08, 0x10, 0x20, 0x40 };
 		uint32 curMat = 0;
 		uint32 curSg = 0;
-		// FT = the box-mapping face type for the UV; emitted per corner in the SAME order the geom
-		// tri is pushed (flip-aware) so map-face t's corner c is (*uvVerts)[t*3 + c].
-		#define BOX_TRI(a, b, c, FT) do { \
+		// Triangles in the flip-aware winding; the UVs follow from the finished mesh (boxSharedUVs).
+		#define BOX_TRI(a, b, c) do { \
 			sint _a = (a), _b = (b), _c = (c); \
 			sint _o0 = flip ? _b : _a, _o1 = flip ? _a : _b; \
 			SPrimTri _t = { { (uint32)_o0, (uint32)_o1, (uint32)_c }, curMat, curSg }; \
 			tris.push_back(_t); \
-			if (uvVerts) { \
-				uvVerts->push_back(boxUvFor(verts[_o0], FT, l, w, h)); \
-				uvVerts->push_back(boxUvFor(verts[_o1], FT, l, w, h)); \
-				uvVerts->push_back(boxUvFor(verts[_c], FT, l, w, h)); \
-			} \
 		} while (0)
 		// Negative height inverts the cap roles: the z=0 grid is now functionally the TOP face
-		// (facing +Z after the winding flip) and the z=h grid is the BOTTOM. Swap the face-type
-		// used for UV generation AND the matId/sg pair on each so a wall-mounted upside-down box
-		// (h < 0, box01.max) uv-maps the same as its right-side-up sibling. Validated against
-		// box01.shape (h < 0): the z=0 face's UVs now match the BX_TOP formula ref carries.
-		TBoxUvFace ftLow = flip ? BX_TOP : BX_BOTTOM;
-		TBoxUvFace ftHigh = flip ? BX_BOTTOM : BX_TOP;
+		// (facing +Z after the winding flip) and the z=h grid is the BOTTOM, so the matId/sg pairs
+		// swap (box01.max, h < 0). The UVs need no swap: they go by the face normal.
 		uint32 matLow = flip ? 0 : 1;
 		uint32 sgLow = flip ? 0x04 : 0x02;
 		uint32 matHigh = flip ? 1 : 0;
@@ -143,16 +193,16 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 			for (sint ix = 0; ix < ws; ++ix)
 			{
 				sint a = iy * row + ix;
-				BOX_TRI(a, a + row, a + row + 1, ftLow);
-				BOX_TRI(a + row + 1, a + 1, a, ftLow);
+				BOX_TRI(a, a + row, a + row + 1);
+				BOX_TRI(a + row + 1, a + 1, a);
 			}
 		curMat = matHigh; curSg = sgHigh;
 		for (sint iy = 0; iy < ls; ++iy)
 			for (sint ix = 0; ix < ws; ++ix)
 			{
 				sint a = gridN + iy * row + ix;
-				BOX_TRI(a, a + 1, a + 1 + row, ftHigh);
-				BOX_TRI(a + 1 + row, a + row, a, ftHigh);
+				BOX_TRI(a, a + 1, a + 1 + row);
+				BOX_TRI(a + 1 + row, a + row, a);
 			}
 		sint sideStart[4] = { 0, ws, ws + ls, 2 * ws + ls };
 		sint sideLen[4] = { ws, ls, ws, ls };
@@ -161,19 +211,36 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 			curMat = sideMat[sd];
 			curSg = sideSg[sd];
 			// sd 0/2 = -Y/+Y faces (span x,z); sd 1/3 = +X/-X faces (span y,z).
-			TBoxUvFace ft = (sd == 0 || sd == 2) ? BX_SIDE_Y : BX_SIDE_X;
 			for (sint v = 0; v < hs; ++v)
 				for (sint k = 0; k < sideLen[sd]; ++k)
 				{
 					sint pk = sideStart[sd] + k;
 					sint lo1 = BOX_RING(v, pk), lo2 = BOX_RING(v, pk + 1);
 					sint up1 = BOX_RING(v + 1, pk), up2 = BOX_RING(v + 1, pk + 1);
-					BOX_TRI(lo1, lo2, up2, ft);
-					BOX_TRI(up2, up1, lo1, ft);
+					BOX_TRI(lo1, lo2, up2);
+					BOX_TRI(up2, up1, lo1);
 				}
 		}
 		#undef BOX_TRI
 		#undef BOX_RING
+		if (uvVerts)
+		{
+			std::vector<NLMISC::CVector> grid;
+			std::vector<uint32> gridFaces;
+			boxSharedUVs(verts, tris, l, w, h, ws, ls, hs, grid, gridFaces);
+			if (uvFaces)
+			{
+				uvVerts->swap(grid);
+				uvFaces->swap(gridFaces);
+			}
+			else
+			{
+				// per corner: corner c of tri t is (*uvVerts)[t*3 + c]
+				uvVerts->resize(gridFaces.size());
+				for (uint i = 0; i < gridFaces.size(); ++i)
+					(*uvVerts)[i] = grid[gridFaces[i]];
+			}
+		}
 		return true;
 	}
 
@@ -383,6 +450,36 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
 				            SPHH_U(k), SPHH_V(rows + 1),
 				            SPHH_U(k + 1), SPHH_V(rows),
 				            SPHH_U(k), SPHH_V(rows));
+			if (uvVerts && uvFaces)
+			{
+				// The primitive's own map verts: a (rows + 2) x (segs + 1) grid, row i at v(i), column j at
+				// u = j / segs (column segs is the seam copy at u = 1), faces in the order above.
+				const sint t1 = segs + 1;
+				uvVerts->clear();
+				for (sint i = 0; i < rows + 2; ++i)
+					for (sint j = 0; j <= segs; ++j)
+						uvVerts->push_back(NLMISC::CVector((float)j / (float)segs, SPHH_V(i), 0.0f));
+				uvFaces->clear();
+				for (sint k = 0; k < segs; ++k)
+				{
+					uvFaces->push_back(k);
+					uvFaces->push_back(t1 + k);
+					uvFaces->push_back(t1 + k + 1);
+				}
+				for (sint i = 1; i < rows; ++i)
+					for (sint k = 0; k < segs; ++k)
+					{
+						const uint32 na = i * t1 + k, nb = na + t1, nc = nb + 1, nd = na + 1;
+						uvFaces->push_back(na); uvFaces->push_back(nb); uvFaces->push_back(nc);
+						uvFaces->push_back(na); uvFaces->push_back(nc); uvFaces->push_back(nd);
+					}
+				for (sint k = 0; k < segs; ++k)
+				{
+					uvFaces->push_back((rows + 1) * t1 + k);
+					uvFaces->push_back(rows * t1 + k + 1);
+					uvFaces->push_back(rows * t1 + k);
+				}
+			}
 			#undef SPHH_U
 			#undef SPHH_TRI_UV
 			#undef SPHH_V

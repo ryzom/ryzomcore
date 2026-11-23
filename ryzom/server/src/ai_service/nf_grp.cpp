@@ -1673,6 +1673,8 @@ Arguments: s(actionName),s(url) ->
 @param[in] actionName of action when player mouse over
 @param[in] url of action when player mouse over
 
+The action is removed again with clearUrl.
+
 @code
 ()setUrl("Click on Me", "http://www.domain.com/script.php");
 @endcode
@@ -1700,6 +1702,38 @@ void setUrl_ss_(CStateInstance* entity, CScriptStack& stack)
 	spawnGroup->setUrl(url);
 	msg.ActionName = actionName;
 	msg.Url = url;
+	msg.send(egsString);
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection clearUrl__
+Removes the right-click web page action from every spawned bot of the group, whether it was
+set with setUrl or comes from the description of the bot. A bot that respawns has the web
+page of its description again, if it has one.
+
+Arguments:  ->
+
+@code
+()clearUrl();
+@endcode
+
+*/
+// CGroup
+void clearUrl__(CStateInstance *entity, CScriptStack &stack)
+{
+	CCreatureSetUrlMsg msg;
+	FOREACH(botIt, CCont<CBot>, entity->getGroup()->bots())
+	{
+		CSpawnBot *pbot = botIt->getSpawnObj();
+		if (pbot != NULL)
+		{
+			msg.Entities.push_back(pbot->dataSetRow());
+		}
+	}
+
+	msg.Clear = true;
 	msg.send(egsString);
 }
 
@@ -1757,9 +1791,17 @@ Arguments:  f(alias),f(Coef), ->
 // CGroup
 void setBotHPScaleByAlias_fs_(CStateInstance* entity, CScriptStack& stack)
 {
-	uint32 alias =  LigoConfig.aliasFromString((string)stack.top()) ; stack.pop();
+	string aliasStr = (string)stack.top(); stack.pop();
+	uint32 alias = LigoConfig.aliasFromString(aliasStr);
 
 	float coef = stack.top(); stack.pop();
+
+	// 0 is the alias of the bots that have none: a string that is no alias must not select them
+	if (alias == 0)
+	{
+		nlwarning("setBotHPScaleByAlias: '%s' is not an alias, in group '%s'", aliasStr.c_str(), entity->getGroup()->getName().c_str());
+		return;
+	}
 
 	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
 
@@ -3574,7 +3616,7 @@ The value *Must* be an number and only few type are handled.
 - integer
 - time
 
-Some value other can be handled *BUT* the value *MUST*  be  the C++ code enum value. So LD must ask to coder to do a scripting fonction that have as input a string that contains enum value as string eg "matis" and that return the C++ enum value as int (eg 4).
+Some value other can be handled *BUT* the value *MUST*  be  the C++ code enum value. So LD must ask to coder to do a scripting function that have as input a string that contains enum value as string eg "matis" and that return the C++ enum value as int (eg 4).
 - skill
 - faction
 - power_type
@@ -3603,7 +3645,7 @@ void phrasePushValue_sf_(CStateInstance* entity, CScriptStack& stack)
 {
 	float f = (float)stack.top();stack.pop(); // get the value as float
 	std::string typeStr = (std::string)stack.top(); stack.pop(); // get the param type
-	// create the good STRING_MANAGER::TParam in fonction of its type and is value
+	// create the good STRING_MANAGER::TParam depending on its type and is value
 	STRING_MANAGER::TParamType type = STRING_MANAGER::stringToParamType(typeStr);
 	STRING_MANAGER::TParam param;
 	param.Type = type;
@@ -3700,7 +3742,7 @@ Input as stringId (number): *WARNING* LD must as coder to do function that retur
 
 
 Input must be a enum value:
-Some value other can be handled *BUT* the value *MUST*  be  the C++ code enum value. So LD must ask to coder to do a scripting fonction that have as input a string that contains enum value as string eg "matis" and that return the C++ enum value as int (eg 4).
+Some value other can be handled *BUT* the value *MUST*  be  the C++ code enum value. So LD must ask to coder to do a scripting function that have as input a string that contains enum value as string eg "matis" and that return the C++ enum value as int (eg 4).
 - skill
 - faction
 - power_type
@@ -3735,7 +3777,7 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 	std::string s = (std::string)stack.top(); stack.pop(); // get the param value
 	std::string typeStr = (std::string)stack.top(); stack.pop(); // get the param type
 
-	// construct a STRING_MANAGER::TParam in fonction of its type and its value
+	// construct a STRING_MANAGER::TParam depending on its type and its value
 	STRING_MANAGER::TParamType type = STRING_MANAGER::stringToParamType(typeStr);
 	STRING_MANAGER::TParam param;
 	param.Type = type;
@@ -4788,7 +4830,11 @@ Arguments: ->
 // CStateInstance
 void setConditionSuccess_f_(CStateInstance* entity, CScriptStack& stack)
 {
-	bool conditionState = (uint32)((float)stack.top()) != 0;
+	// true for a number whose whole part is not 0
+	float const conditionValue = (float)stack.top();
+	bool conditionState = conditionValue >= 1.f || conditionValue <= -1.f;
+	// the parameter is taken from the stack, as every function takes its own
+	stack.pop();
 	CGroup* group = entity->getGroup();
 	if (!group)
 	{
@@ -4933,6 +4979,7 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, setConditionSuccess_f_);
 	REGISTER_NATIVE_FUNC(functions, facing_f_);
 	REGISTER_NATIVE_FUNC(functions, setUrl_ss_);
+	REGISTER_NATIVE_FUNC(functions, clearUrl__);
 
 	// Boss functions (custom text)
 	REGISTER_NATIVE_FUNC(functions, phraseBegin__);

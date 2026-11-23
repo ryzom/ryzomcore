@@ -156,11 +156,18 @@ void CMainWindow::updateInitialization(bool visible)
 		{
 			if (wantGraphics)
 			{
-				m_GraphicsViewport->init(m_GraphicsConfig);
-				if (m_IsSoundInitialized)
-					m_SoundUtilities.initGraphics(m_GraphicsViewport);
-				m_IsGraphicsInitialized = true;
-				done = false;
+				if (m_GraphicsViewport->init(m_GraphicsConfig))
+				{
+					if (m_IsSoundInitialized)
+						m_SoundUtilities.initGraphics(m_GraphicsViewport);
+					m_IsGraphicsInitialized = true;
+					done = false;
+				}
+				else
+				{
+					// graphics are switched off, so that the viewport is not set up again on every update
+					m_IsGraphicsEnabled = false;
+				}
 			}
 		}
 		

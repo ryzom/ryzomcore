@@ -88,7 +88,10 @@ typedef std::vector<TPairCE> TPairVector;
 /*
  * Comparison function object for TPairCE
  */
-struct TComparePairCE : public std::binary_function < const TPairCE&, const TPairCE&, bool >
+struct TComparePairCE
+#ifndef NL_CPP17
+	: public std::binary_function < const TPairCE&, const TPairCE&, bool >
+#endif
 {
 	/// Constructor
 	TComparePairCE( CVisionArray *visionarray ) :

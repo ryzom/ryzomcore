@@ -77,7 +77,15 @@ void CTile_browser_dlg::initDialog(const int& tileSetIndex)
 
 	//Layout
     QHBoxLayout *mainLayout = new QHBoxLayout;
-	mainLayout->addWidget(ui.buttonFrame);
+	// the controls scroll when the screen is lower than they are
+	QScrollArea *buttonScrollArea = new QScrollArea;
+	buttonScrollArea->setFrameShape(QFrame::NoFrame);
+	buttonScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	buttonScrollArea->setWidgetResizable(true);
+	buttonScrollArea->setWidget(ui.buttonFrame);
+	buttonScrollArea->setMinimumWidth(ui.buttonFrame->minimumWidth() + buttonScrollArea->verticalScrollBar()->sizeHint().width());
+	buttonScrollArea->setMaximumWidth(ui.buttonFrame->maximumWidth() + buttonScrollArea->verticalScrollBar()->sizeHint().width());
+	mainLayout->addWidget(buttonScrollArea);
     mainLayout->addWidget(ui.tileBrowserListView);
     setLayout(mainLayout);
 
@@ -86,6 +94,23 @@ void CTile_browser_dlg::initDialog(const int& tileSetIndex)
 	int height = settings.value("browser/height").toInt();
 	if (width > 0 && height > 0)
 		this->resize(width, height);
+
+	// the designed or saved size fits the screen the dialog opens on, with a frame like the one of its parent
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+	QScreen *screen = this->screen();
+#else
+	QScreen *screen = QGuiApplication::primaryScreen();
+#endif
+	if (screen)
+	{
+		QSize frame(0, 0);
+		if (parentWidget())
+		{
+			QWidget *parentWindow = parentWidget()->window();
+			frame = parentWindow->frameGeometry().size() - parentWindow->geometry().size();
+		}
+		this->resize(this->size().boundedTo(screen->availableGeometry().size() - frame));
+	}
 
 	if ( settings.contains("browser/TileType") )
 		tileTypeButtonGroup->button(settings.value("browser/TileType").toInt())->setChecked(true);

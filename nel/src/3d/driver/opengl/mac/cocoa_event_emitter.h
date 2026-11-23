@@ -22,6 +22,9 @@
 #define NL_COCOA_EVENT_EMITTER_H
 
 #include <string.h>
+#include <map>
+#include <string>
+#include <vector>
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/event_server.h"
 #include "nel/misc/events.h"
@@ -43,16 +46,49 @@ class CCocoaEventEmitter : public IEventEmitter
 	// TODO like internal server in unix event emitter... review!
 	CEventServer*    _server;
 
+	// buttons pressed in the view and not released yet
+	uint             m_ButtonsDown;
+
+	// while the mouse is relative, its moves add their deltas to NeL's position and the cursor stays where it is
+	bool             m_MouseRelative;
+	// NeL's position of the mouse in the view
+	float            m_MouseX;
+	float            m_MouseY;
+
+	// the key of each virtual key code in the keyboard layout m_LayoutId, empty until the first key
+	std::vector<TKey> m_LayoutKeys;
+	std::string      m_LayoutId;
+	// the key reported for each key that is down
+	std::map<unsigned short, TKey> m_PressedKeycodes;
+
+	void         readKeyboardLayout();
+	TKey         layoutKeycodeToNelKey(unsigned short keycode);
+
 public:
 	CCocoaEventEmitter() :
 		_driver(NULL),
 		_glView(nil),
-		_server(NULL) { }
+		_server(NULL),
+		m_ButtonsDown(0),
+		m_MouseRelative(false),
+		m_MouseX(0.5f),
+		m_MouseY(0.5f) { }
 
 	void         init(NL3D::IDriver*, CocoaOpenGLView*, bool eventLoop);
 	bool         processMessage(NSEvent* event, CEventServer* server = NULL);
 	virtual void submitEvents(CEventServer& server, bool allWindows);
 	bool         handleQuitRequest();
+
+	/// the window got or lost the keyboard focus
+	void         postFocusEvent(bool focused);
+
+	/// see m_MouseRelative, the driver decides when the mouse is relative
+	void         setMouseRelative(bool relative) { m_MouseRelative = relative; }
+	bool         isMouseRelative() const { return m_MouseRelative; }
+
+	/// NeL's position of the mouse, from the last mouse event or the last position the driver set
+	void         setMousePos(float x, float y) { m_MouseX = x; m_MouseY = y; }
+	void         getMousePos(float &x, float &y) const { x = m_MouseX; y = m_MouseY; }
 
 	virtual bool copyTextToClipboard(const std::string &text);
 	virtual bool pasteTextFromClipboard(std::string &text);

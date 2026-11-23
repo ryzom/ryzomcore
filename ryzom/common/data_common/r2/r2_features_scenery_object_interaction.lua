@@ -163,6 +163,8 @@ end
 function component:textAdapter(text)
 
 	assert(self)
+	-- a text that the component does not have (one of an older editor) is an empty text
+	if text == nil then text = "" end
 	assert(type(text) == "string")
 	local str =  text
 	local object = ""
@@ -174,7 +176,7 @@ function component:textAdapter(text)
 	end
 	
 
-	str=string.gsub(str, "<object_name>", object)
+	str = replaceTag(str, "<object_name>", object)
 	return str
 end
 
@@ -201,7 +203,7 @@ function component:translate(context)
 	--Contextual text
 	do	
 		if sceneryObject then
-			local actionContextual = r2.Translator.createAction("talk_to", rtGrp.Id, self:textAdapter(tostring(self.ContextualText)))
+			local actionContextual = r2.Translator.createAction("talk_to", rtGrp.Id, self:textAdapter(self.ContextualText))
 			local rtAction = r2.Translator.createAction("if_value_equal", rtGrp.Id, "Active", 1,  -- Active
 				 r2.Translator.createAction("if_value_equal", rtGrp.Id, "v2", 0, actionContextual))
 			r2.Translator.translateAiGroupEvent("player_target_npc", sceneryObject, context, rtAction)

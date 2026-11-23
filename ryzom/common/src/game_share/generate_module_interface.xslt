@@ -31,7 +31,7 @@
 	<!-- #####         Root template matcher               ####### -->
 	<!-- ######################################################### -->
 	<xsl:template match="generator">
-<xsl:if test="$output != 'php'">// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
+<xsl:if test="$output != 'php'">// Ryzom - MMORPG Framework &lt;https://wiki.ryzom.dev/&gt;
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -2558,6 +2558,27 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			_CallbackServer->setDisconnectionCallback (_cbDisconnection, this);
 
 			_CallbackServer->init(port);
+		}
+
+		/// Open the interface socket on the specified address, whatever the BindAddress of the service is (a port for clients)
+		void openItf(const NLNET::CInetAddress &amp;addr)
+		{
+			NLNET::TCallbackItem *arrayPtr;
+			uint32 arraySize;
+
+<xsl:if test="@extend">
+			// add callback array of the base interface class
+			<xsl:value-of select="@extend"/>Itf::getCallbakArray(arrayPtr, arraySize);
+			_CallbackServer->addCallbackArray(arrayPtr, arraySize);
+</xsl:if>
+
+			getCallbakArray(arrayPtr, arraySize);
+			_CallbackServer->addCallbackArray(arrayPtr, arraySize);
+
+			_CallbackServer->setConnectionCallback (_cbConnection, this);
+			_CallbackServer->setDisconnectionCallback (_cbDisconnection, this);
+
+			_CallbackServer->init(addr);
 		}
 
 		/** Must be called evenly, update the network subclass to receive message

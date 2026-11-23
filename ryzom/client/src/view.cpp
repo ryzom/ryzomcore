@@ -98,9 +98,13 @@ void CView::update()
 	}
 	else
 	{
+		// The distance and the height the camera goes to: the ones of the user, adapted to a mount
+		float wantedDistance = ClientCfg.CameraDistance * mountCameraDistanceFactor();
+		float wantedHeight = ClientCfg.CameraHeight + mountCameraHeightOffset();
+
 		////////////////////////////
 		// Update Camera Distance //
-		if(ClientCfg.CameraDistance > _CurrentCameraDist)
+		if(wantedDistance > _CurrentCameraDist)
 		{
 			// Acceleration
 			_CurrentCameraSpeed += ClientCfg.CameraAccel*DT;
@@ -108,10 +112,10 @@ void CView::update()
 			clamp(_CurrentCameraSpeed, ClientCfg.CameraSpeedMin, ClientCfg.CameraSpeedMax);
 			// Adjust Camera Distance
 			_CurrentCameraDist += _CurrentCameraSpeed*DT;
-			if(_CurrentCameraDist > ClientCfg.CameraDistance)
-				_CurrentCameraDist = ClientCfg.CameraDistance;
+			if(_CurrentCameraDist > wantedDistance)
+				_CurrentCameraDist = wantedDistance;
 		}
-		else if(ClientCfg.CameraDistance < _CurrentCameraDist)
+		else if(wantedDistance < _CurrentCameraDist)
 		{
 			// Acceleration
 			_CurrentCameraSpeed -= ClientCfg.CameraAccel*DT;
@@ -119,12 +123,12 @@ void CView::update()
 			clamp(_CurrentCameraSpeed, -ClientCfg.CameraSpeedMax, -ClientCfg.CameraSpeedMin);
 			// Adjust Camera Distance
 			_CurrentCameraDist += _CurrentCameraSpeed*DT;
-			if(_CurrentCameraDist < ClientCfg.CameraDistance)
-				_CurrentCameraDist = ClientCfg.CameraDistance;
+			if(_CurrentCameraDist < wantedDistance)
+				_CurrentCameraDist = wantedDistance;
 		}
 		//////////////////////////
 		// Update Camera Height //
-		if(ClientCfg.CameraHeight > _CurrentCameraHeight)
+		if(wantedHeight > _CurrentCameraHeight)
 		{
 			// Acceleration
 			_CurrentCameraSpeed += ClientCfg.CameraAccel*DT;
@@ -132,10 +136,10 @@ void CView::update()
 			clamp(_CurrentCameraSpeed, ClientCfg.CameraSpeedMin, ClientCfg.CameraSpeedMax);
 			// Adjust Camera Distance
 			_CurrentCameraHeight += _CurrentCameraSpeed*DT;
-			if(_CurrentCameraHeight > ClientCfg.CameraHeight)
-				_CurrentCameraHeight = ClientCfg.CameraHeight;
+			if(_CurrentCameraHeight > wantedHeight)
+				_CurrentCameraHeight = wantedHeight;
 		}
-		else if(ClientCfg.CameraHeight < _CurrentCameraHeight)
+		else if(wantedHeight < _CurrentCameraHeight)
 		{
 			// Acceleration
 			_CurrentCameraSpeed -= ClientCfg.CameraAccel*DT;
@@ -143,11 +147,37 @@ void CView::update()
 			clamp(_CurrentCameraSpeed, -ClientCfg.CameraSpeedMax, -ClientCfg.CameraSpeedMin);
 			// Adjust Camera Distance
 			_CurrentCameraHeight += _CurrentCameraSpeed*DT;
-			if(_CurrentCameraHeight < ClientCfg.CameraHeight)
-				_CurrentCameraHeight = ClientCfg.CameraHeight;
+			if(_CurrentCameraHeight < wantedHeight)
+				_CurrentCameraHeight = wantedHeight;
 		}
 	}
 }// update //
+
+//-----------------------------------------------
+// mountCameraHeightOffset :
+// On a mount, the third person camera keeps the framing it has on foot. The rider sits higher by what
+// the eyes rise in the first person view (CUserEntity::mountEyesHeight() against EyesHeight): the camera
+// target rises by as much, over the height the user chose (and over its limit).
+//-----------------------------------------------
+float CView::mountCameraHeightOffset() const
+{
+	if(!UserEntity->isRiding())
+		return 0.0f;
+	return std::max((CUserEntity::mountEyesHeight() - ClientCfg.EyesHeight) * UserEntity->getScalePos(), 0.0f);
+}// mountCameraHeightOffset //
+
+//-----------------------------------------------
+// mountCameraDistanceFactor :
+// On a mount, the distance the user chose is multiplied by how much taller the rider on the mount is
+// than the character on foot (the ratio of the same two eye heights), so they take the same part of
+// the screen.
+//-----------------------------------------------
+float CView::mountCameraDistanceFactor() const
+{
+	if(!UserEntity->isRiding() || ClientCfg.EyesHeight <= 0.0f)
+		return 1.0f;
+	return std::max(CUserEntity::mountEyesHeight() / ClientCfg.EyesHeight, 1.0f);
+}// mountCameraDistanceFactor //
 
 //-----------------------------------------------
 // currentViewPos :
@@ -176,7 +206,7 @@ CVector CView::currentViewPos() const
 			v.z = 0.0f;
 			v.normalize();
 			// pos
-			return UserEntity->pos() + CVector(0.0f, 0.0f, 2.0f) - v*minCamDist;
+			return UserEntity->pos() + CVector(0.0f, 0.0f, 2.0f + mountCameraHeightOffset()) - v*minCamDist;
 		}
 	}
 	else
@@ -225,7 +255,7 @@ CVector CView::currentCameraTarget() const
 	{
 		if(_RearView)
 		{
-			return UserEntity->pos() + CVector(0.0f, 0.0f, 2.0f);
+			return UserEntity->pos() + CVector(0.0f, 0.0f, 2.0f + mountCameraHeightOffset());
 		}
 		else
 		{
@@ -363,7 +393,7 @@ void CView::getCamera3rdPersonSetupInternal(CVector &cameraStart, CVector &camer
 		v.y = - UserEntity->front().y;
 		v.z = 0.f;
 		v.normalize();
-		cameraStart= UserEntity->pos()+CVector(0.f,0.f,2.f);
+		cameraStart= UserEntity->pos()+CVector(0.f,0.f,2.f + mountCameraHeightOffset());
 		// add the threshold, to avoid discontinuity at f=1, when col start
 		cameraEnd= cameraStart - v*(_CurrentCameraDist+_CameraCollisionThreshold);
 	}

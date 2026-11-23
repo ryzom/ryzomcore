@@ -22,6 +22,7 @@
 
 struct AVCodecContext;
 struct AVFormatContext;
+struct AVFrame;
 struct AVIOContext;
 struct AVPacket;
 struct SwrContext;
@@ -54,13 +55,20 @@ protected:
 	// selected stream
 	sint32 _AudioStreamIndex;
 
-	// output buffer for decoded frame
-	SwrContext *_ConvertContext;
+	// decoded frame and packet, reused between calls
+	AVFrame *_Frame;
+	AVPacket *_Packet;
 
 private:
 	// called from constructor if ffmpeg fails to initialize
 	// or from destructor to cleanup ffmpeg pointers
 	void release();
+
+	// create the resampler to the output format from the decoder's format, false if that fails
+	bool createResampler();
+
+	// resample the decoded frame into buffer, returns the number of bytes written
+	uint32 convertFrame(uint8 *buffer, uint32 maximum);
 
 public:
 	CAudioDecoderFfmpeg(NLMISC::IStream *stream, bool loop);

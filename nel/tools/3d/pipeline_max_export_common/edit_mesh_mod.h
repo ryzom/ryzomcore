@@ -125,6 +125,39 @@ struct SCreatedVert
 	NLMISC::CVector Pos;
 };
 
+/// One 0x0230 smoothing-group change: on input face `Index`, the groups in `Mask` take their state
+/// from `Values`.
+struct SFaceSmoothChange
+{
+	uint32 Index;
+	uint32 Mask;
+	uint32 Values;
+};
+
+/// One map face (0x0338 created map face): three map vert indices.
+struct SMapFaceIdx
+{
+	uint32 T[3];
+};
+
+/// The edits of one map channel (0x0320 group). The texture vertices are edited in their own index
+/// space: `VertSets` overwrite map verts (input or created), `CreatedVerts` are appended to the
+/// channel's `VertCount` input map verts. `FaceRemap` rewrites corners of the input map faces (the
+/// 0x0210 rule on the map faces), and `CreatedFaces` are the map faces of the 0x0208 created faces,
+/// one each, in the input + created map vert space. The caller keeps the map faces index-parallel
+/// with the geometry faces through the face deletes. `ChannelKnown` is false when the group's
+/// channel leaf was unreadable; such a group must not be applied.
+struct SMapEdits
+{
+	sint32 Channel;
+	bool ChannelKnown;
+	uint32 VertCount, FaceCount; ///< the channel's input map vert and face counts
+	std::vector<std::pair<uint32, NLMISC::CVector> > VertSets; ///< 0x0330
+	std::vector<NLMISC::CVector> CreatedVerts;                 ///< 0x0334
+	std::vector<SMapFaceIdx> CreatedFaces;                     ///< 0x0338
+	std::vector<SFaceVertRemap> FaceRemap;                     ///< 0x033b
+};
+
 /// The decoded modifier-app record for one Edit Mesh modifier slot.
 ///
 /// `CreatedFacesA` (0x0208, 24-byte with srcTag) is the base-topology created-faces record
@@ -142,7 +175,10 @@ struct SCreatedVert
 /// edge-vis fields); callers apply it themselves before the shared apply — see cmb's
 /// `applyFaceAttribs` for the pattern. This is what makes reference-quality material IDs land
 /// on the output (`fy_hall_reunion`'s reference `.cmb` has matID 60 on 69 faces where the raw
-/// base mesh has matID 0; 0x0220 rewrites them).
+/// base mesh has matID 0; 0x0220 rewrites them). `FaceSmooth` (0x0230) and the map channel
+/// edits (`Maps`) are left to the caller the same way; only the shape exporter carries smoothing
+/// groups and map channels. `IrregularIds` lists the delta chunks that were not readable (their
+/// records are missing from the tables); a caller reports them.
 struct SEdits
 {
 	std::vector<std::pair<uint32, NLMISC::CVector> > Moves;      ///< 0x0140 vertex-delta records
@@ -150,8 +186,15 @@ struct SEdits
 	std::vector<SFace> CreatedFacesA;                             ///< 0x0208 base-topo created faces
 	std::vector<SFaceVertRemap> FaceRemap;                        ///< 0x0210 face-vertex remap
 	std::vector<SFaceAttribChange> FaceAttribs;                   ///< 0x0220 per-face attrib changes
+	std::vector<SFaceSmoothChange> FaceSmooth;                    ///< 0x0230 smoothing-group changes
+	std::vector<SMapEdits> Maps;                                  ///< 0x0320 map channel groups
 	std::vector<bool> DelVerts;                                   ///< 0x0170 → 0x2700 bit array
 	std::vector<bool> DelFaces;                                   ///< 0x0270 → 0x2700 bit array
+	std::vector<uint16> IrregularIds;                             ///< unreadable delta chunks
+	bool HasInputCounts;                                          ///< 0x0100 and 0x0110 present
+	uint32 InputVertCount, InputFaceCount;                        ///< the mesh the delta was recorded on
+
+	SEdits() : HasInputCounts(false), InputVertCount(0), InputFaceCount(0) { }
 };
 
 /// Read the `MeshDelta` sub-tree off one Edit Mesh mod-app container (the OSM Derived wrapper's

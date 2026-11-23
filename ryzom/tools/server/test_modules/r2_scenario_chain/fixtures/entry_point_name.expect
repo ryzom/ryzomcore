@@ -1,0 +1,35 @@
+# Three locations name their entry point as the lists of entry points of spring 2006 did. Each gets the entry
+# point of today that stands where the one it names stood, and the author is told. The islands and entry
+# points of this test are in fixtures/islands: islands the editor has, with the entry points its list has.
+# The acts of the scenario are of version 6: uiR2NorthEntryPoint of uiR2_Deserts25, a name the first list
+# had as well, for another place, means the place of spring 2006 (see entry_point_first_names).
+# uiR2SouthEntryPoint of uiR2_Lakes40 stood where the first of the three entry points of the island stands:
+# the location gets that one, and not the note of an entry point that is far, which it got as long as the
+# list had the three under one name.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteEntryPoints(3)
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsFar
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUncertain
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUnknown
+no_line: version_update_note: uiR2EDVersionNoteIsland
+scenario_at: Locations[0].EntryPoint = uiR2EntryPoint02
+scenario_at: Locations[1].EntryPoint = uiR2EntryPoint05
+scenario_at: Locations[2].EntryPoint = uiR2EntryPoint01
+rt_at: Locations[0].EntryPoint = uiR2EntryPoint02

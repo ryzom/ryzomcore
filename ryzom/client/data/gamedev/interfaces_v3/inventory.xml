@@ -665,6 +665,7 @@
 	<action id="cut" name="uiEditCut" handler="phrase_memory_copy" params="mode=cut" icon="ico_extracting.tga" />
 	<action id="copy" name="uiEditCopy" handler="phrase_memory_copy" icon="r2ed_tool_copy.tga" />
 </group>
+
 <!-- context menu for a linked action -->
 <group type="menu" id="cm_chat_link_phrase" extends="base_menu" on_active="chat_link_phrase_copy_check">
 	<action id="copy" name="uiEditCopy" handler="copy_linked_phrase" icon="r2ed_tool_copy.tga" />

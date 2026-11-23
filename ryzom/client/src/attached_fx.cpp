@@ -43,6 +43,24 @@ using namespace NL3D;
 extern CUserEntity	*UserEntity;
 
 // *************************************************************************************
+// Tell if a bone index that was looked up when the fx was created can be used on a skeleton now.
+// The skeleton may be another one by then (a player's skeleton is rebuilt when its skeleton file changes),
+// and USkeleton::getBone() is a fatal error on a bad index. An index that does not fit is dropped,
+// with a warning: the fx then goes on as for a bone that was not found.
+static bool isBoneUsable(const NL3D::USkeleton *skeleton, uint8 &boneID, const CAnimationFX *aniFX, const char *entityRole)
+{
+	if (boneID == 0xff || !skeleton) return false;
+	if (boneID >= skeleton->getNumBones())
+	{
+		nlwarning("FX '%s': bone %u is not in the skeleton of the %s any more (%u bones), the bone is ignored",
+		    (aniFX && aniFX->Sheet) ? aniFX->Sheet->PSName.c_str() : "", (uint)boneID, entityRole, skeleton->getNumBones());
+		boneID = 0xff;
+		return false;
+	}
+	return true;
+}
+
+// *************************************************************************************
 CAttachedFX::CAttachedFX()
 {
 	clear();
@@ -204,9 +222,10 @@ void CAttachedFX::create(CCharacterCL					 &parent,
 			if (targeterInfo.StickMode.UserBoneName != nullptr)
 			{
 				CEntityCL *targeter =  EntitiesMngr.entity(TargeterInfo.Slot);
-				if (parent.skeleton() && targeter && targeter->skeleton())
+				// The bone index is used on the targeter's skeleton, the name is looked up there
+				if (targeter && targeter->skeleton())
 				{
-					TargeterUserBoneID = parent.skeleton()->getBoneIdByName(NLMISC::CStringMapper::unmap(TargeterInfo.StickMode.UserBoneName));
+					TargeterUserBoneID = targeter->skeleton()->getBoneIdByName(NLMISC::CStringMapper::unmap(TargeterInfo.StickMode.UserBoneName));
 				}
 			}
 			update(parent, CMatrix::Identity);
@@ -224,7 +243,7 @@ void CAttachedFX::create(CCharacterCL					 &parent,
 
 
 // ***********************************************************************************************************************
-void CAttachedFX::evalTargeterStickPos(NLMISC::CVector &dest) const
+void CAttachedFX::evalTargeterStickPos(NLMISC::CVector &dest)
 {
 	CEntityCL *targeter = EntitiesMngr.entity(TargeterInfo.Slot);
 	if (!targeter)
@@ -248,7 +267,7 @@ void CAttachedFX::evalTargeterStickPos(NLMISC::CVector &dest) const
 		case CFXStickMode::UserBoneOrientedTowardTargeter:
 		case CFXStickMode::UserBoneRay:
 		case CFXStickMode::UserBone:
-			if (targeter->skeleton() && TargeterUserBoneID != 0xff)
+			if (isBoneUsable(targeter->skeleton(), TargeterUserBoneID, AniFX, "targeter"))
 			{
 				const UBone bone = targeter->skeleton()->getBone(TargeterUserBoneID);
 				targeter->forceEvalAnim();
@@ -394,7 +413,7 @@ void CAttachedFX::update(CCharacterCL &parent, const NLMISC::CMatrix &alignMatri
 				{
 					CVector orientD;
 					CMatrix orientMat;
-					if (UserBoneID == 0xff || !parent.skeleton())
+					if (!isBoneUsable(parent.skeleton(), UserBoneID, AniFX, "entity that carries the fx"))
 					{
 						// bone not found -> use parent position instead
 						orientD = parent.pos() - targeter->pos();
@@ -425,7 +444,7 @@ void CAttachedFX::update(CCharacterCL &parent, const NLMISC::CMatrix &alignMatri
 				CVector aimingPoint;
 				evalTargeterStickPos(aimingPoint);
 				CVector startPoint = CVector::Null;
-				if (UserBoneID != 0xff && parent.skeleton())
+				if (isBoneUsable(parent.skeleton(), UserBoneID, AniFX, "entity that carries the fx"))
 				{
 					const UBone bone = parent.skeleton()->getBone(UserBoneID);
 					parent.forceEvalAnim();

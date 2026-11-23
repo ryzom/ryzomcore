@@ -205,6 +205,12 @@ public:
 	/// Show or hide the NeL window
 	virtual void			showWindow(bool show = true)=0;
 
+	/// Whether the driver activates its window when it shows it, restores it or sets its mode (true by default). False
+	/// for a window on a virtual desktop that is not shown, as activating it switches the screen to that desktop (Windows).
+	/// Such a window stays in a window: a full screen mode still changes the display of the monitor. Its message boxes
+	/// (systemMessageBox) are not shown either: they go to the log, with the answer that changes nothing.
+	virtual void			setWindowActivation(bool activate)=0;
+
 	/* Pass in dialog box mode. After having called this method, you can use normal GUI.
 	 * In fullscreen under direct3d, the main 3d window is minimized.
 	 *
@@ -232,9 +238,55 @@ public:
 	virtual bool			activate(void)=0;
 	/// Return true if driver is still active. Return false else. If he user close the window, must return false.
 	virtual bool			isActive()=0;
+	/** Return true while the window is minimized (iconified) by the window system, whatever size getWindowSize
+	 *  reports then: with some drivers and window systems a minimized window keeps its size, with others it has
+	 *  no area. Return false when there is no window.
+	 *  The calling application may leave time to other applications when it is the case, as nothing of it is shown.
+	 *  The answer is for a window of the driver's own; for a window handed to the driver that is a part of another
+	 *  window, see IDriver::isWindowMinimized.
+	 */
+	virtual bool			isWindowMinimized() const = 0;
+	/** Restore the window when it is minimized, and ask the window system to bring it in front, as its task bar
+	 *  does: for an application that answers in its window to something it was asked while minimized (to
+	 *  confirm that it may close, for example). Nothing happens when the window is not minimized, when there
+	 *  is none, or when it is not the driver's own.
+	 */
+	virtual void			restoreWindow() = 0;
 
 	/// Return an OS dependent window handle. Under Win32, it is a HWND.
 	virtual nlWindow		getDisplay () = 0;
+	// @}
+
+
+
+	/// \name Picture of the minimized window
+	/** A window system may show a picture of a window where the user picks among the windows (the thumbnail of
+	 *  a taskbar, and the full-size preview shown from it). Of a minimized window it has the last picture from
+	 *  before the window was minimized, unless pictures of it are supplied. The driver supplies them out of
+	 *  the ordinary frames of the application, when the application asks for it
+	 *  (setMinimizedWindowPictureSupplied): the application goes on drawing its frames while its window is
+	 *  minimized, and has nothing else to do.
+	 *
+	 *  While the window system shows a picture of the minimized window, the driver is in its picture mode:
+	 *  getWindowSize gives the size the window had before it was minimized, also with a driver whose minimized
+	 *  window has no area, the frames are drawn as they are for the window when it is shown, and at the swap
+	 *  the driver reads the frame back and hands it to the window system. The mode is entered and left at the
+	 *  end of a frame (swapBuffers). isWindowMinimized goes on answering true. A minimized window nobody looks
+	 *  at is not in picture mode. See IDriver for the details, and for where no picture is supplied.
+	 */
+	// @{
+	/** The pictures of the minimized window are supplied by the driver, out of the frames the application
+	 *  draws (true), or left to the window system again (false, the state a driver starts in). To call once
+	 *  the display is set. An application that asks for it keeps drawing its frames while its window is
+	 *  minimized: the window system shows no picture of its own meanwhile.
+	 */
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied) = 0;
+
+	/** Return true while the driver is in picture mode: the window is minimized, the window system shows a
+	 *  picture of it, and the frames the application draws are read back for it. The application may go by
+	 *  this for the rate of its frames; it changes at the end of a frame (swapBuffers) only.
+	 */
+	virtual bool			isMinimizedWindowPictureWanted() const = 0;
 	// @}
 
 
@@ -332,10 +384,14 @@ public:
 	/// Get the render target manager
 	virtual CRenderTargetManager	&getRenderTargetManager() =0;
 
-	/// Set a texture of specified size or of the size of the window as render target
-	virtual void					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0) =0;
+	/** Set a texture of specified size or of the size of the window as render target.
+	  * Returns false, and sets no render target, when that size has no area (the window is minimized, or resized
+	  * to nothing): there is no picture to apply an effect to then. The frame goes to the back buffer, and
+	  * endDefaultRenderTarget is not called for it.
+	  */
+	virtual bool					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0) =0;
 
-	/// Draw the render target to the back buffer
+	/// Draw the render target to the back buffer. Only after a beginDefaultRenderTarget that returned true
 	virtual void					endDefaultRenderTarget(UScene *scene) =0;
 
 
@@ -559,6 +615,7 @@ public:
 	virtual void			getBuffer (CBitmap &bitmap) = 0;
 
 	/** get the ZBuffer (back buffer).
+	  * NB: the first row is the top one, like in the bitmap of getBuffer().
 	  *
 	  * \param zbuffer the returned array of Z. size of getWindowSize() .
 	  */

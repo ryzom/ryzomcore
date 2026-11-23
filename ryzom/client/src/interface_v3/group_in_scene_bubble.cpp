@@ -435,10 +435,10 @@ void CGroupInSceneBubbleManager::update ()
 			{
 				//nlinfo ("dynchat bubble erase BotUID:%d",_DynBubbles[j].BotUID);
 
-				// Unlink from character
+				// Unlink from character, unless it shows its other bubble (dyn chat and web page) by now
 				CEntityCL *pEntity = EntitiesMngr.getEntityByCompressedIndex(_DynBubbles[j].BotUID);
 				CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(pEntity);
-				if (pChar != nullptr)
+				if (pChar != nullptr && pChar->getBubble() == _DynBubbles[j].Bubble)
 					pChar->setBubble(nullptr);
 
 				CWidgetManager::getInstance()->unMakeWindow(_DynBubbles[j].Bubble);
@@ -465,8 +465,10 @@ void CGroupInSceneBubbleManager::update ()
 			{
 				//nlinfo ("dynchat bubble setText BotUID:%d",_DynBubbles[i].BotUID);
 
+				// A text of "{break}" only has no page, the bubble then opens with the text it had
+				if (!_DynBubbles[i].Bubble->setText(res) && !res.empty())
+					nlwarning("Bot chat text %u of bot %u has no page to show: '%s'", _DynBubbles[i].DescWaiting, _DynBubbles[i].BotUID, res.c_str());
 				_DynBubbles[i].DescWaiting = 0;
-				_DynBubbles[i].Bubble->setText(res);
 				_DynBubbles[i].Bubble->setActive(true);
 
 				if (_DynBubbles[i].Bubble->isOnLastPage())
@@ -499,13 +501,15 @@ CGroupInSceneBubble *CGroupInSceneBubbleManager::newBubble (const string &text)
 		CGroupInSceneBubble *bubble = _Bubbles[_CurrentBubble];
 		if (bubble)
 		{
+			// Reset the bubble. A text with nothing to show takes no bubble from the pool,
+			// the bubble may still be in use with its previous text.
+			if (!bubble->setText(text))
+				return nullptr;
+			bubble->setAlpha(255);
+
 			// Next bubble
 			_CurrentBubble++;
 			_CurrentBubble %= _Bubbles.size();
-
-			// Reset the bubble
-			bubble->setText (text);
-			bubble->setAlpha(255);
 
 			return bubble;
 		}
@@ -957,7 +961,8 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 	uint32 pos, j;
 	for (pos = 0; pos < _DynBubbles.size(); ++pos)
 	{
-		if (_DynBubbles[pos].BotUID == nBotUID && _DynBubbles[pos].BotName != 0)
+		// a web page's bubble on the same bot has its own options, they do not answer the dyn chat
+		if (_DynBubbles[pos].BotUID == nBotUID && !_DynBubbles[pos].WebIg)
 			break;
 	}
 
@@ -1066,11 +1071,21 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 		return;
 	}
 
+	// A text made of "{break}" only has no page to show: no bubble is created or changed for it
+	vector<string> textParts;
+	CGroupInSceneBubble::splitText(text, textParts);
+	if (textParts.empty() && !text.empty())
+	{
+		nlwarning("webIgChatOpen: the text for bot %u has no page to show, no bubble is opened: '%s'", nBotUID, text.c_str());
+		return;
+	}
+
 	// Look if we get a bubble with this nBotUID ?
 	uint32 pos, j;
 	for (pos = 0; pos < _DynBubbles.size(); ++pos)
 	{
-		if (_DynBubbles[pos].BotUID == nBotUID && _DynBubbles[pos].BotName == 0)
+		// never a server dyn chat's bubble: its options would be turned into links
+		if (_DynBubbles[pos].BotUID == nBotUID && _DynBubbles[pos].WebIg)
 			break;
 	}
 
@@ -1079,8 +1094,6 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 	string id;
 	if (pos == _DynBubbles.size())
 	{
-		uint32 i = 0;
-		while (getDynBubble(i) != nullptr) i++;
 		id = "in_scene_webig_bubble_" + toString(nBotUID);
 		// Create the instance
 		std::vector<std::pair<std::string,std::string> > templateParams;
@@ -1110,6 +1123,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 		dynBubble.BotName = 0;
 		dynBubble.BotUID = nBotUID;
 		dynBubble.Bubble = bubble;
+		dynBubble.WebIg = true;
 		_DynBubbles.push_back(dynBubble);
 	}
 	else
@@ -1124,7 +1138,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 		}
 	}
 
-	// Update the bubble's texts
+	// Update the bubble's texts. An empty text leaves the text of the bubble as it is.
 
 	bubble->setText(text);
 	id = bubble->getId() + ":header_opened:window:";
@@ -1223,7 +1237,7 @@ void CGroupInSceneBubbleManager::dynChatClose (uint32 nBotUID)
 	uint32 pos;
 	for (pos = 0; pos < _DynBubbles.size(); ++pos)
 	{
-		if (_DynBubbles[pos].BotUID == nBotUID)
+		if (_DynBubbles[pos].BotUID == nBotUID && !_DynBubbles[pos].WebIg)
 			break;
 	}
 	if (pos != _DynBubbles.size())
@@ -1243,12 +1257,12 @@ CGroupInSceneBubbleManager::CDynBubble *CGroupInSceneBubbleManager::getDynBubble
 {
 	uint32 value;
 	for (uint32 i = 0; i < _DynBubbles.size(); ++i)
-		if (_DynBubbles[i].Bubble != nullptr)
+		if (_DynBubbles[i].Bubble != nullptr && !_DynBubbles[i].WebIg) // only dyn bubbles are numbered
 		{
+			// the number follows "ui:interface:in_scene_dyn_bubble_"
 			string id = _DynBubbles[i].Bubble->getId();
 			id = id.substr(33, id.size());
-			fromString(id, value);
-			if (value == nDynBubbleNb)
+			if (fromString(id, value) && value == nDynBubbleNb)
 				return &_DynBubbles[i];
 		}
 	return nullptr;
@@ -1485,10 +1499,9 @@ void CGroupInSceneBubble::unlink ()
 
 // ***************************************************************************
 
-void CGroupInSceneBubble::setText (const string &text)
+void CGroupInSceneBubble::splitText(const string &text, vector<string> &textParts)
 {
-	if (text.empty()) return;
-	_TextParts.clear();
+	textParts.clear();
 
 	// Look for "{break}" in the message
 	string finalMsg = text;
@@ -1500,12 +1513,24 @@ void CGroupInSceneBubble::setText (const string &text)
 		if (index == string::npos) break;
 		tmpMsg = finalMsg.substr (0, index);
 		if (!tmpMsg.empty())
-			_TextParts.push_back(tmpMsg);
+			textParts.push_back(tmpMsg);
 		finalMsg = finalMsg.substr(index+7, finalMsg.size());
 	}
 	if (!finalMsg.empty())
-		_TextParts.push_back(finalMsg);
+		textParts.push_back(finalMsg);
+}
 
+// ***************************************************************************
+
+bool CGroupInSceneBubble::setText(const string &text)
+{
+	vector<string> textParts;
+	splitText(text, textParts);
+
+	// An empty text or a text made of "{break}" only has no part to show, the bubble keeps what it shows
+	if (textParts.empty()) return false;
+
+	_TextParts.swap(textParts);
 	_CurrentPart = 0;
 
 	setRawText(_TextParts[_CurrentPart]);
@@ -1513,6 +1538,7 @@ void CGroupInSceneBubble::setText (const string &text)
 	displayNextAndSkip( !isOnLastPage() );
 
 	invalidateCoords();
+	return true;
 }
 
 // ***************************************************************************

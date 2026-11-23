@@ -58,6 +58,7 @@
 
 using namespace std;
 using namespace NLMISC;
+
 extern CClientChatManager ChatMngr;
 
 CChatTextManager* CChatTextManager::_Instance = nullptr;
@@ -75,7 +76,8 @@ static CRefPtr<CGroupEditBox> LastSelectedChatInput;
 
 struct CChatQuoteDraft
 {
-	CChatQuoteDraft() : Group(CChatGroup::nbChatMode), DynamicChannelId(CEntityId::Unknown), HistoryOffset(0), MinHeightOffset(0), RequestId(0), SentAt(0), SentRevision(0), InputCleared(false) {}
+	CChatQuoteDraft() : Group(CChatGroup::nbChatMode), DynamicChannelId(CEntityId::Unknown),
+		HistoryOffset(0), MinHeightOffset(0), RequestId(0), SentAt(0), SentRevision(0), InputCleared(false) {}
 	CRefPtr<CGroupEditBox> EditBox;
 	CChatMessage Message;
 	CChatGroup::TGroupType Group;
@@ -97,10 +99,15 @@ static const TTime QuoteSendTimeout = 60 * 1000;
 
 class CChatMessageParagraph : public CGroupParagraph
 {
-public: CChatMessageParagraph(const TCtorParam &param) : CGroupParagraph(param), HasMessage(false), Group(CChatGroup::nbChatMode), DynamicChannelId(CEntityId::Unknown)
+public:
+	CChatMessageParagraph(const TCtorParam &param) :
+		CGroupParagraph(param),
+		HasMessage(false),
+		Group(CChatGroup::nbChatMode),
+		DynamicChannelId(CEntityId::Unknown)
 	{}
 	~CChatMessageParagraph();
-	virtual void draw();
+	virtual void draw() NL_OVERRIDE;
 	bool HasMessage;
 	CChatMessage Message;
 	CChatGroup::TGroupType Group;
@@ -161,14 +168,16 @@ bool CChatTextManager::isMentionInput(CGroupEditBox *editBox) const
 // ***************************************************************************
 class CHandlerChatMention : public IActionHandler
 {
-public: virtual void execute(CCtrlBase *caller, const std::string &params)
+public:
+	virtual void execute(CCtrlBase *caller, const std::string &params) NL_OVERRIDE
 	{
 		CGroupEditBox *editBox = dynamic_cast<CGroupEditBox *>(caller);
 		if (!editBox)
 			return;
 		const std::string uiId = CSString(editBox->getId()).quote(true, false);
 		uint32 start, end;
-		if (CWidgetManager::getInstance()->getCaptureKeyboard() != editBox || !editBox->isActiveThroughParents() || !getMentionInputRange(editBox, start, end))
+		if (CWidgetManager::getInstance()->getCaptureKeyboard() != editBox ||
+			!editBox->isActiveThroughParents() || !getMentionInputRange(editBox, start, end))
 		{
 			CLuaManager::getInstance().executeLuaScript("SearchCommand:clear_mention(" + uiId + ")");
 			return;
@@ -181,7 +190,8 @@ public: virtual void execute(CCtrlBase *caller, const std::string &params)
 			CLuaManager::getInstance().executeLuaScript("SearchCommand:clear_mention(" + uiId + ")");
 			return;
 		}
-		if (params.compare(0, 10, "candidate=") == 0 || params.compare(0, 5, "name=") == 0 || params.compare(0, 12, "number_name=") == 0)
+		if (params.compare(0, 10, "candidate=") == 0 || params.compare(0, 5, "name=") == 0 ||
+			params.compare(0, 12, "number_name=") == 0)
 		{
 			const bool candidate = params.compare(0, 10, "candidate=") == 0;
 			const bool number = params.compare(0, 12, "number_name=") == 0;
@@ -193,7 +203,8 @@ public: virtual void execute(CCtrlBase *caller, const std::string &params)
 			}
 			const std::string name = params.substr(candidate ? 10 : number ? 12 : 5);
 			const ::u32string decoded = CUtfStringView(name).toUtf32();
-			if (decoded.empty() || decoded.size() < prefix.size() || compareCaseInsensitive(CUtfStringView(decoded.substr(0, prefix.size())).toUtf8(), CUtfStringView(prefix).toUtf8()) != 0)
+			if (decoded.empty() || decoded.size() < prefix.size() ||
+				compareCaseInsensitive(CUtfStringView(decoded.substr(0, prefix.size())).toUtf8(), CUtfStringView(prefix).toUtf8()) != 0)
 				return;
 			for (uint i = 0; i < decoded.size(); ++i)
 				if (!CHAT_MESSAGE::isMentionNameChar(decoded[i]))
@@ -201,7 +212,8 @@ public: virtual void execute(CCtrlBase *caller, const std::string &params)
 			if (candidate)
 			{
 				const std::string quotedName = CSString(name).quote(true, false);
-				CLuaManager::getInstance().executeLuaScript("if SearchCommand:find(SearchCommand.valid_commands_list," + quotedName + ") == nil then table.insert(SearchCommand.valid_commands_list," + quotedName + ") end");
+				CLuaManager::getInstance().executeLuaScript("if SearchCommand:find(SearchCommand.valid_commands_list," + quotedName +
+					") == nil then table.insert(SearchCommand.valid_commands_list," + quotedName + ") end");
 				return;
 			}
 			const ::u32string replacement = ::u32string(1, '@') + decoded;
@@ -238,11 +250,15 @@ public: virtual void execute(CCtrlBase *caller, const std::string &params)
 		{
 			if (prefix.empty() || prefix.back() < '1' || prefix.back() > '9')
 				return;
-			const std::string key = editBox->getId() + ":" + toString("%u", start) + ":" + CUtfStringView(prefix.substr(0, prefix.size() - 1)).toUtf8();
-			CLuaManager::getInstance().executeLuaScript("SearchCommand:check_autocomplet_number(" + uiId + "," + toString("%u", prefix.back() - '0') + "," + CSString(key).quote(true, false) + ",{" + players + "})");
+			const std::string key = editBox->getId() + ":" + toString("%u", start) + ":" +
+				CUtfStringView(prefix.substr(0, prefix.size() - 1)).toUtf8();
+			CLuaManager::getInstance().executeLuaScript("SearchCommand:check_autocomplet_number(" + uiId + "," +
+				toString("%u", prefix.back() - '0') + "," + CSString(key).quote(true, false) + ",{" + players + "})");
 			return;
 		}
-		CLuaManager::getInstance().executeLuaScript("SearchCommand:search_mention(" + uiId + "," + CSString(CUtfStringView(prefix).toUtf8()).quote(true, false) + "," + toString("%u", start) + ",{" + players + "}," + (params == "complete" ? "true" : "false") + ")");
+		CLuaManager::getInstance().executeLuaScript("SearchCommand:search_mention(" + uiId + "," +
+			CSString(CUtfStringView(prefix).toUtf8()).quote(true, false) + "," + toString("%u", start) +
+			",{" + players + "}," + (params == "complete" ? "true" : "false") + ")");
 		if (params == "complete")
 			CLuaManager::getInstance().executeLuaScript("SearchCommand:check_autocomplet(" + uiId + ")");
 	}
@@ -283,7 +299,8 @@ static void registerMessageParagraph(CChatMessageParagraph *paragraph)
 }
 
 //=================================================================================
-static void setReactionTarget(const string &messageId, CChatGroup::TGroupType group, const CEntityId &dynamicChannelId, const string &receiver)
+static void setReactionTarget(const string &messageId, CChatGroup::TGroupType group,
+	const CEntityId &dynamicChannelId, const string &receiver)
 {
 	ReactionMessageId = messageId;
 	ReactionGroup = group;
@@ -299,7 +316,7 @@ struct CChatMentionTab : public IOnReceiveTextId
 		if (TextId != nullptr && TextId->getOnReceiveTextId() == this)
 			TextId->setOnReceiveTextId(TextModifier);
 	}
-	virtual void onReceiveTextId(std::string &str)
+	virtual void onReceiveTextId(std::string &str) NL_OVERRIDE
 	{
 		if (TextModifier)
 			TextModifier->onReceiveTextId(str);
@@ -434,7 +451,8 @@ void CChatMessageParagraph::draw()
 			if (right <= left)
 				continue;
 			hasCharacters = true;
-			readable = left >= clipX && right <= clipX + clipW && bottom >= clipY && top <= clipY + clipH && widgets->getWindowUnder((left + right - 1) / 2, (bottom + top - 1) / 2) == window;
+			readable = left >= clipX && right <= clipX + clipW && bottom >= clipY && top <= clipY + clipH &&
+				widgets->getWindowUnder((left + right - 1) / 2, (bottom + top - 1) / 2) == window;
 			// A popup can cover only an edge of the line and miss its midpoint.
 			const vector<CWidgetManager::SMasterGroup> &masterGroups = widgets->getAllMasterGroup();
 			for (uint group = 0; readable && group < masterGroups.size(); ++group)
@@ -447,14 +465,16 @@ void CChatMessageParagraph::draw()
 					for (list<CInterfaceGroup *>::const_iterator it = windows.begin(); readable && it != windows.end(); ++it)
 					{
 						CInterfaceGroup *other = *it;
-						if (other == window || !other->getActive() || !other->getUseCursor() || !other->isIn(left, bottom, right - left, top - bottom))
+						if (other == window || !other->getActive() || !other->getUseCursor() ||
+							!other->isIn(left, bottom, right - left, top - bottom))
 							continue;
 						const sint32 overlapLeft = max(left, other->getXReal());
 						const sint32 overlapRight = min(right, other->getXReal() + other->getWReal());
 						const sint32 overlapBottom = max(bottom, other->getYReal());
 						const sint32 overlapTop = min(top, other->getYReal() + other->getHReal());
 						if (overlapRight > overlapLeft && overlapTop > overlapBottom)
-							readable = widgets->getWindowUnder((overlapLeft + overlapRight - 1) / 2, overlapBottom + (overlapTop - overlapBottom + 1) / 2) == window;
+							readable = widgets->getWindowUnder((overlapLeft + overlapRight - 1) / 2,
+								overlapBottom + (overlapTop - overlapBottom + 1) / 2) == window;
 					}
 				}
 			}
@@ -511,7 +531,15 @@ void CChatTextManager::setMentionTab(CViewBase *message, CCtrlTabButton *tab)
 
 //=================================================================================
 CChatTextManager::CChatTextManager() :
-	_TextFontSize(nullptr), _TextMultilineSpace(nullptr), _TextShadowed(nullptr), _ShowTimestamps(nullptr), _EmojiMode(nullptr), _EmojiSize(nullptr)
+	_TextFontSize(nullptr)
+    ,
+	_TextMultilineSpace(nullptr)
+    ,
+	_TextShadowed(nullptr)
+    ,
+	_ShowTimestamps(nullptr),
+	_EmojiMode(nullptr),
+	_EmojiSize(nullptr)
 {
 }
 
@@ -609,7 +637,8 @@ sint32 CChatTextManager::getEmojiPixelSize() const
 	{
 		case EmojiLarge:	return largePx;
 		case EmojiMedium:	return smallPx < largePx ? (smallPx + largePx) / 2 : largePx;
-		case EmojiSmall: default:			return smallPx;
+		case EmojiSmall:
+		default:			return smallPx;
 	}
 }
 
@@ -887,7 +916,8 @@ static string getPartsText(const std::vector<CChatMessagePart> &parts)
 {
 	string text;
 	for (std::vector<CChatMessagePart>::const_iterator it = parts.begin(); it != parts.end(); ++it)
-		text += it->Type == CChatMessagePart::Text ? it->TextValue.toUtf8() : CHAT_SHARE::getPartName(*it);
+		text += it->Type == CChatMessagePart::Text ? it->TextValue.toUtf8() :
+			CHAT_SHARE::getPartName(*it);
 	return text;
 }
 
@@ -896,7 +926,8 @@ static bool isTranslationDisabled(CChatGroup::TGroupType group)
 {
 	if (group >= CChatGroup::nbChatMode)
 		return false;
-	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + toUpper(CChatGroup::groupTypeToString(group)) + ":DISABLE", false);
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(
+		"UI:SAVE:TRANSLATION:" + toUpper(CChatGroup::groupTypeToString(group)) + ":DISABLE", false);
 	return node && node->getValueBool();
 }
 
@@ -930,7 +961,8 @@ string CChatTextManager::getMessageText(const CChatMessage &message, CChatGroup:
 }
 
 //=================================================================================
-static std::vector<std::pair<size_t, size_t> > getDisplayedMentions(const CChatMessage &message, const string &displayed, size_t offset)
+static std::vector<std::pair<size_t, size_t> > getDisplayedMentions(const CChatMessage &message,
+	const string &displayed, size_t offset)
 {
 	std::vector<std::pair<size_t, size_t> > ranges;
 	if (message.Mentions.empty() || message.Parts.empty())
@@ -940,7 +972,8 @@ static std::vector<std::pair<size_t, size_t> > getDisplayedMentions(const CChatM
 	for (uint i = 0; i < message.Mentions.size(); ++i)
 	{
 		const CChatMessageMention &mention = message.Mentions[i];
-		const bool mentioned = mention.Scope == CChatMessageMention::Player ? mention.PlayerId.getShortId() == localCharacter : message.SenderId.getShortId() != localCharacter;
+		const bool mentioned = mention.Scope == CChatMessageMention::Player ?
+			mention.PlayerId.getShortId() == localCharacter : message.SenderId.getShortId() != localCharacter;
 		if (!mentioned || mention.Part >= message.Parts.size())
 			continue;
 		const ucstring token = message.Parts[mention.Part].TextValue.substr(mention.Start, mention.Length);
@@ -970,7 +1003,8 @@ static void registerMentionParagraph(CChatMessageParagraph *paragraph, const CCh
 }
 
 //=================================================================================
-CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMessage &message, NLMISC::CRGBA col, bool justified, CChatGroup::TGroupType group)
+CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMessage &message,
+	NLMISC::CRGBA col, bool justified, CChatGroup::TGroupType group)
 {
 	string body;
 	if (group == CChatGroup::tell)
@@ -998,17 +1032,22 @@ CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMess
 	if (hasReference || quotedReference)
 	{
 		const bool disableTranslation = isTranslationDisabled(group);
-		const bool hasTranslation = !message.TranslatedParts.empty() && !message.TranslationLanguage.empty() && !disableTranslation && message.SourceLanguage.size() == 2;
+		const bool hasTranslation = !message.TranslatedParts.empty() && !message.TranslationLanguage.empty() &&
+			!disableTranslation && message.SourceLanguage.size() == 2;
 		bool inverse = false, hideFlag = false;
 		if (hasTranslation)
 		{
 			const string language = toUpperAscii(message.SourceLanguage);
-			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + language + ":INVERSE_DISPLAY", false);
+			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(
+				"UI:SAVE:TRANSLATION:" + language + ":INVERSE_DISPLAY", false);
 			inverse = node && node->getValueBool();
-			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + language + ":HIDE_FLAG", false);
+			node = NLGUI::CDBManager::getInstance()->getDbProp(
+				"UI:SAVE:TRANSLATION:" + language + ":HIDE_FLAG", false);
 			hideFlag = node && node->getValueBool();
 		}
-		const std::vector<CChatMessagePart> &parts = hasTranslation && inverse ? message.Parts : !message.TranslatedParts.empty() && (message.TranslationLanguage.empty() || !disableTranslation) ? message.TranslatedParts : message.Parts;
+		const std::vector<CChatMessagePart> &parts = hasTranslation && inverse ? message.Parts :
+			!message.TranslatedParts.empty() && (message.TranslationLanguage.empty() || !disableTranslation) ?
+			message.TranslatedParts : message.Parts;
 		std::vector<string> texts(parts.size());
 		string visibleParts;
 		bool firstText = true;
@@ -1035,10 +1074,12 @@ CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMess
 				firstText = false;
 			}
 		}
-		if (hasTranslation || (body.size() >= visibleParts.size() && body.compare(body.size() - visibleParts.size(), visibleParts.size(), visibleParts) == 0))
+		if (hasTranslation || (body.size() >= visibleParts.size() &&
+			body.compare(body.size() - visibleParts.size(), visibleParts.size(), visibleParts) == 0))
 		{
 			string copyText = hasTranslation ? prefix : prefix + body.substr(0, body.size() - visibleParts.size());
-			string lead = (quotedReference ? quoteHeader : quoteLine) + (quotedReference ? string() : copyText);
+			string lead = (quotedReference ? quoteHeader : quoteLine) +
+				(quotedReference ? string() : copyText);
 			if (!quoteLine.empty())
 			{
 				string colorTag;
@@ -1108,7 +1149,8 @@ CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMess
 		CChatWindow::encodeColorTag(col, colorTag);
 		text.insert(0, colorTag);
 	}
-	std::vector<std::pair<size_t, size_t> > mentions = getDisplayedMentions(message, body, text.size() - body.size());
+	std::vector<std::pair<size_t, size_t> > mentions =
+		getDisplayedMentions(message, body, text.size() - body.size());
 	CInterfaceGroup *commandGroup = parseCommandTag(text);
 	if (commandGroup)
 		mentions.clear();
@@ -1134,19 +1176,22 @@ CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMess
 }
 
 //=================================================================================
-void CChatTextManager::setMessageTarget(CViewBase *view, CChatGroup::TGroupType group, uint32 dynamicChatDbIndex, const string &receiver, const string &sender)
+void CChatTextManager::setMessageTarget(CViewBase *view, CChatGroup::TGroupType group,
+	uint32 dynamicChatDbIndex, const string &receiver, const string &sender)
 {
 	CChatMessageParagraph *paragraph = dynamic_cast<CChatMessageParagraph *>(view);
 	if (!paragraph)
 		return;
 	paragraph->Group = group == CChatGroup::arround ? CChatGroup::say : group;
-	paragraph->DynamicChannelId = group == CChatGroup::dyn_chat ? ChatMngr.getDynamicChannelIdFromDbIndex(dynamicChatDbIndex) : CEntityId::Unknown;
+	paragraph->DynamicChannelId = group == CChatGroup::dyn_chat ?
+		ChatMngr.getDynamicChannelIdFromDbIndex(dynamicChatDbIndex) : CEntityId::Unknown;
 	paragraph->Receiver = receiver;
 	paragraph->Sender = sender;
 }
 
 //=================================================================================
-bool CChatTextManager::getSelectedMessageTarget(CChatGroup::TGroupType &group, CEntityId &dynamicChannelId, string &receiver) const
+bool CChatTextManager::getSelectedMessageTarget(CChatGroup::TGroupType &group,
+	CEntityId &dynamicChannelId, string &receiver) const
 {
 	group = LastSelectedGroup;
 	dynamicChannelId = LastSelectedDynamicChannelId;
@@ -1164,7 +1209,8 @@ string CChatTextManager::getQuoteMessageId(const CGroupEditBox *editBox) const
 }
 
 //=================================================================================
-bool CChatTextManager::getQuoteTarget(const CGroupEditBox *editBox, CChatGroup::TGroupType &group, CEntityId &dynamicChannelId, string &receiver) const
+bool CChatTextManager::getQuoteTarget(const CGroupEditBox *editBox,
+	CChatGroup::TGroupType &group, CEntityId &dynamicChannelId, string &receiver) const
 {
 	for (list<CChatQuoteDraft>::const_iterator it = ChatQuoteDrafts.begin(); it != ChatQuoteDrafts.end(); ++it)
 		if (it->EditBox == editBox)
@@ -1178,7 +1224,8 @@ bool CChatTextManager::getQuoteTarget(const CGroupEditBox *editBox, CChatGroup::
 }
 
 //=================================================================================
-bool CChatTextManager::sendQuote(CGroupEditBox *editBox, const string &text, const CChatMessageRequest *linkRequest)
+bool CChatTextManager::sendQuote(CGroupEditBox *editBox, const string &text,
+	const CChatMessageRequest *linkRequest)
 {
 	const string quoteId = getQuoteMessageId(editBox);
 	if (quoteId.empty())
@@ -1200,7 +1247,8 @@ bool CChatTextManager::sendQuote(CGroupEditBox *editBox, const string &text, con
 		finishQuoteSend(request.ClientRequestId, false);
 		return true;
 	}
-	const bool queued = group == CChatGroup::tell ? ChatMngr.tell(receiver, request) : ChatMngr.chat(request, group, dynamicChannelId);
+	const bool queued = group == CChatGroup::tell ? ChatMngr.tell(receiver, request) :
+		ChatMngr.chat(request, group, dynamicChannelId);
 	if (!queued)
 		finishQuoteSend(request.ClientRequestId, false);
 	return true;
@@ -1260,7 +1308,8 @@ void CChatTextManager::applyReaction(const CChatMessage &message)
 	// Zulip users have no character id, their name tells them apart.
 	const string name = CEntityCL::removeTitleAndShardFromName(message.SenderName.toUtf8());
 	uint reactor = 0;
-	while (reactor < entry.Reactors.size() && (entry.Reactors[reactor] != message.SenderId || (message.SenderId == CEntityId::Unknown && entry.Names[reactor] != name)))
+	while (reactor < entry.Reactors.size() && (entry.Reactors[reactor] != message.SenderId ||
+		(message.SenderId == CEntityId::Unknown && entry.Names[reactor] != name)))
 		++reactor;
 	if (reaction.Remove)
 	{
@@ -1286,7 +1335,8 @@ void CChatTextManager::applyReaction(const CChatMessage &message)
 void CChatTextManager::updateReactionViews(CChatMessageParagraph *paragraph)
 {
 	const bool hadRow = paragraph->clearReactionViews();
-	std::map<std::string, std::vector<CChatReaction> >::const_iterator reactions = ChatReactions.find(paragraph->Message.MessageId);
+	std::map<std::string, std::vector<CChatReaction> >::const_iterator reactions =
+		ChatReactions.find(paragraph->Message.MessageId);
 	if (reactions == ChatReactions.end() || reactions->second.empty())
 	{
 		if (hadRow)
@@ -1295,7 +1345,8 @@ void CChatTextManager::updateReactionViews(CChatMessageParagraph *paragraph)
 	}
 	CViewText *first = paragraph->getNumChildren() ? dynamic_cast<CViewText *>(paragraph->getChild(0)) : nullptr;
 	const CRGBA color = first ? first->getColor() : CRGBA::White;
-	const CRGBA ownColor = CRGBA::stringToRGBA(CWidgetManager::getInstance()->getParser()->getDefine("chat_message_color_mention").c_str());
+	const CRGBA ownColor = CRGBA::stringToRGBA(
+		CWidgetManager::getInstance()->getParser()->getDefine("chat_message_color_mention").c_str());
 	const uint32 localCharacter = getLocalCharacterId();
 	// The row starts on its own line below the message.
 	CViewBase *lineBreak = createMsgTextSimple("\n", color, false, nullptr);
@@ -1314,7 +1365,8 @@ void CChatTextManager::updateReactionViews(CChatMessageParagraph *paragraph)
 		string::size_type length = 0;
 		const CEmojiManager::CEntry *entry = nullptr;
 		string label = code;
-		if (CEmojiManager::getInstance().matchAt(code, 0, code.size(), length, entry) && length == code.size() && !entry->Texture.empty())
+		if (CEmojiManager::getInstance().matchAt(code, 0, code.size(), length, entry) && length == code.size() &&
+			!entry->Texture.empty())
 		{
 			// Clicking the emoji adds or takes back the own reaction.
 			CCtrlButton *button = new CCtrlButton(CViewBase::TCtorParam());
@@ -1333,7 +1385,8 @@ void CChatTextManager::updateReactionViews(CChatMessageParagraph *paragraph)
 			paragraph->ReactionViews.push_back(button);
 			label.clear();
 		}
-		CViewBase *count = createMsgTextSimple(label + " " + toString(it->Reactors.size()) + "   ", own ? ownColor : color, false, nullptr);
+		CViewBase *count = createMsgTextSimple(label + " " + toString(it->Reactors.size()) + "   ",
+			own ? ownColor : color, false, nullptr);
 		paragraph->addChild(count);
 		paragraph->ReactionViews.push_back(count);
 	}
@@ -1365,7 +1418,8 @@ void CChatTextManager::react(const string &emoji)
 	reference.ReactionValue.Emoji = emoji;
 	reference.ReactionValue.Remove = remove;
 	request.References.push_back(reference);
-	const bool queued = request.isValid() && (ReactionGroup == CChatGroup::tell ? ChatMngr.tell(ReactionReceiver, request) : ChatMngr.chat(request, ReactionGroup, ReactionDynamicChannelId));
+	const bool queued = request.isValid() && (ReactionGroup == CChatGroup::tell ?
+		ChatMngr.tell(ReactionReceiver, request) : ChatMngr.chat(request, ReactionGroup, ReactionDynamicChannelId));
 	if (!queued)
 		CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiBCNotAvailable"));
 }
@@ -1407,7 +1461,8 @@ static void restoreSentInput(CChatQuoteDraft &draft)
 		editBox->addTextTag(tag.Start, tag.Length, tag.Color, tag.Reference);
 	}
 	editBox->setCursorPos((sint32)editBox->getInputStringRef().size());
-	if (!draft.Message.MessageId.empty() && !setQuotePreviewActive(editBox, true, draft.HistoryOffset, draft.MinHeightOffset))
+	if (!draft.Message.MessageId.empty() &&
+		!setQuotePreviewActive(editBox, true, draft.HistoryOffset, draft.MinHeightOffset))
 		draft.Message = CChatMessage();
 }
 
@@ -1435,10 +1490,14 @@ void CChatTextManager::finishQuoteSend(uint32 requestId, bool accepted)
 			{
 				CGroupEditBox *editBox = it->EditBox;
 				const vector<CGroupEditBox::CTextTag> &tags = editBox->getTextTags();
-				bool unchanged = it->SentRevision == editBox->getInputRevision() && it->SentText == editBox->getInputString() && it->SentTags.size() == tags.size();
+				bool unchanged = it->SentRevision == editBox->getInputRevision() &&
+					it->SentText == editBox->getInputString() && it->SentTags.size() == tags.size();
 				for (uint i = 0; unchanged && i < tags.size(); ++i)
 				{
-					if (it->SentTags[i].Start != tags[i].Start || it->SentTags[i].Length != tags[i].Length || it->SentTags[i].Reference != tags[i].Reference || it->SentTags[i].Color != tags[i].Color)
+					if (it->SentTags[i].Start != tags[i].Start ||
+						it->SentTags[i].Length != tags[i].Length ||
+						it->SentTags[i].Reference != tags[i].Reference ||
+						it->SentTags[i].Color != tags[i].Color)
 						unchanged = false;
 				}
 				if (unchanged)
@@ -1553,7 +1612,8 @@ void CChatTextManager::quoteSelectedMessage(CGroupEditBox *editBox)
 	CChatGroup::TGroupType group;
 	CEntityId dynamicChannelId;
 	string receiver;
-	if (!LastSelectedHasMessage || LastSelectedMessage.MessageId.empty() || !editBox || !getSelectedMessageTarget(group, dynamicChannelId, receiver))
+	if (!LastSelectedHasMessage || LastSelectedMessage.MessageId.empty() || !editBox ||
+		!getSelectedMessageTarget(group, dynamicChannelId, receiver))
 		return;
 	CInterfaceGroup *widget = editBox->getParent();
 	CInterfaceGroup *content = widget ? widget->getParent() : nullptr;
@@ -1565,7 +1625,8 @@ void CChatTextManager::quoteSelectedMessage(CGroupEditBox *editBox)
 		vector<pair<string, string> > params;
 		params.push_back(make_pair(string("id"), string("quote_preview")));
 		params.push_back(make_pair(string("edit_box"), editBox->getId()));
-		preview = CWidgetManager::getInstance()->getParser()->createGroupInstance("chat_quote_preview", content->getId(), params);
+		preview = CWidgetManager::getInstance()->getParser()->createGroupInstance(
+			"chat_quote_preview", content->getId(), params);
 		if (!preview)
 			return;
 		preview->setActive(false);
@@ -1631,7 +1692,9 @@ string CChatTextManager::getSelectedPlayerName() const
 	const string playerName = CEntityCL::removeTitleAndShardFromName(LastSelectedSender);
 	if (playerName.empty() || compareCaseInsensitive(playerName, UserEntity->getDisplayName()) == 0)
 		return string();
-	if (LastSelectedHasMessage && LastSelectedMessage.SenderId != CEntityId::Unknown)
+	// The sender id only speaks for the sender's name; the player's own tell line names the receiver.
+	if (LastSelectedHasMessage && LastSelectedMessage.SenderId != CEntityId::Unknown &&
+		compareCaseInsensitive(playerName, CEntityCL::removeTitleAndShardFromName(LastSelectedMessage.SenderName.toUtf8())) == 0)
 	{
 		if (LastSelectedMessage.SenderId.getType() != RYZOMID::player)
 			return string();
@@ -1653,7 +1716,8 @@ bool CChatTextManager::isChatInput(CGroupEditBox *editBox) const
 	const string &handler = editBox->getAHOnEnter();
 	if (handler == "contact_entry")
 		return true;
-	CChatWindow *chatWindow = handler == "chat_box_entry" ? getChatWndMgr().getChatWindowFromCaller(editBox) : nullptr;
+	CChatWindow *chatWindow = handler == "chat_box_entry" ?
+		getChatWndMgr().getChatWindowFromCaller(editBox) : nullptr;
 	return chatWindow && chatWindow->getEditBox() == editBox;
 }
 
@@ -1694,7 +1758,9 @@ CViewBase *CChatTextManager::createMsgTextSimple(const string &msg, NLMISC::CRGB
 }
 
 //=================================================================================
-void CChatTextManager::addTextSegment(CGroupParagraph *para, const string &msg, string::size_type from, string::size_type to, NLMISC::CRGBA col, bool justified, const char *id)
+void CChatTextManager::addTextSegment(CGroupParagraph *para, const string &msg,
+	string::size_type from, string::size_type to, NLMISC::CRGBA col, bool justified,
+	const char *id)
 {
 	if (from >= to)
 		return;
@@ -1715,7 +1781,8 @@ void CChatTextManager::addTextSegment(CGroupParagraph *para, const string &msg, 
 // pointer, so clicks still reach the chat line and its links.
 class CCtrlEmoji : public CCtrlToolTip
 {
-public: CCtrlEmoji(const TCtorParam &param) : CCtrlToolTip(param) {}
+public:
+	CCtrlEmoji(const TCtorParam &param) : CCtrlToolTip(param) {}
 
 	bool setTexture(const std::string &texture)
 	{
@@ -1723,17 +1790,20 @@ public: CCtrlEmoji(const TCtorParam &param) : CCtrlToolTip(param) {}
 		return !_TextureId.empty();
 	}
 
-	virtual void draw()
+	virtual void draw() NL_OVERRIDE
 	{
 		// Only the alpha of the interface colour applies to the tile.
 		CRGBA col = CRGBA::White;
-		col.A = (uint8)(((sint32)col.A * ((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A + 1)) >> 8);
+		col.A = (uint8)(((sint32)col.A *
+			((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A + 1)) >> 8);
 
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
-		rVR.drawRotFlipBitmap(_RenderLayer, _XReal, _YReal, _WReal, _HReal, 0, false, _TextureId, col);
+		rVR.drawRotFlipBitmap(_RenderLayer, _XReal, _YReal, _WReal, _HReal,
+			0, false, _TextureId, col);
 	}
 
-private: CViewRenderer::CTextureId	_TextureId;
+private:
+	CViewRenderer::CTextureId	_TextureId;
 };
 
 //=================================================================================
@@ -1759,7 +1829,8 @@ CViewBase *CChatTextManager::createEmojiView(const string &texture, const string
 }
 
 //=================================================================================
-void CChatTextManager::addMsgText(CGroupParagraph *paragraph, const string &msg, NLMISC::CRGBA col, bool justified, const std::vector<std::pair<size_t, size_t> > *mentions)
+void CChatTextManager::addMsgText(CGroupParagraph *paragraph, const string &msg,
+	NLMISC::CRGBA col, bool justified, const std::vector<std::pair<size_t, size_t> > *mentions)
 {
 	CEmojiManager &emoji = CEmojiManager::getInstance();
 	const bool useEmojiImages = getEmojiMode() == EmojiImage && emoji.mayContainEmoji(msg);
@@ -1790,7 +1861,8 @@ void CChatTextManager::addMsgText(CGroupParagraph *paragraph, const string &msg,
 			if (!length || length > msg.size() - i)
 				continue;
 			addTextSegment(paragraph, msg, pos, i, col, justified);
-			const CRGBA color = CRGBA::stringToRGBA(CWidgetManager::getInstance()->getParser()->getDefine("chat_message_color_mention").c_str());
+			const CRGBA color = CRGBA::stringToRGBA(
+				CWidgetManager::getInstance()->getParser()->getDefine("chat_message_color_mention").c_str());
 			CViewBase *highlight = createMsgTextSimple(msg.substr(i, length), color, justified, nullptr);
 			paragraph->addChild(highlight);
 			static_cast<CChatMessageParagraph *>(paragraph)->MentionViews.push_back(highlight);
@@ -1854,7 +1926,8 @@ void CChatTextManager::addMsgText(CGroupParagraph *paragraph, const string &msg,
 }
 
 //=================================================================================
-CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRGBA col, bool justified, bool plaintext, CInterfaceGroup *commandGroup, const std::vector<std::pair<size_t, size_t> > *mentions)
+CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRGBA col, bool justified, bool plaintext,
+	CInterfaceGroup *commandGroup, const std::vector<std::pair<size_t, size_t> > *mentions)
 {
 	string::size_type textSize = msg.size();
 
@@ -1870,7 +1943,6 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 	if (plaintext)
 	{
 		addTextSegment(para, msg, 0, msg.size(), col, justified, "text");
-
 		return para;
 	}
 
@@ -1920,7 +1992,6 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 		  para->addChild(ctrlButton);
 		}
 	}
-
 
 	if (pos < textSize)
 			{
@@ -1981,7 +2052,7 @@ void CChatTextManager::reset ()
 class	CHandlerCopyChatPopup: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &params )
+	virtual void execute(CCtrlBase *pCaller, const string &params ) NL_OVERRIDE
 	{
 		if (pCaller == nullptr) return;
 
@@ -2020,7 +2091,8 @@ public:
 			if (ctrl && ctrl->getParent() == pGP)
 				CHAT_SHARE::getAttachmentSheetId(ctrl, LastSelectedChatSheetId);
 		}
-		CGroupMenu *menu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:chat_copy_action_menu"));
+		CGroupMenu *menu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId(
+			"ui:interface:chat_copy_action_menu"));
 		if (menu && menu->getRootMenu())
 		{
 			const sint sheetIdLine = menu->getRootMenu()->getLineFromId("copy_sheet_id");
@@ -2030,7 +2102,8 @@ public:
 			CEntityId dynamicChannelId;
 			string receiver;
 			// Quotes and reactions go to the channel of the selected message.
-			const bool hasTarget = LastSelectedHasMessage && !LastSelectedMessage.MessageId.empty() && getChatTextMngr().getSelectedMessageTarget(group, dynamicChannelId, receiver);
+			const bool hasTarget = LastSelectedHasMessage && !LastSelectedMessage.MessageId.empty() &&
+				getChatTextMngr().getSelectedMessageTarget(group, dynamicChannelId, receiver);
 			const sint line = menu->getRootMenu()->getLineFromId("quote");
 			if (line >= 0)
 			{
@@ -2056,8 +2129,11 @@ public:
 			{
 				// Privileged accounts and players already in the friend list cannot be added.
 				const string playerName = getChatTextMngr().getSelectedPlayerName();
-				const CHARACTER_TITLE::ECharacterTitle title = CHARACTER_TITLE::toCharacterTitle(CEntityCL::getTitleFromName(LastSelectedSender));
-				const bool selectable = !playerName.empty() && (title < CHARACTER_TITLE::BeginGmTitle || title > CHARACTER_TITLE::EndGmTitle) && PeopleInterraction.FriendList.getIndexFromName(playerName) == -1;
+				const CHARACTER_TITLE::ECharacterTitle title =
+					CHARACTER_TITLE::toCharacterTitle(CEntityCL::getTitleFromName(LastSelectedSender));
+				const bool selectable = !playerName.empty() &&
+					(title < CHARACTER_TITLE::BeginGmTitle || title > CHARACTER_TITLE::EndGmTitle) &&
+					PeopleInterraction.FriendList.getIndexFromName(playerName) == -1;
 				menu->getRootMenu()->setSelectable(friendLine, selectable);
 				menu->getRootMenu()->setGrayedLine(friendLine, !selectable);
 			}
@@ -2071,7 +2147,8 @@ REGISTER_ACTION_HANDLER( CHandlerCopyChatPopup, "copy_chat_popup");
 // ***************************************************************************
 class CHandlerQuoteChat : public IActionHandler
 {
-public: virtual void execute(CCtrlBase *, const string &params)
+public:
+	virtual void execute(CCtrlBase *, const string &params) NL_OVERRIDE
 	{
 		CWidgetManager *widgets = CWidgetManager::getInstance();
 		if (params != "from_modal")
@@ -2094,7 +2171,7 @@ REGISTER_ACTION_HANDLER(CHandlerQuoteChat, "quote_chat");
 class	CHandlerCopyChat: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &params )
+	virtual void execute(CCtrlBase *pCaller, const string &params ) NL_OVERRIDE
 	{
 		if (pCaller == nullptr) return;
 
@@ -2106,11 +2183,13 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerCopyChat, "copy_chat");
+
 // ***************************************************************************
 // Called when we right click on an attachment and choose 'copy sheet id' from context menu
 class CHandlerCopyChatSheetId: public IActionHandler
 {
-public: virtual void execute(CCtrlBase *pCaller, const string &/* params */)
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		if (pCaller == nullptr) return;
 
@@ -2129,7 +2208,8 @@ REGISTER_ACTION_HANDLER( CHandlerCopyChatSheetId, "copy_chat_sheet_id");
 // Called when we right click on a chat line and choose 'react' from context menu
 class CHandlerChatReact : public IActionHandler
 {
-public: virtual void execute(CCtrlBase *pCaller, const string &/* params */)
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		if (pCaller == nullptr) return;
 
@@ -2140,7 +2220,8 @@ public: virtual void execute(CCtrlBase *pCaller, const string &/* params */)
 		CChatGroup::TGroupType group;
 		CEntityId dynamicChannelId;
 		string receiver;
-		if (LastSelectedHasMessage && !LastSelectedMessage.MessageId.empty() && getChatTextMngr().getSelectedMessageTarget(group, dynamicChannelId, receiver))
+		if (LastSelectedHasMessage && !LastSelectedMessage.MessageId.empty() &&
+			getChatTextMngr().getSelectedMessageTarget(group, dynamicChannelId, receiver))
 		{
 			setReactionTarget(LastSelectedMessage.MessageId, group, dynamicChannelId, receiver);
 			CEmojiPicker::getInstance().openForReaction();
@@ -2153,10 +2234,12 @@ REGISTER_ACTION_HANDLER( CHandlerChatReact, "chat_react");
 // Called when we click on an emoji of the reaction row
 class CHandlerChatReaction : public IActionHandler
 {
-public: virtual void execute(CCtrlBase *pCaller, const string &params)
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &params) NL_OVERRIDE
 	{
 		CChatMessageParagraph *paragraph = pCaller ? dynamic_cast<CChatMessageParagraph *>(pCaller->getParent()) : nullptr;
-		if (!paragraph || params.empty() || !CHAT_MESSAGE::isValidTarget(paragraph->Group, paragraph->DynamicChannelId, paragraph->Receiver))
+		if (!paragraph || params.empty() ||
+			!CHAT_MESSAGE::isValidTarget(paragraph->Group, paragraph->DynamicChannelId, paragraph->Receiver))
 			return;
 		setReactionTarget(paragraph->Message.MessageId, paragraph->Group, paragraph->DynamicChannelId, paragraph->Receiver);
 		getChatTextMngr().react(params);
@@ -2167,7 +2250,8 @@ REGISTER_ACTION_HANDLER( CHandlerChatReaction, "chat_reaction");
 // ***************************************************************************
 class CHandlerChatAddFriend: public IActionHandler
 {
-public: virtual void execute(CCtrlBase *pCaller, const string &/* params */)
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		if (pCaller == nullptr) return;
 

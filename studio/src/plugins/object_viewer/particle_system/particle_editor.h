@@ -103,11 +103,14 @@ public:
 	NL3D::CParticleSystemModel *getModelFromPS(NL3D::CParticleSystem *ps) const;
 
 	/// Load a new particle workspace (without asking if current workspace has been modified)
+	/// Throws NLMISC::EStream when the workspace cannot be read, and keeps the current workspace then
 	void loadWorkspace(const std::string &fullPath);
 
+	/// Throws NLMISC::EStream when the new workspace cannot be written, and keeps the current workspace then
 	void createNewWorkspace(const std::string &fullPath);
 
 	/// Save the workspace structure
+	/// Throws NLMISC::EStream when the workspace cannot be written
 	void saveWorkspaceStructure();
 
 	/// Save the workspace content

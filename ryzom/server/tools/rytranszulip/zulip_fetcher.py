@@ -240,6 +240,8 @@ class ZulipFetcher(ZulipService):
 		if not sender:
 			result = self.zulip.get_user_by_id(event["user_id"])
 			if result.get("result") != "success":
+				if self.retryError(result):
+					raise requests.exceptions.ConnectionError("Cannot fetch reacting user "+str(event["user_id"]))
 				print(f"Error fetching reacting user {event['user_id']}", result.get("msg", ""))
 				return
 			sender = result["user"]["full_name"]

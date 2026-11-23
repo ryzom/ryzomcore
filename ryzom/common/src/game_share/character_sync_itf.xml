@@ -48,6 +48,8 @@
 			<property type="TCivilisation"		name="Civilisation"	/>
 			<property type="TCult"				name="Cult"	/>
 			<property type="bool"				name="Newcomer"	/>
+			<property type="bool"				name="NewcomerKnown"				doc="Whether the sending shard could tell the newcomer flag: it follows the continent of the home position, and a Ring shard does not load the mainland continents"/>
+			<property type="bool"				name="RespawnPointsKnown"			doc="Whether the sending shard found every respawn point of the character: a Ring shard does not load the mainland continents, and counts none"/>
 		</class>
 
 		<!-- ############################################################## -->

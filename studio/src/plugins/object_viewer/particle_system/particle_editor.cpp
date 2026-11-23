@@ -108,16 +108,8 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 	CUniquePtr<CParticleWorkspace> newPW(new CParticleWorkspace);
 	newPW->init(fullPath);
 
-	// save empty workspace
-	try
-	{
-		newPW->load();
-	}
-	catch(NLMISC::EStream &e)
-	{
-		nlerror("%s", e.what());
-		return;
-	}
+	// a workspace that cannot be read throws to the caller, the current workspace stays open
+	newPW->load();
 
 	// try to load each ps
 	CWorkspaceNode *firstLoadedNode = 0;
@@ -129,7 +121,7 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 		{
 			node->loadPS();
 		}
-		catch(NLMISC::EStream &e)
+		catch (const NLMISC::Exception &e)
 		{
 			nlwarning("%s", e.what());
 		}
@@ -144,32 +136,22 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 
 void CParticleEditor::createNewWorkspace(const std::string &fullPath)
 {
-	CParticleWorkspace *newPW = new CParticleWorkspace;
+	CUniquePtr<CParticleWorkspace> newPW(new CParticleWorkspace);
 	newPW->init(fullPath);
-	// save empty workspace
-	try
-	{
-		newPW->save();
-	}
-	catch(NLMISC::EStream &e)
-	{
-		nlerror("%s", e.what());
-	}
+
+	// save empty workspace, a workspace that cannot be written throws to the caller and the current one stays open
+	newPW->save();
+
 	closeWorkspace();
-	_PW = newPW;
+	_PW = newPW.release();
 }
 
 void CParticleEditor::saveWorkspaceStructure()
 {
 	nlassert(_PW);
-	try
-	{
-		_PW->save();
-	}
-	catch(NLMISC::EStream &e)
-	{
-		nlerror("%s", e.what());
-	}
+
+	// a workspace that cannot be written throws to the caller
+	_PW->save();
 }
 
 
@@ -395,7 +377,8 @@ void CParticleEditor::update()
 			while(itr != _PlayingNodes.end())
 			{
 				CWorkspaceNode *node = (*itr);
-				if (node->isLoaded())
+				// the weak reference to a node removed from the workspace while it plays is NULL
+				if (node && node->isLoaded())
 				{
 					if (isRunning(node))
 					{

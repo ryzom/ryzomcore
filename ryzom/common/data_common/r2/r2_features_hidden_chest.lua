@@ -51,9 +51,10 @@ feature.Components.HiddenChest =
 			r2.Translator.translateFeatureActivation(this, context)
 		end,
 
-		updateVersion = function(this, scenarioValue, currentValue )
-			
-		end,		
+		-- the class has had one version
+		updateVersion = function(this, scenarioValue, currentValue, update)
+			return true
+		end,
 
 
 	}
@@ -243,9 +244,7 @@ component.initLogicEntitiesInstancesMenu = function(this, subMenu, calledFunctio
 			
 	local entitiesTable = r2.Scenario:getAllInstancesByType(this.Name)
 	for key, entity in pairs(entitiesTable) do
-		local uc_name = ucstring()
-		uc_name:fromUtf8(entity.Name)
-		subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+		subMenu:addLine(entity.Name, "lua", r2:uiCall(calledFunction, entity.InstanceId), entity.InstanceId)
 	end
 
 	if table.getn(entitiesTable)==0 then

@@ -399,15 +399,7 @@ void	uncbMsgProcessing(CMessage &msgin, TSockId from, CCallbackNetBase &/* netba
 
 				(*it).second.before();
 //				const std::string &cbName = itcb->first;
-				try
-				{
 				(*itcb).second (msgin, uc->ServiceName, sid);
-				}
-				catch (const NLMISC::Exception &e)
-				{
-					nlwarning("HNETL5: Uncaught exception in callback '%s' from service '%s' (%hu): %s",
-						msgin.getName().c_str(), uc->ServiceName.c_str(), sid.get(), e.what());
-				}
 				(*it).second.after();
 
 				TTime after = CTime::getLocalTime();
@@ -552,7 +544,17 @@ bool	CUnifiedNetwork::init(const CInetHost *addr, CCallbackNetBase::TRecordingSt
 
 	ThreadCreator = NLMISC::getThreadId();
 
-	vector<CInetAddress> laddr = CInetAddress::localAddresses();
+	// The addresses registered with the naming service, where other services connect to this one
+	vector<CInetAddress> laddr;
+	if (CSock::defaultBindAddress().isAny())
+	{
+		laddr = CInetAddress::localAddresses();
+	}
+	else
+	{
+		// The listen socket is bound to one address only (BindAddress), register just that one
+		laddr.push_back(CInetAddress(CSock::defaultBindAddress(), 0));
+	}
 
 	_RecordingState = rec;
 	_Name = shortName;

@@ -1,0 +1,34 @@
+# A bandit camp of the class the first editors had for it: it becomes the bandit camp of this editor.
+# Its cycle was the time the bandits sit and the time they wander, half of it each; the event and the
+# action of its end have the names they have now.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteConvertedClasses(1)
+scenario_at: Acts[1].Features[1].Class = BanditCamp
+scenario_at: Acts[1].Features[1].InstanceId = Client1_870
+scenario_at: Acts[1].Features[1].SitDuration = 30
+scenario_at: Acts[1].Features[1].WanderDuration = 30
+scenario_at: Acts[1].Features[1].Cycle = <none>
+scenario_at: Acts[1].Features[1].Cost = <none>
+scenario_at: Acts[1].Features[1].BanditsLevel = 170
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Event.Type = deactivation
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[0].Action.Type = deactivate
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[1].Action.Type = Sit Down
+scenario_at: Versions.BanditCamp = 2
+scenario_at: Versions.BanditCampFeature = <none>

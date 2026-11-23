@@ -116,7 +116,8 @@ local registerFeature = function()
 			then
 				--create and fill a RT entry
 				entry = r2.newComponent("RtEntryText")
-				entry.Text = v.Text
+				-- a text of the author that is not in a script (r2.Translator.plainText)
+				entry.Text = r2.Translator.plainText(v.Text)
 				--insert it in the RT text manager
 				table.insert(rtTextMgr.Texts,entry)
 				local tmp = {}

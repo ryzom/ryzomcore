@@ -22,89 +22,76 @@
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
 #include "team_manager/team_manager.h"
+#include "guild_manager/guild_manager.h"
+#include "guild_manager/guild.h"
+#include "mission_manager/mission_solo.h"
+#include "mission_manager/mission_team.h"
+#include "mission_manager/mission_guild.h"
 
 using namespace std;
 using namespace NLMISC;
 
 NL_INSTANCE_COUNTER_IMPL(CAdminProperties);
 
-void CAdminProperties::updateCSRJournal( CCharacter * user, CMission * mission,uint8 idx )
+void CAdminProperties::stopMonitoringMissions( CCharacter & csr )
 {
-	if ( !mission )
-	{
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TYPE",idx), 0);
-		CBankAccessor_PLR::getMISSIONS().getArray(idx).setTYPE(user->_PropertyDatabase, 0 );
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:ICON",idx), 0);
-		CBankAccessor_PLR::getMISSIONS().getArray(idx).setICON(user->_PropertyDatabase, CSheetId::Unknown );
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TITLE",idx), 0);
-		CBankAccessor_PLR::getMISSIONS().getArray(idx).setTITLE(user->_PropertyDatabase, 0 );
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:DETAIL_TEXT",idx), 0);
-		CBankAccessor_PLR::getMISSIONS().getArray(idx).setDETAIL_TEXT(user->_PropertyDatabase, 0 );
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:END_DATE",idx), 0 );
-		CBankAccessor_PLR::getMISSIONS().getArray(idx).setEND_DATE(user->_PropertyDatabase, 0 );
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:BEGIN_DATE",idx), 0 );
-		CBankAccessor_PLR::getMISSIONS().getArray(idx).setBEGIN_DATE(user->_PropertyDatabase, 0 );
-		for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
-		{
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TARGET%u:TITLE",idx,i), 0);
-			CBankAccessor_PLR::getMISSIONS().getArray(idx).getTARGET(i).setTITLE(user->_PropertyDatabase, 0 );
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TARGET%u:X",idx,i), 0);
-			CBankAccessor_PLR::getMISSIONS().getArray(idx).getTARGET(i).setX(user->_PropertyDatabase, 0 );
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TARGET%u:Y",idx,i), 0);
-			CBankAccessor_PLR::getMISSIONS().getArray(idx).getTARGET(i).setY(user->_PropertyDatabase, 0 );
-		}
-		for (uint i = 0; i < NB_STEP_PER_MISSION; i++)
-		{
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:GOALS:%u:TEXT",idx,i), 0);
-			CBankAccessor_PLR::getMISSIONS().getArray(idx).getGOALS().getArray(i).setTEXT(user->_PropertyDatabase, 0 );
-		}
-	}
-	else
-	{
-		// todo mission
-		/*
-		CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
-		nlassert( templ );
-		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TYPE",idx), templ->Type);
-		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:ICON",idx),templ->Icon );
-		TDataSetRow giverRow = TheDataset.getDataSetRow( CAIAliasTranslator::getInstance()->getEntityId( mission->getGiver() ) );
-		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TITLE",idx),templ->sendTitleText( user->getEntityRowId(),giverRow ) );
-		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:DETAIL_TEXT",idx),mission->sendDesc( user->getEntityRowId() ) );
-		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:END_DATE",idx),mission->getEndDate() );
-		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:BEGIN_DATE",idx), mission->getBeginDate() );
-		mission->fillObjectives( user, idx );
-		*/
-	}
-	///TODO NICO test no list
+	CAdminProperties & properties = csr.getAdminProperties();
+	const TDataSetRow monitored = properties._MissionUser;
+	if ( monitored.isNull() )
+		return;
+	properties._MissionUser = TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW );
+
+	CCharacter * user = PlayerManager.getChar( monitored );
+	if ( user && user->getMonitoringCSR() == csr.getEntityRowId() )
+		user->setMonitoringCSR( TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW ) );
+
+	// The CSR has no entry of its own: monitorMissions refuses a CSR that has missions, and CCharacter::addMission
+	// stops the monitoring before the entry of a new mission is written. All the entries were the user's.
+	for ( uint8 i = 0; i < MaxSoloMissionCount; i++ )
+		CMissionSolo::clearJournalEntry( csr, i );
 }
 
-CMission * CAdminProperties::getMission( uint indexInJournal ) const
+CMission* CAdminProperties::getMission(uint indexInJournal) const
 {
-	/// todo mission
-	/*
-	if ( !_Data ) return NULL;
-	CCharacter * user = PlayerManager.getChar( _Data->MissionUser );
-	if ( !user )
+	CCharacter *user = PlayerManager.getChar(_MissionUser);
+	if (!user)
 		return NULL;
-	
-	CMission * mission = NULL;
-	if ( indexInJournal < user->getMissions().size() )
-		return (CMission*) user->getMissions()[indexInJournal];
 
-	indexInJournal-= MaxSoloMissionCount;
-	CTeam * team = TeamManager.getTeam( user->getTeamId() );
-	if (team )
+	// The solo missions come first, by their entry in the journal. The entries of the group journal follow: those of
+	// the team, then those of the guild (the journal entry of a guild mission counts from the end of the team's).
+	if (indexInJournal < MaxSoloMissionCount)
 	{
-		if ( indexInJournal < team->getMissions().size() )
-			return (CMission*) team->getMissions()[indexInJournal];
-	}		
-	indexInJournal-= ( MaxGroupMissionCount);
-	CGuild * guild = user->getGuild();
-	if (guild )
-	{
-		if ( indexInJournal < guild->getMissions().size() )
-			return(CMission*) guild->getMissions()[indexInJournal];
+		for (map<TAIAlias, CMission *>::iterator it = user->getMissionsBegin(); it != user->getMissionsEnd(); ++it)
+		{
+			if ((*it).second->getClientIndex() == indexInJournal)
+				return (*it).second;
+		}
+		return NULL;
 	}
-	*/
+
+	indexInJournal -= MaxSoloMissionCount;
+	if (indexInJournal < MaxGroupMissionCount)
+	{
+		CTeam *team = TeamManager.getRealTeam(user->getTeamId());
+		if (team)
+		{
+			for (uint i = 0; i < team->getMissions().size(); i++)
+			{
+				if (team->getMissions()[i]->getClientIndex() == indexInJournal)
+					return team->getMissions()[i];
+			}
+		}
+		return NULL;
+	}
+
+	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+	if (guild)
+	{
+		for (uint i = 0; i < guild->getMissions().size(); i++)
+		{
+			if (guild->getMissions()[i]->getClientIndex() == indexInJournal)
+				return guild->getMissions()[i];
+		}
+	}
 	return NULL;
 }

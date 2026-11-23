@@ -22,6 +22,10 @@
 
 // Project includes
 #include "ui_world_editor_window.h"
+#include "world_editor_actions.h"
+
+// STL includes
+#include <string>
 
 // Qt includes
 #include <QUndoStack>
@@ -67,6 +71,9 @@ private Q_SLOTS:
 	void updateSelection(const QItemSelection &selected, const QItemSelection &deselected);
 	void selectedItemsInScene(const QList<QGraphicsItem *> &selected);
 
+	// the files a redo did not load, in one message once the redo is over
+	void reportRedoFailures();
+
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
 	virtual void hideEvent(QHideEvent *hideEvent);
@@ -80,8 +87,19 @@ private:
 	void loadWorldEditFile(const QString &fileName);
 	void checkCurrentWorld();
 
+	// records what Save would write for the world now and what the world file had when it was loaded
+	// or last written, from which Save tells whether the editor or another program changed it
+	void updateWorldEditBaseline();
+
 	QString m_context;
 	QString m_dataDir;
+
+	// the .worldedit as it was loaded, for Save to keep what it does not change
+	QString m_loadedFileName;
+	std::string m_loadedContent;
+	QString m_loadedDataDir;
+	QString m_loadedContext;
+	WorldFiles m_worldFiles;
 
 	QString m_lastDir;
 

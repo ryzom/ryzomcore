@@ -42,6 +42,9 @@ struct CAdminCommand
 //
 
 void initAdmin ();
+#ifdef RYZOM_FORGE
+void releaseAdmin();
+#endif
 void initCommandsPrivileges(const std::string & fileName);
 void initPositionFlags(const std::string & fileName);
 void getUCstringFromHash(const std::string & hash, ucstring & finaltext);

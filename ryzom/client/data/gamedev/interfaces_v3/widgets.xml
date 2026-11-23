@@ -411,6 +411,7 @@
         <action id="item_group" name="uimGroup" icon="r2_toolbar_customize_look_small.tga"/>
         <!-- Will be activated and populated in code -->
         <group type="menu" id="item_group_menu" extends="base_menu"></group>
+
     </group>
     <group type="menu" id="item_menu_in_trade" extends="base_menu">
         <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
@@ -419,7 +420,6 @@
             <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
         </action>
         <action id="infos" name="uimBoldInfo" handler="open_help_auto" icon="brick_default.tga"/>
-
     </group>
     <!-- MAX_INVENTORY_ANIMAL -->
     <link expr="switch(@%pa_beast0:TYPE, 'uimMtPaMount0', 'uimMtPaMount0', 'uimMtPaPacker0', 'uimMtPaDemon0')" target="ui:interface:item_menu_in_bag:move:pa0:hardtext" />
@@ -1214,7 +1214,7 @@
     </group>
     <!-- Simple Message Box with just a OK button -->
     <group type="modal" id="message_box" exit_click_out="true" posref="MM MM" w="250" child_resize_h="true" child_resize_hmargin="46" on_enter="leave_modal" options="skin_modal">
-        <view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up" />
+        <view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal" />
         <ctrl style="button_ok" posref="BM BM" x="0" y="8" onclick_l="leave_modal" hardtext="uittOK" avoid_resize_parent="true" />
     </group>
     <!-- Message Box with just a OK/Browse Faq button -->
@@ -1231,7 +1231,7 @@
         <action handler="" params="" />
     </proc>
     <group type="modal" id="message_box_with_help" exit_click_out="false" posref="MM MM" w="250" child_resize_h="true" child_resize_hmargin="46" on_enter="proc" on_enter_params="proc_message_box_with_help_ok" on_deactive="proc" on_deactive_params="proc_message_box_with_help_ok" escapable="true" options="skin_modal">
-        <view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up" />
+        <view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal" />
         <ctrl style="button_ok" id="ok" posref="BM BL" x="2" y="8" onclick_l="proc" params_l="proc_message_box_with_help_ok" hardtext="uittOK" avoid_resize_parent="true" />
         <ctrl style="button_ok" id="browse_faq" posref="BM BR" x="-2" y="8" onclick_l="proc" params_l="proc_browse_faq" hardtext="uittBrowseFaq" avoid_resize_parent="true" />
     </group>
@@ -1252,7 +1252,7 @@
         <group id="icon_group" posref="TL TL" x="4" y="-8" w="24" h="24">
             <view type="bitmap" id="icon" posref="MM MM" texture="" global_color="false" />
         </group>
-        <view type="text" id="text" posref="TL TL" line_maxw="270" x="32" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line_space="0" multi_line="true" case_mode="%case_first_sentence_letter_up" />
+        <view type="text" id="text" posref="TL TL" line_maxw="270" x="32" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line_space="0" multi_line="true" case_mode="%case_normal" />
         <instance template="button_ok_cancel" posref="BM BM" x="0" y="8" onclick_ok="proc" onclick_ok_param="proc_valid_message_box_ok" onclick_cancel="proc" onclick_cancel_param="proc_valid_message_box_cancel" avoid_resize_parent="true" />
     </group>
     <!-- common Style for Message Box For Important Proposal feature (join PVP etc...) -->

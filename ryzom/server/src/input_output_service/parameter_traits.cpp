@@ -188,10 +188,19 @@ public:
 		}
 		else if (cond.Property == "gender")
 		{
-			CCharacterInfos	*playerInfo = IOS->getCharInfos(EId);
-			if (playerInfo != 0)
+			if (EId.getType() == RYZOMID::player)
 			{
-				op1 = GSGENDER::toString(playerInfo->getGender());
+				CCharacterInfos *playerInfo = IOS->getCharInfos(EId);
+				if (playerInfo != 0)
+				{
+					op1 = GSGENDER::toString(playerInfo->getGender());
+				}
+			}
+			else
+			{
+				// Only a player has its gender in the visual property A. The other entities have theirs
+				// in the sheet, and most have another layout in that property (SAltLookProp).
+				op1 = GSGENDER::toString(si.Gender);
 			}
 		}
 		else

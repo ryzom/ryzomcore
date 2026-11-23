@@ -133,9 +133,13 @@ function r2:group(src, target)
 		-- create a new group
 		-- debugInfo(colorTag(255, 255, 0) .. "Creating new group")
 		local newGroup = r2.newComponent("NpcGrpFeature")
-		local uc_groupName = ucstring()
-		uc_groupName:fromUtf8(r2.PaletteIdToGroupTranslation[src.Base].. " " .. i18n.get("uiR2EDNameGroup"):toUtf8())
-		local groupName = r2:genInstanceName(uc_groupName):toUtf8()	
+		-- (a creature the palette does not offer has no name for its kind there)
+		local groupBaseName = i18n.get("uiR2EDNameGroup"):toUtf8()
+		local kindName = r2.PaletteIdToGroupTranslation[src.Base]
+		if kindName ~= nil then
+			groupBaseName = kindName .. " " .. groupBaseName
+		end
+		local groupName = r2:genInstanceName(groupBaseName):toUtf8()
 		newGroup.Name = groupName
 
 		--r2.requestSetNode(target.Behavior.InstanceId, "Type", "")	
@@ -552,7 +556,6 @@ end
 ------------------------------------------------------------------------------------
 -- called by C++ when copy has been pressed (key or ui button)
 function r2:paste()	
-	r2.requestNewAction(concatUCString(i18n.get("uiR2EDPasteAction"), r2.ClipBoardDisplayName))
 	if r2.ClipBoard == nil then
 		displaySystemInfo(i18n.get("uiR2EDEmptyClipBoard"), "BC")
 		return
@@ -704,8 +707,7 @@ function r2:popMainMenu()
 	local menu = getUI(menuName)	
 	assert(menu)
 	local function buildKeyName(action, params)
-		local keyName = ucstring(runExpr(string.format("getKey('%s', '%s')", action, params)))
-		assert(isUCString(keyName))		
+		local keyName = ucstring(r2:getKeyName(action, params))
 		if keyName == i18n.get("uiNotAssigned")	then
 			-- no associated key...
 			return keyName
@@ -737,8 +739,9 @@ function r2:popMainMenu()
 	if r2.Mode ~= "Edit" then
 		menu:find("live").active = not (r2.AccessMode == "Editor") 
 		menu:find("stop_live").active = not (r2.AccessMode == "Editor")
-		menu:find("player_admin").active = not (r2.AccessMode == "Editor")
 	end
+	-- (player control is in both menus for everyone who has them: the window leaves an editor that does not own
+	-- the edit session the list and the tell, see CharTracking:isListOnly)
 
 	menu:find("map_key").t.uc_hardtext = buildKeyName("show_hide", "map")
 	menu:find("debug_console").active = (config.R2EDExtendedDebug == 1)
@@ -771,7 +774,8 @@ function r2:tryGoTest()
 	-- freeze go test in menu & button
 	local goTestButton = getUI("ui:interface:r2ed_toolbar"):find("r2ed_tool_start").unselected.button
 	local goTestMenu = getUI("ui:interface:r2ed_main_menu"):find("go_test")
-	if not goTestButton.frozen or goTest.grayed then	
+	-- (both are freed together when the editor is back in edition: a test that has been asked for is not asked twice)
+	if not goTestButton.frozen and not goTestMenu.grayed then
 		goTestButton.frozen = true
 		goTestMenu.grayed = true
 		runAH(nil, "r2ed_go_test", "")
@@ -895,6 +899,9 @@ end
 -- 'BackToEditing' when switching from dm/test mode to editing (when the transition screen is displayed)
 
 function r2:onModeChanged()
+	-- the INVITE button of the tell windows is for the owner of an animation: it follows the mode
+	runAH(nil, "update_free_teller_headers", "")
+
 	-- if a form was displayed, just cancel it
 	if r2.CurrentForm and r2.CurrentForm.active then
 		r2:cancelForm(r2.CurrentForm)

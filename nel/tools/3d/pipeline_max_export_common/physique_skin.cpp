@@ -45,7 +45,7 @@ using namespace PIPELINE::MAX::BUILTIN;
 namespace PHYSIQUESKIN {
 
 const NLMISC::CClassId CLASSID_PHYSIQUE(0x00000100, 0x00000000);
-const NLMISC::CClassId CLASSID_SKIN(0x0095c6a3, 0x00015666);
+const NLMISC::CClassId CLASSID_SKIN(0x0095c723, 0x00015666);
 
 bool isPhysiqueModifier(CSceneClass *mod)
 {
@@ -57,7 +57,7 @@ bool isPhysiqueModifier(CSceneClass *mod)
 bool isSkinModifier(CSceneClass *mod)
 {
 	if (!mod || !mod->classDesc()) return false;
-	return mod->classDesc()->classId() == CLASSID_SKIN;
+	return mod->classDesc()->classId() == CLASSID_SKIN && mod->classDesc()->superClassId() == SCLASS_OSMODIFIER;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -362,6 +362,146 @@ void buildSkeletonBoneMap(INode *root,
 }
 
 // ---------------------------------------------------------------------------------------------
+// Skin
+//
+// The bone table is on the modifier: 0x0020 the bone count, 0x0030 one record per bone (int32 cross
+// section count, then per cross section a float and two int32; a flags byte, 64 for a deleted bone; a
+// falloff byte; int32 reference slots of the bone node and its two end points, in the reference order of
+// the file). Bones are addressed by their index in this table, never by the
+// order of the node references (a deleted bone keeps its index). The per-node data (mod-app 0x2512, chunks
+// directly inside) holds 0x0040 the vertex count and 0x0490 one record per vertex: int32 influence count,
+// uint32 flags (2 weighted by hand, 4 not normalized, 8 rigid), then 44 bytes per influence, int32 bone
+// index and float weight first, spline bone data after; 0x0540 per vertex a bone for a vertex without
+// influences (-1 none). The stored weights are the weights the modifier last computed. Validated on
+// fy_hof_underwear.max (fy_hof_underwear_gilet): equal to the reference export on every vertex that could
+// be matched by position.
+
+static CStorageRaw *findModifierRaw(CSceneClass *mod, uint16 id)
+{
+	const CStorageContainer::TStorageObjectContainer &orphans = mod->orphanedChunks();
+	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+		if (it->first == id)
+			return dynamic_cast<CStorageRaw *>(it->second);
+	return dynamic_cast<CStorageRaw *>(mod->findStorageObject(id));
+}
+
+static bool skinError(std::string *err, const char *fmt, int a = 0, int b = 0)
+{
+	if (err)
+	{
+		char buf[256];
+		snprintf(buf, sizeof(buf), fmt, a, b);
+		*err = buf;
+	}
+	return false;
+}
+
+// Decode the Skin weights per vertex, in stored order with zero weights kept (the first influence of the
+// first weighted vertex picks the skeleton). False with a reason for anything the reference export
+// would refuse: a vertex without weight, a bone that was deleted or is not a node, unreadable data.
+static bool decodeSkinWeights(CSceneClass *mod, CStorageContainer *modApp, const std::string &nodeName,
+                              std::vector<std::vector<SBoneWeight> > &out, std::string *err)
+{
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mod);
+	const CStorageRaw *countRaw = findModifierRaw(mod, 0x0020);
+	const CStorageRaw *table = findModifierRaw(mod, 0x0030);
+	const CStorageRaw *verRaw = findModifierRaw(mod, 0x0230);
+	if (!rm || !countRaw || countRaw->Value.size() < 4 || !table)
+		return skinError(err, "Skin bone table not readable");
+	uint32 boneCount, version = 3;
+	memcpy(&boneCount, &countRaw->Value[0], 4);
+	if (verRaw && verRaw->Value.size() >= 4)
+		memcpy(&version, &verRaw->Value[0], 4);
+	const std::vector<uint8> &t = table->Value;
+	if (boneCount > t.size() / 18)
+		return skinError(err, "Skin bone count %i does not fit its table", (int)boneCount);
+	std::vector<INode *> bones(boneCount, (INode *)nullptr);
+	size_t at = 0;
+	for (uint32 b = 0; b < boneCount; ++b)
+	{
+		sint32 sections;
+		if (at + 4 > t.size()) return skinError(err, "Skin bone record %i truncated", (int)b);
+		memcpy(&sections, &t[at], 4);
+		if (sections < 0 || sections > 4096) return skinError(err, "Skin bone record %i not readable", (int)b);
+		at += 4 + (size_t)sections * 12;
+		if (at + 14 > t.size()) return skinError(err, "Skin bone record %i truncated", (int)b);
+		const uint8 flags = t[at];
+		sint32 boneRef;
+		memcpy(&boneRef, &t[at + 2], 4);
+		at += 14;
+		if ((flags & 64) || boneRef < 0)
+			continue; // deleted bone
+		// the slot is in the reference order of the file, which this reader keeps (the modifier itself shifts
+		// both by 8 when it loads a version below 4)
+		const uint slot = (uint)boneRef;
+		bones[b] = slot < rm->nbReferences() ? dynamic_cast<INode *>(rm->getReference(slot)) : nullptr;
+	}
+	if (at != t.size())
+		return skinError(err, "Skin bone table has %i bytes left over", (int)(t.size() - at));
+	(void)version;
+
+	CStorageContainer *data = findChildContainer(modApp, 0x2512);
+	const CStorageRaw *vcount = data ? findChildRaw(data, 0x0040) : nullptr;
+	const CStorageRaw *records = data ? findChildRaw(data, 0x0490) : nullptr;
+	const CStorageRaw *closest = data ? findChildRaw(data, 0x0540) : nullptr;
+	if (!vcount || vcount->Value.size() < 4 || !records)
+		return skinError(err, "Skin vertex weights not readable (older vertex layout not supported)");
+	uint32 nv;
+	memcpy(&nv, &vcount->Value[0], 4);
+	const std::vector<uint8> &r = records->Value;
+	if (nv > r.size() / 8)
+		return skinError(err, "Skin vertex count %i does not fit its records", (int)nv);
+	out.assign(nv, std::vector<SBoneWeight>());
+	at = 0;
+	uint unevaluated = 0, envelope = 0;
+	for (uint32 v = 0; v < nv; ++v)
+	{
+		sint32 n;
+		uint32 vflags;
+		if (at + 8 > r.size()) return skinError(err, "Skin vertex record %i truncated", (int)v);
+		memcpy(&n, &r[at], 4);
+		memcpy(&vflags, &r[at + 4], 4);
+		at += 8;
+		if (n < 0 || at + (size_t)n * 44 > r.size()) return skinError(err, "Skin vertex record %i truncated", (int)v);
+		if (vflags & (4 | 8))
+			++unevaluated;
+		if (!(vflags & 2))
+			++envelope;
+		for (sint32 i = 0; i < n; ++i)
+		{
+			sint32 bone;
+			SBoneWeight bw;
+			memcpy(&bone, &r[at + (size_t)i * 44], 4);
+			memcpy(&bw.Weight, &r[at + (size_t)i * 44 + 4], 4);
+			if (bone < 0 || (uint32)bone >= boneCount || !bones[bone])
+				return skinError(err, "Skin vertex %i uses bone %i, which is deleted or not a node", (int)v, (int)bone);
+			bw.Bone = bones[bone];
+			out[v].push_back(bw);
+		}
+		at += (size_t)n * 44;
+		if (out[v].empty())
+		{
+			sint32 fallback = -1;
+			if (closest && closest->Value.size() >= (size_t)(v + 1) * 4)
+				memcpy(&fallback, &closest->Value[(size_t)v * 4], 4);
+			if (fallback < 0 || (uint32)fallback >= boneCount || !bones[fallback])
+				return skinError(err, "Skin vertex %i has no weight", (int)v);
+			SBoneWeight bw = { bones[fallback], 1.0f };
+			out[v].push_back(bw);
+		}
+	}
+	if (at != r.size())
+		return skinError(err, "Skin vertex records have %i bytes left over", (int)(r.size() - at));
+	if (unevaluated)
+		fprintf(stderr, "WARNING: Skin of '%s' has %u rigid or unnormalized vertices; their stored weights are "
+		        "normalized like the others\n", nodeName.c_str(), unevaluated);
+	if (envelope)
+		fprintf(stderr, "WARNING: Skin of '%s' has %u vertices weighted by envelopes; the weights it last stored are "
+		        "used\n", nodeName.c_str(), envelope);
+	return true;
+}
+
+// ---------------------------------------------------------------------------------------------
 // Apply into CMeshBuild
 
 bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
@@ -372,31 +512,38 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
                            std::string *err,
                            std::vector<INode *> *boneNodesOut)
 {
-	// Locate the Physique modifier + its mod-app slot.
+	// Locate the skinning modifier + its mod-app slot: a Skin first, as the reference export does, then a
+	// Physique.
 	CSceneClass *physMod = nullptr;
 	CStorageContainer *physApp = nullptr;
-	for (uint i = 0; i < mods.size(); ++i)
+	bool isSkin = false;
+	for (uint pass = 0; pass < 2 && !physMod; ++pass)
 	{
-		if (isPhysiqueModifier(mods[i]))
+		for (uint i = 0; i < mods.size(); ++i)
 		{
-			physMod = mods[i];
-			physApp = (i < modApps.size()) ? modApps[i] : nullptr;
-			break;
+			if (pass == 0 ? isSkinModifier(mods[i]) : isPhysiqueModifier(mods[i]))
+			{
+				physMod = mods[i];
+				physApp = (i < modApps.size()) ? modApps[i] : nullptr;
+				isSkin = pass == 0;
+				break;
+			}
 		}
 	}
 	if (!physMod)
 	{
-		if (err) *err = "no Physique modifier on node";
+		if (err) *err = "no Skin or Physique modifier on node";
 		return false;
 	}
 	if (!physApp)
 	{
-		if (err) *err = "Physique modifier has no mod-app slot";
+		if (err) *err = isSkin ? "Skin modifier has no mod-app slot" : "Physique modifier has no mod-app slot";
 		return false;
 	}
 
 	std::vector<std::vector<SBoneWeight> > vertWeights;
-	if (!decodePhysiqueWeights(physMod, physApp, vertWeights, err))
+	if (isSkin ? !decodeSkinWeights(physMod, physApp, ucstring(node.userName()).toUtf8(), vertWeights, err)
+	           : !decodePhysiqueWeights(physMod, physApp, vertWeights, err))
 		return false;
 
 	if (vertWeights.size() != buildMesh.Vertices.size())
@@ -407,7 +554,7 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
 		if (err)
 		{
 			char buf[160];
-			sprintf(buf, "Physique vertex count %u != mesh vertex count %u",
+			sprintf(buf, "%s vertex count %u != mesh vertex count %u", isSkin ? "Skin" : "Physique",
 			        (uint)vertWeights.size(), (uint)buildMesh.Vertices.size());
 			*err = buf;
 		}
@@ -428,7 +575,7 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
 		}
 	}
 	// Fallback: first non-NULL ref on the Physique modifier.
-	if (!skelRoot)
+	if (!skelRoot && !isSkin)
 	{
 		CReferenceMaker *modRm = dynamic_cast<CReferenceMaker *>(physMod);
 		for (uint r = 0; modRm && r < modRm->nbReferences(); ++r)
@@ -482,7 +629,16 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
 			float w = vertWeights[v][b].Weight;
 			if (!bn || w <= 0.f) continue;
 			std::map<INode *, sint32>::const_iterator it = mapId.find(bn);
-			if (it == mapId.end()) continue;
+			if (it == mapId.end())
+			{
+				if (isSkin)
+				{
+					// the reference export refuses a bone outside the skeleton
+					if (err) *err = "Skin bone '" + ucstring(bn->userName()).toUtf8() + "' is not in the skeleton";
+					return false;
+				}
+				continue;
+			}
 			weightMap.insert(std::make_pair(w, it->second));
 		}
 
@@ -497,6 +653,16 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
 			sw.Weights[i] = 0.f;
 		}
 
+		if (weightMap.empty() && isSkin)
+		{
+			if (err)
+			{
+				char buf[96];
+				sprintf(buf, "Skin vertex %u has no positive weight", v);
+				*err = buf;
+			}
+			return false;
+		}
 		if (weightMap.empty())
 		{
 			// No resolvable influence — root fallback (coverage path for ConvertToRigid residues).
@@ -550,7 +716,7 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
 			fprintf(stderr, "\n");
 		}
 	}
-	(void)node; // reserved for future Skin-modifier path / diagnostics
+	(void)node;
 	return true;
 }
 

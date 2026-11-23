@@ -40,7 +40,17 @@ using NL3D::CDriverGL;
 
 - (id)initWithDriver:(CDriverGL*)driver;
 - (void)windowDidMove:(NSNotification*)notification;
-- (void)windowDidBecomeKey:(NSNotification *)notification;
-- (void)windowDidResignKey:(NSNotification *)notification;
+- (void)anyWindowDidChangeKey:(NSNotification *)notification;
+/// the driver's window is destroyed: the delegate stops watching and reaching the driver
+- (void)detachDriver;
+
+@end
+
+/// The window the driver makes. In fullscreen it has no title bar, and an NSWindow without a title bar or a resize
+/// bar cannot become the key or the main window, so it would get no keyboard events.
+@interface CocoaWindow : NSWindow
+
+- (BOOL)canBecomeKeyWindow;
+- (BOOL)canBecomeMainWindow;
 
 @end

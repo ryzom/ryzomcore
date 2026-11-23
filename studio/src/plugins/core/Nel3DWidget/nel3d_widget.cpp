@@ -19,6 +19,8 @@
 
 // needs to be included before x11 due to some collisions
 #include <QResizeEvent>
+#include <QSurfaceFormat>
+#include <QWindow>
 
 #include "nel3d_widget.h"
 #include "nel/3d/u_driver.h"
@@ -31,11 +33,39 @@
 #include <Windows.h>
 #endif
 
-Nel3DWidget::Nel3DWidget( QWidget *parent ) :
-NEL3DWIDGET( parent )
+// The mode of the driver for a size of the widget: on X11 the driver takes the size of the window
+// from the mode, and the native window is in device pixels
+static NL3D::UDriver::CMode driverMode(const QWidget *widget, const QSize &size)
+{
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	const qreal ratio = widget->devicePixelRatioF();
+	return NL3D::UDriver::CMode((uint16)qRound(size.width() * ratio), (uint16)qRound(size.height() * ratio), 32, true);
+#else
+	nlunreferenced(widget);
+	return NL3D::UDriver::CMode((uint16)size.width(), (uint16)size.height(), 32, true);
+#endif
+}
+
+Nel3DWidget::Nel3DWidget(QWidget *parent)
+    : QWidget(parent)
 {
 	driver = NULL;
 	textContext = NULL;
+
+	// The driver renders into the native window of this widget with its own context
+	setAttribute(Qt::WA_NativeWindow, true);
+
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	// on X11 the driver renders with the visual of this window, so a depth and stencil buffer
+	// are asked for before the window is created
+	if (QWindow *window = windowHandle())
+	{
+		QSurfaceFormat format = window->requestedFormat();
+		format.setDepthBufferSize(24);
+		format.setStencilBufferSize(8);
+		window->setFormat(format);
+	}
+#endif
 
 	// Need to set this attribute with a NULL paintengine returned to Qt
 	// so that we can render the widget normally ourselves, without the image
@@ -66,7 +96,8 @@ void Nel3DWidget::init()
 	nlassert( driver == NULL );
 
 	driver = NL3D::UDriver::createDriver( 0, false, 0 );
-	driver->setDisplay( winId(), NL3D::UDriver::CMode( width(), height(), 32, true ) );
+	if (!driver->setDisplay((nlWindow)winId(), driverMode(this, size())))
+		throw NLMISC::Exception(std::string("The 3D driver cannot render into the window of the NeL 3D widget"));
 }
 
 void Nel3DWidget::createTextContext( std::string fontFile )
@@ -74,17 +105,9 @@ void Nel3DWidget::createTextContext( std::string fontFile )
 	if( driver == NULL )
 		return;
 		
-	std::string font;
-
-	try
-	{
-		font = NLMISC::CPath::lookup( fontFile );
-	}
-	catch( ... )
-	{
-		nlinfo( "Font %s cannot be found, cannot create textcontext!", fontFile.c_str() );
-		exit( EXIT_FAILURE );
-	}
+	std::string font = NLMISC::CPath::lookup(fontFile, false);
+	if (font.empty())
+		throw NLMISC::Exception(std::string("The font '") + fontFile + "' is not in the search paths");
 
 	if( textContext != NULL )
 	{
@@ -115,67 +138,45 @@ void Nel3DWidget::resizeEvent( QResizeEvent *evnt )
 {
 	QWidget::resizeEvent( evnt );
 
-	Q_EMIT( evnt->size().width(), evnt->size().height() );
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	// on X11 the driver gets no events of this window, it takes its size from setMode
+	if (driver != NULL && evnt->size().width() > 0 && evnt->size().height() > 0)
+		driver->setMode(driverMode(this, evnt->size()));
+#endif
+
+	Q_EMIT resize(evnt->size().width(), evnt->size().height());
 }
 
-#if defined ( NL_OS_WINDOWS )
+// The driver does not subclass a window it did not create, so on Windows the messages of this
+// window are passed on to it: mouse and size reach it, the keyboard does not, as Qt 5 keeps the
+// Win32 keyboard focus on the top-level window, so key messages are sent there and not to this
+// window. On X11 the driver draws at the size given through setMode but gets no input, since its
+// event emitter asks for all input in one selection, which the X server refuses on a window whose
+// button presses Qt already takes. On macOS nothing is passed on: Qt delivers NSEvent objects and
+// the window proc of the driver takes a Carbon EventRef.
+#if defined(NL_OS_WINDOWS)
 
-typedef bool ( *winProc )( NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-bool Nel3DWidget::winEvent( MSG *message, long *result )
+bool Nel3DWidget::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
-	if( driver != NULL ) 
+	if (driver != NULL && eventType == "windows_generic_MSG")
 	{
-		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-		if( iDriver != NULL )
+		NL3D::IDriver *iDriver = dynamic_cast<NL3D::CDriverUser *>(driver)->getDriver();
+		if (iDriver != NULL)
 		{
+			MSG *msg = static_cast<MSG *>(message);
 			winProc proc = (winProc)iDriver->getWindowProc();
-			return proc( iDriver, message->hwnd, message->message, message->wParam, message->lParam );
+			if (proc(iDriver, msg->hwnd, msg->message, msg->wParam, msg->lParam))
+			{
+				*result = 0;
+				return true;
+			}
 		}
 	}
 
-	return false;
+	return QWidget::nativeEvent(eventType, message, result);
 }
 
-#elif defined( NL_OS_MAC )
-
-typedef bool ( *cocoaProc )( NL3D::IDriver *, const void *e );
-
-bool Nel3DWidget::macEvent( EventHandlerCallRef caller, EventRef event )
-{
-	if( caller )
-		nlerror( "You are using QtCarbon! Only QtCocoa supported, please upgrade Qt" );
-
-	if( driver != NULL )
-	{
-		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-		if( iDriver != NULL )
-		{
-			cocoaProc proc = ( cocoaProc )iDriver->getWindowProc();
-			return proc( iDriver, event );
-		}
-	}
-
-	return false;
-}
-
-#elif defined( NL_OS_UNIX )
-
-typedef bool ( *x11Proc )( NL3D::IDriver *drv, XEvent *e );
-
-bool Nel3DWidget::x11Event( XEvent *event )
-{
-	if( driver != NULL )
-	{
-		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-		if( driver != NULL )
-		{
-			x11Proc proc = ( x11Proc )iDriver->getWindowProc();
-			return proc( iDriver, event );
-		}
-	}
-
-	return false;
-}
-#endif 
+#endif
 

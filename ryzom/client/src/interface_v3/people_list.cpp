@@ -26,6 +26,7 @@
 #include "nel/gui/group_list.h"
 #include "nel/gui/view_bitmap.h"
 #include "interface_manager.h"
+#include "../client_ctrl.h"
 #include "nel/gui/action_handler.h"
 #include "nel/gui/group_editbox.h"
 #include "../client_chat_manager.h"
@@ -337,7 +338,27 @@ bool CPeopleList::isPeopleChatVisible(uint index) const
 		nlwarning("Bad index");
 		return false;
 	}
-	return (_Peoples[index].Chat != nullptr);
+	return isChatOfPeople(index);
+}
+
+//==================================================================
+bool CPeopleList::isChatOfPeople(uint index) const
+{
+	const CPeople &people = _Peoples[index];
+	if (people.Chat == NULL || people.Container == NULL)
+		return false;
+	// The chat is the window of the name the entry had when it was opened. A team slot gets the name of another team
+	// mate when the team changes: the window then still belongs to the former one, who may be reached through it.
+	CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
+	return pCGW != NULL && pCGW->findFreeTeller(people.getName()) == people.Chat;
+}
+
+//==================================================================
+CGroupContainer *CPeopleList::getValidChat(uint index)
+{
+	if (!isChatOfPeople(index))
+		_Peoples[index].Chat = NULL;
+	return _Peoples[index].Chat;
 }
 /*
   bool CPeopleList::isPeopleWindowVisible(uint index) const
@@ -692,7 +713,7 @@ void CPeopleList::displayLocalPlayerTell(const string &receiver, uint index, con
 		return;
 	}
 	// get the chat box inside the container
-	CGroupContainer *gc = _Peoples[index].Chat;
+	CGroupContainer *gc = getValidChat(index);
 	if (gc == nullptr)
 		return;
 	CGroupList *gl = dynamic_cast<CGroupList *>(gc->getGroup("text_list"));
@@ -744,8 +765,8 @@ void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA co
 		nlwarning("<CPeopleList::displayMessage> bad index.");
 		return;
 	}
-	// get the chat box inside the container
-	CGroupContainer *gcChat = _Peoples[index].Chat;
+	// get the chat box inside the container (the one of the name the entry has now)
+	CGroupContainer *gcChat = getValidChat(index);
 	CGroupContainer *gcName = _Peoples[index].Container;
 	if (gcName == nullptr)
 	{
@@ -1143,7 +1164,7 @@ class CHandlerContactEntry : public IActionHandler
 			{
 				if (linkRequest.References[0].Start != 0)
 				{
-					CChatWindow::_ChatWindowLaunchingCommand = NULL;
+					CChatWindow::_ChatWindowLaunchingCommand = nullptr;
 					CHAT_SHARE::executeCommand(linkRequest, pEB);
 					return;
 				}
@@ -1160,7 +1181,7 @@ class CHandlerContactEntry : public IActionHandler
 		if (!hasLinks && !CInterfaceManager::parseTokens(text))
 		{
 			if (getChatTextMngr().getQuoteMessageId(pEB).empty())
-			pEB->setInputString (std::string());
+				pEB->setInputString (std::string());
 			return;
 		}
 
@@ -1170,7 +1191,7 @@ class CHandlerContactEntry : public IActionHandler
 			string commandName;
 			if (CHAT_SHARE::isChatCommand(linkRequest, commandName))
 			{
-				CChatWindow::_ChatWindowLaunchingCommand = NULL;
+				CChatWindow::_ChatWindowLaunchingCommand = nullptr;
 				CHAT_SHARE::executeCommand(linkRequest, pEB);
 				return;
 			}
@@ -1185,15 +1206,16 @@ class CHandlerContactEntry : public IActionHandler
 		{
 			CChatWindow::_ChatWindowLaunchingCommand = nullptr; // no CChatWindow instance there ..
 			std::string str = text.substr(1);
-			NLMISC::ICommand::execute( str, g_log );
-			if (keepQuote && quoteEditBox == NULL)
+			if (!ClientCtrl::refuseTypedCommand(str))
+				NLMISC::ICommand::execute( str, g_log );
+			if (keepQuote && quoteEditBox == nullptr)
 				return;
 			pEB->setInputString (std::string());
 			if (!keepQuote)
 				getChatTextMngr().clearQuote(pEB);
 			return;
 		}
-		if (getChatTextMngr().sendQuote(pEB, text, hasLinks ? &linkRequest : NULL))
+		if (getChatTextMngr().sendQuote(pEB, text, hasLinks ? &linkRequest : nullptr))
 			return;
 		// Well, we could have used CChatWindow class to handle this, but CPeopleList was written earlier, so for now
 		// it is simpler to keep it as it and to just use this action handler to manage user input.
@@ -1213,8 +1235,10 @@ class CHandlerContactEntry : public IActionHandler
 				getChatTextMngr().finishQuoteSend(linkRequest.ClientRequestId, false);
 			return;
 		}
-		else
-		ChatMngr.tell(playerName, text);
+		// The server sends the own line of a shared tell back
+		const bool ownLineSent = ChatMngr.tellShared(playerName, text);
+		if (!ownLineSent)
+			ChatMngr.tell(playerName, text);
 		pEB->setInputString (std::string());
 		if (gc)
 		{
@@ -1223,6 +1247,8 @@ class CHandlerContactEntry : public IActionHandler
 			{
 				gc->restorePosition();
 			}
+			if (ownLineSent)
+				return;
 
 			// Retrieve name of the container in the list
 			string ui_interface_free_chat = "ui:interface:free_chat";

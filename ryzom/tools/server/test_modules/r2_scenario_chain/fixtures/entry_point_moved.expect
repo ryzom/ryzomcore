@@ -1,0 +1,36 @@
+# The acts of this scenario are of version 5, of spring 2006. Two of its locations name an entry point by
+# its number, which stood elsewhere then:
+#   uiR2EntryPoint03 of uiR2_Jungle14 stood 164 m from where it stands, 36 m from uiR2EntryPoint02: the
+#   location gets uiR2EntryPoint02;
+#   uiR2EntryPoint02 of uiR2_Forest03 stood 128 m from where it stands, and no entry point is nearer:
+#   the location keeps it, and the author is told that the entry point is far from the one it was.
+# The island files of the editor have neither island today, though its list of entry points has both:
+# this test runs on fixtures/islands_restored, which has them with their boxes of 2006. On the data the
+# editor has today such a location is on a missing island (see island_missing), and these two rules
+# wait for the islands to come back.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteEntryPoints(1)
+version_update_note: uiR2EDVersionNoteEntryPointsFar(1, 75)
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUncertain
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUnknown
+no_line: version_update_note: uiR2EDVersionNoteIslandMissing
+scenario_at: Locations[0].EntryPoint = uiR2EntryPoint02
+scenario_at: Locations[1].EntryPoint = uiR2EntryPoint02
+rt_at: Locations[0].EntryPoint = uiR2EntryPoint02
