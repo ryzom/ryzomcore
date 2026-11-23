@@ -470,7 +470,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_TOOLS               "Build Tools"                                   OFF)
 
   OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            ON)
-  OPTION(WITH_RYZOM_FORGE         "Build the code guarded by RYZOM_FORGE (not maintained)" OFF)
+  OPTION(WITH_RYZOM_FORGE         "Build the code guarded by RYZOM_FORGE (not maintained)" ON)
 
   OPTION(WITH_MONGODB             "Compile server with MongoDB support"           ON)
   OPTION(WITH_MEMCACHED           "Compile server with memcached support"         OFF)
