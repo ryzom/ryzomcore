@@ -422,7 +422,7 @@ public:
 	/// when false the brick can't be used when player has no item in hand
 	bool									UsableWithEmptyHands;
 	/// a property of the sheet was left out (reported at load): without it the brick would cost nothing or work
-	/// with default values, so the phrases that hold it are refused (CPhraseManager::checkPhraseValidity)
+	/// with default values, so the phrases that hold it are not built (CPhraseManager::buildSabrinaPhrase)
 	bool									HasBadProperty;
 
 public:	

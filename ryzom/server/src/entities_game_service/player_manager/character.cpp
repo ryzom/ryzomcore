@@ -4509,12 +4509,13 @@ void CCharacter::addKnownBrick( const CSheetId& brickId )
 		if (brickForm->IndexInFamily > 64)
 		{
 			nlwarning("brick id %s has index %u in its family, past the 64 places of the family's field: the client is not told it is known", brickId.toString().c_str(), (uint)brickForm->IndexInFamily);
-			return;
 		}
-
-		_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
-//		_PropertyDatabase.setProp( _DataIndexReminder->KnownBricksFamilies[brickForm->Family], _BrickFamilyBitField[brickForm->Family]);
-		CBankAccessor_PLR::getBRICK_FAMILY().getArray(brickForm->Family).setBRICKS(_PropertyDatabase, _BrickFamilyBitField[brickForm->Family]);
+		else
+		{
+			_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
+//			_PropertyDatabase.setProp( _DataIndexReminder->KnownBricksFamilies[brickForm->Family], _BrickFamilyBitField[brickForm->Family]);
+			CBankAccessor_PLR::getBRICK_FAMILY().getArray(brickForm->Family).setBRICKS(_PropertyDatabase, _BrickFamilyBitField[brickForm->Family]);
+		}
 
 		// unlock the relative interface if it's the first brick of this type
 		INTERFACE_FLAGS::TInterfaceFlag flag = INTERFACE_FLAGS::Unknown;
@@ -9229,13 +9230,10 @@ void CCharacter::setDatabase()
 				continue;
 			// the known bricks of a family are one 64-bit field of the database
 			if (pos >= 64)
-			{
 				nlwarning("brick id %s of %s has index %u in its family, past the 64 places of the family's field: the client is not told it is known",
 				    (*itb).toString().c_str(), _Id.toString().c_str(), (uint)brickForm->IndexInFamily);
-				continue;
-			}
-
-			_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
+			else
+				_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
 
 			// unlock the relative interface if it's the first brick of this type
 			INTERFACE_FLAGS::TInterfaceFlag flag = INTERFACE_FLAGS::Unknown;

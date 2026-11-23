@@ -1366,9 +1366,6 @@ bool CPhraseManager::checkPhraseValidity( const std::vector<NLMISC::CSheetId> &b
 			nlwarning("<CPhraseManager::checkPhraseValidity> Cannot find brick object for brick sheet %s", (*it).toString().c_str() );
 			return false;
 		}
-		// the property it lost was reported with the sheet at load, and this check runs at every build of a phrase
-		if (brick->HasBadProperty)
-			return false;
 
 		mandatoryFamilies.insert( brick->MandatoryFamilies.begin(), brick->MandatoryFamilies.end() );
 		allowedFamilies.insert( brick->OptionalFamilies.begin(), brick->OptionalFamilies.end() );
@@ -1478,7 +1475,17 @@ CSPhrasePtr CPhraseManager::buildSabrinaPhrase( const TDataSetRow &actorRowId, c
 	// if actor is invalid return NULL
 	if ( !TheDataset.isAccessible(actorRowId) )
 		return NULL;
-	
+
+	// a brick that lost a property at load (reported then, with its sheet) would cost nothing or work with default
+	// values: its phrases stay known and memorized (a build for the memorization is no execution), so they work again
+	// once the sheet is fixed, and are not built for an execution
+	for (uint i = 0; execution && i < brickIds.size(); ++i)
+	{
+		const CStaticBrick *brick = CSheets::getSBrickForm(brickIds[i]);
+		if (brick && brick->HasBadProperty)
+			return NULL;
+	}
+
 	CSPhrasePtr phrase = ISPhraseFactory::buildPhrase(actorRowId,brickIds, execution);
 	if (!phrase)
 	{

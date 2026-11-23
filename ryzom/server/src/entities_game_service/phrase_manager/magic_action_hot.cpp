@@ -248,7 +248,7 @@ protected:
 
 			// a caster keeps one heal over time on a target: a new one replaces the caster's last one there, whose
 			// link the new cast broke and which would otherwise heal on until its survival time ends
-			removeHotFrom(target, phrase->getActor());
+			removeHotFrom(target, actor);
 
 			reportAction.TargetRowId = _ApplyTargets[i].RowId;
 
@@ -287,14 +287,20 @@ protected:
 	}
 
 	/// Removes the heal over time caster has on target, if any (one at most)
-	static void removeHotFrom(CEntityBase *target, const TDataSetRow &caster)
+	static void removeHotFrom(CEntityBase *target, CEntityBase *caster)
 	{
 		const std::vector<CSEffectPtr> &effects = target->getSEffects();
 		for (uint j = 0; j < effects.size(); ++j)
 		{
 			CSEffect *effect = effects[j];
-			if (effect && effect->getFamily() == EFFECT_FAMILIES::Hot && effect->getCreatorRowId() == caster)
+			if (effect && effect->getFamily() == EFFECT_FAMILIES::Hot && effect->getCreatorRowId() == caster->getEntityRowId())
 			{
+				// the caster's side of the link first: the target ends a link only for its active effect, and the
+				// caster's may be a sleeping one behind a stronger heal of another caster (CEntityBase methods, not to
+				// cancel the current action)
+				CSLinkEffect *link = dynamic_cast<CSLinkEffect *>(effect);
+				if (link)
+					caster->CEntityBase::removeLink(link, 0.0f);
 				// removing changes the list: stop there
 				target->removeSabrinaEffect(effect);
 				return;
