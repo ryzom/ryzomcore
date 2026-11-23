@@ -492,6 +492,9 @@ CInterfaceManager::CInterfaceManager()
 #ifdef NL_MSQUIC_AVAILABLE
 	parser->addFeatureFlag("quic");
 #endif
+#ifdef RYZOM_FORGE
+	parser->addFeatureFlag("ryzom_forge");
+#endif
 
 	parser->setSetupOptionsCallback( this );
 	parser->addModule( "scene3d", new CIF3DSceneParser() );
