@@ -1,4 +1,5 @@
 <client_messages_description>
+  <!-- deployed_signature content="58bff78dc823847d7b18d78857870d73" md5="7981f9a9a905e37b74e58748f96325c7" (what this file says, and the MD5 of the file as it is deployed: CGenericXmlMsgHeaderManager::findDeployedSignature) -->
   <!-- stream_class:
     The classes of messages that the frontend sends on QUIC streams instead of in the datagrams, to the clients of
     protocol level ryzomcore/4.2. Each class is one stream, in this order, of which a client allows 16. A branch or a
@@ -13,10 +14,6 @@
     that is left out, with a warning of the frontend, and so is one that finds too much waiting for its client. In
     the other classes a missing message leaves the client without something for good, and the frontend disconnects
     the client instead.
-    Apart from this comment, the stream_class lines and the stream attributes, this file is the file of the servers
-    the game runs with the attribute lines of each tag joined on one line: the signature the clients compare is the
-    MD5 of the file with one attribute per line again (RYZOM_FORGE, CGenericXmlMsgHeaderManager::getSignature).
-    Keep each start tag on one line, its attributes one space apart.
   -->
   <stream_class name="strings" />
   <stream_class name="chat" drop_above="65536" />
@@ -270,10 +267,7 @@
     <leaf name="REMOTE_ADMIN_ANSWER" sendto="EGS" format="u32 s s" description="client send the answer of the remote command" />
     <leaf name="SIT" sendto="EGS" format="b" description="client send to the server the sitting state" />
     <leaf name="AFK" sendto="EGS" format="b" description="AFK command is sent to EGS" />
-      <leaf name="SELFKILL"
-          sendto="EGS"
-          format=""
-          description="client asks EGS to kill self" />
+    <leaf name="SELFKILL" sendto="EGS" format="" description="client asks EGS to kill self" />
     <leaf name="RANDOM" sendto="EGS" format="s16 s16" description="client asks EGS to roll a dice and tell result around" />
     <leaf name="GUILDMOTD" sendto="EGS" format="s" description="client asks EGS to set the guild message of the day" />
     <leaf name="AUTOPACT" sendto="EGS" format="u8" description="client want set AUTOPACT to TRUE or FALSE" />
