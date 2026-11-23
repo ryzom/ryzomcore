@@ -35,6 +35,13 @@ using namespace std;
 
 NL_INSTANCE_COUNTER_IMPL(IMagicAiActionFactory);
 
+/// Whether the refusal of a brick is reported: once for each brick, as a player can build its phrase again and again
+static bool firstRefusalOf(const CSheetId &brick)
+{
+	static std::set<CSheetId> reported;
+	return reported.insert(brick).second;
+}
+
 /// affect a stat.
 /// Put an update period of 0 ( updtae each tick )
 class CMagicActionAffectStat : public IMagicAction
@@ -68,7 +75,8 @@ protected:
 				// the build, as validate accepts a phrase once any one of its actions validates
 				if (_Modifier >= 0)
 				{
-					nlwarning("<CMagicActionAffectStat addBrick> brick %s: a modifier of %d does not lower the speed, raising it is not implemented", _ActionBrickSheetId.toString().c_str(), _Modifier);
+					if (firstRefusalOf(_ActionBrickSheetId))
+						nlwarning("<CMagicActionAffectStat addBrick> brick %s: a modifier of %d does not lower the speed, raising it is not implemented", _ActionBrickSheetId.toString().c_str(), _Modifier);
 					return false;
 				}
 				effectEnd = true;
@@ -79,7 +87,8 @@ protected:
 				_EffectFamily = EFFECT_FAMILIES::toEffectFamily( ((CSBrickParamMagicEffect *)param)->Effect );
 				if ( _EffectFamily == EFFECT_FAMILIES::Unknown )
 				{
-					nlwarning("<CMagicActionNegativeEffect addBrick> invalid effect type %s", ((CSBrickParamMagicEffect *)param)->Effect.c_str());
+					if (firstRefusalOf(brick.SheetId))
+						nlwarning("<CMagicActionAffectStat addBrick> brick %s: invalid effect type %s", brick.SheetId.toString().c_str(), ((CSBrickParamMagicEffect *)param)->Effect.c_str());
 					return false;
 				}
 				// set the main phrase effect ID
@@ -119,27 +128,32 @@ protected:
 					_Stat = (uint) SKILLS::toSkill(value);
 					if ( _Stat == (uint) SKILLS::unknown )
 					{
-						nlwarning("<CMagicActionAffectStat addBrick> invalid skill %s", value.c_str() );
+						if (firstRefusalOf(brick.SheetId))
+							nlwarning("<CMagicActionAffectStat addBrick> brick %s: invalid skill %s", brick.SheetId.toString().c_str(), value.c_str() );
 						return false;
 					}
 					// CSLinkEffectDebuffStat only changes the speed: a skill would give a spell without effect
-					nlwarning("<CMagicActionAffectStat addBrick> brick %s: stat type Skill is not implemented, only Speed is", brick.SheetId.toString().c_str());
+					if (firstRefusalOf(brick.SheetId))
+						nlwarning("<CMagicActionAffectStat addBrick> brick %s: stat type Skill is not implemented, only Speed is", brick.SheetId.toString().c_str());
 					return false;
 				case STAT_TYPES::Score:
 					_Stat = (uint) SCORES::toScore(value);
 					if ( _Stat == (uint) SCORES::unknown )
 					{
-						nlwarning("<CMagicActionAffectStat addBrick> invalid score %s", value.c_str() );
+						if (firstRefusalOf(brick.SheetId))
+							nlwarning("<CMagicActionAffectStat addBrick> brick %s: invalid score %s", brick.SheetId.toString().c_str(), value.c_str() );
 						return false;
 					}
 					// CSLinkEffectDebuffStat only changes the speed: a score would give a spell without effect
-					nlwarning("<CMagicActionAffectStat addBrick> brick %s: stat type Score is not implemented, only Speed is", brick.SheetId.toString().c_str());
+					if (firstRefusalOf(brick.SheetId))
+						nlwarning("<CMagicActionAffectStat addBrick> brick %s: stat type Score is not implemented, only Speed is", brick.SheetId.toString().c_str());
 					return false;
 				case STAT_TYPES::Speed:
 					_Stat = 0;
 					break;
 				default:
-					nlwarning("<CMagicActionAffectStat addBrick> invalid stat type %s", ((CSBrickParamMagicStat *)param)->Type.c_str() );
+					if (firstRefusalOf(brick.SheetId))
+						nlwarning("<CMagicActionAffectStat addBrick> brick %s: invalid stat type %s", brick.SheetId.toString().c_str(), ((CSBrickParamMagicStat *)param)->Type.c_str() );
 					return false;
 				}
 				
@@ -160,7 +174,8 @@ protected:
 		// only lowering the speed is implemented, the end of the effect checks it too (an effect without MA_END reaches here)
 		if (_Modifier >= 0)
 		{
-			nlwarning("<CMagicActionAffectStat validate> brick %s: a modifier of %d does not lower the speed, raising it is not implemented", _ActionBrickSheetId.toString().c_str(), _Modifier);
+			if (firstRefusalOf(_ActionBrickSheetId))
+				nlwarning("<CMagicActionAffectStat validate> brick %s: a modifier of %d does not lower the speed, raising it is not implemented", _ActionBrickSheetId.toString().c_str(), _Modifier);
 			return false;
 		}
 

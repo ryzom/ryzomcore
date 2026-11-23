@@ -75,6 +75,7 @@ CStaticBrick::CStaticBrick()
 	CraftingDuration = 2.f;
 	MinFameValue = (sint32)0x80000000;
 	UsableWithEmptyHands = true;
+	HasBadProperty = false;
 } // constructor //
 
 
@@ -130,10 +131,12 @@ void CStaticBrick::serial(NLMISC::IStream &f)
 
 	// Params
 		Params.clear();
+		HasBadProperty = false;
 		size = (uint16)StringParams.size();
 		for (uint i = 0 ; i < size ; ++i)
 		{
-			addParam(StringParams[i], Params, SheetId.toString());
+			if (!addParam(StringParams[i], Params, SheetId.toString()))
+				HasBadProperty = true;
 		}
 
 	// Grammar
@@ -490,10 +493,12 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 	}
 	// Parse Params
 	Params.clear();
+	HasBadProperty = false;
 	const uint size = (uint)StringParams.size();
 	for (uint i = 0 ; i < size ; ++i)
 	{
-		addParam(StringParams[i], Params, sheetId.toString());
+		if (!addParam(StringParams[i], Params, sheetId.toString()))
+			HasBadProperty = true;
 	}
 
 	// Load Faber tools
@@ -634,7 +639,7 @@ bool	CPlayerSkill::initFromString( const string& skillAndValue )
 //--------------------------------------------------------------
 //					addParam()  
 //--------------------------------------------------------------
-void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Params, const std::string &sheetName)
+bool addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Params, const std::string &sheetName)
 {
 	std::string keyword;
 	std::string tail;
@@ -1692,15 +1697,19 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 	if (Params.size() == nbParamsBefore)
 	{
 		// the client reads these, the server has no use for them
-		if (NLMISC::nlstricmp(keyword, "FPLAN") != 0 && NLMISC::nlstricmp(keyword, "INFO") != 0 && NLMISC::nlstricmp(keyword, "BHFECA_TAG") != 0)
-			nlwarning("Sheet %s: unknown property '%s', left out", sheetName.c_str(), paramStr.c_str());
+		if (NLMISC::nlstricmp(keyword, "FPLAN") == 0 || NLMISC::nlstricmp(keyword, "INFO") == 0 || NLMISC::nlstricmp(keyword, "BHFECA_TAG") == 0)
+			return true;
+		nlwarning("Sheet %s: unknown property '%s', left out", sheetName.c_str(), paramStr.c_str());
+		return false;
 	}
-	else if (!Params.back()->ParsedOk)
+	if (!Params.back()->ParsedOk)
 	{
 		// its values would be the defaults
 		nlwarning("Sheet %s: property '%s' has the wrong number of arguments, left out", sheetName.c_str(), paramStr.c_str());
 		Params.pop_back();
+		return false;
 	}
+	return true;
 } // addParam //
 
 //--------------------------------------------------------------

@@ -175,10 +175,6 @@ protected:
 			if ( !target)
 				continue;
 
-			// a caster keeps one heal over time on a target
-			if (hasHotFrom(target, phrase->getActor()))
-				continue;
-
 			string errorCode;
 			if (!isMad &&!PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::CURATIVE_MAGIC, errorCode, i==0 ))
 			{
@@ -242,10 +238,6 @@ protected:
 			if ( !target)
 				continue;
 
-			// a caster keeps one heal over time on a target
-			if (hasHotFrom(target, phrase->getActor()))
-				continue;
-
 			string errorCode;
 			if (!PHRASE_UTILITIES::validateSpellTarget(actor->getEntityRowId(),target->getEntityRowId(),ACTNATURE::CURATIVE_MAGIC, errorCode, _ApplyTargets[i].MainTarget ))
 			{
@@ -253,6 +245,10 @@ protected:
 				// PHRASE_UTILITIES::sendSimpleMessage(phrase->getActor(), errorCode);
 				continue;
 			}
+
+			// a caster keeps one heal over time on a target: a new one replaces the caster's last one there, whose
+			// link the new cast broke and which would otherwise heal on until its survival time ends
+			removeHotFrom(target, phrase->getActor());
 
 			reportAction.TargetRowId = _ApplyTargets[i].RowId;
 
@@ -290,15 +286,20 @@ protected:
 		}
 	}
 
-	static bool hasHotFrom(CEntityBase *target, const TDataSetRow &caster)
+	/// Removes the heal over time caster has on target, if any (one at most)
+	static void removeHotFrom(CEntityBase *target, const TDataSetRow &caster)
 	{
 		const std::vector<CSEffectPtr> &effects = target->getSEffects();
 		for (uint j = 0; j < effects.size(); ++j)
 		{
-			if (effects[j]->getFamily() == EFFECT_FAMILIES::Hot && effects[j]->getCreatorRowId() == caster)
-				return true;
+			CSEffect *effect = effects[j];
+			if (effect && effect->getFamily() == EFFECT_FAMILIES::Hot && effect->getCreatorRowId() == caster)
+			{
+				// removing changes the list: stop there
+				target->removeSabrinaEffect(effect);
+				return;
+			}
 		}
-		return false;
 	}
 
 	sint32						_HealHp;

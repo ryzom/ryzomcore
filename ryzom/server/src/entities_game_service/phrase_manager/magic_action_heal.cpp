@@ -227,8 +227,9 @@ protected:
 			if ( !target)
 				continue;
 
-			// an area heal cannot affect caster ! (a self spell can, the caster is its one target)
-			if (target->getId().getType() == RYZOMID::player && target == actor && !phrase->isSelfSpell())
+			// an area heal cannot affect caster ! (a self spell without an area can, the caster is its one target; a
+			// phrase that holds a self root and an area option from another root is still an area heal)
+			if (target->getId().getType() == RYZOMID::player && target == actor && !(phrase->isSelfSpell() && phrase->getArea() == NULL))
 				continue;
 
 			string errorCode;

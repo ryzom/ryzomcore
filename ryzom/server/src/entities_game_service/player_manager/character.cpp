@@ -4505,6 +4505,12 @@ void CCharacter::addKnownBrick( const CSheetId& brickId )
 			nlwarning("brick id %s is invalid (index in family == INVALID_POSITION_ID", brickId.toString().c_str());
 			return;
 		}
+		// the known bricks of a family are one 64-bit field of the database
+		if (brickForm->IndexInFamily > 64)
+		{
+			nlwarning("brick id %s has index %u in its family, past the 64 places of the family's field: the client is not told it is known", brickId.toString().c_str(), (uint)brickForm->IndexInFamily);
+			return;
+		}
 
 		_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
 //		_PropertyDatabase.setProp( _DataIndexReminder->KnownBricksFamilies[brickForm->Family], _BrickFamilyBitField[brickForm->Family]);
@@ -4614,6 +4620,10 @@ void CCharacter::removeKnownBrick( const CSheetId& brickId )
 			nlwarning("brick id %s is invalid (index in family == INVALID_POSITION_ID", brickId.toString().c_str());
 			return;
 		}
+
+		// a brick past the 64 places of the family's field has no bit (addKnownBrick)
+		if (brickForm->IndexInFamily > 64)
+			return;
 
 		// clear the brick's bit, the client then no longer shows the brick as known
 		_BrickFamilyBitField[brickForm->Family] &= ~((sint64)1 << (sint64)pos);
@@ -9217,6 +9227,13 @@ void CCharacter::setDatabase()
 				pos -=1;
 			else if ( INVALID_POSITION_ID == pos)
 				continue;
+			// the known bricks of a family are one 64-bit field of the database
+			if (pos >= 64)
+			{
+				nlwarning("brick id %s of %s has index %u in its family, past the 64 places of the family's field: the client is not told it is known",
+				    (*itb).toString().c_str(), _Id.toString().c_str(), (uint)brickForm->IndexInFamily);
+				continue;
+			}
 
 			_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
 

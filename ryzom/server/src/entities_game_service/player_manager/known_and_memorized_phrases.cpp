@@ -308,7 +308,13 @@ void CMemorizationSet::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases,
 				// check phrase validity and memorize it
 				if ( CPhraseManager::getInstance().checkPhraseValidity(knownPhrases[phraseId].PhraseDesc.Bricks) )
 					memorize(phraseIndex, knownPhrases[phraseId].PhraseDesc.Bricks, phraseId, rowId);
+				else
+					nlwarning("<CMemorizationSet::fixPhrases> %s: known phrase %u ('%s') of memorized slot %u is not valid with its bricks any more, the slot is emptied",
+					    TheDataset.getEntityId(rowId).toString().c_str(), (uint)phraseId, knownPhrases[phraseId].PhraseSheetId.toString().c_str(), phraseIndex);
 			}
+			else
+				nlwarning("<CMemorizationSet::fixPhrases> %s: memorized slot %u names known phrase %u, which the character does not have, the slot is emptied",
+				    TheDataset.getEntityId(rowId).toString().c_str(), phraseIndex, (uint)phraseId);
 		}
 	}
 }// fixPhrases //

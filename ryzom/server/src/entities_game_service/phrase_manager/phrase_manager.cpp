@@ -1366,7 +1366,10 @@ bool CPhraseManager::checkPhraseValidity( const std::vector<NLMISC::CSheetId> &b
 			nlwarning("<CPhraseManager::checkPhraseValidity> Cannot find brick object for brick sheet %s", (*it).toString().c_str() );
 			return false;
 		}
-		
+		// the property it lost was reported with the sheet at load, and this check runs at every build of a phrase
+		if (brick->HasBadProperty)
+			return false;
+
 		mandatoryFamilies.insert( brick->MandatoryFamilies.begin(), brick->MandatoryFamilies.end() );
 		allowedFamilies.insert( brick->OptionalFamilies.begin(), brick->OptionalFamilies.end() );
 		allowedFamilies.insert( brick->CreditFamilies.begin(), brick->CreditFamilies.end() );
