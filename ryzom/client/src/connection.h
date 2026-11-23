@@ -79,7 +79,8 @@ TInterfaceState autoLogin (const std::string &cookie, const std::string &fsaddr,
 
 std::string buildPlayerNameForSaveFile(const std::string &playerNameIn);
 // The name of the files of a character in save/: its name as buildPlayerNameForSaveFile makes it, and the
-// session id of its home mainland, as characters on two mainlands may have the same name
+// session id of its home mainland, as characters on two mainlands may have the same name (with RYZOM_FORGE the
+// name alone: one shard)
 std::string buildCharacterFileName(const std::string &playerNameIn, TSessionId homeSessionId);
 
 
