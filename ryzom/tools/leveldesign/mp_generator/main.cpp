@@ -2038,18 +2038,23 @@ void CheckNoLeftoverTemporaries()
 {
 	printf( "-- TEMPORARY FILES OF A STOPPED RUN --\n" );
 	const CSString roots[] = { LEVEL_DESIGN_PATH, TRANSLATION_PATH, CREATURE_PATH, RAW_MATERIAL_ASSIGN };
-	vector<string> walked; // the folders walked, in lower case: one below another is not walked again
+	const uint nbRoots = sizeof( roots ) / sizeof( roots[0] );
 	vector<string> leftovers;
 	const string suffix = s_TempSuffix;
-	for ( uint i = 0; i < sizeof( roots ) / sizeof( roots[0] ); ++i )
+	for ( uint i = 0; i < nbRoots; ++i )
 	{
+		// a folder inside another of the list, or the same as an earlier one, is walked with that one: in whichever order
+		// the cfg gives them, every file is looked at once (the folders end with /, so a prefix is a folder above)
 		const string key = toLowerAscii( string( roots[i] ) );
 		bool covered = false;
-		for ( uint j = 0; !covered && j < walked.size(); ++j )
-			covered = key.compare( 0, walked[j].size(), walked[j] ) == 0;
+		for ( uint j = 0; !covered && j < nbRoots; ++j )
+		{
+			const string other = toLowerAscii( string( roots[j] ) );
+			if ( j != i && key.compare( 0, other.size(), other ) == 0 && ( other.size() < key.size() || j < i ) )
+				covered = true;
+		}
 		if ( covered )
 			continue;
-		walked.push_back( key );
 		vector<string> files;
 		CPath::getPathContent( roots[i], true, false, true, files );
 		for ( uint j = 0; j < files.size(); ++j )
@@ -2069,8 +2074,9 @@ void CheckNoLeftoverTemporaries()
 		listed += ( i ? ", " : "" ) + leftovers[i];
 	if ( leftovers.size() > 5 )
 		listed += toString( " and %u more", (uint)leftovers.size() - 5 );
-	fail( toString( "%u temporary files (*%s) of a run that was stopped while writing are left: %s. That run may have replaced part of its files already; remove these temporary files, then run again, which completes it (nothing has been written by this run)",
-		(uint)leftovers.size(), s_TempSuffix, listed.c_str() ) );
+	const bool one = leftovers.size() == 1;
+	fail( toString( "%u temporary %s (*%s) of a run that was stopped while writing %s left: %s. That run may have replaced part of its files already; remove %s, then run again, which completes it (nothing has been written by this run)",
+		(uint)leftovers.size(), one ? "file" : "files", s_TempSuffix, one ? "is" : "are", listed.c_str(), one ? "it" : "them" ) );
 }
 
 
