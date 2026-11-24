@@ -651,14 +651,14 @@ void initMainLoop()
 		// scene render per eye, but planes tile into the shared reflection
 		// textures); force flag is a dev configuration; the shape list names
 		// the water of assets exported before the reflection flag, the
-		// user switch turns all water back to its original look, and the
-		// envmap fallback shows the sky on reflecting water left without a pass
+		// user switch turns all water back to its original look. The envmap
+		// fallback, the sky on reflecting water left without a pass, is applied
+		// every frame, with the continent (updateWaterEnvMap)
 		Scene->setMaxRealtimeWaterReflections(ClientCfg.MaxWaterReflections);
 		Scene->setWaterReflectionMaxTextures(ClientCfg.MaxWaterReflectionTextures);
 		Scene->setForceRealtimeWaterReflections(ClientCfg.ForceWaterReflections);
 		Scene->setRealtimeWaterReflectionShapes(ClientCfg.WaterReflectionShapes);
 		Scene->setRealtimeWaterReflectionsEnabled(ClientCfg.WaterReflections);
-		Scene->setRealtimeWaterReflectionEnvMapFallback(ClientCfg.WaterReflectionEnvMapFallback);
 
 		// setup load balancing
 		Scene->setPolygonBalancingMode(UScene::PolygonBalancingClamp);

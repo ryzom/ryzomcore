@@ -320,7 +320,7 @@ struct CClientConfig
 	bool			WaterReflections;
 	/// Water shapes that may reflect although their asset predates the realtime reflection flag (shape file names, wildcards allowed)
 	std::vector<std::string> WaterReflectionShapes;
-	/// With WaterReflections, water that may reflect but gets no reflection shows the sky rendered into the water envmap instead of its shape's envmap
+	/// With WaterReflections, water that may reflect but gets no reflection shows the sky rendered into the water envmap instead of its shape's envmap (not in an indoor continent)
 	bool			WaterReflectionEnvMapFallback;
 	// clang-format on
 

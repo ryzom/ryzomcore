@@ -627,13 +627,17 @@ void renderScene(bool forceFullDetail, bool bloom)
 void updateWaterEnvMap()
 {
 	#ifdef USE_WATER_ENV_MAP
+	// The fallback of the water reflections shows the sky. An indoor continent has none: the envmap there is
+	// still the one of the outdoor continent the character came from, and its water keeps the envmap of its
+	// shape. No continent is selected at a position outside all of them.
+	CContinent *continent = ContinentMngr.cur();
+	const bool envMapFallback = ClientCfg.WaterReflectionEnvMapFallback && continent && !continent->Indoor;
+	Scene->setRealtimeWaterReflectionEnvMapFallback(envMapFallback);
 	// water env map needed: by a water shape, forced, or as the fallback of the water reflections
-	if (WaterEnvMapRefCount > 0 || ClientCfg.ForceWaterEnvMap || (ClientCfg.WaterReflections && ClientCfg.WaterReflectionEnvMapFallback))
+	if (WaterEnvMapRefCount > 0 || ClientCfg.ForceWaterEnvMap || (ClientCfg.WaterReflections && envMapFallback))
 	{
 		if (!WaterEnvMap)
 		{
-			// no continent is selected at a position outside all of them
-			CContinent *continent = ContinentMngr.cur();
 			UScene *skyScene = continent ? continent->CurrentSky.getScene() : nullptr;
 			if (skyScene)
 			{

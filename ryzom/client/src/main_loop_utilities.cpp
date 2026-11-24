@@ -230,8 +230,7 @@ void updateFromClientCfg()
 		Scene->setRealtimeWaterReflectionShapes(ClientCfg.WaterReflectionShapes);
 	if (ClientCfg.WaterReflections != LastClientCfg.WaterReflections)
 		Scene->setRealtimeWaterReflectionsEnabled(ClientCfg.WaterReflections);
-	if (ClientCfg.WaterReflectionEnvMapFallback != LastClientCfg.WaterReflectionEnvMapFallback)
-		Scene->setRealtimeWaterReflectionEnvMapFallback(ClientCfg.WaterReflectionEnvMapFallback);
+	// WaterReflectionEnvMapFallback is applied every frame, with the continent (updateWaterEnvMap)
 
 	if (ClientCfg.FxNbMaxPoly != LastClientCfg.FxNbMaxPoly)
 	{
