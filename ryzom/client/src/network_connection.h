@@ -834,9 +834,9 @@ protected:
 	void						updateSmoothServerTick();
 	// @}
 
+	// clang-format off
 	void						reinit();
 
-	// clang-format off
 	/// Reset the data of the session but keep the connection, for going back to the character selection on it after
 	/// quit() (the frontend's limbo mode); reinit() also resets the connection
 	void						resetSession();
@@ -851,6 +851,7 @@ private:
 	/// Builds the CBitMemStream from the next incoming packet
 	bool						buildStream(NLMISC::CBitMemStream &msgin);
 
+	// clang-format off
 	/// @name Client automaton states and actions
 	//@{
 
@@ -871,12 +872,10 @@ private:
 	void						receiveNormalMessage(NLMISC::CBitMemStream &msgin);
 	void						sendNormalMessage();
 	bool						stateConnected();
-	// clang-format off
 	/// Receive the datagrams in the Connected state, returns true if the state changed
 	bool						receiveConnectedDatagrams();
 	/// Give the messages that arrived on the streams of a QUIC connection to the impulse callback (Connected state)
 	void						dispatchStreamRecords();
-	// clang-format on
 	CLFECOMMON::TPacketNumber	_LastReceivedAck;
 	uint						_NormalPacketsReceived;
 
@@ -902,15 +901,14 @@ private:
 	uint32						_QuitId;
 	bool						_ReceivedAckQuit;
 	NLMISC::TTime				_LatestQuitTime;
-	// clang-format off
 	NLMISC::TTime				m_QuitTime; // when quit() was called, for QuitTimeOut
-	// clang-format on
 
 	//
 	void						reset();
 	void						initTicks();
 
 	//@}
+	// clang-format on
 
 	//
 	bool						decodeHeader(NLMISC::CBitMemStream &msgin, bool checkMessageNumber = true);

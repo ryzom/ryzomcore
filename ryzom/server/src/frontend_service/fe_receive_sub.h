@@ -137,6 +137,7 @@ public:
 		_ConnectionStatDisp(NULL)
 		{}
 
+	// clang-format off
 	/// Init
 	void				init( uint16 firstAcceptableFrontendPort, uint16 lastAcceptableFrontendPort, uint32 dgrammaxlength, CHistory *history, TClientIdCont *clientidcont );
 
@@ -146,31 +147,25 @@ public:
 	/// Release
 	void				release();
 
-	// clang-format off
 	/// Add a client. connectionReportedToWS: the login told the welcome service that the user connected
 	/// (CClientHost::ConnectionReportedToWS); when no client host can be created, the leave is told at once.
 	CClientHost			*addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const std::string &userName, const std::string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorisedCharSlot, bool connectionReportedToWS, bool sendCLConnect );
 
 	/// Send CL_CONNECT to the EGS (at login, and after a QUIT)
 	void				sendClientConnectionToEGS( TUid userId, const std::string &userName, const std::string &userPriv, const std::string &userExtended, const std::string &languageId, const NLNET::CInetAddress &addrfrom, const NLNET::CLoginCookie &cookie );
-	// clang-format on
 
 	/// Add to the list of clients which will be removed by addr at the three cycles later (leaving the time to send an impulsion to the client)
 	void				addToRemoveList( TClientId clientid ) { _ClientsToRemove.push_back( std::make_pair(clientid,3) ); }
 
-	// clang-format off
 	/// Disconnect a client for a fault: it is told to disconnect, and removed a few cycles later (see addToRemoveList).
 	/// Nothing is done for a client that is already being removed.
 	void				disconnectClient( CClientHost *client );
-	// clang-format on
 
 	/// Remove from the list of clients
 	void				removeFromRemoveList( TClientId clientid );
 
-	// clang-format off
 	/// Return true if the client is waiting in the list of clients to remove
 	bool				isInRemoveList( TClientId clientid ) const;
-	// clang-format on
 
 	/// Return the number of connecged client
 	uint32				getNbClient();
@@ -182,7 +177,6 @@ public:
 
 	CClientHost			*exitFromLimboMode( const CLimboClient& client );
 
-	// clang-format off
 	/// Remove a user from limbo mode without restoring it: its QUIC connection is closed. The EGS, which had the CL_CONNECT
 	/// sent at the QUIT, and the welcome service are told that the user left, when they need to be. The caller logs why.
 	void				removeLimboClient( std::map<TUid,CLimboClient>::iterator ilc, bool crashed, bool tellEGS );
@@ -198,7 +192,6 @@ public:
 
 	/// Remove the client from the client map. A client put in limbo mode keeps its QUIC connection.
 	void				removeClientFromMap( CClientHost *client, bool closeQuicConnection = true );
-	// clang-format on
 	
 	/// Remove a client by clientid
 	/// all remove are supposed to be a client crashed. it s false only on the case we receive really the client message
@@ -249,6 +242,7 @@ public:
 	NLMISC::CLog		*ConnectionStatLog;
 
 	std::map<TUid,CLimboClient>	LimboClients;
+	// clang-format on
 
 protected:
 

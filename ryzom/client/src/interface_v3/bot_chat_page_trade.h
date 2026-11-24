@@ -49,6 +49,7 @@ public:
 	// update displayed prices
 	virtual void update() NL_OVERRIDE;
 	virtual void end() NL_OVERRIDE;
+	// clang-format off
 	// start the 'buy' dialog window for the given sheet (the player has clicked on an item to buy)
 	void		 startBuyDialog(CDBCtrlSheet *item, CCtrlBase *pCaller);
 	// start the 'sell' dialog (the player has clicked on an item to sell)
@@ -61,10 +62,8 @@ public:
 	void		 endTradeModal();
 	// test if trade can be confirmed yet (price & quantity valid)
 	bool		 isTradeValid( bool enableResale ) const;
-	// clang-format off
 	// the question before buying a building that replaces the one owned: a guild hall or an apartment
 	const char	*getBuildingLossWarning() const;
-	// clang-format on
 	// set the page to diplay buy interface (no sell of player item is done)
 	void		 setBuyOnly(bool buyOnly) { _BuyOnly = buyOnly; }
 	bool		 getBuyOnly() const { return _BuyOnly; }
@@ -96,6 +95,7 @@ public:
 
 	// send to server a request for refreshing the User Resale List
 	void		refreshResale();
+	// clang-format on
 
 	static void setFocusOnEditBox(CInterfaceGroup *eb);
 

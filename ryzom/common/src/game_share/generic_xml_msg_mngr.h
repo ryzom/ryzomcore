@@ -304,6 +304,7 @@ public:
 		return CNodeId(node, nullptr);
 	}
 
+	// clang-format off
 	/**
 	 * Get the message node name
 	 */
@@ -329,7 +330,6 @@ public:
 	 */
 	bool					nodeUsesCycle(CNodeId &nodeId)				{ return nodeId._Node->UseCycle; }
 
-	// clang-format off
 	/**
 	 * The signature of a msg.xml, which the frontend sends to its clients for them to compare with that of their own
 	 * file: the MD5 of the file without what declares the stream classes (see removeStreamClasses), so that a
@@ -421,7 +421,6 @@ public:
 	 * frontend stops on that.
 	 */
 	bool					hasStreamClassError() const					{ return _StreamClassError; }
-	// clang-format on
 
 	/**
 	 * Set node user data
@@ -432,6 +431,7 @@ public:
 	 * Set node user data
 	 */
 	const uint64			&getNodeUserData(CNodeId &nodeId, uint index=0)			{ return nodeId._Node->UserData[index]; }
+	// clang-format on
 
 protected:
 	/**
@@ -443,6 +443,7 @@ protected:
 	class CNode
 	{
 	public:
+		// clang-format off
 		typedef std::vector<CNode*>					TNodes;
 		typedef std::map<std::string, CNode*, NL_SV_LESS> TNodesByName;
 
@@ -457,14 +458,13 @@ protected:
 		TMessageFormat		Format;
 		uint				NbBits;
 		TMsgHeaderCallback	Callback;
-		// clang-format off
 		/// The class of the `stream` attribute of the node, or else that of the branch it is in (an index in
 		/// streamClasses, or CLFECOMMON::NoStreamClass)
 		uint8				StreamClass;
+		// clang-format on
 
 		/// Constructor (streamClassError is set if a `stream` attribute in the node or below names no class)
 		CNode(xmlNodePtr xmlNode, uint32 value, uint8 parentStreamClass, const std::vector<std::string> &streamClasses, bool &streamClassError);
-		// clang-format on
 
 		/// Destructor
 		~CNode();
@@ -598,9 +598,9 @@ protected:
 	};
 
 protected:
+	// clang-format off
 	CNode	*_Root;
 
-	// clang-format off
 	std::vector<std::string>	_StreamClasses;
 	std::vector<uint32>	_StreamClassDropAbove;
 	bool	_StreamClassError;

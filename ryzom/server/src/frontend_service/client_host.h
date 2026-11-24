@@ -172,6 +172,7 @@ public:
 	/// Destructor
 	~CClientHost();
 
+	// clang-format off
 	/// Return IP and port
 	const NLNET::CInetAddress&	address() { return _Address; }
 
@@ -196,10 +197,8 @@ public:
 	/// Prepare a clean system header
 	void				setupSystemHeader( TOutBox& outbox, uint8 code);
 
-	// clang-format off
 	/// On a connection of protocol level ryzomcore/4.2, add the fields of the level to a header, after its system bit
 	void				setupLatenessHeader( TOutBox& outbox );
-	// clang-format on
 
 	/// Compute host stats
 	void				computeHostStats( const TReceivedMessage& msgin, uint32 currentcounter, bool updateAcknowledge );
@@ -236,6 +235,7 @@ public:
 	void				resetDatagramLost() { _DatagramLost = 0; }
 
 	uint32				datagramRepeated() const { return _DatagramRepeated; }
+	// clang-format on
 
 	/// Setup sync for tick measures with client connection
 	void				setFirstSentPacket(uint32 sentPacket, NLMISC::TGameCycle atTick)
@@ -427,6 +427,7 @@ public:
 		
 	}
 
+	// clang-format off
 	// get Pair state
 	TPairState&			getPairState(CLFECOMMON::TCLEntityId e);
 	// get Pair state
@@ -468,7 +469,6 @@ public:
 	// The only character slot that will be granted to connect [0..4], or 0xF (15) for any character
 	uint8				AuthorizedCharSlot;
 
-	// clang-format off
 	/// The login told the welcome service that the user connected (a pending cookie, see CLoginServer::isPendingCookie),
 	/// so the user leaving is told too, once
 	bool				ConnectionReportedToWS;
@@ -663,6 +663,7 @@ public:
 		SendNumber = client->sendNumber();
 	}
 
+	// clang-format off
 	NLNET::CInetAddress	AddrFrom;
 	CQuicUserContextPtr QuicUser;
 	TUid				Uid;
@@ -670,7 +671,6 @@ public:
 	uint32				QuitId;
 	NLMISC::TTime		Timeout;
 	NLNET::CLoginCookie	LoginCookie;
-	// clang-format off
 	uint32				InstanceId;
 	uint8				AuthorizedCharSlot;
 	bool				ConnectionReportedToWS;

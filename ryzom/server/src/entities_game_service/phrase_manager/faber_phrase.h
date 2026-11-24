@@ -127,6 +127,7 @@ public:
 	inline void setSystemCraftedItem( CGameItemPtr item ) { _CraftedItem = item; }
 
 private:
+	// clang-format off
 	// Faber action
 	IFaberAction *				_FaberAction;
 
@@ -152,10 +153,8 @@ private:
 
 	// recommended wanted
 	uint32						_Recommended;
-	// clang-format off
 	// recommended wanted, before the wearing equipment penalty
 	uint32						m_NominalRecommended;
-	// clang-format on
 
 	// stats modifiers on item
 	sint16						_MBOQuality;
@@ -184,6 +183,7 @@ private:
 	float						_MBODefensiveAfflictionPowerFactor;
 	
 	CGameItemPtr				_CraftedItem; // only for internal use for system craft, no persistant pointers
+	// clang-format on
 };
 
 #endif // RYZOM_FABER_PHRASE_H

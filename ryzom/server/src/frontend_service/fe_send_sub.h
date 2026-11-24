@@ -192,29 +192,30 @@ public:
 		_NbImpulseActions = 0;
 	}
 
+	// clang-format off
 	/// Setup headers for outgoing messages of current cycle (only if there are clients)
 	void					prepareHeadersAndFillImpulses();
 
 	/// Fill prioritized actions into outgoing messages (only if there are clients)
 	void					fillPrioritizedActions();
 
-	// clang-format off
 	/// Take out of the stream queues of the QUIC connections what each may send this cycle (after the datagrams are
 	/// filled, before the swap, every cycle)
 	void					grantStreams();
 
 	/// What shares the frontend's budget among the streams (for statistics)
 	const CStreamScheduler	&streamScheduler() const { return m_StreamScheduler; }
-	// clang-format on
 
 	/// Swap send buffers
 	void					swapSendBuffers();
 
 	/// Send outgoing messages
 	void					flushMessages();
+	// clang-format on
 
 private:
 
+	// clang-format off
 	/// Socket access
 	NLNET::CUdpSock			*_DataSock;
 
@@ -259,7 +260,6 @@ private:
 	TSendBuffers			_SendBuffers1, _SendBuffers2;
 	TSendBuffers			*_CurrentFillingBuffers, *_CurrentFlushingBuffers;
 
-	// clang-format off
 	/// Buffers whose address was set or unset in the filling buffers only, to be copied to the others when swapping
 	std::vector<TClientId>	m_PendingSendBufferIds;
 
@@ -281,11 +281,11 @@ private:
 	bool					m_StreamStarted;
 	/// The frontend holds its streams to less than TotalOutgoingBandwidth (for the log)
 	bool					m_StreamBudgetShort;
-	// clang-format on
 
 	/// MD5 hash keys of msg.xml and database.xml
 	NLMISC::CHashKeyMD5		_MsgXmlMD5;
 	NLMISC::CHashKeyMD5		_DatabaseXmlMD5;
+	// clang-format on
 
 	//TBuffersToEnable		_BuffersToEnable; // OBSOLETE
 };

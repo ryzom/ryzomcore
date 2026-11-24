@@ -3096,6 +3096,7 @@ public:
 	//////////////////
 private:
 
+	// clang-format off
 	R2::TUserRole						_SessionUserRole;
 	sint32								_HPB; //backup hp of player for mainland, for be independant of what happend in ring session
 	
@@ -3254,13 +3255,12 @@ private:
 	// money in exchange
 	uint64								_ExchangeMoney;
 
-	// clang-format off
 	// accepting a player exchange started the current static action
 	bool								m_ExchangeStaticAction;
-	// clang-format on
 
 	/// current bot gift of the player
 	CBotGift							*_BotGift;
+	// clang-format on
 	
 	
 	///////////////////////////////////////////////////////////////////////
@@ -3683,6 +3683,7 @@ private:
 	uint16							_RegionKilledInPvp;
 	//@}
 
+	// clang-format off
 	bool							_ChannelAdded;
 
 	bool							_LoadingFinish;
@@ -3696,13 +3697,12 @@ private:
 	TAIAlias						_OutpostIdBeforeUserValidation;
 
 	// duel opponent (a reference pointer: no dangling opponent if one side is gone without the duel ending)
-	// clang-format off
 	NLMISC::CRefPtr<CCharacter>		_DuelOpponent;
-	// clang-format on
 
 	TAIAlias						_LastCreatedNpcGroup;
 
 	TFriendVisibility               _FriendVisibility;
+	// clang-format on
 
 	// :KLUDGE: ICDBStructNode non-const 'coz getName and getParent are not
 	// const methods. See CCDBSynchronised::getICDBStructNodeFromName for more

@@ -222,6 +222,7 @@ public :
 
 private :
 	
+	// clang-format off
 	/// CLient datasetrow
 	TDataSetRow			_DataSetIndex;
 	/// client character id
@@ -285,7 +286,6 @@ private :
 	/// keep infos about which string has been received by the client
 	std::vector<bool>	_KnownStrings;
 
-	// clang-format off
 	/// When the chat allowance is full again: each line accepted moves it lineInterval later (see takeChatLine)
 	NLMISC::TTime		m_ChatAllowanceTime;
 	/// A line was refused since the last one accepted

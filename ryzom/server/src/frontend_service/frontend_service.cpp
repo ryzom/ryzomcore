@@ -104,6 +104,7 @@ uint MaxNbClients = 1000;
 // Size of UDP/IP/Ethernet headers: 8+20+14 = 42
 const uint32 UDP_IP_ETH_HEADER_SIZE = 42;
 
+// clang-format off
 CVariable<bool>		DontNeedBackend("FS", "DontNeedBackend", "Debug feature to allow client connection without backend (1=always allow connection , 0=backend must be up)", false, 0, true);
 
 CVariable<bool>		UseSendThread("FS", "UseSendThread", "Use thread for sending", false, 0, true);
@@ -118,7 +119,6 @@ CVariable<uint32>	DelayBeforeUPDAlert("FS", "DelayBeforeUPDAlert", "Delay (in s)
 
 CVariable<bool>		VerboseFEStatsTime("fs", "VerboseFEStatsTime", "Verbose FESTATS and FETIME", false, 0, true);
 
-// clang-format off
 // Messages on QUIC streams (protocol level ryzomcore/4.2, see game_share/stream_record.h)
 CVariable<uint32>	StreamRecordMaxBytes("fs", "StreamRecordMaxBytes", "Largest message a service may send on a QUIC stream (at most the 16 MiB a client accepts); the client it is for is disconnected for a larger one, which cannot be left out", 4*1024*1024, 0, true);
 CVariable<uint32>	StreamMaxQueuedBytes("fs", "StreamMaxQueuedBytes", "Bytes of messages that may wait for the QUIC streams of one client, above which it is disconnected", 8*1024*1024, 0, true);

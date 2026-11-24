@@ -206,9 +206,9 @@ public:
 		TVerticalPos	_VerticalPos;
 		/// the start position on the layer of its height, not valid for a bot without one (CBotNpc::getStartWorldPos)
 		RYAI_MAP_CRUNCH::CWorldPosition	_StartWorldPos;
-		// clang-format on
 	private:
 		bool			_BotAtDest;
+		// clang-format on
 	};
 	
 	CPathCont* getPathCont(CBot const* bot) NL_OVERRIDE;
