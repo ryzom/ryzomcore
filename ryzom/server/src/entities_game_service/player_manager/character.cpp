@@ -4596,6 +4596,8 @@ void CCharacter::removeKnownBrick( const CSheetId& brickId )
 
 		log_Character_RemoveKnownBrick(brickId);
 		_KnownBricks.erase( brickId );
+		// the memorized phrases that hold the brick are refused from now on
+		_MemorizedPhrases.checkAgainBeforeExecution();
 
 		// if the brick is a training brick, then apply charac increase
 		if ( BRICK_FAMILIES::brickType(brickForm->Family) == BRICK_TYPE::TRAINING)
@@ -14176,30 +14178,91 @@ bool CCharacter::isSpawnValid(bool inVillage, bool inOutpost, bool inStable, boo
 #endif
 
 //-----------------------------------------------
+// A phrase a client sends to learn or to memorize
+//-----------------------------------------------
+enum TPhraseOfClient
+{
+	/// the character knows the bricks, they follow the grammar and they balance
+	PhraseOfClientValid,
+	/// refused for execution, but a phrase the character has in the book already
+	PhraseOfClientKept,
+	/// neither: logged, and not taken
+	PhraseOfClientRejected
+};
+
+static TPhraseOfClient checkPhraseOfClient(const CEntityId &id, const std::set<CSheetId> &knownBricks, const std::vector<CKnownPhrase> &knownPhrases,
+    const vector<CSheetId> &bricks, const char *message, uint16 phraseId)
+{
+	if (bricks.empty())
+	{
+		nlwarning("Player %s sent %s for phrase %u without a brick, refused", id.toString().c_str(), message, (uint)phraseId);
+		return PhraseOfClientRejected;
+	}
+
+	std::string refusal;
+	const TPhraseRefusal check = checkPhraseOfCharacter(bricks, knownBricks, refusal);
+	if (check == PhraseAccepted)
+		return PhraseOfClientValid;
+
+	// A phrase that is refused stays in the book when it is there at a login (CMemorizationSet::fixPhrases). Copying
+	// such a phrase or moving it to another slot makes no new phrase, and it stays refused.
+	for (uint i = 0; i < knownPhrases.size(); ++i)
+	{
+		if (knownPhrases[i].PhraseDesc.Bricks == bricks)
+			return PhraseOfClientKept;
+	}
+
+	if (check == PhraseAgainstGrammar)
+	{
+		// The stock client sends the bricks of a phrase sheet as they are (an action taken from the ready-made ones,
+		// or bought from a trainer), and its action composer builds no phrase against the grammar. So bricks against
+		// the grammar are a fault of the data when a sheet holds them. The composer does open a phrase that is kept
+		// in the book though refused, and sends what the player makes of it. Anything else is a forged phrase.
+		const CSheetId sheet = CPhraseManager::getInstance().findPhraseSheet(bricks);
+		std::string refusalOfKept;
+		if (sheet != CSheetId::Unknown)
+		{
+			nlwarning("Player %s sent %s for phrase %u with the bricks of the phrase sheet %s, which are against the phrase grammar (%s), refused",
+			    id.toString().c_str(), message, (uint)phraseId, sheet.toString().c_str(), refusal.c_str());
+		}
+		else if (phraseId < knownPhrases.size() && !knownPhrases[phraseId].PhraseDesc.Bricks.empty()
+		    && !CPhraseManager::getInstance().checkPhraseGrammar(knownPhrases[phraseId].PhraseDesc.Bricks, refusalOfKept))
+		{
+			nlwarning("Player %s sent %s for phrase %u, an edit of a phrase the book keeps though it is against the phrase grammar, and against it too (%s), refused",
+			    id.toString().c_str(), message, (uint)phraseId, refusal.c_str());
+		}
+		else
+		{
+			nlwarning("HACK: %s sent %s for phrase %u with %u bricks against the phrase grammar (%s), refused",
+			    id.toString().c_str(), message, (uint)phraseId, (uint)bricks.size(), refusal.c_str());
+			reportRefusedClientMessage(id);
+		}
+	}
+	else
+	{
+		// the composer does not test every exclusion between two bricks the way the server does, and the character may
+		// have lost a brick since the client looked, so a stock client may send this
+		nlwarning("Player %s sent %s for phrase %u, refused: %s", id.toString().c_str(), message, (uint)phraseId, refusal.c_str());
+	}
+	return PhraseOfClientRejected;
+} // checkPhraseOfClient //
+
+//-----------------------------------------------
 // memorize
 //-----------------------------------------------
 void CCharacter::memorize(uint8 memorizationSet, uint8 index, uint16 phraseId, const vector<CSheetId> &bricks)
 {
-	// check all used bricks are known
-	const uint size = (uint)bricks.size();
-	for ( uint i = 0 ; i < size ; ++i)
+	switch (checkPhraseOfClient(_Id, _KnownBricks, _KnownPhrases, bricks, "PHRASE:MEMORIZE", phraseId))
 	{
-		if (_KnownBricks.find(bricks[i]) == _KnownBricks.end())
-		{
-			// brick isn't known by player
-			nlwarning("Player %s tried to memorize a phrase with brick %s, but doesn't known it.", _Id.toString().c_str(), bricks[i].toString().c_str());
-			return;
-		}
+	case PhraseOfClientValid:
+		_MemorizedPhrases.memorize(memorizationSet, index, bricks, phraseId, _EntityRowId);
+		break;
+	case PhraseOfClientKept:
+		_MemorizedPhrases.memorizeRefused(memorizationSet, index, bricks, phraseId);
+		break;
+	default:
+		break;
 	}
-
-	// check phrase is valid
-	if ( ! CPhraseManager::getInstance().checkPhraseValidity(bricks) )
-	{
-		nlwarning("Player %s tried to memorize a phrase which failed to be built by phrase manager, cancel", _Id.toString().c_str());
-		return;
-	}
-
-	_MemorizedPhrases.memorize(memorizationSet, index, bricks, phraseId, _EntityRowId);
 } // memorize //
 
 //-----------------------------------------------
@@ -14409,8 +14472,9 @@ void CCharacter::checkPhrases()
 			}
 		}
 	}
-	// Re-memorise phrases to reconstruct them in case bricks inside had changed.
-	_MemorizedPhrases.fixPhrases(_KnownPhrases, getEntityRowId());
+	// Re-memorise phrases to reconstruct them in case bricks inside had changed. A phrase with a brick the character
+	// does not know, or whose bricks make no valid phrase, stays in its slot and is refused when executed.
+	_MemorizedPhrases.fixPhrases(_KnownPhrases, _KnownBricks, getEntityRowId());
 }// checkPhrases //
 
 
@@ -14558,17 +14622,26 @@ void CCharacter::sendPhrasesToClient()
 //-----------------------------------------------
 void CCharacter::learnPhrase(const vector<CSheetId> &bricks, uint16 phraseId, const ucstring &name)
 {
+	// the bricks of the phrase, without the empty places
+	vector<CSheetId> phraseBricks;
+	phraseBricks.reserve(bricks.size());
+	for (uint i = 0; i < bricks.size(); ++i)
+	{
+		if (bricks[i] != NLMISC::CSheetId::Unknown)
+			phraseBricks.push_back(bricks[i]);
+	}
+
+	// A memorized slot is built again from the known phrase at the next login (CMemorizationSet::fixPhrases), so a
+	// known phrase is checked as a memorized one is, with the bricks as they were sent: an empty place is a brick the
+	// character does not know. A rejected phrase leaves the place of the book as it was.
+	if (!phraseBricks.empty() && checkPhraseOfClient(_Id, _KnownBricks, _KnownPhrases, bricks, "PHRASE:LEARN", phraseId) == PhraseOfClientRejected)
+		return;
+
 	if (phraseId >= _KnownPhrases.size())
 		_KnownPhrases.resize(phraseId + 1);
 
 	_KnownPhrases[phraseId].clear();
-
-	const uint size = (uint)bricks.size();
-	for (uint i = 0 ; i < size ; ++i)
-	{
-		if (bricks[i] != NLMISC::CSheetId::Unknown)
-			_KnownPhrases[phraseId].PhraseDesc.Bricks.push_back(bricks[i]);
-	}
+	_KnownPhrases[phraseId].PhraseDesc.Bricks = phraseBricks;
 	_KnownPhrases[phraseId].PhraseDesc.Name = name;
 } // learnPhrase //
 

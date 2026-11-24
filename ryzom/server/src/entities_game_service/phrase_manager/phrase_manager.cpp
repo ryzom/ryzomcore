@@ -1333,133 +1333,217 @@ const std::set<TDataSetRow> &CPhraseManager::getRangeAggressors( const TDataSetR
 }
 
 //-----------------------------------------------
-//			checkPhraseValidity()
+// Part of checkPhraseGrammar: the bricks from pos on are the parameters of the brick owner, each one followed by its own
 //-----------------------------------------------
-bool CPhraseManager::checkPhraseValidity( const std::vector<NLMISC::CSheetId> &brickIds ) const
+static bool checkPhraseParameters(const std::vector<const CStaticBrick *> &bricks, uint &pos, const CStaticBrick *owner, std::string &refusal)
 {
-	H_AUTO(CPhraseManager_checkPhraseValidity);
-	
-	// No check made for the moment, do it later
-	vector<CSheetId>::const_iterator it;
-	vector<CSheetId>::const_iterator itEnd = brickIds.end();
-	
-	set<BRICK_FAMILIES::TBrickFamily> mandatoryFamilies;	
-	set<BRICK_FAMILIES::TBrickFamily> allowedFamilies;
-	
+	// the families still due, the next one last
+	std::vector<BRICK_FAMILIES::TBrickFamily> due(owner->ParameterFamilies.rbegin(), owner->ParameterFamilies.rend());
+	while (!due.empty())
+	{
+		const BRICK_FAMILIES::TBrickFamily family = due.back();
+		due.pop_back();
+		if (pos >= bricks.size())
+		{
+			refusal = NLMISC::toString("it ends where a parameter of family %s is due", BRICK_FAMILIES::toString(family).c_str());
+			return false;
+		}
+		const CStaticBrick *parameter = bricks[pos];
+		if (parameter->Family != family)
+		{
+			refusal = NLMISC::toString("the brick %s of family %s stands where a parameter of family %s is due",
+			    parameter->SheetId.toString().c_str(), BRICK_FAMILIES::toString(parameter->Family).c_str(), BRICK_FAMILIES::toString(family).c_str());
+			return false;
+		}
+		++pos;
+		// each brick of the phrase is taken once, so sheets that name each other as parameters end with the phrase
+		due.insert(due.end(), parameter->ParameterFamilies.rbegin(), parameter->ParameterFamilies.rend());
+	}
+	return true;
+} // checkPhraseParameters //
+
+//-----------------------------------------------
+//			checkPhraseGrammar()
+//-----------------------------------------------
+bool CPhraseManager::checkPhraseGrammar(const std::vector<NLMISC::CSheetId> &brickIds, std::string &refusal) const
+{
+	// The grammar is the one the action composer of the client follows (CDBGroupBuildPhrase): the root brick, one brick
+	// for each mandatory family of the root in the order of its sheet, then the options and credits, whose families the
+	// root lists. Each brick is followed at once by one brick for each of its parameter families, and each of those by
+	// its own. The places matter: a double spell has one mandatory family twice, which the set of the families of a
+	// phrase cannot tell from a brick too many.
+	if (brickIds.empty())
+	{
+		refusal = "it has no brick";
+		return false;
+	}
+
+	std::vector<const CStaticBrick *> bricks(brickIds.size());
+	for (uint i = 0; i < brickIds.size(); ++i)
+	{
+		bricks[i] = CSheets::getSBrickForm(brickIds[i]);
+		if (!bricks[i])
+		{
+			refusal = NLMISC::toString("the brick %s has no sheet", brickIds[i].toString().c_str());
+			return false;
+		}
+	}
+
+	const CStaticBrick *root = bricks[0];
+	if (!BRICK_FAMILIES::isRootFamily(root->Family))
+	{
+		refusal = NLMISC::toString("its first brick %s of family %s is no root brick", root->SheetId.toString().c_str(), BRICK_FAMILIES::toString(root->Family).c_str());
+		return false;
+	}
+
+	uint pos = 1;
+	if (!checkPhraseParameters(bricks, pos, root, refusal))
+		return false;
+
+	// the bricks that are no parameters: none of them is a second root brick, as no root lists a root family
+	std::set<NLMISC::CSheetId> mainBricks;
+	for (uint i = 0; i < root->MandatoryFamilies.size(); ++i)
+	{
+		if (pos >= bricks.size())
+		{
+			refusal = NLMISC::toString("it ends where the mandatory brick of family %s is due", BRICK_FAMILIES::toString(root->MandatoryFamilies[i]).c_str());
+			return false;
+		}
+		const CStaticBrick *mandatory = bricks[pos];
+		if (mandatory->Family != root->MandatoryFamilies[i])
+		{
+			refusal = NLMISC::toString("the brick %s of family %s stands where the mandatory brick of family %s is due",
+			    mandatory->SheetId.toString().c_str(), BRICK_FAMILIES::toString(mandatory->Family).c_str(), BRICK_FAMILIES::toString(root->MandatoryFamilies[i]).c_str());
+			return false;
+		}
+		mainBricks.insert(mandatory->SheetId);
+		++pos;
+		if (!checkPhraseParameters(bricks, pos, mandatory, refusal))
+			return false;
+	}
+
+	// The composer offers the credits of a family once. It offers the options of a family once too, except in a combat
+	// or power phrase, where an option may join others of its family but no brick comes twice (and the exclusion flags
+	// of the bricks, checkPhraseBalance, sort out the rest).
+	const BRICK_TYPE::EBrickType rootType = BRICK_FAMILIES::brickType(root->Family);
+	const bool optionFamilyOnce = rootType != BRICK_TYPE::COMBAT && rootType != BRICK_TYPE::SPECIAL_POWER;
+	std::set<BRICK_FAMILIES::TBrickFamily> families;
+	while (pos < bricks.size())
+	{
+		const CStaticBrick *brick = bricks[pos];
+		const bool credit = root->CreditFamilies.find(brick->Family) != root->CreditFamilies.end();
+		if (!credit && root->OptionalFamilies.find(brick->Family) == root->OptionalFamilies.end())
+		{
+			refusal = NLMISC::toString("the brick %s of family %s is no option or credit of the root brick %s",
+			    brick->SheetId.toString().c_str(), BRICK_FAMILIES::toString(brick->Family).c_str(), root->SheetId.toString().c_str());
+			return false;
+		}
+		const bool newFamily = families.insert(brick->Family).second;
+		const bool newBrick = mainBricks.insert(brick->SheetId).second;
+		if ((credit || optionFamilyOnce) ? !newFamily : !newBrick)
+		{
+			refusal = NLMISC::toString("the brick %s of family %s comes after %s", brick->SheetId.toString().c_str(), BRICK_FAMILIES::toString(brick->Family).c_str(),
+			    newBrick ? "another brick of its family" : "the same brick");
+			return false;
+		}
+		++pos;
+		if (!checkPhraseParameters(bricks, pos, brick, refusal))
+			return false;
+	}
+
+	return true;
+} // checkPhraseGrammar //
+
+//-----------------------------------------------
+//			checkPhraseBalance()
+//-----------------------------------------------
+bool CPhraseManager::checkPhraseBalance(const std::vector<NLMISC::CSheetId> &brickIds, std::string &refusal) const
+{
 	static vector<string> forbidWords(30);
 	static vector<string> defWords(30);
-	
-	set<BRICK_FAMILIES::TBrickFamily> foundFamilies;
+
 	set<string> forbiddenDef;
 	set<string> forbiddenExclude;
-	
-	sint16 totalCost = 0;
-	sint16 totalCredit = 0;
+
+	// 32 bits: the sum of the costs of a long phrase must not wrap around below its credit
+	sint32 totalCost = 0;
+	sint32 totalCredit = 0;
 	float totalRelativeCost = 1.0f;
 	float totalRelativeCredit = 1.0f;
-	
-	for (it = brickIds.begin() ; it != itEnd ; ++it)
+
+	for (uint b = 0; b < brickIds.size(); ++b)
 	{
-		const CStaticBrick *brick = CSheets::getSBrickForm(*it);
+		const CStaticBrick *brick = CSheets::getSBrickForm(brickIds[b]);
 		if (!brick)
 		{
-			nlwarning("<CPhraseManager::checkPhraseValidity> Cannot find brick object for brick sheet %s", (*it).toString().c_str() );
+			refusal = NLMISC::toString("the brick %s has no sheet", brickIds[b].toString().c_str());
 			return false;
 		}
 
-		mandatoryFamilies.insert( brick->MandatoryFamilies.begin(), brick->MandatoryFamilies.end() );
-		allowedFamilies.insert( brick->OptionalFamilies.begin(), brick->OptionalFamilies.end() );
-		allowedFamilies.insert( brick->CreditFamilies.begin(), brick->CreditFamilies.end() );
-		
 		forbidWords.clear();
 		defWords.clear();
 		NLMISC::splitString(brick->ForbiddenExclude, ":", forbidWords);
 		NLMISC::splitString(brick->ForbiddenDef, ":", defWords);
-		
+
 		// check brick doesn't define a flag forbid by another brick
-		for ( uint i = 0 ; i < defWords.size() ; ++i)
+		for (uint i = 0; i < defWords.size(); ++i)
 		{
-			if (forbiddenExclude.find(defWords[i]) != forbiddenExclude.end() )
+			if (forbiddenExclude.find(defWords[i]) != forbiddenExclude.end())
 			{
-				DEBUGLOG("<checkPhraseValidity> The flag %s is forbidden, cancel", defWords[i].c_str() );
+				refusal = NLMISC::toString("the brick %s defines the flag %s, which a brick before it excludes", brick->SheetId.toString().c_str(), defWords[i].c_str());
 				return false;
 			}
 		}
 		// check brick doesn't forbid a flag already defined
-		for ( uint i = 0 ; i < forbidWords.size() ; ++i)
+		for (uint i = 0; i < forbidWords.size(); ++i)
 		{
-			if (forbiddenDef.find(forbidWords[i]) != forbiddenDef.end() )
+			if (forbiddenDef.find(forbidWords[i]) != forbiddenDef.end())
 			{
-				DEBUGLOG("<checkPhraseValidity> The flag %s is forbidden, cancel", forbidWords[i].c_str() );
+				refusal = NLMISC::toString("the brick %s excludes the flag %s, which a brick before it defines", brick->SheetId.toString().c_str(), forbidWords[i].c_str());
 				return false;
 			}
 		}
-		
-		forbiddenDef.insert( defWords.begin(), defWords.end() );
-		forbiddenExclude.insert( forbidWords.begin(), forbidWords.end() );
-		
-		// skip root brick for found families
-		if ( !BRICK_FAMILIES::isRootFamily(brick->Family) )
-		{
-			foundFamilies.insert( brick->Family );
-			/*			if ( foundFamilies.insert( brick->Family ).second == false)
-			{
-			nlwarning("<checkPhraseValidity> The family %s were already found in phrase, error", BRICK_FAMILIES::toString(brick->Family).c_str() );
-			return false;
-			}
-			*/
-		}
 
-		if( brick->SabrinaValue > 0 )
+		forbiddenDef.insert(defWords.begin(), defWords.end());
+		forbiddenExclude.insert(forbidWords.begin(), forbidWords.end());
+
+		if (brick->SabrinaValue > 0)
 			totalCost += brick->SabrinaValue;
 		else
 			totalCredit -= brick->SabrinaValue;
 
-		if( brick->SabrinaRelativeValue > 0.0f )
+		if (brick->SabrinaRelativeValue > 0.0f)
 			totalRelativeCost += brick->SabrinaRelativeValue;
 		else
 			totalRelativeCredit -= brick->SabrinaRelativeValue;
 	}
-	
+
 	// check cost
-	totalCost = (sint16)(totalCost * totalRelativeCost);
-	totalCredit = (sint16)(totalCredit * totalRelativeCredit);
-	
+	totalCost = (sint32)(totalCost * totalRelativeCost);
+	totalCredit = (sint32)(totalCredit * totalRelativeCredit);
 
 	if (totalCost > totalCredit)
 	{
-		DEBUGLOG("<checkPhraseValidity> Credit must be > to cost for a phrase to be valid, cancel return false");
+		refusal = NLMISC::toString("its cost %d is over its credit %d", totalCost, totalCredit);
 		return false;
 	}
-	
-	// check all mandatory are present
-	set<BRICK_FAMILIES::TBrickFamily>::const_iterator itb;
-	set<BRICK_FAMILIES::TBrickFamily>::const_iterator itbEnd = mandatoryFamilies.end();
-	for (itb = mandatoryFamilies.begin() ; itb != itbEnd ; ++itb)
-	{
-		set<BRICK_FAMILIES::TBrickFamily>::iterator itbf = foundFamilies.find(*itb);
-		if ( itbf == foundFamilies.end() )
-		{
-			DEBUGLOG("<checkPhraseValidity> The family %s is mandatory but isn't in the phrase, cancel return false", BRICK_FAMILIES::toString(*itb).c_str() );
-			return false;
-		}
-		else
-			foundFamilies.erase(itbf);
-	}
-	
-	// check all the other families are allowed
-	itbEnd = foundFamilies.end();
-	for (itb = foundFamilies.begin() ; itb != itbEnd ; ++itb)
-	{
-		if (allowedFamilies.find(*itb) == allowedFamilies.end() )
-		{
-			DEBUGLOG("<checkPhraseValidity> The family %s isn't a valid optional or creadit one, cancel return false", BRICK_FAMILIES::toString(*itb).c_str() );
-			return false;
-		}
-	}
-	
+
 	return true;
-} // checkPhraseValidity //
+} // checkPhraseBalance //
+
+//-----------------------------------------------
+//			findPhraseSheet()
+//-----------------------------------------------
+NLMISC::CSheetId CPhraseManager::findPhraseSheet(const std::vector<NLMISC::CSheetId> &brickIds) const
+{
+	const CAllRolemasterPhrases &phrases = CSheets::getSRolemasterPhrasesMap();
+	for (CAllRolemasterPhrases::const_iterator it = phrases.begin(); it != phrases.end(); ++it)
+	{
+		if (it->second.Bricks == brickIds)
+			return it->first;
+	}
+	return CSheetId::Unknown;
+} // findPhraseSheet //
 
 
 //-----------------------------------------------

@@ -36,6 +36,26 @@ NL_INSTANCE_COUNTER_IMPL(CMemorizedPhrase);
 NL_INSTANCE_COUNTER_IMPL(CMemorizationSet);
 
 //-----------------------------------------------
+// checkPhraseOfCharacter
+//-----------------------------------------------
+TPhraseRefusal checkPhraseOfCharacter(const std::vector<NLMISC::CSheetId> &bricks, const std::set<NLMISC::CSheetId> &knownBricks, std::string &refusal)
+{
+	for (uint i = 0; i < bricks.size(); ++i)
+	{
+		if (knownBricks.find(bricks[i]) == knownBricks.end())
+		{
+			refusal = NLMISC::toString("the character does not know the brick %s", bricks[i].toString().c_str());
+			return PhraseUnknownBrick;
+		}
+	}
+	if (!CPhraseManager::getInstance().checkPhraseGrammar(bricks, refusal))
+		return PhraseAgainstGrammar;
+	if (!CPhraseManager::getInstance().checkPhraseBalance(bricks, refusal))
+		return PhraseUnbalanced;
+	return PhraseAccepted;
+}
+
+//-----------------------------------------------
 // CKnownPhrase::empty
 //-----------------------------------------------
 bool CKnownPhrase::empty() const
@@ -73,7 +93,10 @@ CMemorizedPhrase::CMemorizedPhrase()
 //-----------------------------------------------
 // CMemorizedPhrase::CMemorizedPhrase
 //-----------------------------------------------
-CMemorizedPhrase::CMemorizedPhrase(const std::vector<NLMISC::CSheetId> &bricks, uint16 id) : Bricks(bricks), PhraseId(id)
+CMemorizedPhrase::CMemorizedPhrase(const std::vector<NLMISC::CSheetId> &bricks, uint16 id)
+    : Bricks(bricks)
+    , PhraseId(id)
+    , Refused(false)
 {
 }
 
@@ -84,6 +107,8 @@ void CMemorizedPhrase::clear()
 {
 	Bricks.clear();
 	PhraseId=0;
+	// a phrase read from a save is not checked yet
+	Refused = true;
 }
 
 //-----------------------------------------------
@@ -250,6 +275,36 @@ void CMemorizationSet::memorizeWithoutCheck(uint8 i, const vector<CSheetId> &bri
 	Phrases[i] = new CMemorizedPhrase(bricks, id);
 } // CMemorizationSet::memorizeWithoutCheck //
 
+//-----------------------------------------------
+// CMemorizationSet::memorizeRefused
+//-----------------------------------------------
+void CMemorizationSet::memorizeRefused(uint8 i, const vector<CSheetId> &bricks, uint16 id)
+{
+	if (i >= Phrases.size())
+	{
+		nlwarning("<CMemorizationSet::memorizeRefused> Error, tried to memorized in slot %u while there is %u slots", (uint)i, (uint)Phrases.size());
+		return;
+	}
+
+	if (Phrases[i] != NULL)
+		delete Phrases[i];
+
+	Phrases[i] = new CMemorizedPhrase(bricks, id);
+	Phrases[i]->Refused = true;
+} // CMemorizationSet::memorizeRefused //
+
+//-----------------------------------------------
+// CMemorizationSet::checkAgainBeforeExecution
+//-----------------------------------------------
+void CMemorizationSet::checkAgainBeforeExecution()
+{
+	for (uint i = 0; i < Phrases.size(); ++i)
+	{
+		if (Phrases[i] != NULL)
+			Phrases[i]->Refused = true;
+	}
+} // CMemorizationSet::checkAgainBeforeExecution //
+
 
 //-----------------------------------------------
 // CMemorizationSet::executePhrase
@@ -265,7 +320,20 @@ void CMemorizationSet::executePhrase(uint8 i, CCharacter *actor, const TDataSetR
 		nlwarning("<CMemorizationSet::executePhrase> phrase %u is NULL", i);
 		return;
 	}
-	if ( CPhraseManager::getInstance().executePhrase( actor->getEntityRowId(), target, Phrases[i]->Bricks, cyclic, Phrases[i]->PhraseId, actor->nextCounter(),enchant) == NULL)
+
+	// A phrase that was refused, or that was not checked since the character lost a brick, is checked before it is
+	// executed: the character may know the missing brick again. A refused one tells the player why.
+	if (Phrases[i]->Refused)
+	{
+		std::string refusal;
+		const TPhraseRefusal check = checkPhraseOfCharacter(Phrases[i]->Bricks, actor->getKnownBricks(), refusal);
+		if (check == PhraseAccepted)
+			Phrases[i]->Refused = false;
+		else
+			CCharacter::sendDynamicSystemMessage(actor->getEntityRowId(), check == PhraseUnknownBrick ? "EGS_ACTION_UNKNOWN_STANZA" : "EGS_ACTION_INVALID");
+	}
+
+	if (Phrases[i]->Refused || CPhraseManager::getInstance().executePhrase(actor->getEntityRowId(), target, Phrases[i]->Bricks, cyclic, Phrases[i]->PhraseId, actor->nextCounter(), enchant) == NULL)
 	{
 		// error
 //		actor->_PropertyDatabase.setProp( "EXECUTE_PHRASE:NEXT_COUNTER", actor->nextCounter() );
@@ -295,7 +363,7 @@ void CMemorizationSet::executePhrase(uint8 i, CCharacter *actor, const TDataSetR
 // Re-memorise phrases to reconstruct them in case bricks inside had changed.
 // \warning actor must not be NULL.
 //-----------------------------------------------
-void CMemorizationSet::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const TDataSetRow &rowId)
+void CMemorizationSet::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const std::set<NLMISC::CSheetId> &knownBricks, const TDataSetRow &rowId)
 {
 	const uint nbPhrases = (uint)Phrases.size();
 	for(uint phraseIndex=0; phraseIndex<nbPhrases; ++phraseIndex)
@@ -308,21 +376,29 @@ void CMemorizationSet::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases,
 			if(phraseId < knownPhrases.size() && !knownPhrases[phraseId].PhraseDesc.Bricks.empty())
 			{
 				// check phrase validity and memorize it
-				if ( CPhraseManager::getInstance().checkPhraseValidity(knownPhrases[phraseId].PhraseDesc.Bricks) )
+				const std::vector<NLMISC::CSheetId> &bricks = knownPhrases[phraseId].PhraseDesc.Bricks;
+				std::string refusal;
+				if (checkPhraseOfCharacter(bricks, knownBricks, refusal) == PhraseAccepted)
 				{
 					// a phrase the grammar accepts but whose build a brick's values refuse (a sheet changed or broken)
 					// keeps its slot: it would be lost for good with the next save, and works again once the sheet is
 					// fixed; its execution is refused meanwhile
-					if (!memorize(phraseIndex, knownPhrases[phraseId].PhraseDesc.Bricks, phraseId, rowId))
+					if (!memorize(phraseIndex, bricks, phraseId, rowId))
 					{
 						nlwarning("<CMemorizationSet::fixPhrases> %s: known phrase %u ('%s') of memorized slot %u cannot be built with its bricks, the slot keeps it",
 						    TheDataset.getEntityId(rowId).toString().c_str(), (uint)phraseId, knownPhrases[phraseId].PhraseSheetId.toString().c_str(), phraseIndex);
-						memorizeWithoutCheck((uint8)phraseIndex, knownPhrases[phraseId].PhraseDesc.Bricks, phraseId);
+						memorizeWithoutCheck((uint8)phraseIndex, bricks, phraseId);
 					}
 				}
 				else
-					nlwarning("<CMemorizationSet::fixPhrases> %s: known phrase %u ('%s') of memorized slot %u is not valid with its bricks any more, the slot is emptied",
-					    TheDataset.getEntityId(rowId).toString().c_str(), (uint)phraseId, knownPhrases[phraseId].PhraseSheetId.toString().c_str(), phraseIndex);
+				{
+					// A phrase the character may not execute keeps its slot as well and is saved as it is: it works
+					// again once the character knows the brick again or the sheets are put right, and the player can
+					// edit or delete it. It is checked again when the player tries it.
+					nlwarning("<CMemorizationSet::fixPhrases> %s: known phrase %u ('%s') of memorized slot %u is refused (%s), the slot keeps it",
+					    TheDataset.getEntityId(rowId).toString().c_str(), (uint)phraseId, knownPhrases[phraseId].PhraseSheetId.toString().c_str(), phraseIndex, refusal.c_str());
+					memorizeRefused((uint8)phraseIndex, bricks, phraseId);
+				}
 			}
 			else
 				nlwarning("<CMemorizationSet::fixPhrases> %s: memorized slot %u names known phrase %u, which the character does not have or which has no bricks, the slot is emptied",
@@ -461,6 +537,28 @@ void CPlayerPhraseMemory::memorizeWithoutCheck(uint8 memorizationSet, uint8 i, c
 	getMemSet(memorizationSet)->memorizeWithoutCheck(i, bricks, id);
 }
 
+//-----------------------------------------------
+// CPlayerPhraseMemory::memorizeRefused
+//-----------------------------------------------
+void CPlayerPhraseMemory::memorizeRefused(uint8 memorizationSet, uint8 i, const vector<CSheetId> &bricks, uint16 id)
+{
+	BOMB_IF(memorizationSet >= _MemSets.size(), "Invalid memory set bank id", return);
+
+	getMemSet(memorizationSet)->memorizeRefused(i, bricks, id);
+}
+
+//-----------------------------------------------
+// CPlayerPhraseMemory::checkAgainBeforeExecution
+//-----------------------------------------------
+void CPlayerPhraseMemory::checkAgainBeforeExecution()
+{
+	for (uint i = 0; i < _MemSets.size(); ++i)
+	{
+		if (_MemSets[i] != NULL)
+			_MemSets[i]->checkAgainBeforeExecution();
+	}
+}
+
 
 //-----------------------------------------------
 // CPlayerPhraseMemory::executePhrase
@@ -489,14 +587,14 @@ void CPlayerPhraseMemory::executePhrase(uint8 memorizationSet, uint8 i, CCharact
 // Re-memorise phrases to reconstruct them in case bricks inside had changed.
 // \warning actor must not be NULL.
 //-----------------------------------------------
-void CPlayerPhraseMemory::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const TDataSetRow &rowId)
+void CPlayerPhraseMemory::fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const std::set<NLMISC::CSheetId> &knownBricks, const TDataSetRow &rowId)
 {
 	const uint nbSet = (uint)_MemSets.size();
 	for(uint i=0; i<nbSet; ++i)
 	{
 		// Re-build phrases in cases bricks inside had changed.
 		if(_MemSets[i] != 0)
-			_MemSets[i]->fixPhrases(knownPhrases, rowId);
+			_MemSets[i]->fixPhrases(knownPhrases, knownBricks, rowId);
 	}
 }// fixPhrases //
 

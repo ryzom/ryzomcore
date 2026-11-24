@@ -422,6 +422,9 @@ public :
 	void applyEnchantment( const std::vector< NLMISC::CSheetId >& action );
 	// get enchantment
 	const std::vector< NLMISC::CSheetId >& getEnchantment() const { return _Enchantment; }
+	// whether the bricks of the enchantment were checked since they were set or loaded, so that they are checked once
+	bool isEnchantmentChecked() const { return m_EnchantmentChecked; }
+	void setEnchantmentChecked() { m_EnchantmentChecked = true; }
 	// set sapLoad for recharge sap item
 	void setSapLoad( uint32 sap );
 	// reset enchantment
@@ -856,6 +859,8 @@ private:
 //	std::vector< NLMISC::CSheetId > _RmUsedForCraft;
 	/// vector of sheetId of CStaticBrick define spell of enchanted item
 	std::vector<NLMISC::CSheetId> _Enchantment;
+	/// the bricks of _Enchantment were found fit to execute since they were set or loaded (CCharacter::procEnchantment); not saved
+	bool m_EnchantmentChecked;
 
 	/// pointer on the associated static form
 	const CStaticItem*	_Form;

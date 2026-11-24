@@ -1074,6 +1074,7 @@ void CGameItem::setSapLoad( uint32 sap )
 void CGameItem::applyEnchantment( const vector< CSheetId >& action ) 
 { 
 	_Enchantment = action; 
+	m_EnchantmentChecked = false;
 
 	if (getInventory() != NULL)
 		getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_enchant));
@@ -1087,6 +1088,7 @@ void CGameItem::resetEnchantment()
 	_SapLoad = 0;
 	_Enchantment.clear();
 	contReset( _Enchantment );
+	m_EnchantmentChecked = false;
 	_LatencyEndDate = 0;
 
 	if (getInventory() != NULL)
@@ -1277,6 +1279,7 @@ void CGameItem::clear()
 	// clear the enchantment
 	_Enchantment.clear();
 	contReset(_Enchantment);
+	m_EnchantmentChecked = false;
 
 	_CraftParameters = NULL;
 

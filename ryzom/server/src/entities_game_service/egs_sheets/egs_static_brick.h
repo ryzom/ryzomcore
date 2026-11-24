@@ -335,6 +335,7 @@ typedef NLMISC::CSmartPtr<CFaber> CFaberPtr;
 class CStaticBrick
 {
 public:	
+	// clang-format off
 	// Target Restrictions
 	TARGET::TTargetRestriction TargetRestriction;
 
@@ -377,8 +378,11 @@ public:
 	/// localisation forced by this brick if any,a phrase cannot have more than one brick setting the localisation (unless they set the same one)
 	SLOT_EQUIPMENT::TSlotEquipment	ForcedLocalisation;
 
-	/// mandatory families
-	std::set<BRICK_FAMILIES::TBrickFamily>	MandatoryFamilies;
+	/// mandatory families, in the order of the sheet: a phrase with this root brick holds one brick for each of them,
+	/// in that order (a double spell has one family twice)
+	std::vector<BRICK_FAMILIES::TBrickFamily>	MandatoryFamilies;
+	/// parameter families, in the order of the sheet: in a phrase this brick is followed by one brick for each of them
+	std::vector<BRICK_FAMILIES::TBrickFamily>	ParameterFamilies;
 	/// optional families
 	std::set<BRICK_FAMILIES::TBrickFamily>	OptionalFamilies;
 	/// credit families
@@ -425,6 +429,7 @@ public:
 	/// with default values, so what holds it is refused when it is to be used: phrases, item enchantments and consumable
 	/// effects (CPhraseManager::refusesBrokenBricks)
 	bool									HasBadProperty;
+	// clang-format on
 
 public:	
 	/// Constructor
@@ -443,7 +448,7 @@ public:
 	void readStaticBrick ( const NLGEORGES::UFormElm &root, const NLMISC::CSheetId &sheetId );
 		
 	// return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 34 + ( SKILLS::NUM_SKILLS << 16 ); } 
+	inline static uint getVersion() { return 35 + (SKILLS::NUM_SKILLS << 16); }
 
 	/// called when the sheet is removed
 	void removed() {}

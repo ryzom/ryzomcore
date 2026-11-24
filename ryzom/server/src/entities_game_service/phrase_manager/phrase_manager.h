@@ -448,11 +448,29 @@ public:
 	bool cancelAllCombatSentences( const TDataSetRow &playerRowId, bool disengageOnEndOnly );
 
 	/**
-	 * check the validity (grammar and cost) of given phrase
+	 * check the bricks of a phrase follow the grammar of its root brick, in the order the action composer of the
+	 * client writes them. The composer of a stock client builds no phrase that does not.
 	 * \param vector of bricks sheet ids
-	 * \return true if the phrase is valid
+	 * \param refusal what is wrong with the phrase, for the log
+	 * \return true if the phrase follows the grammar
 	 */
-	bool checkPhraseValidity( const std::vector<NLMISC::CSheetId> &brickIds ) const;
+	bool checkPhraseGrammar(const std::vector<NLMISC::CSheetId> &brickIds, std::string &refusal) const;
+
+	/**
+	 * check no brick of a phrase excludes another one and the credit covers the cost
+	 * \param vector of bricks sheet ids
+	 * \param refusal what is wrong with the phrase, for the log
+	 * \return true if the phrase is balanced
+	 */
+	bool checkPhraseBalance(const std::vector<NLMISC::CSheetId> &brickIds, std::string &refusal) const;
+
+	/**
+	 * find the phrase sheet that holds exactly these bricks. The stock client sends the bricks of a sheet as they are
+	 * and a mission item carries them, so what a sheet holds is no forged phrase, whatever the grammar says of it.
+	 * Goes through all phrase sheets: for a refusal, not for every phrase.
+	 * \return the sheet, CSheetId::Unknown if there is none
+	 */
+	NLMISC::CSheetId findPhraseSheet(const std::vector<NLMISC::CSheetId> &brickIds) const;
 
 	/**
 	 * use a consumable item, apply it's effect

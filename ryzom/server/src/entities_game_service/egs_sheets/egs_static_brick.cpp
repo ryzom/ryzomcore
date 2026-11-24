@@ -141,6 +141,8 @@ void CStaticBrick::serial(NLMISC::IStream &f)
 
 	// Grammar
 		// mandatory
+		MandatoryFamilies.clear();
+		ParameterFamilies.clear();
 		f.serial(size);
 		for ( uint16 i = 0 ; i < size ; ++i)
 		{			
@@ -152,7 +154,22 @@ void CStaticBrick::serial(NLMISC::IStream &f)
 				nlwarning("Cannot find family associated to string %s", str.c_str() );
 			}
 			else
-				MandatoryFamilies.insert( family );
+				MandatoryFamilies.push_back(family);
+		}
+
+		// parameter
+		f.serial(size);
+		for (uint16 i = 0; i < size; ++i)
+		{
+			f.serial(str);
+
+			BRICK_FAMILIES::TBrickFamily family = BRICK_FAMILIES::toSBrickFamily(str);
+			if (family == BRICK_FAMILIES::Unknown)
+			{
+				nlwarning("Cannot find family associated to string %s", str.c_str());
+			}
+			else
+				ParameterFamilies.push_back(family);
 		}
 
 		// optional
@@ -233,19 +250,26 @@ void CStaticBrick::serial(NLMISC::IStream &f)
 
 	// grammar
 		// mandatory
-		set<BRICK_FAMILIES::TBrickFamily>::const_iterator it = MandatoryFamilies.begin();
-		set<BRICK_FAMILIES::TBrickFamily>::const_iterator itEnd = MandatoryFamilies.end();
 		uint16 size = (uint16)MandatoryFamilies.size();
 		f.serial(size);
-		for ( ; it != itEnd ; ++it)
+		for (uint i = 0; i < MandatoryFamilies.size(); ++i)
 		{
-			string str = BRICK_FAMILIES::toString(*it);
+			str = BRICK_FAMILIES::toString(MandatoryFamilies[i]);
+			f.serial(str);
+		}
+
+		// parameter
+		size = (uint16)ParameterFamilies.size();
+		f.serial(size);
+		for (uint i = 0; i < ParameterFamilies.size(); ++i)
+		{
+			str = BRICK_FAMILIES::toString(ParameterFamilies[i]);
 			f.serial(str);
 		}
 
 		// optional
-		it = OptionalFamilies.begin();
-		itEnd = OptionalFamilies.end();
+		set<BRICK_FAMILIES::TBrickFamily>::const_iterator it = OptionalFamilies.begin();
+		set<BRICK_FAMILIES::TBrickFamily>::const_iterator itEnd = OptionalFamilies.end();
 		size = (uint16)OptionalFamilies.size();
 
 		f.serial(size);
@@ -546,7 +570,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 		{
 			BRICK_FAMILIES::TBrickFamily	bf= BRICK_FAMILIES::toSBrickFamily(value);
 			if(bf != BRICK_FAMILIES::Unknown)
-				MandatoryFamilies.insert( bf );
+				MandatoryFamilies.push_back(bf);
 			else
 				nlwarning("Unknown Mandatory family %s in sheet %s", value.c_str(), sheetId.toString().c_str());
 		}
@@ -569,7 +593,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 	}
 	
 	// Parameter families
-//	ParameterFamilies.clear();
+	ParameterFamilies.clear();
 	for( uint i = 0 ; i < SBRICK_MAX_PARAMETER ; ++i )
 	{
 		sprintf(tmp, "Parameter.f%d", i);
@@ -578,7 +602,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 		{
 			BRICK_FAMILIES::TBrickFamily	bf= BRICK_FAMILIES::toSBrickFamily(value);
 			if(bf != BRICK_FAMILIES::Unknown)
-				MandatoryFamilies.insert( bf );
+				ParameterFamilies.push_back(bf);
 			else
 				nlwarning("Unknown Parameter family %s in sheet %s", value.c_str(), sheetId.toString().c_str());
 		}

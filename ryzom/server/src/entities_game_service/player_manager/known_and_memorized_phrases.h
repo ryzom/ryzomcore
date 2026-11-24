@@ -28,6 +28,21 @@ const uint8 MaxNbSentencesPerSet			= 20;
 
 class CCharacter;
 
+/// What keeps a character from executing a phrase
+enum TPhraseRefusal
+{
+	PhraseAccepted = 0,
+	/// the character does not know one of the bricks
+	PhraseUnknownBrick,
+	/// the bricks do not follow the phrase grammar: no phrase the action composer of the client builds
+	PhraseAgainstGrammar,
+	/// a brick excludes another one, or the credit does not cover the cost
+	PhraseUnbalanced
+};
+
+/// Checks the bricks of a phrase a character learns, memorizes or executes. refusal receives what is wrong, for the log.
+TPhraseRefusal checkPhraseOfCharacter(const std::vector<NLMISC::CSheetId> &bricks, const std::set<NLMISC::CSheetId> &knownBricks, std::string &refusal);
+
 /**
  * struct for Known Phrases
  */
@@ -72,8 +87,14 @@ public:
 	void clear();
 	void serial(NLMISC::IStream &f);
 
+	// clang-format off
 	std::vector<NLMISC::CSheetId>	Bricks;
 	uint16							PhraseId;
+	/// The phrase is checked before it is executed: it was refused at its last check (a brick the character does not
+	/// know, or bricks that make no valid phrase), or it was not checked yet. A refused phrase keeps its slot and is
+	/// saved as it is; this mark is not saved, the phrase is checked again at every login and when the player tries it.
+	bool							Refused;
+	// clang-format on
 };
 
 /**
@@ -102,6 +123,9 @@ public:
 
 	void memorizeWithoutCheck(uint8 i, const std::vector<NLMISC::CSheetId> &bricks, uint16 id);
 
+	/// memorize a phrase the character may not execute for now, without any check: it keeps its slot and is saved
+	void memorizeRefused(uint8 i, const std::vector<NLMISC::CSheetId> &bricks, uint16 id);
+
 	/// memorize starter phrases in easy order for newcomers
 	bool memorizeStarterPhrase(const std::vector<NLMISC::CSheetId> &bricks, uint16 id);
 
@@ -116,7 +140,10 @@ public:
 	void forgetAll();
 
 	/// Re-memorise phrases to reconstruct them in case bricks inside had changed.
-	void fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const TDataSetRow &rowId);
+	void fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const std::set<NLMISC::CSheetId> &knownBricks, const TDataSetRow &rowId);
+
+	/// have every phrase checked again before its next execution
+	void checkAgainBeforeExecution();
 	
 	const std::vector<CMemorizedPhrase*>	&getMemorizedPhrases() const { return Phrases; }
 
@@ -162,6 +189,9 @@ struct CPlayerPhraseMemory
 
 	// memorize in given set without any check on phrase validity
 	void memorizeWithoutCheck(uint8 memorizationSet, uint8 i, const std::vector<NLMISC::CSheetId> &bricks, uint16 id );
+
+	/// memorize in given set a phrase the character may not execute for now, without any check
+	void memorizeRefused(uint8 memorizationSet, uint8 i, const std::vector<NLMISC::CSheetId> &bricks, uint16 id);
 		
 	void executePhrase(uint8 memorizationSet, uint8 i, CCharacter *actor, const TDataSetRow &target, bool cyclic, bool enchant);
 
@@ -171,7 +201,10 @@ struct CPlayerPhraseMemory
 	void forgetAll();
 
 	/// Re-memorise phrases to reconstruct them in case bricks inside had changed.
-	void fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const TDataSetRow &rowId);
+	void fixPhrases(const std::vector<CKnownPhrase> &knownPhrases, const std::set<NLMISC::CSheetId> &knownBricks, const TDataSetRow &rowId);
+
+	/// have every phrase checked again before its next execution (the character lost a brick)
+	void checkAgainBeforeExecution();
 
 	const std::vector<CMemorizationSet*>	&getMemorizationSets() const { return _MemSets; }
 

@@ -2884,6 +2884,26 @@ void CCharacter::procEnchantment()
 			if (CPhraseManager::getInstance().refusesBrokenBricks(rightHandItem->getEnchantment(), _EntityRowId, "the enchantment", rightHandItem->getSheetId(), true))
 				return;
 
+			// The enchantment holds the bricks of the phrase a crystal was made of, or of a phrase sheet (a mission
+			// item). Bricks against the phrase grammar that no sheet holds come from a phrase no stock client builds:
+			// the enchantment stays on the item and is not executed. Bricks that are fine are checked once.
+			if (!rightHandItem->isEnchantmentChecked())
+			{
+				std::string refusal;
+				if (!CPhraseManager::getInstance().checkPhraseGrammar(rightHandItem->getEnchantment(), refusal)
+				    && CPhraseManager::getInstance().findPhraseSheet(rightHandItem->getEnchantment()) == CSheetId::Unknown)
+				{
+					// once for each character in a run: a player may try again and again
+					static std::set<CEntityId> s_Reported;
+					if (s_Reported.insert(_Id).second)
+						nlwarning("%s: the enchantment of the item %s in the right hand is against the phrase grammar (%s), it is refused",
+						    _Id.toString().c_str(), rightHandItem->getSheetId().toString().c_str(), refusal.c_str());
+					sendDynamicSystemMessage(_EntityRowId, "EGS_ENCHANTMENT_INVALID");
+					return;
+				}
+				rightHandItem->setEnchantmentChecked();
+			}
+
 			CMagicPhrase phrase;
 			if (!phrase.buildProc(_EntityRowId, rightHandItem->getEnchantment()))
 			{
