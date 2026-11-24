@@ -23,6 +23,8 @@
 #include "driver_opengl3_vertex_buffer.h"
 #include "driver_opengl3_uniform_buffer.h"
 
+#include "nel/3d/glsl_block_struct_reads.h"
+
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
@@ -257,6 +259,14 @@ bool CDriverGL3::compileProgram(IProgram *program, GLenum shaderType,
 	{
 		s = src->SourcePtr;
 	}
+#if NL3D_GL3_REWRITE_BLOCK_STRUCT_READS
+	// What the rewrite leaves alone is still a valid shader, which may take long to compile
+	std::string rewrittenSource;
+	std::string rewriteMessage;
+	if (!rewriteGlslBlockStructReads(s, rewrittenSource, rewriteMessage))
+		nlwarning("GL3: The reads of structs out of uniform blocks in '%s' are not all rewritten: %s", src->DisplayName.c_str(), rewriteMessage.c_str());
+	s = rewrittenSource.c_str();
+#endif
 	unsigned int id;
 	if (src->Profile == linkedProfile)
 	{

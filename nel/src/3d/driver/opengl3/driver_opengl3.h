@@ -120,6 +120,17 @@ using NLMISC::CVector;
 #define NL3D_GL3_EGL 0
 #endif
 
+// 1: before a shader is compiled, the reads of whole structs out of uniform blocks in its source
+// become reads of their members (NL3D::rewriteGlslBlockStructReads). The OpenGL ES 3.0 driver does
+// this for every shader: ANGLE on Direct3D, which it cannot tell from another OpenGL ES in a
+// browser, takes about a minute to compile a shader that reads a light of the light table as a
+// whole struct. The desktop driver has no use for it; set it to 1 there to test the rewrite.
+#ifdef USE_OPENGLES3
+#define NL3D_GL3_REWRITE_BLOCK_STRUCT_READS 1
+#else
+#define NL3D_GL3_REWRITE_BLOCK_STRUCT_READS 0
+#endif
+
 // The stream that holds the uniform blocks (see CStreamBufferGL3).
 // The size of a chunk sets how often the blocks that are kept across frames (materials,
 // camera, lights) are written again: each time the head moves on to another chunk, the
@@ -1402,6 +1413,7 @@ private:
 	bool						_LightTableMode;
 	std::vector<CLight>			_LightTable;
 
+	// clang-format off
 	// Light UBO. The light table mode and the mode without a table each have a block with
 	// their lights, and the draw binds the one of its mode: draws of the two modes follow
 	// each other within a frame (the scenes against what is drawn outside of them), and
@@ -1410,7 +1422,8 @@ private:
 	CUniformBlockGL3			_UserLightUBOBlock; // Where it has the block of the mode without a table: the user lights as its first MaxLight entries
 	bool						_LightTableDirty; // Light table entries changed
 	bool						_UserLightUBODirty; // _UserLight[] or _LightEnable[] changed (for non-table UBO mode)
-	sint						_MaxLightTableSize; // Runtime maximum (reduced on ANGLE/D3D11)
+	sint						_MaxLightTableSize; // Runtime maximum (see NL_OPENGL3_REDUCED_LIGHT_TABLE)
+	bool						m_LargeUBOArrays; // What supportLargeUBOArrays() says
 	CLightTableUBOEntry			_LightTableUBOStaging[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // Persistent staging buffer (avoids per-frame heap alloc)
 	CLightTableUBOEntry			_LightTableUBOWritten[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // The entries that _LightTableUBOBlock holds, when the driver still has the block
 	uint						_LightTableUBOWrittenCount; // How many of them
@@ -1421,6 +1434,7 @@ private:
 	/// written and writtenCount are the entries that the block holds: the copy that is kept for this block.
 	void						useLightTableBlock(CUniformBlockGL3 &block, CLightTableUBOEntry *written, uint &writtenCount,
 								    const CLightTableUBOEntry *entries, uint count, uint32 blockSize);
+	// clang-format on
 
 	// Per-object light table selection (set by setLights, used by setupUniforms)
 	sint16						_LightTableObjIndices[MaxLight];

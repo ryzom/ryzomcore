@@ -357,6 +357,7 @@ CDriverGL3::CDriverGL3()
 	_UserLightUBOWrittenCount = 0;
 	_UserLightUBODirty = true;
 	_MaxLightTableSize = NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
+	m_LargeUBOArrays = true;
 	_CameraUBODirty = true;
 	_CameraUBOUploadDirty = false;
 	_LightTableObjCount = 0;
@@ -463,20 +464,31 @@ bool CDriverGL3::setupDisplay()
 	registerGlXExtensions(_Extensions, _dpy, DefaultScreen(_dpy));
 #endif // NL_OS_WINDOWS
 
-	// Determine runtime light table size based on ANGLE/platform detection
+	// The light table has its full size on ANGLE too: the shaders read its lights member by member
+	// (NL3D_GL3_REWRITE_BLOCK_STRUCT_READS). The other large arrays in uniform blocks, the bones of
+	// the skeletons, stay off where ANGLE on Direct3D may be below the driver.
 	_MaxLightTableSize = NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
+	m_LargeUBOArrays = true;
 #ifdef __EMSCRIPTEN__
-	if (_Extensions.IsWindowsPlatform || _Extensions.IsAndroidPlatform) // WebGL on Windows/Android: assume poor GLES translation
-		_MaxLightTableSize = NL_OPENGL3_ANGLE_MAX_LIGHT_TABLE;
+	if (_Extensions.IsAndroidPlatform) // WebGL on Android: assume poor GLES translation
+		_MaxLightTableSize = NL_OPENGL3_REDUCED_LIGHT_TABLE;
+	if (_Extensions.IsWindowsPlatform || _Extensions.IsAndroidPlatform)
+		m_LargeUBOArrays = false;
 #else
-	if (_Extensions.IsANGLE) // Desktop: only if ANGLE detected via GL_RENDERER
-		_MaxLightTableSize = NL_OPENGL3_ANGLE_MAX_LIGHT_TABLE;
+	if (_Extensions.IsANGLE) // only if ANGLE is detected via GL_RENDERER
+	{
+		m_LargeUBOArrays = false;
+#if !NL3D_GL3_REWRITE_BLOCK_STRUCT_READS
+		_MaxLightTableSize = NL_OPENGL3_REDUCED_LIGHT_TABLE;
 #endif
-	nlinfo("3D: Light table size: %d (ANGLE: %s, Windows: %s, Android: %s)",
-		_MaxLightTableSize,
-		_Extensions.IsANGLE ? "yes" : "no",
-		_Extensions.IsWindowsPlatform ? "yes" : "no",
-		_Extensions.IsAndroidPlatform ? "yes" : "no");
+	}
+#endif
+	nlinfo("3D: Light table size: %d, large arrays in uniform blocks: %s (ANGLE: %s, Windows: %s, Android: %s)",
+	    _MaxLightTableSize,
+	    m_LargeUBOArrays ? "yes" : "no",
+	    _Extensions.IsANGLE ? "yes" : "no",
+	    _Extensions.IsWindowsPlatform ? "yes" : "no",
+	    _Extensions.IsAndroidPlatform ? "yes" : "no");
 
 	// Check required extensions!!
 	if (!_Extensions.GLCore)
@@ -2047,7 +2059,7 @@ bool CDriverGL3::supportMADOperator() const
 // ***************************************************************************
 bool CDriverGL3::supportLargeUBOArrays() const
 {
-	return _MaxLightTableSize >= NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
+	return m_LargeUBOArrays;
 }
 
 // ***************************************************************************

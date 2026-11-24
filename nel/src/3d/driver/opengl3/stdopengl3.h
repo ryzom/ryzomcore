@@ -216,6 +216,6 @@ inline void glPolygonMode(GLenum, GLenum) { }
 #define NL_OPENGL3_MAX_LIGHT 8
 
 #define NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY 128 // Hard limit for CPU staging buffers
-#define NL_OPENGL3_ANGLE_MAX_LIGHT_TABLE 8      // Reduced limit for ANGLE/D3D11
+#define NL_OPENGL3_REDUCED_LIGHT_TABLE 8 // Reduced limit for WebGL on Android, and for ANGLE without the rewrite of the reads
 
 #endif // NL_STDOPENGL3_H
