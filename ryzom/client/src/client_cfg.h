@@ -305,6 +305,7 @@ struct CClientConfig
 	/// Off by default: the flash was not visible in the released game, and its look was not tuned
 	bool			WeatherLightningFlash;
 
+	// clang-format off
 	// Is bloom effect activated
 	bool			Bloom;
 	bool			SquareBloom;
@@ -319,6 +320,9 @@ struct CClientConfig
 	bool			WaterReflections;
 	/// Water shapes that may reflect although their asset predates the realtime reflection flag (shape file names, wildcards allowed)
 	std::vector<std::string> WaterReflectionShapes;
+	/// With WaterReflections, water that may reflect but gets no reflection shows the sky rendered into the water envmap instead of its shape's envmap
+	bool			WaterReflectionEnvMapFallback;
+	// clang-format on
 
 	/// Movie Shooter
 	uint			MovieShooterMemory;

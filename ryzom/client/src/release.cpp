@@ -177,7 +177,9 @@ static void releaseMainLoopScenes()
 	{
 		// Release water envmap
 #ifdef USE_WATER_ENV_MAP
+		Scene->setWaterEnvMap(nullptr);
 		Driver->deleteWaterEnvMap(WaterEnvMap);
+		WaterEnvMap = nullptr;
 #endif
 
 		// Release FX manager

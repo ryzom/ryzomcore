@@ -90,12 +90,14 @@ static uint snapUp(uint v, uint snap)
 }
 
 // ***************************************************************************
+// clang-format off
 CWaterReflectionManager::CWaterReflectionManager()
 	: _Scene(nullptr)
 	, _MaxReflections(-1)
 	, _MaxTextures(-1)
 	, _ForceReflections(false)
 	, _Enabled(true)
+	, m_EnvMapFallback(false)
 	, _ReflectionShapesVersion(0)
 	, _HalfRes(true)
 	, _Pow2(true)
@@ -107,6 +109,7 @@ CWaterReflectionManager::CWaterReflectionManager()
 	, _CurrentView(0)
 	, _ReflCamera(nullptr)
 	, _SaveCam(nullptr)
+// clang-format on
 {
 }
 
@@ -602,10 +605,10 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 		fullScissor.initFullScreen();
 		drv->setupScissor(fullScissor);
 		CRGBA clearColor = drv->fogEnabled() ? drv->getFogColor() : CRGBA(0, 0, 0, 255);
-		// The cleared alpha is the water's uniform reflectivity (the water
-		// shader blends the reflection by the texture alpha). 192 is a preview
-		// value; proper reflectivity/opacity handling is future work.
-		clearColor.A = 192;
+		// The cleared alpha is the water's uniform reflectivity where the water
+		// shader blends the reflection by the texture alpha (hardware without
+		// the calculated reflectivity), see UScene::WaterReflectionAlpha.
+		clearColor.A = UScene::WaterReflectionAlpha;
 		drv->clear2D(clearColor);
 		drv->clearZBuffer();
 	}

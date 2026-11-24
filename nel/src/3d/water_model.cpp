@@ -1020,9 +1020,19 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	// select a water FP variant on this flag); legacy envmap draws keep the
 	// texture-alpha semantics
 	CWaterModel::_WaterMat.setWaterCalcReflectivity(planar || envCalc);
+	// A reflection-capable surface without its reflection pass may draw the
+	// scene water envmap, the sky the application renders, instead of its own
+	// envmap. Only with the calculated reflectivity: that envmap's alpha
+	// holds no reflectivity.
+	const bool sceneEnvFallback = envCalc && scene->getWaterEnvMap()
+	    && scene->getWaterReflectionManager().getEnvMapFallback() && isReflectionCapable();
 	if (planar)
 	{
 		CWaterModel::_WaterMat.setTexture(2, _PlanarReflection->Texture);
+	}
+	else if (sceneEnvFallback)
+	{
+		CWaterModel::_WaterMat.setTexture(2, scene->getWaterEnvMap()->getEnvMap2D());
 	}
 	else if (!above && shape->_EnvMap[1])
 	{

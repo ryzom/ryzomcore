@@ -412,6 +412,7 @@ CClientConfig::CClientConfig()
 	MaxWaterReflectionTextures = 1;
 	ForceWaterReflections = false;
 	WaterReflections	= false;
+	WaterReflectionEnvMapFallback = true;
 
 	GlobalWindPower		= 0.10f;					// Default is 0.25
 	GlobalWindDirection	= CVector(1,0,0);			// Default direction is X>0
@@ -1053,6 +1054,7 @@ void CClientConfig::setValues()
 	READ_BOOL_DEV(ForceWaterReflections)
 	READ_BOOL_FV(WaterReflections)
 	READ_STRINGVECTOR_FV(WaterReflectionShapes)
+	READ_BOOL_FV(WaterReflectionEnvMapFallback)
 
 	// FXAA
 	READ_BOOL_FV(FXAA)

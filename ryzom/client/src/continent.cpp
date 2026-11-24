@@ -904,16 +904,7 @@ void CContinent::removeVillages()
 void CContinent::unselect()
 {
 	// remove envmap
-	if (SceneRoot && !WaterEnvMapCanopyCam.empty())
-	{
-		SceneRoot->deleteCamera(WaterEnvMapCanopyCam);
-	}
-	WaterEnvMapCanopyCam.detach();
-	if (CurrentSky.getScene() && !WaterEnvMapSkyCam.empty())
-	{
-		CurrentSky.getScene()->deleteCamera(WaterEnvMapSkyCam);
-	}
-	WaterEnvMapSkyCam.detach();
+	releaseWaterEnvMap();
 	//
 	if (!Indoor)
 	{
@@ -980,12 +971,32 @@ void CContinent::unselect()
 
 	// Release water map
 	WaterMap.release();
+}
 
-	// Release water envmap
-	#ifdef USE_WATER_ENV_MAP
+//=========================================================================
+void CContinent::releaseWaterEnvMap()
+{
+#ifdef USE_WATER_ENV_MAP
+	// the cameras it renders the canopy and the sky with
+	if (SceneRoot && !WaterEnvMapCanopyCam.empty())
+	{
+		SceneRoot->deleteCamera(WaterEnvMapCanopyCam);
+	}
+	WaterEnvMapCanopyCam.detach();
+	// the sky camera was made from the scene of the sky the envmap renders, which is not this continent's
+	// when an indoor continent kept the sky of the outdoor one
+	UScene *envMapSkyScene = WaterEnvMapRdr.Sky ? WaterEnvMapRdr.Sky->getScene() : nullptr;
+	if (envMapSkyScene && !WaterEnvMapSkyCam.empty())
+	{
+		envMapSkyScene->deleteCamera(WaterEnvMapSkyCam);
+	}
+	WaterEnvMapSkyCam.detach();
+	// the scene must not keep using it; updateWaterEnvMap makes it again when it is needed
+	if (Scene)
+		Scene->setWaterEnvMap(nullptr);
 	Driver->deleteWaterEnvMap(WaterEnvMap);
 	WaterEnvMap = nullptr;
-	#endif
+#endif
 }
 
 //=========================================================================
@@ -1378,6 +1389,9 @@ void CContinent::initSky()
 //=========================================================================
 void CContinent::releaseSky()
 {
+	// The water envmap renders the sky through a camera of its scene
+	releaseWaterEnvMap();
+
 	// Remove the (old-style) sky
 	if (!Sky.empty())
 	{

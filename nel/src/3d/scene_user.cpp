@@ -1159,7 +1159,8 @@ void CSceneUser::setWaterEnvMap(UWaterEnvMap *waterEnvMap)
 			return;
 		}
 	}
-	_Scene.setWaterEnvMap(&((CWaterEnvMapUser *) waterEnvMap)->EnvMap);
+	// no envmap: the address of the member of a null envmap is not null
+	_Scene.setWaterEnvMap(waterEnvMap ? &((CWaterEnvMapUser *)waterEnvMap)->EnvMap : nullptr);
 	_WaterEnvMap = waterEnvMap;
 }
 

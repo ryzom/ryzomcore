@@ -678,6 +678,7 @@ public:
 
 	/// \name Realtime planar water reflections
 	// @{
+	// clang-format off
 	/** Maximum number of water planes rendered with realtime planar reflection
 	  * per frame, largest on-screen planes prioritized.
 	  * -1 = unlimited, 0 = no reflection passes (default -1); reflection-capable
@@ -703,6 +704,18 @@ public:
 	  * as well as later ones; an empty list (default) lists none. */
 	virtual void		  setRealtimeWaterReflectionShapes(const std::vector<std::string> &shapeNames) = 0;
 	virtual const std::vector<std::string> &getRealtimeWaterReflectionShapes() const = 0;
+	/** A reflection-capable surface that gets no reflection pass draws the
+	  * scene water envmap (setWaterEnvMap) instead of its own envmap, when
+	  * the scene has one (default false). Keep that envmap updated
+	  * (updateWaterEnvMaps) while this is on. */
+	virtual void		  setRealtimeWaterReflectionEnvMapFallback(bool envMapFallback) = 0;
+	virtual bool		  getRealtimeWaterReflectionEnvMapFallback() const = 0;
+	/** The alpha of the reflection textures: the reflectivity of the water on
+	  * hardware without the calculated reflectivity, where the water blends
+	  * its reflection by the texture alpha. An envmap that stands in for the
+	  * reflection takes it too (UWaterEnvMap::setAlpha), so that the fallback
+	  * matches the reflection there. */
+	static const uint8	  WaterReflectionAlpha = 192;
 	/** Select the water planes to reflect this frame and save the scene and
 	  * driver state; returns the number of reflection passes to render.
 	  * Call once per frame before the scene render (in the scene
@@ -754,6 +767,7 @@ public:
 	  * dynamic allocation mode. */
 	virtual void		  setWaterReflectionMaxTextures(sint maxTextures) = 0;
 	virtual sint		  getWaterReflectionMaxTextures() const = 0;
+	// clang-format on
 	// @}
 };
 

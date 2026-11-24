@@ -627,7 +627,8 @@ void renderScene(bool forceFullDetail, bool bloom)
 void updateWaterEnvMap()
 {
 	#ifdef USE_WATER_ENV_MAP
-	if (WaterEnvMapRefCount > 0 || ClientCfg.ForceWaterEnvMap) // water env map needed
+	// water env map needed: by a water shape, forced, or as the fallback of the water reflections
+	if (WaterEnvMapRefCount > 0 || ClientCfg.ForceWaterEnvMap || (ClientCfg.WaterReflections && ClientCfg.WaterReflectionEnvMapFallback))
 	{
 		if (!WaterEnvMap)
 		{
@@ -648,6 +649,9 @@ void updateWaterEnvMap()
 				}
 			}
 		}
+		// no envmap without a sky scene (an indoor continent, the old sky)
+		if (!WaterEnvMap)
+			return;
 		WaterEnvMapRdr.CurrDate = SmoothedClientDate;
 		WaterEnvMapRdr.AnimationDate = SmoothedClientDate;
 		if (ClientCfg.R2EDEnabled && R2::getEditor().getFixedLighting())
@@ -658,7 +662,14 @@ void updateWaterEnvMap()
 		WaterEnvMapRdr.CurrTime = TimeInSec - FirstTimeInSec;
 		WaterEnvMapRdr.CurrWeather = WeatherManager.getWeatherValue();
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
-		WaterEnvMap->setAlpha(ClientCfg.ForceWaterEnvMap ? 128 : 255); // Not useful and does not work under D3D, use alpha map instead on your water shape! // sky.getWaterEnvMapAlpha())
+		// The alpha is the reflectivity where the water cannot calculate it: when the envmap only serves as
+		// the fallback of the water reflections, the one of the reflection textures
+		uint8 envMapAlpha = 255;
+		if (ClientCfg.ForceWaterEnvMap)
+			envMapAlpha = 128;
+		else if (WaterEnvMapRefCount == 0)
+			envMapAlpha = UScene::WaterReflectionAlpha;
+		WaterEnvMap->setAlpha(envMapAlpha); // Not useful and does not work under D3D, use alpha map instead on your water shape! // sky.getWaterEnvMapAlpha())
 		Scene->updateWaterEnvMaps(TimeInSec - FirstTimeInSec);
 	}
 	#endif

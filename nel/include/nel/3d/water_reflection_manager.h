@@ -99,6 +99,7 @@ public:
 
 	/// \name Configuration
 	// @{
+	// clang-format off
 	/// Maximum number of water planes with realtime reflection per frame. -1 = unlimited, 0 = disabled.
 	void			setMaxReflections(sint maxReflections) { _MaxReflections = maxReflections; if (maxReflections == 0) _HadReflections = false; }
 	sint			getMaxReflections() const { return _MaxReflections; }
@@ -123,6 +124,13 @@ public:
 	bool			isReflectionShape(const std::string &shapeName) const;
 	/// Changes on every setReflectionShapes() call; surfaces cache their match against it.
 	uint32			getReflectionShapesVersion() const { return _ReflectionShapesVersion; }
+	/** A reflection-capable surface that gets no reflection pass (budget,
+	  * admission, no passes) draws the scene's water envmap instead of its
+	  * own envmap (default false): the envmap the application renders the
+	  * sky into (CScene::setWaterEnvMap), when the scene has one. Only with
+	  * the calculated reflectivity of the water shader, seen from above. */
+	void			setEnvMapFallback(bool envMapFallback) { m_EnvMapFallback = envMapFallback; }
+	bool			getEnvMapFallback() const { return m_EnvMapFallback; }
 	/// Render reflections at half resolution (default true)
 	void			setHalfRes(bool halfRes) { _HalfRes = halfRes; }
 	bool			getHalfRes() const { return _HalfRes; }
@@ -152,6 +160,7 @@ public:
 	  * render target contents are per-view. */
 	void			setCurrentView(uint view) { _CurrentView = view; }
 	uint			getCurrentView() const { return _CurrentView; }
+	// clang-format on
 	// @}
 
 	/** Report a visible water surface. Called by CWaterModel during the
@@ -292,11 +301,13 @@ private:
 	// the slot's first claim of the frame (caller must allocate and clear).
 	CSlot			&claimTile(uint allocW, uint allocH, uint &w, uint &h, uint &tileX, uint &tileY, bool &firstTouch);
 
+	// clang-format off
 	CScene								*_Scene;
 	sint								_MaxReflections;
 	sint								_MaxTextures;
 	bool								_ForceReflections;
 	bool								_Enabled;
+	bool								m_EnvMapFallback;
 	std::vector<std::string>			_ReflectionShapes;	// lower case file name patterns
 	uint32								_ReflectionShapesVersion;
 	bool								_HalfRes;
@@ -321,6 +332,7 @@ private:
 	CViewport							_SaveSceneViewport;
 	NLMISC::CSmartPtr<ITexture>			_SaveRenderTarget;
 	CViewport							_SaveDrvViewport;
+	// clang-format on
 
 }; /* class CWaterReflectionManager */
 

@@ -320,6 +320,7 @@ public:
 
 	/// \name Realtime planar water reflections
 	// @{
+	// clang-format off
 	virtual void		  setMaxRealtimeWaterReflections(sint maxCount) NL_OVERRIDE { _Scene.getWaterReflectionManager().setMaxReflections(maxCount); }
 	virtual sint		  getMaxRealtimeWaterReflections() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getMaxReflections(); }
 	virtual void		  setForceRealtimeWaterReflections(bool force) NL_OVERRIDE { _Scene.getWaterReflectionManager().setForceReflections(force); }
@@ -328,6 +329,8 @@ public:
 	virtual bool		  getRealtimeWaterReflectionsEnabled() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getEnabled(); }
 	virtual void		  setRealtimeWaterReflectionShapes(const std::vector<std::string> &shapeNames) NL_OVERRIDE { _Scene.getWaterReflectionManager().setReflectionShapes(shapeNames); }
 	virtual const std::vector<std::string> &getRealtimeWaterReflectionShapes() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getReflectionShapes(); }
+	virtual void		  setRealtimeWaterReflectionEnvMapFallback(bool envMapFallback) NL_OVERRIDE { _Scene.getWaterReflectionManager().setEnvMapFallback(envMapFallback); }
+	virtual bool		  getRealtimeWaterReflectionEnvMapFallback() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getEnvMapFallback(); }
 	virtual uint		  beginWaterReflectionPasses() NL_OVERRIDE { return _Scene.getWaterReflectionManager().beginPasses(); }
 	virtual void		  setWaterReflectionView(uint view) NL_OVERRIDE { _Scene.getWaterReflectionManager().setCurrentView(view); }
 	virtual uint		  getWaterReflectionView() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getCurrentView(); }
@@ -345,6 +348,7 @@ public:
 	virtual bool		  getWaterReflectionFixedSize() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getFixedSize(); }
 	virtual void		  setWaterReflectionMaxTextures(sint maxTextures) NL_OVERRIDE { _Scene.getWaterReflectionManager().setMaxTextures(maxTextures); }
 	virtual sint		  getWaterReflectionMaxTextures() const NL_OVERRIDE { return _Scene.getWaterReflectionManager().getMaxTextures(); }
+	// clang-format on
 	// @}
 
 public:

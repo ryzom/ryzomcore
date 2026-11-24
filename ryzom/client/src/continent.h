@@ -306,6 +306,8 @@ public:
 	// init release the sky
 	void initSky();
 	void releaseSky();
+	// release the water envmap and its cameras (it renders the sky of the continent)
+	void releaseWaterEnvMap();
 
 	/// Return the max number of user landmarks (standard + bonus ones)
 	static uint getMaxNbUserLandMarks();
