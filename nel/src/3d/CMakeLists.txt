@@ -165,6 +165,8 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/vertex_program.h
         vertex_program_parse.cpp
         ../../include/nel/3d/vertex_program_parse.h
+        glsl_block_struct_reads.cpp
+        ../../include/nel/3d/glsl_block_struct_reads.h
         pixel_program.cpp
         ../../include/nel/3d/pixel_program.h
         geometry_program.cpp

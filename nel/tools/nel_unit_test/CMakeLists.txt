@@ -48,6 +48,16 @@ target_compile_definitions(nel_misc_test
         NEL_UNIT_BASE="${CMAKE_CURRENT_SOURCE_DIR}/"
 )
 
+if (WITH_3D)
+    add_test_executable(nel_3d_test
+            ut_3d_glsl_block_struct_reads.test.cpp
+    )
+    target_link_libraries(nel_3d_test
+            PRIVATE
+            NeL::3d
+    )
+endif ()
+
 
 add_test_executable(nel_net_test
         ut_net_address.test.cpp
