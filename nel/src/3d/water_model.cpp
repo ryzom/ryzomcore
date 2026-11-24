@@ -1022,25 +1022,27 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	CWaterModel::_WaterMat.setWaterCalcReflectivity(planar || envCalc);
 	// A reflection-capable surface without its reflection pass may draw the
 	// scene water envmap, the sky the application renders, instead of its own
-	// envmap. Only with the calculated reflectivity: that envmap's alpha
-	// holds no reflectivity.
-	const bool sceneEnvFallback = envCalc && scene->getWaterEnvMap()
+	// envmap, where the reflection would draw: from above, with the calculated
+	// reflectivity. It is rendered only while water uses it.
+	const bool sceneEnvFallback = envCalc
 	    && scene->getWaterReflectionManager().getEnvMapFallback() && isReflectionCapable();
+	CWaterEnvMap *fallbackEnvMap = (!planar && sceneEnvFallback) ? scene->useWaterEnvMap() : nullptr;
 	if (planar)
 	{
 		CWaterModel::_WaterMat.setTexture(2, _PlanarReflection->Texture);
 	}
-	else if (sceneEnvFallback)
+	else if (fallbackEnvMap)
 	{
-		CWaterModel::_WaterMat.setTexture(2, scene->getWaterEnvMap()->getEnvMap2D());
+		CWaterModel::_WaterMat.setTexture(2, fallbackEnvMap->getEnvMap2D());
 	}
 	else if (!above && shape->_EnvMap[1])
 	{
 		if (shape->_UsesSceneWaterEnvMap[1] || scene->getForceWaterEnvMap())
 		{
-			if (scene->getWaterEnvMap())
+			CWaterEnvMap *envMap = scene->useWaterEnvMap();
+			if (envMap)
 			{
-				CWaterModel::_WaterMat.setTexture(2, scene->getWaterEnvMap()->getEnvMap2D());
+				CWaterModel::_WaterMat.setTexture(2, envMap->getEnvMap2D());
 			}
 			else
 			{
@@ -1056,9 +1058,10 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	{
 		if (shape->_UsesSceneWaterEnvMap[0] || scene->getForceWaterEnvMap())
 		{
-			if (scene->getWaterEnvMap())
+			CWaterEnvMap *envMap = scene->useWaterEnvMap();
+			if (envMap)
 			{
-				CWaterModel::_WaterMat.setTexture(2, scene->getWaterEnvMap()->getEnvMap2D());
+				CWaterModel::_WaterMat.setTexture(2, envMap->getEnvMap2D());
 			}
 			else
 			{
@@ -1166,9 +1169,10 @@ void CWaterModel::setupSimpleRender(CWaterShape *shape, const NLMISC::CVector &o
 	{
 		if (shape->_UsesSceneWaterEnvMap[1] || scene->getForceWaterEnvMap())
 		{
-			if (scene->getWaterEnvMap())
+			CWaterEnvMap *envMap = scene->useWaterEnvMap();
+			if (envMap)
 			{
-				_SimpleWaterMat.setTexture(0, scene->getWaterEnvMap()->getEnvMap2D());
+				_SimpleWaterMat.setTexture(0, envMap->getEnvMap2D());
 			}
 			else
 			{
@@ -1184,9 +1188,10 @@ void CWaterModel::setupSimpleRender(CWaterShape *shape, const NLMISC::CVector &o
 	{
 		if (shape->_UsesSceneWaterEnvMap[0] || scene->getForceWaterEnvMap())
 		{
-			if (scene->getWaterEnvMap())
+			CWaterEnvMap *envMap = scene->useWaterEnvMap();
+			if (envMap)
 			{
-				_SimpleWaterMat.setTexture(0, scene->getWaterEnvMap()->getEnvMap2D());
+				_SimpleWaterMat.setTexture(0, envMap->getEnvMap2D());
 			}
 			else
 			{

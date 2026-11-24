@@ -677,17 +677,25 @@ public:
 	// debugging aid : draw all occlusion test mesh that are used by flares
 	void			renderOcclusionTestMeshs();
 
+	// clang-format off
 	// Set a water envmap to be used with water surfaces in that scene. Water envmap may be shared accross several scenes.
-	void		  setWaterEnvMap(CWaterEnvMap *waterEnvMap) { _WaterEnvMap = waterEnvMap; }
+	void		  setWaterEnvMap(CWaterEnvMap *waterEnvMap) { _WaterEnvMap = waterEnvMap; m_WaterEnvMapUpdateFrameId = 0; m_WaterEnvMapShown = false; }
 	// Get currenlty used water envmap for that scene.
 	CWaterEnvMap *getWaterEnvMap() const { return _WaterEnvMap; }
+	/** For water that shows the water envmap: marks it used in this frame, and returns it when it was
+	  * rendered for this frame (else NULL: the water shows its own envmap). */
+	CWaterEnvMap *useWaterEnvMap();
 	// Force all water surfaces to use the scene water envmap, regardless of per-shape flag
 	void		  setForceWaterEnvMap(bool force) { _ForceWaterEnvMap = force; }
 	bool		  getForceWaterEnvMap() const { return _ForceWaterEnvMap; }
 	/** Update water envmaps. Water textures that need to be updated includes UWaterEnvMap textures & Day/Night textures (as defined in the water material).
 	  * Should be called at the beginning of the frame before anything is rendered.
+	  * The water envmap is rendered only while water shows it (useWaterEnvMap in the frame before), and
+	  * whole at once when water shows it again after longer than its update time. The scene that shows
+	  * it updates it: the uses of another scene that shares it are not counted.
 	  */
 	void		  updateWaterEnvMaps(TGlobalAnimationTime time);
+	// clang-format on
 	// Get vertex buffer used for water rendering
 	CVertexBuffer &getWaterVB() { return _WaterVB; }
 private:
@@ -881,6 +889,14 @@ private:
 	void	renderOcclusionTestMeshsWithCurrMaterial();
 	CWaterEnvMap	*_WaterEnvMap;
 	bool			_ForceWaterEnvMap;
+
+	// The last frame water used the water envmap (useWaterEnvMap)
+	uint64 m_WaterEnvMapUseFrameId;
+	// The last frame of updateWaterEnvMaps for the water envmap, 0 for none
+	uint64 m_WaterEnvMapUpdateFrameId;
+	// That update left the water envmap fit to show
+	bool m_WaterEnvMapShown;
+
 	/// Delayed model creation For skeleton spawn script animation
 	std::vector<CSSSModelRequest>		_SSSModelRequests;
 	void									flushSSSModelRequests();

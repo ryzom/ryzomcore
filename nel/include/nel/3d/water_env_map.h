@@ -72,6 +72,8 @@ public:
 	uint8				getAlpha() const { return _Alpha; }
 	// True while any envmap renders its faces: the scenes rendered then are seen from the envmap's cameras
 	static bool			isAnyRendering() { return s_RenderingCount != 0; }
+	// True when it was updated within its update time before the given time, and the driver kept what it rendered
+	bool				isRecent(TGlobalAnimationTime time, const IDriver &driver) const;
 private:
 	NLMISC::CSmartPtr<CTextureCube>  _EnvCubic;
 	NLMISC::CSmartPtr<CTextureBlank> _Env2D;
@@ -92,6 +94,7 @@ private:
 	uint							 _Env2DSize;
 	uint8							 _Alpha;
 	bool							 _D3DConvention; // D3D cubemap Z convention differs from GL
+	uint							 m_DriverResetCounter; // the reset of the driver the content was rendered after
 	static uint						 s_RenderingCount; // envmaps rendering their faces
 private:
 	void initFlattenVB();

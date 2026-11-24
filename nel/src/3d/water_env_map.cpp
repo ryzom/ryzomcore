@@ -81,6 +81,7 @@ CWaterEnvMap::CWaterEnvMap()
 	_StartRenderTime = -1;
 	_Alpha = 255;
 	_D3DConvention = false;
+	m_DriverResetCounter = 0;
 }
 
 // *******************************************************************************
@@ -168,8 +169,21 @@ void CWaterEnvMap::init(uint cubeMapSize, uint projection2DSize, TGlobalAnimatio
 }
 
 // *******************************************************************************
+bool CWaterEnvMap::isRecent(TGlobalAnimationTime time, const IDriver &driver) const
+{
+	return _LastRenderTime >= 0 && time >= _LastRenderTime && time - _LastRenderTime <= _UpdateTime
+	    && driver.getResetCounter() == m_DriverResetCounter;
+}
+
+// *******************************************************************************
 void CWaterEnvMap::update(TGlobalAnimationTime time, IDriver &driver)
 {
+	// A reset of the device (Direct3D) loses what was rendered into the textures: all of it again
+	if (driver.getResetCounter() != m_DriverResetCounter)
+	{
+		m_DriverResetCounter = driver.getResetCounter();
+		invalidate();
+	}
 	if (_LastRenderTime == time) return;
 	_LastRenderTime = time;
 	// First five updates are used to render the cubemap faces (bottom face is not rendered)

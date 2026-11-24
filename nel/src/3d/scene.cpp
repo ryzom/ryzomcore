@@ -203,6 +203,9 @@ CScene::CScene(bool bSmallScene) : LightTrav(bSmallScene)
 
 	_WaterEnvMap = nullptr;
 	_ForceWaterEnvMap = false;
+	m_WaterEnvMapUseFrameId = 0;
+	m_WaterEnvMapUpdateFrameId = 0;
+	m_WaterEnvMapShown = false;
 
 	_GlobalSystemTime= 0.0;
 	_DeltaSystemTimeBetweenRender = 0.020;
@@ -1670,8 +1673,35 @@ void CScene::updateWaterEnvMaps(TGlobalAnimationTime time)
 	nlassert(drv);
 	if (_WaterEnvMap)
 	{
-		_WaterEnvMap->update(time, *drv);
+		const bool recent = _WaterEnvMap->isRecent(time, *drv);
+		// Water shows the envmap: it used it in the last frame (or in this one, when the scene is
+		// animated after this call)
+		if (m_WaterEnvMapUseFrameId + 1 >= _FrameId)
+		{
+			// Its ticks, or all of it at once when it is older than they keep it
+			if (!recent)
+				_WaterEnvMap->invalidate();
+			_WaterEnvMap->update(time, *drv);
+			m_WaterEnvMapShown = true;
+		}
+		else
+		{
+			// No ticks while no water shows it. Water that comes into view shows it while it is as
+			// recent as the ticks keep it, and its own envmap until it is rendered again otherwise.
+			m_WaterEnvMapShown = recent;
+		}
+		m_WaterEnvMapUpdateFrameId = _FrameId;
 	}
+}
+
+// ***************************************************************************
+CWaterEnvMap *CScene::useWaterEnvMap()
+{
+	m_WaterEnvMapUseFrameId = _FrameId;
+	// As this frame's update left it (or the one before, when the scene was animated after the update)
+	if (_WaterEnvMap && m_WaterEnvMapShown && m_WaterEnvMapUpdateFrameId != 0 && m_WaterEnvMapUpdateFrameId + 1 >= _FrameId)
+		return _WaterEnvMap;
+	return nullptr;
 }
 
 
