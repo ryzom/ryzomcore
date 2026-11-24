@@ -1550,7 +1550,8 @@ public:
 	virtual	bool			supportMADOperator() const = 0;
 
 	/// Return true if the driver supports large UBO arrays (e.g. skeleton bones, light tables).
-	/// Returns false on ANGLE/D3D11 where the GLSL-to-HLSL translator fails on large arrays.
+	/// Returns false where the OpenGL 3 driver keeps them small: for WebGL on Android, and on ANGLE when it
+	/// does not rewrite the reads of structs out of uniform blocks (NL3D_GL3_REWRITE_BLOCK_STRUCT_READS).
 	virtual bool			supportLargeUBOArrays() const { return true; }
 
 	// Adapter class

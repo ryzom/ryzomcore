@@ -1423,7 +1423,6 @@ private:
 	bool						_LightTableDirty; // Light table entries changed
 	bool						_UserLightUBODirty; // _UserLight[] or _LightEnable[] changed (for non-table UBO mode)
 	sint						_MaxLightTableSize; // Runtime maximum (see NL_OPENGL3_REDUCED_LIGHT_TABLE)
-	bool						m_LargeUBOArrays; // What supportLargeUBOArrays() says
 	CLightTableUBOEntry			_LightTableUBOStaging[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // Persistent staging buffer (avoids per-frame heap alloc)
 	CLightTableUBOEntry			_LightTableUBOWritten[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // The entries that _LightTableUBOBlock holds, when the driver still has the block
 	uint						_LightTableUBOWrittenCount; // How many of them

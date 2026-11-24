@@ -887,7 +887,7 @@ public:
 	// check if GPU skinning is supported (requires glsl3vi profile and large UBO arrays)
 	virtual bool				supportGPUSkinning() const = 0;
 
-	/// Return true if driver supports large UBO arrays (false on ANGLE/D3D11).
+	/// Return true if driver supports large UBO arrays (see IDriver::supportLargeUBOArrays).
 	virtual bool				supportLargeUBOArrays() const = 0;
 
 	/// \name Bench
