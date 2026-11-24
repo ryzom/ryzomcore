@@ -469,10 +469,7 @@ bool CDriverGL3::setupDisplay()
 	// (NL3D_GL3_REWRITE_BLOCK_STRUCT_READS): a program that reads a light as a whole struct took it
 	// about a minute to link, with the skinning in it or not.
 	_MaxLightTableSize = NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
-#ifdef __EMSCRIPTEN__
-	if (_Extensions.IsAndroidPlatform) // WebGL on Android: assume poor GLES translation
-		_MaxLightTableSize = NL_OPENGL3_REDUCED_LIGHT_TABLE;
-#elif !NL3D_GL3_REWRITE_BLOCK_STRUCT_READS
+#if !NL3D_GL3_REWRITE_BLOCK_STRUCT_READS
 	if (_Extensions.IsANGLE) // only if ANGLE is detected via GL_RENDERER
 		_MaxLightTableSize = NL_OPENGL3_REDUCED_LIGHT_TABLE;
 #endif
