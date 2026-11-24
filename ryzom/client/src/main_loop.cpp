@@ -632,11 +632,13 @@ void updateWaterEnvMap()
 	{
 		if (!WaterEnvMap)
 		{
-			CSky &sky = ContinentMngr.cur()->CurrentSky;
-			if (sky.getScene())
+			// no continent is selected at a position outside all of them
+			CContinent *continent = ContinentMngr.cur();
+			UScene *skyScene = continent ? continent->CurrentSky.getScene() : nullptr;
+			if (skyScene)
 			{
 				nlassert(WaterEnvMapSkyCam.empty());
-				WaterEnvMapSkyCam = sky.getScene()->createCamera(); // deleted in unselect
+				WaterEnvMapSkyCam = skyScene->createCamera(); // deleted in unselect
 				nlassert(WaterEnvMapCanopyCam.empty());
 				WaterEnvMapCanopyCam = SceneRoot->createCamera(); // deleted in unselect
 				// Create water env map if not already created
@@ -649,7 +651,7 @@ void updateWaterEnvMap()
 				}
 			}
 		}
-		// no envmap without a sky scene (an indoor continent, the old sky)
+		// no envmap without a sky scene (no continent, an indoor continent, the old sky)
 		if (!WaterEnvMap)
 			return;
 		WaterEnvMapRdr.CurrDate = SmoothedClientDate;
@@ -661,7 +663,6 @@ void updateWaterEnvMap()
 		WaterEnvMapRdr.CurrFogColor = MainFogState.FogColor;
 		WaterEnvMapRdr.CurrTime = TimeInSec - FirstTimeInSec;
 		WaterEnvMapRdr.CurrWeather = WeatherManager.getWeatherValue();
-		CSky &sky = ContinentMngr.cur()->CurrentSky;
 		// The alpha is the reflectivity where the water cannot calculate it: when the envmap only serves as
 		// the fallback of the water reflections, the one of the reflection textures
 		uint8 envMapAlpha = 255;

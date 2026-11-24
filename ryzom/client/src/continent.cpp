@@ -1391,6 +1391,11 @@ void CContinent::releaseSky()
 {
 	// The water envmap renders the sky through a camera of its scene
 	releaseWaterEnvMap();
+#ifdef USE_WATER_ENV_MAP
+	// its renderer must not keep a sky that is released, the continent may be deleted next
+	if (WaterEnvMapRdr.Sky == &CurrentSky)
+		WaterEnvMapRdr.Sky = nullptr;
+#endif
 
 	// Remove the (old-style) sky
 	if (!Sky.empty())
