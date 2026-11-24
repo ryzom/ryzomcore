@@ -1,4 +1,4 @@
-FILE(GLOB SRC *.cpp)
+FILE(GLOB SRC *.cpp *.manifest)
 
 ADD_EXECUTABLE(driver_check ${SRC})
 
