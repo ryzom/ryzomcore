@@ -521,6 +521,7 @@ bool CDriverGL3::unInit()
 
 #ifdef NL_OS_WINDOWS
 
+#if !NL3D_GL3_EGL
 	// Off-screen rendering ?
 	if (_PBuffer)
 	{
@@ -528,6 +529,7 @@ bool CDriverGL3::unInit()
 		nwglDestroyPbufferARB(_PBuffer);
 		_PBuffer = NULL;
 	}
+#endif
 
 	if (_Registered && !UnregisterClassW(L"NLClass", GetModuleHandle(NULL)))
 	{
@@ -723,10 +725,12 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 
 #elif defined(NL_OS_WINDOWS)
 
+#if !NL3D_GL3_EGL
 	// Init pointers
 	_PBuffer = NULL;
 	_hRC = NULL;
 	_hDC = NULL;
+#endif
 
 	// Driver caps.
 	//=============
@@ -735,7 +739,13 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 	// Offscreen mode ?
 	if (_CurrentMode.OffScreen)
 	{
-#if 0
+#if NL3D_GL3_EGL
+		// no window: the context draws into a surface of EGL of the size of the mode, and no screen
+		// mode is changed for it
+		_CurrentMode.Windowed = true;
+		if (!createContext())
+			return false;
+#elif 0
 		if (!createWindow(mode))
 			return false;
 
@@ -1021,7 +1031,17 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		// associate OpenGL driver to window
 		SetWindowLongPtr(_win, GWLP_USERDATA, (LONG_PTR)this);
 
+#if NL3D_GL3_EGL
+		if (!createContext())
+		{
+			// no fatal error: the application says in its own words that it has no display. What was
+			// made so far goes
+			destroyWindow();
+			return false;
+		}
+#else
 		createContext();
+#endif
 	}
 
 	/// release old emitter
@@ -1768,7 +1788,12 @@ bool CDriverGL3::destroyWindow()
 		setWindowIcon(bitmaps);
 	}
 
-#if defined(NL_OS_WINDOWS)
+#if NL3D_GL3_EGL
+
+	// the context is the driver's own, also on a window of the application
+	releaseEglContext();
+
+#elif defined(NL_OS_WINDOWS)
 
 	// Then delete.
 	// wglMakeCurrent(NULL,NULL);
@@ -2719,9 +2744,186 @@ emptyProc CDriverGL3::getWindowProc()
 }
 
 // --------------------------------------------------
+#if NL3D_GL3_EGL
+
+// The extension that lets the application name the renderer of ANGLE (EGL_ANGLE_platform_angle), for
+// headers of an EGL that is not ANGLE
+#ifndef EGL_PLATFORM_ANGLE_ANGLE
+#define EGL_PLATFORM_ANGLE_ANGLE 0x3202
+#define EGL_PLATFORM_ANGLE_TYPE_ANGLE 0x3203
+#endif
+#ifndef EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE
+#define EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE 0x3208
+#endif
+#ifndef EGL_OPENGL_ES3_BIT
+#define EGL_OPENGL_ES3_BIT 0x00000040
+#endif
+
+// --------------------------------------------------
+bool CDriverGL3::createEglContext()
+{
+	H_AUTO_OGL(CDriverGL3_createEglContext)
+
+	// a display that is set again replaces the context of the one before
+	releaseEglContext();
+
+	// ANGLE is asked for its Direct3D 11 renderer by name: its default can be Direct3D 9, which has
+	// no OpenGL ES 3.0. Another EGL gives its default display
+	const char *clientExtensions = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+	EGLDisplay display = EGL_NO_DISPLAY;
+	if (clientExtensions && strstr(clientExtensions, "EGL_ANGLE_platform_angle_d3d"))
+	{
+		typedef EGLDisplay(EGLAPIENTRY * TGetPlatformDisplay)(EGLenum platform, void *nativeDisplay, const EGLint *attribList);
+		TGetPlatformDisplay getPlatformDisplay = (TGetPlatformDisplay)eglGetProcAddress("eglGetPlatformDisplayEXT");
+		if (!getPlatformDisplay)
+		{
+			nlwarning("3D: EGL names EGL_ANGLE_platform_angle_d3d and has no eglGetPlatformDisplayEXT");
+			return false;
+		}
+		const EGLint displayAttribs[] = {
+			EGL_PLATFORM_ANGLE_TYPE_ANGLE, EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
+			EGL_NONE
+		};
+		nlinfo("3D: EGL is ANGLE, with its Direct3D 11 renderer");
+		display = getPlatformDisplay(EGL_PLATFORM_ANGLE_ANGLE, EGL_DEFAULT_DISPLAY, displayAttribs);
+	}
+	else
+	{
+		nlinfo("3D: EGL is not ANGLE with Direct3D, its default display is used");
+		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+	}
+	if (display == EGL_NO_DISPLAY)
+	{
+		nlwarning("3D: EGL gives no display (0x%x)", (uint)eglGetError());
+		return false;
+	}
+
+	EGLint major = 0, minor = 0;
+	if (!eglInitialize(display, &major, &minor))
+	{
+		nlwarning("3D: eglInitialize failed (0x%x)", (uint)eglGetError());
+		return false;
+	}
+	m_EglDisplay = display;
+	const char *eglVendor = eglQueryString(m_EglDisplay, EGL_VENDOR);
+	const char *eglVersion = eglQueryString(m_EglDisplay, EGL_VERSION);
+	nlinfo("3D: EGL %d.%d, vendor '%s', version '%s'", (sint)major, (sint)minor, eglVendor ? eglVendor : "", eglVersion ? eglVersion : "");
+
+	if (!eglBindAPI(EGL_OPENGL_ES_API))
+	{
+		nlwarning("3D: eglBindAPI failed for OpenGL ES (0x%x)", (uint)eglGetError());
+		releaseEglContext();
+		return false;
+	}
+
+	// The frame buffer the other contexts of the driver ask for: RGBA with a depth and a stencil buffer
+	const bool offScreen = _CurrentMode.OffScreen;
+	const EGLint configAttribs[] = {
+		EGL_SURFACE_TYPE, offScreen ? EGL_PBUFFER_BIT : EGL_WINDOW_BIT,
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
+		EGL_RED_SIZE, 8,
+		EGL_GREEN_SIZE, 8,
+		EGL_BLUE_SIZE, 8,
+		EGL_ALPHA_SIZE, 8,
+		EGL_DEPTH_SIZE, 24,
+		EGL_STENCIL_SIZE, 8,
+		EGL_NONE
+	};
+	EGLint configCount = 0;
+	if (!eglChooseConfig(m_EglDisplay, configAttribs, &m_EglConfig, 1, &configCount) || configCount < 1)
+	{
+		nlwarning("3D: EGL has no OpenGL ES 3.0 config for a %s with RGBA colour, a 24 bit depth buffer and a stencil buffer (0x%x)", offScreen ? "pbuffer" : "window", (uint)eglGetError());
+		releaseEglContext();
+		return false;
+	}
+
+	EGLint configId = 0, redSize = 0, alphaSize = 0, depthSize = 0, stencilSize = 0;
+	eglGetConfigAttrib(m_EglDisplay, m_EglConfig, EGL_CONFIG_ID, &configId);
+	eglGetConfigAttrib(m_EglDisplay, m_EglConfig, EGL_RED_SIZE, &redSize);
+	eglGetConfigAttrib(m_EglDisplay, m_EglConfig, EGL_ALPHA_SIZE, &alphaSize);
+	eglGetConfigAttrib(m_EglDisplay, m_EglConfig, EGL_DEPTH_SIZE, &depthSize);
+	eglGetConfigAttrib(m_EglDisplay, m_EglConfig, EGL_STENCIL_SIZE, &stencilSize);
+	nlinfo("3D: EGL config %d: %d bits of red, %d of alpha, %d of depth, %d of stencil", (sint)configId, (sint)redSize, (sint)alphaSize, (sint)depthSize, (sint)stencilSize);
+
+	if (offScreen)
+	{
+		const EGLint surfaceAttribs[] = {
+			EGL_WIDTH, (EGLint)_CurrentMode.Width,
+			EGL_HEIGHT, (EGLint)_CurrentMode.Height,
+			EGL_NONE
+		};
+		m_EglSurface = eglCreatePbufferSurface(m_EglDisplay, m_EglConfig, surfaceAttribs);
+	}
+	else
+	{
+		m_EglSurface = eglCreateWindowSurface(m_EglDisplay, m_EglConfig, _win, nullptr);
+	}
+	if (m_EglSurface == EGL_NO_SURFACE)
+	{
+		nlwarning("3D: EGL gives no %s surface (0x%x)", offScreen ? "pbuffer" : "window", (uint)eglGetError());
+		releaseEglContext();
+		return false;
+	}
+
+	const EGLint contextAttribs[] = {
+		EGL_CONTEXT_CLIENT_VERSION, 3,
+		EGL_NONE
+	};
+	m_EglContext = eglCreateContext(m_EglDisplay, m_EglConfig, EGL_NO_CONTEXT, contextAttribs);
+	if (m_EglContext == EGL_NO_CONTEXT)
+	{
+		nlwarning("3D: eglCreateContext failed for OpenGL ES 3.0 (0x%x)", (uint)eglGetError());
+		releaseEglContext();
+		return false;
+	}
+
+	if (!eglMakeCurrent(m_EglDisplay, m_EglSurface, m_EglSurface, m_EglContext))
+	{
+		nlwarning("3D: eglMakeCurrent failed (0x%x)", (uint)eglGetError());
+		releaseEglContext();
+		return false;
+	}
+
+	return true;
+}
+
+// --------------------------------------------------
+void CDriverGL3::releaseEglContext()
+{
+	H_AUTO_OGL(CDriverGL3_releaseEglContext)
+
+	if (m_EglDisplay == EGL_NO_DISPLAY)
+		return;
+
+	// the current context can be the one of another driver, of another window of the application
+	if (m_EglContext != EGL_NO_CONTEXT && eglGetCurrentContext() == m_EglContext)
+		eglMakeCurrent(m_EglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+	if (m_EglContext != EGL_NO_CONTEXT)
+		eglDestroyContext(m_EglDisplay, m_EglContext);
+	m_EglContext = EGL_NO_CONTEXT;
+	if (m_EglSurface != EGL_NO_SURFACE)
+		eglDestroySurface(m_EglDisplay, m_EglSurface);
+	m_EglSurface = EGL_NO_SURFACE;
+	m_EglConfig = nullptr;
+
+	// The display is the one of the process and stays initialized: another driver, or the
+	// application itself, may have contexts on it
+	m_EglDisplay = EGL_NO_DISPLAY;
+}
+
+#endif // NL3D_GL3_EGL
+
+// --------------------------------------------------
 bool CDriverGL3::createContext()
 {
-#if defined(NL_OS_WINDOWS)
+#if NL3D_GL3_EGL
+	// the colour depth of the screen
+	HDC hdc = GetDC(_win);
+	_CurrentMode.Depth = uint8(GetDeviceCaps(hdc, BITSPIXEL));
+	ReleaseDC(_win, hdc);
+
+	return createEglContext();
+#elif defined(NL_OS_WINDOWS)
 	_hDC = GetDC(_win);
 	_CurrentMode.Depth = uint8(GetDeviceCaps(_hDC,BITSPIXEL));
 
@@ -2801,10 +3003,18 @@ bool CDriverGL3::activate()
 {
 	H_AUTO_OGL(CDriverGL3_activate);
 
-	if (_win == EmptyWindow)
+	if (!hasDrawable())
 		return false;
 
-#if defined(NL_OS_WINDOWS)
+#if NL3D_GL3_EGL
+
+	if (eglGetCurrentContext() != m_EglContext && !eglMakeCurrent(m_EglDisplay, m_EglSurface, m_EglSurface, m_EglContext))
+	{
+		nlwarning("3D: eglMakeCurrent failed (0x%x)", (uint)eglGetError());
+		return false;
+	}
+
+#elif defined(NL_OS_WINDOWS)
 
 	HGLRC hglrc = wglGetCurrentContext();
 
@@ -2888,7 +3098,13 @@ void CDriverGL3::getWindowSize(uint32 &width, uint32 &height)
 
 	if (_CurrentMode.OffScreen)
 	{
-#ifdef NL_OS_WINDOWS
+#if NL3D_GL3_EGL
+
+		// the surface was made with the size of the mode
+		width = _CurrentMode.Width;
+		height = _CurrentMode.Height;
+
+#elif defined(NL_OS_WINDOWS)
 
 		if (_PBuffer)
 		{
@@ -3047,8 +3263,12 @@ bool CDriverGL3::isActive()
 {
 	H_AUTO_OGL(CDriverGL3_isActive)
 
-	if (_win == EmptyWindow)
+	if (!hasDrawable())
 		return false;
+
+	// an off-screen surface has no window to lose
+	if (_win == EmptyWindow)
+		return true;
 
 	bool res = true;
 

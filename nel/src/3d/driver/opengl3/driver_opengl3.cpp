@@ -176,7 +176,15 @@ CDriverGL3::CDriverGL3()
 	}
 #endif
 
-#if defined(NL_OS_WINDOWS)
+#if NL3D_GL3_EGL
+
+	m_EglDisplay = EGL_NO_DISPLAY;
+	m_EglConfig = nullptr;
+	m_EglSurface = EGL_NO_SURFACE;
+	m_EglContext = EGL_NO_CONTEXT;
+	m_EglSwapError = EGL_SUCCESS;
+
+#elif defined(NL_OS_WINDOWS)
 
 	_PBuffer = NULL;
 	_hRC = NULL;
@@ -447,7 +455,8 @@ bool CDriverGL3::setupDisplay()
 	for (uint i = 0; i < lines.size(); i++)
 		nlinfo("3D: %s", lines[i].c_str());
 
-#if defined(NL_OS_WINDOWS)
+#if NL3D_GL3_EGL
+#elif defined(NL_OS_WINDOWS)
 	registerWGlExtensions(_Extensions, _hDC);
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
@@ -935,7 +944,28 @@ bool CDriverGL3::swapBuffers()
 	if (m_MinimizedPictureMode)
 		endMinimizedPictureFrame();
 
+#if NL3D_GL3_EGL
+	// a swap that fails (a lost Direct3D device, a surface that is gone) is said once per error
+	if (_CurrentMode.OffScreen)
+	{
+		// an off-screen surface has no swap: the commands of the frame are sent, the fence of
+		// the frame among them
+		glFlush();
+	}
+	else if (eglSwapBuffers(m_EglDisplay, m_EglSurface))
+	{
+		m_EglSwapError = EGL_SUCCESS;
+	}
+	else
+	{
+		EGLint swapError = eglGetError();
+		if (swapError != m_EglSwapError)
+			nlwarning("3D: eglSwapBuffers failed (0x%x), the frames are not shown", (uint)swapError);
+		m_EglSwapError = swapError;
+	}
+#else
 	SwapBuffers(_hDC);
+#endif
 
 	// Between two frames: picture mode is entered or left, for the frame to come
 	if (m_MinimizedPictureMode || m_MinimizedPicture.isSupplied())
@@ -1208,6 +1238,10 @@ bool CDriverGL3::release()
 	// release only if the driver was initialized
 	if (!_Initialized)
 	{
+#if NL3D_GL3_EGL
+		// a display that was refused after its context was made
+		releaseEglContext();
+#endif
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 		// a display that was refused, or never set up, still has the X connection and the error
 		// handler of init(), and what setDisplay did before it stopped
@@ -1316,7 +1350,7 @@ void CDriverGL3::setupViewport (const class CViewport& viewport)
 {
 	H_AUTO_OGL(CDriverGL3_setupViewport)
 
-	if (_win == EmptyWindow) return;
+	if (!hasDrawable()) return;
 
 	// Setup gl viewport
 	uint32 clientWidth, clientHeight;
@@ -1371,7 +1405,7 @@ void CDriverGL3::setupScissor (const class CScissor& scissor)
 {
 	H_AUTO_OGL(CDriverGL3_setupScissor)
 
-	if (_win == EmptyWindow) return;
+	if (!hasDrawable()) return;
 
 	// Setup gl viewport
 	uint32 clientWidth, clientHeight;
@@ -1765,7 +1799,9 @@ void	CDriverGL3::setSwapVBLInterval(uint interval)
 
 	bool res = true;
 
-#if defined(NL_OS_WINDOWS)
+#if NL3D_GL3_EGL
+	res = eglSwapInterval(m_EglDisplay, (EGLint)interval) == EGL_TRUE;
+#elif defined(NL_OS_WINDOWS)
 	if (_Extensions.WGLEXTSwapControl)
 	{
 		res = nwglSwapIntervalEXT(interval) == TRUE;
@@ -1801,7 +1837,9 @@ uint	CDriverGL3::getSwapVBLInterval()
 {
 	H_AUTO_OGL(CDriverGL3_getSwapVBLInterval)
 
-#if defined(NL_OS_WINDOWS)
+#if NL3D_GL3_EGL
+	// EGL has no query: the interval is the last one that was set
+#elif defined(NL_OS_WINDOWS)
 	if (_Extensions.WGLEXTSwapControl)
 	{
 		return nwglGetSwapIntervalEXT();

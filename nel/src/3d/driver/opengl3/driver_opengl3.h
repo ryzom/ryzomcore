@@ -111,6 +111,15 @@ using NLMISC::CVector;
 #define NL3D_GL3_BUFFER_QUEUE_MAX (NL3D_GL3_FRAME_QUEUE_MAX + 1) // Additional buffer for current working
 #define NL3D_GL3_SYNC_IMMEDIATE 0 // Don't allow frame processing backlog if set to 1. Reduce input lag. Testing only
 
+// 1: the context of the driver comes from EGL. That is the OpenGL ES 3.0 driver on Windows, where
+// EGL is ANGLE. In a browser the context is the one of the canvas. On X11 the OpenGL ES 3.0 driver
+// has no context code yet: its window would have to take the visual of the EGL config.
+#if defined(USE_OPENGLES3) && defined(NL_OS_WINDOWS)
+#define NL3D_GL3_EGL 1
+#else
+#define NL3D_GL3_EGL 0
+#endif
+
 // The stream that holds the uniform blocks (see CStreamBufferGL3).
 // The size of a chunk sets how often the blocks that are kept across frames (materials,
 // camera, lights) are written again: each time the head moves on to another chunk, the
@@ -1185,15 +1194,20 @@ private:
 
 	TCursorMap					_Cursors;
 
+	// clang-format off
 #ifdef USE_OPENGLES3
 #ifdef __EMSCRIPTEN__
 	// Emscripten WebGL context - managed by the HTML5 canvas
 	EMSCRIPTEN_WEBGL_CONTEXT_HANDLE	_ctx;
 #elif defined(NL_OS_WINDOWS)
-	HGLRC						_hRC;
-	HDC							_hDC;
-	PIXELFORMATDESCRIPTOR		_pfd;
-	HPBUFFERARB					_PBuffer;
+	// The context comes from EGL, which on Windows is ANGLE
+	EGLDisplay					m_EglDisplay;
+	EGLConfig					m_EglConfig;
+	EGLSurface					m_EglSurface;
+	EGLContext					m_EglContext;
+	EGLint						m_EglSwapError; // of the last swap, EGL_SUCCESS when it worked
+	bool						createEglContext();
+	void						releaseEglContext();
 #elif defined(NL_OS_UNIX)
 	// EGL context for native GLES 3.0
 	void*						_ctx;
@@ -1278,6 +1292,17 @@ private:
 #endif // NL_OS_UNIX
 
 #endif // USE_OPENGLES3
+	// clang-format on
+
+	// The driver has something to draw into: its window, or an off-screen surface of EGL
+	bool hasDrawable() const
+	{
+#if NL3D_GL3_EGL
+		if (m_EglSurface != EGL_NO_SURFACE)
+			return true;
+#endif
+		return _win != EmptyWindow;
+	}
 
 	bool					_Initialized;
 

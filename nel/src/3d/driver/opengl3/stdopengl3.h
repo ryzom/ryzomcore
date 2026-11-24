@@ -18,6 +18,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef NL_STDOPENGL3_H
+#define NL_STDOPENGL3_H
+
 #include "nel/misc/types_nl.h"
 
 #include <cstdlib>
@@ -52,8 +55,12 @@
 #include <emscripten/html5.h>
 #include <GLES3/gl3.h>
 #else
+// the headers of ANGLE declare the functions only when this is defined
+#ifndef GL_GLEXT_PROTOTYPES
+#define GL_GLEXT_PROTOTYPES
+#endif
 #include <GLES3/gl3.h>
-#include <GLES3/gl3ext.h>
+#include <GLES2/gl2ext.h>
 #include <EGL/egl.h>
 #endif
 
@@ -210,3 +217,5 @@ inline void glPolygonMode(GLenum, GLenum) { }
 
 #define NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY 128 // Hard limit for CPU staging buffers
 #define NL_OPENGL3_ANGLE_MAX_LIGHT_TABLE 8      // Reduced limit for ANGLE/D3D11
+
+#endif // NL_STDOPENGL3_H
