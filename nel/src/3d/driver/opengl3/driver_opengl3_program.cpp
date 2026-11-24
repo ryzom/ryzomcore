@@ -2517,10 +2517,14 @@ CShaderProgram *CDriverGL3::linkPrograms(
 	GLuint linkedProg = nglCreateProgram();
 	nglAttachShader(linkedProg, vpShader);
 	nglAttachShader(linkedProg, ppShader);
+	// The time up to the link status: a driver that translates the shaders to another language
+	// (ANGLE on Direct3D) compiles the result here, and the status waits for it
+	NLMISC::TTicks linkStart = NLMISC::CTime::getPerformanceTime();
 	nglLinkProgram(linkedProg);
 
 	GLint linkOk;
 	nglGetProgramiv(linkedProg, GL_LINK_STATUS, &linkOk);
+	double linkMs = NLMISC::CTime::ticksToSecond(NLMISC::CTime::getPerformanceTime() - linkStart) * 1000.0;
 	if (linkOk == 0)
 	{
 		char errorLog[1024];
@@ -2530,10 +2534,10 @@ CShaderProgram *CDriverGL3::linkPrograms(
 		return nullptr;
 	}
 
-	nldebug("GL3: Linked user program id=%u (VP=%s, PP=%s)",
-		linkedProg,
-		vpProg->source() ? vpProg->source()->DisplayName.c_str() : "?",
-		ppProg->source() ? ppProg->source()->DisplayName.c_str() : "?");
+	nldebug("GL3: Linked user program id=%u in %.1f ms (VP=%s, PP=%s)",
+	    linkedProg, linkMs,
+	    vpProg->source() ? vpProg->source()->DisplayName.c_str() : "?",
+	    ppProg->source() ? ppProg->source()->DisplayName.c_str() : "?");
 
 	// Override OnlyUBOs based on actual linked program introspection
 	bool linkedHasNonUBO = programHasNonUBOUniforms(linkedProg);
