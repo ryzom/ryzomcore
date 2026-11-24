@@ -37,6 +37,7 @@
 #include "../pipeline_max/scene.h"
 #include "../pipeline_max/storage_object.h"
 
+#include <nel/misc/string_common.h>
 #include <nel/misc/ucstring.h>
 
 using namespace PIPELINE::MAX;
@@ -390,7 +391,7 @@ static bool skinError(std::string *err, const char *fmt, int a = 0, int b = 0)
 	if (err)
 	{
 		char buf[256];
-		snprintf(buf, sizeof(buf), fmt, a, b);
+		NLMISC::smprintf(buf, sizeof(buf), fmt, a, b);
 		*err = buf;
 	}
 	return false;
