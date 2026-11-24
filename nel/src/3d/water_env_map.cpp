@@ -65,6 +65,8 @@ static uint32 inline getFVBVertex(uint section, uint side)
 
 const uint NUM_FACES_TO_RENDER = 5;
 
+uint CWaterEnvMap::s_RenderingCount = 0;
+
 
 // *******************************************************************************
 CWaterEnvMap::CWaterEnvMap()
@@ -189,6 +191,7 @@ void CWaterEnvMap::update(TGlobalAnimationTime time, IDriver &driver)
 		_StartRenderTime = time;
 	}
 	uint lastCubeFacesToRender = std::min((uint) NUM_FACES_TO_RENDER, _NumRenderedFaces + numTexToRender); // we don't render negative Z (only top hemisphere is used)
+	++s_RenderingCount;
 	for(uint k = _NumRenderedFaces; k < lastCubeFacesToRender; ++k)
 	{
 		// On D3D, swap positive_y/negative_y render target faces.
@@ -204,6 +207,7 @@ void CWaterEnvMap::update(TGlobalAnimationTime time, IDriver &driver)
 		driver.setRenderTarget(_EnvCubic, 0, 0, _EnvCubicSize, _EnvCubicSize, 0, rtFace);
 		render((CTextureCube::TFace) k, _StartRenderTime);
 	}
+	--s_RenderingCount;
 	_NumRenderedFaces = lastCubeFacesToRender;
 	if (_NumRenderedFaces == NUM_FACES_TO_RENDER && (_NumRenderedFaces + numTexToRender) > NUM_FACES_TO_RENDER)
 	{

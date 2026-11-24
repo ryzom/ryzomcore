@@ -284,6 +284,7 @@ public:
 
 
 
+	// clang-format off
 	/// get the current time of the scene, in second. It start from 0 (at the firt call of animate)
 	TGlobalAnimationTime getCurrentTime(void) const { return _CurrentTime ; }
 
@@ -301,11 +302,28 @@ public:
 	/// get the number of time render has been called
 	uint64				getNumRender() const { return _NumRender; }
 
-	/// get the frame id, incremented once per animate() call (i.e. once per real frame, not per stereo eye)
+	/** get the frame id, incremented once per animate() call (i.e. once per real frame, not per
+	 *	stereo eye or water reflection). A scene that is never animated begins a frame with every
+	 *	render that is not auxiliary, so each stereo eye is a frame of its own there.
+	 */
 	uint64				getFrameId() const { return _FrameId; }
+
+	/** The view matrix of the camera the frame is seen from. An auxiliary render sees the scene
+	 *	through another camera; LOD and distances that are decided once per frame are decided from
+	 *	this one instead, as the main view would decide them. A scene that is first rendered into
+	 *	another scene's water reflection (the client's sky and canopy) keeps the camera of its last
+	 *	frame until its main view.
+	 */
+	const NLMISC::CMatrix &getFrameViewMatrix() const { return m_FrameViewMatrix; }
+
+	/** True during a render that is not a view of the frame: a water reflection of any scene, or a
+	 *	face of a water envmap.
+	 */
+	static bool			isAuxiliaryRender();
 
 	/// true if currently rendering
 	bool				isRendering() const {return _IsRendering;}
+	// clang-format on
 
 	/// \name LoadBalancing mgt.
 	//@{
@@ -692,11 +710,18 @@ private:
 	TAnimationTime  _EllapsedTime ;
 
 	// System time is a time that always run (independent from the animation time that run only on animate())
+	// clang-format off
 	double	_DeltaSystemTimeBetweenRender;
 	double	_GlobalSystemTime;
 	uint64  _NumRender; // the number of time render has been called
-	uint64  _FrameId;  // incremented once per animate() call (once per real frame)
+	uint64  _FrameId;  // incremented once per animate() call (once per real frame), see getFrameId()
 	uint64  _LastRenderFrameId; // last _FrameId seen by renderPart (for once-per-frame operations)
+	// clang-format on
+
+	// see getFrameViewMatrix()
+	NLMISC::CMatrix m_FrameViewMatrix;
+	// the frame m_FrameViewMatrix was taken for
+	uint64 m_FrameViewFrameId;
 
 
 	/// \name The traversals

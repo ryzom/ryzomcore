@@ -45,6 +45,7 @@ struct IWaterEnvMapRender;
   */
 class CWaterEnvMap
 {
+	// clang-format off
 public:
 	// ctor
 	CWaterEnvMap();
@@ -69,6 +70,8 @@ public:
 	// set constant alpha of envmap
 	void				setAlpha(uint8 alpha) { _Alpha = alpha; }
 	uint8				getAlpha() const { return _Alpha; }
+	// True while any envmap renders its faces: the scenes rendered then are seen from the envmap's cameras
+	static bool			isAnyRendering() { return s_RenderingCount != 0; }
 private:
 	NLMISC::CSmartPtr<CTextureCube>  _EnvCubic;
 	NLMISC::CSmartPtr<CTextureBlank> _Env2D;
@@ -89,10 +92,12 @@ private:
 	uint							 _Env2DSize;
 	uint8							 _Alpha;
 	bool							 _D3DConvention; // D3D cubemap Z convention differs from GL
+	static uint						 s_RenderingCount; // envmaps rendering their faces
 private:
 	void initFlattenVB();
 	void initTestVB(); // tmp
 	void doInit();
+	// clang-format on
 };
 
 } // NL3D

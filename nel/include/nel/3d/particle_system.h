@@ -146,6 +146,7 @@ public:
 
 	///\name Position of the system
 		//@{
+		// clang-format off
 			/** Hide / show the system
 			  * This just duplicates the 'hiden' flag of matching transform (instance of CParticleSystemModel)
 			  * If the system goes from 'hide' to 'show', then no trails are generated
@@ -201,14 +202,22 @@ public:
 
 			/** set the view matrix
 			  * This must be called otherwise results can't be correct
+			  * LOD, distances and colour attenuation are taken from this camera.
 			  */
 			void setViewMat(const NLMISC::CMatrix &m);
+
+			/** set the view matrix of the coming renders only: the camera the particles face, when the
+			  * render is seen through another camera than the one of setViewMat (a water reflection, the
+			  * other eye). LOD and distances stay those of the camera of setViewMat.
+			  */
+			void setRenderViewMat(const NLMISC::CMatrix &m);
 
 			/// get the view matrix .
 			const NLMISC::CMatrix &getViewMat(void) const { return _ViewMat; }
 
-			/// get the inverted view matrix . It is stored each time a new frame is processed
+			/// get the inverted view matrix . It is stored each time setViewMat or setRenderViewMat is called
 			const NLMISC::CMatrix &getInvertedViewMat(void) const { return _InvertedViewMat; }
+		// clang-format on
 		//@}
 
 
@@ -1110,6 +1119,7 @@ private:
 		}
 	};
 
+	// clang-format off
 	CCoordSystemInfo		   _CoordSystemInfo;				// coordinate system infos for this fx
 	CUserCoordSystemInfo	   *_UserCoordSystemInfo;           // coordinate system infos for an hypothetic user matrix
 
@@ -1123,6 +1133,9 @@ private:
 
 	// the inverted view matrix (TODO : this is duplcated from CScene)
 	NLMISC::CMatrix			 _InvertedViewMat;
+
+	// the inverted view matrix of setViewMat, that LOD and distances are taken from
+	NLMISC::CMatrix			 m_InvertedLODViewMat;
 
 
 	// number of rendered pass on the system, incremented each time the system is redrawn
@@ -1224,6 +1237,7 @@ private:
 	#ifdef NL_DEBUG
 		static uint									_NumInstances;
 	#endif
+	// clang-format on
 public:
 	// For use by emitters only : This compute a delta of position of the fx matrix to ensure that spawning position are correct when the system moves
 	void		interpolateFXPosDelta(NLMISC::CVector &dest, TAnimationTime deltaT);

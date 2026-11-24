@@ -342,6 +342,7 @@ private:
 	void	doAnimate();
 
 private:
+	// clang-format off
 	CParticleSystemManager::TModelHandle    _ModelHandle; /** a handle to say when the resources
 															* of the model (_ParticleSystem) are deleted
 															*/
@@ -350,7 +351,7 @@ private:
 	CScene							  	   *_Scene;
 	TAnimationTime						    _EllapsedTime;
 	float									_EllapsedTimeRatio;
-	uint64									_LastFrameId; // avoid double-animation in stereo
+	uint64									_LastFrameId; // the frame the system was last given its camera and face budget
 
 	// old animation mode for the system
 	CParticleSystem::TAnimType				_AnimType;
@@ -365,6 +366,7 @@ private:
 	bool									_InClusterAndVisible        : 1;
 	bool                                    _EmitterActive			    : 1;
 	bool									_SoundActive				: 1;
+	bool									m_SystemCounted				: 1;  /// load balancing has counted the faces of the current system
 
 	std::vector<IPSModelObserver *>			_Observers;
 	CAnimatedValueBool						_TriggerAnimatedValue;
@@ -380,6 +382,7 @@ private:
 		// for fast allocation of ps resources
 		NLMISC::CContiguousBlockAllocator		_Allocator;
 	#endif
+	// clang-format on
 };
 
 

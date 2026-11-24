@@ -107,13 +107,14 @@ uint64 PSStatRender = 0;
 
 ///=====================================================================================
 /// ctor
+// clang-format off
 CParticleSystemModel::CParticleSystemModel() : _ParticleSystem(nullptr)
     ,
 											   _Scene(nullptr)
     ,
 											   _EllapsedTime(0.01f),
 											   _EllapsedTimeRatio(1.f),
-											   _LastFrameId(0),
+											   _LastFrameId(std::numeric_limits<uint64>::max()),
 											   _AnimType(CParticleSystem::AnimVisible),
 											   _AutoGetEllapsedTime(true),
 											   _ToolDisplayEnabled(false),
@@ -125,10 +126,12 @@ CParticleSystemModel::CParticleSystemModel() : _ParticleSystem(nullptr)
 											   _InClusterAndVisible(false),
 											   _EmitterActive(true),
 											   _SoundActive(true),
+											   m_SystemCounted(false),
 											   _BypassGlobalUserParam(0),
 											   _UserColor(CRGBA::White),
 											   _ZBias(0.f),
 											   _LastVisibility(CHrcTrav::Show)
+// clang-format on
 {
 	setOpacity(false);
 	setTransparency(true);
@@ -271,6 +274,10 @@ void CParticleSystemModel::reallocRsc()
 	nlassert(_Scene);
 	CParticleSystemManager &psmgt = _Scene->getParticleSystemManager();
 	_ModelHandle = psmgt.addSystemModel(this);
+	// a face budget counted before was counted without this system, and the camera of the frame
+	// may have been given to the system this one replaces
+	m_SystemCounted = false;
+	_LastFrameId = std::numeric_limits<uint64>::max();
 	_AnimType = _ParticleSystem->getAnimType();
 	if (_ParticleSystem->getAnimType() == CParticleSystem::AnimAlways)
 	{
@@ -488,6 +495,8 @@ float CParticleSystemModel::getNumTriangles (float distance)
 	MINI_TIMER(PSStatsGetNumTriangles)
 	if (!_ParticleSystem) return 0;
 	if (!_InsertedInVisibleList) return 0;
+	// load balancing counts the faces here, its budget belongs to this system from now on
+	m_SystemCounted = true;
 	return (float) _ParticleSystem->getWantedNumTris(distance);
 }
 
@@ -627,8 +636,14 @@ void	CParticleSystemModel::doAnimate()
 	MINI_TIMER(PSStatsDoAnimate)
 	nlassert(!_Invalidated);
 	CParticleSystem		*ps = getPS();
-	CClipTrav			&clipTrav= getOwnerScene()->getClipTrav();
 	const CMatrix		&mat= getWorldMatrix();
+	// The camera and the face budget of a frame are given once, before the frame's animation
+	// step. A frame may render the scene several times (water reflections before the main view,
+	// the other eye): those renders show the particles to their own camera (traverseRender), and
+	// the budget they give was counted before the step changed the system.
+	CScene *ownerScene = getOwnerScene();
+	const bool newFrame = ownerScene->getFrameId() != _LastFrameId;
+	_LastFrameId = ownerScene->getFrameId();
 	//
 	{
 		MINI_TIMER(PSStatsDoAnimatePart1)
@@ -637,7 +652,8 @@ void	CParticleSystemModel::doAnimate()
 		ps->hide(!this->isHrcVisible());
 		ps->setSysMat(&mat);
 		ps->setUserMatrix(&_UserMatrix);
-		ps->setViewMat(clipTrav.ViewMatrix);
+		if (newFrame)
+			ps->setViewMat(ownerScene->getFrameViewMatrix());
 		updateOpacityInfos();
 		updateLightingInfos();
 	}
@@ -648,8 +664,10 @@ void	CParticleSystemModel::doAnimate()
 	{
 		MINI_TIMER(PSStatsDoAnimatePart2)
 
-		// setup the number of faces we allow
-		ps->setNumTris((uint) getNumTrianglesAfterLoadBalancing());
+		// setup the number of faces we allow, once load balancing has counted this system: until
+		// then it keeps its full detail (a budget counted without it would be zero)
+		if (newFrame && m_SystemCounted)
+			ps->setNumTris((uint)getNumTrianglesAfterLoadBalancing());
 
 
 		// set the global user param that are bypassed
@@ -723,6 +741,8 @@ void	CParticleSystemModel::traverseRender()
 			lighting.add(lighting, sunAmbient);
 			_ParticleSystem->setLightingColor(lighting);
 		}
+		// the particles face the camera of this render, a water reflection or an eye
+		_ParticleSystem->setRenderViewMat(getOwnerScene()->getRenderTrav().ViewMatrix);
 		CTransformShape::traverseRender();
 	}
 	//}

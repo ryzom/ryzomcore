@@ -546,22 +546,29 @@ void CSegRemanence::traverseAnimDetail()
 		/////////////////////////////////////////////////////////////////////////////
 
 		CScene *scene = getOwnerScene();
-		if (scene->getNumRender() != (_LastSampleFrame + 1))
+		// Sample once per frame. A frame may render the scene several times (water reflections
+		// before the main view, the other eye): a trail seen in any of them goes on from the frame
+		// before.
+		const uint64 frameId = scene->getFrameId();
+		if (frameId != _LastSampleFrame)
 		{
-			if (!isStopping())
+			if (frameId != (_LastSampleFrame + 1))
 			{
-				// if wasn't visible at previous frame, must invalidate position
-				restart();
+				if (!isStopping())
+				{
+					// if wasn't visible at previous frame, must invalidate position
+					restart();
+				}
+				else
+				{
+					// ribbon started unrolling when it disapperaed from screen so simply remove it
+					stopNoUnroll();
+				}
 			}
-			else
-			{
-				// ribbon started unrolling when it disapperaed from screen so simply remove it
-				stopNoUnroll();
-			}
+			_LastSampleFrame = frameId;
+			setupFromShape();
+			samplePos(scene->getCurrentTime());
 		}
-		_LastSampleFrame = scene->getNumRender();
-		setupFromShape();
-		samplePos(scene->getCurrentTime());
 
 		/////////////////////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////////////

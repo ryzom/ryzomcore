@@ -287,7 +287,7 @@ void CParticleSystem::setNumTris(uint numFaces)
 	NL_PS_FUNC_MAIN(CParticleSystem_setNumTris)
 	if (_EnableLoadBalancing)
 	{
-		float modelDist = (getSysMat().getPos() - _InvertedViewMat.getPos()).norm();
+		float modelDist = (getSysMat().getPos() - m_InvertedLODViewMat.getPos()).norm();
 		/*uint numFaceWanted = (uint) getWantedNumTris(modelDist);*/
 
 		const float epsilon = 10E-5f;
@@ -335,6 +335,15 @@ CParticleSystem::~CParticleSystem()
 void CParticleSystem::setViewMat(const NLMISC::CMatrix &m)
 {
 	NL_PS_FUNC_MAIN(CParticleSystem_setViewMat)
+	_ViewMat = m;
+	_InvertedViewMat = m.inverted();
+	m_InvertedLODViewMat = _InvertedViewMat;
+}
+
+///=======================================================================================
+void CParticleSystem::setRenderViewMat(const NLMISC::CMatrix &m)
+{
+	NL_PS_FUNC_MAIN(CParticleSystem_setRenderViewMat)
 	_ViewMat = m;
 	_InvertedViewMat = m.inverted();
 }
@@ -393,7 +402,7 @@ void CParticleSystem::stepLocated(TPSProcessPass pass)
 float CParticleSystem::getDistFromViewer() const
 {
 	NL_PS_FUNC_MAIN(CParticleSystem_getDistFromViewer)
-	const CVector d = getSysMat().getPos() - _InvertedViewMat.getPos();
+	const CVector d = getSysMat().getPos() - m_InvertedLODViewMat.getPos();
 	return d.norm();
 }
 
@@ -1274,26 +1283,27 @@ bool CParticleSystem::hasLightableObjects() const
 void CParticleSystem::getLODVect(NLMISC::CVector &v, float &offset,  TPSMatrixMode matrixMode)
 {
 	NL_PS_FUNC_MAIN(CParticleSystem_getLODVect)
+	// clang-format off
 	switch(matrixMode)
 	{
 		case PSFXWorldMatrix:
 		{
-			const CVector tv = getInvertedSysMat().mulVector(_InvertedViewMat.getJ());
-			const CVector org = getInvertedSysMat() * _InvertedViewMat.getPos();
+			const CVector tv = getInvertedSysMat().mulVector(m_InvertedLODViewMat.getJ());
+			const CVector org = getInvertedSysMat() * m_InvertedLODViewMat.getPos();
 			v = _InvCurrentViewDist * tv;
 			offset = - org * v;
 		}
 		break;
 		case PSIdentityMatrix:
 		{
-			v = _InvCurrentViewDist * _InvertedViewMat.getJ();
-			offset = - _InvertedViewMat.getPos() * v;
+			v = _InvCurrentViewDist * m_InvertedLODViewMat.getJ();
+			offset = - m_InvertedLODViewMat.getPos() * v;
 		}
 		break;
 		case PSUserMatrix:
 		{
-			const CVector tv = getInvertedUserMatrix().mulVector(_InvertedViewMat.getJ());
-			const CVector org = getInvertedUserMatrix() * _InvertedViewMat.getPos();
+			const CVector tv = getInvertedUserMatrix().mulVector(m_InvertedLODViewMat.getJ());
+			const CVector org = getInvertedUserMatrix() * m_InvertedLODViewMat.getPos();
 			v = _InvCurrentViewDist * tv;
 			offset = - org * v;
 		}
@@ -1302,13 +1312,14 @@ void CParticleSystem::getLODVect(NLMISC::CVector &v, float &offset,  TPSMatrixMo
 			nlassert(0);
 		break;
 	}
+	// clang-format on
 }
 
 ///=======================================================================================
 TPSLod CParticleSystem::getLOD(void) const
 {
 	NL_PS_FUNC_MAIN(CParticleSystem_getLOD)
-	const float dist = fabsf(_InvCurrentViewDist * (getSysMat().getPos() - _InvertedViewMat.getPos()) * _InvertedViewMat.getJ());
+	const float dist = fabsf(_InvCurrentViewDist * (getSysMat().getPos() - m_InvertedLODViewMat.getPos()) * m_InvertedLODViewMat.getJ());
 	return dist > _LODRatio ? PSLod2 : PSLod1;
 }
 

@@ -145,6 +145,8 @@ CLoadBalancingTrav::CLoadBalancingTrav()
 	_CurrentNumVisibleModels= 0;
 
 	_LastAdaptFrameId= 0;
+	_LoadPass = 0;
+	_SumNbFacePass0 = 0;
 }
 
 
@@ -170,10 +172,13 @@ void				CLoadBalancingTrav::traverse()
 	// divergence in the stereo debugger. Replicated passes reuse the
 	// frame's ratios (the 2nd pass below still assigns per-model face
 	// budgets for the pass's own visible list, from each model's last count;
-	// a model that was never counted keeps its initial budget).
+	// a model that was never counted keeps its initial budget). That holds for
+	// every auxiliary render: the client renders its sky and canopy scenes
+	// into the main scene's reflections through mirrored cameras, and into
+	// the water envmap through the cameras of its faces.
 	const uint64 frameId = Scene->getFrameId();
-	const bool adapt = !Scene->getWaterReflectionManager().isRenderingReflection()
-		&& frameId != _LastAdaptFrameId;
+	const bool adapt = !CScene::isAuxiliaryRender()
+	    && frameId != _LastAdaptFrameId;
 	if (adapt)
 	{
 		_LastAdaptFrameId = frameId;

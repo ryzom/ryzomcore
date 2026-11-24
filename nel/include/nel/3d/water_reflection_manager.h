@@ -191,6 +191,7 @@ public:
 
 	/// \name Queries during the main render (all for the current view)
 	// @{
+	// clang-format off
 	/// Returns the active reflection for the given plane height, or NULL.
 	const CActiveReflection	*getActiveReflection(float planeZ) const;
 	/// Returns the active reflection by index (0..getNumActiveReflections()-1), or NULL. For debug display.
@@ -199,6 +200,8 @@ public:
 	uint			getNumActiveReflections() const { const CView *v = currentView(); return v ? (uint)v->Active.size() : 0; }
 	/// True while the manager is rendering a reflection pass (guards recursion and stat collection).
 	bool			isRenderingReflection() const { return _InReflectionRender; }
+	/// During a reflection pass, the scene's camera that the pass mirrors. NULL outside a pass.
+	CCamera			*getMirroredCamera() const { return _InReflectionRender ? _SaveCam : nullptr; }
 	/** Water clip plane variants during a reflection pass. Static geometry
 	  * clips slightly below the surface (bump-perturbed lookups at the
 	  * waterline must not sample the clip void); entities clip exactly at
@@ -234,6 +237,7 @@ public:
 	  * water vertex buffer format stable (with the reflection UV channel)
 	  * instead of reallocating it whenever reflections toggle on and off. */
 	bool			needsPlanarUVs() const { return _HadReflections; }
+	// clang-format on
 	// @}
 
 	/// Release render targets and the internal camera (driver reset / scene teardown).

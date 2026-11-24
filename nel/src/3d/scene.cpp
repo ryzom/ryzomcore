@@ -165,6 +165,7 @@ CScene::CScene(bool bSmallScene) : LightTrav(bSmallScene)
 	_NumRender = 0;
 	_FrameId = 0;
 	_LastRenderFrameId = 0;
+	m_FrameViewFrameId = std::numeric_limits<uint64>::max(); // no frame yet
 
 	_MaxSkeletonsInNotCLodForm= 20;
 
@@ -204,6 +205,7 @@ CScene::CScene(bool bSmallScene) : LightTrav(bSmallScene)
 	_ForceWaterEnvMap = false;
 
 	_GlobalSystemTime= 0.0;
+	_DeltaSystemTimeBetweenRender = 0.020;
 
 	_RequestParticlesAnimate = false;
 }
@@ -592,6 +594,11 @@ void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass, bool doTrav, boo
 		RenderTrav.clearWaterModelList();
 		_FirstFlare = nullptr;
 
+		// A scene that is never animated (the canopy scene of the client) has no frames of its
+		// own: every render that is not auxiliary begins one
+		if (_FirstAnimateCall && !isAuxiliaryRender())
+			++_FrameId;
+
 		// Update system time once per real frame
 		if (_FrameId != _LastRenderFrameId)
 		{
@@ -638,6 +645,21 @@ void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass, bool doTrav, boo
 			HrcTrav.traverse();
 		else
 			HrcTrav._MovingObjects.clear();
+
+		// The camera the frame is seen from, taken at the frame's first render that knows it. A
+		// water reflection of this scene knows the camera it mirrors. Another auxiliary render
+		// (a reflection of another scene, an envmap face) sees this scene through a camera of its
+		// own, and the real one is not known here.
+		CCamera *frameCamera = nullptr;
+		if (_WaterReflectionManager.isRenderingReflection())
+			frameCamera = _WaterReflectionManager.getMirroredCamera();
+		else if (!isAuxiliaryRender())
+			frameCamera = CurrentCamera;
+		if (frameCamera && m_FrameViewFrameId != _FrameId)
+		{
+			m_FrameViewFrameId = _FrameId;
+			m_FrameViewMatrix = frameCamera->getWorldMatrix().inverted();
+		}
 
 		// Set Cam World Matrix for all trav that need it
 		ClipTrav.setCamMatrix(CurrentCamera->getWorldMatrix());
@@ -1634,6 +1656,12 @@ void CScene::renderOcclusionTestMeshs()
 	getDriver()->setPolygonMode(oldPolygonMode);
 }
 
+
+// ***************************************************************************
+bool CScene::isAuxiliaryRender()
+{
+	return CWaterReflectionManager::isAnyRenderingReflection() || CWaterEnvMap::isAnyRendering();
+}
 
 // ***************************************************************************
 void CScene::updateWaterEnvMaps(TGlobalAnimationTime time)
