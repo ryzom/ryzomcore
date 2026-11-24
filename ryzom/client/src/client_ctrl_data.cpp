@@ -512,7 +512,7 @@ void methodWindow(CCtrlCall &call)
 	r.set("minimized", Driver->isWindowMinimized());
 	r.set("focus", CInputHandlerManager::getInstance()->hasFocus());
 	r.set("driven", isDriven());
-	static const char *const s_Drivers[] = { "auto", "opengl", "direct3d", "opengles", "opengl3" };
+	static const char *const s_Drivers[] = { "auto", "opengl", "direct3d", "opengles", "opengl3", "opengles3" };
 	uint driver = (uint)ClientCfg.Driver3D;
 	r.set("driver", driver < sizeof(s_Drivers) / sizeof(s_Drivers[0]) ? s_Drivers[driver] : "unknown");
 	reportDesktop(r);

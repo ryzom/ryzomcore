@@ -1168,6 +1168,7 @@ void prelogInit()
 		uintptr_t icon = 0;
 #endif // NL_OS_WINDOWS
 
+		// clang-format off
 		switch(ClientCfg.Driver3D)
 		{
 			case CClientConfig::DrvAuto:
@@ -1193,9 +1194,13 @@ void prelogInit()
 			case CClientConfig::OpenGL3:
 				driver = UDriver::OpenGl3;
 			break;
+			case CClientConfig::OpenGLES3:
+				driver = UDriver::OpenGlEs3;
+			break;
 			default:
 			break;
 		}
+		// clang-format on
 
 		Driver = UDriver::createDriver(icon, driver);
 
