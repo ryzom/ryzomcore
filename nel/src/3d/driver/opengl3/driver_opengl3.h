@@ -175,6 +175,11 @@ class   COcclusionQueryGL3;
 
 void displayGLError(GLenum error);
 
+// The cube split of the mega pixel programs, the stage that samples a cube texture: 0 none, 1 stage 1 (the
+// reflection of the specular material), 2 stage 0 (a cube read by a plain material, as the projection pass of
+// the water envmap does). See CDriverGL3::getMegaCubeVariant
+static const int MegaCubeVariants = 3;
+
 #ifdef USE_OPENGLES3
 #ifdef __EMSCRIPTEN__
 // Emscripten doesn't need traditional window procedures
@@ -727,6 +732,7 @@ public:
 	void					generateBuiltinPixelProgram(CMaterial &mat);
 
 	// Megashader support
+	// clang-format off
 	bool					initMegaVertexPrograms();
 	bool					initMegaPixelPrograms();
 	bool					initMegaLinkedPrograms();
@@ -735,6 +741,8 @@ public:
 	bool					setupMegaLinkedPrograms();
 	void					setupMegaVPUniforms();
 	void					setupMegaPPUniforms();
+	int						getMegaCubeVariant(CMaterial::TShader shader, uint64 texSamplerMode);
+	// clang-format on
 
 	virtual void			startSpecularBatch() NL_OVERRIDE { }
 	virtual void			endSpecularBatch() NL_OVERRIDE { }
@@ -1334,6 +1342,9 @@ private:
 	// A render target without area was refused and reported (setRenderTarget reports it once)
 	bool					m_ZeroAreaRenderTargetReported;
 
+	// A material with a cube texture the mega shaders cannot sample was reported (getMegaCubeVariant reports it once)
+	bool m_MegaCubeStageReported;
+
 	// Share the same backbuffer for FBO render targets with window size
 	std::vector<CDepthStencilFBO *>	_DepthStencilFBOs;
 
@@ -1895,6 +1906,7 @@ private:
 	//   fogOrPpl: 0=no ecPos/fog/PPL (UI/sky); 1=has ecPos, fog+PPL runtime-gated
 	//   ppClip: 0=no PP clip; 1=PP-based clip plane discard (implies fogOrPpl=1)
 	//   tableUBO: 0=non-table lights; 1=light table UBO
+	//   cube: see MegaCubeVariants
 	bool m_BuildUnusedPrograms;
 	bool m_PPClipPlanes;            // Use PP-based clip plane discard instead of native gl_ClipDistance
 	bool m_LinkedMegaShaders;       // Use linked VP+PP programs instead of SSO for mega path
@@ -1907,11 +1919,11 @@ private:
 	bool m_UseMegaMaterialUBO;      // Select mega VP/PP variants with per-material UBO
 	bool m_PPOBound;                // Track whether PPO is currently bound (vs linked program via glUseProgram)
 	NLMISC::CRefPtr<CVertexProgram> m_MegaVP[2][2][2][2][2][2][2];
-	NLMISC::CRefPtr<CPixelProgram> m_MegaPP[2][2][2][2][2][2][2][2][2];
+	NLMISC::CRefPtr<CPixelProgram> m_MegaPP[2][2][MegaCubeVariants][2][2][2][2][2][2];
 
 	// Linked mega shader programs (combined VP+PP, always UBO-backed)
 	// m_MegaLinked[fogOrPpl][hwClip][cube][specular][ppClip]
-	NLMISC::CSmartPtr<CShaderProgram> m_MegaLinked[2][2][2][2][2];
+	NLMISC::CSmartPtr<CShaderProgram> m_MegaLinked[2][2][MegaCubeVariants][2][2];
 
 	// User VP/PP linked program helpers
 	CShaderProgram *linkPrograms(
@@ -2163,7 +2175,7 @@ public:
 	// Linked program cache for user VP + mega PP combinations
 	// Indexed by [fogOrPpl][cube][specular][clip] (clip = hwClip|ppClip,
 	// mutually exclusive by m_PPClipPlanes — the pass-level clip toggle)
-	NLMISC::CSmartPtr<CShaderProgram> LinkedVPMegaPP[2][2][2][2];
+	NLMISC::CSmartPtr<CShaderProgram> LinkedVPMegaPP[2][MegaCubeVariants][2][2];
 
 	// Linked program cache for mega VP + user PP combinations
 	// Indexed by [fogOrPpl][hwClip]
@@ -2192,7 +2204,7 @@ public:
 	NLMISC::CSmartPtr<CVertexProgram> InsertMegaVP[2][2][2];
 	// Linked combos: insert mega VP + mega PP
 	// [fogOrPpl][cube][specular][ppClip]
-	NLMISC::CSmartPtr<CShaderProgram> InsertLinkedVPMegaPP[2][2][2][2];
+	NLMISC::CSmartPtr<CShaderProgram> InsertLinkedVPMegaPP[2][MegaCubeVariants][2][2];
 
 private:
 	GLuint programId;

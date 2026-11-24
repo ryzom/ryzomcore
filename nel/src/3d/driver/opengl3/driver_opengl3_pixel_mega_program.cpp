@@ -23,10 +23,11 @@
  *   - fogOrPpl (on/off): fogOrPpl=0 for UI/sky (no ecPos/fog/PPL code).
  *     fogOrPpl=1 for world geometry where fog and PPL are runtime-gated
  *     via nlFogEnabled and nlNumPerPixelLights uniforms. Free split.
- *   - Cubemap (has any vs none): sampler2D vs samplerCube is a static GLSL
- *     type. Only Specular shader uses cubemaps, always a separate material
- *     group. In the cube variant, sampler1 is declared as samplerCube.
- *     Free split.
+ *   - Cubemap (none, stage 1, stage 0): sampler2D vs samplerCube is a static
+ *     GLSL type. The Specular shader reads its cubemap on stage 1, always a
+ *     separate material group; a plain material may read one on stage 0 (the
+ *     projection pass of the water envmap). The cube variant declares that
+ *     stage's sampler as samplerCube (see MegaCubeVariants). Free split.
  *   - Specular separate (on/off): Whether VP outputs specularColor varying.
  *     Mega VP always outputs it; user VPs may not. Free split.
  *   - tableUBO (on/off): Whether lights are read from NlLightTable UBO with
@@ -38,7 +39,7 @@
  *     fogOrPpl=1 (needs ecPos varying). Uses nlClipPlaneMask and clipPlane0-5
  *     from camera UBO or individual uniforms. Free split.
  *
- *   Result: m_MegaPP[fogOrPpl][cube][specular][ppClip][tableUBO] (max 20 base variants)
+ *   Result: m_MegaPP[fogOrPpl][cube][specular][ppClip][tableUBO] (max 30 base variants)
  *
  *   FOLDS (uniform-controlled branching — zero GPU cost):
  *   - Shader type (Normal/UserColor/Specular/LightMap): 4 short paths in
@@ -80,8 +81,11 @@ static const char *s_LightFacAccess[8] = {
 	"nlLightFactors45.x", "nlLightFactors45.y", "nlLightFactors45.z", "nlLightFactors45.w"
 };
 
-void megaPPGenerate(std::string &result, bool fogOrPpl, bool cube, bool specular, bool ppClip, bool tableUBO, bool cameraUBO, bool objectUBO, bool materialUBO, bool linked = false)
+void megaPPGenerate(std::string &result, bool fogOrPpl, int cube, bool specular, bool ppClip, bool tableUBO, bool cameraUBO, bool objectUBO, bool materialUBO, bool linked = false)
 {
+	// The stage whose sampler is a samplerCube (see MegaCubeVariants), -1 for none
+	const int cubeStage = (cube == 1) ? 1 : ((cube == 2) ? 0 : -1);
+
 	// Object UBO implies camera UBO
 	if (objectUBO) { cameraUBO = true; }
 	// ppClip implies fogOrPpl (needs ecPos varying)
@@ -157,7 +161,7 @@ void megaPPGenerate(std::string &result, bool fogOrPpl, bool cube, bool specular
 	// Samplers
 	for (int i = 0; i < MEGA_PP_MAX_SAMPLERS; ++i)
 	{
-		if (cube && i == 1)
+		if (i == cubeStage)
 			ss << "uniform samplerCube sampler" << i << ";" << std::endl;
 		else
 			ss << "uniform sampler2D sampler" << i << ";" << std::endl;
@@ -570,7 +574,7 @@ void megaPPGenerate(std::string &result, bool fogOrPpl, bool cube, bool specular
 		}
 
 		// Sample
-		if (cube && i == 1)
+		if (i == cubeStage)
 			ss << "    texel" << i << " = texture(sampler" << i << ", texCoord" << i << ".stp);" << std::endl;
 		else
 			ss << "    texel" << i << " = texture(sampler" << i << ", tc);" << std::endl;
@@ -615,7 +619,7 @@ void megaPPGenerate(std::string &result, bool fogOrPpl, bool cube, bool specular
 		{
 			ss << "        vec2 rtc = texCoord0.st;" << std::endl;
 		}
-		if (cube && i == 1)
+		if (i == cubeStage)
 			ss << "        t" << i << " = texture(sampler" << i << ", vec3(rtc + embmOfs, 0.0));" << std::endl;
 		else
 			ss << "        t" << i << " = texture(sampler" << i << ", rtc + embmOfs);" << std::endl;
@@ -711,6 +715,7 @@ bool CDriverGL3::initMegaPixelPrograms()
 	int activePPClip = m_PPClipPlanes ? 1 : 0;
 
 #ifdef __EMSCRIPTEN__
+	// clang-format off
 	{
 		int ppCount = 0;
 		for (int linked = 0; linked < 2; ++linked)
@@ -718,7 +723,7 @@ bool CDriverGL3::initMegaPixelPrograms()
 			if (!linked && !m_SupportSSO) continue;
 			if (linked && !m_LinkedMegaShaders) continue;
 			for (int fogOrPpl = 0; fogOrPpl < 2; ++fogOrPpl)
-			for (int cube = 0; cube < 2; ++cube)
+			for (int cube = 0; cube < MegaCubeVariants; ++cube)
 			for (int specular = 0; specular < 2; ++specular)
 			for (int ppClip = 0; ppClip < 2; ++ppClip)
 			for (int tableUBO = 0; tableUBO < 2; ++tableUBO)
@@ -741,6 +746,7 @@ bool CDriverGL3::initMegaPixelPrograms()
 		}
 		EM_ASM({ window.nlBeginTask('Compiling pixel shaders', $0); }, ppCount);
 	}
+	// clang-format on
 #endif
 
 	for (int linked = 0; linked < 2; ++linked)
@@ -752,7 +758,7 @@ bool CDriverGL3::initMegaPixelPrograms()
 
 		for (int fogOrPpl = 0; fogOrPpl < 2; ++fogOrPpl)
 		{
-			for (int cube = 0; cube < 2; ++cube)
+			for (int cube = 0; cube < MegaCubeVariants; ++cube)
 			{
 				for (int specular = 0; specular < 2; ++specular)
 				{
@@ -807,7 +813,7 @@ bool CDriverGL3::initMegaPixelPrograms()
 										}
 
 										std::string result;
-										megaPPGenerate(result, fogOrPpl != 0, cube != 0, specular != 0, ppClip != 0, tableUBO != 0, cameraUBO != 0, objectUBO != 0, materialUBO != 0, linked != 0);
+										megaPPGenerate(result, fogOrPpl != 0, cube, specular != 0, ppClip != 0, tableUBO != 0, cameraUBO != 0, objectUBO != 0, materialUBO != 0, linked != 0);
 
 										CPixelProgram *pp = new CPixelProgram();
 										IProgram::CSource *src = new IProgram::CSource();
@@ -881,8 +887,7 @@ bool CDriverGL3::setupMegaPixelProgram()
 	}
 	int ppClip = m_VPBuiltinCurrent.PPClipPlane ? 1 : 0;
 	int fogOrPpl = (m_VPBuiltinCurrent.Fog || pplActive || ppClip) ? 1 : 0;
-	// Cube variant: any cubemap in the material's sampler modes
-	int cube = (matDrv->PPBuiltin.TexSamplerMode != 0) ? 1 : 0;
+	int cube = getMegaCubeVariant(matDrv->PPBuiltin.Shader, matDrv->PPBuiltin.TexSamplerMode);
 	int specular = m_VPSpecularOutput ? 1 : 0;
 	int tableUBO = (m_UseMegaLightTableUBO || m_UseMegaObjectUBO) ? 1 : 0;
 	int cameraUBO = (m_UseMegaCameraUBO || m_UseMegaObjectUBO) ? 1 : 0;
@@ -912,6 +917,30 @@ bool CDriverGL3::setupMegaPixelProgram()
 void CDriverGL3::setupMegaPPUniforms()
 {
 	// All mega PP uniforms are uploaded by setupUniforms(PixelProgram).
+}
+
+int CDriverGL3::getMegaCubeVariant(CMaterial::TShader shader, uint64 texSamplerMode)
+{
+	// Sampler modes take two bits per stage
+	const uint64 stage0Cube = SamplerCube;
+	const uint64 stage1Cube = SamplerCube << 2;
+	// A UserColor material holds its texture on stages 0 and 1, and the program reads it once, on stage 0
+	if (shader == CMaterial::UserColor)
+		texSamplerMode &= ~stage1Cube;
+	if ((texSamplerMode & ~(stage0Cube | stage1Cube)) != 0
+	    || ((texSamplerMode & stage0Cube) != 0 && (texSamplerMode & stage1Cube) != 0))
+	{
+		if (!m_MegaCubeStageReported)
+		{
+			m_MegaCubeStageReported = true;
+			nlwarning("GL3: A material reads cube textures that the mega shaders cannot sample (sampler modes 0x%04x): they read one cube texture, on stage 0 or 1 (reported once)", (uint)texSamplerMode);
+		}
+	}
+	if ((texSamplerMode & stage1Cube) != 0)
+		return 1;
+	if ((texSamplerMode & stage0Cube) != 0)
+		return 2;
+	return 0;
 }
 
 } // NLDRIVERGL3

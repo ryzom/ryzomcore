@@ -282,6 +282,7 @@ CDriverGL3::CDriverGL3()
 
 	_RenderTargetFBO = nullptr;
 	m_ZeroAreaRenderTargetReported = false;
+	m_MegaCubeStageReported = false;
 
 	uint i;
 

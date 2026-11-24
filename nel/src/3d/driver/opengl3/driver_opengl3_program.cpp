@@ -2708,7 +2708,7 @@ bool CDriverGL3::setupUserLinkedPrograms(CVertexProgram *vpProg, CPixelProgram *
 	int ppClip = m_VPBuiltinCurrent.PPClipPlane ? 1 : 0;
 	int fogOrPpl = (m_VPBuiltinCurrent.Fog || pplActive || ppClip) ? 1 : 0;
 	int hwClip = (m_VPBuiltinCurrent.ClipPlaneMask != 0) ? 1 : 0;
-	int cube = (matDrv->PPBuiltin.TexSamplerMode != 0) ? 1 : 0;
+	int cube = getMegaCubeVariant(matDrv->PPBuiltin.Shader, matDrv->PPBuiltin.TexSamplerMode);
 	int specular = m_VPSpecularOutput ? 1 : 0;
 
 	// hwClip (native gl_ClipDistance, desktop) and ppClip (PP discard,
@@ -2868,13 +2868,14 @@ bool CDriverGL3::initMegaLinkedPrograms()
 	int materialUBO = 1;
 
 #ifdef __EMSCRIPTEN__
+	// clang-format off
 	{
 		int linkCount = 0;
 		for (int fogOrPpl = 0; fogOrPpl < 2; ++fogOrPpl)
 		for (int hwClip = 0; hwClip < 2; ++hwClip)
 		{
 			if (hwClip && m_PPClipPlanes) continue;
-			for (int cube = 0; cube < 2; ++cube)
+			for (int cube = 0; cube < MegaCubeVariants; ++cube)
 			for (int specular = 0; specular < 2; ++specular)
 			for (int ppClip = 0; ppClip < 2; ++ppClip)
 			{
@@ -2885,6 +2886,7 @@ bool CDriverGL3::initMegaLinkedPrograms()
 		}
 		EM_ASM({ window.nlBeginTask('Linking shader programs', $0); }, linkCount);
 	}
+	// clang-format on
 #endif
 
 	for (int fogOrPpl = 0; fogOrPpl < 2; ++fogOrPpl)
@@ -2894,7 +2896,7 @@ bool CDriverGL3::initMegaLinkedPrograms()
 			// m_PPClipPlanes zeroes ClipPlaneMask on VP, so hwClip=1 is never selected
 			if (hwClip && m_PPClipPlanes) continue;
 
-			for (int cube = 0; cube < 2; ++cube)
+			for (int cube = 0; cube < MegaCubeVariants; ++cube)
 			{
 				for (int specular = 0; specular < 2; ++specular)
 				{
@@ -2981,7 +2983,7 @@ bool CDriverGL3::setupMegaLinkedPrograms()
 	int fogOrPpl = (m_VPBuiltinCurrent.Fog || pplActive || m_VPBuiltinCurrent.PPClipPlane) ? 1 : 0;
 	int hwClip = (m_VPBuiltinCurrent.ClipPlaneMask != 0) ? 1 : 0;
 	int ppClip = m_VPBuiltinCurrent.PPClipPlane ? 1 : 0;
-	int cube = (matDrv->PPBuiltin.TexSamplerMode != 0) ? 1 : 0;
+	int cube = getMegaCubeVariant(matDrv->PPBuiltin.Shader, matDrv->PPBuiltin.TexSamplerMode);
 	int specular = m_VPSpecularOutput ? 1 : 0;
 
 	CShaderProgram *sp = m_MegaLinked[fogOrPpl][hwClip][cube][specular][ppClip];
