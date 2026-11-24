@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ryzom_forgery"
-version = "4.28.4"
+version = "4.28.5"
 description = "Shared Panda3D + ImGui scaffolding for the Ryzom Forgery tool suite"
 requires-python = ">=3.10"
 dependencies = [
@@ -31,6 +31,6 @@ packages = ["ryzom_forgery", "ryzom_forgery.apps", "ryzom_forgery.apps.object_ed
 # (only .py files are picked up by default) -- see panoply_config.py's
 # _BUNDLED_CFG_PATH.
 ryzom_forgery = [
-	"panoply.cfg", "forgery.png", "splashscreen.png", "examples/*.shape",
+	"panoply.cfg", "forgery.png", "patina.png", "splashscreen.png", "examples/*.shape",
 	"creatures_ref.txt", "creatures_ref_cache.json", "shape_slot_index.json", "creatures_anim_cache.json",
 ]

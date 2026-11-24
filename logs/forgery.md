@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-24 — 🎨 Patina icon in APP_INFO and in the wheel, Forgery 4.28.5
+
+`APP_INFO` of `object_editor` (Patina) gets an `"icon": "patina.png"` key (file name relative to the `ryzom_forgery` package), so ryztart can use it for the `.desktop`/`.lnk` launchers it creates after installing Forgery. `patina.png` (64x64) is added to the package and to `package-data` (it is not bundled otherwise).
+
 ## 2026-10-23 — 🐛 Explorer: _draw_favorites/_toggle_favorite restored, Forgery 4.28.3
 
 Forgery 4.28.2 crashed on the first frame (`AttributeError: 'Explorer' object has no attribute

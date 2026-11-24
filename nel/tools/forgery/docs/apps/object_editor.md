@@ -4,7 +4,7 @@
 
 ## Rôle
 
-Patina est l'application principale de Ryzom Forgery : un éditeur/visualiseur de fichiers `.shape` NeL/Ryzom, construit sur Panda3D (rendu 3D) + ImGui (interface). `APP_INFO` (object_editor.py) la déclare avec l'id `"object_editor"`, le nom `"Patina"`, le sous-titre `"Object Editor"`.
+Patina est l'application principale de Ryzom Forgery : un éditeur/visualiseur de fichiers `.shape` NeL/Ryzom, construit sur Panda3D (rendu 3D) + ImGui (interface). `APP_INFO` (object_editor.py) la déclare avec l'id `"object_editor"`, le nom `"Patina"`, le sous-titre `"Object Editor"` et l'icône `"patina.png"` (fichier du paquet `ryzom_forgery`, utilisé par ryztart pour les raccourcis `.desktop`/`.lnk`).
 
 Elle permet de :
 - Parcourir l'arborescence de fichiers via l'Explorer hérité de `ForgeryApp` (filtre par défaut `*.shape`, object_editor.py).

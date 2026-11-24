@@ -131,6 +131,7 @@ APP_INFO = {
 	"name": "Patina",
 	"subtitle": "Object Editor",
 	"description": "Browse, inspect and edit .shape files.",
+	"icon": "patina.png",
 }
 
 
