@@ -201,8 +201,13 @@ static void drawSkybox(UDriver *driver, UMaterial &mat, const CVector &center, f
 		{ CVector(-s, -s, -s), CVector(1, 0, 0), CVector(0, 0, 1) }, // -Y back
 	};
 
-	CQuadColor q;
+	// The cells go to the driver as one draw: a draw of one quad has vertices and uniform blocks of
+	// its own to send, which costs far more than the quad, in a browser most of all
+	static std::vector<CQuadColorUV> quads;
+	quads.clear();
+	CQuadColorUV q;
 	q.Color0 = q.Color1 = q.Color2 = q.Color3 = color;
+	q.Uv0 = q.Uv1 = q.Uv2 = q.Uv3 = CUV(0.f, 0.f);
 
 	for (int f = 0; f < 6; ++f)
 	{
@@ -219,10 +224,11 @@ static void drawSkybox(UDriver *driver, UMaterial &mat, const CVector &center, f
 				q.V1 = org + du * float(i + 1) + dv * float(j);
 				q.V2 = org + du * float(i + 1) + dv * float(j + 1);
 				q.V3 = org + du * float(i)     + dv * float(j + 1);
-				driver->drawQuad(q, mat);
+				quads.push_back(q);
 			}
 		}
 	}
+	driver->drawQuads(quads, mat);
 }
 
 // Draw a colored quad (one face of the cube)
