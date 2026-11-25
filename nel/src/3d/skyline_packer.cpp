@@ -18,6 +18,7 @@
 #include "nel/3d/skyline_packer.h"
 
 #include <algorithm>
+#include <limits>
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -208,6 +209,26 @@ bool CRectBinPacker::widestFirst(const CSizedRect &a, const CSizedRect &b)
 }
 
 // ***************************************************************************
+bool CRectBinPacker::exceedRoom(const std::vector<CSizedRect> &sized, uint binWidth, uint binHeight, sint maxBins)
+{
+	if (maxBins < 0)
+		return false;
+	const uint64 binRoom = (uint64)binWidth * binHeight;
+	if (maxBins > 0 && binRoom > std::numeric_limits<uint64>::max() / (uint)maxBins)
+		return false; // more room than the number holds: not known
+	const uint64 room = binRoom * (uint)maxBins;
+	uint64 used = 0;
+	for (uint i = 0; i < sized.size(); ++i)
+	{
+		const uint64 area = (uint64)sized[i].Width * sized[i].Height;
+		if (area > room - used)
+			return true;
+		used += area;
+	}
+	return false;
+}
+
+// ***************************************************************************
 bool CRectBinPacker::packInOrder(uint binWidth, uint binHeight, sint maxBins, std::vector<CPackRect> &places, uint &numBins)
 {
 	numBins = 0;
@@ -241,6 +262,12 @@ bool CRectBinPacker::packInOrder(uint binWidth, uint binHeight, sint maxBins, st
 bool CRectBinPacker::packSized(const std::vector<CSizedRect> &sized, uint binWidth, uint binHeight, sint maxBins,
     std::vector<CPackRect> &places, uint &numBins)
 {
+	// Full bins are what makes the rectangles give way, and a rectangle that gives way is tried at
+	// every smaller size in both orders: where the bins are full to the last pixel, this tells
+	// without placing anything
+	if (exceedRoom(sized, binWidth, binHeight, maxBins))
+		return false;
+
 	m_Order = sized;
 	std::sort(m_Order.begin(), m_Order.end(), tallestFirst);
 	if (packInOrder(binWidth, binHeight, maxBins, places, numBins))

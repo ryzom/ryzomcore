@@ -225,20 +225,21 @@ void CWaterReflectionManager::reportVisibleSurface(float planeZ, float screenAre
 	if (screenArea <= 0.f) return;
 
 	sint32 key = planeKey(planeZ);
-	std::map<sint32, CPlaneStats>::iterator it = _Collected.find(key);
-	if (it == _Collected.end())
+	CPlaneStats *collected = findPlane(_Collected, key);
+	if (!collected)
 	{
 		CPlaneStats st;
+		st.Key = key;
 		st.PlaneZ = planeZ;
 		st.Area = screenArea;
 		st.Min = screenMin;
 		st.Max = screenMax;
 		st.Allowed = shapeAllows;
-		_Collected[key] = st;
+		_Collected.push_back(st);
 	}
 	else
 	{
-		CPlaneStats &st = it->second;
+		CPlaneStats &st = *collected;
 		st.Area += screenArea;
 		st.Min.x = std::min(st.Min.x, screenMin.x);
 		st.Min.y = std::min(st.Min.y, screenMin.y);
@@ -249,13 +250,28 @@ void CWaterReflectionManager::reportVisibleSurface(float planeZ, float screenAre
 }
 
 // ***************************************************************************
+CWaterReflectionManager::CPlaneStats *CWaterReflectionManager::findPlane(std::vector<CPlaneStats> &planes, sint32 key)
+{
+	for (uint i = 0; i < planes.size(); ++i)
+	{
+		if (planes[i].Key == key)
+			return &planes[i];
+	}
+	return nullptr;
+}
+
+// ***************************************************************************
 const CWaterReflectionManager::CActiveReflection *CWaterReflectionManager::getActiveReflection(float planeZ) const
 {
 	const CView *view = currentView();
 	if (!view) return nullptr;
-	std::map<sint32, CActiveReflection>::const_iterator it = view->Active.find(planeKey(planeZ));
-	if (it == view->Active.end()) return nullptr;
-	return &it->second;
+	const sint32 key = planeKey(planeZ);
+	for (uint i = 0; i < view->Active.size(); ++i)
+	{
+		if (view->Active[i].Key == key)
+			return &view->Active[i].Refl;
+	}
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -263,9 +279,7 @@ const CWaterReflectionManager::CActiveReflection *CWaterReflectionManager::getAc
 {
 	const CView *view = currentView();
 	if (!view || index >= view->Active.size()) return nullptr;
-	std::map<sint32, CActiveReflection>::const_iterator it = view->Active.begin();
-	std::advance(it, index);
-	return &it->second;
+	return &view->Active[index].Refl;
 }
 
 
@@ -296,9 +310,10 @@ uint CWaterReflectionManager::beginPasses()
 	// applications that never render reflections must not accumulate stats
 	_CollectionArmed = true;
 
-	// Take the merged stats from the last main render
-	std::map<sint32, CPlaneStats> collected;
-	collected.swap(_Collected);
+	// Take the merged stats from the last main render. The two lists change
+	// places, and both keep their memory.
+	m_FrameStats.clear();
+	m_FrameStats.swap(_Collected);
 
 	for (uint i = 0; i < _Views.size(); ++i)
 	{
@@ -313,7 +328,7 @@ uint CWaterReflectionManager::beginPasses()
 	_Passes.clear();
 	m_PassesFixedSize = _FixedSize;
 
-	if (!_Enabled || _MaxReflections == 0 || collected.empty())
+	if (!_Enabled || _MaxReflections == 0 || m_FrameStats.empty())
 	{
 		_PrevAdmitted.clear();
 		return 0;
@@ -330,20 +345,20 @@ uint CWaterReflectionManager::beginPasses()
 	// Build candidate list: allowed planes with the camera above them.
 	// Hysteresis: planes admitted last frame get a sticky area bonus so a
 	// challenger must clearly out-rank them before stealing a slot.
-	std::vector<std::pair<float, sint32> > candidates; // (-effective area, key) for ascending sort
-	for (std::map<sint32, CPlaneStats>::iterator it = collected.begin(); it != collected.end(); ++it)
+	m_Candidates.clear(); // (-effective area, key) for ascending sort
+	for (uint i = 0; i < m_FrameStats.size(); ++i)
 	{
-		const CPlaneStats &st = it->second;
+		const CPlaneStats &st = m_FrameStats[i];
 		if (!(st.Allowed || _ForceReflections)) continue;
 		if (camZ <= st.PlaneZ + WATER_REFLECTION_MIN_CAM_HEIGHT) continue; // underwater / grazing: envmap fallback
 		float effArea = st.Area;
-		if (std::find(_PrevAdmitted.begin(), _PrevAdmitted.end(), it->first) != _PrevAdmitted.end())
+		if (std::find(_PrevAdmitted.begin(), _PrevAdmitted.end(), st.Key) != _PrevAdmitted.end())
 			effArea *= WATER_REFLECTION_HYSTERESIS;
-		candidates.push_back(std::make_pair(-effArea, it->first));
+		m_Candidates.push_back(std::make_pair(-effArea, st.Key));
 	}
-	std::sort(candidates.begin(), candidates.end());
+	std::sort(m_Candidates.begin(), m_Candidates.end());
 
-	uint numAdmitted = (uint)candidates.size();
+	uint numAdmitted = (uint)m_Candidates.size();
 	if (_MaxReflections >= 0)
 		numAdmitted = std::min(numAdmitted, (uint)_MaxReflections);
 
@@ -355,9 +370,10 @@ uint CWaterReflectionManager::beginPasses()
 	_Passes.resize(numAdmitted);
 	for (uint i = 0; i < numAdmitted; ++i)
 	{
-		_Passes[i].Key = candidates[i].second;
-		_Passes[i].Stats = collected[candidates[i].second];
-		_PrevAdmitted.push_back(candidates[i].second);
+		const sint32 key = m_Candidates[i].second;
+		_Passes[i].Key = key;
+		_Passes[i].Stats = *findPlane(m_FrameStats, key);
+		_PrevAdmitted.push_back(key);
 	}
 
 	// Fixed mode: the passes get their tiles now, the same in every view,
@@ -765,7 +781,23 @@ void CWaterReflectionManager::endPass(uint pass)
 	--_AnyReflectionRenderCount;
 
 	// Publish for the coming main render of the current view
-	ensureCurrentView().Active[_Passes[pass].Key] = _Passes[pass].Refl;
+	// (the list is in the order of the keys)
+	std::vector<CPublishedReflection> &active = ensureCurrentView().Active;
+	const sint32 key = _Passes[pass].Key;
+	uint at = 0;
+	while (at < active.size() && active[at].Key < key)
+		++at;
+	if (at < active.size() && active[at].Key == key)
+	{
+		active[at].Refl = _Passes[pass].Refl;
+	}
+	else
+	{
+		CPublishedReflection published;
+		published.Key = key;
+		published.Refl = _Passes[pass].Refl;
+		active.insert(active.begin() + at, published);
+	}
 
 	// Restore scene and driver state
 	drv->setColorMask(true, true, true, true);

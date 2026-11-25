@@ -112,7 +112,8 @@ struct CPackRect
  * cut to the bin first.
  *
  * A packer keeps its working memory from call to call, and so does the list it is given: a packer
- * that places a list in every frame allocates nothing once it has had its largest list.
+ * that places a list in every frame allocates nothing once its lists have grown, which is when
+ * the largest list has been placed both with room for all and without.
  */
 class CRectBinPacker
 {
@@ -136,6 +137,9 @@ private:
 	static bool tallestFirst(const CSizedRect &a, const CSizedRect &b);
 	// and the widest first, of these the tallest, of these by priority
 	static bool widestFirst(const CSizedRect &a, const CSizedRect &b);
+
+	// True when the rectangles are more than the bins hold: they have no room then, in whatever order
+	static bool exceedRoom(const std::vector<CSizedRect> &sized, uint binWidth, uint binHeight, sint maxBins);
 
 	// Places the rectangles of m_Order in that order, each in the first bin that has room for it.
 	// Returns false when one has no room; what is in places means nothing then.

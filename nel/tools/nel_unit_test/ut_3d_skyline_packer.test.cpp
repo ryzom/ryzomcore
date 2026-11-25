@@ -457,6 +457,39 @@ TEST(CUT3DSkylinePacker, byPriorityKeepsShortSidesAndCutsToTheBin)
 	EXPECT_EQ(32u, rects[2].Height);
 }
 
+// Bins whose room together is more than a number holds are no reason to refuse, nor to go wrong
+TEST(CUT3DSkylinePacker, byPriorityInVeryLargeBins)
+{
+	const uint large = 0xFFFFFFFFu;
+	std::vector<NL3D::CPackRect> rects;
+	rects.push_back(rect(large, large));
+	rects.push_back(rect(large, 16));
+	rects.push_back(rect(64, large));
+	EXPECT_EQ(3u, NL3D::packRectsByPriority(rects, large, large, 3, 32));
+	for (uint i = 0; i < 3; ++i)
+	{
+		EXPECT_TRUE(rects[i].Placed) << "rect " << i;
+		EXPECT_EQ(0u, rects[i].X);
+		EXPECT_EQ(0u, rects[i].Y);
+	}
+	EXPECT_EQ(large, rects[0].Width);
+	EXPECT_EQ(large, rects[0].Height);
+
+	// one bin: the first fills it, the others find no room at any size
+	rects.clear();
+	rects.push_back(rect(large, large));
+	rects.push_back(rect(large, 16));
+	rects.push_back(rect(64, large));
+	EXPECT_EQ(1u, NL3D::packRectsByPriority(rects, large, large, 1, 32));
+	EXPECT_TRUE(rects[0].Placed);
+	EXPECT_FALSE(rects[1].Placed);
+	EXPECT_EQ(32u, rects[1].Width);
+	EXPECT_EQ(16u, rects[1].Height);
+	EXPECT_FALSE(rects[2].Placed);
+	EXPECT_EQ(32u, rects[2].Width);
+	EXPECT_EQ(32u, rects[2].Height);
+}
+
 TEST(CUT3DSkylinePacker, byPriorityWithoutBins)
 {
 	std::vector<NL3D::CPackRect> rects(2, rect(8, 8));

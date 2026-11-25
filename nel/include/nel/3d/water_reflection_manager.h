@@ -37,6 +37,7 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace NL3D {
@@ -211,7 +212,7 @@ public:
 	/// \name Queries during the main render (all for the current view)
 	// @{
 	// clang-format off
-	/// Returns the active reflection for the given plane height, or NULL.
+	/// Returns the active reflection for the given plane height, or NULL. Valid until a pass of the view ends or the passes begin again.
 	const CActiveReflection	*getActiveReflection(float planeZ) const;
 	/// Returns the active reflection by index (0..getNumActiveReflections()-1), or NULL. For debug display.
 	const CActiveReflection	*getActiveReflectionByIndex(uint index) const;
@@ -267,13 +268,16 @@ private:
 	static sint32	planeKey(float z) { return (sint32)floorf(z * 16.f + 0.5f); }
 
 	// Per-plane visibility stats collected during the main render
+	// clang-format off
 	struct CPlaneStats
 	{
+		sint32				Key;		// planeKey of PlaneZ
 		float				PlaneZ;
 		float				Area;		// summed projected screen area
 		NLMISC::CVector2f	Min, Max;	// united screen AABB, [0,1]
 		bool				Allowed;	// at least one reflection-capable surface (artist flag or reflection shape list)
 	};
+	// clang-format on
 
 	// One reflection render target texture. In fixed mode it holds the tiles
 	// of the view's passes, see planTiles.
@@ -302,12 +306,21 @@ private:
 		}
 	};
 
+	// A reflection published for the main render, with the key of its plane
+	struct CPublishedReflection
+	{
+		sint32 Key;
+		CActiveReflection Refl;
+	};
+
 	// Per-view (per-eye) reflection state
+	// clang-format off
 	struct CView
 	{
-		std::map<sint32, CActiveReflection>	Active;	// published reflections for the current main render
+		std::vector<CPublishedReflection>	Active;	// published reflections for the current main render, in the order of their keys
 		std::vector<CSlot>					Slots;
 	};
+	// clang-format on
 
 	// What a pass renders of the reflected view, and the sizes that follow from it
 	struct CPassRegion
@@ -327,6 +340,11 @@ private:
 		CActiveReflection	Refl;	// filled by beginPass, published by endPass
 	};
 	// clang-format on
+
+	// The stats of a plane in a list, or NULL. The lists of planes are plain
+	// lists that keep their memory from frame to frame: a frame has a handful
+	// of planes.
+	static CPlaneStats *findPlane(std::vector<CPlaneStats> &planes, sint32 key);
 
 	CCamera			*getReflCamera();
 	const CView		*currentView() const { return _CurrentView < _Views.size() ? &_Views[_CurrentView] : nullptr; }
@@ -363,7 +381,9 @@ private:
 	float								_CurrentPassPlaneZ; // water plane height of the pass being rendered
 	uint								_CurrentView;
 
-	std::map<sint32, CPlaneStats>		_Collected;	// stats from the current main render, merged across views
+	std::vector<CPlaneStats>			_Collected;	// stats from the current main render, merged across views
+	std::vector<CPlaneStats>			m_FrameStats;	// the stats that beginPasses took from _Collected
+	std::vector<std::pair<float, sint32> >	m_Candidates;	// working list of beginPasses, kept for its memory
 	std::vector<CView>					_Views;		// per-view published reflections and render targets
 	std::vector<sint32>					_PrevAdmitted; // hysteresis: planes admitted last frame
 	std::vector<CPassData>				_Passes;	// selected passes between beginPasses and endPasses
