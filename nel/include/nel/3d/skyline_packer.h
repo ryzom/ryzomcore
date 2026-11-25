@@ -75,7 +75,7 @@ private:
 	uint m_Height;
 };
 
-/// A rectangle of packRectsByPriority
+/// A rectangle of CRectBinPacker
 struct CPackRect
 {
 	/// The size asked for; afterwards the size given, which is smaller when there was no room for the size asked for
@@ -111,10 +111,49 @@ struct CPackRect
  * \c minSize (a side that is shorter than \c minSize stays as it is). A rectangle larger than a bin is
  * cut to the bin first.
  *
- * \param rects the rectangles, by priority, see CPackRect
- * \param maxBins the number of bins there may be, or negative for any number
- * \return the number of bins in use
+ * A packer keeps its working memory from call to call, and so does the list it is given: a packer
+ * that places a list in every frame allocates nothing once it has had its largest list.
  */
+class CRectBinPacker
+{
+public:
+	/**
+	 * \param rects the rectangles, by priority, see CPackRect
+	 * \param maxBins the number of bins there may be, or negative for any number
+	 * \return the number of bins in use
+	 */
+	uint pack(std::vector<CPackRect> &rects, uint binWidth, uint binHeight, sint maxBins, uint minSize);
+
+private:
+	// A rectangle of the list at the size it is tried at
+	struct CSizedRect
+	{
+		uint Index;
+		uint Width, Height;
+	};
+
+	// The orders the rectangles are placed in: the tallest first, of these the widest, of these by priority,
+	static bool tallestFirst(const CSizedRect &a, const CSizedRect &b);
+	// and the widest first, of these the tallest, of these by priority
+	static bool widestFirst(const CSizedRect &a, const CSizedRect &b);
+
+	// Places the rectangles of m_Order in that order, each in the first bin that has room for it.
+	// Returns false when one has no room; what is in places means nothing then.
+	bool packInOrder(uint binWidth, uint binHeight, sint maxBins, std::vector<CPackRect> &places, uint &numBins);
+	// Places the rectangles at the sizes given: the tallest first, and where that has no room, the widest first.
+	// Returns false when neither has room for all; what is in places means nothing then.
+	bool packSized(const std::vector<CSizedRect> &sized, uint binWidth, uint binHeight, sint maxBins,
+	    std::vector<CPackRect> &places, uint &numBins);
+
+	std::vector<CSkylinePacker> m_Bins;
+	std::vector<CSizedRect> m_Sized; // all rectangles, at the sizes asked for
+	std::vector<CSizedRect> m_Kept; // the ones that have room, at the sizes they have it at
+	std::vector<CSizedRect> m_Order; // the ones of an attempt, in its order
+	std::vector<CPackRect> m_Attempt;
+	std::vector<CPackRect> m_Placed;
+};
+
+/// CRectBinPacker::pack with a packer of its own, for a list that is placed once
 uint packRectsByPriority(std::vector<CPackRect> &rects, uint binWidth, uint binHeight, sint maxBins, uint minSize);
 
 } // NL3D

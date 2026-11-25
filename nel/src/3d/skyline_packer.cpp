@@ -191,61 +191,44 @@ bool CSkylinePacker::place(uint width, uint height, uint &x, uint &y)
 	return true;
 }
 
-namespace {
-
-// A rectangle of the list at the size it is tried at
-struct CSizedRect
+// ***************************************************************************
+bool CRectBinPacker::tallestFirst(const CSizedRect &a, const CSizedRect &b)
 {
-	uint Index;
-	uint Width, Height;
-};
+	if (a.Height != b.Height) return a.Height > b.Height;
+	if (a.Width != b.Width) return a.Width > b.Width;
+	return a.Index < b.Index;
+}
 
-// An order the rectangles are placed in: the tallest first, of these the widest, of these by priority
-struct CTallestFirst
+// ***************************************************************************
+bool CRectBinPacker::widestFirst(const CSizedRect &a, const CSizedRect &b)
 {
-	bool operator()(const CSizedRect &a, const CSizedRect &b) const
-	{
-		if (a.Height != b.Height) return a.Height > b.Height;
-		if (a.Width != b.Width) return a.Width > b.Width;
-		return a.Index < b.Index;
-	}
-};
+	if (a.Width != b.Width) return a.Width > b.Width;
+	if (a.Height != b.Height) return a.Height > b.Height;
+	return a.Index < b.Index;
+}
 
-// The other order: the widest first, of these the tallest, of these by priority
-struct CWidestFirst
-{
-	bool operator()(const CSizedRect &a, const CSizedRect &b) const
-	{
-		if (a.Width != b.Width) return a.Width > b.Width;
-		if (a.Height != b.Height) return a.Height > b.Height;
-		return a.Index < b.Index;
-	}
-};
-
-// Places the rectangles at the sizes given in the order given, each in the first bin that has room for it.
-// Returns false when one has no room; what is in places means nothing then.
-bool packInOrder(const std::vector<CSizedRect> &sized, uint binWidth, uint binHeight, sint maxBins,
-    std::vector<CSkylinePacker> &bins, std::vector<CPackRect> &places, uint &numBins)
+// ***************************************************************************
+bool CRectBinPacker::packInOrder(uint binWidth, uint binHeight, sint maxBins, std::vector<CPackRect> &places, uint &numBins)
 {
 	numBins = 0;
-	for (uint i = 0; i < sized.size(); ++i)
+	for (uint i = 0; i < m_Order.size(); ++i)
 	{
-		CPackRect &place = places[sized[i].Index];
-		place.Width = sized[i].Width;
-		place.Height = sized[i].Height;
+		CPackRect &place = places[m_Order[i].Index];
+		place.Width = m_Order[i].Width;
+		place.Height = m_Order[i].Height;
 		uint bin = 0;
-		while (bin < numBins && !bins[bin].place(place.Width, place.Height, place.X, place.Y))
+		while (bin < numBins && !m_Bins[bin].place(place.Width, place.Height, place.X, place.Y))
 			++bin;
 		if (bin == numBins)
 		{
 			if (maxBins >= 0 && numBins >= (uint)maxBins)
 				return false;
-			if (bins.size() <= bin)
-				bins.resize(bin + 1);
-			bins[bin].reset(binWidth, binHeight);
+			if (m_Bins.size() <= bin)
+				m_Bins.resize(bin + 1);
+			m_Bins[bin].reset(binWidth, binHeight);
 			++numBins;
 			// what has no room in an empty bin has no room at all
-			if (!bins[bin].place(place.Width, place.Height, place.X, place.Y))
+			if (!m_Bins[bin].place(place.Width, place.Height, place.X, place.Y))
 				return false;
 		}
 		place.Bin = bin;
@@ -254,64 +237,61 @@ bool packInOrder(const std::vector<CSizedRect> &sized, uint binWidth, uint binHe
 	return true;
 }
 
-// Places the rectangles at the sizes given: the tallest first, and where that has no room, the widest first.
-// Returns false when neither has room for all; what is in places means nothing then.
-bool packSized(std::vector<CSizedRect> sized, uint binWidth, uint binHeight, sint maxBins,
-    std::vector<CSkylinePacker> &bins, std::vector<CPackRect> &places, uint &numBins)
+// ***************************************************************************
+bool CRectBinPacker::packSized(const std::vector<CSizedRect> &sized, uint binWidth, uint binHeight, sint maxBins,
+    std::vector<CPackRect> &places, uint &numBins)
 {
-	std::sort(sized.begin(), sized.end(), CTallestFirst());
-	if (packInOrder(sized, binWidth, binHeight, maxBins, bins, places, numBins))
+	m_Order = sized;
+	std::sort(m_Order.begin(), m_Order.end(), tallestFirst);
+	if (packInOrder(binWidth, binHeight, maxBins, places, numBins))
 		return true;
-	std::sort(sized.begin(), sized.end(), CWidestFirst());
-	return packInOrder(sized, binWidth, binHeight, maxBins, bins, places, numBins);
+	std::sort(m_Order.begin(), m_Order.end(), widestFirst);
+	return packInOrder(binWidth, binHeight, maxBins, places, numBins);
 }
 
-} // namespace
-
 // ***************************************************************************
-uint packRectsByPriority(std::vector<CPackRect> &rects, uint binWidth, uint binHeight, sint maxBins, uint minSize)
+uint CRectBinPacker::pack(std::vector<CPackRect> &rects, uint binWidth, uint binHeight, sint maxBins, uint minSize)
 {
 	const uint count = (uint)rects.size();
-	std::vector<CSizedRect> sized(count);
+	m_Sized.resize(count);
 	for (uint i = 0; i < count; ++i)
 	{
-		sized[i].Index = i;
-		sized[i].Width = std::min(rects[i].Width, binWidth);
-		sized[i].Height = std::min(rects[i].Height, binHeight);
+		m_Sized[i].Index = i;
+		m_Sized[i].Width = std::min(rects[i].Width, binWidth);
+		m_Sized[i].Height = std::min(rects[i].Height, binHeight);
 	}
 
-	std::vector<CSkylinePacker> bins;
-	std::vector<CPackRect> attempt(count);
+	// The lists are swapped, not copied: the list of the caller and the lists here keep their memory
+	m_Attempt.assign(count, CPackRect());
 	uint numBins = 0;
-	if (packSized(sized, binWidth, binHeight, maxBins, bins, attempt, numBins))
+	if (packSized(m_Sized, binWidth, binHeight, maxBins, m_Attempt, numBins))
 	{
-		rects.swap(attempt);
+		rects.swap(m_Attempt);
 		return numBins;
 	}
 
 	// The bins are full. By priority, each rectangle gets the largest size at which it has room
 	// together with the ones before it; one that has no room at its smallest size is left out.
-	std::vector<CPackRect> placed(count);
-	std::vector<CSizedRect> kept;
-	kept.reserve(count);
+	m_Placed.assign(count, CPackRect());
+	m_Kept.clear();
 	numBins = 0;
 	for (uint i = 0; i < count; ++i)
 	{
-		CSizedRect rect = sized[i];
+		CSizedRect rect = m_Sized[i];
 		const uint minWidth = std::min(rect.Width, minSize);
 		const uint minHeight = std::min(rect.Height, minSize);
 		for (;;)
 		{
-			kept.push_back(rect);
-			attempt.assign(count, CPackRect());
+			m_Kept.push_back(rect);
+			m_Attempt.assign(count, CPackRect());
 			uint attemptBins;
-			if (packSized(kept, binWidth, binHeight, maxBins, bins, attempt, attemptBins))
+			if (packSized(m_Kept, binWidth, binHeight, maxBins, m_Attempt, attemptBins))
 			{
-				placed.swap(attempt);
+				m_Placed.swap(m_Attempt);
 				numBins = attemptBins;
 				break;
 			}
-			kept.pop_back();
+			m_Kept.pop_back();
 			if (rect.Width <= minWidth && rect.Height <= minHeight)
 				break;
 			rect.Width = std::max(minWidth, rect.Width / 2);
@@ -320,15 +300,22 @@ uint packRectsByPriority(std::vector<CPackRect> &rects, uint binWidth, uint binH
 	}
 	for (uint i = 0; i < count; ++i)
 	{
-		if (!placed[i].Placed)
+		if (!m_Placed[i].Placed)
 		{
 			// the size it had no room at
-			placed[i].Width = std::min(sized[i].Width, minSize);
-			placed[i].Height = std::min(sized[i].Height, minSize);
+			m_Placed[i].Width = std::min(m_Sized[i].Width, minSize);
+			m_Placed[i].Height = std::min(m_Sized[i].Height, minSize);
 		}
 	}
-	rects.swap(placed);
+	rects.swap(m_Placed);
 	return numBins;
+}
+
+// ***************************************************************************
+uint packRectsByPriority(std::vector<CPackRect> &rects, uint binWidth, uint binHeight, sint maxBins, uint minSize)
+{
+	CRectBinPacker packer;
+	return packer.pack(rects, binWidth, binHeight, maxBins, minSize);
 }
 
 } // NL3D

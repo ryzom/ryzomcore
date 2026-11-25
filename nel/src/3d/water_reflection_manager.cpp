@@ -34,7 +34,6 @@
 #include "nel/3d/driver.h"
 #include "nel/3d/scene.h"
 #include "nel/3d/scissor.h"
-#include "nel/3d/skyline_packer.h"
 #include "nel/3d/texture_offscreen.h"
 #include "nel/3d/u_scene.h"
 #include "nel/3d/water_model.h"
@@ -479,7 +478,8 @@ void CWaterReflectionManager::planTiles(const CViewport &viewport, uint32 winW, 
 	// eye mirrors the box further to a side, where the view cuts some of it
 	// off: the region of that eye is the same or smaller, never larger, and
 	// the views can share the tiles.
-	std::vector<CPackRect> rects(_Passes.size());
+	std::vector<CPackRect> &rects = m_TileRects;
+	rects.assign(_Passes.size(), CPackRect());
 	m_TileAllocW = 0;
 	m_TileAllocH = 0;
 	for (uint i = 0; i < _Passes.size(); ++i)
@@ -496,7 +496,7 @@ void CWaterReflectionManager::planTiles(const CViewport &viewport, uint32 winW, 
 	// With the budget full a tile gets what the passes before it leave, at
 	// half its sides until it has room: the UV scale and bias absorb the
 	// size, the plane reflects at a lower resolution
-	m_TileSlots = packRectsByPriority(rects, m_TileAllocW, m_TileAllocH, _MaxTextures, WATER_REFLECTION_SNAP);
+	m_TileSlots = m_TilePacker.pack(rects, m_TileAllocW, m_TileAllocH, _MaxTextures, WATER_REFLECTION_SNAP);
 
 	// A pass whose tile has no room at the smallest size leaves the frame
 	uint numPasses = 0;

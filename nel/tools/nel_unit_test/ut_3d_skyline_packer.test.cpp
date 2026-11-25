@@ -468,6 +468,42 @@ TEST(CUT3DSkylinePacker, byPriorityWithoutBins)
 	EXPECT_EQ(0u, NL3D::packRectsByPriority(rects, 64, 64, -1, 32));
 }
 
+// A packer that is used again gives what a new one gives: nothing of a list stays behind for the next
+TEST(CUT3DSkylinePacker, packerUsedAgainGivesTheSame)
+{
+	CSequence sequence(496);
+	const uint sides[5] = { 16, 32, 64, 128, 256 };
+	NL3D::CRectBinPacker packer;
+	std::vector<NL3D::CPackRect> rects;
+	for (uint round = 0; round < 300; ++round)
+	{
+		const uint binWidth = sides[2 + sequence.next(3)] * 2, binHeight = sides[2 + sequence.next(3)];
+		const sint maxBins = (sint)sequence.next(4) - 1;
+		const uint count = sequence.next(20);
+		// the list of the round before is the one that is filled again
+		rects.clear();
+		for (uint i = 0; i < count; ++i)
+		{
+			const uint rectWidth = sides[sequence.next(5)];
+			const uint rectHeight = sides[sequence.next(5)];
+			rects.push_back(rect(rectWidth, rectHeight));
+		}
+		std::vector<NL3D::CPackRect> fresh = rects;
+		const uint numBins = packer.pack(rects, binWidth, binHeight, maxBins, 32);
+		EXPECT_EQ(NL3D::packRectsByPriority(fresh, binWidth, binHeight, maxBins, 32), numBins);
+		ASSERT_EQ(fresh.size(), rects.size());
+		for (size_t i = 0; i < rects.size(); ++i)
+		{
+			EXPECT_EQ(fresh[i].Placed, rects[i].Placed) << "round " << round << " rect " << i;
+			EXPECT_EQ(fresh[i].Width, rects[i].Width) << "round " << round << " rect " << i;
+			EXPECT_EQ(fresh[i].Height, rects[i].Height) << "round " << round << " rect " << i;
+			EXPECT_EQ(fresh[i].Bin, rects[i].Bin) << "round " << round << " rect " << i;
+			EXPECT_EQ(fresh[i].X, rects[i].X) << "round " << round << " rect " << i;
+			EXPECT_EQ(fresh[i].Y, rects[i].Y) << "round " << round << " rect " << i;
+		}
+	}
+}
+
 TEST(CUT3DSkylinePacker, byPriorityNeverOverlaps)
 {
 	CSequence sequence(8128);

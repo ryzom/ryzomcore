@@ -32,6 +32,7 @@
 #include <nel/misc/vector_2f.h>
 
 #include <nel/3d/frustum.h>
+#include <nel/3d/skyline_packer.h>
 #include <nel/3d/viewport.h>
 
 #include <map>
@@ -338,7 +339,7 @@ private:
 
 	// Give every pass of the frame its tile (fixed mode), for a viewport.
 	// The tiles are placed together, by size, each as low as it goes in the
-	// first texture with room for it (packRectsByPriority). When no texture
+	// first texture with room for it (CRectBinPacker). When no texture
 	// has room and no new one may be opened, the tiles shrink, those of the
 	// later passes first; a pass whose tile has no room at the smallest size
 	// is taken out of the frame's passes.
@@ -369,6 +370,8 @@ private:
 	bool								m_PassesFixedSize;	// the allocation mode of these passes, as beginPasses found it
 	uint								m_TileSlots;	// fixed mode: the textures per view that their tiles are in
 	uint								m_TileAllocW, m_TileAllocH;	// fixed mode: the size of these textures
+	CRectBinPacker						m_TilePacker;	// places the tiles; kept for its working memory
+	std::vector<CPackRect>				m_TileRects;	// the list it places, kept for the same
 	CCamera								*_ReflCamera;
 
 	static uint							_AnyReflectionRenderCount; // reflection passes rendering, across all scenes
