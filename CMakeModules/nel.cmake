@@ -471,6 +471,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
 
   OPTION(WITH_RYZOM_LIVE          "Use ryzom.com urls"                            OFF)
   OPTION(WITH_RYZOM_FORGE         "Build the code guarded by RYZOM_FORGE (not maintained)" OFF)
+  OPTION(WITH_RYZOM_CLASSIC       "Build with the behaviour of Ryzom Classic where it differs (RYZOM_CLASSIC)" OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)

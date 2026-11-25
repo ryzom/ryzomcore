@@ -319,7 +319,16 @@ CVariable<uint16>			MaxCharacteristicValue("egs","MaxCharacteristicValue", "Max 
 // factor on creature and npc damage
 CVariable<float>			BotDamageFactor("egs","BotDamageFactor", "Factor applied on all Bots (creature and npcs) damage", 1.0f, 0, true );
 
+// With the factor, the damage of a creature's hit is raised by the share of hits a player dodges on average
+// (CStaticCreatures::compileCreatureDamagePerHit). The original creature sheets count on it, and so do those of
+// RYZOM_FORGE. The generated creature sheets of Ryzom Core give the damage of a hit as it is.
+// clang-format off
+#if defined(RYZOM_FORGE) || defined(RYZOM_CLASSIC)
 CVariable<bool>				ApplyAverageDodgeFactor("egs","ApplyAverageDodgeFactor", "Whether to use the average dodge factor in calculating mob damage ", true, 0, true );
+#else
+CVariable<bool>				ApplyAverageDodgeFactor("egs","ApplyAverageDodgeFactor", "Whether to use the average dodge factor in calculating mob damage ", false, 0, true );
+#endif
+// clang-format on
 
 CVariable<float>			HitChestStaLossFactor("egs","HitChestStaLossFactor", "factor of damage also lost in sta when hit to chest", 0.5f, 0, true );
 CVariable<float>			HitHeadStunDuration("egs","HitHeadStunDuration", "duration (in seconds) of a stun when hit to head", 2.5f, 0, true );

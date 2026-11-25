@@ -146,6 +146,13 @@ IF(WITH_RYZOM_FORGE)
 ENDIF()
 
 #-----------------------------------------------------------------------------
+# behaviour of Ryzom Classic where it differs, guarded by RYZOM_CLASSIC
+IF(WITH_RYZOM_CLASSIC)
+  MESSAGE("Building with the behaviour of Ryzom Classic (RYZOM_CLASSIC)")
+  ADD_DEFINITIONS(-DRYZOM_CLASSIC)
+ENDIF()
+
+#-----------------------------------------------------------------------------
 #Platform specifics
 
 SETUP_EXTERNAL()

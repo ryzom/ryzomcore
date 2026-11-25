@@ -495,6 +495,9 @@ CInterfaceManager::CInterfaceManager()
 #ifdef RYZOM_FORGE
 	parser->addFeatureFlag("ryzom_forge");
 #endif
+#ifdef RYZOM_CLASSIC
+	parser->addFeatureFlag("ryzom_classic");
+#endif
 
 	parser->setSetupOptionsCallback( this );
 	parser->addModule( "scene3d", new CIF3DSceneParser() );
