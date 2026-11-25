@@ -716,11 +716,14 @@ public:
 	  * reflection takes it too (UWaterEnvMap::setAlpha), so that the fallback
 	  * matches the reflection there. */
 	static const uint8	  WaterReflectionAlpha = 192;
-	/** Select the water planes to reflect this frame and save the scene and
-	  * driver state; returns the number of reflection passes to render.
+	/** Select the water planes to reflect this frame; returns the number of
+	  * reflection passes to render.
 	  * Call once per frame before the scene render (in the scene
 	  * reflections pass of the render loop), with the scene camera set up
-	  * for the frame. For each pass, call beginWaterReflectionPass(), render
+	  * for the frame. In fixed allocation mode the passes get their tiles
+	  * in the reflection textures at this call, sized for the scene
+	  * viewport as it is then, and a plane whose tile finds no room is not
+	  * among the passes. For each pass, call beginWaterReflectionPass(), render
 	  * the scene content through your own render logic (the reflected
 	  * camera is set as the scene camera; use keepTrav-style flags as for
 	  * any replicated pass), then endWaterReflectionPass(); finish with
@@ -762,9 +765,11 @@ public:
 	  * allocation mode, reflection passes pack their active sub-regions as
 	  * tiles into shared textures, so the reflection budget can be raised
 	  * without one render target allocation per water plane; when the
-	  * texture budget is full, tiles shrink to fit instead of dropping
-	  * planes. -1 = as many textures as needed (default). Ignored in
-	  * dynamic allocation mode. */
+	  * texture budget is full, tiles shrink to fit, the planes with the
+	  * least water on screen first, and a plane whose tile has no room at
+	  * the smallest tile size gets no reflection pass in that frame.
+	  * -1 = as many textures as needed (default). Ignored in dynamic
+	  * allocation mode. */
 	virtual void		  setWaterReflectionMaxTextures(sint maxTextures) = 0;
 	virtual sint		  getWaterReflectionMaxTextures() const = 0;
 	// clang-format on

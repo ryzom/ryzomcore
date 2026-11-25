@@ -651,7 +651,9 @@ SOURCE_GROUP(Util FILES
         matrix_3x4.cpp
         ../../include/nel/3d/matrix_3x4.h
         radix_sort.cpp
-        ../../include/nel/3d/radix_sort.h)
+        ../../include/nel/3d/radix_sort.h
+        skyline_packer.cpp
+        ../../include/nel/3d/skyline_packer.h)
 SOURCE_GROUP(Lighting FILES
         ig_surface_light.cpp
         ../../include/nel/3d/ig_surface_light.h

@@ -63,7 +63,8 @@
 //   K/L - Fewer/more procedural pools
 //   O - Cycle the reflection texture budget (unlimited, 1..4): passes pack
 //       their active regions as tiles into shared render target textures;
-//       when the budget is full, tiles shrink instead of dropping planes.
+//       when the budget is full, tiles shrink, and a plane whose tile has
+//       no room at the smallest size has no reflection in that frame.
 //       Watch the RT overlay [T] to see the pools tile into one texture.
 //   B - Toggle the sky flare: a runtime-built CFlareShape with a procedural
 //       blob texture. Bright reference point in reflections, and exercises

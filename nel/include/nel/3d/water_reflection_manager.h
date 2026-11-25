@@ -146,7 +146,10 @@ public:
 	  * In fixed-size mode the passes' active sub-regions are packed as tiles
 	  * into shared textures (a view's tiles never mix with another view's),
 	  * so several water planes can reflect without one allocation each; when
-	  * the budget is full, tiles shrink to fit rather than dropping planes.
+	  * the budget is full, tiles shrink to fit, the planes with the least
+	  * water on screen first, and a plane whose tile has no room at the
+	  * smallest tile size gets no reflection pass in that frame (its surfaces
+	  * draw as reflection-capable surfaces without a pass do).
 	  * -1 = as many textures as needed (default). Ignored in dynamic mode
 	  * (one texture per pass). */
 	void			setMaxTextures(sint maxTextures) { _MaxTextures = maxTextures; }
@@ -173,14 +176,20 @@ public:
 	/// \name Reflection render passes
 	// @{
 	/** Select the water planes to reflect this frame (consumes the merged
-	  * stats from the last main render). Returns the number of reflection
-	  * passes to render. Selection is camera-independent, so this may be
-	  * called before the render loop starts and the count handed to the
-	  * loop driver (IStereoDisplay::setSceneReflectionPasses); each pass
-	  * may then be rendered once per view. For each pass, set the current
-	  * view, call beginPass(), render the scene content through the
-	  * caller's own render logic, then endPass(); finish the frame with
-	  * endPasses() (safe to call when zero passes were returned). */
+	 * stats from the last main render). Returns the number of reflection
+	 * passes to render. Selection takes the height of the scene camera
+	 * and nothing else of it, so this may be called before the render
+	 * loop sets up the camera of a view and the count handed to the loop
+	 * driver (IStereoDisplay::setSceneReflectionPasses); each pass may
+	 * then be rendered once per view. In fixed-size mode the passes get
+	 * their tiles here, the same in every view, sized for the scene
+	 * viewport as it is at the call (where that is the last frame's, the
+	 * tiles have the resolution that fitted the last frame); a plane
+	 * whose tile finds no room is not among the passes. For each pass,
+	 * set the current
+	 * view, call beginPass(), render the scene content through the
+	 * caller's own render logic, then endPass(); finish the frame with
+	 * endPasses() (safe to call when zero passes were returned). */
 	uint			beginPasses();
 	/** Set up reflection pass 'pass' for the current view: saves the scene
 	  * camera and driver state, binds the render target (cleared on its
@@ -265,15 +274,31 @@ private:
 		bool				Allowed;	// at least one reflection-capable surface (artist flag or reflection shape list)
 	};
 
-	// One reflection render target texture, with per-frame shelf-packing
-	// state: passes claim tiles row by row until the texture is full
+	// One reflection render target texture. In fixed mode it holds the tiles
+	// of the view's passes, see planTiles.
+	// clang-format off
 	struct CSlot
 	{
 		NLMISC::CSmartPtr<ITexture>	Texture;
 		uint						AllocW, AllocH;
-		uint						CursorX, CursorY, RowH;	// shelf cursor, reset each frame
 		bool						Touched;				// (re)allocated + cleared this frame
-		CSlot() : AllocW(0), AllocH(0), CursorX(0), CursorY(0), RowH(0), Touched(false) {}
+		CSlot() : AllocW(0), AllocH(0), Touched(false) {}
+	};
+	// clang-format on
+
+	// The tile of a pass in the textures of every view (fixed mode), in pixels
+	struct CTile
+	{
+		uint Slot;
+		uint X, Y, W, H;
+		CTile()
+		    : Slot(0)
+		    , X(0)
+		    , Y(0)
+		    , W(0)
+		    , H(0)
+		{
+		}
 	};
 
 	// Per-view (per-eye) reflection state
@@ -283,23 +308,41 @@ private:
 		std::vector<CSlot>					Slots;
 	};
 
+	// What a pass renders of the reflected view, and the sizes that follow from it
+	struct CPassRegion
+	{
+		float MinX, MaxX, MinY, MaxY; // the water in the reflected view with its margins, [0,1] of the frustum
+		uint ActiveW, ActiveH; // the size of the pass's tile
+		uint AllocW, AllocH; // the size of the render target
+	};
+
 	// Selected state for one reflection pass (one plane, rendered per view)
+	// clang-format off
 	struct CPassData
 	{
 		sint32				Key;
 		CPlaneStats			Stats;
+		CTile				Tile;	// fixed mode, set by planTiles
 		CActiveReflection	Refl;	// filled by beginPass, published by endPass
 	};
+	// clang-format on
 
 	CCamera			*getReflCamera();
 	const CView		*currentView() const { return _CurrentView < _Views.size() ? &_Views[_CurrentView] : nullptr; }
 	CView			&ensureCurrentView();
 
-	// Claim a tile of (w × h) in the current view's textures (fixed mode);
-	// shrinks w/h when no texture has room and no new one may be opened.
-	// Returns the slot and the tile origin in pixels; firstTouch is set on
-	// the slot's first claim of the frame (caller must allocate and clear).
-	CSlot			&claimTile(uint allocW, uint allocH, uint &w, uint &h, uint &tileX, uint &tileY, bool &firstTouch);
+	// The region a pass renders for a camera frustum and viewport, and its
+	// tile and render target sizes
+	void computePassRegion(const CPlaneStats &stats, float frustumLeft, float frustumRight,
+	    const CViewport &viewport, uint32 winW, uint32 winH, CPassRegion &region) const;
+
+	// Give every pass of the frame its tile (fixed mode), for a viewport.
+	// The tiles are placed together, by size, each as low as it goes in the
+	// first texture with room for it (packRectsByPriority). When no texture
+	// has room and no new one may be opened, the tiles shrink, those of the
+	// later passes first; a pass whose tile has no room at the smallest size
+	// is taken out of the frame's passes.
+	void planTiles(const CViewport &viewport, uint32 winW, uint32 winH);
 
 	// clang-format off
 	CScene								*_Scene;
@@ -323,6 +366,9 @@ private:
 	std::vector<CView>					_Views;		// per-view published reflections and render targets
 	std::vector<sint32>					_PrevAdmitted; // hysteresis: planes admitted last frame
 	std::vector<CPassData>				_Passes;	// selected passes between beginPasses and endPasses
+	bool								m_PassesFixedSize;	// the allocation mode of these passes, as beginPasses found it
+	uint								m_TileSlots;	// fixed mode: the textures per view that their tiles are in
+	uint								m_TileAllocW, m_TileAllocH;	// fixed mode: the size of these textures
 	CCamera								*_ReflCamera;
 
 	static uint							_AnyReflectionRenderCount; // reflection passes rendering, across all scenes

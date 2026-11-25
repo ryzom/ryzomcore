@@ -34,6 +34,7 @@
 #include "nel/3d/driver.h"
 #include "nel/3d/scene.h"
 #include "nel/3d/scissor.h"
+#include "nel/3d/skyline_packer.h"
 #include "nel/3d/texture_offscreen.h"
 #include "nel/3d/u_scene.h"
 #include "nel/3d/water_model.h"
@@ -73,8 +74,8 @@ static const float WATER_REFLECTION_HYSTERESIS = 1.25f;
 // UVs only reach the tile edge when they exceed the design margin — and then
 // they sample the neighbor tile's own margin edge, which is as benign as
 // cleared padding would be. Any padding, however small, breaks the exact
-// row fits of pow2 tile sizes inside pow2 allocations (128+128 = 256) and
-// wastes close to half of every shelf row.
+// fits of pow2 tile sizes inside pow2 allocations (128+128 = 256) and
+// wastes close to half of the texture.
 
 // Round down to a power of two (bounds RT memory on large screens; deliberate)
 static uint pow2Down(uint v)
@@ -87,6 +88,17 @@ static uint pow2Down(uint v)
 static uint snapUp(uint v, uint snap)
 {
 	return ((v + snap - 1) / snap) * snap;
+}
+
+// The window size the reflection render targets are sized from
+static void getPassWindowSize(IDriver *drv, uint32 &winW, uint32 &winH)
+{
+	drv->getWindowSize(winW, winH);
+	if (winW == 0 || winH == 0)
+	{
+		winW = 128;
+		winH = 128;
+	}
 }
 
 // ***************************************************************************
@@ -107,6 +119,10 @@ CWaterReflectionManager::CWaterReflectionManager()
 	, _HadReflections(false)
 	, _CurrentPassPlaneZ(0.f)
 	, _CurrentView(0)
+	, m_PassesFixedSize(true)
+	, m_TileSlots(0)
+	, m_TileAllocW(0)
+	, m_TileAllocH(0)
 	, _ReflCamera(nullptr)
 	, _SaveCam(nullptr)
 // clang-format on
@@ -288,18 +304,15 @@ uint CWaterReflectionManager::beginPasses()
 	for (uint i = 0; i < _Views.size(); ++i)
 	{
 		_Views[i].Active.clear();
-		// Reset the tile packing state for the new frame, and drop textures
-		// beyond a lowered budget
+		// Drop textures beyond a lowered budget; no texture is cleared yet
+		// for the new frame
 		if (_MaxTextures >= 0 && _Views[i].Slots.size() > (uint)_MaxTextures && _FixedSize)
 			_Views[i].Slots.resize(_MaxTextures);
 		for (uint s = 0; s < _Views[i].Slots.size(); ++s)
-		{
-			CSlot &slot = _Views[i].Slots[s];
-			slot.CursorX = slot.CursorY = slot.RowH = 0;
-			slot.Touched = false;
-		}
+			_Views[i].Slots[s].Touched = false;
 	}
 	_Passes.clear();
+	m_PassesFixedSize = _FixedSize;
 
 	if (!_Enabled || _MaxReflections == 0 || collected.empty())
 	{
@@ -308,7 +321,7 @@ uint CWaterReflectionManager::beginPasses()
 	}
 
 	CCamera *mainCam = _Scene->getCam();
-	if (!mainCam)
+	if (!mainCam || !gateDrv)
 	{
 		_PrevAdmitted.clear();
 		return 0;
@@ -348,67 +361,160 @@ uint CWaterReflectionManager::beginPasses()
 		_PrevAdmitted.push_back(candidates[i].second);
 	}
 
-	return numAdmitted;
+	// Fixed mode: the passes get their tiles now, the same in every view,
+	// so that a pass whose tile has no room is known before the passes are
+	// counted. It is not rendered, and its plane draws as a plane without a
+	// reflection pass.
+	if (m_PassesFixedSize)
+	{
+		uint32 winW, winH;
+		getPassWindowSize(gateDrv, winW, winH);
+		planTiles(_Scene->getViewport(), winW, winH);
+	}
+
+	return (uint)_Passes.size();
 }
 
 // ***************************************************************************
-CWaterReflectionManager::CSlot &CWaterReflectionManager::claimTile(uint allocW, uint allocH, uint &w, uint &h, uint &tileX, uint &tileY, bool &firstTouch)
+void CWaterReflectionManager::computePassRegion(const CPlaneStats &stats, float frustumLeft, float frustumRight,
+    const CViewport &viewport, uint32 winW, uint32 winH, CPassRegion &region) const
 {
-	CView &view = ensureCurrentView();
-	for (;;)
+	// --- Screen AABB of the water in the reflected view ---
+	// For points on the mirror plane, the reflected-camera projection is
+	// the main-camera projection mirrored across the optical axis:
+	// u' = -u - 2*Left/(Right-Left), which reduces to 1-u for x-symmetric
+	// frusta but stays correct for off-center (per-eye HMD) frusta. The
+	// AABB is merged across views, so all views share the sub-region
+	// sizing.
+	const float mirrorOfs = -2.f * frustumLeft / (frustumRight - frustumLeft);
+	float minX = -stats.Max.x + mirrorOfs;
+	float maxX = -stats.Min.x + mirrorOfs;
+	float minY = stats.Min.y;
+	float maxY = stats.Max.y;
+	clamp(minX, 0.f, 1.f);
+	clamp(maxX, 0.f, 1.f);
+	clamp(minY, 0.f, 1.f);
+	clamp(maxY, 0.f, 1.f);
+	minX -= WATER_REFLECTION_MARGIN;
+	maxX += WATER_REFLECTION_MARGIN;
+	minY -= WATER_REFLECTION_MARGIN;
+	maxY += WATER_REFLECTION_MARGIN;
+
+	// --- RT sizing (fixed/dynamic mode; see planar_reflection sample) ---
+	// The reported AABB is relative to the camera viewport, which may be a
+	// sub-region of the window (per-eye side-by-side viewports)
+	const float vpPixW = (float)winW * viewport.getWidth();
+	const float vpPixH = (float)winH * viewport.getHeight();
+
+	// Active region: snapped AABB dimensions, padded symmetrically
+	uint rawW = (uint)std::max(1.f, ceilf((maxX - minX) * vpPixW));
+	uint rawH = (uint)std::max(1.f, ceilf((maxY - minY) * vpPixH));
+	uint snappedW = snapUp(rawW, WATER_REFLECTION_SNAP);
+	uint snappedH = snapUp(rawH, WATER_REFLECTION_SNAP);
+	float padX = (float)(snappedW - rawW) / (2.f * std::max(1.f, vpPixW));
+	float padY = (float)(snappedH - rawH) / (2.f * std::max(1.f, vpPixH));
+	minX -= padX;
+	maxX += padX;
+	minY -= padY;
+	maxY += padY;
+	uint activeW = snappedW;
+	uint activeH = snappedH;
+	if (_HalfRes)
 	{
-		for (uint s = 0; s < view.Slots.size(); ++s)
-		{
-			CSlot &slot = view.Slots[s];
-			// an untouched slot is (re)allocated at the current size on claim
-			uint effW = slot.Touched ? slot.AllocW : allocW;
-			uint effH = slot.Touched ? slot.AllocH : allocH;
-			// place in the current shelf row, or open a new row below it
-			uint x = slot.CursorX, y = slot.CursorY;
-			if (x + w > effW)
-			{
-				x = 0;
-				y = slot.CursorY + slot.RowH;
-			}
-			if (x + w <= effW && y + h <= effH)
-			{
-				if (y != slot.CursorY)
-				{
-					slot.CursorY = y;
-					slot.RowH = 0;
-				}
-				tileX = x;
-				tileY = y;
-				slot.CursorX = x + w;
-				slot.RowH = std::max(slot.RowH, h);
-				firstTouch = !slot.Touched;
-				slot.Touched = true;
-				return slot;
-			}
-		}
-		// no texture has room: open a new one if the budget allows
-		if (_MaxTextures < 0 || view.Slots.size() < (uint)_MaxTextures)
-		{
-			view.Slots.push_back(CSlot());
-			continue; // the new (untouched) slot is claimed by the loop above
-		}
-		// budget full: shrink the tile until it fits somewhere (the UV
-		// scale/bias absorb the size — the pool reflects at lower res)
-		if (w <= WATER_REFLECTION_SNAP && h <= WATER_REFLECTION_SNAP)
-		{
-			// degenerate (should not happen with a sane budget): overlap
-			// into the first texture rather than failing the pass
-			if (view.Slots.empty())
-				view.Slots.push_back(CSlot());
-			CSlot &slot = view.Slots[0];
-			tileX = tileY = 0;
-			firstTouch = !slot.Touched;
-			slot.Touched = true;
-			return slot;
-		}
-		w = std::max(WATER_REFLECTION_SNAP, w / 2);
-		h = std::max(WATER_REFLECTION_SNAP, h / 2);
+		activeW = std::max(1u, activeW / 2);
+		activeH = std::max(1u, activeH / 2);
 	}
+	if (_Pow2)
+	{
+		activeW = pow2Down(activeW);
+		activeH = pow2Down(activeH);
+	}
+
+	// Allocation: fixed mode allocates from the window size + margin (stable
+	// across frames); dynamic mode allocates at the active size
+	uint allocW, allocH;
+	if (m_PassesFixedSize)
+	{
+		uint marginPx = (uint)ceilf(WATER_REFLECTION_MARGIN * (float)std::max(winW, winH));
+		allocW = snapUp(winW + 2 * marginPx, WATER_REFLECTION_SNAP);
+		allocH = snapUp(winH + 2 * marginPx, WATER_REFLECTION_SNAP);
+		if (_HalfRes)
+		{
+			allocW = std::max(1u, allocW / 2);
+			allocH = std::max(1u, allocH / 2);
+		}
+		if (_Pow2)
+		{
+			allocW = pow2Down(allocW);
+			allocH = pow2Down(allocH);
+		}
+		activeW = std::min(activeW, allocW);
+		activeH = std::min(activeH, allocH);
+	}
+	else
+	{
+		allocW = activeW;
+		allocH = activeH;
+	}
+
+	region.MinX = minX;
+	region.MaxX = maxX;
+	region.MinY = minY;
+	region.MaxY = maxY;
+	region.ActiveW = activeW;
+	region.ActiveH = activeH;
+	region.AllocW = allocW;
+	region.AllocH = allocH;
+}
+
+// ***************************************************************************
+void CWaterReflectionManager::planTiles(const CViewport &viewport, uint32 winW, uint32 winH)
+{
+	// The tiles are placed together instead of pass by pass: the passes come
+	// in the order of their water's area on screen, and tiles in that order
+	// leave gaps (a tall tile between short ones, short ones behind a tall
+	// one) that tiles placed by height do not leave.
+	// A tile has the size of its region under a centered frustum, which is
+	// the size of the water's box on screen. The off-center frustum of an
+	// eye mirrors the box further to a side, where the view cuts some of it
+	// off: the region of that eye is the same or smaller, never larger, and
+	// the views can share the tiles.
+	std::vector<CPackRect> rects(_Passes.size());
+	m_TileAllocW = 0;
+	m_TileAllocH = 0;
+	for (uint i = 0; i < _Passes.size(); ++i)
+	{
+		CPassRegion region;
+		computePassRegion(_Passes[i].Stats, -1.f, 1.f, viewport, winW, winH, region);
+		rects[i].Width = region.ActiveW;
+		rects[i].Height = region.ActiveH;
+		// the allocation follows from the window: the same for every pass
+		m_TileAllocW = region.AllocW;
+		m_TileAllocH = region.AllocH;
+	}
+
+	// With the budget full a tile gets what the passes before it leave, at
+	// half its sides until it has room: the UV scale and bias absorb the
+	// size, the plane reflects at a lower resolution
+	m_TileSlots = packRectsByPriority(rects, m_TileAllocW, m_TileAllocH, _MaxTextures, WATER_REFLECTION_SNAP);
+
+	// A pass whose tile has no room at the smallest size leaves the frame
+	uint numPasses = 0;
+	for (uint i = 0; i < rects.size(); ++i)
+	{
+		if (!rects[i].Placed)
+			continue;
+		if (numPasses != i)
+			_Passes[numPasses] = _Passes[i];
+		CTile &tile = _Passes[numPasses].Tile;
+		tile.Slot = rects[i].Bin;
+		tile.X = rects[i].X;
+		tile.Y = rects[i].Y;
+		tile.W = rects[i].Width;
+		tile.H = rects[i].Height;
+		++numPasses;
+	}
+	_Passes.resize(numPasses);
 }
 
 // ***************************************************************************
@@ -467,99 +573,63 @@ void CWaterReflectionManager::beginPass(uint pass, CActiveReflection &out)
 	reflCamWorld.setRot(Im, Jm, Km);
 	reflCamWorld.setPos(Pm);
 
-	// --- Screen AABB of the water in the reflected view ---
-	// For points on the mirror plane, the reflected-camera projection is
-	// the main-camera projection mirrored across the optical axis:
-	// u' = -u - 2*Left/(Right-Left), which reduces to 1-u for x-symmetric
-	// frusta but stays correct for off-center (per-eye HMD) frusta. The
-	// AABB is merged across views, so all views share the sub-region
-	// sizing.
+	// --- Region of the reflected view to render ---
 	float fl, fr, fb, ft, fnear, ffar;
 	mainCam->getFrustum(fl, fr, fb, ft, fnear, ffar);
-	const float mirrorOfs = -2.f * fl / (fr - fl);
-	float minX = -stats.Max.x + mirrorOfs;
-	float maxX = -stats.Min.x + mirrorOfs;
-	float minY = stats.Min.y;
-	float maxY = stats.Max.y;
-	clamp(minX, 0.f, 1.f); clamp(maxX, 0.f, 1.f);
-	clamp(minY, 0.f, 1.f); clamp(maxY, 0.f, 1.f);
-	minX -= WATER_REFLECTION_MARGIN; maxX += WATER_REFLECTION_MARGIN;
-	minY -= WATER_REFLECTION_MARGIN; maxY += WATER_REFLECTION_MARGIN;
-
-	// --- RT sizing (fixed/dynamic mode; see planar_reflection sample) ---
 	uint32 winW, winH;
-	drv->getWindowSize(winW, winH);
-	if (winW == 0 || winH == 0) { winW = 128; winH = 128; }
-
-	// The reported AABB is relative to the camera viewport, which may be a
-	// sub-region of the window (per-eye side-by-side viewports)
-	const float vpPixW = (float)winW * _SaveSceneViewport.getWidth();
-	const float vpPixH = (float)winH * _SaveSceneViewport.getHeight();
-
-	// Active region: snapped AABB dimensions, padded symmetrically
-	uint rawW = (uint)std::max(1.f, ceilf((maxX - minX) * vpPixW));
-	uint rawH = (uint)std::max(1.f, ceilf((maxY - minY) * vpPixH));
-	uint snappedW = snapUp(rawW, WATER_REFLECTION_SNAP);
-	uint snappedH = snapUp(rawH, WATER_REFLECTION_SNAP);
-	float padX = (float)(snappedW - rawW) / (2.f * std::max(1.f, vpPixW));
-	float padY = (float)(snappedH - rawH) / (2.f * std::max(1.f, vpPixH));
-	minX -= padX; maxX += padX;
-	minY -= padY; maxY += padY;
-	uint activeW = snappedW;
-	uint activeH = snappedH;
-	if (_HalfRes) { activeW = std::max(1u, activeW / 2); activeH = std::max(1u, activeH / 2); }
-	if (_Pow2) { activeW = pow2Down(activeW); activeH = pow2Down(activeH); }
-
-	// Allocation: fixed mode allocates from the window size + margin (stable
-	// across frames); dynamic mode allocates at the active size
-	uint allocW, allocH;
-	if (_FixedSize)
-	{
-		uint marginPx = (uint)ceilf(WATER_REFLECTION_MARGIN * (float)std::max(winW, winH));
-		allocW = snapUp(winW + 2 * marginPx, WATER_REFLECTION_SNAP);
-		allocH = snapUp(winH + 2 * marginPx, WATER_REFLECTION_SNAP);
-		if (_HalfRes) { allocW = std::max(1u, allocW / 2); allocH = std::max(1u, allocH / 2); }
-		if (_Pow2) { allocW = pow2Down(allocW); allocH = pow2Down(allocH); }
-		activeW = std::min(activeW, allocW);
-		activeH = std::min(activeH, allocH);
-	}
-	else
-	{
-		allocW = activeW;
-		allocH = activeH;
-	}
+	getPassWindowSize(drv, winW, winH);
+	CPassRegion region;
+	computePassRegion(stats, fl, fr, _SaveSceneViewport, winW, winH, region);
 
 	// --- Off-center sub-frustum over the reflected AABB ---
 	CFrustum subFrustum;
 	float fw = fr - fl;
 	float fh = ft - fb;
 	subFrustum.init(
-		fl + minX * fw, fl + maxX * fw,
-		fb + minY * fh, fb + maxY * fh,
-		fnear, ffar, true);
+	    fl + region.MinX * fw, fl + region.MaxX * fw,
+	    fb + region.MinY * fh, fb + region.MaxY * fh,
+	    fnear, ffar, true);
 
 	// --- Render target and tile for this pass, in the current view ---
 	// Fixed mode packs the passes' active regions as tiles into shared
 	// per-view textures (several water planes per allocation, see
-	// claimTile); dynamic mode keeps one texture per pass at the active
+	// planTiles); dynamic mode keeps one texture per pass at the active
 	// size. Tiles of different views never share a texture: the slot lists
 	// are per view.
 	CView &view = ensureCurrentView();
 	CSlot *slot;
 	uint tileX = 0, tileY = 0;
-	bool firstTouch;
-	if (_FixedSize)
+	uint activeW, activeH, allocW, allocH;
+	if (m_PassesFixedSize)
 	{
-		slot = &claimTile(allocW, allocH, activeW, activeH, tileX, tileY, firstTouch);
+		// The tile is what beginPasses planned, in this view's textures. It
+		// is not always the size of the region in pixels: smaller when the
+		// textures were full, larger where the frustum of this view cuts
+		// the region, and of the viewport that beginPasses saw. The UV
+		// scale and bias absorb the size.
+		const CTile &tile = pd.Tile;
+		if (view.Slots.size() < m_TileSlots)
+			view.Slots.resize(m_TileSlots);
+		slot = &view.Slots[tile.Slot];
+		tileX = tile.X;
+		tileY = tile.Y;
+		activeW = tile.W;
+		activeH = tile.H;
+		allocW = m_TileAllocW;
+		allocH = m_TileAllocH;
 	}
 	else
 	{
 		if (view.Slots.size() <= pass)
 			view.Slots.resize(pass + 1);
 		slot = &view.Slots[pass];
-		firstTouch = !slot->Touched;
-		slot->Touched = true;
+		activeW = region.ActiveW;
+		activeH = region.ActiveH;
+		allocW = region.AllocW;
+		allocH = region.AllocH;
 	}
+	const bool firstTouch = !slot->Touched;
+	slot->Touched = true;
 	if (firstTouch && (!slot->Texture || slot->AllocW != allocW || slot->AllocH != allocH))
 	{
 		CTextureOffscreen *tex = new CTextureOffscreen();

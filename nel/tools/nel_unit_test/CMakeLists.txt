@@ -51,6 +51,7 @@ target_compile_definitions(nel_misc_test
 if (WITH_3D)
     add_test_executable(nel_3d_test
             ut_3d_glsl_block_struct_reads.test.cpp
+            ut_3d_skyline_packer.test.cpp
     )
     target_link_libraries(nel_3d_test
             PRIVATE
