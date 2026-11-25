@@ -1730,6 +1730,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:USER_CHAR_FADE" type="bool" value="false" />
 <variable entry="UI:SAVE:USER_CHAR_OPA_MIN" type="sint32" value="160" />
 
+<!-- The light of the player character (toggle_light) is on or off as it was left -->
+<variable entry="UI:SAVE:PLAYER_LIGHT" type="bool" value="false" />
+
 <variable entry="UI:SAVE:DAY_COLOR" type="rgba" value="255 255 255 255" />
 <variable entry="UI:SAVE:NIGHT_COLOR" type="rgba" value="255 255 255 255" />
 

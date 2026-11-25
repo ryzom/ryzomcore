@@ -364,8 +364,11 @@ public:
 	/// Return 'true' is an attack animation is currently playing.
 	bool isAttacking() const {return _AnimAttackOn;}
 
-	/// Show/Hide the user light.
+	/// Show/Hide the user light. The state is kept with the interface of the character (UI:SAVE:PLAYER_LIGHT).
 	void light();
+
+	/// Give the user light its saved state. The light is made when it is on and there is a skeleton to carry it.
+	void updateLight();
 
 	/// Display dmg/heal numbers above the head.
 	virtual void displayModifiers() NL_OVERRIDE;
@@ -633,6 +636,14 @@ protected:
 		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 	};
 	CInvisibleObserver			_InvisibleObs;
+
+	/// Applies the saved state of the user light when it changes: another interface file is loaded, the interface is reset
+	class CLightObserver : public NLMISC::ICDBNode::IPropertyObserver
+	{
+	public:
+		virtual void update(NLMISC::ICDBNode *node) NL_OVERRIDE;
+	};
+	CLightObserver m_LightObs;
 
 	/// Fame observer
 	class CFameObserver : public NLMISC::ICDBNode::IPropertyObserver

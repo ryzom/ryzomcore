@@ -119,6 +119,9 @@ NLMISC::CVectorD	UserEntityInitPos;
 NLMISC::CVector		UserEntityInitFront;
 CUserEntity			*UserEntity = nullptr;
 
+// Whether the user light is on, saved with the interface of the character
+static const char *const s_UserLightDb = "UI:SAVE:PLAYER_LIGHT";
+
 uint32				CharFirstConnectedTime = 0;
 uint32				CharPlayedTime = 0;
 
@@ -220,6 +223,15 @@ CUserEntity::~CUserEntity()
 		{
 			ICDBNode::CTextId textId;
 			node->removeObserver(&_InvisibleObs, textId);
+		}
+	}
+
+	{
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(s_UserLightDb, false);
+		if (node)
+		{
+			ICDBNode::CTextId textId;
+			node->removeObserver(&m_LightObs, textId);
 		}
 	}
 
@@ -381,6 +393,12 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 			ICDBNode::CTextId textId;
 			node->addObserver(&_InvisibleObs, textId);
 		}
+	}
+
+	// Add observer on the saved state of the light
+	{
+		ICDBNode::CTextId textId;
+		NLGUI::CDBManager::getInstance()->getDbProp(s_UserLightDb)->addObserver(&m_LightObs, textId);
 	}
 
 	// Add an observer on skill points
@@ -577,6 +595,9 @@ void CUserEntity::updateVisualPropertyVpa(const NLMISC::TGameCycle &gameCycle, c
 	}
 
 	updateVisualDisplay();
+
+	// The light that was left on is made now that there is a skeleton to carry it
+	updateLight();
 }// updateVisualPropertyVpa //
 
 //-----------------------------------------------
@@ -3502,8 +3523,25 @@ void CUserEntity::onInstancesLoaded()	// virtual
 //---------------------------------------------------
 void CUserEntity::light()
 {
-	// Create the light
-	if(_Light.empty())
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(s_UserLightDb);
+	node->setValueBool(!node->getValueBool());
+	updateLight();
+
+	// said at the key press only: the state is applied again at every change of the equipment
+	if (_LightOn && !_Skeleton.empty() && _NameBoneId == -1)
+		nlwarning("UE:light: there is no Name Bone to stick the light.");
+} // light //
+
+//---------------------------------------------------
+// updateLight:
+// Give the user light its saved state.
+//---------------------------------------------------
+void CUserEntity::updateLight()
+{
+	const bool on = NLGUI::CDBManager::getInstance()->getDbProp(s_UserLightDb)->getValueBool();
+
+	// Create the light when it is on. Before the skeleton is there, it waits for it (updateVisualPropertyVpa).
+	if (on && _Light.empty())
 	{
 		// Check there is a skeleton and a bone to stick the light before to create it.
 		if(!_Skeleton.empty() && _NameBoneId!=-1)
@@ -3532,11 +3570,9 @@ void CUserEntity::light()
 				*/
 			}
 		}
-		else
-			nlwarning("UE:light: there is no skeleton or Name Bone to stick the light.");
 	}
 	// Turn On/Off the Light
-	_LightOn = !_LightOn;
+	_LightOn = on;
 	if(!_Light.empty())
 	{
 		if(_LightOn)
@@ -3544,7 +3580,7 @@ void CUserEntity::light()
 		else
 			_Light.hide();
 	}
-}// light //
+} // updateLight //
 
 //---------------------------------------------------
 // CSpeedFactor::init :
@@ -3822,6 +3858,12 @@ void CUserEntity::load()	// virtual
 void CUserEntity::CInvisibleObserver::update(ICDBNode* node)
 {
 	UserEntity->buildInSceneInterface();
+}
+
+//---------------------------------------------------
+void CUserEntity::CLightObserver::update(ICDBNode * /* node */)
+{
+	UserEntity->updateLight();
 }
 
 //---------------------------------------------------

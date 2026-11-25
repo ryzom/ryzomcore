@@ -232,6 +232,7 @@
 	<action handler="set" params="dblink=UI:SAVE:KEY_REPEAT_SPEED|value=50" />
 	<action handler="set" params="dblink=UI:SAVE:USER_CHAR_FADE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:USER_CHAR_OPA_MIN|value=160" />
+	<action handler="set" params="dblink=UI:SAVE:PLAYER_LIGHT|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:DAY_COLOR|value=makeRGB(219,254,174)" />
 	<action handler="set" params="dblink=UI:SAVE:NIGHT_COLOR|value=makeRGB(127,190,254)" />
 	<action handler="set" params="dblink=UI:SAVE:SHOW_3D_ITEM_PREVIEW|value=1" />
