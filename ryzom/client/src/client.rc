@@ -160,7 +160,11 @@ END
 // Bitmap
 //
 
+#ifdef RYZOM_CLASSIC
+IDB_SLASH_SCREEN        BITMAP  DISCARDABLE     "splash_screen_classic.bmp"
+#else
 IDB_SLASH_SCREEN        BITMAP  DISCARDABLE     "splash_screen.bmp"
+#endif
 IDB_ERROR_LOGO          BITMAP  DISCARDABLE     "error_logo.bmp"
 #endif    // French (France) resources
 /////////////////////////////////////////////////////////////////////////////
