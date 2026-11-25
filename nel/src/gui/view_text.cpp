@@ -126,6 +126,33 @@ namespace
 		}
 		return end;
 	}
+
+	// The zero width space (U+200B) marks a place where a line may break. A paragraph that has these marks is
+	// laid out by its phrases, the pieces between two marks or spaces: a phrase goes on a line as a whole, and
+	// only a phrase wider than a line is cut by the rule above. A paragraph without marks is laid out by that
+	// rule alone.
+	const char s_BreakMark[] = "\xE2\x80\x8B";
+	const TCharPos s_BreakMarkSize = 3;
+
+	// The first break mark between pos and end, or end
+	TCharPos findBreakMark(const std::string &text, TCharPos pos, TCharPos end)
+	{
+		if (pos >= end)
+			return end;
+		const char *const markEnd = s_BreakMark + s_BreakMarkSize;
+		std::string::const_iterator textEnd = text.begin() + end;
+		return (TCharPos)(std::search(text.begin() + pos, textEnd, s_BreakMark, markEnd) - text.begin());
+	}
+
+	// The end of the phrase that begins at pos: after the first break mark between pos and end, or end. The
+	// marks a phrase begins with stay with it: a mark alone is no phrase.
+	TCharPos findPhraseEnd(const std::string &text, TCharPos pos, TCharPos end)
+	{
+		while (pos + s_BreakMarkSize <= end && text.compare(pos, s_BreakMarkSize, s_BreakMark) == 0)
+			pos += s_BreakMarkSize;
+		TCharPos mark = findBreakMark(text, pos, end);
+		return mark >= end ? end : mark + s_BreakMarkSize;
+	}
 }
 
 REGISTER_UI_CLASS(CViewText)
@@ -1954,6 +1981,11 @@ namespace NLGUI
 		// the end of the last run of text without space, \n or FormatTagChange: a text written without spaces is
 		// cut in several words in it, which need not look for its end again
 		uint		runEnd= 0;
+		// whether the paragraph has break marks, the place from which this has to be looked at again, and the end
+		// of the phrase wider than a line that is being cut, if there is one
+		bool paragraphHasMarks = false;
+		TCharPos paragraphMarksEnd = 0;
+		TCharPos charRuleEnd = 0;
 		//
 		nMaxWidth *= _Scale;
 		while (currPos != _Text.length())
@@ -2034,9 +2066,41 @@ namespace NLGUI
 					}
 					runEnd = i;
 				}
-				// or until a place where a line of text written without spaces may break
-				wordEnd = findLineBreakInWord(_Text, spaceEnd, i);
-
+				// a paragraph that has break marks is laid out by its phrases
+				if (spaceEnd >= paragraphMarksEnd)
+				{
+					TCharPos paragraphEnd = _Text.find('\n', spaceEnd);
+					if (paragraphEnd == std::string::npos)
+						paragraphEnd = _Text.length();
+					paragraphHasMarks = findBreakMark(_Text, spaceEnd, paragraphEnd) != paragraphEnd;
+					paragraphMarksEnd = paragraphEnd + 1;
+				}
+				// or until a place where a line of text written without spaces may break: the next mark in a
+				// paragraph that has break marks, and in other paragraphs, and inside a phrase wider than a line,
+				// the next place between two characters
+				wordEnd = i;
+				bool charRule = !paragraphHasMarks;
+				if (paragraphHasMarks)
+				{
+					if (spaceEnd < charRuleEnd)
+					{
+						wordEnd = charRuleEnd;
+						charRule = true;
+					}
+					else
+					{
+						wordEnd = findPhraseEnd(_Text, spaceEnd, i);
+						si = TextContext->getStringInfo(_Text.substr(spaceEnd, wordEnd - spaceEnd));
+						// wider than a line, behind the tab of its format
+						if ((float)wordFormat.TabX * _TabWidth + si.StringWidth > nMaxWidth)
+						{
+							charRuleEnd = wordEnd;
+							charRule = true;
+						}
+					}
+				}
+				if (charRule)
+					wordEnd = findLineBreakInWord(_Text, spaceEnd, wordEnd);
 
 				// Get the word value.
 				wordValue = _Text.substr(spaceEnd, wordEnd - spaceEnd);
@@ -3144,10 +3208,14 @@ namespace NLGUI
 				if (wordEnd == std::string::npos)
 					wordEnd = _Text.length();
 
-				// The parts of the word between the places where a line of text written without spaces may break
+				// The parts of the word between the places where a line of text written without spaces may break:
+				// a phrase between two break marks may be cut too, when it is wider than a line
+				TCharPos markEnd = currPos;
 				for (TCharPos partEnd; currPos < wordEnd; currPos = partEnd)
 				{
-					partEnd = findLineBreakInWord(_Text, currPos, wordEnd);
+					if (currPos >= markEnd)
+						markEnd = findPhraseEnd(_Text, currPos, wordEnd);
+					partEnd = findLineBreakInWord(_Text, currPos, markEnd);
 
 					// Get the word
 					wordValue = _Text.substr(currPos, partEnd - currPos);

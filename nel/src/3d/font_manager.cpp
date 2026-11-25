@@ -146,6 +146,10 @@ void CFontManager::computeString (NLMISC::CUtfStringView sv,
 		{
 			// Creating font
 			k.Char = *it;
+			// a zero width space marks a place where a line may break: nothing is drawn for it and it has no
+			// width, whatever glyph the font has for it or lacks
+			if (k.Char == 0x200B)
+				continue;
 			// draw tab as space
 			if (k.Char == '\t')
 				k.Char = ' ';
@@ -307,6 +311,9 @@ void CFontManager::computeStringInfo (	NLMISC::CUtfStringView sv,
 	{
 		// Creating font
 		k.Char = *it;
+		// a zero width space has no width, as in computeString
+		if (k.Char == 0x200B)
+			continue;
 		// draw tab as space
 		if (k.Char == '\t')
 			k.Char = ' ';
