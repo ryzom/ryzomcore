@@ -44,6 +44,7 @@
 #include "client_cfg.h"
 #include "user_entity.h"
 #include "faction_war_manager.h"
+#include "fx_manager.h"
 // Client Sheets
 #include "client_sheets/player_sheet.h"
 // 3D
@@ -104,6 +105,10 @@ CPlayerCL::CPlayerCL()
 	_WaitForAppearance = true;
 
 	_PlayerCLAsyncTextureLoading= false;
+	_MorphSheetId = 0;
+	_MorphFXPending = false;
+	_UnmorphedClipRadius = 0.f;
+	_UnmorphedClipDeltaZ = 0.f;
 
 	// Light Off and not allocated
 	_LightOn = false;
@@ -142,6 +147,9 @@ CPlayerCL::~CPlayerCL()
 //---------------------------------------------------
 float CPlayerCL::getScale() const	// virtual
 {
+	if (isMorphed())
+		return CCharacterCL::getScale();
+
 	// Default Scale.
 	return _CharacterScalePos;
 }// getScale //
@@ -154,6 +162,9 @@ float CPlayerCL::getScale() const	// virtual
 //-----------------------------------------------
 const std::vector<CGroundFXSheet> *CPlayerCL::getGroundFX() const
 {
+	if (isMorphed())
+		return CCharacterCL::getGroundFX();
+
 	switch (getGender())
 	{
 		case 0: return &(_PlayerSheet->GenderInfos[0].GroundFX);
@@ -190,6 +201,12 @@ bool CPlayerCL::isFriend () const
 //-----------------------------------------------
 bool CPlayerCL::isEnemy () const
 {
+	if (UserEntity && UserEntity->isMorphed() && !UserEntity->properties().attackable())
+		return false;
+	if (isMorphed())
+		return !isUser() && properties().attackable();
+	if (UserEntity && UserEntity->isMorphed())
+		return !isUser();
 	// Challenge i.e. SOLO FULL PVP
 	if( getPvpMode()&PVP_MODE::PvpChallenge  ||
 		UserEntity->getPvpMode()&PVP_MODE::PvpChallenge )
@@ -287,6 +304,8 @@ bool CPlayerCL::isEnemy () const
 //-----------------------------------------------
 bool CPlayerCL::isAlly() const
 {
+	if (isMorphed() || (UserEntity && UserEntity->isMorphed()))
+		return false;
 
 	// Challenge i.e. SOLO FULL PVP
 	if( getPvpMode()&PVP_MODE::PvpChallenge  ||
@@ -427,6 +446,9 @@ bool CPlayerCL::build(const CEntitySheet *sheet)	// virtual
 //-----------------------------------------------
 std::string CPlayerCL::automatonType() const	// virtual
 {
+	if (isMorphed())
+		return CCharacterCL::automatonType();
+
 	return _PlayerSheet->Automaton;
 }// automatonType //
 
@@ -725,6 +747,15 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 //-----------------------------------------------
 void CPlayerCL::computeAnimSet(sint32 fakeLeftHand, sint32 fakeRightHand)
 {
+	if (isMorphed())
+	{
+		if (_Mode == MBEHAV::SIT)
+			::computeAnimSet(_CurrentAnimSet[MOVE], MBEHAV::REST, CCharacterCL::_Sheet->getAnimSetBaseName(), NULL, NULL, false);
+		else
+			CCharacterCL::computeAnimSet(fakeLeftHand, fakeRightHand);
+		return;
+	}
+
 	// We need a valid Gender to compute the animset.
 	if(_Gender >= 2)
 	{
@@ -754,6 +785,9 @@ void CPlayerCL::computeAnimSet(sint32 fakeLeftHand, sint32 fakeRightHand)
 //-----------------------------------------------
 void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
+	if (isMorphed())
+		return;
+
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
 
 	// Player will now have enough information to display the character.
@@ -1104,6 +1138,9 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 	// No skeleton
 	else
 		nlwarning("PL::updateVPVpa:%d: Skeleton not allocated.", _Slot);
+
+	if (_MorphSheetId != 0)
+		updateVisualPropertyMorphSheet(0, _MorphSheetId);
 }// updateVisualPropertyVpa //
 
 //-----------------------------------------------
@@ -1191,6 +1228,9 @@ void CPlayerCL::updateClippedHairInstance()
 //-----------------------------------------------
 void CPlayerCL::updateVisualPropertyVpb(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
+	if (isMorphed())
+		return;
+
 	// Get the property.
 	SPropVisualB visualB = *(SPropVisualB *)(&prop);
 
@@ -1233,6 +1273,9 @@ void CPlayerCL::updateVisualPropertyVpb(const NLMISC::TGameCycle &/* gameCycle *
 //-----------------------------------------------
 void CPlayerCL::updateVisualPropertyVpc(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
+	if (isMorphed())
+		return;
+
 	if(skeleton())
 	{
 		// Get the property.
@@ -1351,6 +1394,9 @@ void CPlayerCL::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &gameCycle,
 //-----------------------------------------------
 sint CPlayerCL::skin() const	// virtual
 {
+	if (isMorphed())
+		return CCharacterCL::skin();
+
 	return _PlayerSheet->Skin;
 }// skin //
 
@@ -1392,6 +1438,9 @@ void CPlayerCL::drawName(const NLMISC::CMatrix &mat)	// virtual
 //-----------------------------------------------
 CEntityCL::SInstanceCL *CPlayerCL::getFace()
 {
+	if (isMorphed())
+		return CCharacterCL::getFace();
+
 	// Implemented in CPlayerCL
 	return &_Face;
 }// getFace //
@@ -1494,6 +1543,14 @@ float	CPlayerCL::updateAsyncTexture()
 		_Face.Current.setAsyncTextureDistance(distToCam);
 	}
 
+	if (_MorphFXPending && !_AsyncTextureLoading && !_PlayerCLAsyncTextureLoading)
+	{
+		_MorphFXPending = false;
+		UParticleSystemInstance fx = FXMngr.instantFX("mag_cur_cast_bomb_end.ps");
+		if (!fx.empty())
+			fx.setPos(pos());
+	}
+
 	return distToCam;
 }
 
@@ -1593,6 +1650,9 @@ void CPlayerCL::load()	// virtual
 // *********************************************************************************************
 const char *CPlayerCL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TSide side) const
 {
+	if (isMorphed())
+		return CCharacterCL::getBoneNameFromBodyPart(part, side);
+
 	if (!_PlayerSheet) return CCharacterCL::getBoneNameFromBodyPart(part, side);
 	return _PlayerSheet->BodyToBone.getBoneName(part, side);
 }
@@ -1612,6 +1672,7 @@ const CItemSheet *CPlayerCL::getLeftHandItemSheet() const
 // *********************************************************************************************
 const CAttack *CPlayerCL::getAttack(const CAttackIDSheet &id) const
 {
+	if (isMorphed()) return CCharacterCL::getAttack(id);
 	if (!_PlayerSheet) return NULL;
 	return CCharacterCL::getAttack(id, _PlayerSheet->AttackLists);
 }
@@ -1619,6 +1680,9 @@ const CAttack *CPlayerCL::getAttack(const CAttackIDSheet &id) const
 // *********************************************************************************************
 float CPlayerCL::getScaleRef() const
 {
+	if (isMorphed())
+		return CCharacterCL::getScaleRef();
+
 	float fyrosRefScale = GabaritSet.getRefHeightScale(0, EGSPD::CPeople::Fyros);
 	if (fyrosRefScale == 0) return 1.f;
 	return _CustomScalePos * (GabaritSet.getRefHeightScale(_Gender, people()) / fyrosRefScale);
@@ -1628,6 +1692,9 @@ float CPlayerCL::getScaleRef() const
 // *********************************************************************************************
 float CPlayerCL::getNamePosZ() const
 {
+	if (isMorphed())
+		return CCharacterCL::getNamePosZ();
+
 	if (!_PlayerSheet)
 		return 0.f;
 
@@ -1675,6 +1742,7 @@ void CPlayerCL::computePrimitive()
 {
 	// Initialize the primitive.
 	initPrimitive(0.5f, 2.0f, 0.0f, 0.0f, UMovePrimitive::DoNothing, UMovePrimitive::NotATrigger, MaskColPlayer, MaskColNone);
+	setMorphCollision();
 	if(_Primitive)
 		_Primitive->insertInWorldImage(dynamicWI);
 	// Set the position.

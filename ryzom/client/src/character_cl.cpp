@@ -6785,6 +6785,10 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 
 			// Get the covered distance from the animation.
 			double move = getTheMove(loopTimeStep, oldMovingTimeOffset, oldMovingTimeOffsetRun);
+			// The move animation of a creature can be faster than a morphed user (its speed factor never goes below 0.5):
+			// moving it further than its speed would run ahead of the server, which then sets it back.
+			if(isUser() && UserEntity->isMorphed())
+				move = std::min(move, getMaxSpeed()*loopTimeStep);
 			// The move is big enough to reach the first step with motion.
 			if(move >= dist2FirstPos())	// dist2FirstPos() > 0 -> move > 0.
 			{

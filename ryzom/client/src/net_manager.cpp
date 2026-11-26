@@ -89,6 +89,7 @@
 #include "game_share/r2_share_itf.h"
 #include "game_share/r2_types.h"
 #include "npc_icon.h"
+#include "player_morph.h"
 #include "interface_v3/action_handler_base.h"
 
 // Std.
@@ -3553,6 +3554,31 @@ void	impulseUserPopup(NLMISC::CBitMemStream &impulse)
 	ServerMessageBoxOnReceiveTextId.startWaitTexts(titleTextId, docTextId);
 }
 
+void impulseUserMorphPrepare(NLMISC::CBitMemStream &impulse)
+{
+	uint32 sheet;
+	impulse.serial(sheet);
+	prepareMorph(sheet);
+}
+
+void impulseUserMorphAbilities(NLMISC::CBitMemStream &impulse)
+{
+	uint32 sheet;
+	vector<CSheetId> actions;
+	vector<string> labels;
+	bool attackable;
+	impulse.serial(sheet);
+	impulse.serialCont(actions);
+	impulse.serialCont(labels);
+	impulse.serial(attackable);
+	if (actions.size() != labels.size())
+	{
+		nlwarning("impulseUserMorphAbilities: %u actions but %u labels", (uint)actions.size(), (uint)labels.size());
+		return;
+	}
+	setMorphAbilities(sheet, actions, labels, attackable);
+}
+
 //-----------------------------------------------
 //-----------------------------------------------
 //extern void impulseCombatFlyingHpDelta(NLMISC::CBitMemStream &impulse);
@@ -3822,6 +3848,8 @@ void initializeNetwork()
 
 	GenericMsgHeaderMngr.setCallback("USER:BARS", impulseUserBars);
 	GenericMsgHeaderMngr.setCallback("USER:POPUP", impulseUserPopup);
+	GenericMsgHeaderMngr.setCallback("USER:MORPH_PREPARE", impulseUserMorphPrepare);
+	GenericMsgHeaderMngr.setCallback("USER:MORPH_ABILITIES", impulseUserMorphAbilities);
 
 
 	GenericMsgHeaderMngr.setCallback("MISSION:ASK_ENTER_CRITICAL", impulseEnterCrZoneProposal);

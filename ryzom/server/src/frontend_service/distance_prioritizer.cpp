@@ -705,6 +705,7 @@ void		CDistancePrioritizer::arbitrateAllDiscreetProperties(const CPropertyHistor
 	arbitrateDiscreetProperty( entry, PVP_CLAN );
 	arbitrateNeverSendProperty( OWNER_PEOPLE );
 	arbitrateDiscreetProperty( entry, OUTPOST_INFOS );
+	arbitrateDiscreetProperty( entry, MORPH_SHEET );
 
 	if (TVPNodeServer::PrioContext.Slot != 0)
 	{
@@ -765,6 +766,7 @@ void		CDistancePrioritizer::arbitrateNPCDiscreetProperties(const CPropertyHistor
 	arbitrateNeverSendProperty( PVP_CLAN );
 	arbitrateNeverSendProperty( OWNER_PEOPLE );
 	arbitrateDiscreetProperty( entry, OUTPOST_INFOS );
+	arbitrateNeverSendProperty( MORPH_SHEET );
 
 	arbitrateCommonPosAndMode(entry);
 }
@@ -808,6 +810,7 @@ void		CDistancePrioritizer::arbitrateCreatureDiscreetProperties(const CPropertyH
 	arbitrateNeverSendProperty( PVP_CLAN );
 	arbitrateDiscreetProperty( entry, OWNER_PEOPLE );
 	arbitrateNeverSendProperty( OUTPOST_INFOS );
+	arbitrateNeverSendProperty( MORPH_SHEET );
 
 	arbitrateCommonPosAndMode(entry);
 }
@@ -849,6 +852,7 @@ void		CDistancePrioritizer::arbitrateForageSourceDiscreetProperties(const CPrope
 	arbitrateNeverSendProperty( PVP_CLAN );
 	arbitrateNeverSendProperty( OWNER_PEOPLE );
 	arbitrateNeverSendProperty( OUTPOST_INFOS );
+	arbitrateNeverSendProperty( MORPH_SHEET );
 	
 	GET_VP_NODE(POSITION)->BranchHasPayload = sentity->positionIsInitialized() && positionHasChangedEnough();
 	GET_VP_NODE(ORIENTATION)->BranchHasPayload = thetaIntModehasChanged(entry.Properties[PROPERTY_ORIENTATION]);
@@ -1431,6 +1435,23 @@ void		fillOUTPOST_INFOS( TOutBox& outbox, TPropIndex )
 	DECLARE_AP(OUTPOST_INFOS);
 	caseFillAction( OUTPOST_INFOS )
 	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu OUTPOST_INFOS at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_OUTPOST_INFOS, outbox.getPosInBit(), ap->getValue() );
+	ap->packFast( outbox );
+	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
+	REMOVE_AP();
+	++(TVPNodeServer::PrioContext.ClientHost->NbActionsSentAtCycle);
+}
+
+
+/*
+ * MORPH_SHEET
+ */
+void		fillMORPH_SHEET( TOutBox& outbox, TPropIndex )
+{
+	bool payloadBit = true;
+	outbox.serialBitAndLog( payloadBit );
+	DECLARE_AP(MORPH_SHEET);
+	caseFillAction( MORPH_SHEET )
+	LOG_WHAT_IS_SENT( "%u: Filling buffer for C%hu S%hu P%hu MORPH_SHEET at bitpos %d - value %" NL_I64 "u", CTickEventHandler::getGameCycle(), TVPNodeServer::PrioContext.ClientId, (uint16)TVPNodeServer::PrioContext.Slot, PROPERTY_MORPH_SHEET, outbox.getPosInBit(), ap->getValue() );
 	ap->packFast( outbox );
 	CFrontEndService::instance()->history()->store( TVPNodeServer::PrioContext.ClientId, TVPNodeServer::PrioContext.ClientHost->sendNumber(), ap );
 	REMOVE_AP();

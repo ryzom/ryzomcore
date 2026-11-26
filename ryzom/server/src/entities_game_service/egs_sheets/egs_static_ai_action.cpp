@@ -631,6 +631,8 @@ void CStaticAiAction::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &fo
 
 	const UFormElm &root = form->getRootNode();
 
+	root.getValueByName( _SelfAction, "SelfAction" );
+
 	string value;
 	root.getValueByName( value, "type" );
 	
@@ -687,6 +689,7 @@ void CStaticAiAction::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &fo
 void CStaticAiAction::serial(class NLMISC::IStream &f)
 {
 	f.serial(_SheetId);
+	f.serial(_SelfAction);
 	
 	if (f.isReading())
 	{
@@ -743,3 +746,26 @@ void CStaticAiAction::reloadSheet(const CStaticAiAction &o)
 	// nothing special
 	*this= o;
 }
+
+
+//--------------------------------------------------------------
+//					CStaticActionList::readGeorges
+//--------------------------------------------------------------
+void CStaticActionList::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
+{
+	if (!form) return;
+
+	const UFormElm *actions = NULL;
+	if (!form->getRootNode().getNodeByName(&actions, "actions") || !actions)
+		return;
+
+	uint size = 0;
+	actions->getArraySize(size);
+	for (uint i = 0; i < size; ++i)
+	{
+		string action;
+		actions->getArrayValue(action, i);
+		if (!action.empty())
+			_Actions.push_back(CSheetId(action));
+	}
+} // CStaticActionList::readGeorges //

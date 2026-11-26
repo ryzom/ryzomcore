@@ -135,6 +135,7 @@ void CEntityContainer::initMirror()
 	_DataSet->declareProperty( "PvpClan", PSOReadOnly );
 	_DataSet->declareProperty( "OwnerPeople", PSOReadOnly );
 	_DataSet->declareProperty( "OutpostInfos", PSOReadOnly );
+	_DataSet->declareProperty( "MorphSheet", PSOReadOnly );
 
 	
 	// All will be ready when _Mirror.mirrorIsReady()
@@ -177,6 +178,7 @@ void CEntityContainer::initMirror()
 	DSPropertyPVP_CLAN = mapVisualPropIndex( "PvpClan", PROPERTY_PVP_CLAN );
 	DSPropertyOWNER_PEOPLE = mapVisualPropIndex( "OwnerPeople", PROPERTY_OWNER_PEOPLE );
 	DSPropertyOUTPOST_INFOS = mapVisualPropIndex( "OutpostInfos", PROPERTY_OUTPOST_INFOS );
+	DSPropertyMORPH_SHEET = mapVisualPropIndex( "MorphSheet", PROPERTY_MORPH_SHEET );
 	DSPropertyNPC_ALIAS = getPropertyIndex( "NPCAlias" );
 
 	// Resize the entity container

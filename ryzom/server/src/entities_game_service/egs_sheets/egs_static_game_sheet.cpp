@@ -875,6 +875,22 @@ void CStaticCreatures::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 			_ActionOnDeath = value;
 		}
 
+		// action lists, chosen like the AIS does: each of the first four action_cfg digits selects
+		// an entry (1 based) of melee_cfg, range_cfg, nuke_cfg and heal_cfg
+		_ActionLists.clear();
+		static const char *fightConfigs[] = { "melee_cfg", "range_cfg", "nuke_cfg", "heal_cfg" };
+		if ( root.getValueByName(value, "action_cfg") && value.size() == 5 )
+		{
+			for (uint i = 0; i < sizeof(fightConfigs) / sizeof(fightConfigs[0]); ++i)
+			{
+				const UFormElm *configs = NULL;
+				string actionList;
+				if ( value[i] >= '1' && value[i] <= '9' && root.getNodeByName(&configs, fightConfigs[i]) && configs &&
+					 configs->getArrayValue(actionList, value[i] - '1') && !actionList.empty() )
+					_ActionLists.push_back(CSheetId(actionList));
+			}
+		}
+
 		// Fame
 		string s;
 		if (root.getValueByName( s, "Basics.Fame"))
@@ -911,7 +927,7 @@ void CStaticCreatures::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 ///////////////////////////////////////////////////////////////////////////
 uint CStaticCreatures::getVersion()
 {
-	return 50 + ( SKILLS::NUM_SKILLS << 16 );
+	return 51 + ( SKILLS::NUM_SKILLS << 16 );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -984,6 +1000,7 @@ void CStaticCreatures::serial(class NLMISC::IStream &f)
 
 	f.serial(_DamageShieldDamage);
 	f.serial(_DamageShieldHpDrain);
+	f.serialCont(_ActionLists);
 }
 
 ///////////////////////////////////////////////////////////////////////////

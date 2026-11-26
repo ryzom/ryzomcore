@@ -24,6 +24,7 @@
 //	INCLUDE	//
 //////////////
 #include "stdpch.h"
+#include "player_morph.h"
 #include "combat_phrase.h"
 // net
 #include "nel/net/message.h"
@@ -236,7 +237,7 @@ bool CCombatPhrase::initPhraseFromAiAction( const TDataSetRow & actorRowId, cons
 
 	AIACTIONLOG("AI actor %s execute action %s on target %s",attacker->getId().toString().c_str(), aiAction->getSheetId().toString().c_str(), attacker->getTarget().toString().c_str());
 
-	if (attacker->getId().getType() == RYZOMID::player )
+	if (attacker->getId().getType() == RYZOMID::player && !getPlayerMorphForm(actorRowId) )
 	{
 		_Attacker = new CCombatAttackerPlayer(actorRowId);
 	}
@@ -934,7 +935,9 @@ bool CCombatPhrase::validate()
 	switch( actingEntity->getId().getType() )
 	{
 	case RYZOMID::player:
-		if ( !dynamic_cast<CCombatAttackerPlayer*> (_Attacker) )
+		// a morphed player attacks with the ai actions of its creature form
+		if ( !dynamic_cast<CCombatAttackerPlayer*> (_Attacker) &&
+			 !(dynamic_cast<CCombatAttackerAI*> (_Attacker) && getPlayerMorphForm(actingEntity->getEntityRowId())) )
 		{
 			nlwarning("SERIOUS ERROR !! Entity %s type 'player' and _Attacker type does not match ! very serious error", actingEntity->getId().toString().c_str());
 				return false;
@@ -1155,9 +1158,9 @@ bool CCombatPhrase::validate()
 			else
 				range = 6000;
 				
-			if ((character && !character->meleeCombatIsValid()) ||  ! PHRASE_UTILITIES::testRange(*actingEntity, *defender, range ))
+			if ((character && !getPlayerMorphForm(character->getEntityRowId()) && !character->meleeCombatIsValid()) ||  ! PHRASE_UTILITIES::testRange(*actingEntity, *defender, range ))
 			{
-				if (!_TargetTooFarMsg && (character && !character->meleeCombatIsValid()))
+				if (!_TargetTooFarMsg && (character && !getPlayerMorphForm(character->getEntityRowId()) && !character->meleeCombatIsValid()))
 				{
 					PHRASE_UTILITIES::sendSimpleMessage( _Attacker->getEntityRowId(), "BS_TARGET_TOO_FAR_OR");
 					_TargetTooFarMsg = true;
@@ -1279,7 +1282,7 @@ bool CCombatPhrase::validate()
 	_TotalHPCost = _HPCost;
 
 	// if attacker is a player, use equipment wear malus on stamina and Hp cost
-	if (actingEntity->getId().getType() == RYZOMID::player)
+	if (actingEntity->getId().getType() == RYZOMID::player && !getPlayerMorphForm(actingEntity->getEntityRowId()))
 	{
 		CCharacter *character = dynamic_cast<CCharacter*> (actingEntity);
 		if (!character)
@@ -1400,7 +1403,9 @@ bool  CCombatPhrase::update()
 			TDataSetRow target = actor->getTargetDataSetRow();
 			debugStep = 6;
 			if	( TheDataset.isAccessible(target) 
-				&& (!combatDefender || !combatDefender->isValid() || target != combatDefender->getEntityRowId()) 
+				&& (!combatDefender || !combatDefender->isValid() || target != combatDefender->getEntityRowId()
+					// a target that morphed or unmorphed since has another body
+					|| combatDefender->getMorphForm() != getPlayerMorphForm(target))
 				)
 			{
 				debugStep = 7;
@@ -1522,10 +1527,10 @@ bool  CCombatPhrase::update()
 					else
 						range = 6000;
 					
-					if ((character && !character->meleeCombatIsValid()) || !PHRASE_UTILITIES::testRange(*actor, *combatDefender->getEntity(), range))
+					if ((character && !getPlayerMorphForm(character->getEntityRowId()) && !character->meleeCombatIsValid()) || !PHRASE_UTILITIES::testRange(*actor, *combatDefender->getEntity(), range))
 					{
 						debugStep = 19;
-						if (!_TargetTooFarMsg && !_Idle && (character && !character->meleeCombatIsValid()))
+						if (!_TargetTooFarMsg && !_Idle && (character && !getPlayerMorphForm(character->getEntityRowId()) && !character->meleeCombatIsValid()))
 						{
 							PHRASE_UTILITIES::sendSimpleMessage( actor->getId(), "BS_TARGET_TOO_FAR_OR");
 							_TargetTooFarMsg = true;
@@ -2335,7 +2340,7 @@ bool CCombatPhrase::launchAttack(CEntityBase * actingEntity, bool rightHand, boo
 #endif
 
 	// wear equipment if actor is a player
-	if (actingEntity->getId().getType() == RYZOMID::player)
+	if (actingEntity->getId().getType() == RYZOMID::player && !getPlayerMorphForm(actingEntity->getEntityRowId()))
 	{
 		H_AUTO(CCombatPhrase_launchAttack_wearEquipment);
 		CCharacter *playerChar = dynamic_cast<CCharacter*> (actingEntity);
@@ -2654,7 +2659,7 @@ void CCombatPhrase::launchAttackOnTarget(uint8 targetIndex, bool rightHand, bool
 			factor += _DamageFactorOnSuccess.applyValue(_WeaponSabrinaValue) - 1.0f;
 
 		// if PVP, apply PVP damage factor
-		if (defender->getId().getType() == RYZOMID::player && actingEntity->getId().getType() == RYZOMID::player && defender != actingEntity)
+		if (isHominBody(defender) && isHominBody(actingEntity) && defender != actingEntity)
 		{
 			if (_MeleeCombat)
 			{
@@ -3053,7 +3058,8 @@ void CCombatPhrase::applyAction(TApplyAction & action, std::vector<TReportAction
 		}
 	}
 	
-	if( targetId.getType() == RYZOMID::player )
+	// a morph already took the armor of its creature from its defender, like a creature
+	if( targetId.getType() == RYZOMID::player && !getPlayerMorphForm(defender->getEntityRowId()) )
 	{
 		damage = defender->applyDamageOnArmor( dmgType, damage );
 	}
@@ -3309,7 +3315,7 @@ void CCombatPhrase::applyAction(TApplyAction & action, std::vector<TReportAction
 	if( damage > 0 )
 	{
 		std::vector<SItemSpecialEffect> effects;
-		if ( _Attacker->getEntity()->getId().getType() == RYZOMID::player )
+		if ( _Attacker->getEntity()->getId().getType() == RYZOMID::player && !getPlayerMorphForm(_Attacker->getEntityRowId()) )
 		{
 			CCharacter* c = dynamic_cast<CCharacter*>(_Attacker->getEntity());
 			effects = c->lookForSpecialItemEffects(ITEM_SPECIAL_EFFECT::ISE_FIGHT_VAMPIRISM);
@@ -3539,7 +3545,12 @@ float CCombatPhrase::testOpponentDefense(CCombatDefenderPtr &combatDefender, boo
 		if (engagedEntity == attacker->getEntityRowId())
 		{
 			sint32 reachDelta = 0;
-			if (defender->getId().getType() == RYZOMID::player)
+			const CStaticCreatures *morphForm = getPlayerMorphForm(defender->getEntityRowId());
+			if (morphForm)
+			{
+				reachDelta = weapon.ReachValue - morphForm->getMeleeReachValue();
+			}
+			else if (defender->getId().getType() == RYZOMID::player)
 			{
 				CCharacter *player = dynamic_cast<CCharacter*> (defender);
 				if (!player)
@@ -3626,7 +3637,7 @@ float CCombatPhrase::testOpponentDefense(CCombatDefenderPtr &combatDefender, boo
 
 	// check target nature to use right table
 	const sint32 delta = defenderLevel - attackerLevel;
-	if (defender->getId().getType() == RYZOMID::player)
+	if (defender->getId().getType() == RYZOMID::player && !getPlayerMorphForm(defender->getEntityRowId()))
 	{
 		chances = CStaticSuccessTable::getSuccessChance( SUCCESS_TABLE_TYPE::FightDefense, delta );
 		dodgeFactor = CStaticSuccessTable::getSuccessFactor(SUCCESS_TABLE_TYPE::FightDefense, delta, test);
@@ -3905,7 +3916,7 @@ bool CCombatPhrase::testPhraseSuccess(bool useRightHand)
 	}
 
 	// add fight skill bonus given by consumable effect
-	if ( _Attacker->getEntity()->getId().getType() == RYZOMID::player )
+	if ( _Attacker->getEntity()->getId().getType() == RYZOMID::player && !getPlayerMorphForm(_Attacker->getEntityRowId()) )
 	{
 		CCharacter * c = dynamic_cast<CCharacter*>(_Attacker->getEntity());
 		if( _MeleeCombat )	
@@ -3955,7 +3966,7 @@ bool CCombatPhrase::testPhraseSuccess(bool useRightHand)
 		uint8 criticalChances = (uint8) min((uint16)100, uint16(CriticalHitChances + _CriticalHitChancesModifier.applyValue(_WeaponSabrinaValue)) );
 
 		// add spire effect ( critical hit )
-		if ( _Attacker->getEntity()->getId().getType() == RYZOMID::player )
+		if ( _Attacker->getEntity()->getId().getType() == RYZOMID::player && !getPlayerMorphForm(_Attacker->getEntityRowId()) )
 		{
 			const CSEffect* pEffect = _Attacker->getEntity()->lookForActiveEffect( EFFECT_FAMILIES::TotemCombatCri );
 			if ( pEffect != NULL )
@@ -3964,7 +3975,7 @@ bool CCombatPhrase::testPhraseSuccess(bool useRightHand)
 		// Add item effect (only take into account the used item for the moment)
 		{
 			std::vector<SItemSpecialEffect> effects;
-			if ( _Attacker->getEntity()->getId().getType() == RYZOMID::player )
+			if ( _Attacker->getEntity()->getId().getType() == RYZOMID::player && !getPlayerMorphForm(_Attacker->getEntityRowId()) )
 			{
 				CCharacter* c = dynamic_cast<CCharacter*>(_Attacker->getEntity());
 				effects = c->lookForSpecialItemEffects(ITEM_SPECIAL_EFFECT::ISE_FIGHT_ADD_CRITICAL);
@@ -4088,8 +4099,8 @@ CCombatDefenderPtr CCombatPhrase::createDefender( const TDataSetRow &targetRowId
 	if ( !TheDataset.isAccessible(targetRowId) )
 		return NULL;
 
-	// create defender structure
-	if ( TheDataset.getEntityId(targetRowId).getType() == RYZOMID::player )
+	// create defender structure, a morphed player defends with the body of its creature
+	if ( TheDataset.getEntityId(targetRowId).getType() == RYZOMID::player && !getPlayerMorphForm(targetRowId) )
 	{
 		return new CCombatDefenderPlayer(targetRowId);
 	}
@@ -4342,7 +4353,7 @@ sint32 CCombatPhrase::applyArmorProtections(CCombatDefenderPtr &defender, sint32
 	// compute armor and shield protections
 	sint32 defenderArmorLevel;
 	sint32 defenderShieldLevel;
-	if (entity->getId().getType() == RYZOMID::player)
+	if (entity->getId().getType() == RYZOMID::player && !defender->getMorphForm())
 	{
 		sint32 bestArmorSkill = 0;
 		sint32 bestShieldSkill = 0;
@@ -4821,7 +4832,7 @@ void CCombatPhrase::computeBaseDamage(bool rightHand, EGSPD::CPeople::TPeople ta
 	}
 	
 	// if attacker is not a player, the _RightWeapon damage is direclty the value to use, otherwise we need the CWeaponDamageTable
-	if (actingEntity->getId().getType() == RYZOMID::player)
+	if (actingEntity->getId().getType() == RYZOMID::player && !getPlayerMorphForm(actingEntity->getEntityRowId()))
 	{
 		// add fight skill bonus given by consumable effect
 		CCharacter * c = dynamic_cast<CCharacter*>(actingEntity);

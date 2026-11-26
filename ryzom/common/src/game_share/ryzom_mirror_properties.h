@@ -82,6 +82,7 @@ extern TPropertyIndex DSPropertyPVP_CLAN;
 extern TPropertyIndex DSPropertyFUEL;
 extern TPropertyIndex DSPropertyOWNER_PEOPLE;
 extern TPropertyIndex DSPropertyOUTPOST_INFOS;
+extern TPropertyIndex DSPropertyMORPH_SHEET;
 extern TPropertyIndex DSPropertyNPC_ALIAS;
 
 
@@ -149,6 +150,8 @@ void	initRyzomVisualPropertyIndices( CMirroredDataSet& dataset );
 #define TYPE_OWNER_PEOPLE uint8
 
 #define TYPE_OUTPOST_INFOS uint16
+
+#define TYPE_MORPH_SHEET uint32
 
 #define TYPE_ALIAS uint32 // TAIAlias
 

@@ -171,6 +171,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 
 	// Character type
 	bool user = entity->isUser ();
+	CPlayerCL *player = dynamic_cast<CPlayerCL *>(entity);
+	bool morphed = player && player->isMorphed();
 	bool _friend = entity->isViewedAsFriend ();
 	bool isForageSource = entity->isForageSource ();
 	// Special display for roleMaster etc...
@@ -335,6 +337,16 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 		}
 	}
 
+
+	if (morphed)
+	{
+		entityName = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(player->getSheet()->Id);
+		name = !entityName.empty();
+		title = symbol = guildName = tribeName = eventFaction = false;
+		needGuildNameId = needGuildSymbolId = needPvPLogo = permanentContent = rpTags = false;
+		for (uint i = 0; i < NumBars; ++i)
+			bars[i] = (i == HP);
+	}
 
 	// Create the template
 	CGroupInSceneUserInfo *info = newGroupInScene(templateName, id);
@@ -638,7 +650,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			if (!isForageSource)
 			{
 				CViewBase * invisibleLogo = info->getView("invisible_logo");
-				if (entity->isUser() && invisibleLogo)
+				if (entity->isUser() && invisibleLogo && !morphed)
 				{
 					bool invisible = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IS_INVISIBLE")->getValueBool();
 					invisibleLogo->setActive(invisible);
@@ -904,12 +916,22 @@ void CGroupInSceneUserInfo::setLeftGroupActive( bool active )
 	_IsLeftGroupActive = active;
 
 	// The user and forage source cases are handled externally
-	if ( _Entity->isUser() || _Entity->isForageSource() )
+	CPlayerCL *player = dynamic_cast<CPlayerCL *>(_Entity);
+	bool morphed = player && player->isMorphed();
+	if ( (_Entity->isUser() && !morphed) || _Entity->isForageSource() )
 		return;
 
 	int dbEntry;
 	bool barSettings [NumBars];
 	getBarSettings( CInterfaceManager::getInstance(), _Entity->isUser(), _Entity->isPlayer(), _Entity->isViewedAsFriend(), dbEntry, barSettings );
+	if (morphed)
+	{
+		bool selected = _Entity->slot() == UserEntity->selection();
+		active = active && _Entity->getDisplayOSDBars() &&
+			(selected || _ConfigSaveInsceneDB[SAVE_ENEMY].getHP()->getValueBool());
+		for (uint i = 0; i < NumBars; ++i)
+			barSettings[i] = (i == HP);
+	}
 
 	// Show/hide bars
 	bool atLeastOneBar = false;
@@ -957,6 +979,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 
 	// Set state fx
 	CPlayerCL *pPlayer = dynamic_cast<CPlayerCL*>(_Entity);
+	bool morphed = pPlayer && pPlayer->isMorphed();
 	if (pPlayer != NULL)
 	{
 		if (pPlayer->isAFK())
@@ -974,10 +997,16 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		_Name->setColor(entityColor);
 		_Name->setModulateGlobalColor(false);
 		string entityName = _Entity->getDisplayName();
-		if (entityName.empty())
+		if (morphed)
+		{
+			entityName = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(pPlayer->getSheet()->Id);
+			_Name->setActive(_Entity->getDisplayOSDName() &&
+				(_Entity->slot() == UserEntity->selection() || _ConfigSaveInsceneDB[SAVE_ENEMY].getName()->getValueBool()));
+		}
+		if (entityName.empty() && !morphed)
 			entityName = _Entity->getTitle();
 
-		if (pPlayer != NULL)
+		if (pPlayer != NULL && !morphed)
 			if (pPlayer->isAFK())
 				entityName += CI18N::get("uiAFK");
 		_Name->setText(entityName);
@@ -1042,6 +1071,8 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	}
 
 	double manhattanDistance = getManhattanDistance( UserEntity->pos()-_Entity->pos() );
+	if (morphed)
+		setLeftGroupActive(manhattanDistance < CLFECOMMON::THRESHOLD_BARS_CLIENT_M);
 	// Does this entity target the user
 	if (_Target)
 	{

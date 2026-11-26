@@ -20,6 +20,8 @@
 
 
 #include "stdpch.h"
+#include "player_morph.h"
+#include "game_share/ryzom_mirror_properties.h"
 
 #include "nel/net/service.h"
 #include "nel/misc/hierarchical_timer.h"
@@ -778,6 +780,17 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 	CCharacter * pTarget = dynamic_cast<CCharacter*>(target);
 	if( pTarget )
 	{
+		if (!curative && actor != pTarget)
+		{
+			CMirrorPropValue<TYPE_MORPH_SHEET> targetMorph(TheDataset, pTarget->getEntityRowId(), DSPropertyMORPH_SHEET);
+			CMirrorPropValue<TYPE_MORPH_SHEET> actorMorph(TheDataset, actor->getEntityRowId(), DSPropertyMORPH_SHEET);
+			if (actorMorph.getValue() != 0 && !actor->getContextualProperty().directAccessForStructMembers().attackable())
+				return PVP_RELATION::NeutralPVP;
+			if (targetMorph.getValue() != 0)
+				return pTarget->getContextualProperty().directAccessForStructMembers().attackable() ? PVP_RELATION::Ennemy : PVP_RELATION::NeutralPVP;
+			if (actorMorph.getValue() != 0)
+				return PVP_RELATION::Ennemy;
+		}
 		if (curative && pTarget == actor)
 		{
 			return PVP_RELATION::Ally;
@@ -898,7 +911,8 @@ bool CPVPManager2::isCurativeActionValid( CCharacter * actor, CEntityBase * targ
 				CCharacter::sendDynamicSystemMessage(actor->getEntityRowId(), "PVP_CANT_HELP_UNKNOWN");
 	}
 
-	if( actionValid && !checkMode )
+	if( actionValid && !checkMode && !getPlayerMorphForm(actor->getEntityRowId()) &&
+		!(target && getPlayerMorphForm(target->getEntityRowId())) )
 	{
 		CCharacter * pTarget = dynamic_cast<CCharacter*>(target);
 

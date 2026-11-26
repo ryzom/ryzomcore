@@ -17,6 +17,7 @@
  
 
 #include "stdpch.h"
+#include "player_morph.h"
 #include "magic_action_ai_damage_aura.h"
 #include "phrase_manager/magic_phrase.h"
 #include "phrase_manager/effect_factory.h"
@@ -47,9 +48,9 @@ bool CMagicAiActionDamageAura::initFromAiAction( const CStaticAiAction *aiAction
 	// read parameters
 	const COTEffectSpellParams &data = aiAction->getData().OTEffectSpell;
 
-	CCreature *creature = CreatureManager.getCreature( phrase->getActor() );
-	if (creature && creature->getForm())
-		_DamagePerUpdate = (uint16)(data.SpellParamValue2 + data.SpellPowerFactor * creature->getForm()->getAttackLevel());
+	const CStaticCreatures *form = getActingCreatureForm( phrase->getActor() );
+	if (form)
+		_DamagePerUpdate = (uint16)(data.SpellParamValue2 + data.SpellPowerFactor * form->getAttackLevel());
 	else
 		_DamagePerUpdate = (uint16)data.SpellParamValue2;
 	

@@ -118,6 +118,7 @@ struct CEntity
 	CMirrorPropValueRO<TYPE_PVP_CLAN>			VP_PVP_CLAN;
 	CMirrorPropValueRO<TYPE_OWNER_PEOPLE>		VP_OWNER_PEOPLE;
 	CMirrorPropValueRO<TYPE_OUTPOST_INFOS>		VP_OUTPOST_INFOS;
+	CMirrorPropValueRO<TYPE_MORPH_SHEET>		VP_MORPH_SHEET;
 #endif
 
 	/// Manhattan distance accumulated when moving
@@ -176,6 +177,7 @@ struct CEntity
 		VP_PVP_CLAN.init( *DataSet, entityIndex, DSPropertyPVP_CLAN );
 		VP_OWNER_PEOPLE.init( *DataSet, entityIndex, DSPropertyOWNER_PEOPLE );
 		VP_OUTPOST_INFOS.init( *DataSet, entityIndex, DSPropertyOUTPOST_INFOS );
+		VP_MORPH_SHEET.init( *DataSet, entityIndex, DSPropertyMORPH_SHEET );
 #endif
 
 		invalidateProperties();

@@ -52,8 +52,12 @@ struct CCyclicActionInfos
 	TDataSetRow						TargetRowId;
 	std::vector<NLMISC::CSheetId>	CyclicActionBricks;
 
-	CCyclicActionInfos() { }
-	inline void reset() { CyclicActionBricks.clear(); }
+	NLMISC::CSheetId AiAction;
+	float DamageCoeff;
+	float SpeedCoeff;
+
+	CCyclicActionInfos() : DamageCoeff(1.0f), SpeedCoeff(1.0f) { }
+	inline void reset() { CyclicActionBricks.clear(); AiAction = NLMISC::CSheetId::Unknown; }
 };
 
 static const CCyclicActionInfos NoCyclicInfo = CCyclicActionInfos();
@@ -99,6 +103,8 @@ public:
 	 * \return the new cyclic action (the copy) or a NULL pointer if the cyclic action was NULL.
 	 */
 	CSPhrasePtr &renewCyclicAction();
+
+	const NLMISC::CSheetId &getCyclicAiAction() const { return _CyclicActionInfos.AiAction; }
 
 	/// stop the cyclic action
 	void stopCyclicAction(const TDataSetRow &entityRowId);
@@ -470,7 +476,7 @@ public:
 	 * \param targetRowId rowid of the target
 	 * \param actionId sheetid of the ai action
 	 */
-	void executeAiAction( const TDataSetRow &actorRowId, const TDataSetRow &targetRowId,  const NLMISC::CSheetId &actionId, float damageCoeff = 1.0f, float speedCoeff = 1.0f );
+	CSPhrasePtr executeAiAction( const TDataSetRow &actorRowId, const TDataSetRow &targetRowId,  const NLMISC::CSheetId &actionId, float damageCoeff = 1.0f, float speedCoeff = 1.0f, bool cyclic = false );
 
 	/**
 	 * cancel the top phrase of given entity

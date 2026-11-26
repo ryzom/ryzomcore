@@ -18,6 +18,7 @@
 
 
 #include "stdpch.h"
+#include "player_morph.h"
 #include "combat_attacker.h"
 #include "phrase_manager/phrase_manager.h"
 #include "creature_manager/creature_manager.h"
@@ -26,6 +27,7 @@
 
 #include "egs_sheets/egs_sheets.h"
 #include "egs_sheets/egs_static_ai_action.h"
+#include "egs_variables.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -264,6 +266,9 @@ CCombatAttackerAI::CCombatAttackerAI(const TDataSetRow &rowId, const CStaticAiAc
 		_Ammo.Family = ITEMFAMILY::AMMO;
 		_Ammo.LatencyInTicks = 0;
 		_RightHandWeapon.Damage = 0;
+		// creatures get their range from the AIS, a morphed player's range is checked by the EGS
+		if (getPlayerMorphForm(rowId))
+			_RightHandWeapon.Range = MorphRangeAttackRange;
 	}
 	
 	nlassert(_RightHandWeapon.Area == NULL);
@@ -275,18 +280,14 @@ CCombatAttackerAI::CCombatAttackerAI(const TDataSetRow &rowId, const CStaticAiAc
 //--------------------------------------------------------------
 void CCombatAttackerAI::initFromRowId( const TDataSetRow &rowId )
 {
-	CCreature  *entity = CreatureManager.getCreature(rowId);
+	CEntityBase *entity = CEntityBaseManager::getEntityBasePtr(rowId);
 	if (!entity)
 		return;
 
-#if !FINAL_VERSION
-	nlassert(entity->getId().getType() == RYZOMID::creature);
-#endif
-
-	const CStaticCreatures * form = entity->getForm();
+	const CStaticCreatures *form = getActingCreatureForm(rowId);
 	if ( !form )
 	{
-		nlwarning( "<CCombatAttackerAI::CCombatAttackerAI> invalid creature form %s in entity %s", entity->_SheetId.toString().c_str(), entity->getId().toString().c_str() );
+		nlwarning( "<CCombatAttackerAI::CCombatAttackerAI> invalid creature form %s in entity %s", entity->getType().toString().c_str(), entity->getId().toString().c_str() );
 		return;
 	}
 

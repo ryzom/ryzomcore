@@ -153,6 +153,9 @@ public:
 	// get form of Ai Action
 	static const CStaticAiAction * getAiActionForm( const NLMISC::CSheetId& sheetId );
 
+	// get form of a creature fight config action list
+	static const CStaticActionList * getActionListForm( const NLMISC::CSheetId& sheetId );
+
 	// get form of a success table
 	static const CStaticSuccessTable * getSuccessTableForm( const NLMISC::CSheetId& sheetId );
 
@@ -254,6 +257,9 @@ private :
 
 	/// ai actions
 	std::map< NLMISC::CSheetId, CStaticAiAction > _AiActions;
+
+	/// creature fight config action lists
+	std::map< NLMISC::CSheetId, CStaticActionList > _ActionLists;
 
 	// success tables
 	std::map< NLMISC::CSheetId, CStaticSuccessTable > _SuccessTables;

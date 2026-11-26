@@ -70,6 +70,7 @@ TPropertyIndex DSPropertyPVP_CLAN = INVALID_PROPERTY_INDEX;
 TPropertyIndex DSPropertyFUEL =  INVALID_PROPERTY_INDEX;
 TPropertyIndex DSPropertyOWNER_PEOPLE = INVALID_PROPERTY_INDEX;
 TPropertyIndex DSPropertyOUTPOST_INFOS = INVALID_PROPERTY_INDEX;
+TPropertyIndex DSPropertyMORPH_SHEET = INVALID_PROPERTY_INDEX;
 TPropertyIndex DSPropertyNPC_ALIAS = INVALID_PROPERTY_INDEX;
 
 
@@ -172,6 +173,7 @@ void	initRyzomVisualPropertyIndices( CMirroredDataSet& dataset )
 	assignProp( OWNER_PEOPLE, OwnerPeople );
 
 	assignProp( OUTPOST_INFOS, OutpostInfos );
+	assignProp( MORPH_SHEET, MorphSheet );
 
 	assignProp( NPC_ALIAS, NPCAlias );
 

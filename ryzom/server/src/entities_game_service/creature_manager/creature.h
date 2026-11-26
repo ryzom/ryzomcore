@@ -394,6 +394,14 @@ public:
 	/// get the resist value associated to damage type
 	uint32 getMagicResistance(DMGTYPE::EDamageType dmgType);
 
+	/// resist and armor of a creature form, shared with the players morphed into it
+	static uint32 getFormMagicResistance(const CStaticCreatures &form, const CCreatureResistModifiers &modifiers, EFFECT_FAMILIES::TEffectFamily effectFamily);
+	static uint32 getFormMagicResistance(const CStaticCreatures &form, const CCreatureResistModifiers &modifiers, DMGTYPE::EDamageType dmgType);
+	static sint32 applyFormArmor(const CStaticCreatures &form, CEntityBase &entity, DMGTYPE::EDamageType dmgType, sint32 damage);
+
+	/// create the items of a loot set, defaultQuality for the items the set gives no level; shared with the morph roles
+	static void createLootSetItems(const CStaticLootSet &lootSet, const CStaticItem *bagForm, uint16 defaultQuality, std::vector<CGameItemPtr> &items, bool &haveLoot);
+
 	/// get creature resist modifiers
 	const CCreatureResistModifiers	&getResistModifiers() const { return _ResistModifiers; }
 

@@ -36,6 +36,7 @@
 #include "server_share/used_continent.h"
 //egs
 #include "client_messages.h"
+#include "player_morph.h"
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
 #include "player_manager/character.h"
@@ -419,7 +420,7 @@ void cbClientItemEquip( NLNET::CMessage& msgin, const std::string &serviceName, 
 		c->incInterfaceCounter();
 
 		// if player is stunned or dead cancel action
-		if (c->isDead() || c->isStunned())
+		if (c->isDead() || c->isStunned() || isMorphLockedItem(c, INVENTORIES::TInventory(equippedInventory), equippedSlot))
 			return;
 		c->equipCharacter( INVENTORIES::TInventory(equippedInventory), equippedSlot, bagSlot, false );
 	}
@@ -451,7 +452,7 @@ void cbClientItemUnequip( NLNET::CMessage& msgin, const std::string &serviceName
 		c->incInterfaceCounter();
 
 		// if player is stunned or dead cancel action
-		if (c->isDead() || c->isStunned())
+		if (c->isDead() || c->isStunned() || isMorphLockedItem(c, INVENTORIES::TInventory(equippedInventory), equippedSlot))
 			return;
 
 		c->unequipCharacter( INVENTORIES::TInventory(equippedInventory), equippedSlot, false );
@@ -527,7 +528,8 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 		return;
 	}
 
-	if (!canUseUpItemOf(character, inventory, "cbItemDestroy"))
+	if (!canUseUpItemOf(character, inventory, "cbItemDestroy") ||
+		isMorphLockedItem(character, INVENTORIES::TInventory(inventory), slot))
 		return;
 
 	character->setAfkState(false);
@@ -3098,6 +3100,9 @@ void cbClientPing( NLNET::CMessage& msgin, const std::string &serviceName, NLNET
 extern void cbClientAdmin( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 extern void cbClientAdminOffline( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 extern void cbClientRemoteAdmin( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+extern void cbClientMorphReady( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+extern void cbClientMorphAction( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+extern void cbClientMorphMode( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
 
 /************************************************************************/
@@ -4010,6 +4015,9 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:COMMAND:RANDOM",				cbClientRollDice },
 	{ "CLIENT:COMMAND:GUILDMOTD",			cbClientGuildMotd },
 	{ "CLIENT:COMMAND:AUTOPACT",			cbClientAutoPact },
+	{ "CLIENT:COMMAND:MORPH_READY",			cbClientMorphReady },
+	{ "CLIENT:COMMAND:MORPH_ACTION",		cbClientMorphAction },
+	{ "CLIENT:COMMAND:MORPH_MODE",			cbClientMorphMode },
 
 
 // For all these commented commands, now you have to use the CLIENT:COMMAND:ADMIN message using /a client command

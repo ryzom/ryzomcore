@@ -1998,6 +1998,12 @@ public:
 			if (UserEntity->selection() == Slot)
 			{
 				string copyInout = inout;
+				CPlayerCL *player = dynamic_cast<CPlayerCL *>(EntitiesMngr.entity(Slot));
+				if (player && player->isMorphed())
+				{
+					inout = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(player->getSheet()->Id);
+					return true;
+				}
 				CStringPostProcessRemoveTitle::cbIDStringReceived(inout);
 				if (inout.empty())
 				{
@@ -2042,6 +2048,12 @@ public:
 			if (UserEntity->selection() == Slot)
 			{
 				CEntityCL *entity = EntitiesMngr.entity(Slot);
+				CPlayerCL *player = dynamic_cast<CPlayerCL *>(entity);
+				if (player && player->isMorphed())
+				{
+					inout.clear();
+					return true;
+				}
 				CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
 				if (pChar != NULL)
 				{
@@ -2100,7 +2112,12 @@ class CActionHandlerSetTargetName : public IActionHandler
 					nDBid = EntitiesMngr.entities()[nSlot]->getNameId();
 				}
 
-				if (nDBid != 0)
+				CPlayerCL *player = dynamic_cast<CPlayerCL *>(EntitiesMngr.entity(nSlot));
+				if (player && player->isMorphed())
+				{
+					TargetName = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(player->getSheet()->Id);
+				}
+				else if (nDBid != 0)
 				{
 					CSPPRemoveTitleAndCheckSelection *pSPPRT = new CSPPRemoveTitleAndCheckSelection;
 					pSPPRT->Slot = nSlot;

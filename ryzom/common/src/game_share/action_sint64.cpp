@@ -76,6 +76,7 @@ void CActionSint64::registerNumericPropertiesRyzom()
 	CActionSint64::registerNumericProperty( PROPERTY_PVP_CLAN, 32 );
 	CActionSint64::registerNumericProperty( PROPERTY_OWNER_PEOPLE, 3 ); // 4 races and unknow
 	CActionSint64::registerNumericProperty( PROPERTY_OUTPOST_INFOS, 16 ); // 15+1
+	CActionSint64::registerNumericProperty( PROPERTY_MORPH_SHEET, 32 );
 }
 
 

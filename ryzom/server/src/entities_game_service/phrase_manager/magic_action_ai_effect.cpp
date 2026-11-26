@@ -17,6 +17,7 @@
  
 
 #include "stdpch.h"
+#include "player_morph.h"
 #include "magic_action_ai_effect.h"
 #include "phrase_manager/magic_phrase.h"
 #include "phrase_manager/effect_factory.h"
@@ -73,14 +74,15 @@ void CMagicAiActionEffect::launch( CMagicPhrase * phrase, sint deltaLevel, sint 
 	
 	const CSEffectPtr debuff = actor->lookForActiveEffect( EFFECT_FAMILIES::DebuffSkillMagic );
 	sint skillValue = 0;
-	if ( actor->getId().getType() == RYZOMID::player )
+	const CStaticCreatures *morphForm = getPlayerMorphForm( phrase->getActor() );
+	if ( actor->getId().getType() == RYZOMID::player && !morphForm )
 	{
 		CCharacter * pC = (CCharacter *) actor;
 		skillValue = pC->getSkillValue( _Skill );
 	}
 	else
 	{
-		const CStaticCreatures * form = actor->getForm();
+		const CStaticCreatures * form = morphForm ? morphForm : actor->getForm();
 		if ( !form )
 		{
 			nlwarning( "<MAGIC>invalid creature form %s in entity %s", actor->getType().toString().c_str(), actor->getId().toString().c_str() );

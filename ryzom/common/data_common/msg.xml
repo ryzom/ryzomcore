@@ -573,6 +573,18 @@
           sendto="EGS"
           format="u8"
           description="client want set AUTOPACT to TRUE or FALSE" />
+    <leaf name="MORPH_READY"
+          sendto="EGS"
+          format="u32"
+          description="client can display the creature sheet $u32 it was asked to morph into" />
+    <leaf name="MORPH_ACTION"
+          sendto="EGS"
+          format="u32"
+          description="morphed client uses the creature ai action $u32" />
+    <leaf name="MORPH_MODE"
+          sendto="EGS"
+          format="u8"
+          description="morphed client takes on the creature mood $u8, or stands normally again" />
   </branch>
   <!-- MP Exotic Price Evaluation (discontinued) -->
   <branch name="MP_EVAL">
@@ -1117,6 +1129,11 @@
     <leaf name="POPUP"
           format="u32 u32"
           description="server display an important info message on the client (u32 titleDynString u32 textDynString)" />
+    <leaf name="MORPH_ABILITIES"
+          description="server send the creature sheet id of the morph, its ai action sheet ids, their translation keys and whether players can attack it" />
+    <leaf name="MORPH_PREPARE"
+          format="u32"
+          description="server asks the client whether it can display the creature sheet $u32" />
   </branch>
   <branch name="EVENT">
     <leaf name="SET_ITEM_CUSTOM_TEXT"

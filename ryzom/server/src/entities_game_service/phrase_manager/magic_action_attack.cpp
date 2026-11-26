@@ -17,6 +17,7 @@
 
 
 #include "stdpch.h"
+#include "player_morph.h"
 
 #include "magic_action_attack.h"
 
@@ -69,9 +70,9 @@ bool CMagicActionBasicDamage::initFromAiAction(CStaticAiAction const* aiAction, 
 	if (aiAction->getType() != AI_ACTION::DamageSpell ) return false;
 	
 	sint32 damageBonus = 0;
-	CCreature *creature = CreatureManager.getCreature( phrase->getActor() );
-	if (creature && creature->getForm())
-		damageBonus = sint32(aiAction->getData().Spell.SpellPowerFactor * creature->getForm()->getAttackLevel());
+	const CStaticCreatures *form = getActingCreatureForm( phrase->getActor() );
+	if (form)
+		damageBonus = sint32(aiAction->getData().Spell.SpellPowerFactor * form->getAttackLevel());
 	
 	switch(aiAction->getData().Spell.AffectedScore)
 	{
@@ -264,7 +265,7 @@ bool CMagicActionBasicDamage::launchOnEntity(
 		float dmgFactor = resistFactor * rangeFactor * (1.0f + phrase->getUsedItemStats().getPowerFactor(_Skill, phrase->getBrickMaxSabrinaCost()));
 		
 		// if PVP, apply PVP magic damage factor
-		if( actor != target && actor->getId().getType() == RYZOMID::player && target->getId().getType() == RYZOMID::player)
+		if( actor != target && isHominBody(actor) && isHominBody(target))
 		{
 			dmgFactor *= PVPMagicDamageFactor.get();
 		}
@@ -404,7 +405,7 @@ bool CMagicActionBasicDamage::computeMagicResistance(
 		float dmgFactor = resistFactor * rangeFactor * (1.0f + powerFactor);
 		
 		// if PVP, apply PVP magic damage factor
-		if( actor != target && actor->getId().getType() == RYZOMID::player && target->getId().getType() == RYZOMID::player)
+		if( actor != target && isHominBody(actor) && isHominBody(target))
 		{
 			dmgFactor *= PVPMagicDamageFactor.get();
 		}
@@ -638,7 +639,8 @@ void CMagicActionBasicDamage::launch(
 
 	sint skillValue = 0;
 	sint skillBaseValue = 0;
-	if ( actor->getId().getType() == RYZOMID::player )
+	const CStaticCreatures *morphForm = getPlayerMorphForm( phrase->getActor() );
+	if ( actor->getId().getType() == RYZOMID::player && !morphForm )
 	{
 		CCharacter * pC = safe_cast<CCharacter *> (actor);
 		skillValue = pC->getSkillValue( _Skill );
@@ -646,7 +648,7 @@ void CMagicActionBasicDamage::launch(
 	}
 	else
 	{
-		const CStaticCreatures * form = actor->getForm();
+		const CStaticCreatures * form = morphForm ? morphForm : actor->getForm();
 		if ( !form )
 		{
 			nlwarning( "<MAGIC>invalid creature form %s in entity %s", actor->getType().toString().c_str(), actor->getId().toString().c_str() );

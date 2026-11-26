@@ -36,6 +36,7 @@
 #include "interface_v3/chat_link_ui.h"
 #include "string_manager_client.h"
 #include "entity_cl.h"
+#include "player_cl.h"
 #include "nel/gui/action_handler.h"
 #include "entities.h"
 #include "nel/gui/group_editbox.h"
@@ -1238,7 +1239,7 @@ void CClientChatManager::buildTellSentence(const string &sender, const string &m
 
 
 // ***************************************************************************
-void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderIndex */, const string &sender, const string &msg, CChatGroup::TGroupType type, string &result)
+void CClientChatManager::buildChatSentence(TDataSetIndex compressedSenderIndex, const string &sender, const string &msg, CChatGroup::TGroupType type, string &result)
 {
 	// if its a tell, then use buildTellSentence
 	if(type==CChatGroup::tell)
@@ -1309,6 +1310,16 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 		}
 
 		senderName = STRING_MANAGER::CStringManagerClient::getLocalizedName(senderName);
+		// a morphed player speaking around is seen as its creature
+		if (type == CChatGroup::say || type == CChatGroup::shout)
+		{
+			CPlayerCL *player = dynamic_cast<CPlayerCL*>(EntitiesMngr.getEntityByCompressedIndex(compressedSenderIndex));
+			if (player && player->isMorphed())
+			{
+				senderName = STRING_MANAGER::CStringManagerClient::getCreatureLocalizedName(player->getSheet()->Id);
+				csr.clear();
+			}
+		}
 		switch(type)
 		{
 			case CChatGroup::shout:

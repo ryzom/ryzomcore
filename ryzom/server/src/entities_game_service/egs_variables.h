@@ -208,6 +208,7 @@ extern NLMISC::CVariable<uint16>				CriticalHitChances;
 extern NLMISC::CVariable<float>					DodgeFactorForMagicSkills;
 extern NLMISC::CVariable<float>					DodgeFactorForForageSkills;
 extern NLMISC::CVariable<float>					MaxAngleForRangeCombat;
+extern NLMISC::CVariable<float>					MorphRangeAttackRange;
 
 extern NLMISC::CVariable<float>					MagicResistFactorForCombatSkills;
 extern NLMISC::CVariable<float>					MagicResistFactorForMagicSkills;

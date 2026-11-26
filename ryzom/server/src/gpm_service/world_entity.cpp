@@ -100,6 +100,7 @@ void	CWorldEntity::init( const CEntityId& id, const TDataSetRow &index )
 	registerEntityProperty("LocalZ", &LocalZ, id);
 	registerEntityProperty("Theta", &Theta, id);
 	registerEntityProperty("Sheet", &Sheet, id);
+	registerEntityProperty("MorphSheet", &MorphSheet, id);
 	registerEntityProperty("TickPos", &Tick, id);
 	registerEntityProperty("Cell", &Cell, id);
 	registerEntityProperty("VisionCounter", &VisionCounter, id);
@@ -315,17 +316,6 @@ void CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8
 	Primitive = NULL;
 	MoveContainer = NULL;
 
-	const CGpmSheets::CSheet	*sheet = CGpmSheets::lookup(CSheetId(Sheet()));
-
-	float	primRadius = 0.5f;
-	float	primHeight = 2.0f;
-	
-	if (sheet != NULL)
-	{
-		primRadius = sheet->Radius * sheet->Scale;
-		primHeight = sheet->Height * sheet->Scale;
-	}
-
 	primitive = pMoveContainer->addNonCollisionablePrimitive();
 
 	if (primitive == NULL)
@@ -342,13 +332,33 @@ void CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8
 	primitive->setOcclusionMask( 0x00000000 );
 	primitive->setObstacle( false );
 	primitive->setAbsorbtion( 0 );
-	primitive->setHeight( primHeight );
-	primitive->setRadius( primRadius-0.1f );	// decrease primitive usable radius to lessen pacs load (avoid collision test)
 
 	Primitive = primitive;
 	MoveContainer = pMoveContainer;
+	updatePrimitiveSize();
 
 	PrimIterator = CWorldPositionManager::_PrimitivedList.insert(CWorldPositionManager::_PrimitivedList.end(), this);
+}
+
+/****************************************************************\
+			updatePrimitiveSize
+\****************************************************************/
+void CWorldEntity::updatePrimitiveSize()
+{
+	// a morphed player has the size of its creature
+	const CGpmSheets::CSheet	*sheet = CGpmSheets::lookup(CSheetId(MorphSheet() != 0 ? MorphSheet() : Sheet()));
+
+	float	primRadius = 0.5f;
+	float	primHeight = 2.0f;
+
+	if (sheet != NULL)
+	{
+		primRadius = sheet->Radius * sheet->Scale;
+		primHeight = sheet->Height * sheet->Scale;
+	}
+
+	Primitive->setHeight( primHeight );
+	Primitive->setRadius( primRadius-0.1f );	// decrease primitive usable radius to lessen pacs load (avoid collision test)
 }
 
 /****************************************************************\

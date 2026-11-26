@@ -29,6 +29,7 @@
 #include "player_manager/character.h"
 #include "player_manager/player_manager.h"
 #include "entity_manager/entity_manager.h"
+#include "player_morph.h"
 
 extern CPlayerManager PlayerManager;
 
@@ -92,6 +93,7 @@ public:
 	CCombatDefender(const TDataSetRow &rowId)
 	{
 		_TargetIndex = 0;
+		_MorphForm = NULL;
 		if ( !TheDataset.isAccessible(rowId))
 		{
 			nlwarning("<CCombatDefender> ERROR Get an invalid row id as param for the constructor, should never happens");
@@ -100,6 +102,7 @@ public:
 		}
 
 		_RowId = rowId;
+		_MorphForm = getPlayerMorphForm(rowId);
 	}
 
 	virtual ~CCombatDefender()
@@ -115,6 +118,8 @@ public:
 
 	inline CEntityBase *getEntity() const { return CEntityBaseManager::getEntityBasePtr(_RowId); }
 	inline const TDataSetRow &getEntityRowId() const { return _RowId; }
+	/// creature form of the morphed player this defender was built for, NULL otherwise
+	inline const CStaticCreatures *getMorphForm() const { return _MorphForm; }
 
 	virtual bool getArmor( SLOT_EQUIPMENT::TSlotEquipment slot, CCombatArmor &armor ) const = 0;
 	virtual bool getShield(CCombatShield &shield) const = 0;
@@ -140,6 +145,7 @@ protected:
 	TDataSetRow		_RowId;
 	// index of the defender in the target list in case of multi target attack
 	uint			_TargetIndex;
+	const CStaticCreatures	*_MorphForm;
 };
 
 typedef NLMISC::CSmartPtr<CCombatDefender> CCombatDefenderPtr;

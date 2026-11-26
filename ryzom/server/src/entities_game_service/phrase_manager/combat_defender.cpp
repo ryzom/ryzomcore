@@ -312,7 +312,7 @@ CCombatDefenderAI::CCombatDefenderAI(const TDataSetRow &rowId) : CCombatDefender
 
 	/// TODO : specialize this class for NPCs other than creature
 
-	_CreatureForm  = entity->getForm();
+	_CreatureForm  = _MorphForm ? _MorphForm : entity->getForm();
 	if (!_CreatureForm)
 	{
 		nlwarning("Failed to get form for entity sheet %s", entity->getType().toString().c_str());

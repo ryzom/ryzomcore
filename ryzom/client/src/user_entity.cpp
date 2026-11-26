@@ -438,6 +438,9 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 //-----------------------------------------------
 float CUserEntity::eyesHeight()
 {
+	if (isMorphed())
+		return CCharacterCL::_Sheet->ColHeight * getScale();
+
 	if(!_OnMount)
 		return _EyesHeight * _CharacterScalePos;
 	else
@@ -860,7 +863,12 @@ bool CUserEntity::mode(MBEHAV::EMode m)
 
 	bool doSetAnim = true;
 	// if user sits down or stands up we set transition anim before changing animset
-	if( m == MBEHAV::SIT )
+	if (isMorphed())
+	{
+		if (m == MBEHAV::SIT || _Mode == MBEHAV::SIT)
+			_Mode = m;
+	}
+	else if( m == MBEHAV::SIT )
 	{
 		setAnim(CAnimationStateSheet::SitMode);
 		_Mode = m;
@@ -888,8 +896,14 @@ bool CUserEntity::mode(MBEHAV::EMode m)
 
 	if( doSetAnim )
 	{
-		// Animset changed -> update current animation
-		setAnim(CAnimationStateSheet::Idle);
+		// Creature death clips are in the normal set; the death set only holds the corpse pose.
+		if (isMorphed() && m == MBEHAV::DEATH)
+		{
+			::computeAnimSet(_CurrentAnimSet[MOVE], MBEHAV::NORMAL, CCharacterCL::_Sheet->getAnimSetBaseName(), NULL, NULL, false);
+			setAnim(CAnimationStateSheet::Death);
+		}
+		else
+			setAnim(CAnimationStateSheet::Idle);
 	}
 
 	// Changing the mode well done.
@@ -949,6 +963,14 @@ CVector CUserEntity::getVelocity() const
 	else if(isSit())
 	{
 		velocity *= 0.0;
+	}
+	// a morph moves at the speeds of its creature, also in water, the server sends them like the speeds of a mount
+	else if(isMorphed())
+	{
+		if(_FrontVelocity > 0.0f && _Run)
+			velocity *= getMountRunVelocity();
+		else
+			velocity *= getMountWalkVelocity();
 	}
 	// User is swimming
 	else if(isSwimming())
@@ -2166,7 +2188,7 @@ void CUserEntity::applyBehaviour(const CBehaviourContext &behaviourContext)	// v
 {
 	const MBEHAV::CBehaviour &behaviour = behaviourContext.Behav;
 	// Special code for the First Person View
-	if((viewMode() == FirstPV) && behaviour.isCombat())
+	if((viewMode() == FirstPV) && behaviour.isCombat() && !isMorphed())
 	{
 		// Backup the current behaviour.
 		_CurrentBehaviour = behaviourContext.Behav;
@@ -2384,6 +2406,10 @@ double CUserEntity::getMaxSpeed()	const // virtual
 	else if(isSit())
 	{
 		maxSpeed *= 0.0;
+	}
+	else if(isMorphed())
+	{
+		maxSpeed *= (double)getMountRunVelocity();
 	}
 	// User is swimming
 	else if(isSwimming())
@@ -3313,6 +3339,9 @@ void CUserEntity::forceCameraFirstPerson()
 //---------------------------------------------------
 float CUserEntity::getScale() const	// virtual
 {
+	if (isMorphed())
+		return CPlayerCL::getScale();
+
 	// Default Scale.
 	return 1.0f;
 }// getScale //
@@ -3349,7 +3378,10 @@ void CUserEntity::computePrimitive() // virtual
 {
 	// Initialize the primitive.
 	if(initPrimitive(0.5f, 2.0f, 0.0f, 0.0f, UMovePrimitive::Slide, (UMovePrimitive::TTrigger)(UMovePrimitive::OverlapTrigger | UMovePrimitive::EnterTrigger), MaskColPlayer, MaskColPlayer | MaskColNpc | MaskColDoor))
+	{
+		setMorphCollision();
 		_Primitive->insertInWorldImage(dynamicWI);
+	}
 	// Set the position.
 	pacsPos(pos());
 }// computePrimitive //
@@ -3899,14 +3931,18 @@ void CUserEntity::makeTransparent(bool t)
 	uint32	opaMin= getOpacityMin();
 	uint8 opacity = (uint8)(opaMin + (255-opaMin) * (1.0 - _TranspFactor));
 
-	getFace()->makeInstanceTransparent(opacity, (uint8)opaMin);
+	SInstanceCL *face = getFace();
+	if (face)
+		face->makeInstanceTransparent(opacity, (uint8)opaMin);
 }// makeTransparent //
 
 //---------------------------------------------------
 void CUserEntity::setDiffuse(bool onOff, NLMISC::CRGBA diffuse)
 {
 	CPlayerCL::setDiffuse(onOff, diffuse);
-	getFace()->setDiffuse(onOff, diffuse);
+	SInstanceCL *face = getFace();
+	if (face)
+		face->setDiffuse(onOff, diffuse);
 }
 
 

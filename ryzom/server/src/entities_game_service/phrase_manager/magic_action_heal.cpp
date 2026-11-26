@@ -17,6 +17,7 @@
 
 
 #include "stdpch.h"
+#include "player_morph.h"
 #include "magic_action.h"
 #include "phrase_manager/magic_phrase.h"
 #include "creature_manager/creature.h"
@@ -55,9 +56,9 @@ public:
 		if (aiAction->getType() != AI_ACTION::HealSpell ) return false;
 
 		sint32 healBonus = 0;
-		CCreature *creature = CreatureManager.getCreature( phrase->getActor() );
-		if (creature && creature->getForm())
-			healBonus = sint32(aiAction->getData().Spell.SpellPowerFactor * creature->getForm()->getAttackLevel());
+		const CStaticCreatures *form = getActingCreatureForm( phrase->getActor() );
+		if (form)
+			healBonus = sint32(aiAction->getData().Spell.SpellPowerFactor * form->getAttackLevel());
 
 		switch(aiAction->getData().Spell.AffectedScore)
 		{
@@ -239,8 +240,8 @@ protected:
 			if ( !target)
 				continue;
 
-			// an area heal cannot affect caster !
-			if ( target->getId().getType() == RYZOMID::player && target == actor)
+			// an area heal cannot affect caster ! (a morphed player heals itself like its creature form)
+			if ( target->getId().getType() == RYZOMID::player && target == actor && !getPlayerMorphForm(actor->getEntityRowId()) )
 				continue;
 
 			string errorCode;

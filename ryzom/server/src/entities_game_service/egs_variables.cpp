@@ -94,6 +94,7 @@ CVariable<uint16>			HandToHandLatency("egs","HandToHandLatency", "attacks latenc
 CVariable<uint16>			HandToHandReachValue("egs","HandToHandReachValue", "reach value (~allonge) when fighting without a weapon", 0, 0, true );
 CVariable<uint16>			MinTwoWeaponsLatency("egs","MinTwoWeaponsLatency", "Min attack latency (in ticks) when using 2 weapons", 15, 0, true );
 CVariable<float>			MaxAngleForRangeCombat("egs","MaxAngleForRangeCombat", "Max angle in Radians between player heading and target position to validate range combat", (float)NLMISC::Pi, 0, true );
+CVariable<float>			MorphRangeAttackRange("egs","MorphRangeAttackRange", "range (in mm) of the creature range attacks of a morphed player, like the AIS fightRangeMaxRange of creatures", 80000.0f, 0, true );
 
 CVariable<uint32>			AreaEffectClipDistance("egs","AreaEffectClipDistance", "above this value (in mm) we clip vertical range to 'AreaEffectClipVerticalRange' millimeters", 5000, 0, true );
 CVariable<uint32>			AreaEffectClipVerticalRange("egs","AreaEffectClipVerticalRange", "vertical range of area effects when area effect range is below 4-5meters (see 'AreaEffectClipDistance')", 2000, 0, true );

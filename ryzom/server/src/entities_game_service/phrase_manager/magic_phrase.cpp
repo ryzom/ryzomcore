@@ -23,10 +23,12 @@
 //	INCLUDE	//
 //////////////
 #include "stdpch.h"
+#include "player_morph.h"
 //
 #include "game_share/brick_families.h"
 #include "game_share/magic_fx.h"
 #include "game_share/combat_flying_text.h"
+#include "game_share/ryzom_mirror_properties.h"
 //
 #include "entity_structure/statistic.h"
 #include "phrase_manager/magic_phrase.h"
@@ -123,6 +125,8 @@ bool CMagicPhrase::initPhraseFromAiAction( const TDataSetRow & actorRowId, const
 	AIACTIONLOG("AI actor %s execute Magic action %s ",TheDataset.getEntityId(actorRowId).toString().c_str(), aiAction->getSheetId().toString().c_str());
 
 	const TAiActionParams &data = aiAction->getData();
+	const CStaticCreatures *morphForm = getPlayerMorphForm(actorRowId);
+	bool creatureBehaviour = morphForm != NULL || TheDataset.getEntityId(actorRowId).getType() == RYZOMID::creature;
 
 	switch(aiAction->getType())
 	{
@@ -161,8 +165,8 @@ bool CMagicPhrase::initPhraseFromAiAction( const TDataSetRow & actorRowId, const
 			actionLatency = data.Spell.CastingTime;
 			_PostCastTime += data.Spell.PostActionTime;
 			
-			// take behaviour only for creatures, npcs use cast behaviours
-			if ( TheDataset.getEntityId(_ActorRowId).getType() == RYZOMID::creature)
+			// Creature forms use the action animation instead of homin casting.
+			if (creatureBehaviour)
 				_CreatureBehaviour = data.Spell.Behaviour;
 			else
 				_CastBehaviour = data.Spell.Behaviour;
@@ -188,8 +192,7 @@ bool CMagicPhrase::initPhraseFromAiAction( const TDataSetRow & actorRowId, const
 			actionLatency = data.OTSpell.CastingTime;
 			_PostCastTime += data.OTSpell.PostActionTime;
 			
-			// take behaviour only for creatures, npcs use standard cast behaviours
-			if ( TheDataset.getEntityId(_ActorRowId).getType() == RYZOMID::creature)
+			if (creatureBehaviour)
 				_CreatureBehaviour = data.OTSpell.Behaviour;
 			else
 				_CastBehaviour = data.OTSpell.Behaviour;
@@ -214,8 +217,7 @@ bool CMagicPhrase::initPhraseFromAiAction( const TDataSetRow & actorRowId, const
 			actionLatency = data.EffectSpell.CastingTime;
 			_PostCastTime += data.EffectSpell.PostActionTime;
 			
-			// take behaviour only for creatures, npcs use standard cast behaviours
-			if ( TheDataset.getEntityId(_ActorRowId).getType() == RYZOMID::creature)
+			if (creatureBehaviour)
 				_CreatureBehaviour = data.EffectSpell.Behaviour;
 			else
 				_CastBehaviour = data.EffectSpell.Behaviour;
@@ -239,8 +241,7 @@ bool CMagicPhrase::initPhraseFromAiAction( const TDataSetRow & actorRowId, const
 			actionLatency = data.OTEffectSpell.CastingTime;
 			_PostCastTime += data.OTEffectSpell.PostActionTime;
 			
-			// take behaviour only for creatures, npcs use standard cast behaviours
-			if ( TheDataset.getEntityId(_ActorRowId).getType() == RYZOMID::creature)
+			if (creatureBehaviour)
 				_CreatureBehaviour = data.OTEffectSpell.Behaviour;
 			else
 				_CastBehaviour = data.OTEffectSpell.Behaviour;
@@ -264,13 +265,20 @@ bool CMagicPhrase::initPhraseFromAiAction( const TDataSetRow & actorRowId, const
 		break;
 	};
 
+	// a morph casts like its creature, which the costs of the ai action are not made for: the homin sap and hit points stay untouched
+	if (morphForm != NULL)
+	{
+		_SapCost = 0;
+		_HPCost = 0;
+	}
+
 	// if casting time and post action time are null, use creature base attack speed as post action delay
 	if (actionLatency == CSpellParams::UseAttackSpeedForCastingTime)
 	{
-		CCreature  *creature = CreatureManager.getCreature(actorRowId);
-		if (creature != NULL && creature->getForm() != NULL)
+		const CStaticCreatures *form = getActingCreatureForm(actorRowId);
+		if (form != NULL)
 		{
-			_CastingTime = creature->getForm()->getAttackLatency();
+			_CastingTime = form->getAttackLatency();
 			_BaseCastingTime = _CastingTime;
 		}
 		else
@@ -1212,7 +1220,8 @@ bool CMagicPhrase::launch()
 	float successFactor = 1.0f;
 	TReportAction report;
 	sint deltaLvl = 0;
-	sint skillValue = 0;
+	const CStaticCreatures *morphForm = getPlayerMorphForm(_ActorRowId);
+	sint skillValue = morphForm ? morphForm->getAttackLevel() : 0;
 	sint skillBaseValue = 0;
 
 	if (autoSuccess)
@@ -1232,7 +1241,9 @@ bool CMagicPhrase::launch()
 		}
 		else
 		{
-			if ( entity->getId().getType() == RYZOMID::player )
+			if (morphForm)
+				skillBaseValue = skillValue = morphForm->getAttackLevel();
+			else if ( entity->getId().getType() == RYZOMID::player )
 			{
 				CCharacter *pC = dynamic_cast<CCharacter*> (entity);
 				if (!pC)
@@ -1271,7 +1282,7 @@ bool CMagicPhrase::launch()
 			if ( outPostBuff )
 				skillValue += outPostBuff->getParamValue();
 
-			sint32 armorMalus = (sint32) ( entity->getArmorCastingMalus() * (float)skillValue );
+			sint32 armorMalus = morphForm ? 0 : (sint32) ( entity->getArmorCastingMalus() * (float)skillValue );
 			armorMalus -= _ArmorCompensation;
 			if ( armorMalus <0 )
 				armorMalus = 0;
@@ -1718,7 +1729,7 @@ void CMagicPhrase::apply()
 	
 	// wear armor, shield, jewels..
 	CCharacter *character = PlayerManager.getChar(_ActorRowId);
-	if (character)
+	if (character && !getPlayerMorphForm(_ActorRowId))
 	{
 		H_AUTO(CMagicPhrase_apply_wearEquipment);
 		// wear focus item is it has been used
@@ -1858,6 +1869,13 @@ void CMagicPhrase::end()
 void CMagicPhrase::setPrimaryTarget( const TDataSetRow &entityRowId )	// virtual
 {
 	H_AUTO(CMagicPhrase_setPrimaryTarget);
+	// AI self-actions also pass through player validation when morphed.
+	if (_CreatureBehaviour != MBEHAV::UNKNOWN_BEHAVIOUR && entityRowId == _ActorRowId)
+	{
+		_TargetRestriction = TARGET::SelfOnly;
+		_Targets.resize(1);
+		_Targets[0].setId(_ActorRowId);
+	}
 	
 	// Change the primary target (if not a self only spell).
 	if(_TargetRestriction != TARGET::SelfOnly)

@@ -49,6 +49,7 @@
 #include "entity_manager/entity_base.h"
 
 #include "egs_sheets/egs_sheets.h"
+#include "player_morph.h"
 
 extern uint8					CMSIsUp;
 extern CPlayerManager			PlayerManager;
@@ -502,7 +503,11 @@ bool testRange( CEntityBase &source, CEntityBase &target, uint32 maxRange )
 		break;
 		// Target is Player
 	case RYZOMID::player:
-		radius += 0.5;
+		{
+			// a morph is as large as its creature
+			const CStaticCreatures * morphForm = getPlayerMorphForm(target.getEntityRowId());
+			radius += morphForm ? morphForm->getColRadius() * morphForm->getScale() : 0.5;
+		}
 		break;
 	}
 	// Convert in mm

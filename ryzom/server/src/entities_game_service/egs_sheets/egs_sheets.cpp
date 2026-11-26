@@ -255,6 +255,7 @@ void CSheets::init()
 	loadSheetSet( "starting_role",			"egs_starting_role.packed_sheets",			_StaticSheets._StaticRole);
 	loadSheetSet( "skill_tree",				"egs_skill_tree.packed_sheets",				_StaticSheets._SkillsTree);
 	loadSheetSet( "aiaction",				"egs_aiactions.packed_sheets",				_StaticSheets._AiActions);
+	loadSheetSet( "actionlist",				"egs_action_lists.packed_sheets",			_StaticSheets._ActionLists);
 	loadSheetSet( "weather_setup",			"egs_weather_setup.packed_sheets",			_StaticSheets._WeatherSetups);
 	loadSheetSet( "weather_function_params","egs_weather_function_params.packed_sheets",_StaticSheets._WeatherFunctionParams);	
 	loadSheetSet( "world",					"egs_world.packed_sheets",					_StaticSheets._StaticWorld);
@@ -603,6 +604,20 @@ const CStaticAiAction * CSheets::getAiActionForm( const NLMISC::CSheetId& sheetI
 	if (itForm == _StaticSheets._AiActions.end() )
 	{
 		nlwarning("<CSheets::getAiActionForm> The static form sheet %s (%d) is unknown", sheetId.toString().c_str(), sheetId.asInt() );
+		return 0;
+	}
+	return &(*itForm).second;
+}
+
+//---------------------------------------------------
+// getActionListForm : Get form of a creature fight config action list
+//---------------------------------------------------
+const CStaticActionList * CSheets::getActionListForm( const NLMISC::CSheetId& sheetId )
+{
+	std::map< NLMISC::CSheetId, CStaticActionList >::const_iterator itForm = _StaticSheets._ActionLists.find( sheetId );
+	if (itForm == _StaticSheets._ActionLists.end() )
+	{
+		nlwarning("<CSheets::getActionListForm> The static form sheet %s (%d) is unknown", sheetId.toString().c_str(), sheetId.asInt() );
 		return 0;
 	}
 	return &(*itForm).second;

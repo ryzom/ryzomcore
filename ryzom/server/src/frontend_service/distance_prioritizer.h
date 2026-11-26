@@ -86,6 +86,7 @@ void		fillPVP_MODE( TOutBox& outbox, CLFECOMMON::TPropIndex );
 void		fillPVP_CLAN( TOutBox& outbox, CLFECOMMON::TPropIndex );
 void		fillOWNER_PEOPLE( TOutBox& outbox, CLFECOMMON::TPropIndex );
 void		fillOUTPOST_INFOS( TOutBox& outbox, CLFECOMMON::TPropIndex );
+void		fillMORPH_SHEET( TOutBox& outbox, CLFECOMMON::TPropIndex );
 void		fillRowProperty( TOutBox& outbox, CLFECOMMON::TPropIndex propIndex );
 
 
@@ -281,6 +282,7 @@ public:
 		SET_FILLFUNC( PVP_CLAN );
 		SET_FILLFUNC( OWNER_PEOPLE );
 		SET_FILLFUNC( OUTPOST_INFOS );
+		SET_FILLFUNC( MORPH_SHEET );
 
 		for (uint i=0; i<CLFECOMMON::NB_VISUAL_PROPERTIES; ++i)
 			nlassert(getServerVPNode(i) != NULL);

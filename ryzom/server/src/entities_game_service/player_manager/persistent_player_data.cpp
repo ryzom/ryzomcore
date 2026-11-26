@@ -354,12 +354,14 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 				PositionStack.topToModify() = farPosToSave;\
 		}\
 	} \
+	const_cast<CCharacter*>(this)->swapMorphBodyForStore(true);\
 	sint32 hp = _PhysScores._PhysicalScores[SCORES::hit_points].Current;\
 	if (IsRingShard) { const_cast<CCharacter*>(this)->_PhysScores._PhysicalScores[SCORES::hit_points].Current = std::max(hp,sint32(1)); }\
 	if (!IsRingShard) { const_cast<CCharacter*>(this)->_HPB = _PhysScores._PhysicalScores[SCORES::hit_points].Current; }\
 
 #define PERSISTENT_POST_STORE\
 	if (IsRingShard) { const_cast<CCharacter*>(this)->_PhysScores._PhysicalScores[SCORES::hit_points].Current = hp; }\
+	const_cast<CCharacter*>(this)->swapMorphBodyForStore(false);\
 
 
 // Sidenote:

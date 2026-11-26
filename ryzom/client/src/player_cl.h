@@ -86,6 +86,7 @@ public:
 
 	/// Return the entity scale. (return 1.0 if there is any problem).
 	virtual float getScale() const;
+	bool isMorphed() const { return CCharacterCL::_Sheet != NULL; }
 	// return vector of ground fxs sorted by ground type, or NULL is ground fxs are not supported for the entity
 	virtual const std::vector<CGroundFXSheet> *getGroundFX() const;
 	virtual bool supportGroundFX() const { return true; }
@@ -102,7 +103,8 @@ public:
 	virtual bool isNeutralPVP() const;
 
 	/// Ask if the entity is afk (a character is never afk but players can be)
-	virtual bool isAFK() const {return (_Mode == MBEHAV::REST || properties().afk());}
+	/// The rest mode of a morph is the mood of its creature, only the afk property makes it afk.
+	virtual bool isAFK() const {return ((_Mode == MBEHAV::REST && !isMorphed()) || properties().afk());}
 
 	/// Return true if this player is in the same faction as the user's (except if neutral)
 	bool isFromSameNonNeutralPvpClanAsUser() const;
@@ -115,6 +117,7 @@ public:
 	virtual const CItemSheet *getLeftHandItemSheet() const;
 
 	virtual const CAttack *getAttack(const CAttackIDSheet &id) const;
+	virtual void applyBehaviour(const CBehaviourContext &behaviour);
 
 	virtual float getScaleRef() const;
 
@@ -153,6 +156,11 @@ protected:
 	NL3D::UPointLight		_Light;
 
 	std::string _CacheSkeletonShapeName;
+	uint32 _MorphSheetId;
+	bool _MorphFXPending;
+	// clip sphere of the homin, restored on unmorph
+	float _UnmorphedClipRadius;
+	float _UnmorphedClipDeltaZ;
 
 protected:
 	// Return the automaton type of the entity (homin, creature, etc.)
@@ -171,6 +179,10 @@ protected:
 
 	/// Compute the animation set to use according to weapons, mode and race.
 	virtual void computeAnimSet(sint32 fakeLeftHand = -1, sint32 fakeRightHand = -1);
+
+	virtual void updateVisualPropertyMorphSheet(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	/// Give the primitive the collision size of the morph creature, or of the homin
+	void setMorphCollision();
 
 	/// Update the Visual Property A
 	virtual void updateVisualPropertyVpa(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);

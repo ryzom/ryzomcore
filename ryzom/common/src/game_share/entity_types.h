@@ -223,13 +223,16 @@ const TCoord		THRESHOLD_OWNER_PEOPLE		= 60000;
 const TPropIndex	PROPERTY_OUTPOST_INFOS		= 27;
 const TCoord		THRESHOLD_OUTPOST_INFOS		= 60000;
 
+const TPropIndex	PROPERTY_MORPH_SHEET = 28;
+const TCoord		THRESHOLD_MORPH_SHEET = MAX_THRESHOLD;
+
 const uint			USER_DEFINED_PROPERTY_NB_BITS	= 32;
 
 const TProperty		INVALID_PROPERTY = 0xFFFF;
 const TPropIndex	INVALID_PROP_INDEX = 0xFF;
 
 // Number of visual properties
-const uint NB_VISUAL_PROPERTIES = 28;
+const uint NB_VISUAL_PROPERTIES = 29;
 
 const uint MAX_PROPERTIES_PER_ENTITY = NB_VISUAL_PROPERTIES;
 
@@ -269,6 +272,7 @@ inline const char *getPropText( TPropIndex p )
 	case PROPERTY_PVP_CLAN: return "PVP_CLAN";
 	case PROPERTY_OWNER_PEOPLE: return "OWNER_PEOPLE";
 	case PROPERTY_OUTPOST_INFOS: return "OUTPOST_INFOS";
+	case PROPERTY_MORPH_SHEET: return "MORPH_SHEET";
 	//case PROPERTY_STATUS: return "STATUS";
 	// yoyo: cannot return a toString()!! (local object)
 	default: return unknowProp;
@@ -306,6 +310,7 @@ inline const char *getPropShortText( TPropIndex p )
 	case PROPERTY_PVP_CLAN: return "PVPC";
 	case PROPERTY_OWNER_PEOPLE: return "OWP";
 	case PROPERTY_OUTPOST_INFOS: return "OTP";
+	case PROPERTY_MORPH_SHEET: return "MRP";
 	//case PROPERTY_STATUS: return "STA";
 	// yoyo: cannot return a toString()!! (local object)
 	default: return unknowProp;
@@ -368,6 +373,7 @@ inline void	initThresholdTable( TCoord *table )
 	setThreshold( table, PROPERTY_PVP_CLAN, THRESHOLD_PVP_CLAN, 1 );
 	setThreshold( table, PROPERTY_OWNER_PEOPLE, THRESHOLD_OWNER_PEOPLE, 1 );
 	setThreshold( table, PROPERTY_OUTPOST_INFOS, THRESHOLD_OUTPOST_INFOS, 1 );
+	setThreshold( table, PROPERTY_MORPH_SHEET, THRESHOLD_MORPH_SHEET, 1 );
 	checkThresholds();
 }
 
@@ -451,7 +457,8 @@ public:
 	TVPNodeBase *getRIDER_ENTITY_IDnode() { return VPB->VPB->VPB->VPA->VPB; }
 	TVPNodeBase *getOUTPOST_INFOSnode() { return VPB->VPB->VPB->VPB->VPA; }
 	TVPNodeBase *getGUILD_SYMBOLnode() { return VPB->VPB->VPB->VPB->VPB->VPA; }
-	TVPNodeBase *getGUILD_NAME_IDnode() { return VPB->VPB->VPB->VPB->VPB->VPB; }
+	TVPNodeBase *getGUILD_NAME_IDnode() { return VPB->VPB->VPB->VPB->VPB->VPB->VPA; }
+	TVPNodeBase *getMORPH_SHEETnode() { return VPB->VPB->VPB->VPB->VPB->VPB->VPB; }
 
 	// WHEN ADDING A PROPERTY, CHECK IF ENUM FOR CNetworkConnection::AddNewEntity
 	// BASE INDEX IS STILL VALID!
@@ -500,7 +507,9 @@ public:
 		discreetRoot->setNodePropIndex( OUTPOST_INFOS );
 		discreetRoot->VPB->VPB->VPB->VPB->VPB->makeChildren();
 		discreetRoot->setNodePropIndex( GUILD_SYMBOL );
+		discreetRoot->VPB->VPB->VPB->VPB->VPB->VPB->makeChildren();
 		discreetRoot->setNodePropIndex( GUILD_NAME_ID );
+		discreetRoot->setNodePropIndex( MORPH_SHEET );
 
 		return NB_VISUAL_PROPERTIES;
 	}

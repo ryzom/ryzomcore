@@ -713,6 +713,30 @@ public:
 	bool getEnterFlag() const;
 
 	/**
+	 * Get/Set the creature a GM asked this player to morph into, until the client confirms it can show it
+	 * \param sheet creature sheet id, 0 when no morph is pending
+	 * \param role GM role the morph plays, empty for a plain creature morph
+	 * \param endCycle game cycle the morph ends on its own, 0 for a morph that lasts until unmorph
+	 */
+	uint32 getPendingMorphSheet() const { return _PendingMorphSheet; }
+	bool getPendingMorphAttackable() const { return _PendingMorphAttackable; }
+	const std::string &getPendingMorphRole() const { return _PendingMorphRole; }
+	NLMISC::TGameCycle getPendingMorphEndCycle() const { return _PendingMorphEndCycle; }
+	void setPendingMorph(uint32 sheet, bool attackable, const std::string &role = std::string(), NLMISC::TGameCycle endCycle = 0) { _PendingMorphSheet = sheet; _PendingMorphAttackable = attackable; _PendingMorphRole = role; _PendingMorphEndCycle = endCycle; }
+	const std::string &getMorphRole() const { return _MorphRole; }
+	void setMorphRole(const std::string &role) { _MorphRole = role; }
+	NLMISC::TGameCycle getMorphEndCycle() const { return _MorphEndCycle; }
+	void setMorphEndCycle(NLMISC::TGameCycle endCycle) { _MorphEndCycle = endCycle; }
+
+	/// Give the scores the body of a creature (maxHp hit points) or, with 0, back to the homin. The homin current
+	/// scores are kept meanwhile and restored after, the save only ever sees the homin values.
+	void setMorphBody(sint32 maxHp);
+	/// While morphed, put the homin scores and speeds in place for the save (true) and the creature body back (false)
+	void swapMorphBodyForStore(bool homin);
+	/// Let players attack the morph, also once it has left a fight (which restores the static contextual property)
+	void setMorphAttackable(bool attackable);
+
+	/**
 	 * Get the online status
 	 * \return true if the player are in the game, false if he left
 	 */
@@ -3993,6 +4017,17 @@ private:
 	bool _PvPSafeZoneActive;
 	// player changed his faction tag, we have to update pvp mode
 	bool _HaveToUpdatePVPMode;
+	// morph requested by a GM, waiting for the client load check (not saved)
+	uint32 _PendingMorphSheet;
+	bool _PendingMorphAttackable;
+	std::string _PendingMorphRole;
+	NLMISC::TGameCycle _PendingMorphEndCycle;
+	// role of the current morph, empty for a plain creature morph, and the cycle it ends on its own, 0 for none (not saved)
+	std::string _MorphRole;
+	NLMISC::TGameCycle _MorphEndCycle;
+	// hit points of the creature body while morphed, 0 for the homin, and the homin current scores meanwhile (not saved)
+	sint32 _MorphMaxHp;
+	sint32 _UnmorphedScores[SCORES::NUM_SCORES];
 	// counter for database management
 	uint32 _PvPDatabaseCounter;
 	// last civ points written in database

@@ -49,6 +49,7 @@
 
 
 #include "stdpch.h"
+#include "player_morph.h"
 #include "progression_pve.h"
 
 #include "entity_manager/entity_manager.h"
@@ -148,6 +149,8 @@ CCharacterProgressionPVE::~CCharacterProgressionPVE()
 void CCharacterProgressionPVE::actionReport( TReportAction& reportAction, bool incActionCounter, bool scaleForNewbies )
 {
 	H_AUTO(CCharacterProgressionPVE_actionReport);
+	if (getPlayerMorphForm(reportAction.ActorRowId) || getPlayerMorphForm(reportAction.TargetRowId))
+		return;
 
 	CEntityBase * actor = CEntityBaseManager::getEntityBasePtr( reportAction.ActorRowId );
 	if( actor == 0 )

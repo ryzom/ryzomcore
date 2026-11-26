@@ -19,6 +19,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
+#include "player_morph.h"
 
 /////////////
 // INCLUDE //
@@ -667,6 +668,11 @@ CCharacter::CCharacter()
 	_DeclaredCult = PVP_CLAN::Unknown;
 	_DeclaredCiv = PVP_CLAN::Unknown;
 	_HaveToUpdatePVPMode = false;
+	_PendingMorphSheet = 0;
+	_PendingMorphAttackable = false;
+	_PendingMorphEndCycle = 0;
+	_MorphEndCycle = 0;
+	_MorphMaxHp = 0;
 	_SessionId = TSessionId(0);
 	_CurrentSessionId = _SessionId;
 	_PvPSafeZoneActive = false;
@@ -880,6 +886,10 @@ void CCharacter::addPropertiesToMirror(const TDataSetRow &entityIndex, bool keep
 	updateGuildFlag();
 	_OutpostInfos.init(TheDataset, entityIndex, DSPropertyOUTPOST_INFOS);
 	_OutpostInfos = 0;
+	CMirrorPropValue<TYPE_MORPH_SHEET> morphSheet(TheDataset, entityIndex, DSPropertyMORPH_SHEET);
+	morphSheet = 0;
+	_PendingMorphSheet = 0;
+	_MorphEndCycle = 0;
 
 	if (!_OutpostAlias.isReadable())
 	{
@@ -1708,6 +1718,8 @@ uint32 CCharacter::tickUpdate()
 		setStoppedNpc(TDataSetRow());
 	}
 
+	checkMorphEnd(this);
+
 	if (_RequestMount != TDataSetRow())
 	{
 		_RequestMountTimer--;
@@ -1870,7 +1882,8 @@ void CCharacter::kill(TDataSetRow killerRowId)
 		killerId = e->getId();
 		killerSheet = e->getType();
 
-		if (!(getPVPInterface().isValid() && getPVPInterface().killedBy(e)))
+		if (!getPlayerMorphForm(_EntityRowId) && !getPlayerMorphForm(killerRowId) &&
+			!(getPVPInterface().isValid() && getPVPInterface().killedBy(e)))
 		{
 			// if killed by a creature, check if death penalty should be applied or not
 			if (killerId.getType() == RYZOMID::creature || killerId.getType() == RYZOMID::npc)
@@ -1902,6 +1915,10 @@ void CCharacter::kill(TDataSetRow killerRowId)
 			}
 		}
 	}
+
+	if (getPlayerMorphForm(_EntityRowId) || getPlayerMorphForm(killerRowId))
+		setNextDeathPenaltyFactor(0.0f);
+	dropMorphLoot(this, killerRowId);
 
 	// Bsi.append( StatPath, NLMISC::toString("[PJM] %s %s %s %s %s %s", _Id.toString().c_str(),
 	// CONTINENT::toString(_CurrentContinent).c_str(), regionName.c_str(), placeName.c_str(),
@@ -2149,7 +2166,12 @@ void CCharacter::applyRespawnEffects(bool applyDP)
 		resetNextDeathPenaltyFactor();
 	}
 
-	if (sbrickParam.ParsedOk && sbrickParam.Value == "halfLife" && (rand() % 100) < sbrickParam.Modifier)
+	// the creature died, not the homin: it comes back with the values it had before the morph
+	if (getPlayerMorphForm(_EntityRowId))
+	{
+		endPlayerMorph(this);
+	}
+	else if (sbrickParam.ParsedOk && sbrickParam.Value == "halfLife" && (rand() % 100) < sbrickParam.Modifier)
 	{
 		sendDynamicSystemMessage(_Id, "ALLEGORY_EFFECT_TRIGGERED", params);
 		_PhysScores._PhysicalScores[SCORES::hit_points].Current = _PhysScores._PhysicalScores[SCORES::hit_points].Base / 2;
@@ -2197,6 +2219,8 @@ void CCharacter::applyRespawnEffects(bool applyDP)
 //---------------------------------------------------
 void CCharacter::resurrected()
 {
+	if (getPlayerMorphForm(_EntityRowId))
+		endPlayerMorph(this);
 	_Mode = MBEHAV::NORMAL;
 	_Behaviour = MBEHAV::IDLE;
 	_IsDead = false;
@@ -2302,6 +2326,8 @@ void CCharacter::displayPowerFlags()
 //---------------------------------------------------
 void CCharacter::mount(TDataSetRow PetRowId, bool fromArk, bool skipDistance)
 {
+	if (getPlayerMorphForm(_EntityRowId))
+		return;
 	if (!R2_VISION::isEntityVisibleToPlayers(getWhoSeesMe()))
 	{
 		PHRASE_UTILITIES::sendDynamicSystemMessage(
@@ -2652,6 +2678,12 @@ void CCharacter::computeMaxValue()
 		_PhysScores._PhysicalScores[i].Max
 			= _PhysScores._PhysicalScores[i].Base + _PhysScores._PhysicalScores[i].Modifier;
 
+		// a morph has the hit points of its creature, the homin equipment bonuses stay in Modifier for later
+		if (i == SCORES::hit_points && _MorphMaxHp != 0)
+		{
+			_PhysScores._PhysicalScores[i].Max = _MorphMaxHp;
+		}
+
 		if (_PhysScores._PhysicalScores[i].Max < 1)
 		{
 			_PhysScores._PhysicalScores[i].Max = 1;
@@ -2673,6 +2705,72 @@ void CCharacter::computeMaxValue()
 		_Skills._Skills[i].Current = _Skills._Skills[i].Modifier + _Skills._Skills[i].Base;
 	}
 } // computeMaxValue //
+
+//---------------------------------------------------
+// setMorphBody
+//
+//---------------------------------------------------
+void CCharacter::setMorphBody(sint32 maxHp)
+{
+	SCharacteristicsAndScores &hp = _PhysScores._PhysicalScores[SCORES::hit_points];
+	if (maxHp != 0 && _MorphMaxHp == 0)
+	{
+		for (uint i = 0; i < SCORES::NUM_SCORES; ++i)
+			_UnmorphedScores[i] = _PhysScores._PhysicalScores[i].Current;
+		hp.Current = maxHp;
+	}
+	else if (maxHp != 0)
+	{
+		// another creature keeps the health percentage, and a living body stays alive
+		hp.Current = max(sint32(sint64(hp.Current) * maxHp / _MorphMaxHp), min(sint32(hp.Current), sint32(1)));
+	}
+	else if (_MorphMaxHp != 0)
+	{
+		for (uint i = 0; i < SCORES::NUM_SCORES; ++i)
+			_PhysScores._PhysicalScores[i].Current = _UnmorphedScores[i];
+	}
+	_MorphMaxHp = maxHp;
+	computeMaxValue();
+} // setMorphBody //
+
+//---------------------------------------------------
+// swapMorphBodyForStore
+//
+//---------------------------------------------------
+void CCharacter::swapMorphBodyForStore(bool homin)
+{
+	if (_MorphMaxHp == 0)
+		return;
+	for (uint i = 0; i < SCORES::NUM_SCORES; ++i)
+	{
+		sint32 current = _PhysScores._PhysicalScores[i].Current;
+		_PhysScores._PhysicalScores[i].Current = _UnmorphedScores[i];
+		_UnmorphedScores[i] = current;
+	}
+	SCharacteristicsAndScores &hp = _PhysScores._PhysicalScores[SCORES::hit_points];
+	if (homin)
+	{
+		hp.Max = hp.Base + hp.Modifier;
+		_PhysScores.CurrentWalkSpeed = _PhysScores.BaseWalkSpeed;
+		_PhysScores.CurrentRunSpeed = _PhysScores.BaseRunSpeed;
+	}
+	else
+	{
+		hp.Max = _MorphMaxHp;
+		applyCurrentSpeed();
+	}
+} // swapMorphBodyForStore //
+
+//---------------------------------------------------
+// setMorphAttackable
+//
+//---------------------------------------------------
+void CCharacter::setMorphAttackable(bool attackable)
+{
+	_StaticContextualProperty.attackable(attackable);
+	_ContextualProperty.directAccessForStructMembers().attackable(attackable);
+	_ContextualProperty.setChanged();
+} // setMorphAttackable //
 
 //---------------------------------------------------
 // apply regenerate and clip currents value
@@ -2860,15 +2958,17 @@ void CCharacter::applyCurrentSpeed()
 	if (_Mode().Mode != MBEHAV::SIT && !_ContextualProperty.directAccessForStructMembers().afk() && canEntityMove()
 		&& !PlayerManager.isRootedByGM(_Id))
 	{
+		// a morph moves at the speeds of its creature, its client gets them like the speeds of a mount
+		const CStaticCreatures *morphForm = getPlayerMorphForm(_EntityRowId);
 		float pcSpeed = 1.0f + speedVariationModifier / 100.0f;
 		oldCurrentSpeed = _PhysScores.CurrentWalkSpeed;
-		_PhysScores.CurrentWalkSpeed = pcSpeed * _PhysScores.BaseWalkSpeed;
+		_PhysScores.CurrentWalkSpeed = pcSpeed * (morphForm ? morphForm->getWalkSpeed() : _PhysScores.BaseWalkSpeed);
 		// if( oldCurrentSpeed != _PhysScores.CurrentWalkSpeed )
 		//{
 		//	_PropertyDatabase.setProp( "USER:WALK_SPEED", (uint32)(_PhysScores.CurrentWalkSpeed * 1000) );
 		//}
 		oldCurrentSpeed = _PhysScores.CurrentRunSpeed;
-		_PhysScores.CurrentRunSpeed = pcSpeed * _PhysScores.BaseRunSpeed;
+		_PhysScores.CurrentRunSpeed = pcSpeed * (morphForm ? morphForm->getRunSpeed() : _PhysScores.BaseRunSpeed);
 		// if( oldCurrentSpeed != _PhysScores.CurrentRunSpeed )
 		//{
 		//	_PropertyDatabase.setProp( "USER:RUN_SPEED", (uint32)(_PhysScores.CurrentRunSpeed * 1000) );
@@ -9263,6 +9363,8 @@ void CCharacter::returnToPreviousSession(uint32 userId, sint32 charIndex, TSessi
 //-----------------------------------------------
 void CCharacter::harvestAsked(uint16 mpIndex, uint16 quantity)
 {
+	if (getPlayerMorphForm(_EntityRowId))
+		return;
 	// harvest
 	if (harvestedMpIndex() != 0xff)
 	{
@@ -9321,6 +9423,8 @@ void CCharacter::harvestAsked(uint16 mpIndex, uint16 quantity)
 //-----------------------------------------------
 void CCharacter::harvest(uint8 mpIndex, uint16 quantity)
 {
+	if (getPlayerMorphForm(_EntityRowId))
+		return;
 	if (quantity == 0)
 	{
 		nlwarning("<CCharacter::harvest> Player %s tried to harvest 0 element, do nothing", _Id.toString().c_str());
@@ -16137,6 +16241,10 @@ void CCharacter::stopAllLinks(float factorOnSurvivalTime)
 inline sint32 CCharacter::applyDamageOnArmor(
 	DMGTYPE::EDamageType dmgType, sint32 damage, SLOT_EQUIPMENT::TSlotEquipment forcedSlot)
 {
+	const CStaticCreatures *morphForm = getPlayerMorphForm(_EntityRowId);
+	if (morphForm)
+		return CCreature::applyFormArmor(*morphForm, *this, dmgType, damage);
+
 	uint32 protection = 0;
 
 	// only used by magic
@@ -18002,6 +18110,9 @@ uint32 CCharacter::getMagicResistance(RESISTANCE_TYPE::TResistanceType magicResi
 //--------------------------------------------------------------
 uint32 CCharacter::getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamily)
 {
+	const CStaticCreatures *morphForm = getPlayerMorphForm(_EntityRowId);
+	if (morphForm)
+		return CCreature::getFormMagicResistance(*morphForm, CCreatureResistModifiers(), effectFamily);
 	RESISTANCE_TYPE::TResistanceType resistanceType = EFFECT_FAMILIES::getAssociatedResistanceType(effectFamily);
 	return getMagicResistance(resistanceType);
 }
@@ -18011,6 +18122,9 @@ uint32 CCharacter::getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamil
 //--------------------------------------------------------------
 uint32 CCharacter::getMagicResistance(DMGTYPE::EDamageType dmgType)
 {
+	const CStaticCreatures *morphForm = getPlayerMorphForm(_EntityRowId);
+	if (morphForm)
+		return CCreature::getFormMagicResistance(*morphForm, CCreatureResistModifiers(), dmgType);
 	RESISTANCE_TYPE::TResistanceType resistanceType = DMGTYPE::getAssociatedResistanceType(dmgType);
 	return getMagicResistance(resistanceType);
 }
@@ -19486,6 +19600,19 @@ SKILLS::ESkills CCharacter::getFirstUnlockedParentSkill(SKILLS::ESkills skill) c
 bool CCharacter::changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEntity)
 {
 	H_AUTO(CCharacter_changeCurrentHp);
+	// Recheck protection when delayed damage or a damage-over-time tick lands.
+	if (deltaValue < 0 && responsibleEntity != getEntityRowId() &&
+		TheDataset.isAccessible(responsibleEntity) && TheDataset.isAccessible(getEntityRowId()) &&
+		TheDataset.getEntityId(responsibleEntity).getType() == RYZOMID::player)
+	{
+		CMirrorPropValue<TYPE_MORPH_SHEET> morphSheet(TheDataset, getEntityRowId(), DSPropertyMORPH_SHEET);
+		if (morphSheet.getValue() != 0 && !_ContextualProperty.directAccessForStructMembers().attackable())
+			return false;
+		CCharacter *source = PlayerManager.getChar(responsibleEntity);
+		if (source && getPlayerMorphForm(responsibleEntity) &&
+			!source->getContextualProperty().directAccessForStructMembers().attackable())
+			return false;
+	}
 
 	// test entity isn't dead already (unless it's a player in coma)
 	if (isDead())
@@ -19566,6 +19693,9 @@ bool CCharacter::changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEntit
 							  / _PhysScores._PhysicalScores[SCORES::hit_points].Max));
 		else
 			setHpBar(0);
+
+		if (deltaValue < 0)
+			checkMorphTransformation(this);
 
 		return false;
 	}
@@ -19692,6 +19822,8 @@ void CCharacter::addCreationBricks()
 void CCharacter::sendEmote(
 	const NLMISC::CEntityId &id, MBEHAV::EBehaviour behaviour, uint16 emoteTextId, bool checkPrivilege)
 {
+	if (getPlayerMorphForm(_EntityRowId))
+		return;
 	const CStaticTextEmotes &emotes = CSheets::getTextEmoteList();
 	const CStaticTextEmotes::CTextEmotePhrases* phraseCont = emotes.getPhrase(emoteTextId);
 
@@ -19806,6 +19938,8 @@ void CCharacter::sendEmote(
 //-----------------------------------------------
 void CCharacter::sendCustomEmote(const NLMISC::CEntityId &id, MBEHAV::EBehaviour behaviour, ucstring &emoteCustomText)
 {
+	if (getPlayerMorphForm(_EntityRowId))
+		return;
 	// set behaviour
 	if (behaviour != MBEHAV::IDLE)
 	{
@@ -20447,6 +20581,8 @@ void CCharacter::entersWater() const
 //-----------------------------------------------------------------------------
 void CCharacter::consumeItem(INVENTORIES::TInventory inventory, uint32 slot)
 {
+	if (getPlayerMorphForm(_EntityRowId))
+		return;
 	TLogContext_Item_Consume logContext(_Id);
 
 	// if player is already consumming something, cancel action

@@ -131,6 +131,7 @@ void	cbMirrorIsReadyForInit( CMirror *mirror )
 	FeTempDataset->declareProperty( "OwnerPeople", PSOReadWrite );
 
 	FeTempDataset->declareProperty( "OutpostInfos", PSOReadWrite );
+	FeTempDataset->declareProperty( "MorphSheet", PSOReadWrite );
 
 	initRyzomVisualPropertyIndices( *FeTempDataset );
 

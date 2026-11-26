@@ -412,6 +412,7 @@ void CGlobalPositionManagerService::initMirror()
 	DataSet->declareProperty( "LocalZ", PSOReadWrite );
 	DataSet->declareProperty( "TickPos", PSOReadWrite );
 	DataSet->declareProperty( "Sheet", PSOReadWrite );
+	DataSet->declareProperty( "MorphSheet", PSOReadOnly | PSONotifyChanges );
 	DataSet->declareProperty( "Mode", PSOReadOnly /*| PSONotifyChanges*/ );
 	DataSet->declareProperty( "Behaviour", PSOReadOnly );
 	DataSet->declareProperty( "Cell", PSOReadWrite );
@@ -660,6 +661,12 @@ void CGlobalPositionManagerService::processMirrorUpdates()
 					CWorldPositionManager::updateEntityPosition(entity);
 				}
 			}
+		}
+		else if (propIndex == DSPropertyMORPH_SHEET)
+		{
+			CWorldEntity	*entity = CWorldPositionManager::getEntityPtr(entityIndex);
+			if (entity && entity->Primitive != NULL)
+				entity->updatePrimitiveSize();
 		}
 		//nldebug( "Pos changed from mirror E%d", entityIndex  );
 		TheDataset.getNextChangedValue( entityIndex, propIndex );

@@ -615,6 +615,9 @@ public:
 	virtual std::vector<NLMISC::CSheetId> const& getItemsForMissions() const { return CStaticHarvestable::getItemsForMissions(); }
 	//@}
 	
+	/// action lists selected by the creature fight configs (action_cfg)
+	std::vector<NLMISC::CSheetId> const&	getActionLists() const { return _ActionLists; }
+
 private:
 	EGSPD::CPeople::TPeople		_Race;
 	uint8		_Gender;	
@@ -642,6 +645,8 @@ private:
 	
 	NLMISC::CSheetId	_ActionOnDeath;
 	
+	std::vector<NLMISC::CSheetId>	_ActionLists;
+
 	float		_WalkSpeed;
 	float		_RunSpeed;
 	CProperties	_Properties;

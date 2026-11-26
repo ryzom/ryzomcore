@@ -40,6 +40,7 @@
 #include "../entities.h"
 #include "../view.h"
 #include "../input.h"
+#include "../player_morph.h"
 //
 #include "../r2/editor.h"
 
@@ -1068,6 +1069,7 @@ void CUserControls::move()
 	if( _DirectionMove != none )
 	{
 		cancelActionsWhenMoving();
+		endMorphMood();
 	}
 
 	// Forward/backward motion.

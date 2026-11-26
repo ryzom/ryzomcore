@@ -49,6 +49,7 @@
 
 #include "phrase_manager/phrase_utilities_functions.h"
 #include "entities_game_service.h"
+#include "player_morph.h"
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
 #include "player_manager/character.h"
@@ -2635,6 +2636,9 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 	// increment inventory counter
 	//character->incActionCounter();
 	character->incInterfaceCounter();
+
+	if (isMorphLockedItem(character, inventorySrc, slotSrc))
+		return;
 
 	// Special case for guilds
 	if (inventorySrc == INVENTORIES::guild || inventoryDst == INVENTORIES::guild)

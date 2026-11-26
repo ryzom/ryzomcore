@@ -400,13 +400,13 @@ class CStaticAiAction
 public:
 
 	/// Constructor
-	CStaticAiAction() {}
+	CStaticAiAction() : _SelfAction(false) {}
 
 	/// Read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 
 	/// Return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 21; }
+	inline static uint getVersion () { return 22; }
 
 	/// Serial
 	void serial(class NLMISC::IStream &f);
@@ -428,6 +428,9 @@ public:
 	/// get sheetId
 	inline const NLMISC::CSheetId &getSheetId() const { return _SheetId; }
 
+	/// true if the action targets its actor
+	inline bool isSelfAction() const { return _SelfAction; }
+
 protected:
 	/// ai action type
 	AI_ACTION::TAiActionType	_Type;
@@ -440,6 +443,35 @@ protected:
 
 	/// associated sheetId
 	NLMISC::CSheetId			_SheetId;
+
+	/// the action targets its actor
+	bool						_SelfAction;
+};
+
+
+/**
+ * List of ai actions of a creature fight config (melee_cfg, range_cfg, nuke_cfg, heal_cfg)
+ */
+class CStaticActionList
+{
+public:
+	/// Read georges sheet
+	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
+
+	/// Return the version of this class, increments this value when the content of this class has changed
+	inline static uint getVersion () { return 1; }
+
+	/// Serial
+	void serial(class NLMISC::IStream &f) { f.serialCont(_Actions); }
+
+	/// Removed
+	void removed() {}
+
+	/// get the ai action sheets of the list
+	inline const std::vector<NLMISC::CSheetId> &getActions() const { return _Actions; }
+
+private:
+	std::vector<NLMISC::CSheetId>	_Actions;
 };
 
 

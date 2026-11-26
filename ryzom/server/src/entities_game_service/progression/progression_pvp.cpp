@@ -22,6 +22,7 @@
 //-----------------------------------------------------------------------------
 
 #include "stdpch.h"
+#include "player_morph.h"
 #include "progression_pvp.h"
 
 #include "player_manager/character.h"
@@ -890,6 +891,8 @@ void CDamageScoreManager::tickUpdate()
 void CDamageScoreManager::reportAction(const TReportAction & action)
 {
 	H_AUTO(CDamageScoreManager_reportAction);
+	if (getPlayerMorphForm(action.ActorRowId) || getPlayerMorphForm(action.TargetRowId))
+		return;
 
 	CEntityBase * actor = CEntityBaseManager::getEntityBasePtr(action.ActorRowId);
 	if (actor == NULL)
@@ -1121,6 +1124,13 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 
 	// a dead player loses his damage points
 	clearDamages(victimChar, true);
+
+	// a morph fight gives no faction points
+	if (getPlayerMorphForm(victimChar->getEntityRowId()) || (finalBlower && getPlayerMorphForm(finalBlower->getEntityRowId())))
+	{
+		removeDamageScoreTable(victimChar->getEntityRowId());
+		return;
+	}
 
 	TDamageScoreTablesByPlayer::iterator it = _DamageScoreTablesByPlayer.find(victimChar->getEntityRowId());
 	if (it == _DamageScoreTablesByPlayer.end())

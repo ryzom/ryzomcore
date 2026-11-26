@@ -690,13 +690,34 @@ void CCreature::fillLootInventory( CSheetId& lootTable, const CStaticItem * bagF
 		return;
 	}
 
+	vector<CGameItemPtr> items;
+	createLootSetItems(*lootSet, bagForm, _Form->getXPLevel(), items, haveLoot);
+	for (uint i = 0; i < items.size(); ++i)
+	{
+		// inventory is not made to grow up automatically
+		// TODO: should implement a better solution in terms of performance
+		if (_LootInventory->getFreeSlotCount() == 0)
+		{
+			_LootInventory->setSlotCount(_LootInventory->getSlotCount()+1);
+		}
+		_LootInventory->insertItem(items[i]);
+	}
+}// fillLootInventory //
+
+
+//---------------------------------------------------
+// createLootSetItems
+//
+//---------------------------------------------------
+void CCreature::createLootSetItems( const CStaticLootSet &lootSet, const CStaticItem * bagForm, uint16 defaultQuality, vector<CGameItemPtr> &items, bool& haveLoot )
+{
 	// create the objects from the loot set
 	sint16 i = 0;
-	for( vector< CStaticLootSet::SItemLoot >::const_iterator itemLoot = lootSet->ItemLoot.begin(); itemLoot != lootSet->ItemLoot.end(); ++itemLoot )
+	for( vector< CStaticLootSet::SItemLoot >::const_iterator itemLoot = lootSet.ItemLoot.begin(); itemLoot != lootSet.ItemLoot.end(); ++itemLoot )
 	{
 		if( i >= bagForm->SlotCount )
 		{
-			nlwarning("<CCreature::fillLootInventory> Too many items in loot set, max is %d",bagForm->SlotCount);
+			nlwarning("<CCreature::createLootSetItems> Too many items in loot set, max is %d",bagForm->SlotCount);
 			break;
 		}
 		i++;
@@ -711,7 +732,7 @@ void CCreature::fillLootInventory( CSheetId& lootTable, const CStaticItem * bagF
 			const CStaticItem* form = CSheets::getForm( obtainedItem );
 			if (!form)
 			{
-				nlwarning("<CCreature::fillLootInventory> Cannot find form of item %s", obtainedItem.toString().c_str());
+				nlwarning("<CCreature::createLootSetItems> Cannot find form of item %s", obtainedItem.toString().c_str());
 				return;
 			}
 
@@ -743,39 +764,24 @@ void CCreature::fillLootInventory( CSheetId& lootTable, const CStaticItem * bagF
 			{
 				uint16 quality;
 				if( itemLoot->Level == 0 )
-					quality = _Form->getXPLevel();
+					quality = defaultQuality;
 				else
 					quality = itemLoot->Level;
 
 				CGameItemPtr item = GameItemManager.createItem(obtainedItem, quality, true, true);
 				item->setStackSize(min(item->getMaxStackSize(), qtToLoot));
 				qtToLoot -= item->getStackSize();
-
-				// inventory is not made to grow up automatically
-				// TODO: should implement a better solution in terms of performance
-				if (_LootInventory->getFreeSlotCount() == 0)
-				{
-					_LootInventory->setSlotCount(_LootInventory->getSlotCount()+1);
-				}
-				_LootInventory->insertItem(item);
+				items.push_back(item);
 			}
 		}
 		else
 		{
 			CGameItemPtr itemTmp = CNamedItems::getInstance().createNamedItem( itemLoot->Item, itemLoot->Quantity );
 			if ( itemTmp != NULL )
-			{
-				// inventory is not made to grow up automatically
-				// TODO: should implement a better solution in terms of performance
-				if (_LootInventory->getFreeSlotCount() == 0)
-				{
-					_LootInventory->setSlotCount(_LootInventory->getSlotCount()+1);
-				}
-				_LootInventory->insertItem(itemTmp);
-			}
+				items.push_back(itemTmp);
 		}
 	}
-}// fillLootInventory //
+}// createLootSetItems //
 
 
 //---------------------------------------------------
@@ -1591,6 +1597,14 @@ void CCreature::disbandTrain()
 //---------------------------------------------------
 inline sint32 CCreature::applyDamageOnArmor( DMGTYPE::EDamageType dmgType, sint32 damage, SLOT_EQUIPMENT::TSlotEquipment forcedSlot)
 {
+	return applyFormArmor(*_Form, *this, dmgType, damage);
+}// applyDamageOnArmor
+
+//---------------------------------------------------
+// applyFormArmor
+//---------------------------------------------------
+sint32 CCreature::applyFormArmor(const CStaticCreatures &form, CEntityBase &entity, DMGTYPE::EDamageType dmgType, sint32 damage)
+{
 	///\todo localisation for NPCS
 	if ( dmgType <0 || uint(dmgType) >= /*form->Protections.size()*/DMGTYPE::NBTYPES )
 	{
@@ -1600,14 +1614,14 @@ inline sint32 CCreature::applyDamageOnArmor( DMGTYPE::EDamageType dmgType, sint3
 	else
 	{
 		float armorReducFactor = 1.0f;
-		const CSEffect* effect = lookForActiveEffect( EFFECT_FAMILIES::getDebuffResistEffect( dmgType) );
+		const CSEffect* effect = entity.lookForActiveEffect( EFFECT_FAMILIES::getDebuffResistEffect( dmgType) );
 		if ( effect )
 		{
 			armorReducFactor = float(effect->getParamValue()) /100.0f;
 		}
 		
-		uint16 max = _Form->getProtections()[dmgType].Max;
-		float factor = _Form->getProtections()[dmgType].Factor;
+		uint16 max = form.getProtections()[dmgType].Max;
+		float factor = form.getProtections()[dmgType].Factor;
 
 		sint32 dmgAbsorbed = sint32(damage * factor);
 		if ( dmgAbsorbed > max )
@@ -1620,7 +1634,7 @@ inline sint32 CCreature::applyDamageOnArmor( DMGTYPE::EDamageType dmgType, sint3
 			return 0;
 		return damage;
 	}
-}// applyDamageOnArmor
+}// applyFormArmor
 
 
 /*
@@ -1846,39 +1860,46 @@ void CCreature::tpWanted( sint32 x, sint32 y, sint32 z , bool useHeading , float
 uint32 CCreature::getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamily)
 {
 	nlassert(_Form);
+	return getFormMagicResistance(*_Form, _ResistModifiers, effectFamily);
+} // getResistScore //
 
+//--------------------------------------------------------------
+//					getFormMagicResistance()
+//--------------------------------------------------------------
+uint32 CCreature::getFormMagicResistance(const CStaticCreatures &form, const CCreatureResistModifiers &modifiers, EFFECT_FAMILIES::TEffectFamily effectFamily)
+{
 	uint32 value;
 	switch(effectFamily)
 	{
 	case EFFECT_FAMILIES::Root:
-		value = _Form->getResists().Root + _ResistModifiers.Root;
+		value = form.getResists().Root + modifiers.Root;
 		break;
 	case EFFECT_FAMILIES::Mezz:
-		value = _Form->getResists().Sleep + _ResistModifiers.Sleep;
+		value = form.getResists().Sleep + modifiers.Sleep;
 		break;
 	case EFFECT_FAMILIES::Stun:
-		value = _Form->getResists().Stun + _ResistModifiers.Stun;
+		value = form.getResists().Stun + modifiers.Stun;
 		break;
 	case EFFECT_FAMILIES::Blind:
-		value = _Form->getResists().Blind + _ResistModifiers.Blind;
+		value = form.getResists().Blind + modifiers.Blind;
 		break;
 	case EFFECT_FAMILIES::SlowMove:
-		value = _Form->getResists().Snare + _ResistModifiers.Snare;
+		value = form.getResists().Snare + modifiers.Snare;
 		break;
 	case EFFECT_FAMILIES::SlowMelee:
 	case EFFECT_FAMILIES::SlowRange:
 	case EFFECT_FAMILIES::SlowMagic:
 	case EFFECT_FAMILIES::SlowAttack:
-		value = _Form->getResists().Slow + _ResistModifiers.Slow;
+		value = form.getResists().Slow + modifiers.Slow;
 		break;
 	case EFFECT_FAMILIES::Fear:
-		value = _Form->getResists().Fear + _ResistModifiers.Fear;
+		value = form.getResists().Fear + modifiers.Fear;
 		break;
 	case EFFECT_FAMILIES::MadnessMelee:
 	case EFFECT_FAMILIES::MadnessMagic:
 	case EFFECT_FAMILIES::MadnessRange:
 	case EFFECT_FAMILIES::Madness:
-		value = _Form->getResists().Madness + _ResistModifiers.Madness;
+		value = form.getResists().Madness + modifiers.Madness;
 		break;
 	default:
 		value = 0;
@@ -1895,30 +1916,37 @@ uint32 CCreature::getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamily
 uint32 CCreature::getMagicResistance(DMGTYPE::EDamageType dmgType)
 {
 	nlassert(_Form);
+	return getFormMagicResistance(*_Form, _ResistModifiers, dmgType);
+} // getResistScore //
 
+//--------------------------------------------------------------
+//					getFormMagicResistance()
+//--------------------------------------------------------------
+uint32 CCreature::getFormMagicResistance(const CStaticCreatures &form, const CCreatureResistModifiers &modifiers, DMGTYPE::EDamageType dmgType)
+{
 	uint32 value;
 	switch(dmgType) 
 	{
 	case DMGTYPE::ACID:
-		value = _Form->getResists().Acid + _ResistModifiers.Acid;
+		value = form.getResists().Acid + modifiers.Acid;
 		break;
 	case DMGTYPE::COLD:
-		value = _Form->getResists().Cold + _ResistModifiers.Cold;
+		value = form.getResists().Cold + modifiers.Cold;
 		break;
 	case DMGTYPE::ELECTRICITY:
-		value = _Form->getResists().Electricity + _ResistModifiers.Electricity;
+		value = form.getResists().Electricity + modifiers.Electricity;
 		break;
 	case DMGTYPE::FIRE:
-		value = _Form->getResists().Fire + _ResistModifiers.Fire;
+		value = form.getResists().Fire + modifiers.Fire;
 		break;
 	case DMGTYPE::POISON:
-		value = _Form->getResists().Poison + _ResistModifiers.Poison;
+		value = form.getResists().Poison + modifiers.Poison;
 		break;
 	case DMGTYPE::ROT:
-		value = _Form->getResists().Rot + _ResistModifiers.Rot;
+		value = form.getResists().Rot + modifiers.Rot;
 		break;
 	case DMGTYPE::SHOCK:
-		value = _Form->getResists().Shockwave + _ResistModifiers.Shockwave;
+		value = form.getResists().Shockwave + modifiers.Shockwave;
 		break;
 	default:
 		return 0;

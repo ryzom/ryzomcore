@@ -1,0 +1,26 @@
+<interface_config>
+  <root id="interface" x="0" y="0" w="800" h="600" active="true" />
+  <template name="player_morph_button" keep="true">
+    <group id="#id" w="104" h="28" posref="TL TL">
+      <ctrl id="cast" style="button_ok" posref="TL TL" x="2" y="-2"
+        wmin="96" hardtext="#label" onclick_l="#handler" params_l="#handler_params" />
+    </group>
+  </template>
+  <group type="container" id="player_morph" x="0" y="150" w="260" h="120" posref="BM BM"
+    title="" active="false" opened="true" openable="false" movable="true"
+    savable="false" resizer="false" right_button="false" options="layer0_pad">
+    <group id="header_closed" h="18" posref="TL TL" />
+    <group id="header_opened" h="18" posref="TL TL" />
+    <group id="content" w="260" h="100" posref="TL TL">
+      <view type="text" id="pvp" x="6" y="-6" posref="TL TL" color="255 255 255 255"
+        fontsize="10" shadow="true" hardtext="uiMorphAttackableOff" />
+      <group type="list" id="abilities" x="4" y="-28" w="244" h="28" posref="TL TL"
+        addelt="R" align="T" />
+      <group type="list" id="moods" x="4" y="-56" w="244" h="28" posref="TL TL"
+        addelt="R" align="T" />
+      <ctrl style="skin_scroll" id="scroll" target="abilities" vertical="false" align="L"
+        x="4" y="0" w="244" h="12" posref="BL BL" />
+    </group>
+  </group>
+  <tree node="player_morph" />
+</interface_config>

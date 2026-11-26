@@ -23,6 +23,7 @@
 #include "phrase_manager/phrase_manager.h"
 #include "phrase_manager/phrase_manager_callbacks.h"
 #include "combat_phrase.h"
+#include "player_morph.h"
 #include "s_phrase_factory.h"
 #include "phrase_manager/s_effect.h"
 #include "player_manager/player_manager.h"
@@ -205,7 +206,12 @@ CSPhrasePtr &CEntityPhrases::renewCyclicAction()
 		if (_NextAction == _CyclicAction)
 			_NextAction = NULL;
 		
-		CSPhrasePtr ptr = CPhraseManager::getInstance().executePhrase( _CyclicActionInfos.ActorRowId, _CyclicActionInfos.TargetRowId, _CyclicActionInfos.CyclicActionBricks, true );
+		CSPhrasePtr ptr;
+		if (_CyclicActionInfos.AiAction != CSheetId::Unknown)
+			ptr = CPhraseManager::getInstance().executeAiAction(_CyclicActionInfos.ActorRowId, _CyclicActionInfos.TargetRowId,
+				_CyclicActionInfos.AiAction, _CyclicActionInfos.DamageCoeff, _CyclicActionInfos.SpeedCoeff, true);
+		else
+			ptr = CPhraseManager::getInstance().executePhrase( _CyclicActionInfos.ActorRowId, _CyclicActionInfos.TargetRowId, _CyclicActionInfos.CyclicActionBricks, true );
 		if (ptr.isNull())
 		{
 			_CyclicAction = NULL;
@@ -950,6 +956,22 @@ CSPhrasePtr CPhraseManager::executePhrase( const TDataSetRow &actorRowId, const 
 	if ( brickIds.empty() )
 		return NULL;
 	const CStaticBrick * brick = CSheets::getSBrickForm( brickIds[0] );
+	if (getPlayerMorphForm(actorRowId))
+	{
+		bool allowed = false;
+		if (brick && brickIds.size() == 1)
+			for (uint i = 0; i < brick->Params.size(); ++i)
+				if (brick->Params[i] && (brick->Params[i]->id() == TBrickParam::TA_TELEPORT ||
+					brick->Params[i]->id() == TBrickParam::TA_DISCONNECT))
+					allowed = true;
+		if (!allowed)
+		{
+			CCharacter *user = PlayerManager.getChar(actorRowId);
+			if (user)
+				user->writeNextPhraseInDB(nextCounter);
+			return NULL;
+		}
+	}
 	if ( brick && brick->Family == BRICK_FAMILIES::BEPA )
 	{
 		CEntityBase *entity = CEntityBaseManager::getEntityBasePtr(actorRowId);
@@ -1062,7 +1084,7 @@ CSPhrasePtr CPhraseManager::executePhrase( const TDataSetRow &actorRowId, const 
 //-----------------------------------------------
 //			executeAiAction()
 //-----------------------------------------------
-void CPhraseManager::executeAiAction( const TDataSetRow &actorRowId, const TDataSetRow &targetRowId,  const NLMISC::CSheetId &actionId, float damageCoeff, float speedCoeff )
+CSPhrasePtr CPhraseManager::executeAiAction( const TDataSetRow &actorRowId, const TDataSetRow &targetRowId,  const NLMISC::CSheetId &actionId, float damageCoeff, float speedCoeff, bool cyclic )
 {
 	H_AUTO(CPhraseManager_executeAiAction);
 	
@@ -1087,7 +1109,7 @@ void CPhraseManager::executeAiAction( const TDataSetRow &actorRowId, const TData
 			if( c != 0 )
 				c->checkCharacterStillValide("Step1 CPhraseManager::executeAiAction");
 		}
-		return;
+		return NULL;
 	}
 	
 	CSPhrasePtr phrase = NULL;
@@ -1157,11 +1179,21 @@ void CPhraseManager::executeAiAction( const TDataSetRow &actorRowId, const TData
 				if( c != 0 )
 					c->checkCharacterStillValide("Step2 CPhraseManager::executeAiAction");
 			}
-			return;
+			return NULL;
 		}
 		else
 		{
-			if (!addPhrase(actorRowId, phrase))
+			CCyclicActionInfos infos;
+			cyclic = cyclic && (type == AI_ACTION::Melee || type == AI_ACTION::Range);
+			if (cyclic)
+			{
+				infos.ActorRowId = actorRowId;
+				infos.TargetRowId = targetRowId;
+				infos.AiAction = actionId;
+				infos.DamageCoeff = damageCoeff;
+				infos.SpeedCoeff = speedCoeff;
+			}
+			if (!addPhrase(actorRowId, phrase, infos, cyclic))
 				phrase = NULL;
 		}		
 	}
@@ -1180,7 +1212,7 @@ void CPhraseManager::executeAiAction( const TDataSetRow &actorRowId, const TData
 		if( c != 0 )
 			c->checkCharacterStillValide("End CPhraseManager::executeAiAction");
 	}
-	return;
+	return phrase;
 } // executeAiAction //
 
 //-----------------------------------------------

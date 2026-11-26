@@ -81,6 +81,7 @@
 #include "team_manager/team_manager.h"
 #include "world_instances.h"
 #include "egs_variables.h"
+#include "player_morph.h"
 #include "building_manager/building_manager.h"
 #include "building_manager/building_physical.h"
 #include "player_manager/gm_tp_pending_command.h"
@@ -232,6 +233,12 @@ AdminCommandsInit[] =
 		"learnAllFaberPlans",				true,
 		"logXpGain",						true,
 		"memorizePhrase",					true,
+		"morph",							true,
+		"unmorph",							true,
+		"morphRole",						true,
+		"morphRoleAbilities",				true,
+		"removeMorphRole",					true,
+		"listMorphRoles",					true,
 		"resetPowerFlags",					true,
 		"setSkillsToMaxValue",				true,
 		"displayForageRM",					true,
@@ -6861,6 +6868,26 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		{
 			c->addCustomMissionParam(command_args[2], command_args[3]);
 		}
+	}
+
+	//*************************************************
+	//***************** morph!role or creature sheet[!attackable 0|1[!duration in seconds]]
+	//*************************************************
+	else if (command_args[0] == "morph")
+	{
+		if (command_args.size() < 2 || command_args.size() > 4)
+			return false;
+
+		if (!morphPlayer(c, vector<string>(command_args.begin() + 1, command_args.end()), log))
+			return false;
+	}
+
+	//*************************************************
+	//***************** unmorph
+	//*************************************************
+	else if (command_args[0] == "unmorph")
+	{
+		unmorphPlayer(c);
 	}
 	else
 	{

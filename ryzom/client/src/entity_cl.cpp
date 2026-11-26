@@ -869,7 +869,18 @@ bool CEntityCL::initPrimitive(float radius, float height, float length, float wi
 	else
 		nlwarning("CEntityCL::initPrimitive:%d: PACS not allocated -> _Primitive not created.", _Slot);
 
-	// **** setup the 3D Clip Sphere.
+	initClipSphere(radius, height, length, width, clipRadius, clipHeight);
+
+	return primitiveOk;
+}// initPrimitive //
+
+
+//-----------------------------------------------
+// initClipSphere :
+// Setup the 3D Clip Sphere from the collision size, or from the clip size when given.
+//-----------------------------------------------
+void CEntityCL::initClipSphere(float radius, float height, float length, float width, float clipRadius, float clipHeight)
+{
 	// if clip radius not specified, deduce from collision
 	if(clipRadius<=0.f)
 	{
@@ -905,10 +916,7 @@ bool CEntityCL::initPrimitive(float radius, float height, float length, float wi
 	// Compute the local Sphere info
 	_ClipRadius= clipBox.getRadius();
 	_ClipDeltaZ= clipBox.getCenter().z;		// NB different from radius, since radius>center.z
-
-
-	return primitiveOk;
-}// initPrimitive //
+}// initClipSphere //
 
 
 //-----------------------------------------------
@@ -1043,6 +1051,10 @@ void CEntityCL::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, const 
 
 		case PROPERTY_OWNER_PEOPLE:
 			updateVisualPropertyOwnerPeople(gameCycle, nodeProp->getValue64());
+		break;
+
+		case PROPERTY_MORPH_SHEET:
+			updateVisualPropertyMorphSheet(gameCycle, nodeProp->getValue64());
 		break;
 
 		case PROPERTY_OUTPOST_INFOS:
@@ -2547,6 +2559,9 @@ NLMISC::CRGBA	CEntityCL::getColor () const
 	// dead
 	if (isReallyDead())
 		return _DeadColor;
+	const CPlayerCL *player = dynamic_cast<const CPlayerCL *>(this);
+	if (player && player->isMorphed())
+		return _EntitiesColor[Fauna];
 	// mount
 	if (isUserMount())
 		return _UserMountColor;

@@ -346,6 +346,13 @@
         <ATOM Name="mirror" Value="true"/>
         <ATOM Name="weight" Value="1"/>
       </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MorphSheet"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
     </ARRAY>
     <ATOM Name="max number of rows or entities" Value="500000"/>
     <ARRAY Name="entity types">

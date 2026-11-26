@@ -256,6 +256,8 @@ public:
 	 *	clipRadius/clipHeight, specify them if you want special clip values (different from collision ones)
 	 */
 	bool initPrimitive(float radius, float height, float length, float width, NLPACS::UMovePrimitive::TReaction reactionType, NLPACS::UMovePrimitive::TTrigger triggerType, NLPACS::UMovePrimitive::TCollisionMask occlusionMask, NLPACS::UMovePrimitive::TCollisionMask collisionMask, float clipRadius=0.f, float clipHeight=0.f);
+	/// Initialize the 3D clip sphere only, with the same rules as initPrimitive()
+	void initClipSphere(float radius, float height, float length, float width, float clipRadius=0.f, float clipHeight=0.f);
 
 	/**
 	 * Update a visual property from the database.
@@ -1156,6 +1158,7 @@ protected:
 	virtual void updateVisualPropertyPvpClan		(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &/* prop */) {}
 	virtual void updateVisualPropertyOwnerPeople	(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &/* prop */) {}
 	virtual void updateVisualPropertyOutpostInfos	(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &/* prop */) {}
+	virtual void updateVisualPropertyMorphSheet	(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &/* prop */) {}
 
 
 	/// Update Entity State

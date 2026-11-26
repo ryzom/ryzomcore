@@ -97,6 +97,7 @@ public:
 	CMirrorPropValue1DS<TYPE_POSZ>					LocalZ;					// Local Coordinate X in world in unit
 	CMirrorPropValue1DS<TYPE_ORIENTATION>			Theta;					// Heading in world
 	CMirrorPropValue1DS<TYPE_SHEET>					Sheet;					// Id sheet	of entity
+	CMirrorPropValue1DS<TYPE_MORPH_SHEET>			MorphSheet;				// Creature sheet of a morphed player, 0 otherwise
 	CMirrorPropValue1DS<NLMISC::TGameCycle>			Tick;					// GameCycle of other properties
 	CMirrorPropValue1DS<TYPE_CELL>					Cell;					// Current XY Cell where entity is
 	CMirrorPropValue1DS<TYPE_VISION_COUNTER>		VisionCounter;			// Number of times this entity is seen by players
@@ -187,6 +188,11 @@ public:
 	 * \return pointer on PACS primitve
 	 */
 	void	createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8 worldImage);
+
+	/**
+	 * Sets the primitive size from the sheet, or from the creature sheet of a morphed player
+	 */
+	void	updatePrimitiveSize();
 
 	/**
 	 * Removes primitive allocated previously

@@ -17,6 +17,7 @@
  
 
 #include "stdpch.h"
+#include "player_morph.h"
 #include "magic_action_ai_hot.h"
 #include "phrase_manager/magic_phrase.h"
 #include "nolink_hot_effect.h"
@@ -43,9 +44,9 @@ bool CMagicAiActionHoT::initFromAiAction( const CStaticAiAction *aiAction, CMagi
 	// read parameters
 	const COTSpellParams &data = aiAction->getData().OTSpell;
 
-	CCreature *creature = CreatureManager.getCreature( phrase->getActor() );
-	if (creature && creature->getForm())
-		_TotalHealValue = (uint16)(data.SpellParamValue + data.SpellPowerFactor * creature->getForm()->getAttackLevel());
+	const CStaticCreatures *form = getActingCreatureForm( phrase->getActor() );
+	if (form)
+		_TotalHealValue = (uint16)(data.SpellParamValue + data.SpellPowerFactor * form->getAttackLevel());
 	else
 		_TotalHealValue = (uint16)data.SpellParamValue;
 	

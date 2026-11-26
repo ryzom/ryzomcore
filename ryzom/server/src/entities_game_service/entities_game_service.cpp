@@ -76,6 +76,7 @@
 #include "cdb_struct_banks.h"
 #include "mission_manager/mission_manager.h"
 #include "zone_manager.h"
+#include "player_morph_roles.h"
 #include "primitives_parser.h"
 #include "team_manager/team_manager.h"
 #include "guild_manager/guild_manager.h"
@@ -1447,6 +1448,7 @@ void CPlayerService::init()
 
 	// load the sart position and other parameters
 	initConfigFileVars();
+	if (!packingSheets) CPlayerMorphRoles::getInstance().loadFromFile();
 	// Add callback to change the progression factor without to stop the service.
 	ConfigFile.setCallback("SkillProgressionFactor", cfgSkillProgressionFactorCB);
 	cfgSkillProgressionFactorCB( ConfigFile.getVar( "SkillProgressionFactor" ) );
