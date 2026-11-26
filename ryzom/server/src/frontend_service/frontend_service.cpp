@@ -63,6 +63,7 @@
 #	ifndef NL_COMP_MINGW
 #		define NOMINMAX
 #	endif
+#	undef B
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 
