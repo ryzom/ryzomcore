@@ -17,3 +17,16 @@ hunter_config(breakpad
     CMAKE_ARGS
         "DIASDK_INCLUDE_DIR=C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/DIA SDK/include"
 )
+
+# needs C++20, and does not configure without the embedded HRTF data
+hunter_config(OpenAL
+  VERSION 1.25.2
+  URL "https://github.com/kcat/openal-soft/archive/1.25.2.tar.gz"
+  SHA1 "22fcefb486d598f748c021296a5d7b683e78069c"
+  CMAKE_ARGS
+    ALSOFT_ENABLE_MODULES=OFF
+    ALSOFT_EMBED_HRTF_DATA=ON
+    ALSOFT_INSTALL_CONFIG=OFF
+    ALSOFT_INSTALL_HRTF_DATA=OFF
+    ALSOFT_INSTALL_AMBDEC_PRESETS=OFF
+)

@@ -66,6 +66,31 @@ void alExtInitDevice(ALCdevice *device)
 		}
 	}
 
+	AlExtDisconnect = (alcIsExtensionPresent(device, "ALC_EXT_disconnect") == ALC_TRUE);
+
+	if ((AlSoftReopenDevice = (alcIsExtensionPresent(device, "ALC_SOFT_reopen_device") == ALC_TRUE)) == true)
+	{
+		alcReopenDevice = (TAlcReopenDevice)alcGetProcAddress(device, "alcReopenDeviceSOFT");
+		if (!alcReopenDevice)
+		{
+			nlwarning("AL: ALC_SOFT_reopen_device alcGetProcAddress failed");
+			AlSoftReopenDevice = false;
+		}
+	}
+
+	if ((AlSoftSystemEvents = (alcIsExtensionPresent(device, "ALC_SOFT_system_events") == ALC_TRUE)) == true)
+	{
+		alcEventControl = (TAlcEventControl)alcGetProcAddress(device, "alcEventControlSOFT");
+		alcEventCallback = (TAlcEventCallback)alcGetProcAddress(device, "alcEventCallbackSOFT");
+		if (!alcEventControl || !alcEventCallback)
+		{
+			nlwarning("AL: ALC_SOFT_system_events alcGetProcAddress failed");
+			AlSoftSystemEvents = false;
+		}
+	}
+
+	AlSoftHoldOnDisconnect = (alIsExtensionPresent("AL_SOFTX_hold_on_disconnect") == AL_TRUE);
+
 #if !defined(AL_LIBTYPE_STATIC)
 // Windows and Mac OS always link to shared OpenAL library
 #if defined(NL_OS_WINDOWS) || defined(NL_OS_MAC) || !defined(NL_STATIC)
@@ -115,6 +140,8 @@ void alExtInitDevice(ALCdevice *device)
 		}
 	}
 #endif
+#else
+	AlExtEfx = (alcIsExtensionPresent(device, "ALC_EXT_EFX") == ALC_TRUE);
 #endif
 }
 
@@ -130,6 +157,21 @@ bool AlEnumerationExt = false;
 
 // ALC_ENUMERATE_ALL_EXT
 bool AlEnumerateAllExt = false;
+
+// ALC_EXT_disconnect
+bool AlExtDisconnect = false;
+
+// ALC_SOFT_reopen_device
+bool AlSoftReopenDevice = false;
+TAlcReopenDevice alcReopenDevice = NULL;
+
+// ALC_SOFT_system_events
+bool AlSoftSystemEvents = false;
+TAlcEventControl alcEventControl = NULL;
+TAlcEventCallback alcEventCallback = NULL;
+
+// AL_SOFTX_hold_on_disconnect
+bool AlSoftHoldOnDisconnect = false;
 
 // EAX-RAM
 bool AlExtXRam = false;

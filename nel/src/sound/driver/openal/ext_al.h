@@ -39,6 +39,17 @@
 #	include <AL/efx-creative.h>
 #	include <AL/EFX-Util.h>
 #endif
+#ifdef AL_LIBTYPE_STATIC
+// the static library exports the EFX functions
+#	ifndef AL_ALEXT_PROTOTYPES
+#		define AL_ALEXT_PROTOTYPES
+#	endif
+#	ifdef NL_OS_MAC
+#		include <efx.h>
+#	else
+#		include <AL/efx.h>
+#	endif
+#endif
 
 extern "C"
 {
@@ -63,6 +74,40 @@ extern bool AlEnumerateAllExt;
 #endif
 #ifndef ALC_ALL_DEVICES_SPECIFIER
 #	define ALC_ALL_DEVICES_SPECIFIER 0x1013
+#endif
+
+// ALC_EXT_disconnect
+extern bool AlExtDisconnect;
+#ifndef ALC_CONNECTED
+#	define ALC_CONNECTED 0x313
+#endif
+
+// ALC_SOFT_reopen_device and ALC_SOFT_system_events, looked up at runtime so older libraries still link
+extern bool AlSoftReopenDevice;
+typedef ALCboolean (ALC_APIENTRY *TAlcReopenDevice)(ALCdevice *device, const ALCchar *deviceName, const ALCint *attribs);
+extern TAlcReopenDevice alcReopenDevice;
+extern bool AlSoftSystemEvents;
+#ifndef ALC_PLAYBACK_DEVICE_SOFT
+#	define ALC_PLAYBACK_DEVICE_SOFT 0x19D4
+#endif
+#ifndef ALC_EVENT_TYPE_DEFAULT_DEVICE_CHANGED_SOFT
+#	define ALC_EVENT_TYPE_DEFAULT_DEVICE_CHANGED_SOFT 0x19D6
+#endif
+typedef void (ALC_APIENTRY *TAlcEventProc)(ALCenum eventType, ALCenum deviceType, ALCdevice *device, ALCsizei length, const ALCchar *message, void *userParam);
+typedef ALCboolean (ALC_APIENTRY *TAlcEventControl)(ALCsizei count, const ALCenum *events, ALCboolean enable);
+extern TAlcEventControl alcEventControl;
+typedef void (ALC_APIENTRY *TAlcEventCallback)(TAlcEventProc callback, void *userParam);
+extern TAlcEventCallback alcEventCallback;
+
+// AL_SOFTX_hold_on_disconnect
+extern bool AlSoftHoldOnDisconnect;
+#ifndef AL_STOP_SOURCES_ON_DISCONNECT_SOFT
+#	define AL_STOP_SOURCES_ON_DISCONNECT_SOFT 0x19AB
+#endif
+
+// ALC_SOFT_HRTF
+#ifndef ALC_HRTF_SOFT
+#	define ALC_HRTF_SOFT 0x1992
 #endif
 
 // EAX-RAM (see OpenAL Programmer's Guide.pdf and http://icculus.org/alextreg/)
@@ -96,6 +141,7 @@ typedef void (AL_APIENTRY *LPALGETEFXOBJECTFV)(ALuint id, ALenum pname, ALfloat*
 #define AL_AUXILIARY_SEND_FILTER_GAIN_AUTO 0x2000B
 #define AL_AUXILIARY_SEND_FILTER_GAINHF_AUTO 0x2000C
 // effect objects
+#ifndef AL_LIBTYPE_STATIC
 extern LPALGENEFXOBJECTS alGenEffects;
 extern LPALDELETEEFXOBJECTS alDeleteEffects;
 extern LPALISEFXOBJECT alIsEffect;
@@ -107,6 +153,7 @@ extern LPALGETEFXOBJECTI alGetEffecti;
 extern LPALGETEFXOBJECTIV alGetEffectiv;
 extern LPALGETEFXOBJECTF alGetEffectf;
 extern LPALGETEFXOBJECTFV alGetEffectfv;
+#endif
 #define AL_EFFECT_FIRST_PARAMETER 0x0000
 #define AL_EFFECT_LAST_PARAMETER 0x8000
 #define AL_EFFECT_TYPE 0x8001
@@ -126,6 +173,7 @@ extern LPALGETEFXOBJECTFV alGetEffectfv;
 #define AL_REVERB_ROOM_ROLLOFF_FACTOR 0x000C
 #define AL_REVERB_DECAY_HFLIMIT 0x000D
 // filter objects
+#ifndef AL_LIBTYPE_STATIC
 extern LPALGENEFXOBJECTS alGenFilters;
 extern LPALDELETEEFXOBJECTS alDeleteFilters;
 extern LPALISEFXOBJECT alIsFilter;
@@ -137,6 +185,7 @@ extern LPALGETEFXOBJECTI alGetFilteri;
 extern LPALGETEFXOBJECTIV alGetFilteriv;
 extern LPALGETEFXOBJECTF alGetFilterf;
 extern LPALGETEFXOBJECTFV alGetFilterfv;
+#endif
 #define AL_LOWPASS_GAIN 0x0001
 #define AL_LOWPASS_GAINHF 0x0002
 #define AL_HIGHPASS_GAIN 0x0001
@@ -152,6 +201,7 @@ extern LPALGETEFXOBJECTFV alGetFilterfv;
 #define AL_FILTER_HIGHPASS 0x0002
 #define AL_FILTER_BANDPASS 0x0003
 // submix objects
+#ifndef AL_LIBTYPE_STATIC
 extern LPALGENEFXOBJECTS alGenAuxiliaryEffectSlots;
 extern LPALDELETEEFXOBJECTS alDeleteAuxiliaryEffectSlots;
 extern LPALISEFXOBJECT alIsAuxiliaryEffectSlot;
@@ -163,6 +213,7 @@ extern LPALGETEFXOBJECTI alGetAuxiliaryEffectSloti;
 extern LPALGETEFXOBJECTIV alGetAuxiliaryEffectSlotiv;
 extern LPALGETEFXOBJECTF alGetAuxiliaryEffectSlotf;
 extern LPALGETEFXOBJECTFV alGetAuxiliaryEffectSlotfv;
+#endif
 #define AL_EFFECTSLOT_EFFECT 0x0001
 #define AL_EFFECTSLOT_GAIN  0x0002
 #define AL_EFFECTSLOT_AUXILIARY_SEND_AUTO 0x0003

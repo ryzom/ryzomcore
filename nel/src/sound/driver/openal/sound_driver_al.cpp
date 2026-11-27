@@ -84,6 +84,20 @@ void alTestWarning(const char *src)
 
 #define ROLLOFF_FACTOR_DEFAULT 1.0f
 
+// ms between two attempts to reopen the output device
+#define REOPEN_INTERVAL 1000
+
+// the static build embeds HRTF data, which would turn HRTF on for headphones
+static const ALCint *contextAttribs(ALCdevice *device)
+{
+#ifdef AL_LIBTYPE_STATIC
+	static const ALCint noHrtf[] = { ALC_HRTF_SOFT, ALC_FALSE, 0 };
+	return alcIsExtensionPresent(device, "ALC_SOFT_HRTF") ? noHrtf : NULL;
+#else
+	return NULL;
+#endif
+}
+
 #ifndef NL_STATIC
 
 class CSoundDriverALNelLibrary : public NLMISC::INelLibrary
@@ -189,6 +203,7 @@ uint32 NLSOUND_interfaceVersion ()
  */
 CSoundDriverAL::CSoundDriverAL(ISoundDriver::IStringMapperProvider *stringMapper) 
 : _StringMapper(stringMapper), _AlDevice(NULL), _AlContext(NULL), 
+_AlDefaultDevice(false), _DefaultDeviceChanged(false), _ReopenPending(false), _AlDeviceLost(false), _ReopenTime(0),
 _NbExpBuffers(0), _NbExpSources(0), _RolloffFactor(1.f)
 {
 	alExtInit();
@@ -222,6 +237,13 @@ CSoundDriverAL::~CSoundDriverAL()
 	}
 
 	// OpenAL exit
+	if (_AlDevice && AlSoftSystemEvents)
+	{
+		// no event may reach the deleted driver
+		alcEventCallback(NULL, NULL);
+		ALCenum event = ALC_EVENT_TYPE_DEFAULT_DEVICE_CHANGED_SOFT;
+		alcEventControl(1, &event, ALC_FALSE);
+	}
 	if (_AlContext) { alcDestroyContext(_AlContext); _AlContext = NULL; }
 	if (_AlDevice) { alcCloseDevice(_AlDevice); _AlDevice = NULL; }
 }
@@ -306,6 +328,7 @@ void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundO
 
 	// OpenAL initialization
 	const ALchar *dev = getDeviceInternal(device);
+	_AlDefaultDevice = (dev == NULL);
 	if (!dev) dev = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
 	nldebug("AL: Opening device: '%s'", dev == NULL ? "NULL" : dev);
 	_AlDevice = alcOpenDevice(dev);
@@ -315,7 +338,7 @@ void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundO
 	//                   ALC_MONO_SOURCES, 12, 
 	//                   ALC_STEREO_SOURCES, 4, 
 	//                   ALC_INVALID };
-	_AlContext = alcCreateContext(_AlDevice, NULL); // attrlist);
+	_AlContext = alcCreateContext(_AlDevice, contextAttribs(_AlDevice)); // attrlist);
 	if (!_AlContext) { alcCloseDevice(_AlDevice); throw ESoundDriver("AL: Failed to create context"); }
 	alcMakeContextCurrent(_AlContext);
 	alTestError();
@@ -343,6 +366,22 @@ void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundO
 		AlExtEfx ? "Present" : "Not available");
 #endif
 	alTestError();
+
+	// keep the sources of a lost device for the reopen
+	if (AlSoftHoldOnDisconnect && AlSoftReopenDevice)
+	{
+		alDisable(AL_STOP_SOURCES_ON_DISCONNECT_SOFT);
+		if (alGetError() != AL_NO_ERROR)
+			nlwarning("AL: Sources stop when the output device is lost, AL_STOP_SOURCES_ON_DISCONNECT_SOFT cannot be disabled");
+	}
+
+	if (AlSoftSystemEvents)
+	{
+		ALCenum event = ALC_EVENT_TYPE_DEFAULT_DEVICE_CHANGED_SOFT;
+		alcEventCallback(eventCallback, this);
+		if (!alcEventControl(1, &event, ALC_TRUE))
+			nlwarning("AL: alcEventControlSOFT failed, the output does not follow a new default device");
+	}
 
 	nldebug("AL: Max. sources: %u, Max. effects: %u", (uint32)countMaxSources(), (uint32)countMaxEffects());
 
@@ -632,6 +671,63 @@ void CSoundDriverAL::commit3DChanges()
 		for (std::set<CSourceAL *>::iterator it(_Sources.begin()), end(_Sources.end()); it != end; ++it)
 			(*it)->updateManualRolloff();
 	}
+
+	if (AlExtDisconnect && !_AlDeviceLost)
+	{
+		ALCint connected = ALC_TRUE;
+		alcGetIntegerv(_AlDevice, ALC_CONNECTED, 1, &connected);
+		if (!connected)
+		{
+			nlwarning("AL: Output device lost");
+			_ReopenPending = true;
+			_AlDeviceLost = true;
+		}
+	}
+	if (_AlDefaultDevice && AlSoftSystemEvents)
+	{
+		NLMISC::CAutoMutex<NLMISC::CMutex> autoMutex(_DefaultDeviceChangedMutex);
+		if (_DefaultDeviceChanged)
+		{
+			_DefaultDeviceChanged = false;
+			_ReopenPending = true;
+		}
+	}
+	if (_ReopenPending && AlSoftReopenDevice)
+		reopenDevice();
+}
+
+void ALC_APIENTRY CSoundDriverAL::eventCallback(ALCenum eventType, ALCenum deviceType, ALCdevice * /* device */, ALCsizei /* length */, const ALCchar * /* message */, void *userParam)
+{
+	// no OpenAL calls on this thread, commit3DChanges() does the reopen
+	if (eventType != ALC_EVENT_TYPE_DEFAULT_DEVICE_CHANGED_SOFT || deviceType != ALC_PLAYBACK_DEVICE_SOFT)
+		return;
+	CSoundDriverAL *soundDriver = static_cast<CSoundDriverAL *>(userParam);
+	NLMISC::CAutoMutex<NLMISC::CMutex> autoMutex(soundDriver->_DefaultDeviceChangedMutex);
+	soundDriver->_DefaultDeviceChanged = true;
+}
+
+void CSoundDriverAL::reopenDevice()
+{
+	TTime now = CTime::getLocalTime();
+	if (_ReopenTime && (uint32)(now - _ReopenTime) < REOPEN_INTERVAL)
+		return;
+	_ReopenTime = now;
+	if (!alcReopenDevice(_AlDevice, NULL, contextAttribs(_AlDevice)))
+	{
+		// OpenAL restarted the old output, a lost device tries again
+		ALCint connected = ALC_TRUE;
+		if (AlExtDisconnect)
+			alcGetIntegerv(_AlDevice, ALC_CONNECTED, 1, &connected);
+		if (connected)
+		{
+			nlwarning("AL: Failed to move to the new default output device");
+			_ReopenPending = false;
+		}
+		return;
+	}
+	_ReopenPending = false;
+	_AlDeviceLost = false;
+	nlinfo("AL: Output device reopened: '%s'", alcGetString(_AlDevice, ALC_ALL_DEVICES_SPECIFIER));
 }
 
 /// Write information about the driver to the output stream.

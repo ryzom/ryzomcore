@@ -56,7 +56,7 @@ CStandardReverbEffectAL::CStandardReverbEffectAL(CSoundDriverAL *soundDriver, AL
 	// unused params, set default values
 	alEffectf(_AlEffect, AL_REVERB_AIR_ABSORPTION_GAINHF, 0.994f);
 	alEffectf(_AlEffect, AL_REVERB_ROOM_ROLLOFF_FACTOR, 0.0f);
-	alEffectf(_AlEffect, AL_REVERB_DECAY_HFLIMIT, AL_TRUE);
+	alEffecti(_AlEffect, AL_REVERB_DECAY_HFLIMIT, AL_TRUE);
 
 	// set default environment
 	setEnvironment();
@@ -82,6 +82,7 @@ void CStandardReverbEffectAL::setEnvironment(const CEnvironment &environment, fl
 	alEffectf(_AlEffect, AL_REVERB_REFLECTIONS_DELAY, environment.ReflectionsDelay); alTestWarning("AL_REVERB_REFLECTIONS_DELAY");
 	alEffectf(_AlEffect, AL_REVERB_LATE_REVERB_GAIN, decibelsToAmplitudeRatio(environment.LateReverb)); alTestWarning("AL_REVERB_LATE_REVERB_GAIN");
 	alEffectf(_AlEffect, AL_REVERB_LATE_REVERB_DELAY, environment.LateReverbDelay); alTestWarning("AL_REVERB_LATE_REVERB_DELAY");
+	alAuxiliaryEffectSloti(_AlAuxEffectSlot, AL_EFFECTSLOT_EFFECT, _AlEffect); alTestWarning("AL_EFFECTSLOT_EFFECT");
 }
 
 // ******************************************************************
@@ -158,6 +159,7 @@ void CCreativeReverbEffectAL::setEnvironment(const CEnvironment &environment, fl
 	alEffectf(_AlEffect, AL_EAXREVERB_LFREFERENCE, efxcreativereverb.flLFReference); alTestWarning("AL_EAXREVERB_LFREFERENCE");
 	alEffectf(_AlEffect, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, efxcreativereverb.flRoomRolloffFactor); alTestWarning("AL_EAXREVERB_ROOM_ROLLOFF_FACTOR");
 	alEffecti(_AlEffect, AL_EAXREVERB_DECAY_HFLIMIT, efxcreativereverb.iDecayHFLimit); alTestWarning("AL_EAXREVERB_DECAY_HFLIMIT"); // note: spec says AL_EAXREVERB_DECAYHF_LIMIT
+	alAuxiliaryEffectSloti(_AlAuxEffectSlot, AL_EFFECTSLOT_EFFECT, _AlEffect); alTestWarning("AL_EFFECTSLOT_EFFECT");
 }
 
 #endif /* #if EFX_CREATIVE_AVAILABLE */

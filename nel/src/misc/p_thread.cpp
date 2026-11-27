@@ -170,11 +170,15 @@ void CPThread::start()
 		detach_old_thread = true;
 	}
 
+	// set before the thread starts, it can finish before pthread_create returns
+	TThreadState old_state = _State;
+	_State = ThreadStateRunning;
 	if (pthread_create(&_ThreadHandle, _StackSize != 0 ? &tattr : NULL, ProxyFunc, this) != 0)
 	{
+		_ThreadHandle = old_thread_handle;
+		_State = old_state;
 		throw EThread("Cannot start new thread");
 	}
-	_State = ThreadStateRunning;
 
 	if (detach_old_thread)
 	{
@@ -227,6 +231,8 @@ void CPThread::wait ()
 		}
 		if(_State != ThreadStateFinished)
 			throw EThread("Thread did not finish, this should not happen");
+		// the joined thread is gone and its id can be reused, nothing is left to detach
+		_State = ThreadStateNone;
 	}
 }
 

@@ -201,10 +201,11 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 #endif
 		break;
 	default:
+		// the auto driver is OpenAL, on Windows XAudio2 when the OpenAL driver is missing
 #if defined (NL_COMP_MINGW)
-		dllName = "libnel_drv_xaudio2_win";
+		dllName = "libnel_drv_openal_win";
 #elif defined (NL_OS_WINDOWS)
-		dllName = "nel_drv_xaudio2_win";
+		dllName = "nel_drv_openal_win";
 #elif defined (NL_OS_UNIX)
 		dllName = "nel_drv_openal";
 #else
@@ -222,6 +223,13 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	// Load it (adding standard nel pre/suffix, looking in library path and not taking ownership)
 	if (!driverLib.loadLibrary(dllName, true, true, false))
 	{
+#ifdef NL_OS_WINDOWS
+		if (driverType == DriverAuto)
+		{
+			nlwarning("Sound driver '%s' not found, trying XAudio2", dllName.c_str());
+			return createDriver(stringMapper, DriverXAudio2);
+		}
+#endif
 		throw ESoundDriverNotFound(dllName);
 	}
 

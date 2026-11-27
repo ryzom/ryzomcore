@@ -35,6 +35,9 @@ using namespace NLMISC;
 
 namespace NLSOUND {
 
+// Time a flushed voice gets to release its buffers, a few processing passes
+static const TTime FlushTimeout = (TTime)(4 * XAUDIO2_QUANTUM_MS);
+
 CSourceXAudio2::CSourceXAudio2(CSoundDriverXAudio2 *soundDriver) 
 : _SoundDriver(soundDriver), _SourceVoice(NULL), _StaticBuffer(NULL), _LastPreparedBuffer(NULL), _OperationSet(soundDriver->getUniqueOperationSet()), 
 _Format(IBuffer::FormatUnknown), _Frequency(0), _PlayStart(0), 
@@ -254,34 +257,18 @@ void CSourceXAudio2::updateState()
 
 	if (_IsPlaying)
 	{
-		if (_AdpcmUtility)
+		XAUDIO2_VOICE_STATE voice_state;
+		_SourceVoice->GetState(&voice_state);
+		// adpcm decodes ahead, its last chunks are still queued when the source data ends
+		if (!voice_state.BuffersQueued && (!_AdpcmUtility || !_AdpcmUtility->getSourceData()))
 		{
-			if (!_AdpcmUtility->getSourceData())
+			_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
+			if (!_BufferStreaming)
 			{
-				_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
-				if (!_BufferStreaming)
-				{
-					// nldebug(NLSOUND_XAUDIO2_PREFIX "Stop");
-					if (FAILED(_SourceVoice->Stop(0))) 
-						nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Stop");
-					_IsPlaying = false;
-				}
-			}
-		}
-		else
-		{
-			XAUDIO2_VOICE_STATE voice_state;
-			_SourceVoice->GetState(&voice_state);
-			if (!voice_state.BuffersQueued)
-			{
-				_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
-				if (!_BufferStreaming)
-				{
-					// nldebug(NLSOUND_XAUDIO2_PREFIX "Stop");
-					if (FAILED(_SourceVoice->Stop(0))) 
-						nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Stop");
-					_IsPlaying = false;
-				}
+				// nldebug(NLSOUND_XAUDIO2_PREFIX "Stop");
+				if (FAILED(_SourceVoice->Stop(0))) 
+					nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Stop");
+				_IsPlaying = false;
 			}
 		}
 	}
@@ -326,7 +313,9 @@ void CSourceXAudio2::submitBuffer(CBufferXAudio2 *ibuffer)
 		buffer.PlayBegin = 0;
 		buffer.PlayLength = 0;
 		
-		_SourceVoice->SubmitSourceBuffer(&buffer);
+		HRESULT hr = _SourceVoice->SubmitSourceBuffer(&buffer);
+		if (FAILED(hr))
+			nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED SubmitSourceBuffer (0x%08x)", (uint32)hr);
 	}
 }
 
@@ -371,6 +360,58 @@ void CSourceXAudio2::setupVoiceSends()
 	_SoundDriver->getXAudio2()->CommitChanges(_OperationSet); // SetOutputVoices does not support OperationSet
 }
 
+/// (Internal) Flush the buffers of a stopped voice and wait until it releases them, destroy the voice if it does not.
+void CSourceXAudio2::releaseQueuedBuffers()
+{
+	if (!_SourceVoice)
+		return;
+	XAUDIO2_VOICE_STATE voice_state;
+	_SourceVoice->GetState(&voice_state);
+	if (!voice_state.BuffersQueued)
+		return;
+	_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
+	if (FAILED(_SourceVoice->FlushSourceBuffers()))
+		nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED FlushSourceBuffers");
+	waitQueuedBuffers(0);
+}
+
+/// (Internal) Wait until a pcm voice restarted for another static buffer has dropped the buffer of its previous play.
+void CSourceXAudio2::releasePreviousBuffer()
+{
+	if (!_SourceVoice || _BufferStreaming || _AdpcmUtility)
+		return;
+	XAUDIO2_VOICE_STATE voice_state;
+	_SourceVoice->GetState(&voice_state);
+	// the flushed buffer of the play before stays current until the next pass, a loop requeue keeps the own buffer current
+	if (voice_state.BuffersQueued > 1 && voice_state.pCurrentBufferContext != _StaticBuffer)
+		waitQueuedBuffers(1);
+}
+
+/// (Internal) Wait until the voice queues no more than count buffers, destroy the voice if it still does after the flush timeout.
+void CSourceXAudio2::waitQueuedBuffers(UINT32 count)
+{
+	XAUDIO2_VOICE_STATE voice_state;
+	TTime start = CTime::getLocalTime();
+	uint32 waited;
+	do
+	{
+		nlSleep(1);
+		_SourceVoice->GetState(&voice_state);
+		waited = (uint32)(CTime::getLocalTime() - start);
+	} while (voice_state.BuffersQueued > count && waited < FlushTimeout);
+	if (voice_state.BuffersQueued > count)
+	{
+		nlwarning(NLSOUND_XAUDIO2_PREFIX "%u buffers still queued %u ms after the flush, destroy voice", (uint32)voice_state.BuffersQueued, waited);
+		nlcrashdbg(6524326, "waitQueuedBuffers: destroy voice (flush timeout), source=%p voice=%p thread=%u playing=%d streaming=%d", (void *)this, (void *)_SourceVoice, (unsigned int)getThreadId(), (int)_IsPlaying, (int)_BufferStreaming);
+		destroyVoice();
+		// a voice made in advance by initSourcesFormat gets no rate, the next preparePlay must set it
+		_Frequency = 0;
+		// a restarted voice loses its play
+		_IsPlaying = false;
+		_IsPaused = false;
+	}
+}
+
 /// Enable or disable streaming mode. Source must be stopped to call this.
 void CSourceXAudio2::setStreaming(bool streaming)
 {
@@ -378,19 +419,8 @@ void CSourceXAudio2::setStreaming(bool streaming)
 
 	// nldebug(NLSOUND_XAUDIO2_PREFIX "setStreaming %i", (uint32)streaming);
 
-	if (_SourceVoice)
-	{
-		XAUDIO2_VOICE_STATE voice_state;
-		_SourceVoice->GetState(&voice_state);
-		if (!voice_state.BuffersQueued)
-		{
-			if (!_IsLooping)
-				nlwarning(NLSOUND_XAUDIO2_PREFIX "Switched streaming mode while buffer still queued!?! Flush");
-			_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
-			if (FAILED(_SourceVoice->FlushSourceBuffers())) 
-				nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED FlushSourceBuffers");
-		}
-	}
+	// the next owner of the track must not inherit the flushed buffers
+	releaseQueuedBuffers();
 
 	_BufferStreaming = streaming;
 
@@ -436,7 +466,8 @@ void CSourceXAudio2::submitStreamingBuffer(IBuffer *buffer)
 		uint8 bitsPerSample;
 		uint32 frequency;
 		buffer->getFormat(bufferFormat, channels, bitsPerSample, frequency);
-		preparePlay(bufferFormat, channels, bitsPerSample, frequency);
+		if (!preparePlay(bufferFormat, channels, bitsPerSample, frequency))
+			return;
 		_LastPreparedBuffer = NULL;
 	}
 	
@@ -538,7 +569,7 @@ bool CSourceXAudio2::initFormat(IBuffer::TBufferFormat bufferFormat, uint8 chann
 	// create voice with adpcm utility callback or NULL callback
 	_SourceVoice = _SoundDriver->createSourceVoice(bufferFormat, channels, bitsPerSample, _AdpcmUtility);
 	if (_AdpcmUtility) _AdpcmUtility->setSourceVoice(_SourceVoice);
-	if (!_SourceVoice) return false; // fail
+	if (!_SourceVoice) { delete _AdpcmUtility; _AdpcmUtility = NULL; return false; } // fail
 	_Format = bufferFormat;
 	_Channels = channels;
 	_BitsPerSample = bitsPerSample;
@@ -568,6 +599,18 @@ bool CSourceXAudio2::initFormat(IBuffer::TBufferFormat bufferFormat, uint8 chann
 	return true;
 }
 
+/// (Internal) Destroy the voice and its adpcm utility.
+void CSourceXAudio2::destroyVoice()
+{
+	_SoundDriver->destroySourceVoice(_SourceVoice); _SourceVoice = NULL;
+	// destroy adpcm utility (if it exists)
+	delete _AdpcmUtility; _AdpcmUtility = NULL;
+	// reset current stuff
+	_Format = IBuffer::FormatNotSet;
+	_Channels = 0;
+	_BitsPerSample = 0;
+}
+
 /// (Internal) Prepare to play. Stop the currently playing buffers, and set the correct voice settings.
 bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 channels, uint8 bitsPerSample, uint32 frequency)
 {
@@ -585,13 +628,7 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 		// destroy existing voice
 		_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
 		nlcrashdbg(6524326, "preparePlay: destroy voice (format change), source=%p voice=%p thread=%u playing=%d streaming=%d", (void *)this, (void *)_SourceVoice, (unsigned int)getThreadId(), (int)_IsPlaying, (int)_BufferStreaming);
-		_SoundDriver->destroySourceVoice(_SourceVoice); _SourceVoice = NULL;
-		// destroy adpcm utility (if it exists)
-		delete _AdpcmUtility; _AdpcmUtility = NULL;
-		// reset current stuff
-		_Format = IBuffer::FormatNotSet;
-		_Channels = 0;
-		_BitsPerSample = 0;
+		destroyVoice();
 	}
 	if (frequency != _Frequency)
 	{
@@ -599,7 +636,12 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 		{
 			setupDirectFilter();
 			setupEffectFilter();
-			_SourceVoice->SetSourceSampleRate(frequency);
+			if (FAILED(_SourceVoice->SetSourceSampleRate(frequency)))
+			{
+				_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
+				nlcrashdbg(6524326, "preparePlay: destroy voice (sample rate refused), source=%p voice=%p thread=%u playing=%d streaming=%d", (void *)this, (void *)_SourceVoice, (unsigned int)getThreadId(), (int)_IsPlaying, (int)_BufferStreaming);
+				destroyVoice();
+			}
 		}
 		_Frequency = frequency;
 	}
@@ -609,9 +651,20 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 		if (!initFormat(bufferFormat, channels, bitsPerSample))
 		{
 			nlwarning(NLSOUND_XAUDIO2_PREFIX "Fail to init voice!");
+		}
+		else if (FAILED(_SourceVoice->SetSourceSampleRate(frequency)))
+		{
+			nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED SetSourceSampleRate %u", frequency);
+			destroyVoice();
+		}
+		if (!_SourceVoice)
+		{
+			// a playing source loses its voice in a format change
+			_Frequency = 0;
+			_IsPlaying = false;
+			_IsPaused = false;
 			return false;
 		}
-		_SourceVoice->SetSourceSampleRate(frequency);
 		if (!_BufferStreaming)
 		{
 			// notify other sources about this format, so they can make a voice in advance
@@ -656,7 +709,12 @@ bool CSourceXAudio2::play()
 			// preparePlay already called, 
 			// stop already called before going into buffer streaming
 			nlassert(!_IsPlaying);
-			nlassert(_SourceVoice);
+			// no voice when nothing was submitted yet or voice creation failed
+			if (!_SourceVoice)
+			{
+				nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Play (_BufferStreaming), no voice");
+				return false;
+			}
 			_PlayStart = CTime::getLocalTime();
 			if (SUCCEEDED(_SourceVoice->Start(0))) _IsPlaying = true;
 			else nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Play (_BufferStreaming)");
@@ -665,10 +723,11 @@ bool CSourceXAudio2::play()
 		{
 			if (_StaticBuffer)
 			{
-				preparePlay(_StaticBuffer->getFormat(), 
+				if (!preparePlay(_StaticBuffer->getFormat(),
 					_StaticBuffer->getChannels(), 
 					_StaticBuffer->getBitsPerSample(),
-					_StaticBuffer->getFrequency());
+					_StaticBuffer->getFrequency()))
+					return false;
 				_LastPreparedBuffer = _StaticBuffer;
 				submitBuffer(_StaticBuffer);
 				_PlayStart = CTime::getLocalTime();
@@ -961,18 +1020,21 @@ void CSourceXAudio2::setupDirectFilter()
 	// todo: this sort of works and sounds sort of similar to the openal way, but still needs work
 	if (_DirectDryEnabled && _DirectFilterEnabled)
 	{
+		// a send filter runs after the rate conversion of the voice, at the rate of the send's destination
+		XAUDIO2_VOICE_DETAILS voiceDetails;
+		_DirectFilterVoice->GetVoiceDetails(&voiceDetails);
 		switch (_DirectFilter.Type)
 		{
 		case LowPassFilter:
-			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_DirectFilterHighFrequency / 10.0f, _Frequency);
+			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_DirectFilterHighFrequency / 10.0f, voiceDetails.InputSampleRate);
 			_DirectFilter.OneOverQ = 1.0f;
 			break;
 		case BandPassFilter:
-			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(((_DirectFilterLowFrequency * 10.0f) + (_DirectFilterHighFrequency / 10.0f)) / 2.0f, _Frequency);
+			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(((_DirectFilterLowFrequency * 10.0f) + (_DirectFilterHighFrequency / 10.0f)) / 2.0f, voiceDetails.InputSampleRate);
 			_DirectFilter.OneOverQ = 1.5f; // todo: calculate OneOverQ from range between low and high frequency
 			break;
 		case HighPassFilter:
-			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_DirectFilterLowFrequency * 10.0f, _Frequency);
+			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_DirectFilterLowFrequency * 10.0f, voiceDetails.InputSampleRate);
 			_DirectFilter.OneOverQ = 1.0f;
 			break;
 		default:
@@ -1109,19 +1171,22 @@ void CSourceXAudio2::setupEffectFilter()
 	// todo: this sort of works and sounds sort of similar to the openal way, but still needs work
 	if (_EffectDryEnabled && _EffectFilterEnabled)
 	{
+		XAUDIO2_VOICE_DETAILS voiceDetails;
+		_EffectFilterVoice->GetVoiceDetails(&voiceDetails);
 		switch (_EffectFilter.Type)
 		{
 		case LowPassFilter:
-			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_EffectFilterHighFrequency / 10.0f, _Frequency);
+			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_EffectFilterHighFrequency / 10.0f, voiceDetails.InputSampleRate);
 			_EffectFilter.OneOverQ = 1.0f;
 			break;
 		case BandPassFilter:
-			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(((_EffectFilterLowFrequency * 10.0f) + (_EffectFilterHighFrequency / 10.0f)) / 2.0f, _Frequency);
+			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(((_EffectFilterLowFrequency * 10.0f) + (_EffectFilterHighFrequency / 10.0f)) / 2.0f, voiceDetails.InputSampleRate);
 			_EffectFilter.OneOverQ = 1.5f; // todo: calculate OneOverQ from range between low and high frequency
 			break;
 		case HighPassFilter:
-			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_EffectFilterLowFrequency * 10.0f, _Frequency);
+			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_EffectFilterLowFrequency * 10.0f, voiceDetails.InputSampleRate);
 			_EffectFilter.OneOverQ = 1.0f;
+			break;
 		default:
 			_EffectFilter.Type = (XAUDIO2_FILTER_TYPE)~0;
 			break;

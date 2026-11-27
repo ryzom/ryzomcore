@@ -126,6 +126,14 @@ public:
 	
 	/// (Internal) Initialize voice with this format, if no voice has been created yet.
 	bool initFormat(IBuffer::TBufferFormat bufferFormat, uint8 channels, uint8 bitsPerSample);
+	/// (Internal) Destroy the voice and its adpcm utility.
+	void destroyVoice();
+	/// (Internal) Flush the buffers of a stopped voice and wait until it releases them, destroy the voice if it does not.
+	void releaseQueuedBuffers();
+	/// (Internal) Wait until a pcm voice restarted for another static buffer has dropped the buffer of its previous play.
+	void releasePreviousBuffer();
+	/// (Internal) Wait until the voice queues no more than count buffers, destroy the voice if it still does after the flush timeout.
+	void waitQueuedBuffers(UINT32 count);
 	/// (Internal) Returns the XAudio2 source voice.
 	inline IXAudio2SourceVoice * getSourceVoice() { return _SourceVoice; }
 	/// (Internal) Submit a buffer to the XAudio2 source voice.

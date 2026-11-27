@@ -65,8 +65,9 @@ CStreamSource::CStreamSource(CStreamSound *streamSound, bool spawn, TSpawnEndCal
 
 CStreamSource::~CStreamSource()
 {
-	if (_Playing)
-		stop();
+	// a waiting source must leave the waiting list
+	if (_Playing || m_WaitingForPlay)
+		stopInt();
 
 	if (m_Buffers[0] != NULL) { delete m_Buffers[0]; m_Buffers[0] = NULL; }
 	if (m_Buffers[1] != NULL) { delete m_Buffers[1]; m_Buffers[1] = NULL; }
@@ -149,6 +150,13 @@ CVector CStreamSource::getVirtualPos() const
 
 void CStreamSource::play()
 {
+	// a spawned source is deleted by stop(), which must not run under the buffer mutex
+	if (!playInt())
+		stop();
+}
+
+bool CStreamSource::playInt()
+{
 	nlassert(!_Playing);
 	bool play = false;
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
@@ -161,16 +169,10 @@ void CStreamSource::play()
 		{
 			// Source is too far to play
 			m_WaitingForPlay = false;
-			if (_Spawn)
-			{
-				if (_SpawnEndCb != NULL)
-					_SpawnEndCb(this, _CbUserParam);
-				delete this;
-			}
 #ifdef NLSOUND_DEBUG_STREAM
 			nldebug("CStreamSource %p : play FAILED, source is too far away !", (CAudioMixerUser::IMixerEvent*)this);
 #endif
-			return;
+			return false;
 		}
 		
 		CAudioMixerUser *mixer = CAudioMixerUser::instance();
@@ -220,19 +222,13 @@ void CStreamSource::play()
 				// This sound is not discardable, add it in waiting playlist
 				mixer->addSourceWaitingForPlay(this);
 				m_WaitingForPlay = true;
-				return;
+				return true;
 			}
 			else
 			{
 				// No source available, kill.
 				m_WaitingForPlay = false;
-				if (_Spawn)
-				{
-					if (_SpawnEndCb != NULL)
-						_SpawnEndCb(this, _CbUserParam);					
-					delete this;
-				}
-				return;
+				return false;
 			}
 		}
 		
@@ -269,14 +265,17 @@ void CStreamSource::play()
 			nlwarning(" * isEffectFilterEnabled: %s", getPhysicalSource()->isEffectFilterEnabled() ? "YES" : "NO");
 #endif
 		}
+		else
+		{
+			// stopInt() only releases the track of a playing source
+			releasePhysicalSource();
+			m_WaitingForPlay = false;
+		}
 	}
 
-#ifdef NL_DEBUG
-	nlassert(play);
-#else
 	if (!play)
 		nlwarning("Failed to play physical sound source. This is a serious error");
-#endif
+	return play;
 }
 
 void CStreamSource::stopInt()
@@ -425,7 +424,9 @@ void CStreamSource::updateAvailableBuffers()
 {
 	if (hasPhysicalSource())
 	{
-		m_FreeBuffers = 3 - getPhysicalSource()->countStreamingBuffers();
+		// a reused voice can still hold buffers of its old queue
+		uint queued = getPhysicalSource()->countStreamingBuffers();
+		m_FreeBuffers = queued < 3 ? 3 - queued : 0;
 	}
 }
 
@@ -487,7 +488,10 @@ uint32 CStreamSource::getRecommendedSleepTime() const
 /// Return if there are still buffers available for playback.
 bool CStreamSource::hasFilledBuffersAvailable() const
 {
-	const_cast<CStreamSource *>(this)->updateAvailableBuffers();
+	// called by the decoder thread, stopInt() releases the track from the main thread
+	CStreamSource *self = const_cast<CStreamSource *>(this);
+	CAutoMutex<CMutex> autoMutex(self->m_BufferMutex);
+	self->updateAvailableBuffers();
 	return m_FreeBuffers < 3;
 }
 

@@ -255,6 +255,13 @@ bool CSourceAL::play()
 	if (_Buffer)
 	{
 		// Static playing mode
+		// a lost device holds a new voice for every start until the reopen, so new sounds end at once
+		if (_SoundDriver->isAlDeviceLost() && !_IsPaused)
+		{
+			_IsPlaying = true;
+			_StartTime = CTime::getLocalTime();
+			return true;
+		}
 		_IsPaused = false;
 		alSourcePlay(_Source);
 		_IsPlaying = (alGetError() == AL_NO_ERROR);
@@ -321,14 +328,11 @@ void CSourceAL::stop()
 		_IsPaused = false;
 		alSourceStop(_Source);
 		alTestError();
-		// unqueue buffers
+		// unqueueing fails for the buffers of a source that never played
+		alSourcei(_Source, AL_BUFFER, AL_NONE);
+		alTestError();
 		while (!_QueuedBuffers.empty())
-		{
-			ALuint bufferName = _QueuedBuffers.front()->bufferName();
-			alSourceUnqueueBuffers(_Source, 1, &bufferName);
 			_QueuedBuffers.pop();
-			alTestError();
-		}
 		// Streaming mode
 		//nlwarning("AL: Cannot stop null buffer; streaming not implemented" );
 		//nlstop;

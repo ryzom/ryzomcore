@@ -1696,13 +1696,12 @@ void				CAudioMixerUser::update()
 	std::list<CSourceCommon *>::size_type nbWaitingSources = _Sources.size();
 	for (i=0; i<_Tracks.size(); ++i)
 	{
-		if (!_Tracks[i]->isPlaying())
+		// a streaming track plays until stop(), an ended file stream only tells its logical source
+		CSourceCommon *source = _Tracks[i]->getLogicalSource();
+		if (!_Tracks[i]->isPlaying() || (source != 0 && !source->isPlaying()))
 		{
-			if (_Tracks[i]->getLogicalSource() != 0)
-			{
-				CSourceCommon *source = _Tracks[i]->getLogicalSource();
+			if (source != 0)
 				source->stop();
-			}
 
 			// try to play any waiting source.
 			if (!_SourceWaitingForPlay.empty() && nbWaitingSources)

@@ -20,6 +20,8 @@
 #ifndef NL_SOUND_DRIVER_AL_H
 #define NL_SOUND_DRIVER_AL_H
 
+#include "nel/misc/mutex.h"
+#include "nel/misc/time_nl.h"
 #include "nel/sound/driver/sound_driver.h"
 
 namespace NLSOUND {
@@ -75,6 +77,17 @@ private:
 	ALCdevice *_AlDevice;
 	// OpenAL context
 	ALCcontext *_AlContext;
+	// Device opened as the default output, follows a change of the system default
+	bool _AlDefaultDevice;
+	// Set by the OpenAL event thread when the system default output changed
+	bool _DefaultDeviceChanged;
+	NLMISC::CMutex _DefaultDeviceChangedMutex;
+	// The device is lost or must follow the default, kept until a reopen succeeds
+	bool _ReopenPending;
+	// ALC_CONNECTED went to 0, until a reopen succeeds
+	bool _AlDeviceLost;
+	// Last reopen attempt
+	NLMISC::TTime _ReopenTime;
 
 	// system vars
 	// Allocated buffers
@@ -103,6 +116,7 @@ public:
 	inline ALCdevice *getAlDevice() { return _AlDevice; }
 	inline ALCcontext *getAlContext() { return _AlContext; }
 	inline float getRolloffFactor() { return _RolloffFactor; }
+	inline bool isAlDeviceLost() { return _AlDeviceLost; }
 
 	/// Return a list of available devices for the user. The value at index 0 is empty, and is used for automatic device selection.
 	virtual void getDevices(std::vector<std::string> &devices);
@@ -154,6 +168,11 @@ public:
 	virtual bool isMusicExtensionSupported(const std::string & /* extension */) const { return false; }
 
 protected:
+
+	/// ALC_SOFT_system_events callback, runs on an OpenAL thread
+	static void ALC_APIENTRY eventCallback(ALCenum eventType, ALCenum deviceType, ALCdevice *device, ALCsizei length, const ALCchar *message, void *userParam);
+	/// Move the device to the current default output, at most one attempt per second
+	void reopenDevice();
 
 	/// Allocate nb new buffers or sources
 	void					allocateNewItems( TGenFunctionAL algenfunc, TTestFunctionAL altestfunc,

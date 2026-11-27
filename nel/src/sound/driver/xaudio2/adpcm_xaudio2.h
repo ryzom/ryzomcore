@@ -42,8 +42,6 @@ protected:
 	uint _SampleRate;
 	/// Size in uint8 50ms ADPCM. (50ms 4bit ADPCM in uint8 = _SampleRate / 40)
 	uint _AdpcmSize;
-	/// Samples for 50ms. Also size in uint16 for 100ms PCM. (50ms 16bit PCM in uint16 = _SampleRate / 20)
-	uint _SampleNb;
 	/// Current position in ADPCM buffer in uint8.
 	uint _AdpcmIndex;
 	

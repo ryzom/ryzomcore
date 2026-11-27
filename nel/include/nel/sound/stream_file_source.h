@@ -87,6 +87,8 @@ public:
 private:
 	bool prepareDecoder();
 	inline bool bufferMore(uint bytes);
+	/// Decoder thread check of the play state
+	bool isPlayingOrWaiting();
 
 private:
 	CStreamFileSource(const CStreamFileSource &);

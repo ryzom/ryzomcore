@@ -52,7 +52,8 @@ CStreamFileSource::CStreamFileSource(CStreamFileSound *streamFileSound, bool spa
 
 CStreamFileSource::~CStreamFileSource()
 {
-	stop();
+	// not stop(), which deletes a spawned source
+	stopInt();
 	m_Thread->wait(); // thread must have stopped for delete!
 	delete m_Thread;
 	m_Thread = NULL;
@@ -69,15 +70,15 @@ void CStreamFileSource::play()
 	{
 		if (m_Thread->isRunning())
 		{
-			if (m_NextBuffer || !m_FreeBuffers)
+			if (hasFilledBuffersAvailable())
 			{
 #ifdef NLSOUND_STREAM_FILE_DEBUG
 				nldebug("play waiting, play stream %s", getStreamFileSound()->getFilePath().c_str());
 #endif
-				CStreamSource::play();
-				if (!_Playing && !m_WaitingForPlay)
+				if (!playInt())
 				{
 					nldebug("Stream file source playback not possible or necessary for some reason");
+					stop();
 				}
 			}
 			else
@@ -93,8 +94,9 @@ void CStreamFileSource::play()
 		else
 		{
 			// thread went kaboom while not started playing yet, probably the audiodecoder cannot be started
-			// don't play
+			// don't play, clear the flag before stop(), this source is the mixer's current waiting entry
 			m_WaitingForPlay = false;
+			stop();
 		}
 	}
 	else if (!_Playing)
@@ -116,12 +118,14 @@ void CStreamFileSource::play()
 		if (m_LookupPath.empty())
 		{
 			nlwarning("Music file %s does not exist!", filepath.c_str());
+			stop();
 			return;
 		}
 		if (!getStreamFileSound()->getAsync())
 		{
 			if (!prepareDecoder())
 			{
+				stop();
 				return;
 			}
 		}
@@ -132,7 +136,7 @@ void CStreamFileSource::play()
 		if (!getStreamFileSound()->getAsync())
 		{
 			// wait until at least one buffer is ready
-			while (!(m_NextBuffer || !m_FreeBuffers) && m_WaitingForPlay && m_Thread->isRunning())
+			while (!hasFilledBuffersAvailable() && m_WaitingForPlay && m_Thread->isRunning())
 			{
 #ifdef NLSOUND_STREAM_FILE_DEBUG
 				nldebug("wait buffer");
@@ -141,11 +145,19 @@ void CStreamFileSource::play()
 			}
 			if (m_WaitingForPlay && m_Thread->isRunning())
 			{
-				CStreamSource::play();
+				bool play = playInt();
 				if (!_Playing)
 				{
-					nlwarning("Failed to synchronously start playing a file stream source. This happens when all physical tracks are in use. Use a Highest Priority sound");
+					nlwarning("Failed to synchronously start playing a file stream source");
 				}
+				if (!play)
+					stop();
+			}
+			else
+			{
+				// the decoder ended before the first buffer
+				m_WaitingForPlay = false;
+				stop();
 			}
 		}
 		else
@@ -323,12 +335,13 @@ void CStreamFileSource::run()
 		if (!prepareDecoder())
 			return;
 	}
+	// the decoder starts with the sound's looping, setLooping() may have changed it before play()
+	m_AudioDecoder->setLooping(looping);
 	uint samples, bytes;
 	this->getRecommendedBufferSize(samples, bytes);
-	uint32 recSleep = 40;
 	uint32 doSleep = 10;
 	m_DecodingEnded = false;
-	while (_Playing || m_WaitingForPlay)
+	while (isPlayingOrWaiting())
 	{
 		if (!m_AudioDecoder->isMusicEnded())
 		{
@@ -344,19 +357,19 @@ void CStreamFileSource::run()
 			bool newLooping = _Looping;
 			if (looping != newLooping)
 			{
-				m_AudioDecoder->setLooping(looping);
+				m_AudioDecoder->setLooping(newLooping);
 				looping = newLooping;
 			}
 			
-			// reduce sleeping time if nothing was buffered
-			if (bufferMore(bytes)) recSleep = doSleep = this->getRecommendedSleepTime();
-			else doSleep = recSleep >> 2; // /4
+			// reduce sleeping time if nothing was buffered, at least 1 ms
+			if (bufferMore(bytes)) doSleep = this->getRecommendedSleepTime();
+			else doSleep = max(this->getRecommendedSleepTime() >> 2, (uint32)1); // /4
 			NLMISC::nlSleep(doSleep);
 		}
 		else
 		{
 			// wait until done playing buffers
-			while (this->hasFilledBuffersAvailable() && (_Playing || m_WaitingForPlay))
+			while (this->hasFilledBuffersAvailable() && isPlayingOrWaiting())
 			{
 #ifdef NLSOUND_STREAM_FILE_DEBUG
 				nldebug("music ended, wait until done %s", getStreamFileSound()->getFilePath().c_str());
@@ -383,12 +396,21 @@ void CStreamFileSource::run()
 		m_DecodingEnded = !m_WaitingForPlay;
 	}
 	// drop buffers
-	m_FreeBuffers = 3;
-	m_NextBuffer = 0;
+	{
+		NLMISC::CAutoMutex<NLMISC::CMutex> autoMutex(m_BufferMutex);
+		m_FreeBuffers = 3;
+		m_NextBuffer = 0;
+	}
 
 #ifdef NLSOUND_STREAM_FILE_DEBUG
 	nldebug("run end %s", getStreamFileSound()->getFilePath().c_str());
 #endif
+}
+
+bool CStreamFileSource::isPlayingOrWaiting()
+{
+	NLMISC::CAutoMutex<NLMISC::CMutex> autoMutex(m_BufferMutex);
+	return _Playing || m_WaitingForPlay;
 }
 
 } /* namespace NLSOUND */

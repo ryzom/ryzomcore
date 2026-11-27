@@ -31,7 +31,7 @@ namespace NLSOUND {
 
 CAdpcmXAudio2::CAdpcmXAudio2(bool loop) 
 : _SourceVoice(NULL), _SourceData(NULL), _SourceSize(0), _SampleRate(0), 
-_Loop(loop), _BufferNext(0), _SampleNb(0), _AdpcmSize(0),
+_Loop(loop), _BufferNext(0), _AdpcmSize(0),
 _AdpcmIndex(0), _LastBufferContext(0)
 {
 	_State.PreviousSample = 0;
@@ -51,15 +51,19 @@ void CAdpcmXAudio2::submitSourceBuffer(CBufferXAudio2 *buffer)
 	_Mutex.enter();
 	if (_SourceData) nlerror(NLSOUND_XAUDIO2_PREFIX "Only 1 ADPCM buffer can be submitted at a time! Call flushSourceBuffers first in CSourceXAudio2 stop().");
 	_SourceSize = buffer->getSize();
+	// one adpcm byte decodes to 2 samples, a chunk must fit into one pcm buffer
+	_AdpcmSize = min(buffer->getFrequency() / 40, _BufferMax / 2);
 	if (_SourceSize == 0)
 	{
 		nlwarning(NLSOUND_XAUDIO2_PREFIX "Empty ADPCM buffer!");
 	}
+	else if (_AdpcmSize == 0)
+	{
+		// the decoder would never get past an empty chunk
+		nlwarning(NLSOUND_XAUDIO2_PREFIX "Invalid ADPCM buffer frequency %u!", buffer->getFrequency());
+	}
 	else
 	{
-		_AdpcmSize = buffer->getFrequency() / 40;
-		_SampleNb = _AdpcmSize * 2;
-		nlassert(_SampleNb < _BufferMax);
 		_SourceData = buffer->getData();
 		// nldebug("submit called!!!");
 		processBuffers();
@@ -113,7 +117,9 @@ void CAdpcmXAudio2::processBuffers()
 				xbuffer.pContext = (void *)(++_LastBufferContext);
 				xbuffer.PlayBegin = 0;
 				xbuffer.PlayLength = 0;
-				_SourceVoice->SubmitSourceBuffer(&xbuffer);
+				HRESULT hr = _SourceVoice->SubmitSourceBuffer(&xbuffer);
+				if (FAILED(hr))
+					nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED SubmitSourceBuffer (0x%08x)", (uint32)hr);
 				// nlwarning("submit %u", (uint32)xbuffer.pContext);
 
 				_AdpcmIndex += inbytes;

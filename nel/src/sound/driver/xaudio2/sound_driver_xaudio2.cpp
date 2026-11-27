@@ -258,7 +258,8 @@ void CSoundDriverXAudio2::getDevices(std::vector<std::string> &devices)
 	devices.push_back(""); // empty
 
 	UINT32 deviceCount;
-	_XAudio2->GetDeviceCount(&deviceCount);
+	if (FAILED(_XAudio2->GetDeviceCount(&deviceCount)))
+		deviceCount = 0;
 
 	if (deviceCount == 0)
 	{
@@ -270,7 +271,8 @@ void CSoundDriverXAudio2::getDevices(std::vector<std::string> &devices)
 		nldebug("XA2: Listing devices: ");
 		for (uint i = 0; i < deviceCount; ++i)
 		{
-			_XAudio2->GetDeviceDetails(i, &deviceDetails);
+			if (FAILED(_XAudio2->GetDeviceDetails(i, &deviceDetails)))
+				continue;
 			std::string deviceName = wideToUtf8(deviceDetails.DisplayName);
 			nldebug("XA2:   - %s", deviceName.c_str());
 			devices.push_back(deviceName);
@@ -288,11 +290,13 @@ uint CSoundDriverXAudio2::getDeviceIndex(const std::string &device, XAUDIO2_DEVI
 	}
 	
 	UINT32 deviceCount;
-	_XAudio2->GetDeviceCount(&deviceCount);
+	if (FAILED(_XAudio2->GetDeviceCount(&deviceCount)))
+		deviceCount = 0;
 
 	for (uint i = 0; i < deviceCount; ++i)
 	{
-		_XAudio2->GetDeviceDetails(i, deviceDetails);
+		if (FAILED(_XAudio2->GetDeviceDetails(i, deviceDetails)))
+			continue;
 		std::string deviceName = wideToUtf8(deviceDetails->DisplayName);
 		if (deviceName == device)
 			return i;
@@ -335,7 +339,20 @@ void CSoundDriverXAudio2::initDevice(const std::string &device, TSoundOptions op
 	// XAudio2
 	XAUDIO2_DEVICE_DETAILS deviceDetails;
 	uint deviceIndex = getDeviceIndex(device, &deviceDetails);
-	if (FAILED(hr = _XAudio2->CreateMasteringVoice(&_MasteringVoice, 0, NLSOUND_XAUDIO2_MASTER_SAMPLE_RATE, 0, deviceIndex, NULL)))
+	// a device that was not found leaves the details of the last enumerated one
+	if (FAILED(hr = _XAudio2->GetDeviceDetails(deviceIndex, &deviceDetails)))
+		{ release(); throw ESoundDriver(NLSOUND_XAUDIO2_PREFIX "FAILED GetDeviceDetails!"); return; }
+	// the reverb effect refuses a rate outside its range, such a device gets resampled output
+	UINT32 sampleRate = NLSOUND_XAUDIO2_MASTER_SAMPLE_RATE;
+	if (getOption(OptionEnvironmentEffects))
+	{
+		UINT32 deviceRate = deviceDetails.OutputFormat.Format.nSamplesPerSec;
+		if (deviceRate > XAUDIO2FX_REVERB_MAX_FRAMERATE)
+			sampleRate = XAUDIO2FX_REVERB_MAX_FRAMERATE;
+		else if (deviceRate < XAUDIO2FX_REVERB_MIN_FRAMERATE)
+			sampleRate = XAUDIO2FX_REVERB_MIN_FRAMERATE;
+	}
+	if (FAILED(hr = _XAudio2->CreateMasteringVoice(&_MasteringVoice, 0, sampleRate, 0, deviceIndex, NULL)))
 		{ release(); throw ESoundDriver(NLSOUND_XAUDIO2_PREFIX "FAILED CreateMasteringVoice _MasteringVoice!"); return; }
 	
 	// X3DAudio
@@ -394,7 +411,7 @@ IXAudio2SourceVoice *CSoundDriverXAudio2::createSourceVoice(IBuffer::TBufferForm
 	IXAudio2SourceVoice *source_voice = NULL;
 
 	if (FAILED(hr = _XAudio2->CreateSourceVoice(&source_voice, &wfe, 0, NLSOUND_MAX_PITCH, callback, NULL, NULL)))
-	{ if (source_voice) source_voice->DestroyVoice(); nlerror(NLSOUND_XAUDIO2_PREFIX "FAILED CreateSourceVoice"); return NULL; }
+	{ if (source_voice) source_voice->DestroyVoice(); nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED CreateSourceVoice (0x%08x)", (uint32)hr); return NULL; }
 
 	return source_voice;
 }
@@ -524,6 +541,13 @@ void CSoundDriverXAudio2::removeBuffer(CBufferXAudio2 *buffer)
 {
 	if (_Buffers.find(buffer) != _Buffers.end()) _Buffers.erase(buffer);
 	else nlwarning("removeBuffer already called");
+	// the buffer data is freed next, a voice stopped or restarted just before can still read it
+	set<CSourceXAudio2 *>::iterator it(_Sources.begin()), end(_Sources.end());
+	for (; it != end; ++it)
+	{
+		if ((*it)->isPlaying()) (*it)->releasePreviousBuffer();
+		else (*it)->releaseQueuedBuffers();
+	}
 }
 
 /// Remove a source (should be called by the friend destructor of the source class)

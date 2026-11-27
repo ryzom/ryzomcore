@@ -59,6 +59,8 @@ public:
 	/// Play
 	virtual void					play();
 protected:
+	/// Like play(), but returns false instead of stopping and deleting a spawned source
+	bool							playInt();
 	void							stopInt();
 public:
 	/// Stop playing
