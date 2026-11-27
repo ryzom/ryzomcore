@@ -181,9 +181,9 @@ eventLeaveControl			::			audit		// Leave control of entity : <master eid>
 resetName					::			audit		// Reset player's name; undo a temporary rename
 showOnline					::			audit		// Set friend visibility: <user id> <mode=0,1,2>
 
-morph						:DEV:SGM:GM:			// Temporarily use a creature appearance
-unmorph						:DEV:SGM:GM:			// Restore the player appearance
-morphRole					:DEV:SGM:GM:			// Create or replace a creature role for morphs
-morphRoleAbilities			:DEV:SGM:GM:			// Choose which creature actions a morph role may use
-removeMorphRole				:DEV:SGM:GM:			// Remove a creature role for morphs
-listMorphRoles				:DEV:SGM:GM:			// List the creature roles for morphs
+morph						:DEV:SGM:GM:EM:			// Temporarily use a creature appearance
+unmorph						:DEV:SGM:GM:EM:			// Restore the player appearance
+morphRole					:DEV:SGM:GM:EM:			// Create or replace a creature role for morphs
+morphRoleAbilities			:DEV:SGM:GM:EM:			// Choose which creature actions a morph role may use
+removeMorphRole				:DEV:SGM:GM:EM:			// Remove a creature role for morphs
+listMorphRoles				:DEV:SGM:GM:EM:			// List the creature roles for morphs

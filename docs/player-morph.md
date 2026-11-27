@@ -10,7 +10,7 @@ Client code: `ryzom/client/src/player_morph.{h,cpp}`, panel template
 ## Commands
 
 All are admin commands (`/a` on oneself, `/b` on the target, `/c <player>` on a named player),
-privileges `:DEV:SGM:GM:` in `client_commands_privileges*.txt`.
+privileges `:DEV:SGM:GM:EM:` in `client_commands_privileges*.txt`.
 
 | Command | Arguments |
 |---|---|
